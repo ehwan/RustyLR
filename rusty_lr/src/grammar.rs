@@ -66,7 +66,11 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Grammar<Term, NonTerm> {
     }
 
     /// add new production rule for given nonterminal 'name'
-    pub fn add_rule(&mut self, name: NonTerm, rule: Vec<Token<Term, NonTerm>>) {
+    pub fn add_rule<'a>(
+        &'a mut self,
+        name: NonTerm,
+        rule: Vec<Token<Term, NonTerm>>,
+    ) -> &'a ProductionRule<Term, NonTerm> {
         // assign uid for each production rules in order of insertion
         let rule = ProductionRule {
             name: name.clone(),
@@ -75,7 +79,10 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Grammar<Term, NonTerm> {
         };
         self.uid += 1;
 
-        self.rules.entry(name).or_insert(Vec::new()).push(rule);
+        let rule_vec = self.rules.entry(name).or_insert(Vec::new());
+        rule_vec.push(rule);
+
+        rule_vec.last().unwrap()
     }
     /// set main entry nonterminal rule
     pub fn set_main(&mut self, name: NonTerm) {
