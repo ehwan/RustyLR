@@ -63,8 +63,6 @@ fn main() {
 
     grammar.set_main("E");
 
-    println!("{}", grammar);
-
     let parser = match grammar.build_main("Augmented") {
         Ok(result) => result,
         Err(err) => {
@@ -72,6 +70,7 @@ fn main() {
             return;
         }
     };
+    println!("{}", grammar);
     println!("Number of states: {}", parser.states.len());
     println!("Main state: {}", parser.main_state);
 
@@ -92,7 +91,7 @@ fn main() {
         Term::RightParen,
     ];
     match parser.parse(&tokens) {
-        Ok(result) => println!("Result: {}", result),
+        Ok(_) => println!("Parse success"),
         Err(err) => eprintln!("{}", err),
     }
 }
