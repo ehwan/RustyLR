@@ -12,40 +12,49 @@ use crate::term::TermTraitBound;
 use crate::token::Token;
 
 #[derive(Error, Debug)]
-pub enum BuildError<Term: TermTraitBound> {
+pub enum BuildError<Term: TermTraitBound, NonTerm: TermTraitBound> {
     #[error("Rule not found: {0}")]
-    RuleNotFound(LookaheadRule<Term>),
+    RuleNotFound(LookaheadRule<Term, NonTerm>),
 
     /// reduce/reduce conflict
     #[error("Conflict in grammar: {0} and {1}")]
-    ReduceReduceConflict(NamedShiftedRule<Term>, NamedShiftedRule<Term>),
+    ReduceReduceConflict(
+        NamedShiftedRule<Term, NonTerm>,
+        NamedShiftedRule<Term, NonTerm>,
+    ),
 
     /// reduce/shift conflict
     #[error("Conflict in grammar:\n{0} and\n{1}")]
-    ReduceShiftConflict(NamedShiftedRule<Term>, LookaheadRuleSet<Term>),
+    ReduceShiftConflict(
+        NamedShiftedRule<Term, NonTerm>,
+        LookaheadRuleSet<Term, NonTerm>,
+    ),
 
     #[error("Entry rule not set; use .set_main( entry_name: &str )")]
     EntryNotSet,
 
     #[error("Duplicated rule: {0}")]
-    DuplicatedRule(LookaheadRule<Term>),
+    DuplicatedRule(LookaheadRule<Term, NonTerm>),
+
+    #[error("Augmented rule cannot be in production rule; in definition of {0}")]
+    AugmentedInRule(NonTerm),
 }
 
 /// A set of production rules and main entry point
 #[derive(Debug, Clone)]
-pub struct Grammar<Term: TermTraitBound> {
+pub struct Grammar<Term: TermTraitBound, NonTerm: TermTraitBound> {
     /// set of production rules
-    pub rules: BTreeMap<String, Vec<Vec<Token<Term>>>>,
+    pub rules: BTreeMap<NonTerm, Vec<Vec<Token<Term, NonTerm>>>>,
 
     /// name of main entry nonterminal rule
-    pub main: Option<String>,
+    pub main: Option<NonTerm>,
 
     /// first terminal tokens for each nonterminals
     /// true if it can be empty
-    pub firsts: BTreeMap<String, (BTreeSet<Token<Term>>, bool)>,
+    pub firsts: BTreeMap<NonTerm, (BTreeSet<Token<Term, NonTerm>>, bool)>,
 }
 
-impl<Term: TermTraitBound> Grammar<Term> {
+impl<Term: TermTraitBound, NonTerm: TermTraitBound> Grammar<Term, NonTerm> {
     pub fn new() -> Self {
         Grammar {
             rules: BTreeMap::new(),
@@ -55,19 +64,19 @@ impl<Term: TermTraitBound> Grammar<Term> {
     }
 
     /// add new production rule for given nonterminal 'name'
-    pub fn add_rule(&mut self, name: &str, rule: Vec<Token<Term>>) {
-        self.rules
-            .entry(name.to_string())
-            .or_insert(Vec::new())
-            .push(rule);
+    pub fn add_rule(&mut self, nonterm: NonTerm, rule: Vec<Token<Term, NonTerm>>) {
+        self.rules.entry(nonterm).or_insert(Vec::new()).push(rule);
     }
     /// set main entry nonterminal rule
-    pub fn set_main(&mut self, name: &str) {
-        self.main = Some(name.to_string());
+    pub fn set_main(&mut self, nonterm: NonTerm) {
+        self.main = Some(nonterm);
     }
 
     /// build LR(1) parser table from given grammar
-    pub fn build_main(&mut self) -> Result<Parser<Term>, BuildError<Term>> {
+    pub fn build_main(
+        &mut self,
+        augmented_name: NonTerm,
+    ) -> Result<Parser<Term, NonTerm>, BuildError<Term, NonTerm>> {
         for (_name, rules) in self.rules.iter_mut() {
             rules.sort();
         }
@@ -77,13 +86,16 @@ impl<Term: TermTraitBound> Grammar<Term> {
         if self.main.is_none() {
             return Err(BuildError::EntryNotSet);
         }
-        let main_name = self.main.clone().unwrap();
 
         // add main augmented rule
         let augmented_rule_set = {
+            let main_rule = self.main.clone().unwrap();
             let augmented_rule = NamedShiftedRule {
-                name: main_name.clone() + "'",
-                rule: vec![Token::NonTerm(main_name), Token::End],
+                name: augmented_name,
+                rule: vec![
+                    Token::<Term, NonTerm>::NonTerm(main_rule),
+                    Token::<Term, NonTerm>::End,
+                ],
                 shifted: 0,
             };
             let augmented_rule = LookaheadRule {
@@ -102,11 +114,11 @@ impl<Term: TermTraitBound> Grammar<Term> {
     }
 
     /// search for every production rules with name 'name'
-    fn search_rules<'a>(&'a self, name: &str) -> Option<&'a Vec<Vec<Token<Term>>>> {
-        self.rules.get(name)
+    fn search_rules<'a>(&'a self, nonterm: &NonTerm) -> Option<&'a Vec<Vec<Token<Term, NonTerm>>>> {
+        self.rules.get(nonterm)
     }
     /// calculate first terminals for each nonterminals
-    fn calculate_first(&mut self) -> Result<(), BuildError<Term>> {
+    fn calculate_first(&mut self) -> Result<(), BuildError<Term, NonTerm>> {
         loop {
             let mut changed = false;
             for (name, rules) in self.rules.iter() {
@@ -173,9 +185,9 @@ impl<Term: TermTraitBound> Grammar<Term> {
     /// this is equivalent to FIRST( follow_tokens lookahead )
     fn lookahead(
         &self,
-        follow_tokens: &[Token<Term>],
-        lookahead: &BTreeSet<Token<Term>>,
-    ) -> Result<BTreeSet<Token<Term>>, BuildError<Term>> {
+        follow_tokens: &[Token<Term, NonTerm>],
+        lookahead: &BTreeSet<Token<Term, NonTerm>>,
+    ) -> Result<BTreeSet<Token<Term, NonTerm>>, BuildError<Term, NonTerm>> {
         let mut ret = BTreeSet::new();
         for token in follow_tokens.iter() {
             match token {
@@ -198,19 +210,22 @@ impl<Term: TermTraitBound> Grammar<Term> {
 
     /// for given set of production rules,
     /// if the first token of each rule is nonterminal, attach its production rules
-    fn expand(&self, rules: &mut LookaheadRuleSet<Term>) -> Result<(), BuildError<Term>> {
+    fn expand(
+        &self,
+        rules: &mut LookaheadRuleSet<Term, NonTerm>,
+    ) -> Result<(), BuildError<Term, NonTerm>> {
         loop {
             let mut new_rules = Vec::new();
             for rule in rules.rules.iter() {
-                if let Some(Token::NonTerm(ref rule_name)) = rule.rule.first() {
-                    if let Some(searched_rules) = self.search_rules(rule_name) {
+                if let Some(Token::NonTerm(ref nonterm_rule)) = rule.rule.first() {
+                    if let Some(searched_rules) = self.search_rules(nonterm_rule) {
                         // calculate lookaheads
                         let lookaheads = self.lookahead(&rule.rule.rest(), &rule.lookaheads)?;
 
                         for searched_rule in searched_rules.iter() {
                             let rule_with_ahead = LookaheadRule {
                                 rule: NamedShiftedRule {
-                                    name: rule_name.clone(),
+                                    name: nonterm_rule.clone(),
                                     rule: searched_rule.clone(),
                                     shifted: 0,
                                 },
@@ -237,10 +252,10 @@ impl<Term: TermTraitBound> Grammar<Term> {
     /// build new state with given production rules
     fn build(
         &self,
-        mut rules: LookaheadRuleSet<Term>,
-        states: &mut Vec<State<Term>>,
-        state_map: &mut BTreeMap<LookaheadRuleSet<Term>, usize>,
-    ) -> Result<usize, BuildError<Term>> {
+        mut rules: LookaheadRuleSet<Term, NonTerm>,
+        states: &mut Vec<State<Term, NonTerm>>,
+        state_map: &mut BTreeMap<LookaheadRuleSet<Term, NonTerm>, usize>,
+    ) -> Result<usize, BuildError<Term, NonTerm>> {
         // expand
         self.expand(&mut rules)?;
 
@@ -296,7 +311,7 @@ impl<Term: TermTraitBound> Grammar<Term> {
         // process next rules with token
         for (next_token, next_rule) in next_rules.into_iter() {
             let next_state_id = self.build(next_rule.clone(), states, state_map)?;
-            let action = Action::<Term>::Goto(next_state_id);
+            let action = Action::<Term, NonTerm>::Goto(next_state_id);
             if let Some(old) = states[state_id].action_map.insert(next_token, action) {
                 // reduce/shift conflict
                 return Err(BuildError::ReduceShiftConflict(

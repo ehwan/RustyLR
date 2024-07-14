@@ -7,10 +7,10 @@ use crate::token::Token;
 
 /// A struct for state in LR(1) parser
 #[derive(Debug, Clone)]
-pub struct State<Term: TermTraitBound> {
-    pub action_map: BTreeMap<Token<Term>, Action<Term>>,
+pub struct State<Term: TermTraitBound, NonTerm: TermTraitBound> {
+    pub action_map: BTreeMap<Token<Term, NonTerm>, Action<Term, NonTerm>>,
 }
-impl<Term: TermTraitBound> State<Term> {
+impl<Term: TermTraitBound, NonTerm: TermTraitBound> State<Term, NonTerm> {
     pub fn new() -> Self {
         State {
             action_map: BTreeMap::new(),
@@ -18,11 +18,13 @@ impl<Term: TermTraitBound> State<Term> {
     }
 
     /// feed one token and get action
-    pub fn feed<'a>(&'a self, token: &Token<Term>) -> Option<&'a Action<Term>> {
+    pub fn feed<'a>(&'a self, token: &Token<Term, NonTerm>) -> Option<&'a Action<Term, NonTerm>> {
         self.action_map.get(token)
     }
 }
-impl<Term: TermTraitBound + Display> Display for State<Term> {
+impl<Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Display
+    for State<Term, NonTerm>
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (token, action) in self.action_map.iter() {
             writeln!(f, "{}: {}", token, action)?;

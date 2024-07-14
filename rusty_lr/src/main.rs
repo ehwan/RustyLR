@@ -27,43 +27,43 @@ impl std::fmt::Display for Term {
 }
 
 fn main() {
-    type Token = token::Token<Term>;
+    type Token = token::Token<Term, &'static str>;
     let mut grammar = grammar::Grammar::new();
 
     grammar.add_rule(
         "A",
         vec![
-            Token::NonTerm("A".to_string()),
+            Token::NonTerm("A"),
             Token::Term(Term::Plus),
-            Token::NonTerm("M".to_string()),
+            Token::NonTerm("M"),
         ],
     );
-    grammar.add_rule("A", vec![Token::NonTerm("M".to_string())]);
+    grammar.add_rule("A", vec![Token::NonTerm("M")]);
 
     grammar.add_rule(
         "M",
         vec![
-            Token::NonTerm("M".to_string()),
+            Token::NonTerm("M"),
             Token::Term(Term::Star),
-            Token::NonTerm("P".to_string()),
+            Token::NonTerm("P"),
         ],
     );
-    grammar.add_rule("M", vec![Token::NonTerm("P".to_string())]);
+    grammar.add_rule("M", vec![Token::NonTerm("P")]);
 
     grammar.add_rule("P", vec![Token::Term(Term::Id)]);
     grammar.add_rule(
         "P",
         vec![
             Token::Term(Term::LeftParen),
-            Token::NonTerm("E".to_string()),
+            Token::NonTerm("E"),
             Token::Term(Term::RightParen),
         ],
     );
-    grammar.add_rule("E", vec![Token::NonTerm("A".to_string())]);
+    grammar.add_rule("E", vec![Token::NonTerm("A")]);
 
     grammar.set_main("E");
 
-    let parser = match grammar.build_main() {
+    let parser = match grammar.build_main("Augmented") {
         Ok(result) => result,
         Err(err) => {
             eprintln!("{}", err);
@@ -79,15 +79,15 @@ fn main() {
     }
 
     let tokens = vec![
-        Token::Term(Term::Id),
-        Token::Term(Term::Plus),
-        Token::Term(Term::Id),
-        Token::Term(Term::Star),
-        Token::Term(Term::LeftParen),
-        Token::Term(Term::Id),
-        Token::Term(Term::Plus),
-        Token::Term(Term::Id),
-        Token::Term(Term::RightParen),
+        Term::Id,
+        Term::Plus,
+        Term::Id,
+        Term::Star,
+        Term::LeftParen,
+        Term::Id,
+        Term::Plus,
+        Term::Id,
+        Term::RightParen,
     ];
     match parser.parse(&tokens) {
         Ok(result) => println!("Result: {}", result),

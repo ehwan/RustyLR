@@ -8,9 +8,9 @@ use crate::term::TermTraitBound;
 use crate::token::Token;
 
 #[derive(Error, Debug)]
-pub enum ParseError<Term: TermTraitBound> {
+pub enum ParseError<Term: TermTraitBound, NonTerm: TermTraitBound> {
     #[error("Invalid Token: {0}")]
-    InvalidToken(Token<Term>),
+    InvalidToken(Token<Term, NonTerm>),
 
     #[error("State Stack is empty")]
     StateStackEmpty,
@@ -24,19 +24,19 @@ pub enum ParseError<Term: TermTraitBound> {
     #[error("Invalid State: {0}")]
     InvalidState(usize),
 }
-pub struct Parser<Term: TermTraitBound> {
-    pub states: Vec<State<Term>>,
+pub struct Parser<Term: TermTraitBound, NonTerm: TermTraitBound> {
+    pub states: Vec<State<Term, NonTerm>>,
     pub main_state: usize,
 }
 
-impl<Term: TermTraitBound> Parser<Term> {
+impl<Term: TermTraitBound, NonTerm: TermTraitBound> Parser<Term, NonTerm> {
     /// feed one token to parser, and update state stack and stack
     fn feed(
         &self,
         state_stack: &mut Vec<usize>,
-        stack: &mut Vec<Token<Term>>,
-        token: &Token<Term>,
-    ) -> Result<(), ParseError<Term>> {
+        stack: &mut Vec<Token<Term, NonTerm>>,
+        token: &Token<Term, NonTerm>,
+    ) -> Result<(), ParseError<Term, NonTerm>> {
         // fetch state from state stack
         let state = if let Some(state_id) = state_stack.last() {
             if let Some(state) = self.states.get(*state_id) {
@@ -84,17 +84,26 @@ impl<Term: TermTraitBound> Parser<Term> {
     }
 
     /// parse given tokens and return result
-    pub fn parse(&self, tokens: &[Token<Term>]) -> Result<Token<Term>, ParseError<Term>> {
+    pub fn parse(
+        &self,
+        tokens: &[Term],
+    ) -> Result<Token<Term, NonTerm>, ParseError<Term, NonTerm>> {
+        // create state stack and set default state to main_state
         let mut state_stack = Vec::new();
         state_stack.push(self.main_state);
+
+        // create stack for tokens
         let mut stack = Vec::new();
-        for token in tokens.iter() {
-            self.feed(&mut state_stack, &mut stack, token)?;
+
+        // feed all tokens
+        for token in tokens.iter().cloned() {
+            self.feed(&mut state_stack, &mut stack, &Token::Term(token))?;
         }
 
         // feed End token
         self.feed(&mut state_stack, &mut stack, &Token::End)?;
 
+        // if parse succeeded, stack should have [ MainEntry, End ]
         let result = if let Some(result) = stack.get(0) {
             result
         } else {
