@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::fmt::Display;
 
 use crate::action::Action;
@@ -8,12 +9,12 @@ use crate::token::Token;
 /// A struct for state in LR(1) parser
 #[derive(Debug, Clone)]
 pub struct State<Term: TermTraitBound, NonTerm: TermTraitBound> {
-    pub action_map: BTreeMap<Token<Term, NonTerm>, Action<Term, NonTerm>>,
+    pub action_map: HashMap<Token<Term, NonTerm>, Action<Term, NonTerm>>,
 }
 impl<Term: TermTraitBound, NonTerm: TermTraitBound> State<Term, NonTerm> {
     pub fn new() -> Self {
         State {
-            action_map: BTreeMap::new(),
+            action_map: HashMap::new(),
         }
     }
 

@@ -16,7 +16,7 @@ pub struct NamedShiftedRule<Term: TermTraitBound, NonTerm: TermTraitBound> {
     /// production rule
     pub rule: Vec<Token<Term, NonTerm>>,
 
-    /// index of shifted token
+    /// number of shifted token
     pub shifted: usize,
 }
 impl<Term: TermTraitBound, NonTerm: TermTraitBound> NamedShiftedRule<Term, NonTerm> {

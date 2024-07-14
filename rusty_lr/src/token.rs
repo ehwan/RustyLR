@@ -4,7 +4,7 @@ use std::fmt::Display;
 use crate::term::TermTraitBound;
 
 /// Token represents a terminal or non-terminal symbol in the grammar.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Token<Term: TermTraitBound, NonTerm: TermTraitBound> {
     Term(Term),
     NonTerm(NonTerm),

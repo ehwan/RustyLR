@@ -6,7 +6,7 @@ mod state;
 mod term;
 mod token;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Hash, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Term {
     Id,
     Plus,

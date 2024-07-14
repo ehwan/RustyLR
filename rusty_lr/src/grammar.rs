@@ -287,11 +287,11 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Grammar<Term, NonTerm> {
             }
         }
 
-        // process empty rules
+        // process rules that no more tokens left to shift
         // if next token is one of lookahead, add reduce action
-        // if there are multiple recude rules for same lookahead, it is a reduce/reduce conflict
-        for mut empty_rule in empty_rules.into_iter() {
-            empty_rule.rule.shifted = 0;
+        // if there are multiple recude rules for same lookahead, it is a reduce/reduce conflict (since there are no shift action inserted yet)
+        for empty_rule in empty_rules.into_iter() {
+            // empty_rule.rule.shifted = 0;
             let action = Action::Reduce(empty_rule.rule);
             let lookaheads = empty_rule.lookaheads;
             let state = &mut states[state_id];
@@ -309,14 +309,15 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Grammar<Term, NonTerm> {
         }
 
         // process next rules with token
-        for (next_token, next_rule) in next_rules.into_iter() {
-            let next_state_id = self.build(next_rule.clone(), states, state_map)?;
+        // add shift and goto action
+        for (next_token, next_rule_set) in next_rules.into_iter() {
+            let next_state_id = self.build(next_rule_set.clone(), states, state_map)?;
             let action = Action::<Term, NonTerm>::Goto(next_state_id);
             if let Some(old) = states[state_id].action_map.insert(next_token, action) {
                 // reduce/shift conflict
                 return Err(BuildError::ReduceShiftConflict(
                     old.clone().rule().unwrap(),
-                    next_rule,
+                    next_rule_set,
                 ));
             }
         }
