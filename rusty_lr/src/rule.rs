@@ -5,67 +5,148 @@ use std::fmt::Display;
 use crate::term::TermTraitBound;
 use crate::token::Token;
 
-/// A struct for single shifted named production rule
-/// name -> Token1 Token2 . Token3
-///         ^^^^^^^^^^^^^ shifted = 2
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct NamedShiftedRule<Term: TermTraitBound, NonTerm: TermTraitBound> {
-    /// unique identifier of this rule
+/// Production rule.
+/// name -> Token0 Token1 Token2 ...
+#[derive(Debug, Clone)]
+pub(crate) struct ProductionRule<Term: TermTraitBound, NonTerm: TermTraitBound> {
     pub name: NonTerm,
-
-    /// production rule
     pub rule: Vec<Token<Term, NonTerm>>,
-
-    /// number of shifted token
-    pub shifted: usize,
+    pub uid: usize,
 }
-impl<Term: TermTraitBound, NonTerm: TermTraitBound> NamedShiftedRule<Term, NonTerm> {
-    pub fn new(name: NonTerm, rule: Vec<Token<Term, NonTerm>>, shifted: usize) -> Self {
-        NamedShiftedRule {
-            name,
-            rule,
-            shifted,
-        }
+impl<Term: TermTraitBound, NonTerm: TermTraitBound> PartialEq for ProductionRule<Term, NonTerm> {
+    fn eq(&self, other: &Self) -> bool {
+        self.uid == other.uid
     }
-
-    /// get first token of shifted rule
-    pub fn first(&self) -> Option<&Token<Term, NonTerm>> {
-        self.rule.get(self.shifted)
+}
+impl<Term: TermTraitBound, NonTerm: TermTraitBound> Eq for ProductionRule<Term, NonTerm> {}
+impl<Term: TermTraitBound, NonTerm: TermTraitBound> PartialOrd for ProductionRule<Term, NonTerm> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.uid.partial_cmp(&other.uid)
     }
-    /// get rest of the shifted rule (excluding first token)
-    pub fn rest(&self) -> &[Token<Term, NonTerm>] {
-        &self.rule[self.shifted + 1..]
+}
+impl<Term: TermTraitBound, NonTerm: TermTraitBound> Ord for ProductionRule<Term, NonTerm> {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.uid.cmp(&other.uid)
     }
 }
 impl<Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Display
-    for NamedShiftedRule<Term, NonTerm>
+    for ProductionRule<Term, NonTerm>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} -> ", self.name)?;
         for (id, token) in self.rule.iter().enumerate() {
-            if id == self.shifted {
-                write!(f, ". ")?;
-            }
             write!(f, "{}", token)?;
             if id < self.rule.len() - 1 {
                 write!(f, " ")?;
             }
         }
-        if self.shifted == self.rule.len() {
+        Ok(())
+    }
+}
+
+/// A struct for single shifted named production rule
+/// name -> Token1 Token2 . Token3
+///         ^^^^^^^^^^^^^ shifted = 2
+#[derive(Debug, Clone)]
+pub(crate) struct ShiftedRuleRef<'a, Term: TermTraitBound, NonTerm: TermTraitBound> {
+    pub rule: &'a ProductionRule<Term, NonTerm>,
+    pub shifted: usize,
+}
+impl<'a, Term: TermTraitBound, NonTerm: TermTraitBound> PartialEq
+    for ShiftedRuleRef<'a, Term, NonTerm>
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.rule.uid == other.rule.uid && self.shifted == other.shifted
+    }
+}
+impl<'a, Term: TermTraitBound, NonTerm: TermTraitBound> ShiftedRuleRef<'a, Term, NonTerm> {
+    pub fn first(&self) -> Option<&Token<Term, NonTerm>> {
+        self.rule.rule.get(self.shifted)
+    }
+    pub fn rest(&self) -> &[Token<Term, NonTerm>] {
+        &self.rule.rule[self.shifted + 1..]
+    }
+}
+impl<'a, Term: TermTraitBound, NonTerm: TermTraitBound> Eq for ShiftedRuleRef<'a, Term, NonTerm> {}
+impl<'a, Term: TermTraitBound, NonTerm: TermTraitBound> PartialOrd
+    for ShiftedRuleRef<'a, Term, NonTerm>
+{
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        if self.rule.uid == other.rule.uid {
+            self.shifted.partial_cmp(&other.shifted)
+        } else {
+            self.rule.uid.partial_cmp(&other.rule.uid)
+        }
+    }
+}
+impl<'a, Term: TermTraitBound, NonTerm: TermTraitBound> Ord for ShiftedRuleRef<'a, Term, NonTerm> {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        if self.rule.uid == other.rule.uid {
+            self.shifted.cmp(&other.shifted)
+        } else {
+            self.rule.uid.cmp(&other.rule.uid)
+        }
+    }
+}
+impl<'a, Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Display
+    for ShiftedRuleRef<'a, Term, NonTerm>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} -> ", self.rule.name)?;
+        for (id, token) in self.rule.rule.iter().enumerate() {
+            if id == self.shifted {
+                write!(f, ". ")?;
+            }
+            write!(f, "{}", token)?;
+            if id < self.rule.rule.len() - 1 {
+                write!(f, " ")?;
+            }
+        }
+        if self.shifted == self.rule.rule.len() {
             write!(f, " .")?;
         }
         Ok(())
     }
 }
 
-/// A struct for single shifted named production rule with lookahead tokens
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct LookaheadRule<Term: TermTraitBound, NonTerm: TermTraitBound> {
-    pub rule: NamedShiftedRule<Term, NonTerm>,
+/// shifted rule with lookahead tokens
+#[derive(Debug, Clone)]
+pub(crate) struct LookaheadRuleRef<'a, Term: TermTraitBound, NonTerm: TermTraitBound> {
+    pub rule: ShiftedRuleRef<'a, Term, NonTerm>,
     pub lookaheads: BTreeSet<Token<Term, NonTerm>>,
 }
-impl<Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Display
-    for LookaheadRule<Term, NonTerm>
+impl<'a, Term: TermTraitBound, NonTerm: TermTraitBound> PartialEq
+    for LookaheadRuleRef<'a, Term, NonTerm>
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.rule == other.rule && self.lookaheads == other.lookaheads
+    }
+}
+impl<'a, Term: TermTraitBound, NonTerm: TermTraitBound> Eq for LookaheadRuleRef<'a, Term, NonTerm> {}
+impl<'a, Term: TermTraitBound, NonTerm: TermTraitBound> PartialOrd
+    for LookaheadRuleRef<'a, Term, NonTerm>
+{
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        if self.rule == other.rule {
+            self.lookaheads.partial_cmp(&other.lookaheads)
+        } else {
+            self.rule.partial_cmp(&other.rule)
+        }
+    }
+}
+impl<'a, Term: TermTraitBound, NonTerm: TermTraitBound> Ord
+    for LookaheadRuleRef<'a, Term, NonTerm>
+{
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        if self.rule == other.rule {
+            self.lookaheads.cmp(&other.lookaheads)
+        } else {
+            self.rule.cmp(&other.rule)
+        }
+    }
+}
+impl<'a, Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Display
+    for LookaheadRuleRef<'a, Term, NonTerm>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} / ", self.rule)?;
@@ -79,23 +160,20 @@ impl<Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Display
     }
 }
 
-/// A struct for set of lookahead rules
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct LookaheadRuleSet<Term: TermTraitBound, NonTerm: TermTraitBound> {
-    pub rules: BTreeSet<LookaheadRule<Term, NonTerm>>,
+/// set of lookahead rules
+#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
+pub(crate) struct LookaheadRuleRefSet<'a, Term: TermTraitBound, NonTerm: TermTraitBound> {
+    pub rules: BTreeSet<LookaheadRuleRef<'a, Term, NonTerm>>,
 }
-impl<Term: TermTraitBound, NonTerm: TermTraitBound> LookaheadRuleSet<Term, NonTerm> {
+impl<'a, Term: TermTraitBound, NonTerm: TermTraitBound> LookaheadRuleRefSet<'a, Term, NonTerm> {
     pub fn new() -> Self {
-        LookaheadRuleSet {
+        LookaheadRuleRefSet {
             rules: BTreeSet::new(),
         }
     }
-    pub fn add_rule(&mut self, rule: LookaheadRule<Term, NonTerm>) {
-        self.rules.insert(rule);
-    }
 }
-impl<Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Display
-    for LookaheadRuleSet<Term, NonTerm>
+impl<'a, Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Display
+    for LookaheadRuleRefSet<'a, Term, NonTerm>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (id, rule) in self.rules.iter().enumerate() {

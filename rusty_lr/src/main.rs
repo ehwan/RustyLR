@@ -63,6 +63,8 @@ fn main() {
 
     grammar.set_main("E");
 
+    println!("{}", grammar);
+
     let parser = match grammar.build_main("Augmented") {
         Ok(result) => result,
         Err(err) => {

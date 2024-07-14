@@ -5,7 +5,7 @@ use crate::term::TermTraitBound;
 
 #[derive(Debug, Clone)]
 pub enum Action<Term: TermTraitBound, NonTerm: TermTraitBound> {
-    Reduce(NamedShiftedRule<Term, NonTerm>),
+    Reduce(ProductionRule<Term, NonTerm>),
     Goto(usize),
 }
 impl<Term: TermTraitBound, NonTerm: TermTraitBound> Action<Term, NonTerm> {
@@ -17,11 +17,10 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Action<Term, NonTerm> {
         }
     }
 
-    /// get production rule if it is reduce action
-    pub fn rule(self) -> Option<NamedShiftedRule<Term, NonTerm>> {
+    pub fn rule(&self) -> Option<&ProductionRule<Term, NonTerm>> {
         match self {
             Action::Reduce(rule) => Some(rule),
-            _ => None,
+            Action::Goto(_) => None,
         }
     }
 }
@@ -30,7 +29,7 @@ impl<Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Display
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Action::Reduce(rule) => write!(f, "Reduce {}", rule)?,
+            Action::Reduce(rule) => write!(f, "Reduce {}", *rule)?,
             Action::Goto(state) => write!(f, "Goto {}", state)?,
         }
         Ok(())
