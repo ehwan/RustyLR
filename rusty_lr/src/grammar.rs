@@ -30,9 +30,6 @@ pub enum BuildError<'a, Term: TermTraitBound, NonTerm: NonTermTraitBound> {
         LookaheadRuleRefSet<'a, Term, NonTerm>,
     ),
 
-    #[error("Duplicated rule: {0}")]
-    DuplicatedRule(LookaheadRuleRef<'a, Term, NonTerm>),
-
     #[error("Augmented rule cannot be in production rule; in definition of {0}")]
     AugmentedInRule(NonTerm),
 }
@@ -284,10 +281,8 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
                     let next_rule_set = next_rules
                         .entry(token)
                         .or_insert(LookaheadRuleRefSet::new());
-                    let insert_result = next_rule_set.rules.insert(rule.clone());
-                    if insert_result == false {
-                        return Err(BuildError::DuplicatedRule(rule));
-                    }
+                    next_rule_set.rules.insert(rule.clone());
+                    // Duplicated rule will be handled in reduce/reduce or reduce/shift conflict
                 }
                 None => {
                     empty_rules.push(rule);
