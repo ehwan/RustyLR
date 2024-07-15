@@ -130,7 +130,7 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Parser<Term, NonTerm> {
     }
 
     /// call `parse()` with default reducer.
-    pub fn parse_with_default_reducer(
+    pub fn parse_with_default_callback(
         &self,
         terminals: &[Term],
         end_term: Option<Term>,
@@ -141,7 +141,7 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Parser<Term, NonTerm> {
     }
 
     /// call `parse()` with debug reducer
-    pub fn parse_with_debug_reducer(
+    pub fn parse_with_debug_callback(
         &self,
         terminals: &[Term],
         end_term: Option<Term>,

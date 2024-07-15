@@ -88,7 +88,7 @@ fn main() {
         Term::RightParen,
     ];
 
-    match parser.parse_with_debug_reducer(&terms, Some(Term::Eof)) {
+    match parser.parse_with_debug_callback(&terms, Some(Term::Eof)) {
         Ok(_) => println!("Parse success"),
         Err(err) => eprintln!("{}", err),
     }
