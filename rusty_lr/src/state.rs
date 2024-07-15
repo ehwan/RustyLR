@@ -5,12 +5,10 @@ use crate::rule::ProductionRule;
 use crate::term::TermTraitBound;
 
 /// A struct for state in LR(1) parser
+/// normally, the keys in shift_goto_map and reduce_map don't overlap
+/// but in some case, they may overlap and need to be resolved by config(TODO)
 #[derive(Debug, Clone)]
 pub struct State<Term: TermTraitBound, NonTerm: TermTraitBound> {
-    /// action maps
-    /// normally, the keys in shift_goto_map and reduce_map don't overlap
-    /// but in some case, they may overlap and need to be resolved by config(TODO)
-    /// currently it is BuildError when conflict occured
     pub shift_goto_map_term: HashMap<Term, usize>,
     pub shift_goto_map_nonterm: HashMap<NonTerm, usize>,
     pub reduce_map: HashMap<Term, ProductionRule<Term, NonTerm>>,
