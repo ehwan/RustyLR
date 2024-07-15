@@ -1,4 +1,3 @@
-pub(crate) mod action;
 pub(crate) mod grammar;
 pub(crate) mod parser;
 pub(crate) mod rule;

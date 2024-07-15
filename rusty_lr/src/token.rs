@@ -8,9 +8,6 @@ use crate::term::TermTraitBound;
 pub enum Token<Term: TermTraitBound, NonTerm: TermTraitBound> {
     Term(Term),
     NonTerm(NonTerm),
-
-    /// special token for end of input stream
-    End,
 }
 impl<Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Display
     for Token<Term, NonTerm>
@@ -19,7 +16,6 @@ impl<Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Display
         match self {
             Token::Term(term) => write!(f, "{}", term),
             Token::NonTerm(nonterm) => write!(f, "{}", nonterm),
-            Token::End => write!(f, "$"),
         }
     }
 }

@@ -113,7 +113,7 @@ impl<'a, Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Disp
 #[derive(Debug, Clone)]
 pub(crate) struct LookaheadRuleRef<'a, Term: TermTraitBound, NonTerm: TermTraitBound> {
     pub rule: ShiftedRuleRef<'a, Term, NonTerm>,
-    pub lookaheads: BTreeSet<Token<Term, NonTerm>>,
+    pub lookaheads: BTreeSet<Term>,
 }
 impl<'a, Term: TermTraitBound, NonTerm: TermTraitBound> PartialEq
     for LookaheadRuleRef<'a, Term, NonTerm>

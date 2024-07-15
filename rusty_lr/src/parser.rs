@@ -1,17 +1,18 @@
 use thiserror::Error;
 
-use std::error;
 use std::vec::Vec;
 
-use crate::action::Action;
 use crate::state::State;
 use crate::term::TermTraitBound;
 use crate::token::Token;
 
 #[derive(Error, Debug)]
 pub enum ParseError<Term: TermTraitBound, NonTerm: TermTraitBound> {
-    #[error("Invalid Token: {0}")]
-    InvalidToken(Token<Term, NonTerm>),
+    #[error("Invalid Non-Terminal: {0}")]
+    InvalidNonTerminal(NonTerm),
+
+    #[error("Invalid Terminal: {0}")]
+    InvalidTerminal(Term),
 
     #[error("State Stack is empty")]
     StateStackEmpty,
@@ -28,11 +29,11 @@ pub struct Parser<Term: TermTraitBound, NonTerm: TermTraitBound> {
 }
 
 impl<Term: TermTraitBound, NonTerm: TermTraitBound> Parser<Term, NonTerm> {
-    /// feed one token to parser, and update state stack and stack
+    /// feed one terminal to parser, and update state stack
     fn feed(
         &self,
         state_stack: &mut Vec<usize>,
-        token: &Token<Term, NonTerm>,
+        term: &Term,
     ) -> Result<(), ParseError<Term, NonTerm>> {
         // fetch state from state stack
         let state = if let Some(state_id) = state_stack.last() {
@@ -46,52 +47,77 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Parser<Term, NonTerm> {
         };
 
         // feed token to current state and get action
-        let action = if let Some(action) = state.feed(token) {
-            action
-        } else {
-            // TODO add curret context or production rule to error
-            return Err(ParseError::InvalidToken(token.clone()));
-        };
-
-        if action.should_shift() {
-            // TODO send shift signal to external handler
+        // for shift/reduce confict, shift has higher priority
+        if let Some(next_state_id) = state.shift_goto_term(term) {
+            state_stack.push(next_state_id);
+            return Ok(());
         }
-        match action {
-            Action::Reduce(rule) => {
-                // reduce items in stack
-                if state_stack.len() < rule.rule.len() {
-                    return Err(ParseError::StateStackNotEnough);
-                }
-                state_stack.truncate(state_stack.len() - rule.rule.len());
-
-                // feed reduced token
-                let reduced_token = Token::NonTerm(rule.name.clone());
-                self.feed(state_stack, &reduced_token)?;
-
-                // original feed token is not shifted, so feed it again
-                self.feed(state_stack, token)?;
+        if let Some(reduce_rule) = state.reduce(term) {
+            // reduce items in stack
+            if state_stack.len() < reduce_rule.rule.len() {
+                return Err(ParseError::StateStackNotEnough);
             }
-            Action::Goto(next_state_id) => {
-                state_stack.push(*next_state_id);
-            }
+            state_stack.truncate(state_stack.len() - reduce_rule.rule.len());
+
+            // feed reduced token
+            self.feed_nonterm(state_stack, &reduce_rule.name)?;
+
+            // original feed token is not shifted, so feed it again
+            self.feed(state_stack, term)?;
+            return Ok(());
         }
-
-        Ok(())
+        // TODO add curret context or production rule to error
+        Err(ParseError::InvalidTerminal(term.clone()))
     }
 
-    /// parse given tokens and return result
-    pub fn parse(&self, tokens: &[Term]) -> Result<(), ParseError<Term, NonTerm>> {
+    /// feed one non-terminal to parser, and update state stack
+    fn feed_nonterm(
+        &self,
+        state_stack: &mut Vec<usize>,
+        nonterm: &NonTerm,
+    ) -> Result<(), ParseError<Term, NonTerm>> {
+        // fetch state from state stack
+        let state = if let Some(state_id) = state_stack.last() {
+            if let Some(state) = self.states.get(*state_id) {
+                state
+            } else {
+                return Err(ParseError::InvalidState(*state_id));
+            }
+        } else {
+            return Err(ParseError::StateStackEmpty);
+        };
+
+        // feed token to current state and get action
+        // for shift/reduce confict, shift has higher priority
+        if let Some(next_state_id) = state.shift_goto_nonterm(nonterm) {
+            state_stack.push(next_state_id);
+            return Ok(());
+        }
+        // TODO add curret context or production rule to error
+        Err(ParseError::InvalidNonTerminal(nonterm.clone()))
+    }
+
+    /// parse given terminals and return result
+    /// if end_term is Some, it will be feeded after all tokens are feeded
+    /// if end_term is None, terminals should end with End token
+    pub fn parse(
+        &self,
+        terminals: &[Term],
+        end_term: Option<Term>,
+    ) -> Result<(), ParseError<Term, NonTerm>> {
         // create state stack and set default state to main_state
         let mut state_stack = Vec::new();
         state_stack.push(self.main_state);
 
         // feed all tokens
-        for token in tokens.iter().cloned() {
-            self.feed(&mut state_stack, &Token::Term(token))?;
+        for term in terminals.iter() {
+            self.feed(&mut state_stack, term)?;
         }
 
         // feed End token
-        self.feed(&mut state_stack, &Token::End)?;
+        if let Some(end_term) = end_term {
+            self.feed(&mut state_stack, &end_term)?;
+        }
 
         Ok(())
     }

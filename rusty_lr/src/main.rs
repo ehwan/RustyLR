@@ -1,4 +1,3 @@
-mod action;
 mod grammar;
 mod parser;
 mod rule;
@@ -13,6 +12,7 @@ pub enum Term {
     Star,
     LeftParen,
     RightParen,
+    Eof,
 }
 impl std::fmt::Display for Term {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -22,6 +22,7 @@ impl std::fmt::Display for Term {
             Term::Star => write!(f, "*"),
             Term::LeftParen => write!(f, "("),
             Term::RightParen => write!(f, ")"),
+            Term::Eof => write!(f, "$"),
         }
     }
 }
@@ -61,9 +62,7 @@ fn main() {
     );
     grammar.add_rule("E", vec![Token::NonTerm("A")]);
 
-    grammar.set_main("E");
-
-    let parser = match grammar.build_main("Augmented") {
+    let parser = match grammar.build_main("E", Term::Eof, "E'") {
         Ok(result) => result,
         Err(err) => {
             eprintln!("{}", err);
@@ -79,7 +78,7 @@ fn main() {
         println!("{}", state);
     }
 
-    let tokens = vec![
+    let terms = vec![
         Term::Id,
         Term::Plus,
         Term::Id,
@@ -90,7 +89,7 @@ fn main() {
         Term::Id,
         Term::RightParen,
     ];
-    match parser.parse(&tokens) {
+    match parser.parse(&terms, Some(Term::Eof)) {
         Ok(_) => println!("Parse success"),
         Err(err) => eprintln!("{}", err),
     }
