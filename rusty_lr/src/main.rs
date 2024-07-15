@@ -57,7 +57,10 @@ fn main() {
     );
     grammar.add_rule("E", vec![Token::NonTerm("A")]);
 
-    let parser = match grammar.build_main("E", Term::Eof, "E'") {
+    // augmented rule
+    grammar.add_rule("E'", vec![Token::NonTerm("E"), Token::Term(Term::Eof)]);
+
+    let parser = match grammar.build_main("E'") {
         Ok(result) => result,
         Err(err) => {
             eprintln!("{}", err);

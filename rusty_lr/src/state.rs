@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::fmt::Display;
 
-use crate::rule::ProductionRule;
 use crate::term::NonTermTraitBound;
 use crate::term::TermTraitBound;
 
@@ -12,7 +11,7 @@ use crate::term::TermTraitBound;
 pub struct State<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     pub shift_goto_map_term: HashMap<Term, usize>,
     pub shift_goto_map_nonterm: HashMap<NonTerm, usize>,
-    pub reduce_map: HashMap<Term, ProductionRule<Term, NonTerm>>,
+    pub reduce_map: HashMap<Term, usize>,
 }
 impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> State<Term, NonTerm> {
     pub fn new() -> Self {
@@ -32,8 +31,8 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> State<Term, NonTerm> {
         self.shift_goto_map_nonterm.get(nonterm).copied()
     }
     /// feed one token and get action
-    pub fn reduce<'a>(&'a self, term: &Term) -> Option<&'a ProductionRule<Term, NonTerm>> {
-        self.reduce_map.get(term)
+    pub fn reduce<'a>(&'a self, term: &Term) -> Option<usize> {
+        self.reduce_map.get(term).copied()
     }
 }
 impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display

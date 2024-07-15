@@ -5,6 +5,7 @@ use std::vec::Vec;
 use crate::reducer::DebugReducer;
 use crate::reducer::DefaultReducer;
 use crate::reducer::Reducer;
+use crate::rule::ProductionRule;
 use crate::state::State;
 use crate::term::NonTermTraitBound;
 use crate::term::TermTraitBound;
@@ -27,6 +28,7 @@ pub enum ParseError<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     InvalidState(usize),
 }
 pub struct Parser<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
+    pub rules: Vec<ProductionRule<Term, NonTerm>>,
     pub states: Vec<State<Term, NonTerm>>,
     pub main_state: usize,
 }
@@ -59,14 +61,15 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Parser<Term, NonTerm> {
         }
         if let Some(reduce_rule) = state.reduce(term) {
             // reduce items in stack
-            if state_stack.len() < reduce_rule.rule.len() {
+            let rule = &self.rules[reduce_rule];
+            if state_stack.len() < rule.rule.len() {
                 return Err(ParseError::StateStackNotEnough);
             }
-            state_stack.truncate(state_stack.len() - reduce_rule.rule.len());
-            reducer.reduce(reduce_rule);
+            state_stack.truncate(state_stack.len() - rule.rule.len());
+            reducer.reduce(rule);
 
             // feed reduced token
-            self.feed_nonterm(state_stack, &reduce_rule.name, reducer)?;
+            self.feed_nonterm(state_stack, &rule.name, reducer)?;
 
             // original feed token is not shifted, so feed it again
             self.feed(state_stack, term, reducer)?;
