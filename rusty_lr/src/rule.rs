@@ -8,7 +8,7 @@ use crate::token::Token;
 /// Production rule.
 /// name -> Token0 Token1 Token2 ...
 #[derive(Debug, Clone)]
-pub(crate) struct ProductionRule<Term: TermTraitBound, NonTerm: TermTraitBound> {
+pub struct ProductionRule<Term: TermTraitBound, NonTerm: TermTraitBound> {
     pub name: NonTerm,
     pub rule: Vec<Token<Term, NonTerm>>,
     pub uid: usize,
@@ -48,7 +48,7 @@ impl<Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Display
 /// name -> Token1 Token2 . Token3
 ///         ^^^^^^^^^^^^^ shifted = 2
 #[derive(Debug, Clone)]
-pub(crate) struct ShiftedRuleRef<'a, Term: TermTraitBound, NonTerm: TermTraitBound> {
+pub struct ShiftedRuleRef<'a, Term: TermTraitBound, NonTerm: TermTraitBound> {
     pub rule: &'a ProductionRule<Term, NonTerm>,
     pub shifted: usize,
 }
@@ -111,7 +111,7 @@ impl<'a, Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Disp
 
 /// shifted rule with lookahead tokens
 #[derive(Debug, Clone)]
-pub(crate) struct LookaheadRuleRef<'a, Term: TermTraitBound, NonTerm: TermTraitBound> {
+pub struct LookaheadRuleRef<'a, Term: TermTraitBound, NonTerm: TermTraitBound> {
     pub rule: ShiftedRuleRef<'a, Term, NonTerm>,
     pub lookaheads: BTreeSet<Term>,
 }
@@ -162,7 +162,7 @@ impl<'a, Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Disp
 
 /// set of lookahead rules
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub(crate) struct LookaheadRuleRefSet<'a, Term: TermTraitBound, NonTerm: TermTraitBound> {
+pub struct LookaheadRuleRefSet<'a, Term: TermTraitBound, NonTerm: TermTraitBound> {
     pub rules: BTreeSet<LookaheadRuleRef<'a, Term, NonTerm>>,
 }
 impl<'a, Term: TermTraitBound, NonTerm: TermTraitBound> LookaheadRuleRefSet<'a, Term, NonTerm> {

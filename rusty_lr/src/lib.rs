@@ -1,6 +1,7 @@
-pub(crate) mod grammar;
-pub(crate) mod parser;
-pub(crate) mod rule;
-pub(crate) mod state;
-pub(crate) mod term;
-pub(crate) mod token;
+pub mod grammar;
+pub mod parser;
+pub mod reducer;
+pub mod rule;
+pub mod state;
+pub mod term;
+pub mod token;

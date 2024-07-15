@@ -1,9 +1,4 @@
-mod grammar;
-mod parser;
-mod rule;
-mod state;
-mod term;
-mod token;
+use rusty_lr::*;
 
 #[derive(Debug, Hash, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Term {
@@ -89,7 +84,8 @@ fn main() {
         Term::Id,
         Term::RightParen,
     ];
-    match parser.parse(&terms, Some(Term::Eof)) {
+
+    match parser.parse_with_debug_reducer(&terms, Some(Term::Eof)) {
         Ok(_) => println!("Parse success"),
         Err(err) => eprintln!("{}", err),
     }

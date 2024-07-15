@@ -2,9 +2,11 @@ use thiserror::Error;
 
 use std::vec::Vec;
 
+use crate::reducer::DebugReducer;
+use crate::reducer::DefaultReducer;
+use crate::reducer::Reducer;
 use crate::state::State;
 use crate::term::TermTraitBound;
-use crate::token::Token;
 
 #[derive(Error, Debug)]
 pub enum ParseError<Term: TermTraitBound, NonTerm: TermTraitBound> {
@@ -30,10 +32,11 @@ pub struct Parser<Term: TermTraitBound, NonTerm: TermTraitBound> {
 
 impl<Term: TermTraitBound, NonTerm: TermTraitBound> Parser<Term, NonTerm> {
     /// feed one terminal to parser, and update state stack
-    fn feed(
+    fn feed<R: Reducer<Term, NonTerm>>(
         &self,
         state_stack: &mut Vec<usize>,
         term: &Term,
+        reducer: &mut R,
     ) -> Result<(), ParseError<Term, NonTerm>> {
         // fetch state from state stack
         let state = if let Some(state_id) = state_stack.last() {
@@ -50,6 +53,7 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Parser<Term, NonTerm> {
         // for shift/reduce confict, shift has higher priority
         if let Some(next_state_id) = state.shift_goto_term(term) {
             state_stack.push(next_state_id);
+            reducer.shift_and_goto(term, next_state_id);
             return Ok(());
         }
         if let Some(reduce_rule) = state.reduce(term) {
@@ -58,12 +62,13 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Parser<Term, NonTerm> {
                 return Err(ParseError::StateStackNotEnough);
             }
             state_stack.truncate(state_stack.len() - reduce_rule.rule.len());
+            reducer.reduce(reduce_rule);
 
             // feed reduced token
             self.feed_nonterm(state_stack, &reduce_rule.name)?;
 
             // original feed token is not shifted, so feed it again
-            self.feed(state_stack, term)?;
+            self.feed(state_stack, term, reducer)?;
             return Ok(());
         }
         // TODO add curret context or production rule to error
@@ -97,13 +102,40 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Parser<Term, NonTerm> {
         Err(ParseError::InvalidNonTerminal(nonterm.clone()))
     }
 
-    /// parse given terminals and return result
-    /// if end_term is Some, it will be feeded after all tokens are feeded
-    /// if end_term is None, terminals should end with End token
-    pub fn parse(
+    /// call `parse()` with default reducer.
+    pub fn parse_with_default_reducer(
         &self,
         terminals: &[Term],
         end_term: Option<Term>,
+    ) -> Result<(), ParseError<Term, NonTerm>> {
+        let mut reducer = DefaultReducer::new();
+
+        self.parse(terminals, end_term, &mut reducer)
+    }
+
+    /// call `parse()` with debug reducer
+    pub fn parse_with_debug_reducer(
+        &self,
+        terminals: &[Term],
+        end_term: Option<Term>,
+    ) -> Result<(), ParseError<Term, NonTerm>>
+    where
+        Term: std::fmt::Debug,
+        NonTerm: std::fmt::Debug,
+    {
+        let mut reducer = DebugReducer::new();
+
+        self.parse(terminals, end_term, &mut reducer)
+    }
+
+    /// parse given terminals and return result
+    /// if end_term is Some, it will be feeded after all tokens are feeded
+    /// if end_term is None, terminals should end with End token
+    pub fn parse<R: Reducer<Term, NonTerm>>(
+        &self,
+        terminals: &[Term],
+        end_term: Option<Term>,
+        reducer: &mut R,
     ) -> Result<(), ParseError<Term, NonTerm>> {
         // create state stack and set default state to main_state
         let mut state_stack = Vec::new();
@@ -111,12 +143,12 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Parser<Term, NonTerm> {
 
         // feed all tokens
         for term in terminals.iter() {
-            self.feed(&mut state_stack, term)?;
+            self.feed(&mut state_stack, term, reducer)?;
         }
 
         // feed End token
         if let Some(end_term) = end_term {
-            self.feed(&mut state_stack, &end_term)?;
+            self.feed(&mut state_stack, &end_term, reducer)?;
         }
 
         Ok(())
