@@ -6,10 +6,11 @@ use crate::reducer::DebugReducer;
 use crate::reducer::DefaultReducer;
 use crate::reducer::Reducer;
 use crate::state::State;
+use crate::term::NonTermTraitBound;
 use crate::term::TermTraitBound;
 
 #[derive(Error, Debug)]
-pub enum ParseError<Term: TermTraitBound, NonTerm: TermTraitBound> {
+pub enum ParseError<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     #[error("Invalid Non-Terminal: {0}")]
     InvalidNonTerminal(NonTerm),
 
@@ -25,12 +26,12 @@ pub enum ParseError<Term: TermTraitBound, NonTerm: TermTraitBound> {
     #[error("Invalid State: Goto {0}")]
     InvalidState(usize),
 }
-pub struct Parser<Term: TermTraitBound, NonTerm: TermTraitBound> {
+pub struct Parser<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     pub states: Vec<State<Term, NonTerm>>,
     pub main_state: usize,
 }
 
-impl<Term: TermTraitBound, NonTerm: TermTraitBound> Parser<Term, NonTerm> {
+impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Parser<Term, NonTerm> {
     /// feed one terminal to parser, and update state stack
     fn feed<R: Reducer<Term, NonTerm>>(
         &self,

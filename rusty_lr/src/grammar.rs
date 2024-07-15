@@ -2,17 +2,20 @@ use thiserror::Error;
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
+use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fmt::Display;
 use std::vec::Vec;
 
 use crate::parser::Parser;
 use crate::rule::*;
 use crate::state::State;
+use crate::term::NonTermTraitBound;
 use crate::term::TermTraitBound;
 use crate::token::Token;
 
 #[derive(Error, Debug)]
-pub enum BuildError<'a, Term: TermTraitBound, NonTerm: TermTraitBound> {
+pub enum BuildError<'a, Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     #[error("Rule not found: {0}")]
     RuleNotFound(NonTerm),
 
@@ -36,23 +39,23 @@ pub enum BuildError<'a, Term: TermTraitBound, NonTerm: TermTraitBound> {
 
 /// A set of production rules and main entry point
 #[derive(Debug, Clone)]
-pub struct Grammar<Term: TermTraitBound, NonTerm: TermTraitBound> {
+pub struct Grammar<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     /// set of production rules
-    pub rules: BTreeMap<NonTerm, Vec<ProductionRule<Term, NonTerm>>>,
+    pub rules: HashMap<NonTerm, Vec<ProductionRule<Term, NonTerm>>>,
 
     /// first terminal tokens for each nonterminals
     /// true if it can be empty
-    firsts: BTreeMap<NonTerm, (BTreeSet<Term>, bool)>,
+    firsts: HashMap<NonTerm, (HashSet<Term>, bool)>,
 
     /// unique counter from 0 to assign uid for each production rules
     uid: usize,
 }
 
-impl<Term: TermTraitBound, NonTerm: TermTraitBound> Grammar<Term, NonTerm> {
+impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
     pub fn new() -> Self {
         Grammar {
-            rules: BTreeMap::new(),
-            firsts: BTreeMap::new(),
+            rules: HashMap::new(),
+            firsts: HashMap::new(),
             uid: 0,
         }
     }
@@ -130,7 +133,7 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Grammar<Term, NonTerm> {
                     .entry(name.clone())
                     .or_insert_with(|| {
                         changed = true;
-                        (BTreeSet::new(), false)
+                        (HashSet::new(), false)
                     })
                     .clone();
 
@@ -199,7 +202,8 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Grammar<Term, NonTerm> {
                 }
                 Token::NonTerm(nonterm) => {
                     let (firsts, canbe_empty) = self.firsts.get(nonterm).unwrap();
-                    ret.append(&mut firsts.clone());
+                    ret.extend(firsts.iter().cloned());
+                    // ret.append(&mut firsts.clone());
                     if !canbe_empty {
                         return Ok(ret);
                     }
@@ -271,7 +275,7 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Grammar<Term, NonTerm> {
         state_map.insert(rules.clone(), state_id);
         states.push(State::new());
 
-        let mut next_rules = BTreeMap::new();
+        let mut next_rules = HashMap::new();
         let mut empty_rules = Vec::new();
         for mut rule in rules.rules.into_iter() {
             match rule.rule.first().cloned() {
@@ -338,7 +342,7 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Grammar<Term, NonTerm> {
     }
 }
 
-impl<Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Display
+impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display
     for Grammar<Term, NonTerm>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

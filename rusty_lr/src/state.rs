@@ -2,18 +2,19 @@ use std::collections::HashMap;
 use std::fmt::Display;
 
 use crate::rule::ProductionRule;
+use crate::term::NonTermTraitBound;
 use crate::term::TermTraitBound;
 
 /// A struct for state in LR(1) parser
 /// normally, the keys in shift_goto_map and reduce_map don't overlap
 /// but in some case, they may overlap and need to be resolved by config(TODO)
 #[derive(Debug, Clone)]
-pub struct State<Term: TermTraitBound, NonTerm: TermTraitBound> {
+pub struct State<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     pub shift_goto_map_term: HashMap<Term, usize>,
     pub shift_goto_map_nonterm: HashMap<NonTerm, usize>,
     pub reduce_map: HashMap<Term, ProductionRule<Term, NonTerm>>,
 }
-impl<Term: TermTraitBound, NonTerm: TermTraitBound> State<Term, NonTerm> {
+impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> State<Term, NonTerm> {
     pub fn new() -> Self {
         State {
             shift_goto_map_term: HashMap::new(),
@@ -35,7 +36,7 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> State<Term, NonTerm> {
         self.reduce_map.get(term)
     }
 }
-impl<Term: TermTraitBound + Display, NonTerm: TermTraitBound + Display> Display
+impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display
     for State<Term, NonTerm>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
