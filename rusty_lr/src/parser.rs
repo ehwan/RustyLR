@@ -65,7 +65,7 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Parser<Term, NonTerm> {
             reducer.reduce(reduce_rule);
 
             // feed reduced token
-            self.feed_nonterm(state_stack, &reduce_rule.name)?;
+            self.feed_nonterm(state_stack, &reduce_rule.name, reducer)?;
 
             // original feed token is not shifted, so feed it again
             self.feed(state_stack, term, reducer)?;
@@ -76,10 +76,11 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Parser<Term, NonTerm> {
     }
 
     /// feed one non-terminal to parser, and update state stack
-    fn feed_nonterm(
+    fn feed_nonterm<R: Reducer<Term, NonTerm>>(
         &self,
         state_stack: &mut Vec<usize>,
         nonterm: &NonTerm,
+        reducer: &mut R,
     ) -> Result<(), ParseError<Term, NonTerm>> {
         // fetch state from state stack
         let state = if let Some(state_id) = state_stack.last() {
@@ -96,6 +97,7 @@ impl<Term: TermTraitBound, NonTerm: TermTraitBound> Parser<Term, NonTerm> {
         // for shift/reduce confict, shift has higher priority
         if let Some(next_state_id) = state.shift_goto_nonterm(nonterm) {
             state_stack.push(next_state_id);
+            reducer.shift_and_goto_nonterm(nonterm, next_state_id);
             return Ok(());
         }
         // TODO add curret context or production rule to error
