@@ -130,46 +130,52 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Parser<Term, NonTerm> {
     }
 
     /// call `parse()` with default reducer.
-    pub fn parse_with_default_callback(
+    pub fn parse_with_default_callback<'a, It: Iterator<Item = &'a Term>>(
         &self,
-        terminals: &[Term],
-        end_term: Option<Term>,
-    ) -> Result<(), ParseError<Term, NonTerm>> {
-        let mut callback = DefaultCallback::new();
-
-        self.parse(terminals, end_term, &mut callback)
-    }
-
-    /// call `parse()` with debug reducer
-    pub fn parse_with_debug_callback(
-        &self,
-        terminals: &[Term],
+        input_terminal_iterator: It,
         end_term: Option<Term>,
     ) -> Result<(), ParseError<Term, NonTerm>>
     where
-        Term: std::fmt::Debug,
+        Term: 'a,
+    {
+        let mut callback = DefaultCallback::new();
+
+        self.parse(input_terminal_iterator, end_term, &mut callback)
+    }
+
+    /// call `parse()` with debug reducer
+    pub fn parse_with_debug_callback<'a, It: Iterator<Item = &'a Term>>(
+        &self,
+        input_terminal_iterator: It,
+        end_term: Option<Term>,
+    ) -> Result<(), ParseError<Term, NonTerm>>
+    where
+        Term: std::fmt::Debug + 'a,
         NonTerm: std::fmt::Debug,
     {
         let mut callback = DebugCallback::new();
 
-        self.parse(terminals, end_term, &mut callback)
+        self.parse(input_terminal_iterator, end_term, &mut callback)
     }
 
     /// parse given terminals and return result
     /// if end_term is Some, it will be feeded after all tokens are feeded
     /// if end_term is None, terminals should end with End token
-    pub fn parse<C: Callback<Term, NonTerm>>(
+    pub fn parse<'a, It: Iterator<Item = &'a Term>, C: Callback<Term, NonTerm>>(
         &self,
-        terminals: &[Term],
+        input_terminal_iterator: It,
         end_term: Option<Term>,
         callback: &mut C,
-    ) -> Result<(), ParseError<Term, NonTerm>> {
+    ) -> Result<(), ParseError<Term, NonTerm>>
+    where
+        Term: 'a,
+    {
         // create state stack and set default state to main_state
         let mut state_stack = Vec::new();
         state_stack.push(self.main_state);
 
         // feed all tokens
-        for term in terminals.iter() {
+        for term in input_terminal_iterator {
             self.feed(&mut state_stack, term, callback)?;
         }
 
