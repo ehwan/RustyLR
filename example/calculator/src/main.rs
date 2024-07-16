@@ -1,9 +1,9 @@
-# RustyLR
-LR(1) Parser generator in Rust
+#![allow(unused_variables)]
 
-## Usage
-In [`example/calculator/src/main.rs`](example/calculator/src/main.rs)
-```rust
+use std::fmt::Display;
+
+use rusty_lr::*;
+
 /// define set of terminal symbols
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)] // must implement these traits
 pub enum TermType {
@@ -26,10 +26,29 @@ pub enum NonTermType {
 }
 
 /// impl Display for TermType, NonTermType will make related ProductionRule, error message Display-able
-impl Display for TermType { ... }
-impl Display for NonTermType { ... }
-
-
+impl Display for TermType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TermType::Num => write!(f, "Num"),
+            TermType::Plus => write!(f, "+"),
+            TermType::Mul => write!(f, "*"),
+            TermType::LeftParen => write!(f, "("),
+            TermType::RightParen => write!(f, ")"),
+            TermType::Eof => write!(f, "$"),
+        }
+    }
+}
+impl Display for NonTermType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            NonTermType::E => write!(f, "E"),
+            NonTermType::A => write!(f, "A"),
+            NonTermType::M => write!(f, "M"),
+            NonTermType::P => write!(f, "P"),
+            NonTermType::Augmented => write!(f, "E'"),
+        }
+    }
+}
 
 /// define callback struct to track parser's action
 struct ParserCallback {}
@@ -55,7 +74,6 @@ impl rusty_lr::callback::Callback<TermType, NonTermType> for ParserCallback {
     ) {
         // println!("Shift {} and goto State{}", nonterm, state_goto);
     }
-
     /// set of tokens reduced by rule
     /// you can access the actual rule struct by parser.rules[rule_id]
     fn reduce(&mut self, parser: &parser::Parser<TermType, NonTermType>, rule: usize) {
@@ -64,7 +82,6 @@ impl rusty_lr::callback::Callback<TermType, NonTermType> for ParserCallback {
     }
 }
 
-
 fn main() {
     type Token = token::Token<TermType, NonTermType>;
     let mut grammar = grammar::Grammar::new();
@@ -72,7 +89,11 @@ fn main() {
     // A -> A + A | M ( reduce left )
     grammar.add_rule(
         NonTermType::A,
-        vec![Token::NonTerm(NonTermType::A), Token::Term(TermType::Plus), Token::NonTerm(NonTermType::A)],
+        vec![
+            Token::NonTerm(NonTermType::A),
+            Token::Term(TermType::Plus),
+            Token::NonTerm(NonTermType::A),
+        ],
         rule::ReduceType::Left, // reduce left
     );
     grammar.add_rule(
@@ -84,7 +105,11 @@ fn main() {
     // M -> M * M | P ( reduce left )
     grammar.add_rule(
         NonTermType::M,
-        vec![Token::NonTerm(NonTermType::M), Token::Term(TermType::Mul), Token::NonTerm(NonTermType::M)],
+        vec![
+            Token::NonTerm(NonTermType::M),
+            Token::Term(TermType::Mul),
+            Token::NonTerm(NonTermType::M),
+        ],
         rule::ReduceType::Left, // reduce left
     );
     grammar.add_rule(
@@ -101,7 +126,11 @@ fn main() {
     );
     grammar.add_rule(
         NonTermType::P,
-        vec![Token::Term(TermType::LeftParen), Token::NonTerm(NonTermType::E), Token::Term(TermType::RightParen)],
+        vec![
+            Token::Term(TermType::LeftParen),
+            Token::NonTerm(NonTermType::E),
+            Token::Term(TermType::RightParen),
+        ],
         rule::ReduceType::Error, // error on shift/reduce conflict
     );
 
@@ -147,7 +176,6 @@ fn main() {
         TermType::RightParen,
     ];
 
-
     // start parsing with callback
     let mut callback = ParserCallback {};
     match parser.parse(terms.iter(), Some(TermType::Eof), &mut callback) {
@@ -155,39 +183,3 @@ fn main() {
         Err(err) => eprintln!("{:?}", err),
     }
 }
-```
-
-
-The output will be:
-```
-Grammar:
-0: A -> A + A (Left)
-1: A -> M
-2: M -> M * M (Left)
-3: M -> P
-4: P -> Num
-5: P -> ( E )
-6: E -> A
-7: E' -> E $
-
-Reduce by P -> Num
-Reduce by M -> P
-Reduce by A -> M
-Reduce by P -> Num
-Reduce by M -> P
-Reduce by P -> Num
-Reduce by M -> P
-Reduce by A -> M
-Reduce by P -> Num
-Reduce by M -> P
-Reduce by A -> M
-Reduce by A -> A + A (Left)
-Reduce by E -> A
-Reduce by P -> ( E )
-Reduce by M -> P
-Reduce by M -> M * M (Left)
-Reduce by A -> M
-Reduce by A -> A + A (Left)
-Reduce by E -> A
-Parse success
-```

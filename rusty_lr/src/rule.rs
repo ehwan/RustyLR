@@ -43,7 +43,11 @@ impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Displ
                 write!(f, " ")?;
             }
         }
-        write!(f, " /ReduceType: {}", self.reduce_type)?;
+        match self.reduce_type {
+            ReduceType::Left => write!(f, " (Left)")?,
+            ReduceType::Right => write!(f, " (Right)")?,
+            ReduceType::Error => {}
+        }
         Ok(())
     }
 }
