@@ -6,12 +6,31 @@ use crate::term::NonTermTraitBound;
 use crate::term::TermTraitBound;
 use crate::token::Token;
 
+/// wheather to reduce to the left or right, for reduce/shift conflict resolving
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum ReduceType {
+    Left,
+    Right,
+    /// error when conflict occurs
+    Error,
+}
+impl Display for ReduceType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ReduceType::Left => write!(f, "Left"),
+            ReduceType::Right => write!(f, "Right"),
+            ReduceType::Error => write!(f, "Error"),
+        }
+    }
+}
+
 /// Production rule.
 /// name -> Token0 Token1 Token2 ...
 #[derive(Debug, Clone)]
 pub struct ProductionRule<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     pub name: NonTerm,
     pub rule: Vec<Token<Term, NonTerm>>,
+    pub reduce_type: ReduceType,
 }
 impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display
     for ProductionRule<Term, NonTerm>
@@ -24,6 +43,7 @@ impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Displ
                 write!(f, " ")?;
             }
         }
+        write!(f, " /ReduceType: {}", self.reduce_type)?;
         Ok(())
     }
 }

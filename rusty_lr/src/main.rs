@@ -31,22 +31,24 @@ fn main() {
         vec![
             Token::NonTerm("A"),
             Token::Term(Term::Plus),
-            Token::NonTerm("M"),
+            Token::NonTerm("A"),
         ],
+        rule::ReduceType::Left,
     );
-    grammar.add_rule("A", vec![Token::NonTerm("M")]);
+    grammar.add_rule("A", vec![Token::NonTerm("M")], rule::ReduceType::Left);
 
     grammar.add_rule(
         "M",
         vec![
             Token::NonTerm("M"),
             Token::Term(Term::Star),
-            Token::NonTerm("P"),
+            Token::NonTerm("M"),
         ],
+        rule::ReduceType::Left,
     );
-    grammar.add_rule("M", vec![Token::NonTerm("P")]);
+    grammar.add_rule("M", vec![Token::NonTerm("P")], rule::ReduceType::Left);
 
-    grammar.add_rule("P", vec![Token::Term(Term::Id)]);
+    grammar.add_rule("P", vec![Token::Term(Term::Id)], rule::ReduceType::Left);
     grammar.add_rule(
         "P",
         vec![
@@ -54,11 +56,16 @@ fn main() {
             Token::NonTerm("E"),
             Token::Term(Term::RightParen),
         ],
+        rule::ReduceType::Left,
     );
-    grammar.add_rule("E", vec![Token::NonTerm("A")]);
+    grammar.add_rule("E", vec![Token::NonTerm("A")], rule::ReduceType::Left);
 
     // augmented rule
-    grammar.add_rule("E'", vec![Token::NonTerm("E"), Token::Term(Term::Eof)]);
+    grammar.add_rule(
+        "E'",
+        vec![Token::NonTerm("E"), Token::Term(Term::Eof)],
+        rule::ReduceType::Left,
+    );
 
     let parser = match grammar.build_main("E'") {
         Ok(result) => result,

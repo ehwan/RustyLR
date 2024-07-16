@@ -5,7 +5,6 @@ use std::vec::Vec;
 use crate::callback::Callback;
 use crate::callback::DebugCallback;
 use crate::callback::DefaultCallback;
-use crate::callback::ShiftReduceConflict;
 use crate::rule::ProductionRule;
 use crate::state::State;
 use crate::term::NonTermTraitBound;
@@ -54,33 +53,14 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Parser<Term, NonTerm> {
         };
 
         // feed token to current state and get action
-        // for shift/reduce confict, resolve by callback
-        let mut shift_and_goto = state.shift_goto_term(term);
-        let mut reduce_rule = state.reduce(term);
-        if shift_and_goto.is_some() && reduce_rule.is_some() {
-            // shift/reduct conflict occured
-            match callback.resolve_shift_reduce_conflict(
-                self,
-                state_stack,
-                term,
-                shift_and_goto.unwrap(),
-                reduce_rule.unwrap(),
-            ) {
-                ShiftReduceConflict::Shift => {
-                    reduce_rule = None;
-                }
-                ShiftReduceConflict::Reduce => {
-                    shift_and_goto = None;
-                }
-            }
-        }
-
-        if let Some(next_state_id) = shift_and_goto {
+        // there must be no reduce/shift conflict ( both shift and reduce are possible with this term ),
+        // since it is resolved in state generation ( Grammar::build() )
+        if let Some(next_state_id) = state.shift_goto_term(term) {
             callback.shift_and_goto(self, state_stack, term, next_state_id);
             state_stack.push(next_state_id);
             return Ok(());
         }
-        if let Some(reduce_rule) = reduce_rule {
+        if let Some(reduce_rule) = state.reduce(term) {
             // reduce items in stack
             let rule = &self.rules[reduce_rule];
             if state_stack.len() < rule.rule.len() {

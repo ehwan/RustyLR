@@ -2,11 +2,6 @@ use crate::parser::Parser;
 use crate::term::NonTermTraitBound;
 use crate::term::TermTraitBound;
 
-/// result of choosing between shift and reduce
-pub enum ShiftReduceConflict {
-    Shift,
-    Reduce,
-}
 pub trait Callback<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     /// the actual state-transition of DFA is managed by parser
     /// if you are tyring to track the state transition with this method,
@@ -33,20 +28,6 @@ pub trait Callback<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     /// production rule matched and reduce
     /// this is called before the reduced non-terminal is feeded
     fn reduce(&mut self, parser: &Parser<Term, NonTerm>, rule: usize);
-
-    /// resolve shift/reduce conflict
-    #[allow(unused_variables)]
-    fn resolve_shift_reduce_conflict(
-        &mut self,
-        parser: &Parser<Term, NonTerm>,
-        state_stack: &[usize],
-        term: &Term,
-        state_goto: usize,
-        rule: usize,
-    ) -> ShiftReduceConflict {
-        // default to shift
-        ShiftReduceConflict::Shift
-    }
 }
 
 /// Default reducer that does nothing

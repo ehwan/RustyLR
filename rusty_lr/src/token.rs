@@ -5,7 +5,7 @@ use crate::term::NonTermTraitBound;
 use crate::term::TermTraitBound;
 
 /// Token represents a terminal or non-terminal symbol in the grammar.
-#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone)]
 pub enum Token<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     Term(Term),
     NonTerm(NonTerm),

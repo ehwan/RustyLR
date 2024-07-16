@@ -15,13 +15,16 @@ use crate::term::TermTraitBound;
 use crate::token::Token;
 
 #[derive(Error, Debug)]
-pub enum BuildError<NonTerm: NonTermTraitBound> {
+pub enum BuildError<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     #[error("Rule not found: {0:?}")]
     RuleNotFound(NonTerm),
 
     /// reduce/reduce conflict
     #[error("Conflict in grammar: {0} and {1}")]
     ReduceReduceConflict(usize, usize),
+
+    #[error("Shift/Reduce conflict")]
+    ShiftReduceConflict(LookaheadRuleRefSet<Term>, usize),
 
     #[error("Multiple definition of augmented rule: {0:?}")]
     InvalidAugmented(Vec<usize>),
@@ -47,11 +50,17 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
     }
 
     /// add new production rule for given nonterminal 'name'
-    pub fn add_rule(&mut self, name: NonTerm, rule: Vec<Token<Term, NonTerm>>) -> usize {
+    pub fn add_rule(
+        &mut self,
+        name: NonTerm,
+        rule: Vec<Token<Term, NonTerm>>,
+        reduce_type: ReduceType,
+    ) -> usize {
         let id = self.rules.len();
         let rule = ProductionRule {
             name: name.clone(),
             rule,
+            reduce_type,
         };
         self.rules.push(rule);
         id
@@ -61,7 +70,7 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
     pub fn build_main(
         &mut self,
         augmented_name: NonTerm,
-    ) -> Result<Parser<Term, NonTerm>, BuildError<NonTerm>> {
+    ) -> Result<Parser<Term, NonTerm>, BuildError<Term, NonTerm>> {
         self.calculate_first();
 
         // add main augmented rule
@@ -173,7 +182,7 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
         &self,
         follow_tokens: &[Token<Term, NonTerm>],
         lookahead: &BTreeSet<Term>,
-    ) -> Result<BTreeSet<Term>, BuildError<NonTerm>> {
+    ) -> Result<BTreeSet<Term>, BuildError<Term, NonTerm>> {
         let mut ret = BTreeSet::new();
         for token in follow_tokens.iter() {
             match token {
@@ -197,7 +206,10 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
 
     /// for given set of production rules,
     /// if the first token of each rule is nonterminal, attach its production rules
-    fn expand(&self, rules: &mut LookaheadRuleRefSet<Term>) -> Result<(), BuildError<NonTerm>> {
+    fn expand(
+        &self,
+        rules: &mut LookaheadRuleRefSet<Term>,
+    ) -> Result<(), BuildError<Term, NonTerm>> {
         loop {
             let mut new_rules = Vec::new();
             for rule_ref in rules.rules.iter() {
@@ -245,7 +257,7 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
         mut rules: LookaheadRuleRefSet<Term>,
         states: &mut Vec<State<Term, NonTerm>>,
         state_map: &mut BTreeMap<LookaheadRuleRefSet<Term>, usize>,
-    ) -> Result<usize, BuildError<NonTerm>> {
+    ) -> Result<usize, BuildError<Term, NonTerm>> {
         // expand
         self.expand(&mut rules)?;
 
@@ -259,18 +271,29 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
         state_map.insert(rules.clone(), state_id);
         states.push(State::new());
 
-        let mut next_rules = HashMap::new();
+        let mut next_rules_term = HashMap::new();
+        let mut next_rules_nonterm = HashMap::new();
         let mut empty_rules = Vec::new();
         for mut rule_ref in rules.rules.into_iter() {
             let rule = &self.rules[rule_ref.rule.rule];
             match rule.rule.get(rule_ref.rule.shifted).cloned() {
-                Some(token) => {
+                Some(Token::Term(term)) => {
                     rule_ref.rule.shifted += 1;
-                    let next_rule_set = next_rules
-                        .entry(token)
-                        .or_insert(LookaheadRuleRefSet::new());
-                    next_rule_set.rules.insert(rule_ref.clone());
-                    // Duplicated rule will be handled in reduce/reduce or reduce/shift conflict
+                    next_rules_term
+                        .entry(term)
+                        .or_insert_with(LookaheadRuleRefSet::new)
+                        .rules
+                        .insert(rule_ref.clone());
+                    // Duplicated rule will be handled in reduce/reduce conflict
+                }
+                Some(Token::NonTerm(nonterm)) => {
+                    rule_ref.rule.shifted += 1;
+                    next_rules_nonterm
+                        .entry(nonterm)
+                        .or_insert(LookaheadRuleRefSet::new())
+                        .rules
+                        .insert(rule_ref.clone());
+                    // Duplicated rule will be handled in reduce/reduce conflict
                 }
                 None => {
                     empty_rules.push(rule_ref);
@@ -296,26 +319,62 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
 
         // process next rules with token
         // add shift and goto action
-        for (next_token, next_rule_set) in next_rules.into_iter() {
-            let next_state_id = self.build(next_rule_set.clone(), states, state_map)?;
+        // if next_token is in reduce_map, then it is a reduce/shift conflict
+        for (next_term, next_rule_set) in next_rules_term.into_iter() {
+            // check shift/reduce conflict
+            if let Some(reduce_rule) = states[state_id].reduce_map.get(&next_term) {
+                // if all rules in next_rule_set has same reduce_type
 
-            // TODO
-            // we should check shift/reduce conflict here
-            // if next_token is in reduce_map, then it is a reduce/shift conflict
-            // currently, we just add both shift and reduce action
-            // and resolve conflict in parser's config
-            match next_token {
-                Token::Term(term) => {
-                    states[state_id]
-                        .shift_goto_map_term
-                        .insert(term, next_state_id);
+                let mut reduce_type = None;
+                // Left -> reduce first
+                for rule in next_rule_set.rules.iter() {
+                    let target_reduce_type = self.rules[rule.rule.rule].reduce_type;
+                    if reduce_type.is_none() || reduce_type == Some(target_reduce_type) {
+                        reduce_type = Some(target_reduce_type);
+                    } else {
+                        reduce_type = Some(ReduceType::Error);
+                        // return Err(BuildError::ShiftReduceConflict(next_rule_set, *reduce_rule));
+                    }
                 }
-                Token::NonTerm(nonterm) => {
-                    states[state_id]
-                        .shift_goto_map_nonterm
-                        .insert(nonterm, next_state_id);
+
+                match reduce_type {
+                    // reduce first
+                    Some(ReduceType::Left) => {}
+                    // shift first
+                    Some(ReduceType::Right) => {
+                        // remove next_term from reduce_map
+                        states[state_id].reduce_map.remove(&next_term);
+
+                        let next_state_id = self.build(next_rule_set, states, state_map)?;
+
+                        states[state_id]
+                            .shift_goto_map_term
+                            .insert(next_term, next_state_id);
+                    }
+                    Some(ReduceType::Error) => {
+                        return Err(BuildError::ShiftReduceConflict(next_rule_set, *reduce_rule));
+                    }
+                    None => {
+                        // should not reach here
+                        unreachable!("Unreachable code for resolving Shift/Reduce Conflict");
+                    }
                 }
+            } else {
+                // add shift action
+                let next_state_id = self.build(next_rule_set, states, state_map)?;
+
+                states[state_id]
+                    .shift_goto_map_term
+                    .insert(next_term, next_state_id);
             }
+        }
+
+        for (next_nonterm, next_rule_set) in next_rules_nonterm.into_iter() {
+            let next_state_id = self.build(next_rule_set, states, state_map)?;
+
+            states[state_id]
+                .shift_goto_map_nonterm
+                .insert(next_nonterm, next_state_id);
         }
 
         Ok(state_id)
