@@ -124,7 +124,7 @@ fn main() {
     println!("Grammar:\n{}", grammar);
 
     // build DFA
-    let parser = match grammar.build_main(NonTermType::Augmented) {
+    let parser = match grammar.build(NonTermType::Augmented) {
         Ok(result) => result,
         Err(err) => {
             // error is Display if Term, NonTerm is Display
@@ -190,4 +190,74 @@ Reduce by A -> M
 Reduce by A -> A + A (Left)
 Reduce by E -> A
 Parse success
+```
+
+## Error Messages
+An `BuildError` type returned from `Grammar::build()` will contain the error message.
+```rust
+let parser = match grammar.build(NonTermType::Augmented) {
+    Ok(result) => result,
+    Err(err) => {
+        // error is Display if Term, NonTerm is Display
+        eprintln!("{}", err);
+
+        // error is Debug if Term, NonTerm is Debug
+        eprintln!("{:?}", err);
+    }
+};
+```
+
+For reduce/reduce conflict, the error message will be:
+```
+Grammar:
+0: A -> A + A
+1: A -> A + A
+
+Reduce/Reduce Conflict with lookahead: +
+A -> A + A
+and
+A -> A + A
+```
+
+For shift/reduce conflict, the error message will be:
+```
+Grammar:
+0: A -> A + A
+1: A -> M
+
+Shift/Reduce Conflict
+This rule has ReduceType::Error:
+A -> A + . A / +
+and the reduce rule is:
+A -> A + A
+Try rearanging the rules or change ReduceType to Left or Right.
+```
+
+
+## Resolving Conflicts
+
+For shift/reduce conflict, you can specify the reduce type in `Grammar::add_rule()`.
+```rust
+pub enum ReduceType {
+    Left,
+    Right,
+    /// error when conflict occurs
+    Error,
+}
+```
+
+For example, the production rule `A -> A + A | M` has a shift/reduce conflict.
+Passing `ReduceType::Left` will force the rule to be reduced left (reduce first) when there is a shift/reduce conflict.
+
+```rust
+grammar.add_rule(
+    NonTermType::A,
+    vec![Token::NonTerm(NonTermType::A), Token::Term(TermType::Plus), Token::NonTerm(NonTermType::A)],
+    rule::ReduceType::Left, // reduce left
+);
+grammar.add_rule(
+    NonTermType::A,
+    vec![Token::NonTerm(NonTermType::M)],
+    rule::ReduceType::Error,
+);
 ```

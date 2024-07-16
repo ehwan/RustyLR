@@ -1,9 +1,8 @@
-use thiserror::Error;
-
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::fmt::Debug;
 use std::fmt::Display;
 use std::vec::Vec;
 
@@ -14,20 +13,155 @@ use crate::term::NonTermTraitBound;
 use crate::term::TermTraitBound;
 use crate::token::Token;
 
-#[derive(Error, Debug)]
 pub enum BuildError<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
-    #[error("Rule not found: {0:?}")]
     RuleNotFound(NonTerm),
 
-    /// reduce/reduce conflict
-    #[error("Conflict in grammar: {0} and {1}")]
-    ReduceReduceConflict(usize, usize),
+    ReduceReduceConflict {
+        lookahead: Term,
+        rule1: ProductionRule<Term, NonTerm>,
+        rule2: ProductionRule<Term, NonTerm>,
+    },
 
-    #[error("Shift/Reduce conflict")]
-    ShiftReduceConflict(LookaheadRuleRefSet<Term>, usize),
+    /// shift/reduce conflict, one of the rule have ReduceType::Error
+    ShiftReduceConflictError {
+        reduce: ProductionRule<Term, NonTerm>,
+        shift: LookaheadRule<Term, NonTerm>,
+    },
 
-    #[error("Multiple definition of augmented rule: {0:?}")]
-    InvalidAugmented(Vec<usize>),
+    /// shift/reduce conflict, one has ReduceType::Left and other has ReduceType::Right
+    ShiftReduceConflict {
+        reduce: ProductionRule<Term, NonTerm>,
+        left: LookaheadRule<Term, NonTerm>,
+        right: LookaheadRule<Term, NonTerm>,
+    },
+
+    NoAugmented,
+
+    MultipleAugmented(Vec<ProductionRule<Term, NonTerm>>),
+}
+
+impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display
+    for BuildError<Term, NonTerm>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::RuleNotFound(nonterm) => write!(f, "Production Rule not found for {}", nonterm)?,
+            Self::ReduceReduceConflict {
+                lookahead,
+                rule1,
+                rule2,
+            } => write!(
+                f,
+                r#"Reduce/Reduce Conflict with lookahead: {}
+{}
+and
+{}"#,
+                lookahead, rule1, rule2
+            )?,
+            Self::ShiftReduceConflictError { reduce, shift } => write!(
+                f,
+                r#"Shift/Reduce Conflict
+This rule has ReduceType::Error:
+{}
+and the reduce rule is:
+{}
+Try rearanging the rules or change ReduceType to Left or Right."#,
+                shift, reduce
+            )?,
+            Self::ShiftReduceConflict {
+                reduce,
+                left,
+                right,
+            } => write!(
+                f,
+                r#"Shift/Reduce Conflict
+This rule has ReduceType::Left:
+{}
+this rule has ReduceType::Right:
+{}
+and the reduce rule is:
+{}
+Try rearanging the rules or change ReduceType to Left or Right."#,
+                left, right, reduce
+            )?,
+            Self::NoAugmented => {
+                write!(f, "No Augmented Rule found.")?;
+            }
+            Self::MultipleAugmented(rules) => {
+                writeln!(
+                    f,
+                    "Multiple Augmented Rule found. Augmented Rule must be unique."
+                )?;
+                for rule in rules.iter() {
+                    writeln!(f, "{}", rule)?;
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
+impl<Term: TermTraitBound + Debug, NonTerm: NonTermTraitBound + Debug> Debug
+    for BuildError<Term, NonTerm>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::RuleNotFound(nonterm) => {
+                write!(f, "Production Rule not found for {:?}", nonterm)?
+            }
+            Self::ReduceReduceConflict {
+                lookahead,
+                rule1,
+                rule2,
+            } => write!(
+                f,
+                r#"Reduce/Reduce Conflict with lookahead: {:?}
+{:?}
+and
+{:?}"#,
+                lookahead, rule1, rule2
+            )?,
+            Self::ShiftReduceConflictError { reduce, shift } => write!(
+                f,
+                r#"Shift/Reduce Conflict
+This rule has ReduceType::Error:
+{:?}
+and the reduce rule is:
+{:?}
+Try rearanging the rules or change ReduceType to Left or Right."#,
+                shift, reduce
+            )?,
+            Self::ShiftReduceConflict {
+                reduce,
+                left,
+                right,
+            } => write!(
+                f,
+                r#"Shift/Reduce Conflict
+This rule has ReduceType::Left:
+{:?}
+this rule has ReduceType::Right:
+{:?}
+and the reduce rule is:
+{:?}
+Try rearanging the rules or change ReduceType to Left or Right."#,
+                left, right, reduce
+            )?,
+            Self::NoAugmented => {
+                write!(f, "No Augmented Rule found.")?;
+            }
+            Self::MultipleAugmented(rules) => {
+                writeln!(
+                    f,
+                    "Multiple Augmented Rule found. Augmented Rule must be unique."
+                )?;
+                for rule in rules.iter() {
+                    writeln!(f, "{:?}", rule)?;
+                }
+            }
+        }
+        Ok(())
+    }
 }
 
 /// A set of production rules and main entry point
@@ -67,7 +201,7 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
     }
 
     /// build LR(1) parser table from given grammar
-    pub fn build_main(
+    pub fn build(
         &mut self,
         augmented_name: NonTerm,
     ) -> Result<Parser<Term, NonTerm>, BuildError<Term, NonTerm>> {
@@ -77,8 +211,15 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
         let augmented_rule_set = {
             let augmented_rules = self.search_rules(&augmented_name);
 
-            if augmented_rules.len() != 1 {
-                return Err(BuildError::InvalidAugmented(augmented_rules));
+            if augmented_rules.is_empty() {
+                return Err(BuildError::NoAugmented);
+            } else if augmented_rules.len() != 1 {
+                return Err(BuildError::MultipleAugmented(
+                    augmented_rules
+                        .into_iter()
+                        .map(|id| self.rules[id].clone())
+                        .collect(),
+                ));
             }
 
             let augmented_rule = augmented_rules[0];
@@ -96,7 +237,7 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
 
         let mut states = Vec::new();
         let mut state_map = BTreeMap::new();
-        let main_state = self.build(augmented_rule_set, &mut states, &mut state_map)?;
+        let main_state = self.build_recursive(augmented_rule_set, &mut states, &mut state_map)?;
 
         Ok(Parser {
             rules: self.rules.clone(),
@@ -252,7 +393,7 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
     }
 
     /// build new state with given production rules
-    fn build(
+    fn build_recursive(
         &self,
         mut rules: LookaheadRuleRefSet<Term>,
         states: &mut Vec<State<Term, NonTerm>>,
@@ -310,7 +451,11 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
             for lookahead in lookaheads.into_iter() {
                 if let Some(old) = state.reduce_map.get_mut(&lookahead) {
                     // conflict
-                    return Err(BuildError::ReduceReduceConflict(*old, empty_rule.rule.rule));
+                    return Err(BuildError::ReduceReduceConflict {
+                        lookahead: lookahead.clone(),
+                        rule1: self.rules[*old].clone(),
+                        rule2: self.rules[empty_rule.rule.rule].clone(),
+                    });
                 } else {
                     state.reduce_map.insert(lookahead, empty_rule.rule.rule);
                 }
@@ -323,45 +468,86 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
         for (next_term, next_rule_set) in next_rules_term.into_iter() {
             // check shift/reduce conflict
             if let Some(reduce_rule) = states[state_id].reduce_map.get(&next_term) {
-                // if all rules in next_rule_set has same reduce_type
+                // check if all rules in next_rule_set has same reduce_type
+                // Left => reduce first
+                // Right => shift first
+                // else => error
 
-                let mut reduce_type = None;
-                // Left -> reduce first
+                // check if there is any Error in reduce_type
                 for rule in next_rule_set.rules.iter() {
-                    let target_reduce_type = self.rules[rule.rule.rule].reduce_type;
-                    if reduce_type.is_none() || reduce_type == Some(target_reduce_type) {
-                        reduce_type = Some(target_reduce_type);
-                    } else {
-                        reduce_type = Some(ReduceType::Error);
-                        // return Err(BuildError::ShiftReduceConflict(next_rule_set, *reduce_rule));
+                    if self.rules[rule.rule.rule].reduce_type == ReduceType::Error {
+                        return Err(BuildError::ShiftReduceConflictError {
+                            reduce: self.rules[*reduce_rule].clone(),
+                            shift: LookaheadRule {
+                                rule: ShiftedRule {
+                                    rule: self.rules[rule.rule.rule].clone(),
+                                    shifted: rule.rule.shifted,
+                                },
+                                lookaheads: rule.lookaheads.clone(),
+                            },
+                        });
                     }
                 }
 
-                match reduce_type {
-                    // reduce first
-                    Some(ReduceType::Left) => {}
-                    // shift first
-                    Some(ReduceType::Right) => {
-                        // remove next_term from reduce_map
-                        states[state_id].reduce_map.remove(&next_term);
+                // check if all rules in next_rule_set has same reduce_type
+                // ReduceType::Error is filtered above, so only for Left/Right
+                let mut reduce_left = None;
+                let mut reduce_right = None;
+                for rule in next_rule_set.rules.iter() {
+                    let target_reduce_type = self.rules[rule.rule.rule].reduce_type;
+                    match target_reduce_type {
+                        ReduceType::Left => {
+                            reduce_left = Some(rule);
+                        }
+                        ReduceType::Right => {
+                            reduce_right = Some(rule);
+                        }
+                        ReduceType::Error => {
+                            // should not reach here
+                            unreachable!("Unreachable code for resolving Shift/Reduce Conflict");
+                        }
+                    }
+                }
 
-                        let next_state_id = self.build(next_rule_set, states, state_map)?;
+                // if both reduce_left and reduce_right is Some, then it is a conflict
+                if reduce_left.is_some() && reduce_right.is_some() {
+                    return Err(BuildError::ShiftReduceConflict {
+                        reduce: self.rules[*reduce_rule].clone(),
+                        left: LookaheadRule {
+                            rule: ShiftedRule {
+                                rule: self.rules[reduce_left.unwrap().rule.rule].clone(),
+                                shifted: reduce_left.unwrap().rule.shifted,
+                            },
+                            lookaheads: reduce_left.unwrap().lookaheads.clone(),
+                        },
+                        right: LookaheadRule {
+                            rule: ShiftedRule {
+                                rule: self.rules[reduce_left.unwrap().rule.rule].clone(),
+                                shifted: reduce_left.unwrap().rule.shifted,
+                            },
+                            lookaheads: reduce_left.unwrap().lookaheads.clone(),
+                        },
+                    });
+                }
 
-                        states[state_id]
-                            .shift_goto_map_term
-                            .insert(next_term, next_state_id);
-                    }
-                    Some(ReduceType::Error) => {
-                        return Err(BuildError::ShiftReduceConflict(next_rule_set, *reduce_rule));
-                    }
-                    None => {
-                        // should not reach here
-                        unreachable!("Unreachable code for resolving Shift/Reduce Conflict");
-                    }
+                // if it is reduce_left, reduce first, so do nothing
+
+                // if it is reduce_right, shift first,
+                // remove next_term from reduce_map
+                // and add shift action
+                if reduce_right.is_some() {
+                    // remove next_term from reduce_map
+                    states[state_id].reduce_map.remove(&next_term);
+
+                    let next_state_id = self.build_recursive(next_rule_set, states, state_map)?;
+
+                    states[state_id]
+                        .shift_goto_map_term
+                        .insert(next_term, next_state_id);
                 }
             } else {
                 // add shift action
-                let next_state_id = self.build(next_rule_set, states, state_map)?;
+                let next_state_id = self.build_recursive(next_rule_set, states, state_map)?;
 
                 states[state_id]
                     .shift_goto_map_term
@@ -370,7 +556,7 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
         }
 
         for (next_nonterm, next_rule_set) in next_rules_nonterm.into_iter() {
-            let next_state_id = self.build(next_rule_set, states, state_map)?;
+            let next_state_id = self.build_recursive(next_rule_set, states, state_map)?;
 
             states[state_id]
                 .shift_goto_map_nonterm

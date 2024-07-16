@@ -1,5 +1,6 @@
 use std::collections::BTreeSet;
 
+use std::fmt::Debug;
 use std::fmt::Display;
 
 use crate::term::NonTermTraitBound;
@@ -26,7 +27,7 @@ impl Display for ReduceType {
 
 /// Production rule.
 /// name -> Token0 Token1 Token2 ...
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct ProductionRule<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     pub name: NonTerm,
     pub rule: Vec<Token<Term, NonTerm>>,
@@ -51,35 +52,95 @@ impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Displ
         Ok(())
     }
 }
+impl<Term: TermTraitBound + Debug, NonTerm: NonTermTraitBound + Debug> Debug
+    for ProductionRule<Term, NonTerm>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?} -> ", self.name)?;
+        for (id, token) in self.rule.iter().enumerate() {
+            write!(f, "{:?}", token)?;
+            if id < self.rule.len() - 1 {
+                write!(f, " ")?;
+            }
+        }
+        match self.reduce_type {
+            ReduceType::Left => write!(f, " (Left)")?,
+            ReduceType::Right => write!(f, " (Right)")?,
+            ReduceType::Error => {}
+        }
+        Ok(())
+    }
+}
 
 /// A struct for single shifted named production rule
 /// name -> Token1 Token2 . Token3
 ///         ^^^^^^^^^^^^^ shifted = 2
+/// This struct has index of the Rule in Grammar::rules
+/// and it will be used for Eq, Ord, Hash
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ShiftedRuleRef {
     pub rule: usize,
     pub shifted: usize,
 }
-// impl<'a, Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display
-//     for ShiftedRuleRef<'a, Term, NonTerm>
-// {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         write!(f, "{} -> ", self.rule.name)?;
-//         for (id, token) in self.rule.rule.iter().enumerate() {
-//             if id == self.shifted {
-//                 write!(f, ". ")?;
-//             }
-//             write!(f, "{}", token)?;
-//             if id < self.rule.rule.len() - 1 {
-//                 write!(f, " ")?;
-//             }
-//         }
-//         if self.shifted == self.rule.rule.len() {
-//             write!(f, " .")?;
-//         }
-//         Ok(())
-//     }
-// }
+
+/// A struct for single shifted named production rule
+/// name -> Token1 Token2 . Token3
+///         ^^^^^^^^^^^^^ shifted = 2
+#[derive(Clone)]
+pub struct ShiftedRule<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
+    pub rule: ProductionRule<Term, NonTerm>,
+    pub shifted: usize,
+}
+impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display
+    for ShiftedRule<Term, NonTerm>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} -> ", self.rule.name)?;
+        for (id, token) in self.rule.rule.iter().enumerate() {
+            if id == self.shifted {
+                write!(f, ". ")?;
+            }
+            write!(f, "{}", token)?;
+            if id < self.rule.rule.len() - 1 {
+                write!(f, " ")?;
+            }
+        }
+        if self.shifted == self.rule.rule.len() {
+            write!(f, " .")?;
+        }
+        match self.rule.reduce_type {
+            ReduceType::Left => write!(f, " (Left)")?,
+            ReduceType::Right => write!(f, " (Right)")?,
+            ReduceType::Error => {}
+        }
+        Ok(())
+    }
+}
+impl<Term: TermTraitBound + Debug, NonTerm: NonTermTraitBound + Debug> Debug
+    for ShiftedRule<Term, NonTerm>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?} -> ", self.rule.name)?;
+        for (id, token) in self.rule.rule.iter().enumerate() {
+            if id == self.shifted {
+                write!(f, ". ")?;
+            }
+            write!(f, "{:?}", token)?;
+            if id < self.rule.rule.len() - 1 {
+                write!(f, " ")?;
+            }
+        }
+        if self.shifted == self.rule.rule.len() {
+            write!(f, " .")?;
+        }
+        match self.rule.reduce_type {
+            ReduceType::Left => write!(f, " (Left)")?,
+            ReduceType::Right => write!(f, " (Right)")?,
+            ReduceType::Error => {}
+        }
+        Ok(())
+    }
+}
 
 /// shifted rule with lookahead tokens
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -87,20 +148,40 @@ pub struct LookaheadRuleRef<Term> {
     pub rule: ShiftedRuleRef,
     pub lookaheads: BTreeSet<Term>,
 }
-// impl<'a, Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display
-//     for LookaheadRuleRef<'a, Term, NonTerm>
-// {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         write!(f, "{} / ", self.rule)?;
-//         for (id, lookahead) in self.lookaheads.iter().enumerate() {
-//             write!(f, "{}", lookahead)?;
-//             if id < self.lookaheads.len() - 1 {
-//                 write!(f, ", ")?;
-//             }
-//         }
-//         Ok(())
-//     }
-// }
+
+#[derive(Clone)]
+pub struct LookaheadRule<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
+    pub rule: ShiftedRule<Term, NonTerm>,
+    pub lookaheads: BTreeSet<Term>,
+}
+impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display
+    for LookaheadRule<Term, NonTerm>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} / ", self.rule)?;
+        for (id, lookahead) in self.lookaheads.iter().enumerate() {
+            write!(f, "{}", lookahead)?;
+            if id < self.lookaheads.len() - 1 {
+                write!(f, ", ")?;
+            }
+        }
+        Ok(())
+    }
+}
+impl<Term: TermTraitBound + Debug, NonTerm: NonTermTraitBound + Debug> Debug
+    for LookaheadRule<Term, NonTerm>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?} / ", self.rule)?;
+        for (id, lookahead) in self.lookaheads.iter().enumerate() {
+            write!(f, "{:?}", lookahead)?;
+            if id < self.lookaheads.len() - 1 {
+                write!(f, ", ")?;
+            }
+        }
+        Ok(())
+    }
+}
 
 /// set of lookahead rules
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]

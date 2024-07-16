@@ -153,7 +153,7 @@ fn main() {
     println!("Grammar:\n{}", grammar);
 
     // build DFA
-    let parser = match grammar.build_main(NonTermType::Augmented) {
+    let parser = match grammar.build(NonTermType::Augmented) {
         Ok(result) => result,
         Err(err) => {
             // error is Display if Term, NonTerm is Display
