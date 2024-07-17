@@ -1,16 +1,22 @@
 # RustyLR
 LR(1) Parser generator in Rust
 
-## Features
- - pure Rust implementation.
- - DFA construction from CFG.
- - conflict resolution
- - tracing parser action with callback, also error handling.
- - construct Tree from parsing result.
+```
+[dependencies]
+rusty_lr = "0.1.0"
+```
 
-Sample code in: [`example/calculator/src/main.rs`](example/calculator/src/main.rs)
+## Features
+ - pure Rust implementation
+ - DFA construction from CFG
+ - resolving conflicts of ambiguous grammar
+ - tracing parser action with callback, also error handling
+ - construct Tree from parsing result
+
 
 ## Build Deterministic Finite Automa (DFA) from Context Free Grammar (CFG)
+
+Sample code in: [`example/calculator/src/main.rs`](example/calculator/src/main.rs)
 
 ### 1. Define terminal and non-terminal symbols
 

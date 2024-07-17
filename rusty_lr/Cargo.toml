@@ -2,6 +2,12 @@
 name = "rusty_lr"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "LR(1) parser generator"
+repository = "https://github.com/ehwan/RustyLR"
+readme = "../README.md"
+keywords = ["parser", "yacc", "context-free-grammar", "lr", "compiler"]
+categories = ["parsing"]
 
 [dependencies]
 thiserror = "1.0.62"

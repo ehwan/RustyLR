@@ -1,3 +1,4 @@
+/// A tree struct for result of parsing
 #[derive(Debug, Clone)]
 pub enum Tree {
     /// index on input sequence
