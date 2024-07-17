@@ -4,16 +4,15 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fmt::Debug;
 use std::fmt::Display;
+use std::hash::Hash;
 use std::vec::Vec;
 
-use crate::parser::Parser;
+use crate::parser::parser::Parser;
 use crate::rule::*;
 use crate::state::State;
-use crate::term::NonTermTraitBound;
-use crate::term::TermTraitBound;
 use crate::token::Token;
 
-pub enum BuildError<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
+pub enum BuildError<Term, NonTerm> {
     RuleNotFound(NonTerm),
 
     ReduceReduceConflict {
@@ -40,9 +39,7 @@ pub enum BuildError<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     MultipleAugmented(Vec<ProductionRule<Term, NonTerm>>),
 }
 
-impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display
-    for BuildError<Term, NonTerm>
-{
+impl<Term: Display, NonTerm: Display> Display for BuildError<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::RuleNotFound(nonterm) => write!(f, "Production Rule not found for {}", nonterm)?,
@@ -101,9 +98,7 @@ Try rearanging the rules or change ReduceType to Left or Right."#,
     }
 }
 
-impl<Term: TermTraitBound + Debug, NonTerm: NonTermTraitBound + Debug> Debug
-    for BuildError<Term, NonTerm>
-{
+impl<Term: Debug, NonTerm: Debug> Debug for BuildError<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::RuleNotFound(nonterm) => {
@@ -166,7 +161,7 @@ Try rearanging the rules or change ReduceType to Left or Right."#,
 
 /// A set of production rules and main entry point
 #[derive(Debug, Clone)]
-pub struct Grammar<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
+pub struct Grammar<Term, NonTerm> {
     /// set of production rules
     pub rules: Vec<ProductionRule<Term, NonTerm>>,
 
@@ -175,7 +170,7 @@ pub struct Grammar<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     firsts: HashMap<NonTerm, (HashSet<Term>, bool)>,
 }
 
-impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
+impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, NonTerm> {
     pub fn new() -> Self {
         Grammar {
             rules: Vec::new(),
@@ -567,9 +562,7 @@ impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Grammar<Term, NonTerm> {
     }
 }
 
-impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display
-    for Grammar<Term, NonTerm>
-{
+impl<Term: Display, NonTerm: Display> Display for Grammar<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (id, rule) in self.rules.iter().enumerate() {
             writeln!(f, "{}: {}", id, rule)?;

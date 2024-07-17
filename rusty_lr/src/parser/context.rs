@@ -1,4 +1,4 @@
-use crate::tree::Tree;
+use super::tree::Tree;
 
 pub struct Context<'a, Term, NonTerm> {
     /// stack for state transition

@@ -3,8 +3,6 @@ use std::collections::BTreeSet;
 use std::fmt::Debug;
 use std::fmt::Display;
 
-use crate::term::NonTermTraitBound;
-use crate::term::TermTraitBound;
 use crate::token::Token;
 
 /// wheather to reduce to the left or right, for reduce/shift conflict resolving
@@ -28,14 +26,12 @@ impl Display for ReduceType {
 /// Production rule.
 /// name -> Token0 Token1 Token2 ...
 #[derive(Clone)]
-pub struct ProductionRule<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
+pub struct ProductionRule<Term, NonTerm> {
     pub name: NonTerm,
     pub rule: Vec<Token<Term, NonTerm>>,
     pub reduce_type: ReduceType,
 }
-impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display
-    for ProductionRule<Term, NonTerm>
-{
+impl<Term: Display, NonTerm: Display> Display for ProductionRule<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} -> ", self.name)?;
         for (id, token) in self.rule.iter().enumerate() {
@@ -52,9 +48,7 @@ impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Displ
         Ok(())
     }
 }
-impl<Term: TermTraitBound + Debug, NonTerm: NonTermTraitBound + Debug> Debug
-    for ProductionRule<Term, NonTerm>
-{
+impl<Term: Debug, NonTerm: Debug> Debug for ProductionRule<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?} -> ", self.name)?;
         for (id, token) in self.rule.iter().enumerate() {
@@ -87,13 +81,11 @@ pub struct ShiftedRuleRef {
 /// name -> Token1 Token2 . Token3
 ///         ^^^^^^^^^^^^^ shifted = 2
 #[derive(Clone)]
-pub struct ShiftedRule<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
+pub struct ShiftedRule<Term, NonTerm> {
     pub rule: ProductionRule<Term, NonTerm>,
     pub shifted: usize,
 }
-impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display
-    for ShiftedRule<Term, NonTerm>
-{
+impl<Term: Display, NonTerm: Display> Display for ShiftedRule<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} -> ", self.rule.name)?;
         for (id, token) in self.rule.rule.iter().enumerate() {
@@ -116,9 +108,7 @@ impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Displ
         Ok(())
     }
 }
-impl<Term: TermTraitBound + Debug, NonTerm: NonTermTraitBound + Debug> Debug
-    for ShiftedRule<Term, NonTerm>
-{
+impl<Term: Debug, NonTerm: Debug> Debug for ShiftedRule<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?} -> ", self.rule.name)?;
         for (id, token) in self.rule.rule.iter().enumerate() {
@@ -150,13 +140,11 @@ pub struct LookaheadRuleRef<Term> {
 }
 
 #[derive(Clone)]
-pub struct LookaheadRule<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
+pub struct LookaheadRule<Term, NonTerm> {
     pub rule: ShiftedRule<Term, NonTerm>,
     pub lookaheads: BTreeSet<Term>,
 }
-impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display
-    for LookaheadRule<Term, NonTerm>
-{
+impl<Term: Display, NonTerm: Display> Display for LookaheadRule<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} / ", self.rule)?;
         for (id, lookahead) in self.lookaheads.iter().enumerate() {
@@ -168,9 +156,7 @@ impl<Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Displ
         Ok(())
     }
 }
-impl<Term: TermTraitBound + Debug, NonTerm: NonTermTraitBound + Debug> Debug
-    for LookaheadRule<Term, NonTerm>
-{
+impl<Term: Debug, NonTerm: Debug> Debug for LookaheadRule<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?} / ", self.rule)?;
         for (id, lookahead) in self.lookaheads.iter().enumerate() {
@@ -185,10 +171,10 @@ impl<Term: TermTraitBound + Debug, NonTerm: NonTermTraitBound + Debug> Debug
 
 /// set of lookahead rules
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct LookaheadRuleRefSet<Term: TermTraitBound> {
+pub struct LookaheadRuleRefSet<Term> {
     pub rules: BTreeSet<LookaheadRuleRef<Term>>,
 }
-impl<Term: TermTraitBound> LookaheadRuleRefSet<Term> {
+impl<Term: Ord> LookaheadRuleRefSet<Term> {
     pub fn new() -> Self {
         LookaheadRuleRefSet {
             rules: BTreeSet::new(),

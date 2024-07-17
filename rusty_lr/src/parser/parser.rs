@@ -1,18 +1,17 @@
 use thiserror::Error;
 
+use std::hash::Hash;
 use std::vec::Vec;
 
-use crate::callback::Callback;
-use crate::callback::DefaultCallback;
-use crate::context::Context;
+use super::callback::Callback;
+use super::callback::DefaultCallback;
+use super::context::Context;
+use super::tree::Tree;
 use crate::rule::ProductionRule;
 use crate::state::State;
-use crate::term::NonTermTraitBound;
-use crate::term::TermTraitBound;
-use crate::tree::Tree;
 
 #[derive(Error, Debug)]
-pub enum ParseError<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
+pub enum ParseError<Term, NonTerm> {
     #[error("Invalid Non-Terminal: {0}")]
     InvalidNonTerminal(NonTerm),
 
@@ -28,13 +27,13 @@ pub enum ParseError<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
     #[error("Invalid State: Goto {0}; This should not be happened if DFA is generated correctly")]
     InvalidState(usize),
 }
-pub struct Parser<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
+pub struct Parser<Term, NonTerm> {
     pub rules: Vec<ProductionRule<Term, NonTerm>>,
     pub states: Vec<State<Term, NonTerm>>,
     pub main_state: usize,
 }
 
-impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Parser<Term, NonTerm> {
+impl<Term: Clone + Hash + Eq, NonTerm: Clone + Hash + Eq> Parser<Term, NonTerm> {
     /// give lookahead token to parser, and check if there is any reduce action
     fn lookahead<'a, C: Callback<Term, NonTerm>>(
         &self,

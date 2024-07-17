@@ -1,9 +1,7 @@
-use crate::context::Context;
-use crate::parser::Parser;
-use crate::term::NonTermTraitBound;
-use crate::term::TermTraitBound;
+use super::context::Context;
+use super::parser::Parser;
 
-pub trait Callback<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
+pub trait Callback<Term, NonTerm> {
     /// this is called after the shift of terminal symbol and state transition
     /// the actual state-transition of DFA is managed by parser
     /// if you are tyring to track the state transition with this method,
@@ -55,7 +53,7 @@ pub trait Callback<Term: TermTraitBound, NonTerm: NonTermTraitBound> {
 /// default callback that does nothing
 pub struct DefaultCallback {}
 #[allow(unused_variables)]
-impl<Term: TermTraitBound, NonTerm: NonTermTraitBound> Callback<Term, NonTerm> for DefaultCallback {
+impl<Term, NonTerm> Callback<Term, NonTerm> for DefaultCallback {
     fn invalid_nonterm(
         &mut self,
         parser: &Parser<Term, NonTerm>,

@@ -5,7 +5,7 @@ use std::fmt::Display;
 use rusty_lr;
 
 /// define set of terminal symbols
-/// Term must implement Clone, PartialEq, Eq, PartialOrd, Ord, Hash ( for BTreeMap, HashMap ) for DFA generation
+/// Term must implement Clone, Eq, Ord, Hash ( for BTreeMap, HashMap ) for DFA generation
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Term {
     Num,
@@ -17,7 +17,7 @@ pub enum Term {
 }
 
 /// define set of non-terminal symbols
-/// NonTerm must implement Clone, PartialEq, Eq, Hash for DFA generation
+/// NonTerm must implement Clone, Eq, Hash for DFA generation
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum NonTerm {
     E,
