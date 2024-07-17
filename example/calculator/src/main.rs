@@ -2,11 +2,12 @@
 
 use std::fmt::Display;
 
-use rusty_lr::*;
+use rusty_lr;
 
 /// define set of terminal symbols
-#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)] // must implement these traits
-pub enum TermType {
+/// Term must implement Clone, PartialEq, Eq, PartialOrd, Ord, Hash ( for BTreeMap, HashMap ) for DFA generation
+#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Term {
     Num,
     Plus,
     Mul,
@@ -16,8 +17,9 @@ pub enum TermType {
 }
 
 /// define set of non-terminal symbols
-#[derive(Debug, Clone, Hash, PartialEq, Eq)] // must implement these traits
-pub enum NonTermType {
+/// NonTerm must implement Clone, PartialEq, Eq, Hash for DFA generation
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub enum NonTerm {
     E,
     A,
     M,
@@ -26,135 +28,162 @@ pub enum NonTermType {
 }
 
 /// impl Display for TermType, NonTermType will make related ProductionRule, error message Display-able
-impl Display for TermType {
+impl Display for Term {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            TermType::Num => write!(f, "Num"),
-            TermType::Plus => write!(f, "+"),
-            TermType::Mul => write!(f, "*"),
-            TermType::LeftParen => write!(f, "("),
-            TermType::RightParen => write!(f, ")"),
-            TermType::Eof => write!(f, "$"),
+            Term::Num => write!(f, "Num"),
+            Term::Plus => write!(f, "+"),
+            Term::Mul => write!(f, "*"),
+            Term::LeftParen => write!(f, "("),
+            Term::RightParen => write!(f, ")"),
+            Term::Eof => write!(f, "$"),
         }
     }
 }
-impl Display for NonTermType {
+impl Display for NonTerm {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            NonTermType::E => write!(f, "E"),
-            NonTermType::A => write!(f, "A"),
-            NonTermType::M => write!(f, "M"),
-            NonTermType::P => write!(f, "P"),
-            NonTermType::Augmented => write!(f, "E'"),
+            NonTerm::E => write!(f, "E"),
+            NonTerm::A => write!(f, "A"),
+            NonTerm::M => write!(f, "M"),
+            NonTerm::P => write!(f, "P"),
+            NonTerm::Augmented => write!(f, "E'"),
         }
     }
 }
 
-/// define callback struct to track parser's action
+/// define callback struct to trace parser's action
 struct ParserCallback {}
 
-impl rusty_lr::callback::Callback<TermType, NonTermType> for ParserCallback {
-    /// terminal symbol shifted and state transitioned to state_goto
+impl rusty_lr::Callback<Term, NonTerm> for ParserCallback {
+    /// terminal symbol shifted and state transitioned
     fn shift_and_goto(
         &mut self,
-        parser: &parser::Parser<TermType, NonTermType>,
-        state_stack: &[usize],
-        term: &TermType,
-        state_goto: usize,
+        parser: &rusty_lr::Parser<Term, NonTerm>,
+        context: &rusty_lr::Context<'_, Term, NonTerm>,
     ) {
-        // println!("Shift {} and goto State{}", term, state_goto);
+        // println!("Shift {} and goto State{}", context.term(), context.state());
     }
-    /// non-terminal symbol shifted and state transitioned to state_goto
+    /// non-terminal symbol shifted and state transitioned
     fn shift_and_goto_nonterm(
         &mut self,
-        parser: &parser::Parser<TermType, NonTermType>,
-        state_stack: &[usize],
-        nonterm: &NonTermType,
-        state_goto: usize,
+        parser: &rusty_lr::Parser<Term, NonTerm>,
+        context: &rusty_lr::Context<'_, Term, NonTerm>,
+        nonterm: &NonTerm,
     ) {
-        // println!("Shift {} and goto State{}", nonterm, state_goto);
+        // println!("Shift {} and goto State{}", nonterm, context.state());
     }
     /// set of tokens reduced by rule
     /// you can access the actual rule struct by parser.rules[rule_id]
-    fn reduce(&mut self, parser: &parser::Parser<TermType, NonTermType>, rule: usize) {
+    fn reduce(
+        &mut self,
+        parser: &rusty_lr::Parser<Term, NonTerm>,
+        context: &rusty_lr::Context<'_, Term, NonTerm>,
+        rule: usize,
+    ) {
         // rule is display if term, nonterm is display
         println!("Reduce by {}", parser.rules[rule]);
+    }
+
+    /// error handling
+    fn invalid_term(
+        &mut self,
+        parser: &rusty_lr::Parser<Term, NonTerm>,
+        context: &rusty_lr::Context<'_, Term, NonTerm>,
+    ) {
+        eprintln!(
+            "Invalid terminal {} at state {}",
+            context.term(),
+            context.state()
+        );
+    }
+    fn invalid_nonterm(
+        &mut self,
+        parser: &rusty_lr::Parser<Term, NonTerm>,
+        context: &rusty_lr::Context<'_, Term, NonTerm>,
+        nonterm: &NonTerm,
+    ) {
+        eprintln!(
+            "Invalid non-terminal {} at state {}",
+            nonterm,
+            context.state()
+        );
     }
 }
 
 fn main() {
-    type Token = token::Token<TermType, NonTermType>;
-    let mut grammar = grammar::Grammar::new();
+    type Token = rusty_lr::Token<Term, NonTerm>;
+    let mut grammar = rusty_lr::Grammar::<Term, NonTerm>::new();
 
     // A -> A + A | M ( reduce left )
     grammar.add_rule(
-        NonTermType::A,
+        NonTerm::A,
         vec![
-            Token::NonTerm(NonTermType::A),
-            Token::Term(TermType::Plus),
-            Token::NonTerm(NonTermType::A),
+            Token::NonTerm(NonTerm::A),
+            Token::Term(Term::Plus),
+            Token::NonTerm(NonTerm::A),
         ],
-        rule::ReduceType::Left, // reduce left
+        rusty_lr::ReduceType::Left, // reduce left
     );
     grammar.add_rule(
-        NonTermType::A,
-        vec![Token::NonTerm(NonTermType::M)],
-        rule::ReduceType::Error, // error on shift/reduce conflict
+        NonTerm::A,
+        vec![Token::NonTerm(NonTerm::M)],
+        rusty_lr::ReduceType::Error, // error on shift/reduce conflict
     );
 
     // M -> M * M | P ( reduce left )
     grammar.add_rule(
-        NonTermType::M,
+        NonTerm::M,
         vec![
-            Token::NonTerm(NonTermType::M),
-            Token::Term(TermType::Mul),
-            Token::NonTerm(NonTermType::M),
+            Token::NonTerm(NonTerm::M),
+            Token::Term(Term::Mul),
+            Token::NonTerm(NonTerm::M),
         ],
-        rule::ReduceType::Left, // reduce left
+        rusty_lr::ReduceType::Left, // reduce left
     );
     grammar.add_rule(
-        NonTermType::M,
-        vec![Token::NonTerm(NonTermType::P)],
-        rule::ReduceType::Error, // error on shift/reduce conflict
+        NonTerm::M,
+        vec![Token::NonTerm(NonTerm::P)],
+        rusty_lr::ReduceType::Error, // error on shift/reduce conflict
     );
 
     // P -> Num | ( E ) ( error on shift/reduce conflict )
     grammar.add_rule(
-        NonTermType::P,
-        vec![Token::Term(TermType::Num)],
-        rule::ReduceType::Error, // error on shift/reduce conflict
+        NonTerm::P,
+        vec![Token::Term(Term::Num)],
+        rusty_lr::ReduceType::Error, // error on shift/reduce conflict
     );
     grammar.add_rule(
-        NonTermType::P,
+        NonTerm::P,
         vec![
-            Token::Term(TermType::LeftParen),
-            Token::NonTerm(NonTermType::E),
-            Token::Term(TermType::RightParen),
+            Token::Term(Term::LeftParen),
+            Token::NonTerm(NonTerm::E),
+            Token::Term(Term::RightParen),
         ],
-        rule::ReduceType::Error, // error on shift/reduce conflict
+        rusty_lr::ReduceType::Error, // error on shift/reduce conflict
     );
 
     // E -> A
     grammar.add_rule(
-        NonTermType::E,
-        vec![Token::NonTerm(NonTermType::A)],
-        rule::ReduceType::Error, // error on shift/reduce conflict
+        NonTerm::E,
+        vec![Token::NonTerm(NonTerm::A)],
+        rusty_lr::ReduceType::Error, // error on shift/reduce conflict
     );
 
     // augmented rule
     // E' -> E $
     grammar.add_rule(
-        NonTermType::Augmented,
-        vec![Token::NonTerm(NonTermType::E), Token::Term(TermType::Eof)],
-        rule::ReduceType::Error, // error on shift/reduce conflict
+        NonTerm::Augmented,
+        vec![Token::NonTerm(NonTerm::E), Token::Term(Term::Eof)],
+        rusty_lr::ReduceType::Error, // error on shift/reduce conflict
     );
 
     // grammar is Display if Term, NonTerm is Display
     println!("Grammar:\n{}", grammar);
 
     // build DFA
-    let parser = match grammar.build(NonTermType::Augmented) {
-        Ok(result) => result,
+    let parser = match grammar.build(NonTerm::Augmented) {
+        Ok(parser) => parser,
         Err(err) => {
             // error is Display if Term, NonTerm is Display
             eprintln!("{}", err);
@@ -165,21 +194,21 @@ fn main() {
     // input terminal symbols
     // num + num * ( num + num )
     let terms = vec![
-        TermType::Num,
-        TermType::Plus,
-        TermType::Num,
-        TermType::Mul,
-        TermType::LeftParen,
-        TermType::Num,
-        TermType::Plus,
-        TermType::Num,
-        TermType::RightParen,
+        Term::Num,
+        Term::Plus,
+        Term::Num,
+        Term::Mul,
+        Term::LeftParen,
+        Term::Num,
+        Term::Plus,
+        Term::Num,
+        Term::RightParen,
     ];
 
     // start parsing with callback
     let mut callback = ParserCallback {};
-    match parser.parse(terms.iter(), Some(TermType::Eof), &mut callback) {
-        Ok(_) => println!("Parse success"),
-        Err(err) => eprintln!("{:?}", err),
+    match parser.parse_with_callback(&terms, &mut callback, Term::Eof) {
+        Ok(tree) => println!("Parse success {:?}", tree.slice(&terms)),
+        Err(err) => eprintln!("{}", err),
     }
 }

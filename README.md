@@ -1,12 +1,22 @@
 # RustyLR
 LR(1) Parser generator in Rust
 
-## Usage
-In [`example/calculator/src/main.rs`](example/calculator/src/main.rs)
+## Features
+ - pure Rust implementation.
+ - DFA construction from CFG.
+ - conflict resolution
+ - tracing parser action with callback, also error handling.
+ - construct Tree from parsing result.
+
+Sample code in: [`example/calculator/src/main.rs`](example/calculator/src/main.rs)
+
+## Build Deterministic Finite Automa (DFA) from Context Free Grammar (CFG)
+
+### 1. Define terminal and non-terminal symbols
+
 ```rust
-/// define set of terminal symbols
-#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)] // must implement these traits
-pub enum TermType {
+#[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)] // must implement these traits
+pub enum Term {
     Num,
     Plus,
     Mul,
@@ -15,9 +25,8 @@ pub enum TermType {
     Eof,
 }
 
-/// define set of non-terminal symbols
-#[derive(Debug, Clone, Hash, PartialEq, Eq)] // must implement these traits
-pub enum NonTermType {
+#[derive(Clone, Hash, PartialEq, Eq)] // must implement these traits
+pub enum NonTerm {
     E,
     A,
     M,
@@ -28,148 +37,150 @@ pub enum NonTermType {
 /// impl Display for TermType, NonTermType will make related ProductionRule, error message Display-able
 impl Display for TermType { ... }
 impl Display for NonTermType { ... }
+```
+Or simply, you can use `char` or `u8` as terminal, and `&'static str` as non-terminal.
+***Any type*** that implements traits above can be used as terminal and non-terminal symbols.
 
+### 2. Define production rules
+Consider the following context free grammar:
+```
+A -> A + A  (reduce left)
+A -> M
+```
+This grammar can be written as:
+```rust
+/// type alias
+type Token = rusty_lr::Token<Term, NonTerm>;
 
+/// create grammar
+let mut grammar = rusty_lr::Grammar::<Term,NonTerm>::new();
 
-/// define callback struct to track parser's action
+grammar.add_rule(
+    NonTerm::A,
+    vec![Token::NonTerm(NonTerm::A), Token::Term(Term::Plus), Token::NonTerm(NonTerm::A)],
+    rusty_lr::ReduceType::Left, // reduce left
+);
+grammar.add_rule(
+    NonTerm::A,
+    vec![Token::NonTerm(NonTerm::M)],
+    rusty_lr::ReduceType::Error,
+);
+```
+
+Note that the production rule `A -> A + A` has a shift/reduce conflict, and the reduce type is set to `ReduceType::Left` to resolve the conflict. Letting the reduce type to `ReduceType::Error` will cause an error when a conflict occurs. This is useful when you want to know unexpected conflicts in your grammar.
+
+reduce/reduce conflict (e.g. duplicated rules) will be always an error.
+
+### 3. Build DFA
+Calling `grammar.build()` will build the DFA from the CFG.
+
+```rust
+let parser:rusty_lr::Parser<Term,NonTerm> = match grammar.build(NonTerm::Augmented) {
+    Ok(parser) => parser,
+    Err(err) => {
+        // error is Display if Term, NonTerm is Display
+        eprintln!("{}", err);
+        return;
+    }
+};
+```
+
+You must explicitly specify the Augmented non-terminal symbol, and the production rule `Augmented -> StartSymbol $` must be defined in the grammar.
+
+The `Error` type returned from `Grammar::build()` will contain the error information.
+It is `Display` if both `Term` and `NonTerm` is `Display`, and It is `Debug` if both `Term` and `NonTerm` is `Debug`.
+
+The returned `Parser` struct contains the DFA and the production rules(cloned). It is completely independent from the `Grammar` struct, so you can drop the `Grammar` struct, or export the `Parser` struct to another module.
+
+## Parse input sequence with generated DFA
+### 1. Parse without callback
+For given input sequence, you can parse it with `Parser::parse()` method. The input sequence must be slice of `Term`(`&[Term]`).
+
+```rust
+let terms = vec![ Term::Num, Term::Plus, Term::Num, Term::Mul, Term::LeftParen, Term::Num, Term::Plus, Term::Num, Term::RightParen];
+
+match parser.parse(&terms, Term::Eof) {
+    Ok(tree) => println!("Parse success {:?}", tree.slice(&terms)),
+    // error is Display if Term, NonTerm is Display
+    Err(err) => eprintln!("{:?}", err),
+}
+```
+
+Note that the given input sequence **must not** ends with `EOF`(the end symbol you provided in Augmented rule). And the final Augmented rule will not be reduced.
+
+### 2. Parse with callback
+For complex error handling and tracing parser action, you can implement `Callback` trait and pass it to `Parser::parse_with_callback(...)`.
+
+```rust
 struct ParserCallback {}
 
-impl rusty_lr::callback::Callback<TermType, NonTermType> for ParserCallback {
-    /// terminal symbol shifted and state transitioned to state_goto
+impl rusty_lr::Callback<Term, NonTerm> for ParserCallback {
+    /// terminal symbol shifted and state transitioned
     fn shift_and_goto(
         &mut self,
-        parser: &parser::Parser<TermType, NonTermType>,
-        state_stack: &[usize],
-        term: &TermType,
-        state_goto: usize,
+        parser: &rusty_lr::Parser<Term, NonTerm>,
+        context: &rusty_lr::Context<'_, Term, NonTerm>,
     ) {
-        // println!("Shift {} and goto State{}", term, state_goto);
+        // println!("Shift {} and goto State{}", context.term(), context.state());
     }
-    /// non-terminal symbol shifted and state transitioned to state_goto
+    /// non-terminal symbol shifted and state transitioned
     fn shift_and_goto_nonterm(
         &mut self,
-        parser: &parser::Parser<TermType, NonTermType>,
-        state_stack: &[usize],
-        nonterm: &NonTermType,
-        state_goto: usize,
+        parser: &rusty_lr::Parser<Term, NonTerm>,
+        context: &rusty_lr::Context<'_, Term, NonTerm>,
+        nonterm: &NonTerm,
     ) {
-        // println!("Shift {} and goto State{}", nonterm, state_goto);
+        // println!("Shift {} and goto State{}", nonterm, context.state());
     }
-
     /// set of tokens reduced by rule
     /// you can access the actual rule struct by parser.rules[rule_id]
-    fn reduce(&mut self, parser: &parser::Parser<TermType, NonTermType>, rule: usize) {
+    fn reduce(
+        &mut self,
+        parser: &rusty_lr::Parser<Term, NonTerm>,
+        context: &rusty_lr::Context<'_, Term, NonTerm>,
+        rule: usize,
+    ) {
         // rule is display if term, nonterm is display
         println!("Reduce by {}", parser.rules[rule]);
     }
-}
 
-
-fn main() {
-    type Token = token::Token<TermType, NonTermType>;
-    let mut grammar = grammar::Grammar::new();
-
-    // A -> A + A | M ( reduce left )
-    grammar.add_rule(
-        NonTermType::A,
-        vec![Token::NonTerm(NonTermType::A), Token::Term(TermType::Plus), Token::NonTerm(NonTermType::A)],
-        rule::ReduceType::Left, // reduce left
-    );
-    grammar.add_rule(
-        NonTermType::A,
-        vec![Token::NonTerm(NonTermType::M)],
-        rule::ReduceType::Error, // error on shift/reduce conflict
-    );
-
-    // M -> M * M | P ( reduce left )
-    grammar.add_rule(
-        NonTermType::M,
-        vec![Token::NonTerm(NonTermType::M), Token::Term(TermType::Mul), Token::NonTerm(NonTermType::M)],
-        rule::ReduceType::Left, // reduce left
-    );
-    grammar.add_rule(
-        NonTermType::M,
-        vec![Token::NonTerm(NonTermType::P)],
-        rule::ReduceType::Error, // error on shift/reduce conflict
-    );
-
-    // P -> Num | ( E ) ( error on shift/reduce conflict )
-    grammar.add_rule(
-        NonTermType::P,
-        vec![Token::Term(TermType::Num)],
-        rule::ReduceType::Error, // error on shift/reduce conflict
-    );
-    grammar.add_rule(
-        NonTermType::P,
-        vec![Token::Term(TermType::LeftParen), Token::NonTerm(NonTermType::E), Token::Term(TermType::RightParen)],
-        rule::ReduceType::Error, // error on shift/reduce conflict
-    );
-
-    // E -> A
-    grammar.add_rule(
-        NonTermType::E,
-        vec![Token::NonTerm(NonTermType::A)],
-        rule::ReduceType::Error, // error on shift/reduce conflict
-    );
-
-    // augmented rule
-    // E' -> E $
-    grammar.add_rule(
-        NonTermType::Augmented,
-        vec![Token::NonTerm(NonTermType::E), Token::Term(TermType::Eof)],
-        rule::ReduceType::Error, // error on shift/reduce conflict
-    );
-
-    // grammar is Display if Term, NonTerm is Display
-    println!("Grammar:\n{}", grammar);
-
-    // build DFA
-    let parser = match grammar.build(NonTermType::Augmented) {
-        Ok(result) => result,
-        Err(err) => {
-            // error is Display if Term, NonTerm is Display
-            eprintln!("{}", err);
-            return;
-        }
-    };
-
-    // input terminal symbols
-    // num + num * ( num + num )
-    let terms = vec![
-        TermType::Num,
-        TermType::Plus,
-        TermType::Num,
-        TermType::Mul,
-        TermType::LeftParen,
-        TermType::Num,
-        TermType::Plus,
-        TermType::Num,
-        TermType::RightParen,
-    ];
-
-
-    // start parsing with callback
-    let mut callback = ParserCallback {};
-    match parser.parse(terms.iter(), Some(TermType::Eof), &mut callback) {
-        Ok(_) => println!("Parse success"),
-        Err(err) => eprintln!("{:?}", err),
+    /// error handling
+    fn invalid_term(
+        &mut self,
+        parser: &rusty_lr::Parser<Term, NonTerm>,
+        context: &rusty_lr::Context<'_, Term, NonTerm>,
+    ) {
+        eprintln!(
+            "Invalid terminal {} at state {}",
+            context.term(),
+            context.state()
+        );
+    }
+    fn invalid_nonterm(
+        &mut self,
+        parser: &rusty_lr::Parser<Term, NonTerm>,
+        context: &rusty_lr::Context<'_, Term, NonTerm>,
+        nonterm: &NonTerm,
+    ) {
+        eprintln!(
+            "Invalid non-terminal {} at state {}",
+            nonterm,
+            context.state()
+        );
     }
 }
 ```
 
+```rust
+let mut callback = ParserCallback{};
+match parser.parse_with_callback(&terms, &mut callback, Term::Eof) {
+    Ok(tree) => println!("Parse success {:?}", tree.slice(&terms)),
+    Err(err) => eprintln!("{:?}", err),
+}
+```
 
 The output will be:
 ```
-Grammar:
-0: A -> A + A (Left)
-1: A -> M
-2: M -> M * M (Left)
-3: M -> P
-4: P -> Num
-5: P -> ( E )
-6: E -> A
-7: E' -> E $
-
 Reduce by P -> Num
 Reduce by M -> P
 Reduce by A -> M
@@ -189,75 +200,21 @@ Reduce by M -> M * M (Left)
 Reduce by A -> M
 Reduce by A -> A + A (Left)
 Reduce by E -> A
-Parse success
+Parse success [Num, Plus, Num, Mul, LeftParen, Num, Plus, Num, RightParen]
 ```
 
-## Error Messages
-An `BuildError` type returned from `Grammar::build()` will contain the error message.
-```rust
-let parser = match grammar.build(NonTermType::Augmented) {
-    Ok(result) => result,
-    Err(err) => {
-        // error is Display if Term, NonTerm is Display
-        eprintln!("{}", err);
+### 3. `Tree` struct as parsing result
+`Tree` struct is constructed from parsing result. You can access the reduced rule as tree structure.
 
-        // error is Debug if Term, NonTerm is Debug
-        eprintln!("{:?}", err);
+```rust
+// get slice of input sequence that this tree holds
+let slc = tree.slice(&terms);
+
+match tree {
+    Tree::Terminal( terminal_index:usize ) => { println!("Terminal {:?}", terms[terminal_index]); }
+    Tree::NonTerminal( rule_index:usize, reduced_tokens:Vec<Tree> ) => {
+        let rule = &parser.rules[rule_index];
+        ...
     }
-};
-```
-
-For reduce/reduce conflict, the error message will be:
-```
-Grammar:
-0: A -> A + A
-1: A -> A + A
-
-Reduce/Reduce Conflict with lookahead: +
-A -> A + A
-and
-A -> A + A
-```
-
-For shift/reduce conflict, the error message will be:
-```
-Grammar:
-0: A -> A + A
-1: A -> M
-
-Shift/Reduce Conflict
-This rule has ReduceType::Error:
-A -> A + . A / +
-and the reduce rule is:
-A -> A + A
-Try rearanging the rules or change ReduceType to Left or Right.
-```
-
-
-## Resolving Conflicts
-
-For shift/reduce conflict, you can specify the reduce type in `Grammar::add_rule()`.
-```rust
-pub enum ReduceType {
-    Left,
-    Right,
-    /// error when conflict occurs
-    Error,
 }
-```
-
-For example, the production rule `A -> A + A | M` has a shift/reduce conflict.
-Passing `ReduceType::Left` will force the rule to be reduced left (reduce first) when there is a shift/reduce conflict.
-
-```rust
-grammar.add_rule(
-    NonTermType::A,
-    vec![Token::NonTerm(NonTermType::A), Token::Term(TermType::Plus), Token::NonTerm(NonTermType::A)],
-    rule::ReduceType::Left, // reduce left
-);
-grammar.add_rule(
-    NonTermType::A,
-    vec![Token::NonTerm(NonTermType::M)],
-    rule::ReduceType::Error,
-);
 ```
