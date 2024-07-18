@@ -31,11 +31,17 @@ pub use grammar::grammar::Grammar;
 
 /// callback trait for tracing the parsing process
 pub use parser::callback::Callback;
+/// callback trait for tracing the parsing process (for `&str`)
+pub use parser::callback::CallbackStr;
 /// A struct for parsing context
 pub use parser::context::Context;
+/// A struct for parsing context (for `&str`)
+pub use parser::context::ContextStr;
 /// Error type for parsing
 pub use parser::parser::ParseError;
 /// A struct for LR parser
 pub use parser::parser::Parser;
 /// A tree struct for result of parsing
 pub use parser::tree::Tree;
+/// A tree struct for result of parsing (for `&str`)
+pub use parser::tree::TreeStr;

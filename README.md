@@ -3,7 +3,7 @@ LR(1) Parser generator in Rust
 
 ```
 [dependencies]
-rusty_lr = "0.1.0"
+rusty_lr = "0.2.0"
 ```
 
 ## Features
@@ -14,7 +14,7 @@ rusty_lr = "0.1.0"
  - construct Tree from parsing result
 
 
-## Build Deterministic Finite Automa (DFA) from Context Free Grammar (CFG)
+## Build Deterministic Finite Automata (DFA) from Context Free Grammar (CFG)
 
 Sample code in: [`example/calculator/src/main.rs`](example/calculator/src/main.rs)
 
