@@ -327,7 +327,11 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
                     return Ok(ret);
                 }
                 Token::NonTerm(nonterm) => {
-                    let (firsts, canbe_empty) = self.firsts.get(nonterm).unwrap();
+                    let (firsts, canbe_empty) = if let Some(nonterm) = self.firsts.get(nonterm) {
+                        nonterm
+                    } else {
+                        return Err(BuildError::RuleNotFound(nonterm.clone()));
+                    };
                     ret.extend(firsts.iter().cloned());
                     // ret.append(&mut firsts.clone());
                     if !canbe_empty {
@@ -445,6 +449,9 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
             let state = &mut states[state_id];
             for lookahead in lookaheads.into_iter() {
                 if let Some(old) = state.reduce_map.get_mut(&lookahead) {
+                    if old == &empty_rule.rule.rule {
+                        continue;
+                    }
                     // conflict
                     return Err(BuildError::ReduceReduceConflict {
                         lookahead: lookahead.clone(),
