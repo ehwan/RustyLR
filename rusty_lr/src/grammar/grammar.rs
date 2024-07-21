@@ -35,8 +35,6 @@ pub enum BuildError<Term, NonTerm> {
     },
 
     NoAugmented,
-
-    MultipleAugmented(Vec<ProductionRule<Term, NonTerm>>),
 }
 
 impl<Term: Display, NonTerm: Display> Display for BuildError<Term, NonTerm> {
@@ -83,15 +81,6 @@ Try rearanging the rules or change ReduceType to Left or Right."#,
             )?,
             Self::NoAugmented => {
                 write!(f, "No Augmented Rule found.")?;
-            }
-            Self::MultipleAugmented(rules) => {
-                writeln!(
-                    f,
-                    "Multiple Augmented Rule found. Augmented Rule must be unique."
-                )?;
-                for rule in rules.iter() {
-                    writeln!(f, "{}", rule)?;
-                }
             }
         }
         Ok(())
@@ -144,15 +133,6 @@ Try rearanging the rules or change ReduceType to Left or Right."#,
             )?,
             Self::NoAugmented => {
                 write!(f, "No Augmented Rule found.")?;
-            }
-            Self::MultipleAugmented(rules) => {
-                writeln!(
-                    f,
-                    "Multiple Augmented Rule found. Augmented Rule must be unique."
-                )?;
-                for rule in rules.iter() {
-                    writeln!(f, "{:?}", rule)?;
-                }
             }
         }
         Ok(())
@@ -208,13 +188,6 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
 
             if augmented_rules.is_empty() {
                 return Err(BuildError::NoAugmented);
-            } else if augmented_rules.len() != 1 {
-                return Err(BuildError::MultipleAugmented(
-                    augmented_rules
-                        .into_iter()
-                        .map(|id| self.rules[id].clone())
-                        .collect(),
-                ));
             }
 
             let augmented_rule = augmented_rules[0];
