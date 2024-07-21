@@ -173,11 +173,7 @@ impl<Term: Clone + Hash + Eq, NonTerm: Clone + Hash + Eq> Parser<Term, NonTerm> 
     /// parse given terminals and return result
     /// terminals must not contains eof
     /// eof is explicitly given as argument
-    pub fn parse<C: Callback<Term, NonTerm>>(
-        &self,
-        terminals: &[Term],
-        eof: Term,
-    ) -> Result<Tree, ParseError<Term, NonTerm>> {
+    pub fn parse(&self, terminals: &[Term], eof: Term) -> Result<Tree, ParseError<Term, NonTerm>> {
         let mut callback = DefaultCallback {};
         self.parse_with_callback(terminals, &mut callback, eof)
     }
@@ -333,7 +329,7 @@ impl<Term: Clone + Hash + Eq, NonTerm: Clone + Hash + Eq> Parser<Term, NonTerm> 
     /// parse given str and return result
     /// terminals must not contains eof
     /// eof is explicitly given as argument
-    pub fn parse_str<C: Callback<Term, NonTerm>>(
+    pub fn parse_str(
         &self,
         terminals: &str,
         eof: Term,
