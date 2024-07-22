@@ -12,6 +12,17 @@ pub struct Context<'a, Term, NonTerm> {
 
     _phantom: std::marker::PhantomData<NonTerm>,
 }
+impl<'a, Term, NonTerm> Clone for Context<'a, Term, NonTerm> {
+    fn clone(&self) -> Self {
+        Context {
+            state_stack: self.state_stack.clone(),
+            stack: self.stack.clone(),
+            terms: self.terms,
+            idx: self.idx,
+            _phantom: std::marker::PhantomData,
+        }
+    }
+}
 
 impl<'a, Term, NonTerm> Context<'a, Term, NonTerm> {
     pub(crate) fn new(terms: &'a [Term], main_state: usize) -> Self {
@@ -83,6 +94,18 @@ pub struct ContextStr<'a, Term, NonTerm> {
     cur: Option<(char, usize, usize)>,
 
     _phantom: std::marker::PhantomData<(Term, NonTerm)>,
+}
+impl<'a, Term, NonTerm> Clone for ContextStr<'a, Term, NonTerm> {
+    fn clone(&self) -> Self {
+        ContextStr {
+            state_stack: self.state_stack.clone(),
+            stack: self.stack.clone(),
+            terms: self.terms,
+            chars: self.terms.chars(),
+            cur: self.cur,
+            _phantom: std::marker::PhantomData,
+        }
+    }
 }
 
 impl<'a, Term, NonTerm> ContextStr<'a, Term, NonTerm> {

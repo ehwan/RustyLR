@@ -37,8 +37,10 @@ pub use parser::callback::CallbackStr;
 pub use parser::context::Context;
 /// A struct for parsing context (for `&str`)
 pub use parser::context::ContextStr;
-/// Error type for parsing
-pub use parser::parser::ParseError;
+/// Error type for parsing slice
+pub use parser::error::ParseError;
+/// Error type for parsing str
+pub use parser::error::ParseErrorStr;
 /// A struct for LR parser
 pub use parser::parser::Parser;
 /// A tree struct for result of parsing

@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr"
-version = "0.2.3"
+version = "0.2.4"
 edition = "2021"
 license = "MIT"
 description = "LR(1) parser generator"
@@ -10,4 +10,3 @@ keywords = ["parser", "yacc", "context-free-grammar", "lr", "compiler"]
 categories = ["parsing"]
 
 [dependencies]
-thiserror = "1.0.62"
