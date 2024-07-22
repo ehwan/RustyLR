@@ -2,6 +2,7 @@
 name = "rusty_lr_derive"
 version = "0.3.0"
 edition = "2021"
+license = "MIT"
 description = "useful macro definitions for rusty_lr"
 repository = "https://github.com/ehwan/RustyLR"
 readme = "../README.md"
