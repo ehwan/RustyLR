@@ -16,6 +16,9 @@ pub(crate) mod token;
 
 // reexport
 
+/// A struct for production rule
+pub use rule::ProductionRule;
+
 /// An enum for resolving shift/reduce conflict
 pub use rule::ReduceType;
 /// A struct for state in DFA

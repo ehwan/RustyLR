@@ -1,12 +1,18 @@
 [package]
-name = "rusty_lr"
+name = "rusty_lr_derive"
 version = "0.3.0"
 edition = "2021"
-license = "MIT"
-description = "LR(1) parser generator"
+description = "useful macro definitions for rusty_lr"
 repository = "https://github.com/ehwan/RustyLR"
 readme = "../README.md"
 keywords = ["parser", "yacc", "context-free-grammar", "lr", "compiler"]
 categories = ["parsing"]
 
+[lib]
+proc-macro = true
+
 [dependencies]
+syn = "2.0"
+proc-macro2 = "1.0.86"
+quote = "1.0"
+rusty_lr = "0.3.0"

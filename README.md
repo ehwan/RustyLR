@@ -3,20 +3,111 @@ LR(1) Parser generator in Rust
 
 ```
 [dependencies]
-rusty_lr = "0.2.3"
+rusty_lr = "0.3.0"
+rusty_lr_derive = "0.3.0"
 ```
 
 ## Features
  - pure Rust implementation
- - DFA construction from CFG
+ - compile-time DFA construction from CFG ( with yacc-like syntax )
+ - customizable reducing action
  - resolving conflicts of ambiguous grammar
  - tracing parser action with callback, also error handling
  - construct Tree from parsing result
 
+## Sample
+In [`example/calculator/parser.rs`](example/calculator/src/parser.rs),
+```rust
+use rusty_lr_derive::lr1_str;
+
+// this define struct `EParser`
+lr1_str! {
+    // define terminal symbols
+    // the TokenStream will be copied to the generated code
+    %token add '+';
+    %token mul '*';
+    %token lparen '(';
+    %token rparen ')';
+    %token eof '\0';
+    %token zero '0';
+    %token one '1';
+    %token two '2';
+    %token three '3';
+    %token four '4';
+    %token five '5';
+    %token six '6';
+    %token seven '7';
+    %token eight '8';
+    %token nine '9';
+
+    // start symbol ( for final reduction )
+    %start E;
+
+    // set augmented production rule
+    %augmented Augmented;
+
+    // v{N} is the value of the N-th symbol in the production rule
+    // s{N} is the &str(or &[Term]) of the N-th symbol
+    A(i32): A add A %left { println!("{:?}+{:?}={:?}", s0, s2, s); v0 + v2 }
+    //              |||||       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ reduce action
+    //              ^^^^^ left reduction
+          | M { v0 }
+          ;
+    M(i32): M mul M %left { v0 * v2 }
+          | P { v0 }
+          ;
+    P(i32): Num { s0.parse().unwrap() }
+          | lparen E rparen { v1 }
+          ;
+    Num: Digit Num
+       | Digit
+       ;
+    Digit : zero %left
+          | one % left
+          | two % left
+          | three % left
+          | four % left
+          | five % left
+          | six % left
+          | seven % left
+          | eight % left
+          | nine % left
+          ;
+    E(i32): A { v0 }
+          ;
+    Augmented(i32) : E eof { v0 }
+                   ;
+}
+```
+
+In [`example/calculator/src/main.rs`](example/calculator/src/main.rs),
+```rust
+mod parser;
+
+fn main() {
+    let p = parser::EParser::new();
+
+    let input = "1+2*(3+4)";
+    let res = match p.parse_str(input, 0 as char) {
+        Ok(res) => res,
+        Err(e) => {
+            println!("Error: {}", e);
+            return;
+        }
+    };
+    println!("Result: {}", res);
+}
+```
+
+The result will be:
+```
+"3"+"4"="3+4"
+"1"+"2*(3+4)"="1+2*(3+4)"
+Result: 15
+```
 
 ## Build Deterministic Finite Automata (DFA) from Context Free Grammar (CFG)
-
-Sample code in: [`example/calculator/src/main.rs`](example/calculator/src/main.rs)
+This section will describe how to build DFA from CFG, on runtime.
 
 ### 1. Define terminal and non-terminal symbols
 
@@ -73,7 +164,7 @@ grammar.add_rule(
 );
 ```
 
-Note that the production rule `A -> A + A` has a shift/reduce conflict, and the reduce type is set to `ReduceType::Left` to resolve the conflict. Letting the reduce type to `ReduceType::Error` will cause an error when a conflict occurs. This is useful when you want to know unexpected conflicts in your grammar.
+Note that the production rule `A -> A + A` has a shift/reduce conflict, and the reduce type is set to `ReduceType::Left` to resolve the conflict. Letting the reduce type to `ReduceType::Error` will cause an error when a conflict occurs. This is useful when you want to know unexpected conflicts exist in your grammar.
 
 reduce/reduce conflict (e.g. duplicated rules) will be always an error.
 
@@ -94,13 +185,15 @@ let parser:rusty_lr::Parser<Term,NonTerm> = match grammar.build(NonTerm::Augment
 You must explicitly specify the Augmented non-terminal symbol, and the production rule `Augmented -> StartSymbol $` must be defined in the grammar.
 
 The `Error` type returned from `Grammar::build()` will contain the error information.
-It is `Display` if both `Term` and `NonTerm` is `Display`, and It is `Debug` if both `Term` and `NonTerm` is `Debug`.
+`Grammar` is `Display` if both `Term` and `NonTerm` is `Display`, and It is `Debug` if both `Term` and `NonTerm` is `Debug`.
 
 The returned `Parser` struct contains the DFA and the production rules(cloned). It is completely independent from the `Grammar` struct, so you can drop the `Grammar` struct, or export the `Parser` struct to another module.
 
 ## Parse input sequence with generated DFA
 ### 1. Parse without callback
 For given input sequence, you can parse it with `Parser::parse()` method. The input sequence must be slice of `Term`(`&[Term]`).
+
+If `Term` is `char`, you can use `&str` as input sequence (via `Parser::parse_str()`).
 
 ```rust
 let terms = vec![ Term::Num, Term::Plus, Term::Num, Term::Mul, Term::LeftParen, Term::Num, Term::Plus, Term::Num, Term::RightParen];
@@ -112,7 +205,7 @@ match parser.parse(&terms, Term::Eof) {
 }
 ```
 
-Note that the given input sequence **must not** ends with `EOF`(the end symbol you provided in Augmented rule). And the final Augmented rule will not be reduced.
+Note that the given input sequence **must not** ends with `EOF`(the end symbol you provided in Augmented rule). And the final Augmented rule will not be reduced (`EOF` will be only used for lookahead/reduce check, not shifted).
 
 ### 2. Parse with callback
 For complex error handling and tracing parser action, you can implement `Callback` trait and pass it to `Parser::parse_with_callback(...)`.
