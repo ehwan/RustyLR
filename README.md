@@ -3,8 +3,8 @@ LR(1) Parser generator in Rust
 
 ```
 [dependencies]
-rusty_lr = "0.3.0"
-rusty_lr_derive = "0.3.0"
+rusty_lr = "0.3.1"
+rusty_lr_derive = "0.3.2"
 ```
 
 ## Features

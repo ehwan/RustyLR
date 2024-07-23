@@ -105,6 +105,7 @@ impl RuleLines {
     // RuleLines: RuleLine '|' RuleLines
     //          | RuleLine
     //          ;
+    // returned vec is reversed
     pub(crate) fn parse_tree(
         tree: &rusty_lr::Tree,
         terms: &[TermType],
@@ -115,7 +116,7 @@ impl RuleLines {
                 if children.len() == 3 {
                     let rule_line = RuleLine::parse_tree(&children[0], terms, parser)?;
                     let mut rule = Self::parse_tree(&children[2], terms, parser)?;
-                    rule.rule_lines.insert(0, rule_line);
+                    rule.rule_lines.push(rule_line);
                     Ok(rule)
                 } else if children.len() == 1 {
                     let rule_line = RuleLine::parse_tree(&children[0], terms, parser)?;

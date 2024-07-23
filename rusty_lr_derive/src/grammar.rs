@@ -755,7 +755,9 @@ impl Grammar {
 
                 let typename = Self::parse_ruletype(&children[1], terms, parser)?;
 
-                let rulelines = RuleLines::parse_tree(&children[3], terms, parser)?;
+                // it is reversed
+                let mut rulelines = RuleLines::parse_tree(&children[3], terms, parser)?;
+                rulelines.rule_lines.reverse();
 
                 Ok((rulename.clone(), typename, rulelines))
             }
@@ -765,17 +767,18 @@ impl Grammar {
         }
     }
 
-    // Grammar: Grammar Rule
-    //        | Grammar TokenDef
-    //        | Grammar StartDef
-    //        | Grammar EofDef
-    //        | Grammar TokenTypeDef
+    // Grammar: Rule Grammar
     //        | Rule
+    //        | TokenDef Grammar
     //        | TokenDef
+    //        | StartDef Grammar
     //        | StartDef
-    //        | EofDef
+    //        | AugDef Grammar
+    //        | AugDef
+    //        | TokenTypeDef Grammar
     //        | TokenTypeDef
     //        ;
+    // returned Vec of Rule is reversed
     pub(crate) fn parse_tree_impl(
         tree: &rlr::Tree,
         terms: &[TermType],
@@ -788,7 +791,7 @@ impl Grammar {
                     (Some(rlr::Token::NonTerm("Rule")), Some(rlr::Token::NonTerm("Grammar"))) => {
                         let rule = Self::parse_rule(&children[0], terms, parser)?;
                         let mut grammar = Self::parse_tree_impl(&children[1], terms, parser)?;
-                        grammar.rules.insert(0, rule);
+                        grammar.rules.push(rule);
 
                         Ok(grammar)
                     }
@@ -925,6 +928,8 @@ impl Grammar {
         parser: &rlr::Parser<TermType, &'static str>,
     ) -> Result<Self, ParseError> {
         let mut grammar = Self::parse_tree_impl(tree, terms, parser)?;
+        // reverse the rules
+        grammar.rules.reverse();
 
         // check start defined
         if grammar.start_rule_name.is_none() {
