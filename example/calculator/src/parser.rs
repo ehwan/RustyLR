@@ -42,16 +42,7 @@ lr1_str! {
     Num: Digit Num
        | Digit
        ;
-    Digit : zero %left
-          | one % left
-          | two % left
-          | three % left
-          | four % left
-          | five % left
-          | six % left
-          | seven % left
-          | eight % left
-          | nine % left
+    Digit : zero | one | two | three | four | five | six | seven | eight | nine
           ;
     E(i32): A { v0 }
           ;
