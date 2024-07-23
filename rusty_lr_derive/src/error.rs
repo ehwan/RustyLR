@@ -8,6 +8,7 @@ pub enum ParseError {
     MultipleStartDefinition(Ident, Ident),
     MultipleAugmentedDefinition(Ident, Ident),
     MultipleTokenTypeDefinition(TokenStream, TokenStream),
+    MultipleUserDataDefinition(TokenStream, TokenStream),
 
     StartNotDefined,
     TokenTypeNotDefined,
@@ -46,6 +47,11 @@ impl ParseError {
             ParseError::MultipleTokenTypeDefinition(ident, tokens) => {
                 quote! {
                     compile_error!(concat!("Multiple token type definition: ", #ident, " ", #tokens));
+                }
+            }
+            ParseError::MultipleUserDataDefinition(ident, tokens) => {
+                quote! {
+                    compile_error!(concat!("Multiple user data definition: ", #ident, " ", #tokens));
                 }
             }
             ParseError::StartNotDefined => {

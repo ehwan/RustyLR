@@ -289,6 +289,12 @@ impl Grammar {
         reducer_name.set_span(start_rule_name.span());
         let mut struct_name = format_ident!("{}Parser", start_rule_name);
         struct_name.set_span(start_rule_name.span());
+        let (user_data_parameter_def, user_data_var) =
+            if let Some(user_data) = &self.userdata_typename {
+                (quote! { data: &mut #user_data, }, quote! { data, })
+            } else {
+                (quote! {}, quote! {})
+            };
 
         let parser_emit = self.emit_parser()?;
 
@@ -310,6 +316,7 @@ impl Grammar {
                 &mut self,
                 terms: &'a [#term_typename],
                 tree: &::rusty_lr::Tree,
+                #user_data_parameter_def
             )
             {
                 // slice of this tree
@@ -321,7 +328,7 @@ impl Grammar {
                     }
                     ::rusty_lr::Tree::NonTerminal(rustylr_macro_generated_ruleid__, children) => {
                         for child in children.iter() {
-                            self.reduce_impl(terms, child);
+                            self.reduce_impl(terms, child, #user_data_var);
                         }
                         #match_streams
                     }
@@ -329,9 +336,9 @@ impl Grammar {
                 self.range_stack.push( tree.range() );
             }
 
-            pub fn reduce(&mut self, terms: &'a [#term_typename], tree: &::rusty_lr::Tree) -> #start_rule_typename
+            pub fn reduce(&mut self, terms: &'a [#term_typename], tree: &::rusty_lr::Tree, #user_data_parameter_def) -> #start_rule_typename
             {
-                self.reduce_impl(terms, tree);
+                self.reduce_impl(terms, tree, #user_data_var);
                 self.#start_rule_stack_name.pop().unwrap()
             }
             }
@@ -350,18 +357,19 @@ impl Grammar {
                     &'a self,
                     terminals: &'a [#term_typename],
                     callback: &mut C,
-                    eof: #term_typename
+                    eof: #term_typename,
+                    #user_data_parameter_def
                 ) -> Result<#start_rule_typename, ::rusty_lr::ParseError<'a, #term_typename, &'static str>>
                 {
                     let tree = self.parser.parse_with_callback( terminals, callback, eof )?;
                     let mut reducer = #reducer_name::new();
-                    Ok(reducer.reduce(terminals, &tree))
+                    Ok(reducer.reduce(terminals, &tree, #user_data_var))
                 }
-                pub fn parse<'a>(&'a self, terminals: &'a [#term_typename], eof: #term_typename) -> Result<#start_rule_typename, ::rusty_lr::ParseError<'a, #term_typename, &'static str>>
+                pub fn parse<'a>(&'a self, terminals: &'a [#term_typename], eof: #term_typename, #user_data_parameter_def) -> Result<#start_rule_typename, ::rusty_lr::ParseError<'a, #term_typename, &'static str>>
                 {
                     let tree = self.parser.parse( terminals, eof )?;
                     let mut reducer = #reducer_name::new();
-                    Ok(reducer.reduce(terminals, &tree))
+                    Ok(reducer.reduce(terminals, &tree, #user_data_var))
                 }
             }
         })
@@ -474,6 +482,12 @@ impl Grammar {
         reducer_name.set_span(start_rule_name.span());
         let mut struct_name = format_ident!("{}Parser", start_rule_name);
         struct_name.set_span(start_rule_name.span());
+        let (user_data_parameter_def, user_data_var) =
+            if let Some(user_data) = &self.userdata_typename {
+                (quote! { data: &mut #user_data, }, quote! { data, })
+            } else {
+                (quote! {}, quote! {})
+            };
 
         let parser_emit = self.emit_parser()?;
 
@@ -495,6 +509,7 @@ impl Grammar {
                     &mut self,
                     terms: &str,
                     tree: &::rusty_lr::TreeStr,
+                    #user_data_parameter_def
                 )
                 {
                     // slice of this tree
@@ -507,7 +522,7 @@ impl Grammar {
                         }
                         ::rusty_lr::TreeStr::NonTerminal(rustylr_macro_generated_ruleid__, children) => {
                             for child in children.iter() {
-                                self.reduce_impl(terms, child);
+                                self.reduce_impl(terms, child, #user_data_var);
                             }
                             #match_streams
                         }
@@ -515,9 +530,9 @@ impl Grammar {
                     self.range_stack.push( tree.range() );
                 }
 
-                pub fn reduce(&mut self, terms: &str, tree: &::rusty_lr::TreeStr) -> #start_rule_typename
+                pub fn reduce(&mut self, terms: &str, tree: &::rusty_lr::TreeStr, #user_data_parameter_def)-> #start_rule_typename
                 {
-                    self.reduce_impl(terms, tree);
+                    self.reduce_impl(terms, tree, #user_data_var);
                     self.#start_rule_stack_name.pop().unwrap()
                 }
             }
@@ -537,17 +552,18 @@ impl Grammar {
                     terminals: &'a str,
                     callback: &mut C,
                     eof: char,
+                    #user_data_parameter_def
                 ) -> Result<#start_rule_typename, ::rusty_lr::ParseErrorStr<'a, char, &'static str>>
                 {
                     let tree = self.parser.parse_str_with_callback( terminals, callback, eof )?;
                     let mut reducer = #reducer_name::new();
-                    Ok(reducer.reduce(terminals, &tree))
+                    Ok(reducer.reduce(terminals, &tree, #user_data_var))
                 }
-                pub fn parse_str<'a>(&'a self, terminals: &'a str, eof: char) -> Result<#start_rule_typename, ::rusty_lr::ParseErrorStr<'a, char, &'static str>>
+                pub fn parse_str<'a>(&'a self, terminals: &'a str, eof: char, #user_data_parameter_def)-> Result<#start_rule_typename, ::rusty_lr::ParseErrorStr<'a, char, &'static str>>
                 {
                     let tree = self.parser.parse_str( terminals, eof )?;
                     let mut reducer = #reducer_name::new();
-                    Ok(reducer.reduce(terminals, &tree))
+                    Ok(reducer.reduce(terminals, &tree, #user_data_var))
                 }
             }
         })

@@ -29,6 +29,7 @@ pub(crate) enum TermType {
     Start(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %start
     AugDef(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %aug
     TokenType(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %tokentype
+    UserData(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %userdata
     Group(Option<Group>),
     Literal(Option<proc_macro2::Literal>),
     Eof,
@@ -48,9 +49,10 @@ impl TermType {
             TermType::Start(_) => 9,
             TermType::AugDef(_) => 10,
             TermType::TokenType(_) => 11,
-            TermType::Group(_) => 12,
-            TermType::Literal(_) => 13,
-            TermType::Eof => 14,
+            TermType::UserData(_) => 12,
+            TermType::Group(_) => 13,
+            TermType::Literal(_) => 14,
+            TermType::Eof => 15,
         }
     }
     pub fn stream(self) -> TokenStream {
@@ -88,6 +90,10 @@ impl TermType {
                 let (punct, ident) = punct_ident.unwrap();
                 quote! { #punct #ident }
             }
+            TermType::UserData(punct_ident) => {
+                let (punct, ident) = punct_ident.unwrap();
+                quote! { #punct #ident }
+            }
             TermType::Group(group) => group.unwrap().to_token_stream(),
             TermType::Literal(lit) => lit.unwrap().to_token_stream(),
             TermType::Eof => unreachable!("Eof should not be converted to TokenStream"),
@@ -109,6 +115,7 @@ impl std::fmt::Display for TermType {
             TermType::Start(_) => write!(f, "%start"),
             TermType::AugDef(_) => write!(f, "%augmented"),
             TermType::TokenType(_) => write!(f, "%tokentype"),
+            TermType::UserData(_) => write!(f, "%userdata"),
             TermType::Group(_) => write!(f, "TokenTree::Group"),
             TermType::Literal(_) => write!(f, "TokenTree::Literal"),
             TermType::Eof => write!(f, "$"),
@@ -143,6 +150,7 @@ pub struct Grammar {
     pub augmented: Option<Ident>,
     pub terminals: HashMap<String, (Ident, TokenStream)>,
     pub tokentype: Option<TokenStream>,
+    pub userdata_typename: Option<TokenStream>,
     pub rules: Vec<(Ident, TokenStream, RuleLines)>,
     //              name    typename     rules
 }
@@ -154,6 +162,7 @@ impl Grammar {
             augmented: None,
             terminals: HashMap::new(),
             tokentype: None,
+            userdata_typename: None,
             rules: Vec::new(),
         }
     }
@@ -204,6 +213,10 @@ impl Grammar {
                             }
                             "tokentype" => {
                                 tokens.push(TermType::TokenType(Some((punct, ident.clone()))));
+                                iter.next();
+                            }
+                            "userdata" => {
+                                tokens.push(TermType::UserData(Some((punct, ident.clone()))));
                                 iter.next();
                             }
                             _ => {
@@ -275,6 +288,8 @@ impl Grammar {
         //       ;
         // TokenTypeDef: '%tokentype' RustCode ';'
         //             ;
+        // UserDataDef: '%userdata' RustCode ';'
+        //            ;
         //
         // Grammar: Rule Grammar
         //        | Rule
@@ -286,6 +301,8 @@ impl Grammar {
         //        | AugDef
         //        | TokenTypeDef Grammar
         //        | TokenTypeDef
+        //        | UserDataDef Grammar
+        //        | UserDataDef
         //        ;
 
         // Rule : Ident RuleType ':' RuleLines ';' ;
@@ -471,6 +488,11 @@ impl Grammar {
         );
         grammar.add_rule(
             "AnyTokenNoSemi",
+            vec![Token::Term(TermType::UserData(None))],
+            ReduceType::Error,
+        );
+        grammar.add_rule(
+            "AnyTokenNoSemi",
             vec![Token::Term(TermType::Literal(None))],
             ReduceType::Error,
         );
@@ -534,6 +556,15 @@ impl Grammar {
             ],
             ReduceType::Error,
         );
+        grammar.add_rule(
+            "UserDataDef",
+            vec![
+                Token::Term(TermType::UserData(None)),
+                Token::NonTerm("RustCode"),
+                Token::Term(TermType::Semicolon(None)),
+            ],
+            ReduceType::Error,
+        );
 
         // Grammar: Rule Grammar
         //        | Rule
@@ -545,6 +576,8 @@ impl Grammar {
         //        | AugDef
         //        | TokenTypeDef Grammar
         //        | TokenTypeDef
+        //        | UserDataDef Grammar
+        //        | UserDataDef
         //        ;
         grammar.add_rule(
             "Grammar",
@@ -588,6 +621,16 @@ impl Grammar {
         grammar.add_rule(
             "Grammar",
             vec![Token::NonTerm("TokenTypeDef")],
+            ReduceType::Error,
+        );
+        grammar.add_rule(
+            "Grammar",
+            vec![Token::NonTerm("UserDataDef"), Token::NonTerm("Grammar")],
+            ReduceType::Error,
+        );
+        grammar.add_rule(
+            "Grammar",
+            vec![Token::NonTerm("UserDataDef")],
             ReduceType::Error,
         );
 
@@ -766,6 +809,26 @@ impl Grammar {
             }
         }
     }
+    // UserDataDef: '%userdata' RustCode ';'
+    pub(crate) fn parse_userdatadef(
+        tree: &rlr::Tree,
+        terms: &[TermType],
+        _parser: &rlr::Parser<TermType, &'static str>,
+    ) -> Result<TokenStream, ParseError> {
+        match tree {
+            rlr::Tree::NonTerminal(_, children) => {
+                let mut rustcode = TokenStream::new();
+                for token in children[1].slice(terms).iter() {
+                    rustcode.extend(token.clone().stream());
+                }
+
+                Ok(rustcode)
+            }
+            _ => {
+                unreachable!();
+            }
+        }
+    }
 
     // Grammar: Rule Grammar
     //        | Rule
@@ -777,6 +840,8 @@ impl Grammar {
     //        | AugDef
     //        | TokenTypeDef Grammar
     //        | TokenTypeDef
+    //        | UserDataDef Grammar
+    //        | UserDataDef
     //        ;
     // returned Vec of Rule is reversed
     pub(crate) fn parse_tree_impl(
@@ -822,12 +887,9 @@ impl Grammar {
                         let (tokenname, tokenreplace) =
                             Self::parse_tokendef(&children[0], terms, parser)?;
                         let mut grammar = Grammar::new();
-                        let old = grammar
+                        grammar
                             .terminals
                             .insert(tokenname.to_string(), (tokenname.clone(), tokenreplace));
-                        if let Some(rule) = old {
-                            return Err(ParseError::MultipleTokenDefinition(tokenname, rule.1));
-                        }
 
                         Ok(grammar)
                     }
@@ -849,9 +911,6 @@ impl Grammar {
                         let startname = Self::parse_startdef(&children[0], terms, parser)?;
                         let mut grammar = Grammar::new();
 
-                        if let Some(old_start) = grammar.start_rule_name {
-                            return Err(ParseError::MultipleStartDefinition(old_start, startname));
-                        }
                         grammar.start_rule_name = Some(startname);
 
                         Ok(grammar)
@@ -871,9 +930,6 @@ impl Grammar {
                         let augname = Self::parse_augdef(&children[1], terms, parser)?;
                         let mut grammar = Grammar::new();
 
-                        if let Some(old_aug) = grammar.augmented {
-                            return Err(ParseError::MultipleAugmentedDefinition(old_aug, augname));
-                        }
                         grammar.augmented = Some(augname);
 
                         Ok(grammar)
@@ -901,13 +957,32 @@ impl Grammar {
                             Self::parse_tokentypedef(&children[0], terms, parser)?;
                         let mut grammar = Grammar::new();
 
-                        if let Some(old_tokentype) = grammar.tokentype {
-                            return Err(ParseError::MultipleTokenTypeDefinition(
-                                old_tokentype,
-                                tokentype_stream,
+                        grammar.tokentype = Some(tokentype_stream);
+
+                        Ok(grammar)
+                    }
+                    (
+                        Some(rlr::Token::NonTerm("UserDataDef")),
+                        Some(rlr::Token::NonTerm("Grammar")),
+                    ) => {
+                        let userdata_stream = Self::parse_userdatadef(&children[0], terms, parser)?;
+                        let mut grammar = Self::parse_tree_impl(&children[1], terms, parser)?;
+
+                        if let Some(old_userdata) = grammar.userdata_typename {
+                            return Err(ParseError::MultipleUserDataDefinition(
+                                old_userdata,
+                                userdata_stream,
                             ));
                         }
-                        grammar.tokentype = Some(tokentype_stream);
+                        grammar.userdata_typename = Some(userdata_stream);
+
+                        Ok(grammar)
+                    }
+                    (Some(rlr::Token::NonTerm("UserDataDef")), None) => {
+                        let userdata_stream = Self::parse_userdatadef(&children[0], terms, parser)?;
+                        let mut grammar = Grammar::new();
+
+                        grammar.userdata_typename = Some(userdata_stream);
 
                         Ok(grammar)
                     }

@@ -2,6 +2,9 @@ use rusty_lr_derive::lr1_str;
 
 // this define struct `EParser`
 lr1_str! {
+    // define type of user data
+    %userdata i32;
+
     // define terminal symbols
     // the TokenStream will be copied to the generated code
     %token add '+';
@@ -36,7 +39,7 @@ lr1_str! {
     M(i32): M mul M %left { v0 * v2 }
           | P { v0 }
           ;
-    P(i32): Num { s0.parse().unwrap() }
+    P(i32): Num { *data += 1; s0.parse().unwrap() } // user data can be accessed by `data`
           | lparen E rparen { v1 }
           ;
     Num: Digit Num

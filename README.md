@@ -3,8 +3,8 @@ LR(1) Parser generator in Rust
 
 ```
 [dependencies]
-rusty_lr = "0.3.1"
-rusty_lr_derive = "0.3.2"
+rusty_lr = "0.3.3"
+rusty_lr_derive = "0.3.3"
 ```
 
 ## Features
@@ -22,6 +22,9 @@ use rusty_lr_derive::lr1_str;
 
 // this define struct `EParser`
 lr1_str! {
+    // define type of user data
+    %userdata i32;
+
     // define terminal symbols
     // the TokenStream will be copied to the generated code
     %token add '+';
@@ -56,7 +59,7 @@ lr1_str! {
     M(i32): M mul M %left { v0 * v2 }
           | P { v0 }
           ;
-    P(i32): Num { s0.parse().unwrap() }
+    P(i32): Num { *data += 1; s0.parse().unwrap() } // user data can be accessed by `data`
           | lparen E rparen { v1 }
           ;
     Num: Digit Num
@@ -79,7 +82,9 @@ fn main() {
     let p = parser::EParser::new();
 
     let input = "1+2*(3+4)";
-    let res = match p.parse_str(input, 0 as char) {
+    let mut number_of_num: i32 = 0;
+    // `number_of_num` passed to parser as user_data
+    let res = match p.parse_str(input, 0 as char, &mut number_of_num) {
         Ok(res) => res,
         Err(e) => {
             println!("Error: {}", e);
@@ -87,6 +92,7 @@ fn main() {
         }
     };
     println!("Result: {}", res);
+    println!("Number of 'Num' in {}: {}", input, number_of_num);
 }
 ```
 
@@ -95,6 +101,7 @@ The result will be:
 "3"+"4"="3+4"
 "1"+"2*(3+4)"="1+2*(3+4)"
 Result: 15
+Number of 'Num' in 1+2*(3+4): 4
 ```
 
 ## Build Deterministic Finite Automata (DFA) from Context Free Grammar (CFG)
