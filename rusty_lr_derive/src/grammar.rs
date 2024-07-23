@@ -225,8 +225,7 @@ impl Grammar {
         }
         Ok(tokens)
     }
-    pub(crate) fn build_parser(
-    ) -> Result<rlr::Parser<TermType, &'static str>, rlr::BuildError<TermType, &'static str>> {
+    pub(crate) fn build_parser() -> rlr::Parser<TermType, &'static str> {
         use rlr::*;
 
         let mut grammar = Grammar::new();
@@ -598,7 +597,12 @@ impl Grammar {
             ReduceType::Error,
         );
 
-        grammar.build("Augmented")
+        match grammar.build("Augmented") {
+            Ok(parser) => parser,
+            Err(err) => {
+                panic!("{}", err);
+            }
+        }
     }
 
     // AugDef: '%aug' Ident ';'

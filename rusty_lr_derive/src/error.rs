@@ -17,7 +17,6 @@ pub enum ParseError {
     GrammarBuildError(String),
 
     // building the grammar for parsing production rules failed
-    InternalGrammarBuildError(String),
     InternalGrammarParseError(String),
     // UnexpectedToken(String),
     // MultipleDefinition(String),
@@ -71,11 +70,6 @@ impl ParseError {
                 }
             }
             ParseError::GrammarBuildError(message) => {
-                quote! {
-                    compile_error!(#message);
-                }
-            }
-            ParseError::InternalGrammarBuildError(message) => {
                 quote! {
                     compile_error!(#message);
                 }

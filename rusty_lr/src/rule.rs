@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
 use std::fmt::Debug;
@@ -172,13 +173,23 @@ impl<Term: Debug, NonTerm: Debug> Debug for LookaheadRule<Term, NonTerm> {
 /// set of lookahead rules
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct LookaheadRuleRefSet<Term> {
-    pub rules: BTreeSet<LookaheadRuleRef<Term>>,
+    pub rules: BTreeMap<ShiftedRuleRef, BTreeSet<Term>>,
 }
 impl<Term: Ord> LookaheadRuleRefSet<Term> {
     pub fn new() -> Self {
         LookaheadRuleRefSet {
-            rules: BTreeSet::new(),
+            rules: BTreeMap::new(),
         }
+    }
+    pub fn add(&mut self, rule: ShiftedRuleRef, mut lookaheads: BTreeSet<Term>) -> bool {
+        let mut changed = false;
+        let set = self.rules.entry(rule).or_insert_with(|| {
+            changed = true;
+            BTreeSet::new()
+        });
+        let old = set.len();
+        set.append(&mut lookaheads);
+        changed || old != set.len()
     }
 }
 // impl<'a, Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display

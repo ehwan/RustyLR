@@ -7,137 +7,11 @@ use std::fmt::Display;
 use std::hash::Hash;
 use std::vec::Vec;
 
+use super::error::BuildError;
 use crate::parser::parser::Parser;
 use crate::rule::*;
 use crate::state::State;
 use crate::token::Token;
-
-pub enum BuildError<Term, NonTerm> {
-    RuleNotFound(NonTerm),
-
-    ReduceReduceConflict {
-        lookahead: Term,
-        rule1: ProductionRule<Term, NonTerm>,
-        rule2: ProductionRule<Term, NonTerm>,
-    },
-
-    /// shift/reduce conflict, one of the rule have ReduceType::Error
-    ShiftReduceConflictError {
-        reduce: ProductionRule<Term, NonTerm>,
-        shift: LookaheadRule<Term, NonTerm>,
-    },
-
-    /// shift/reduce conflict, one has ReduceType::Left and other has ReduceType::Right
-    ShiftReduceConflict {
-        reduce: ProductionRule<Term, NonTerm>,
-        left: LookaheadRule<Term, NonTerm>,
-        right: LookaheadRule<Term, NonTerm>,
-    },
-
-    NoAugmented,
-}
-
-impl<Term: Display, NonTerm: Display> Display for BuildError<Term, NonTerm> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::RuleNotFound(nonterm) => write!(f, "Production Rule not found for {}", nonterm)?,
-            Self::ReduceReduceConflict {
-                lookahead,
-                rule1,
-                rule2,
-            } => write!(
-                f,
-                r#"Reduce/Reduce Conflict with lookahead: {}
-{}
-and
-{}"#,
-                lookahead, rule1, rule2
-            )?,
-            Self::ShiftReduceConflictError { reduce, shift } => write!(
-                f,
-                r#"Shift/Reduce Conflict
-This rule has ReduceType::Error:
-{}
-and the reduce rule is:
-{}
-Try rearanging the rules or change ReduceType to Left or Right."#,
-                shift, reduce
-            )?,
-            Self::ShiftReduceConflict {
-                reduce,
-                left,
-                right,
-            } => write!(
-                f,
-                r#"Shift/Reduce Conflict
-This rule has ReduceType::Left:
-{}
-this rule has ReduceType::Right:
-{}
-and the reduce rule is:
-{}
-Try rearanging the rules or change ReduceType to Left or Right."#,
-                left, right, reduce
-            )?,
-            Self::NoAugmented => {
-                write!(f, "No Augmented Rule found.")?;
-            }
-        }
-        Ok(())
-    }
-}
-
-impl<Term: Debug, NonTerm: Debug> Debug for BuildError<Term, NonTerm> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::RuleNotFound(nonterm) => {
-                write!(f, "Production Rule not found for {:?}", nonterm)?
-            }
-            Self::ReduceReduceConflict {
-                lookahead,
-                rule1,
-                rule2,
-            } => write!(
-                f,
-                r#"Reduce/Reduce Conflict with lookahead: {:?}
-{:?}
-and
-{:?}"#,
-                lookahead, rule1, rule2
-            )?,
-            Self::ShiftReduceConflictError { reduce, shift } => write!(
-                f,
-                r#"Shift/Reduce Conflict
-This rule has ReduceType::Error:
-{:?}
-and the reduce rule is:
-{:?}
-Try rearanging the rules or change ReduceType to Left or Right."#,
-                shift, reduce
-            )?,
-            Self::ShiftReduceConflict {
-                reduce,
-                left,
-                right,
-            } => write!(
-                f,
-                r#"Shift/Reduce Conflict
-This rule has ReduceType::Left:
-{:?}
-this rule has ReduceType::Right:
-{:?}
-and the reduce rule is:
-{:?}
-Try rearanging the rules or change ReduceType to Left or Right."#,
-                left, right, reduce
-            )?,
-            Self::NoAugmented => {
-                write!(f, "No Augmented Rule found.")?;
-            }
-        }
-        Ok(())
-    }
-}
 
 /// A set of production rules and main entry point
 #[derive(Debug, Clone)]
@@ -190,17 +64,13 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
                 return Err(BuildError::NoAugmented);
             }
 
-            let augmented_rule = augmented_rules[0];
-            let augmented_rule = LookaheadRuleRef {
-                rule: ShiftedRuleRef {
-                    rule: augmented_rule,
-                    shifted: 0,
-                },
-                lookaheads: BTreeSet::new(),
-            };
-            LookaheadRuleRefSet {
-                rules: BTreeSet::from([augmented_rule]),
+            let mut augmented_rules_set = LookaheadRuleRefSet::new();
+            for rule in augmented_rules.into_iter() {
+                augmented_rules_set
+                    .rules
+                    .insert(ShiftedRuleRef { rule, shifted: 0 }, BTreeSet::new());
             }
+            augmented_rules_set
         };
 
         let mut states = Vec::new();
@@ -325,28 +195,22 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
     ) -> Result<(), BuildError<Term, NonTerm>> {
         loop {
             let mut new_rules = Vec::new();
-            for rule_ref in rules.rules.iter() {
-                let rule = &self.rules[rule_ref.rule.rule];
-                if let Some(Token::NonTerm(ref nonterm_name)) = rule.rule.get(rule_ref.rule.shifted)
-                {
+            for (rule_ref, lookaheads) in rules.rules.iter() {
+                let rule = &self.rules[rule_ref.rule];
+                if let Some(Token::NonTerm(ref nonterm_name)) = rule.rule.get(rule_ref.shifted) {
                     let searched_rules = self.search_rules(nonterm_name);
                     if !searched_rules.is_empty() {
                         // calculate lookaheads
-                        let lookaheads = self.lookahead(
-                            &rule.rule[rule_ref.rule.shifted + 1..],
-                            &rule_ref.lookaheads,
-                        )?;
+                        let lookaheads =
+                            self.lookahead(&rule.rule[rule_ref.shifted + 1..], lookaheads)?;
 
                         // init new LookaheadRule with searched rules
                         for searched_rule in searched_rules.iter() {
-                            let rule_with_ahead = LookaheadRuleRef {
-                                rule: ShiftedRuleRef {
-                                    rule: *searched_rule,
-                                    shifted: 0,
-                                },
-                                lookaheads: lookaheads.clone(),
+                            let rule = ShiftedRuleRef {
+                                rule: *searched_rule,
+                                shifted: 0,
                             };
-                            new_rules.push(rule_with_ahead);
+                            new_rules.push((rule, lookaheads.clone()));
                         }
                     } else {
                         // rule not found
@@ -354,11 +218,12 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
                     }
                 }
             }
+            let mut changed = false;
+            for (rule, lookaheads) in new_rules.into_iter() {
+                changed |= rules.add(rule, lookaheads);
+            }
 
-            let old_len = rules.rules.len();
-            rules.rules.extend(new_rules.into_iter());
-            if rules.rules.len() == old_len {
-                // nothing added newly; stop loop
+            if !changed {
                 return Ok(());
             }
         }
@@ -387,29 +252,27 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
         let mut next_rules_term = HashMap::new();
         let mut next_rules_nonterm = HashMap::new();
         let mut empty_rules = Vec::new();
-        for mut rule_ref in rules.rules.into_iter() {
-            let rule = &self.rules[rule_ref.rule.rule];
-            match rule.rule.get(rule_ref.rule.shifted).cloned() {
+        for (mut rule_ref, lookaheads) in rules.rules.into_iter() {
+            let rule = &self.rules[rule_ref.rule];
+            match rule.rule.get(rule_ref.shifted).cloned() {
                 Some(Token::Term(term)) => {
-                    rule_ref.rule.shifted += 1;
+                    rule_ref.shifted += 1;
                     next_rules_term
                         .entry(term)
                         .or_insert_with(LookaheadRuleRefSet::new)
-                        .rules
-                        .insert(rule_ref.clone());
+                        .add(rule_ref, lookaheads);
                     // Duplicated rule will be handled in reduce/reduce conflict
                 }
                 Some(Token::NonTerm(nonterm)) => {
-                    rule_ref.rule.shifted += 1;
+                    rule_ref.shifted += 1;
                     next_rules_nonterm
                         .entry(nonterm)
                         .or_insert(LookaheadRuleRefSet::new())
-                        .rules
-                        .insert(rule_ref.clone());
+                        .add(rule_ref, lookaheads);
                     // Duplicated rule will be handled in reduce/reduce conflict
                 }
                 None => {
-                    empty_rules.push(rule_ref);
+                    empty_rules.push((rule_ref.rule, lookaheads));
                 }
             }
         }
@@ -417,22 +280,22 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
         // process rules that no more tokens left to shift
         // if next token is one of lookahead, add reduce action
         // if there are multiple recude rules for same lookahead, it is a reduce/reduce conflict
-        for empty_rule in empty_rules.into_iter() {
-            let lookaheads = empty_rule.lookaheads;
+        for (empty_rule, lookaheads) in empty_rules.into_iter() {
             let state = &mut states[state_id];
             for lookahead in lookaheads.into_iter() {
                 if let Some(old) = state.reduce_map.get_mut(&lookahead) {
-                    if old == &empty_rule.rule.rule {
+                    if old == &empty_rule {
                         continue;
                     }
                     // conflict
                     return Err(BuildError::ReduceReduceConflict {
-                        lookahead: lookahead.clone(),
-                        rule1: self.rules[*old].clone(),
-                        rule2: self.rules[empty_rule.rule.rule].clone(),
+                        lookahead,
+                        rule1: *old,
+                        rule2: empty_rule,
+                        grammar: self,
                     });
                 } else {
-                    state.reduce_map.insert(lookahead, empty_rule.rule.rule);
+                    state.reduce_map.insert(lookahead, empty_rule);
                 }
             }
         }
@@ -449,17 +312,15 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
                 // else => error
 
                 // check if there is any Error in reduce_type
-                for rule in next_rule_set.rules.iter() {
-                    if self.rules[rule.rule.rule].reduce_type == ReduceType::Error {
+                for (rule, lookaheads) in next_rule_set.rules.iter() {
+                    if self.rules[rule.rule].reduce_type == ReduceType::Error {
                         return Err(BuildError::ShiftReduceConflictError {
-                            reduce: self.rules[*reduce_rule].clone(),
-                            shift: LookaheadRule {
-                                rule: ShiftedRule {
-                                    rule: self.rules[rule.rule.rule].clone(),
-                                    shifted: rule.rule.shifted,
-                                },
-                                lookaheads: rule.lookaheads.clone(),
+                            reduce: *reduce_rule,
+                            shift: LookaheadRuleRef {
+                                rule: rule.clone(),
+                                lookaheads: lookaheads.clone(),
                             },
+                            grammar: self,
                         });
                     }
                 }
@@ -468,14 +329,19 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
                 // ReduceType::Error is filtered above, so only for Left/Right
                 let mut reduce_left = None;
                 let mut reduce_right = None;
-                for rule in next_rule_set.rules.iter() {
-                    let target_reduce_type = self.rules[rule.rule.rule].reduce_type;
-                    match target_reduce_type {
+                for (rule, lookaheads) in next_rule_set.rules.iter() {
+                    match self.rules[rule.rule].reduce_type {
                         ReduceType::Left => {
-                            reduce_left = Some(rule);
+                            reduce_left = Some((rule, lookaheads));
+                            if reduce_right.is_some() {
+                                break;
+                            }
                         }
                         ReduceType::Right => {
-                            reduce_right = Some(rule);
+                            reduce_right = Some((rule, lookaheads));
+                            if reduce_left.is_some() {
+                                break;
+                            }
                         }
                         ReduceType::Error => {
                             // should not reach here
@@ -486,22 +352,19 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
 
                 // if both reduce_left and reduce_right is Some, then it is a conflict
                 if reduce_left.is_some() && reduce_right.is_some() {
+                    let (left_rule, left_lookaheads) = reduce_left.unwrap();
+                    let (right_rule, right_lookaheads) = reduce_right.unwrap();
                     return Err(BuildError::ShiftReduceConflict {
-                        reduce: self.rules[*reduce_rule].clone(),
-                        left: LookaheadRule {
-                            rule: ShiftedRule {
-                                rule: self.rules[reduce_left.unwrap().rule.rule].clone(),
-                                shifted: reduce_left.unwrap().rule.shifted,
-                            },
-                            lookaheads: reduce_left.unwrap().lookaheads.clone(),
+                        reduce: *reduce_rule,
+                        left: LookaheadRuleRef {
+                            rule: left_rule.clone(),
+                            lookaheads: left_lookaheads.clone(),
                         },
-                        right: LookaheadRule {
-                            rule: ShiftedRule {
-                                rule: self.rules[reduce_left.unwrap().rule.rule].clone(),
-                                shifted: reduce_left.unwrap().rule.shifted,
-                            },
-                            lookaheads: reduce_left.unwrap().lookaheads.clone(),
+                        right: LookaheadRuleRef {
+                            rule: right_rule.clone(),
+                            lookaheads: right_lookaheads.clone(),
                         },
+                        grammar: self,
                     });
                 }
 

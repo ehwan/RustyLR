@@ -20,15 +20,7 @@ pub fn lr1(input: TokenStream) -> TokenStream {
         }
     };
 
-    let parser = match grammar::Grammar::build_parser() {
-        Ok(parser) => parser,
-        Err(err) => {
-            let message = format!("{}", err);
-            return ParseError::InternalGrammarBuildError(message)
-                .compile_error()
-                .into();
-        }
-    };
+    let parser = grammar::Grammar::build_parser();
     let res = match parser.parse(&tokens, grammar::TermType::Eof) {
         Ok(res) => res,
         Err(err) => {
@@ -68,15 +60,7 @@ pub fn lr1_str(input: TokenStream) -> TokenStream {
         }
     };
 
-    let parser = match grammar::Grammar::build_parser() {
-        Ok(parser) => parser,
-        Err(err) => {
-            let message = format!("{}", err);
-            return ParseError::InternalGrammarBuildError(message)
-                .compile_error()
-                .into();
-        }
-    };
+    let parser = grammar::Grammar::build_parser();
     let res = match parser.parse(&tokens, grammar::TermType::Eof) {
         Ok(res) => res,
         Err(err) => {

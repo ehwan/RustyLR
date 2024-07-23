@@ -27,7 +27,7 @@ pub use state::State;
 pub use token::Token;
 
 /// Error type for LR(1) DFA construction
-pub use grammar::grammar::BuildError;
+pub use grammar::error::BuildError;
 
 /// A struct for Context Free Grammar and DFA construction
 pub use grammar::grammar::Grammar;
