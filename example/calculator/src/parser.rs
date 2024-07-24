@@ -1,8 +1,11 @@
+#![allow(unused_imports)]
+
+use rusty_lr_derive::lalr1_str;
 use rusty_lr_derive::lr1_str;
 
 // this define struct `EParser`
 // where 'E' is the start symbol
-lr1_str! {
+lalr1_str! {
     // define type of user data
     %userdata i32;
 

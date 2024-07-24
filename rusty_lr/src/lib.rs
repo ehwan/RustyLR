@@ -17,6 +17,8 @@ pub(crate) mod token;
 
 // reexport
 
+pub use parser::lalr;
+
 /// A struct for production rule
 pub use rule::ProductionRule;
 

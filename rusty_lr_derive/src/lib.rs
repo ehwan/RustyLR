@@ -38,7 +38,7 @@ pub fn lr1(input: TokenStream) -> TokenStream {
         }
     };
 
-    let emit = match grammar.emit() {
+    let emit = match grammar.emit(false) {
         Ok(emit) => emit,
         Err(err) => {
             return err.compile_error().into();
@@ -78,7 +78,87 @@ pub fn lr1_str(input: TokenStream) -> TokenStream {
         }
     };
 
-    let emit = match grammar.emit_str() {
+    let emit = match grammar.emit_str(false) {
+        Ok(emit) => emit,
+        Err(err) => {
+            return err.compile_error().into();
+        }
+    };
+
+    emit.into()
+}
+
+/// build a lalr1 Deterministic Finite Automaton (DFA) parser for Slice of TokenStream
+#[proc_macro]
+pub fn lalr1(input: TokenStream) -> TokenStream {
+    let input = proc_macro2::TokenStream::from(input);
+
+    let tokens = match grammar::Grammar::tokenize(input) {
+        Ok(tokens) => tokens,
+        Err(err) => {
+            return err.compile_error().into();
+        }
+    };
+
+    let parser = grammar::Grammar::build_parser();
+    let res = match parser.parse(&tokens, grammar::TermType::Eof) {
+        Ok(res) => res,
+        Err(err) => {
+            let message = format!("{}", err);
+            return ParseError::InternalGrammarParseError(message)
+                .compile_error()
+                .into();
+        }
+    };
+
+    let grammar = match grammar::Grammar::parse_tree(&res, &tokens, &parser) {
+        Ok(grammar) => grammar,
+        Err(err) => {
+            return err.compile_error().into();
+        }
+    };
+
+    let emit = match grammar.emit(true) {
+        Ok(emit) => emit,
+        Err(err) => {
+            return err.compile_error().into();
+        }
+    };
+
+    emit.into()
+}
+
+/// build a lalr1 Deterministic Finite Automaton (DFA) parser for &str
+#[proc_macro]
+pub fn lalr1_str(input: TokenStream) -> TokenStream {
+    let input = proc_macro2::TokenStream::from(input);
+
+    let tokens = match grammar::Grammar::tokenize(input) {
+        Ok(tokens) => tokens,
+        Err(err) => {
+            return err.compile_error().into();
+        }
+    };
+
+    let parser = grammar::Grammar::build_parser();
+    let res = match parser.parse(&tokens, grammar::TermType::Eof) {
+        Ok(res) => res,
+        Err(err) => {
+            let message = format!("{}", err);
+            return ParseError::InternalGrammarParseError(message)
+                .compile_error()
+                .into();
+        }
+    };
+
+    let grammar = match grammar::Grammar::parse_tree(&res, &tokens, &parser) {
+        Ok(grammar) => grammar,
+        Err(err) => {
+            return err.compile_error().into();
+        }
+    };
+
+    let emit = match grammar.emit_str(true) {
         Ok(emit) => emit,
         Err(err) => {
             return err.compile_error().into();

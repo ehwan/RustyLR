@@ -1,9 +1,9 @@
 [package]
 name = "rusty_lr"
-version = "0.3.4"
+version = "0.4.0"
 edition = "2021"
 license = "MIT"
-description = "LR(1) parser generator"
+description = "LR(1) and LALR(1) parser generator"
 repository = "https://github.com/ehwan/RustyLR"
 readme = "../README.md"
 keywords = ["parser", "yacc", "context-free-grammar", "lr", "compiler"]

@@ -11,7 +11,7 @@ use rusty_lr as rlr;
 
 /// emit Rust code for the parser
 impl Grammar {
-    pub fn emit_parser(&self) -> Result<TokenStream, ParseError> {
+    pub fn emit_parser(&self, lalr: bool) -> Result<TokenStream, ParseError> {
         let terminals = &self.terminals;
 
         let mut grammar: rlr::Grammar<String, String> = rlr::Grammar::new();
@@ -31,12 +31,20 @@ impl Grammar {
             }
         }
         let augmented = self.augmented.as_ref().unwrap().to_string();
-        let parser = match grammar.build(augmented) {
+        let mut parser = match grammar.build(augmented) {
             Ok(parser) => parser,
             Err(err) => {
                 return Err(ParseError::GrammarBuildError(format!("{}", err)));
             }
         };
+        if lalr {
+            match parser.optimize_lalr() {
+                Ok(_) => {}
+                Err(err) => {
+                    return Err(ParseError::GrammarBuildError(format!("{}", err)));
+                }
+            }
+        }
 
         let mut ret = quote! {};
 
@@ -218,7 +226,7 @@ impl Grammar {
         })
     }
 
-    pub fn emit(&self) -> Result<TokenStream, ParseError> {
+    pub fn emit(&self, lalr: bool) -> Result<TokenStream, ParseError> {
         // =====================================================================
         // ========================Writing Reducer==============================
         // =====================================================================
@@ -335,7 +343,7 @@ impl Grammar {
                 (quote! {}, quote! {})
             };
 
-        let parser_emit = self.emit_parser()?;
+        let parser_emit = self.emit_parser(lalr)?;
 
         Ok(quote! {
             struct #reducer_name<'a> {
@@ -410,7 +418,7 @@ impl Grammar {
             }
         })
     }
-    pub fn emit_str(&self) -> Result<TokenStream, ParseError> {
+    pub fn emit_str(&self, lalr: bool) -> Result<TokenStream, ParseError> {
         // =====================================================================
         // ========================Writing Reducer==============================
         // =====================================================================
@@ -525,7 +533,7 @@ impl Grammar {
                 (quote! {}, quote! {})
             };
 
-        let parser_emit = self.emit_parser()?;
+        let parser_emit = self.emit_parser(lalr)?;
 
         Ok(quote! {
             pub struct #reducer_name {

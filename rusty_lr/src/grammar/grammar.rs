@@ -1,7 +1,6 @@
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::collections::HashMap;
-use std::collections::HashSet;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::hash::Hash;
@@ -21,7 +20,7 @@ pub struct Grammar<Term, NonTerm> {
 
     /// first terminal tokens for each nonterminals
     /// true if it can be empty
-    firsts: HashMap<NonTerm, (HashSet<Term>, bool)>,
+    firsts: HashMap<NonTerm, (BTreeSet<Term>, bool)>,
 }
 
 impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, NonTerm> {
@@ -104,7 +103,7 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
                     .entry(rule.name.clone())
                     .or_insert_with(|| {
                         changed = true;
-                        (HashSet::new(), false)
+                        (BTreeSet::new(), false)
                     })
                     .clone();
 
@@ -175,8 +174,7 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
                     } else {
                         return Err(BuildError::RuleNotFound(nonterm.clone()));
                     };
-                    ret.extend(firsts.iter().cloned());
-                    // ret.append(&mut firsts.clone());
+                    ret.append(&mut firsts.clone());
                     if !canbe_empty {
                         return Ok(ret);
                     }
@@ -310,7 +308,7 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
                             lookahead,
                             rule1: *old,
                             rule2: empty_rule,
-                            grammar: self,
+                            rules: &self.rules,
                         });
                     }
 
@@ -347,7 +345,7 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
                                 rule: rule.clone(),
                                 lookaheads: lookaheads.clone(),
                             },
-                            grammar: self,
+                            rules: &self.rules,
                         });
                     }
                 }
@@ -391,7 +389,7 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
                             rule: right_rule.clone(),
                             lookaheads: right_lookaheads.clone(),
                         },
-                        grammar: self,
+                        rules: &self.rules,
                     });
                 }
 

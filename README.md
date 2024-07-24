@@ -1,10 +1,10 @@
 # RustyLR
-LR(1) Parser generator in Rust
+LR(1) and LALR(1) parser code generator for Rust
 
 ```
 [dependencies]
-rusty_lr = "0.3.4"
-rusty_lr_derive = "0.3.4"
+rusty_lr = "0.4.0"
+rusty_lr_derive = "0.4.0"
 ```
 
 ## Features
@@ -18,11 +18,14 @@ rusty_lr_derive = "0.3.4"
 ## Sample
 In [`example/calculator/parser.rs`](example/calculator/src/parser.rs),
 ```rust
+// for LR(1) parser, with &str
 use rusty_lr_derive::lr1_str;
+// for LALR(1) parser, with &str
+use rusty_lr_derive::lalr1_str;
 
 // this define struct `EParser`
 // where 'E' is the start symbol
-lr1_str! {
+lalr1_str! {
     // define type of user data
     %userdata i32;
 
