@@ -2,11 +2,12 @@
 //! LR(1) Parser generator in Rust
 //!
 //! ## Features
-//!  - pure Rust implementation.
-//!  - DFA construction from CFG.
-//!  - conflict resolution
-//!  - tracing parser action with callback, also error handling.
-//!  - construct Tree from parsing result.
+//!  - pure Rust implementation
+//!  - compile-time DFA construction from CFG ( with yacc-like syntax )
+//!  - customizable reducing action
+//!  - resolving conflicts of ambiguous grammar
+//!  - tracing parser action with callback, also error handling
+//!  - construct Tree from parsing result
 
 pub(crate) mod grammar;
 pub(crate) mod parser;
@@ -18,6 +19,9 @@ pub(crate) mod token;
 
 /// A struct for production rule
 pub use rule::ProductionRule;
+
+pub use rule::LookaheadRuleRefSet;
+pub use rule::ShiftedRuleRef;
 
 /// An enum for resolving shift/reduce conflict
 pub use rule::ReduceType;

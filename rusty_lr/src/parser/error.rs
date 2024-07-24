@@ -4,6 +4,7 @@ use std::fmt::Display;
 use super::context::Context;
 use super::context::ContextStr;
 use super::parser::Parser;
+use crate::rule::ShiftedRule;
 
 pub enum ParseError<'a, Term, NonTerm> {
     // #[error("Invalid Non-Terminal: {0}")]
@@ -30,7 +31,9 @@ pub enum ParseError<'a, Term, NonTerm> {
     InvalidState(usize),
 }
 
-impl<'a, Term: Display, NonTerm: Display> Display for ParseError<'a, Term, NonTerm> {
+impl<'a, Term: Display + Clone, NonTerm: Display + Clone> Display
+    for ParseError<'a, Term, NonTerm>
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ParseError::InvalidNonTerminal(nonterm, parser, context) => {
@@ -55,6 +58,22 @@ impl<'a, Term: Display, NonTerm: Display> Display for ParseError<'a, Term, NonTe
                 for (shift_token, next_state) in state.shift_goto_map_nonterm.iter() {
                     writeln!(f, "{}: {}", shift_token, next_state)?;
                 }
+                writeln!(f, "Backtrace states:")?;
+                for state_id in context.state_stack.iter().rev() {
+                    let state = &parser.states[*state_id];
+                    for (rule, lookaheads) in state.ruleset.rules.iter() {
+                        let shifted = ShiftedRule {
+                            rule: parser.rules[rule.rule].clone(),
+                            shifted: rule.shifted,
+                        };
+                        write!(f, "{} / ", shifted)?;
+                        for lookahead in lookaheads.iter() {
+                            write!(f, "{}, ", lookahead)?;
+                        }
+                        writeln!(f)?;
+                    }
+                    writeln!(f, "{:-^40}", "Prev State")?;
+                }
             }
             ParseError::InvalidTerminal(term, parser, context) => {
                 writeln!(f, "Invalid Terminal: {} at state {}", term, context.state())?;
@@ -72,6 +91,22 @@ impl<'a, Term: Display, NonTerm: Display> Display for ParseError<'a, Term, NonTe
                 writeln!(f, "NonTerminals for shift:")?;
                 for (shift_token, next_state) in state.shift_goto_map_nonterm.iter() {
                     writeln!(f, "{}: {}", shift_token, next_state)?;
+                }
+                writeln!(f, "Backtrace states:")?;
+                for state_id in context.state_stack.iter().rev() {
+                    let state = &parser.states[*state_id];
+                    for (rule, lookaheads) in state.ruleset.rules.iter() {
+                        let shifted = ShiftedRule {
+                            rule: parser.rules[rule.rule].clone(),
+                            shifted: rule.shifted,
+                        };
+                        write!(f, "{} / ", shifted)?;
+                        for lookahead in lookaheads.iter() {
+                            write!(f, "{}, ", lookahead)?;
+                        }
+                        writeln!(f)?;
+                    }
+                    writeln!(f, "{:-^40}", "Prev State")?;
                 }
             }
             ParseError::StateStackEmpty => {
@@ -93,7 +128,7 @@ impl<'a, Term: Display, NonTerm: Display> Display for ParseError<'a, Term, NonTe
         Ok(())
     }
 }
-impl<'a, Term: Debug, NonTerm: Debug> Debug for ParseError<'a, Term, NonTerm> {
+impl<'a, Term: Debug + Clone, NonTerm: Debug + Clone> Debug for ParseError<'a, Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ParseError::InvalidNonTerminal(nonterm, parser, context) => {
@@ -118,6 +153,22 @@ impl<'a, Term: Debug, NonTerm: Debug> Debug for ParseError<'a, Term, NonTerm> {
                 for (shift_token, next_state) in state.shift_goto_map_nonterm.iter() {
                     writeln!(f, "{:?}: {}", shift_token, next_state)?;
                 }
+                writeln!(f, "Backtrace states:")?;
+                for state_id in context.state_stack.iter().rev() {
+                    let state = &parser.states[*state_id];
+                    for (rule, lookaheads) in state.ruleset.rules.iter() {
+                        let shifted = ShiftedRule {
+                            rule: parser.rules[rule.rule].clone(),
+                            shifted: rule.shifted,
+                        };
+                        write!(f, "{:?} / ", shifted)?;
+                        for lookahead in lookaheads.iter() {
+                            write!(f, "{:?}, ", lookahead)?;
+                        }
+                        writeln!(f)?;
+                    }
+                    writeln!(f, "{:-^40}", "Prev State")?;
+                }
             }
             ParseError::InvalidTerminal(term, parser, context) => {
                 writeln!(
@@ -140,6 +191,22 @@ impl<'a, Term: Debug, NonTerm: Debug> Debug for ParseError<'a, Term, NonTerm> {
                 writeln!(f, "NonTerminals for shift:")?;
                 for (shift_token, next_state) in state.shift_goto_map_nonterm.iter() {
                     writeln!(f, "{:?}: {}", shift_token, next_state)?;
+                }
+                writeln!(f, "Backtrace states:")?;
+                for state_id in context.state_stack.iter().rev() {
+                    let state = &parser.states[*state_id];
+                    for (rule, lookaheads) in state.ruleset.rules.iter() {
+                        let shifted = ShiftedRule {
+                            rule: parser.rules[rule.rule].clone(),
+                            shifted: rule.shifted,
+                        };
+                        write!(f, "{:?} / ", shifted)?;
+                        for lookahead in lookaheads.iter() {
+                            write!(f, "{:?}, ", lookahead)?;
+                        }
+                        writeln!(f)?;
+                    }
+                    writeln!(f, "{:-^40}", "Prev State")?;
                 }
             }
             ParseError::StateStackEmpty => {
@@ -187,7 +254,9 @@ pub enum ParseErrorStr<'a, Term, NonTerm> {
     InvalidState(usize),
 }
 
-impl<'a, Term: Display, NonTerm: Display> Display for ParseErrorStr<'a, Term, NonTerm> {
+impl<'a, Term: Display + Clone, NonTerm: Display + Clone> Display
+    for ParseErrorStr<'a, Term, NonTerm>
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ParseErrorStr::InvalidNonTerminal(nonterm, parser, context) => {
@@ -212,9 +281,30 @@ impl<'a, Term: Display, NonTerm: Display> Display for ParseErrorStr<'a, Term, No
                 for (shift_token, next_state) in state.shift_goto_map_nonterm.iter() {
                     writeln!(f, "{}: {}", shift_token, next_state)?;
                 }
+                writeln!(f, "Backtrace states:")?;
+                for state_id in context.state_stack.iter().rev() {
+                    let state = &parser.states[*state_id];
+                    for (rule, lookaheads) in state.ruleset.rules.iter() {
+                        let shifted = ShiftedRule {
+                            rule: parser.rules[rule.rule].clone(),
+                            shifted: rule.shifted,
+                        };
+                        write!(f, "{} / ", shifted)?;
+                        for lookahead in lookaheads.iter() {
+                            write!(f, "{}, ", lookahead)?;
+                        }
+                        writeln!(f)?;
+                    }
+                    writeln!(f, "{:-^40}", "Prev State")?;
+                }
             }
             ParseErrorStr::InvalidTerminal(term, parser, context) => {
-                writeln!(f, "Invalid Terminal: {} at state {}", term, context.state())?;
+                writeln!(
+                    f,
+                    "Invalid Terminal: '{}' at state {}",
+                    term,
+                    context.state()
+                )?;
                 let state = context.state();
                 let state = &parser.states[state];
 
@@ -224,11 +314,27 @@ impl<'a, Term: Display, NonTerm: Display> Display for ParseErrorStr<'a, Term, No
                 }
                 writeln!(f, "Terminals for shift:")?;
                 for (shift_token, next_state) in state.shift_goto_map_term.iter() {
-                    writeln!(f, "{}: {}", shift_token, next_state)?;
+                    writeln!(f, "'{}': {}", shift_token, next_state)?;
                 }
                 writeln!(f, "NonTerminals for shift:")?;
                 for (shift_token, next_state) in state.shift_goto_map_nonterm.iter() {
                     writeln!(f, "{}: {}", shift_token, next_state)?;
+                }
+                writeln!(f, "Backtrace states:")?;
+                for state_id in context.state_stack.iter().rev() {
+                    let state = &parser.states[*state_id];
+                    for (rule, lookaheads) in state.ruleset.rules.iter() {
+                        let shifted = ShiftedRule {
+                            rule: parser.rules[rule.rule].clone(),
+                            shifted: rule.shifted,
+                        };
+                        write!(f, "{} / ", shifted)?;
+                        for lookahead in lookaheads.iter() {
+                            write!(f, "'{}', ", lookahead)?;
+                        }
+                        writeln!(f)?;
+                    }
+                    writeln!(f, "{:-^40}", "Prev State")?;
                 }
             }
             ParseErrorStr::StateStackEmpty => {
@@ -250,7 +356,7 @@ impl<'a, Term: Display, NonTerm: Display> Display for ParseErrorStr<'a, Term, No
         Ok(())
     }
 }
-impl<'a, Term: Debug, NonTerm: Debug> Debug for ParseErrorStr<'a, Term, NonTerm> {
+impl<'a, Term: Debug + Clone, NonTerm: Debug + Clone> Debug for ParseErrorStr<'a, Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ParseErrorStr::InvalidNonTerminal(nonterm, parser, context) => {
@@ -275,6 +381,22 @@ impl<'a, Term: Debug, NonTerm: Debug> Debug for ParseErrorStr<'a, Term, NonTerm>
                 for (shift_token, next_state) in state.shift_goto_map_nonterm.iter() {
                     writeln!(f, "{:?}: {}", shift_token, next_state)?;
                 }
+                writeln!(f, "Backtrace states:")?;
+                for state_id in context.state_stack.iter().rev() {
+                    let state = &parser.states[*state_id];
+                    for (rule, lookaheads) in state.ruleset.rules.iter() {
+                        let shifted = ShiftedRule {
+                            rule: parser.rules[rule.rule].clone(),
+                            shifted: rule.shifted,
+                        };
+                        write!(f, "{:?} / ", shifted)?;
+                        for lookahead in lookaheads.iter() {
+                            write!(f, "{:?}, ", lookahead)?;
+                        }
+                        writeln!(f)?;
+                    }
+                    writeln!(f, "{:-^40}", "Prev State")?;
+                }
             }
             ParseErrorStr::InvalidTerminal(term, parser, context) => {
                 writeln!(
@@ -297,6 +419,22 @@ impl<'a, Term: Debug, NonTerm: Debug> Debug for ParseErrorStr<'a, Term, NonTerm>
                 writeln!(f, "NonTerminals for shift:")?;
                 for (shift_token, next_state) in state.shift_goto_map_nonterm.iter() {
                     writeln!(f, "{:?}: {}", shift_token, next_state)?;
+                }
+                writeln!(f, "Backtrace states:")?;
+                for state_id in context.state_stack.iter().rev() {
+                    let state = &parser.states[*state_id];
+                    for (rule, lookaheads) in state.ruleset.rules.iter() {
+                        let shifted = ShiftedRule {
+                            rule: parser.rules[rule.rule].clone(),
+                            shifted: rule.shifted,
+                        };
+                        write!(f, "{:?} / ", shifted)?;
+                        for lookahead in lookaheads.iter() {
+                            write!(f, "{:?}, ", lookahead)?;
+                        }
+                        writeln!(f)?;
+                    }
+                    writeln!(f, "{:-^40}", "Prev State")?;
                 }
             }
             ParseErrorStr::StateStackEmpty => {

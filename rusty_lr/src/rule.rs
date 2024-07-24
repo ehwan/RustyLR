@@ -175,13 +175,16 @@ impl<Term: Debug, NonTerm: Debug> Debug for LookaheadRule<Term, NonTerm> {
 pub struct LookaheadRuleRefSet<Term> {
     pub rules: BTreeMap<ShiftedRuleRef, BTreeSet<Term>>,
 }
-impl<Term: Ord> LookaheadRuleRefSet<Term> {
+impl<Term> LookaheadRuleRefSet<Term> {
     pub fn new() -> Self {
         LookaheadRuleRefSet {
             rules: BTreeMap::new(),
         }
     }
-    pub fn add(&mut self, rule: ShiftedRuleRef, mut lookaheads: BTreeSet<Term>) -> bool {
+    pub fn add(&mut self, rule: ShiftedRuleRef, mut lookaheads: BTreeSet<Term>) -> bool
+    where
+        Term: Ord,
+    {
         let mut changed = false;
         let set = self.rules.entry(rule).or_insert_with(|| {
             changed = true;

@@ -3,8 +3,8 @@ LR(1) Parser generator in Rust
 
 ```
 [dependencies]
-rusty_lr = "0.3.3"
-rusty_lr_derive = "0.3.3"
+rusty_lr = "0.3.4"
+rusty_lr_derive = "0.3.4"
 ```
 
 ## Features
@@ -21,6 +21,7 @@ In [`example/calculator/parser.rs`](example/calculator/src/parser.rs),
 use rusty_lr_derive::lr1_str;
 
 // this define struct `EParser`
+// where 'E' is the start symbol
 lr1_str! {
     // define type of user data
     %userdata i32;
@@ -42,6 +43,7 @@ lr1_str! {
     %token seven '7';
     %token eight '8';
     %token nine '9';
+    %token ws ' ';
 
     // start symbol ( for final reduction )
     %start E;
@@ -51,26 +53,34 @@ lr1_str! {
 
     // v{N} is the value of the N-th symbol in the production rule
     // s{N} is the &str(or &[Term]) of the N-th symbol
+    // (%left|%reduce|%right|%shift) to resolve shift/reduce conflict
+    // reduce action must be evaluated into type (`i32` in this case) you provided
     A(i32): A add A %left { println!("{:?}+{:?}={:?}", s0, s2, s); v0 + v2 }
-    //              |||||       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ reduce action
-    //              ^^^^^ left reduction
           | M { v0 }
           ;
     M(i32): M mul M %left { v0 * v2 }
           | P { v0 }
           ;
-    P(i32): Num { *data += 1; s0.parse().unwrap() } // user data can be accessed by `data`
-          | lparen E rparen { v1 }
+    P(i32): Num { v0 }
+          | WS lparen E rparen WS { v2 }
           ;
-    Num: Digit Num
+    Num(i32): WS Num0 WS { *data += 1; s1.parse().unwrap() }; // user data can be accessed by `data`
+    Num0: Digit Num0
        | Digit
        ;
     Digit : zero | one | two | three | four | five | six | seven | eight | nine
           ;
     E(i32): A { v0 }
           ;
-    Augmented(i32) : E eof { v0 }
-                   ;
+
+    WS1: ws WS1
+      | ws
+      ;
+    WS: WS1
+      |
+      ;
+    Augmented : E eof
+              ;
 }
 ```
 
@@ -81,7 +91,7 @@ mod parser;
 fn main() {
     let p = parser::EParser::new();
 
-    let input = "1+2*(3+4)";
+    let input = " 1  + 2*(3   + 4)  ";
     let mut number_of_num: i32 = 0;
     // `number_of_num` passed to parser as user_data
     let res = match p.parse_str(input, 0 as char, &mut number_of_num) {
@@ -98,10 +108,10 @@ fn main() {
 
 The result will be:
 ```
-"3"+"4"="3+4"
-"1"+"2*(3+4)"="1+2*(3+4)"
+"3   "+" 4"="3   + 4"
+" 1  "+" 2*(3   + 4)  "=" 1  + 2*(3   + 4)  "
 Result: 15
-Number of 'Num' in 1+2*(3+4): 4
+Number of 'Num' in  1  + 2*(3   + 4)  : 4
 ```
 
 ## Build Deterministic Finite Automata (DFA) from Context Free Grammar (CFG)

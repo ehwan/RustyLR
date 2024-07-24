@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::Hash;
 
+use super::rule::LookaheadRuleRefSet;
+
 /// A struct for state in LR(1) parser
 /// normally, the keys in shift_goto_map and reduce_map don't overlap
 /// but in some case, they may overlap and need to be resolved by config(TODO)
@@ -10,6 +12,7 @@ pub struct State<Term, NonTerm> {
     pub shift_goto_map_term: HashMap<Term, usize>,
     pub shift_goto_map_nonterm: HashMap<NonTerm, usize>,
     pub reduce_map: HashMap<Term, usize>,
+    pub ruleset: LookaheadRuleRefSet<Term>,
 }
 impl<Term: Hash + Eq, NonTerm: Hash + Eq> State<Term, NonTerm> {
     pub fn new() -> Self {
@@ -17,6 +20,7 @@ impl<Term: Hash + Eq, NonTerm: Hash + Eq> State<Term, NonTerm> {
             shift_goto_map_term: HashMap::new(),
             shift_goto_map_nonterm: HashMap::new(),
             reduce_map: HashMap::new(),
+            ruleset: LookaheadRuleRefSet::new(),
         }
     }
 

@@ -61,7 +61,7 @@ impl RuleLine {
         parser: &rusty_lr::Parser<TermType, &'static str>,
     ) -> Result<Self, ParseError> {
         match tree {
-            rusty_lr::Tree::NonTerminal(_, children) => {
+            rusty_lr::Tree::NonTerminal(_, children, _) => {
                 // children[0] = RuleDef
                 // children[1] = ReduceType
                 // children[2] = Action
@@ -112,7 +112,7 @@ impl RuleLines {
         parser: &rusty_lr::Parser<TermType, &'static str>,
     ) -> Result<Self, ParseError> {
         match tree {
-            rusty_lr::Tree::NonTerminal(_, children) => {
+            rusty_lr::Tree::NonTerminal(_, children, _) => {
                 if children.len() == 3 {
                     let rule_line = RuleLine::parse_tree(&children[0], terms, parser)?;
                     let mut rule = Self::parse_tree(&children[2], terms, parser)?;

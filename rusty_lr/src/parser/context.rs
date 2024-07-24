@@ -72,7 +72,9 @@ impl<'a, Term, NonTerm> Context<'a, Term, NonTerm> {
     pub(crate) fn reduce(&mut self, rule: usize, items: usize) {
         self.state_stack.truncate(self.state_stack.len() - items);
 
-        let tree = Tree::NonTerminal(rule, self.stack.split_off(self.stack.len() - items));
+        let children = self.stack.split_off(self.stack.len() - items);
+        let beg = children.first().map(|x| x.begin()).unwrap_or(self.idx);
+        let tree = Tree::NonTerminal(rule, children, beg);
         self.stack.push(tree);
     }
     pub(crate) fn inc(&mut self) {
@@ -165,7 +167,12 @@ impl<'a, Term, NonTerm> ContextStr<'a, Term, NonTerm> {
     pub(crate) fn reduce(&mut self, rule: usize, items: usize) {
         self.state_stack.truncate(self.state_stack.len() - items);
 
-        let tree = TreeStr::NonTerminal(rule, self.stack.split_off(self.stack.len() - items));
+        let children = self.stack.split_off(self.stack.len() - items);
+        let cur = self.cur.as_ref().map(|x| x.1).unwrap_or(0);
+        let beg = children.first().map(|x| x.begin()).unwrap_or(cur);
+        let end = children.last().map(|x| x.end()).unwrap_or(cur);
+
+        let tree = TreeStr::NonTerminal(rule, children, beg, end);
         self.stack.push(tree);
     }
     pub(crate) fn inc(&mut self) {

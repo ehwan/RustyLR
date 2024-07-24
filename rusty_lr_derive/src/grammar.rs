@@ -656,7 +656,7 @@ impl Grammar {
         _parser: &rlr::Parser<TermType, &'static str>,
     ) -> Result<Ident, ParseError> {
         match tree {
-            rlr::Tree::NonTerminal(_, children) => {
+            rlr::Tree::NonTerminal(_, children, _) => {
                 let augname = children[1].slice(terms);
                 let augname = if let TermType::Ident(augname) = &augname[0] {
                     augname.clone().unwrap()
@@ -680,7 +680,7 @@ impl Grammar {
         _parser: &rlr::Parser<TermType, &'static str>,
     ) -> Result<Ident, ParseError> {
         match tree {
-            rlr::Tree::NonTerminal(_, children) => {
+            rlr::Tree::NonTerminal(_, children, _) => {
                 let startname = children[1].slice(terms);
                 let startname = if let TermType::Ident(startname) = &startname[0] {
                     startname.clone().unwrap()
@@ -703,7 +703,7 @@ impl Grammar {
         _parser: &rlr::Parser<TermType, &'static str>,
     ) -> Result<TokenStream, ParseError> {
         match tree {
-            rlr::Tree::NonTerminal(_, children) => {
+            rlr::Tree::NonTerminal(_, children, _) => {
                 let mut rustcode = TokenStream::new();
                 for token in children[1].slice(terms).iter() {
                     rustcode.extend(token.clone().stream());
@@ -732,7 +732,7 @@ impl Grammar {
         _parser: &rlr::Parser<TermType, &'static str>,
     ) -> Result<(Ident, TokenStream), ParseError> {
         match tree {
-            rlr::Tree::NonTerminal(_, children) => {
+            rlr::Tree::NonTerminal(_, children, _) => {
                 let tokenname = children[1].slice(terms);
                 let tokenname = if let TermType::Ident(tokenname) = &tokenname[0] {
                     tokenname.as_ref().unwrap()
@@ -758,7 +758,7 @@ impl Grammar {
         _parser: &rlr::Parser<TermType, &'static str>,
     ) -> Result<TokenStream, ParseError> {
         match tree {
-            rlr::Tree::NonTerminal(_, children) => {
+            rlr::Tree::NonTerminal(_, children, _) => {
                 if children.len() == 0 {
                     Ok(quote! {()})
                 } else if children.len() == 1 {
@@ -788,7 +788,7 @@ impl Grammar {
         parser: &rlr::Parser<TermType, &'static str>,
     ) -> Result<(Ident, TokenStream, RuleLines), ParseError> {
         match tree {
-            rlr::Tree::NonTerminal(_, children) => {
+            rlr::Tree::NonTerminal(_, children, _) => {
                 let rulename = children[0].slice(terms);
                 let rulename = if let TermType::Ident(rulename) = &rulename[0] {
                     rulename.as_ref().unwrap()
@@ -816,7 +816,7 @@ impl Grammar {
         _parser: &rlr::Parser<TermType, &'static str>,
     ) -> Result<TokenStream, ParseError> {
         match tree {
-            rlr::Tree::NonTerminal(_, children) => {
+            rlr::Tree::NonTerminal(_, children, _) => {
                 let mut rustcode = TokenStream::new();
                 for token in children[1].slice(terms).iter() {
                     rustcode.extend(token.clone().stream());
@@ -850,7 +850,7 @@ impl Grammar {
         parser: &rlr::Parser<TermType, &'static str>,
     ) -> Result<Self, ParseError> {
         match tree {
-            rlr::Tree::NonTerminal(ruleid, children) => {
+            rlr::Tree::NonTerminal(ruleid, children, _) => {
                 let rule = parser.rules.get(*ruleid).unwrap();
                 match (rule.rule.get(0).as_ref(), rule.rule.get(1).as_ref()) {
                     (Some(rlr::Token::NonTerm("Rule")), Some(rlr::Token::NonTerm("Grammar"))) => {

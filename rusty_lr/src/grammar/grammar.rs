@@ -248,6 +248,7 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
         let state_id = states.len();
         state_map.insert(rules.clone(), state_id);
         states.push(State::new());
+        states[state_id].ruleset = rules.clone();
 
         let mut next_rules_term = HashMap::new();
         let mut next_rules_nonterm = HashMap::new();
@@ -283,17 +284,43 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
         for (empty_rule, lookaheads) in empty_rules.into_iter() {
             let state = &mut states[state_id];
             for lookahead in lookaheads.into_iter() {
+                // check for reduce/reduce conflict
                 if let Some(old) = state.reduce_map.get_mut(&lookahead) {
+                    // same rule, continue
                     if old == &empty_rule {
                         continue;
                     }
-                    // conflict
-                    return Err(BuildError::ReduceReduceConflict {
-                        lookahead,
-                        rule1: *old,
-                        rule2: empty_rule,
-                        grammar: self,
-                    });
+
+                    // check two reduce rules
+                    // old:
+                    // A -> token0 token1 token2 ...
+                    // new:
+                    // B -> token0 token1 token2 ...
+                    // if only one 'A' or 'B' exists in shift non-term map, go for it
+                    // else, it is a conflict
+                    let name_old = &self.rules[*old].name;
+                    let name_new = &self.rules[empty_rule].name;
+
+                    let old_res = next_rules_nonterm.contains_key(name_old);
+                    let new_res = next_rules_nonterm.contains_key(name_new);
+
+                    if (old_res && new_res) || (!old_res && !new_res) {
+                        // conflict
+                        return Err(BuildError::ReduceReduceConflict {
+                            lookahead,
+                            rule1: *old,
+                            rule2: empty_rule,
+                            grammar: self,
+                        });
+                    }
+
+                    if new_res {
+                        // using new rule is right choice
+                        *old = empty_rule;
+                    } else {
+                        // using old rule is right choice
+                        // reduce map is already old, so do nothing
+                    }
                 } else {
                     state.reduce_map.insert(lookahead, empty_rule);
                 }

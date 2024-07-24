@@ -139,16 +139,55 @@ impl Grammar {
                 });
             }
 
+            let mut init_ruleset = quote! {};
+            init_ruleset.extend(
+                quote! {
+                    let mut ruleset = ::rusty_lr::LookaheadRuleRefSet::new();
+                }
+                .into_iter(),
+            );
+            for (rule, lookaheads) in state.ruleset.rules.iter() {
+                let mut init_lookaheads = quote! {
+                    let mut lookaheads = std::collections::BTreeSet::new();
+                };
+                for lookahead_name in lookaheads.iter() {
+                    let (_, term_stream) = terminals.get(&lookahead_name.to_string()).unwrap();
+                    init_lookaheads.extend(quote! {
+                        lookaheads.insert(#term_stream);
+                    });
+                }
+
+                let rule_id = rule.rule;
+                let shifted = rule.shifted;
+                init_ruleset.extend(
+                    quote! {
+                        {
+                        let shifted_rule = ::rusty_lr::ShiftedRuleRef {
+                            rule: #rule_id,
+                            shifted: #shifted,
+                        };
+                        #init_lookaheads
+
+                        ruleset.add( shifted_rule, lookaheads );
+                    }
+
+                    }
+                    .into_iter(),
+                );
+            }
+
             ret.extend(
                 quote! {
                     {
                         #init_shift_goto_map_term
                         #init_shift_goto_map_nonterm
                         #init_reduce_map
+                        #init_ruleset
                         let state = ::rusty_lr::State {
                             shift_goto_map_term,
                             shift_goto_map_nonterm,
                             reduce_map,
+                            ruleset,
                         };
                         states.push(state);
                     }
@@ -208,7 +247,7 @@ impl Grammar {
                     let slice_name = format_ident!("s{}", idx);
                     token_pop_stream.extend(
                         quote! {
-                            let #slice_name = &terms[self.range_stack.pop().unwrap()];
+                            let #slice_name = &terms[children[#idx].range()];
                         }
                         .into_iter(),
                     );
@@ -300,14 +339,12 @@ impl Grammar {
 
         Ok(quote! {
             struct #reducer_name<'a> {
-                pub range_stack: Vec<std::ops::Range<usize>>,
                 pub #term_stack_name : Vec<&'a #term_typename>,
                 #stack_def_streams
             }
             impl<'a> #reducer_name<'a> {
                 pub fn new() -> Self {
                     Self {
-                        range_stack: Vec::new(),
                         #term_stack_name : Vec::new(),
                         #stack_init_streams
                     }
@@ -326,14 +363,13 @@ impl Grammar {
                         let term = &terms[*term_idx];
                         self.#term_stack_name.push(term);
                     }
-                    ::rusty_lr::Tree::NonTerminal(rustylr_macro_generated_ruleid__, children) => {
+                    ::rusty_lr::Tree::NonTerminal(rustylr_macro_generated_ruleid__, children, idx) => {
                         for child in children.iter() {
                             self.reduce_impl(terms, child, #user_data_var);
                         }
                         #match_streams
                     }
                 }
-                self.range_stack.push( tree.range() );
             }
 
             pub fn reduce(&mut self, terms: &'a [#term_typename], tree: &::rusty_lr::Tree, #user_data_parameter_def) -> #start_rule_typename
@@ -401,7 +437,7 @@ impl Grammar {
                     let slice_name = format_ident!("s{}", idx);
                     token_pop_stream.extend(
                         quote! {
-                            let #slice_name = &terms[self.range_stack.pop().unwrap()];
+                            let #slice_name = &terms[children[#idx].range()];
                         }
                         .into_iter(),
                     );
@@ -493,14 +529,12 @@ impl Grammar {
 
         Ok(quote! {
             pub struct #reducer_name {
-                pub range_stack: Vec<std::ops::Range<usize>>,
                 pub #term_stack_name : Vec<char>,
                 #stack_def_streams
             }
             impl #reducer_name {
                 pub fn new() -> Self {
                     Self {
-                        range_stack: Vec::new(),
                         #term_stack_name : Vec::new(),
                         #stack_init_streams
                     }
@@ -512,22 +546,21 @@ impl Grammar {
                     #user_data_parameter_def
                 )
                 {
-                    // slice of this tree
-                    let s = &terms[tree.range()];
                     match tree {
                         ::rusty_lr::TreeStr::Terminal(begin, end) => {
                             let term = &terms[*begin..*end];
                             let ch : char = term.chars().next().unwrap();
                             self.#term_stack_name.push(ch);
                         }
-                        ::rusty_lr::TreeStr::NonTerminal(rustylr_macro_generated_ruleid__, children) => {
+                        ::rusty_lr::TreeStr::NonTerminal(rustylr_macro_generated_ruleid__, children, beg, end) => {
                             for child in children.iter() {
                                 self.reduce_impl(terms, child, #user_data_var);
                             }
+                            // slice of this tree
+                            let s = &terms[*beg..*end];
                             #match_streams
                         }
                     }
-                    self.range_stack.push( tree.range() );
                 }
 
                 pub fn reduce(&mut self, terms: &str, tree: &::rusty_lr::TreeStr, #user_data_parameter_def)-> #start_rule_typename

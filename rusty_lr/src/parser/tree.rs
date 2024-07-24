@@ -3,8 +3,8 @@
 pub enum Tree {
     /// index on input sequence
     Terminal(usize),
-    /// rule index for reduce, children Trees
-    NonTerminal(usize, Vec<Tree>),
+    /// rule index for reduce, children Trees, index on input sequence
+    NonTerminal(usize, Vec<Tree>, usize),
 }
 
 impl Tree {
@@ -21,14 +21,14 @@ impl Tree {
     pub(crate) fn begin(&self) -> usize {
         match self {
             Tree::Terminal(idx) => *idx,
-            Tree::NonTerminal(_, children) => children.first().map(|x| x.begin()).unwrap_or(0),
+            Tree::NonTerminal(_, _children, idx) => *idx,
         }
     }
     /// get the end index of input sequence that this tree represents
     pub(crate) fn end(&self) -> usize {
         match self {
             Tree::Terminal(idx) => *idx + 1,
-            Tree::NonTerminal(_, children) => children.last().map(|x| x.end()).unwrap_or(0),
+            Tree::NonTerminal(_, children, idx) => children.last().map(|x| x.end()).unwrap_or(*idx),
         }
     }
 }
@@ -38,8 +38,8 @@ impl Tree {
 pub enum TreeStr {
     /// byte range of single character (terminal symbol) in input sequence
     Terminal(usize, usize),
-    /// rule index for reduce, children Trees
-    NonTerminal(usize, Vec<TreeStr>),
+    /// rule index for reduce, children Trees, byte range of input sequence
+    NonTerminal(usize, Vec<TreeStr>, usize, usize),
 }
 
 impl TreeStr {
@@ -56,14 +56,16 @@ impl TreeStr {
     pub(crate) fn begin(&self) -> usize {
         match self {
             TreeStr::Terminal(beg, _end) => *beg,
-            TreeStr::NonTerminal(_, children) => children.first().map(|x| x.begin()).unwrap_or(0),
+            TreeStr::NonTerminal(_rule, _children, beg, _end) => *beg,
         }
     }
     /// get the end index of input sequence that this tree represents
     pub(crate) fn end(&self) -> usize {
         match self {
             TreeStr::Terminal(_beg, end) => *end,
-            TreeStr::NonTerminal(_, children) => children.last().map(|x| x.end()).unwrap_or(0),
+            TreeStr::NonTerminal(_rule, children, _beg, end) => {
+                children.last().map(|x| x.end()).unwrap_or(*end)
+            }
         }
     }
 }
