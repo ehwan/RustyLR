@@ -3,7 +3,7 @@ LR(1) and LALR(1) parser code generator for Rust
 
 ```
 [dependencies]
-rusty_lr = "0.4.0"
+rusty_lr = "0.4.1"
 rusty_lr_derive = "0.4.0"
 ```
 

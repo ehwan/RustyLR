@@ -1,6 +1,8 @@
 use std::collections::BTreeMap;
 use std::hash::Hash;
 
+use crate::rule::LookaheadRuleRef;
+use crate::rule::ReduceType;
 use crate::BuildError;
 
 use super::parser::Parser;
@@ -81,14 +83,102 @@ impl<Term: Clone + Ord + Hash + Eq, NonTerm: Clone + Hash + Eq> Parser<Term, Non
 
                 // merge reduce map
                 for (term, ruleid) in state.reduce_map.iter() {
-                    if let Some(old) = new_state.reduce_map.insert(term.clone(), *ruleid) {
-                        if old != *ruleid {
-                            return Err(BuildError::ReduceReduceConflict {
-                                lookahead: term.clone(),
-                                rule1: old,
-                                rule2: *ruleid,
+                    // check shift/reduce conflict
+                    if new_state.shift_goto_map_term.contains_key(term) {
+                        // check if all rules in next_rule_set has same reduce_type
+                        // Left => reduce first
+                        // Right => shift first
+                        // else => error
+
+                        // check if there is any Error in reduce_type
+                        for (rule, lookaheads) in new_state.ruleset.rules.iter() {
+                            if self.rules[rule.rule].reduce_type == ReduceType::Error {
+                                return Err(BuildError::ShiftReduceConflictError {
+                                    reduce: *ruleid,
+                                    shift: LookaheadRuleRef {
+                                        rule: rule.clone(),
+                                        lookaheads: lookaheads.clone(),
+                                    },
+                                    rules: &self.rules,
+                                });
+                            }
+                        }
+
+                        // check if all rules in next_rule_set has same reduce_type
+                        // ReduceType::Error is filtered above, so only for Left/Right
+                        let mut reduce_left = None;
+                        let mut reduce_right = None;
+                        for (rule, lookaheads) in new_state.ruleset.rules.iter() {
+                            match self.rules[rule.rule].reduce_type {
+                                ReduceType::Left => {
+                                    reduce_left = Some((rule, lookaheads));
+                                    if reduce_right.is_some() {
+                                        break;
+                                    }
+                                }
+                                ReduceType::Right => {
+                                    reduce_right = Some((rule, lookaheads));
+                                    if reduce_left.is_some() {
+                                        break;
+                                    }
+                                }
+                                ReduceType::Error => {
+                                    // should not reach here
+                                    unreachable!(
+                                        "Unreachable code for resolving Shift/Reduce Conflict"
+                                    );
+                                }
+                            }
+                        }
+
+                        // if both reduce_left and reduce_right is Some, then it is a conflict
+                        if reduce_left.is_some() && reduce_right.is_some() {
+                            let (left_rule, left_lookaheads) = reduce_left.unwrap();
+                            let (right_rule, right_lookaheads) = reduce_right.unwrap();
+                            return Err(BuildError::ShiftReduceConflict {
+                                reduce: *ruleid,
+                                left: LookaheadRuleRef {
+                                    rule: left_rule.clone(),
+                                    lookaheads: left_lookaheads.clone(),
+                                },
+                                right: LookaheadRuleRef {
+                                    rule: right_rule.clone(),
+                                    lookaheads: right_lookaheads.clone(),
+                                },
                                 rules: &self.rules,
                             });
+                        }
+
+                        // if it is reduce_right, shift first, so do nothing
+
+                        // if it is reduce_left, reduce first
+                        // remove term from shift_goto_map
+                        // and add reduce action
+                        if reduce_left.is_some() {
+                            // remove next_term from reduce_map
+                            new_state.shift_goto_map_term.remove(term);
+
+                            if let Some(old) = new_state.reduce_map.insert(term.clone(), *ruleid) {
+                                if old != *ruleid {
+                                    return Err(BuildError::ReduceReduceConflict {
+                                        lookahead: term.clone(),
+                                        rule1: old,
+                                        rule2: *ruleid,
+                                        rules: &self.rules,
+                                    });
+                                }
+                            }
+                        }
+                    } else {
+                        if let Some(old) = new_state.reduce_map.insert(term.clone(), *ruleid) {
+                            if old != *ruleid {
+                                return Err(BuildError::ReduceReduceConflict {
+                                    lookahead: term.clone(),
+                                    rule1: old,
+                                    rule2: *ruleid,
+                                    rules: &self.rules,
+                                });
+                            }
                         }
                     }
                 }
