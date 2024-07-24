@@ -319,7 +319,7 @@ let slc = tree.slice(&terms);
 
 match tree {
     Tree::Terminal( terminal_index:usize ) => { println!("Terminal {:?}", terms[terminal_index]); }
-    Tree::NonTerminal( rule_index:usize, reduced_tokens:Vec<Tree> ) => {
+    Tree::NonTerminal( rule_index:usize, reduced_tokens:Vec<Tree>, begin_index:usize ) => {
         let rule = &parser.rules[rule_index];
         ...
     }
