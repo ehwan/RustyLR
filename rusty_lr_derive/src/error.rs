@@ -1,4 +1,5 @@
 use proc_macro2::Ident;
+use proc_macro2::Literal;
 use proc_macro2::TokenStream;
 use quote::quote;
 
@@ -9,6 +10,9 @@ pub enum ParseError {
     MultipleAugmentedDefinition(Ident, Ident),
     MultipleTokenTypeDefinition(TokenStream, TokenStream),
     MultipleUserDataDefinition(TokenStream, TokenStream),
+
+    LiteralInCustomType(Literal),
+    InvalidLiteral(Literal),
 
     StartNotDefined,
     TokenTypeNotDefined,
@@ -67,6 +71,16 @@ impl ParseError {
             ParseError::AugmentedNotDefined => {
                 quote! {
                     compile_error!("Augmented production rule not defined;\n>> %augmented <RuleName>;");
+                }
+            }
+            ParseError::LiteralInCustomType(literal) => {
+                quote! {
+                    compile_error!("Literal in custom type: {}", #literal);
+                }
+            }
+            ParseError::InvalidLiteral(literal) => {
+                quote! {
+                    compile_error!("Invalid literal: {}", #literal);
                 }
             }
             ParseError::InvalidPunct(punct) => {

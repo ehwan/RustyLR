@@ -37,7 +37,7 @@ impl RuleLine {
     // TokensOne: Token TokensOne
     //          | Token
     //          ;
-    // Token: Ident
+    // Token: Ident | Literal
     pub(crate) fn parse_defs(
         tree: &rusty_lr::Tree,
         terms: &[TermType],
@@ -46,10 +46,16 @@ impl RuleLine {
         let mut ret = Vec::with_capacity(terms.len());
 
         for term in tree.slice(terms) {
-            if let TermType::Ident(ident) = term {
-                ret.push(Token::Term(ident.as_ref().unwrap().clone()));
-            } else {
-                unreachable!();
+            match term {
+                TermType::Ident(ident) => {
+                    ret.push(Token::Term(ident.as_ref().unwrap().clone()));
+                }
+                TermType::Literal(literal) => {
+                    ret.push(Token::Literal(literal.as_ref().unwrap().clone()));
+                }
+                _ => {
+                    unreachable!();
+                }
             }
         }
         Ok(ret)
@@ -75,10 +81,8 @@ impl RuleLine {
                         Some(group.stream())
                     }
                     None => {
-                        // if not set, use action that returns '()'
                         // @TODO set span here
-                        let stream = quote::quote! { () };
-                        Some(stream)
+                        Some(quote::quote! {{}})
                     }
                     _ => unreachable!(),
                 };

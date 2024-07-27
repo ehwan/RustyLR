@@ -1,5 +1,6 @@
 use proc_macro2::Group;
 use proc_macro2::Ident;
+use proc_macro2::Literal;
 use proc_macro2::TokenStream;
 use proc_macro2::TokenTree;
 
@@ -151,8 +152,8 @@ pub struct Grammar {
     pub terminals: HashMap<String, (Ident, TokenStream)>,
     pub tokentype: Option<TokenStream>,
     pub userdata_typename: Option<TokenStream>,
-    pub rules: Vec<(Ident, TokenStream, RuleLines)>,
-    //              name    typename     rules
+    pub rules: Vec<(Ident, Option<TokenStream>, RuleLines)>,
+    //              name       typename           rules
 }
 
 impl Grammar {
@@ -172,6 +173,23 @@ impl Grammar {
         let mut ident = format_ident!("rustylr_macro_generated_{}_stack", name);
         ident.set_span(span);
         ident
+    }
+    pub fn literal_to_string(literal: &Literal) -> Result<String, ParseError> {
+        let lit = match syn::parse2::<syn::ExprLit>(literal.to_token_stream()) {
+            Ok(lit) => lit.lit,
+            Err(_) => {
+                return Err(ParseError::InvalidLiteral(literal.clone()));
+            }
+        };
+        match lit {
+            syn::Lit::Char(ch) => Ok(ch.value().to_string()),
+            syn::Lit::Byte(b) => Ok((b.value() as char).to_string()),
+            syn::Lit::Str(s) => Ok(s.value()),
+            syn::Lit::ByteStr(b) => Ok(String::from_utf8(b.value()).unwrap()),
+            _ => {
+                return Err(ParseError::InvalidLiteral(literal.clone()));
+            }
+        }
     }
     pub(crate) fn tokenize(input: TokenStream) -> Result<Vec<TermType>, ParseError> {
         let mut tokens = Vec::new();
@@ -262,7 +280,7 @@ impl Grammar {
         //          | Token
         //          ;
         //
-        // Token: Ident
+        // Token: Ident | Literal ;
         //
         // ReduceType: Left | Right | Error
         //           |
@@ -381,10 +399,15 @@ impl Grammar {
             ReduceType::Error,
         );
 
-        // Token: Ident
+        // Token: Ident | Literal
         grammar.add_rule(
             "Token",
             vec![Token::Term(TermType::Ident(None))],
+            ReduceType::Error,
+        );
+        grammar.add_rule(
+            "Token",
+            vec![Token::Term(TermType::Literal(None))],
             ReduceType::Error,
         );
         // ReduceType: Left | Right | Error
@@ -756,15 +779,15 @@ impl Grammar {
         tree: &rlr::Tree,
         terms: &[TermType],
         _parser: &rlr::Parser<TermType, &'static str>,
-    ) -> Result<TokenStream, ParseError> {
+    ) -> Result<Option<TokenStream>, ParseError> {
         match tree {
             rlr::Tree::NonTerminal(_, children, _) => {
                 if children.len() == 0 {
-                    Ok(quote! {()})
+                    Ok(None)
                 } else if children.len() == 1 {
                     if let Some(token) = children[0].slice(terms).get(0) {
                         if let TermType::Group(group) = token {
-                            Ok(group.as_ref().unwrap().stream())
+                            Ok(Some(group.as_ref().unwrap().stream()))
                         } else {
                             unreachable!();
                         }
@@ -786,7 +809,7 @@ impl Grammar {
         tree: &rlr::Tree,
         terms: &[TermType],
         parser: &rlr::Parser<TermType, &'static str>,
-    ) -> Result<(Ident, TokenStream, RuleLines), ParseError> {
+    ) -> Result<(Ident, Option<TokenStream>, RuleLines), ParseError> {
         match tree {
             rlr::Tree::NonTerminal(_, children, _) => {
                 let rulename = children[0].slice(terms);
@@ -1021,14 +1044,17 @@ impl Grammar {
             for rule_line in rule.rule_lines.iter_mut() {
                 for token in rule_line.tokens.iter_mut() {
                     let name = match token {
-                        Token::Term(term) => term.clone(),
-                        Token::NonTerm(nonterm) => nonterm.clone(),
+                        Token::Term(term) => Some(term.clone()),
+                        Token::NonTerm(nonterm) => Some(nonterm.clone()),
+                        Token::Literal(_) => None,
                     };
 
-                    if terminals.contains_key(&name.to_string()) {
-                        *token = Token::Term(name);
-                    } else {
-                        *token = Token::NonTerm(name);
+                    if let Some(name) = name {
+                        if terminals.contains_key(&name.to_string()) {
+                            *token = Token::Term(name);
+                        } else {
+                            *token = Token::NonTerm(name);
+                        }
                     }
                 }
             }

@@ -1,3 +1,4 @@
+use proc_macro2::Literal;
 use proc_macro2::TokenStream;
 
 use quote::format_ident;
@@ -11,21 +12,27 @@ use rusty_lr as rlr;
 
 /// emit Rust code for the parser
 impl Grammar {
-    pub fn emit_parser(&self, lalr: bool) -> Result<TokenStream, ParseError> {
+    pub fn emit(&self, lalr: bool) -> Result<TokenStream, ParseError> {
         let terminals = &self.terminals;
 
         let mut grammar: rlr::Grammar<String, String> = rlr::Grammar::new();
 
         for (name, _typename, rules) in self.rules.iter() {
             for rule in rules.rule_lines.iter() {
-                let tokens: Vec<_> = rule
-                    .tokens
-                    .iter()
-                    .map(|t| match t {
-                        Token::Term(term) => rlr::Token::Term(term.to_string()),
-                        Token::NonTerm(nonterm) => rlr::Token::NonTerm(nonterm.to_string()),
-                    })
-                    .collect();
+                let mut tokens = Vec::with_capacity(rule.tokens.len());
+                for token in rule.tokens.iter() {
+                    match token {
+                        Token::Term(term) => {
+                            tokens.push(rlr::Token::Term(term.to_string()));
+                        }
+                        Token::NonTerm(nonterm) => {
+                            tokens.push(rlr::Token::NonTerm(nonterm.to_string()));
+                        }
+                        Token::Literal(literal) => {
+                            return Err(ParseError::LiteralInCustomType(literal.clone()));
+                        }
+                    }
+                }
 
                 grammar.add_rule(name.to_string(), tokens, rule.reduce_type);
             }
@@ -46,12 +53,12 @@ impl Grammar {
             }
         }
 
-        let mut ret = quote! {};
+        let mut write_parser = quote! {};
 
         // =====================================================================
         // ==================Writing Production Rules===========================
         // =====================================================================
-        ret.extend(
+        write_parser.extend(
             quote! {
                 let mut rules = Vec::new();
             }
@@ -81,7 +88,7 @@ impl Grammar {
 
             let nonterm = rule.name.clone();
 
-            ret.extend(
+            write_parser.extend(
                 quote! {
                     {
                     let production_rule = ::rusty_lr::ProductionRule {
@@ -99,7 +106,7 @@ impl Grammar {
         // =====================================================================
         // =========================Writing States==============================
         // =====================================================================
-        ret.extend(
+        write_parser.extend(
             quote! {
                 let mut states = Vec::new();
             }
@@ -184,7 +191,7 @@ impl Grammar {
                 );
             }
 
-            ret.extend(
+            write_parser.extend(
                 quote! {
                     {
                         #init_shift_goto_map_term
@@ -208,25 +215,17 @@ impl Grammar {
         // =========================Writing Parser==============================
         // =====================================================================
         let main_state = parser.main_state;
-        ret.extend(
-            quote! {
-                let parser = ::rusty_lr::Parser {
+        let parser_emit = quote! {
+            {
+                #write_parser
+                ::rusty_lr::Parser {
                     rules,
                     states,
                     main_state: #main_state,
-                };
+                }
             }
-            .into_iter(),
-        );
-        Ok(quote! {
-            {
-            #ret
-            parser
-            }
-        })
-    }
+        };
 
-    pub fn emit(&self, lalr: bool) -> Result<TokenStream, ParseError> {
         // =====================================================================
         // ========================Writing Reducer==============================
         // =====================================================================
@@ -239,7 +238,7 @@ impl Grammar {
         }
         let term_typename = self.tokentype.as_ref().unwrap();
 
-        for (name, _typename, rules) in self.rules.iter() {
+        for (name, typename, rules) in self.rules.iter() {
             // push result to this stack
             let stack_name = Self::stack_name(name);
 
@@ -267,20 +266,41 @@ impl Grammar {
                         }
                         Token::NonTerm(nonterm) => {
                             let stack_name = Self::stack_name(nonterm);
-                            token_pop_stream.extend(quote! {
-                                let #var_name = self.#stack_name.pop().unwrap();
-                            });
+
+                            let mut typename_search = None;
+                            for (name, typename, _) in self.rules.iter() {
+                                if name == nonterm {
+                                    typename_search = typename.clone();
+                                    break;
+                                }
+                            }
+
+                            if typename_search.is_some() {
+                                token_pop_stream.extend(quote! {
+                                    let #var_name = self.#stack_name.pop().unwrap();
+                                });
+                            }
+                        }
+                        Token::Literal(literal) => {
+                            return Err(ParseError::LiteralInCustomType(literal.clone()));
                         }
                     }
                 }
-                let push_stream = quote! { self.#stack_name.push(#action); };
-                let case_straem = quote! {
-                    #ruleid => {
-                        #token_pop_stream
-                        #push_stream
-                    }
-                };
-                case_streams.extend(case_straem.into_iter());
+                if typename.is_some() {
+                    case_streams.extend(quote! {
+                        #ruleid => {
+                            #token_pop_stream
+                            self.#stack_name.push(#action);
+                        }
+                    });
+                } else {
+                    case_streams.extend(quote! {
+                        #ruleid => {
+                            #token_pop_stream
+                            #action
+                        }
+                    });
+                }
 
                 ruleid += 1;
             }
@@ -300,16 +320,25 @@ impl Grammar {
         };
 
         let start_rule_name = self.start_rule_name.as_ref().unwrap();
-        let start_rule_stack_name = Self::stack_name(start_rule_name);
-        let start_rule_typename = {
-            let mut start_rule_typename = TokenStream::new();
+        let (start_rule_typename, pop_from_start_rule_stack) = {
+            let start_rule_stack_name = Self::stack_name(start_rule_name);
+            let mut start_rule_typename = None;
             for (name, typename, _) in self.rules.iter() {
                 if name == self.start_rule_name.as_ref().unwrap() {
                     start_rule_typename = typename.clone();
                     break;
                 }
             }
-            start_rule_typename
+            if let Some(start_rule_typename) = start_rule_typename {
+                (
+                    start_rule_typename,
+                    quote! {
+                        self.#start_rule_stack_name.pop().unwrap()
+                    },
+                )
+            } else {
+                (quote! {()}, quote! {})
+            }
         };
 
         let mut stack_def_streams = quote! {};
@@ -318,18 +347,20 @@ impl Grammar {
             // push result to this stack
             let stack_name = Self::stack_name(name);
 
-            stack_def_streams.extend(
-                quote! {
-                    pub #stack_name : Vec<#typename>,
-                }
-                .into_iter(),
-            );
-            stack_init_streams.extend(
-                quote! {
-                    #stack_name : Vec::new(),
-                }
-                .into_iter(),
-            );
+            if let Some(typename) = typename {
+                stack_def_streams.extend(
+                    quote! {
+                        pub #stack_name : Vec<#typename>,
+                    }
+                    .into_iter(),
+                );
+                stack_init_streams.extend(
+                    quote! {
+                        #stack_name : Vec::new(),
+                    }
+                    .into_iter(),
+                );
+            }
         }
 
         let mut reducer_name = format_ident!("{}Reducer", start_rule_name);
@@ -342,8 +373,6 @@ impl Grammar {
             } else {
                 (quote! {}, quote! {})
             };
-
-        let parser_emit = self.emit_parser(lalr)?;
 
         Ok(quote! {
             struct #reducer_name<'a> {
@@ -383,7 +412,7 @@ impl Grammar {
             pub fn reduce(&mut self, terms: &'a [#term_typename], tree: &::rusty_lr::Tree, #user_data_parameter_def) -> #start_rule_typename
             {
                 self.reduce_impl(terms, tree, #user_data_var);
-                self.#start_rule_stack_name.pop().unwrap()
+                #pop_from_start_rule_stack
             }
             }
 
@@ -419,15 +448,214 @@ impl Grammar {
         })
     }
     pub fn emit_str(&self, lalr: bool) -> Result<TokenStream, ParseError> {
+        let mut grammar: rlr::Grammar<char, String> = rlr::Grammar::new();
+
+        for (name, _typename, rules) in self.rules.iter() {
+            for rule in rules.rule_lines.iter() {
+                let mut tokens = Vec::with_capacity(rule.tokens.len());
+                for token in rule.tokens.iter() {
+                    match token {
+                        Token::Term(_) => {
+                            unreachable!("Term type in str_parser is not supported");
+                        }
+                        Token::NonTerm(nonterm) => {
+                            tokens.push(rlr::Token::NonTerm(nonterm.to_string()));
+                        }
+                        Token::Literal(literal) => {
+                            let s = Self::literal_to_string(literal)?;
+                            for ch in s.chars() {
+                                tokens.push(rlr::Token::Term(ch));
+                            }
+                        }
+                    }
+                }
+
+                grammar.add_rule(name.to_string(), tokens, rule.reduce_type);
+            }
+        }
+        let augmented = self.augmented.as_ref().unwrap().to_string();
+        let mut parser = match grammar.build(augmented) {
+            Ok(parser) => parser,
+            Err(err) => {
+                return Err(ParseError::GrammarBuildError(format!("{}", err)));
+            }
+        };
+        if lalr {
+            match parser.optimize_lalr() {
+                Ok(_) => {}
+                Err(err) => {
+                    return Err(ParseError::GrammarBuildError(format!("{}", err)));
+                }
+            }
+        }
+
+        let mut parser_write = quote! {};
+
+        // =====================================================================
+        // ==================Writing Production Rules===========================
+        // =====================================================================
+        parser_write.extend(quote! {
+            let mut rules = Vec::new();
+        });
+        for rule in parser.rules.iter() {
+            let mut comma_separated_tokens = quote! {};
+            for token in rule.rule.iter() {
+                match token {
+                    rlr::Token::Term(term) => {
+                        let ch = Literal::character(*term);
+                        comma_separated_tokens
+                            .extend(quote! {::rusty_lr::Token::Term(#ch),}.into_iter());
+                    }
+                    rlr::Token::NonTerm(nonterm) => {
+                        comma_separated_tokens
+                            .extend(quote! {::rusty_lr::Token::NonTerm(#nonterm),}.into_iter());
+                    }
+                }
+            }
+
+            let reduce_type = match rule.reduce_type {
+                rlr::ReduceType::Left => quote! {::rusty_lr::ReduceType::Left},
+                rlr::ReduceType::Right => quote! {::rusty_lr::ReduceType::Right},
+                rlr::ReduceType::Error => quote! {::rusty_lr::ReduceType::Error},
+            };
+
+            let nonterm = rule.name.clone();
+
+            parser_write.extend(quote! {
+                {
+                let production_rule = ::rusty_lr::ProductionRule {
+                    name: #nonterm,
+                    rule: vec![#comma_separated_tokens],
+                    reduce_type: #reduce_type,
+                };
+                rules.push(production_rule);
+                }
+            });
+        }
+
+        // =====================================================================
+        // =========================Writing States==============================
+        // =====================================================================
+        parser_write.extend(
+            quote! {
+                let mut states = Vec::new();
+            }
+            .into_iter(),
+        );
+        for state in parser.states.iter() {
+            let mut init_shift_goto_map_term = quote! {};
+            init_shift_goto_map_term.extend(
+                quote! {
+                    let mut shift_goto_map_term = std::collections::HashMap::new();
+                }
+                .into_iter(),
+            );
+            for (term, goto) in state.shift_goto_map_term.iter() {
+                let ch = Literal::character(*term);
+                init_shift_goto_map_term.extend(quote! {
+                    shift_goto_map_term.insert( #ch, #goto);
+                });
+            }
+
+            let mut init_shift_goto_map_nonterm = quote! {};
+            init_shift_goto_map_nonterm.extend(quote! {
+                let mut shift_goto_map_nonterm = std::collections::HashMap::new();
+            });
+            for (nonterm, goto) in state.shift_goto_map_nonterm.iter() {
+                init_shift_goto_map_nonterm.extend(quote! {
+                    shift_goto_map_nonterm.insert( #nonterm, #goto);
+                });
+            }
+
+            let mut init_reduce_map = quote! {};
+            init_reduce_map.extend(quote! {
+                let mut reduce_map = std::collections::HashMap::new();
+            });
+            for (term, ruleid) in state.reduce_map.iter() {
+                let ch = Literal::character(*term);
+                init_reduce_map.extend(quote! {
+                    reduce_map.insert( #ch, #ruleid);
+                });
+            }
+
+            let mut init_ruleset = quote! {};
+            init_ruleset.extend(
+                quote! {
+                    let mut ruleset = ::rusty_lr::LookaheadRuleRefSet::new();
+                }
+                .into_iter(),
+            );
+            for (rule, lookaheads) in state.ruleset.rules.iter() {
+                let mut init_lookaheads = quote! {
+                    let mut lookaheads = std::collections::BTreeSet::new();
+                };
+                for lookahead_name in lookaheads.iter() {
+                    let ch = Literal::character(*lookahead_name);
+                    init_lookaheads.extend(quote! {
+                        lookaheads.insert(#ch);
+                    });
+                }
+
+                let rule_id = rule.rule;
+                let shifted = rule.shifted;
+                init_ruleset.extend(quote! {
+                    {
+                    let shifted_rule = ::rusty_lr::ShiftedRuleRef {
+                        rule: #rule_id,
+                        shifted: #shifted,
+                    };
+                    #init_lookaheads
+
+                    ruleset.add( shifted_rule, lookaheads );
+                }
+
+                });
+            }
+
+            parser_write.extend(quote! {
+                {
+                    #init_shift_goto_map_term
+                    #init_shift_goto_map_nonterm
+                    #init_reduce_map
+                    #init_ruleset
+                    let state = ::rusty_lr::State {
+                        shift_goto_map_term,
+                        shift_goto_map_nonterm,
+                        reduce_map,
+                        ruleset,
+                    };
+                    states.push(state);
+                }
+            });
+        }
+
+        // =====================================================================
+        // =========================Writing Parser==============================
+        // =====================================================================
+        let main_state = parser.main_state;
+        parser_write.extend(quote! {
+            let parser = ::rusty_lr::Parser {
+                rules,
+                states,
+                main_state: #main_state,
+            };
+        });
+
+        let parser_emit = quote! {
+            {
+            #parser_write
+            parser
+            }
+        };
+
         // =====================================================================
         // ========================Writing Reducer==============================
         // =====================================================================
         // let mut stack_defs = quote! {};
         let mut ruleid: usize = 0;
         let mut case_streams = quote! {};
-        let term_stack_name = Self::stack_name(&format_ident! {"rlterminal"});
 
-        for (name, _typename, rules) in self.rules.iter() {
+        for (name, typename, rules) in self.rules.iter() {
             // push result to this stack
             let stack_name = Self::stack_name(name);
 
@@ -435,54 +663,85 @@ impl Grammar {
                 let action = if let Some(action) = &rule.reduce_action {
                     quote! { {#action} }
                 } else {
-                    quote! {
-                        ()
-                    }
+                    unreachable!();
                 };
                 let mut token_pop_stream = TokenStream::new();
-                for (idx, token) in rule.tokens.iter().enumerate().rev() {
-                    let var_name = format_ident!("v{}", idx);
-                    let slice_name = format_ident!("s{}", idx);
-                    token_pop_stream.extend(
-                        quote! {
-                            let #slice_name = &terms[children[#idx].range()];
-                        }
-                        .into_iter(),
-                    );
+                let mut ch_idx: usize = 0;
+                for (token_idx, token) in rule.tokens.iter().enumerate() {
+                    let var_name = format_ident!("v{}", token_idx);
+                    let slice_name = format_ident!("s{}", token_idx);
                     match token {
                         Token::Term(_) => {
-                            token_pop_stream.extend(quote! {
-                                let #var_name = self.#term_stack_name.pop().unwrap();
-                            });
+                            unreachable!();
                         }
                         Token::NonTerm(nonterm) => {
                             let stack_name = Self::stack_name(nonterm);
+
+                            let mut typename_search = None;
+                            for (name, typename, _) in self.rules.iter() {
+                                if name == nonterm {
+                                    typename_search = typename.clone();
+                                    break;
+                                }
+                            }
+
+                            if typename_search.is_some() {
+                                token_pop_stream.extend(quote! {
+                                    let #var_name = self.#stack_name.pop().unwrap();
+                                });
+                            }
                             token_pop_stream.extend(quote! {
-                                let #var_name = self.#stack_name.pop().unwrap();
+                                let #slice_name = &terms[children[#ch_idx].range()];
                             });
+                            ch_idx += 1;
+                        }
+                        Token::Literal(literal) => {
+                            let s = Self::literal_to_string(literal)?;
+
+                            if s.is_empty() {
+                                token_pop_stream.extend(quote! {
+                                    let #var_name = #literal;
+                                    let #slice_name = #var_name;
+                                });
+                            } else {
+                                let count = s.chars().count();
+                                let first_idx = ch_idx;
+                                let last_idx = first_idx + count - 1;
+
+                                token_pop_stream.extend(quote! {
+                                    let #slice_name = &terms[children[#first_idx].begin()..children[#last_idx].end()];
+                                    let #var_name = #literal;
+                                });
+
+                                ch_idx += count;
+                            }
                         }
                     }
                 }
-                let push_stream = quote! { self.#stack_name.push(#action); };
-                let case_straem = quote! {
-                    #ruleid => {
-                        #token_pop_stream
-                        #push_stream
-                    }
-                };
-                case_streams.extend(case_straem.into_iter());
+                if typename.is_some() {
+                    case_streams.extend(quote! {
+                        #ruleid => {
+                            #token_pop_stream
+                            self.#stack_name.push(#action);
+                        }
+                    });
+                } else {
+                    case_streams.extend(quote! {
+                        #ruleid => {
+                            #token_pop_stream
+                            #action
+                        }
+                    });
+                }
 
                 ruleid += 1;
             }
         }
-        case_streams.extend(
-            quote! {
-                _ => {
-                    unreachable!();
-                }
+        case_streams.extend(quote! {
+            _ => {
+                unreachable!();
             }
-            .into_iter(),
-        );
+        });
         let match_streams = quote! {
             match rustylr_macro_generated_ruleid__ {
                 #case_streams
@@ -490,16 +749,25 @@ impl Grammar {
         };
 
         let start_rule_name = self.start_rule_name.as_ref().unwrap();
-        let start_rule_stack_name = Self::stack_name(start_rule_name);
-        let start_rule_typename = {
-            let mut start_rule_typename = TokenStream::new();
+        let (start_rule_typename, pop_from_start_rule_stack) = {
+            let start_rule_stack_name = Self::stack_name(start_rule_name);
+            let mut start_rule_typename = None;
             for (name, typename, _) in self.rules.iter() {
                 if name == self.start_rule_name.as_ref().unwrap() {
                     start_rule_typename = typename.clone();
                     break;
                 }
             }
-            start_rule_typename
+            if let Some(start_rule_typename) = start_rule_typename {
+                (
+                    start_rule_typename,
+                    quote! {
+                        self.#start_rule_stack_name.pop().unwrap()
+                    },
+                )
+            } else {
+                (quote! {()}, quote! {})
+            }
         };
 
         let mut stack_def_streams = quote! {};
@@ -508,18 +776,14 @@ impl Grammar {
             // push result to this stack
             let stack_name = Self::stack_name(name);
 
-            stack_def_streams.extend(
-                quote! {
+            if let Some(typename) = typename {
+                stack_def_streams.extend(quote! {
                     pub #stack_name : Vec<#typename>,
-                }
-                .into_iter(),
-            );
-            stack_init_streams.extend(
-                quote! {
+                });
+                stack_init_streams.extend(quote! {
                     #stack_name : Vec::new(),
-                }
-                .into_iter(),
-            );
+                });
+            }
         }
 
         let mut reducer_name = format_ident!("{}Reducer", start_rule_name);
@@ -533,17 +797,13 @@ impl Grammar {
                 (quote! {}, quote! {})
             };
 
-        let parser_emit = self.emit_parser(lalr)?;
-
         Ok(quote! {
             pub struct #reducer_name {
-                pub #term_stack_name : Vec<char>,
                 #stack_def_streams
             }
             impl #reducer_name {
                 pub fn new() -> Self {
                     Self {
-                        #term_stack_name : Vec::new(),
                         #stack_init_streams
                     }
                 }
@@ -556,12 +816,9 @@ impl Grammar {
                 {
                     match tree {
                         ::rusty_lr::TreeStr::Terminal(begin, end) => {
-                            let term = &terms[*begin..*end];
-                            let ch : char = term.chars().next().unwrap();
-                            self.#term_stack_name.push(ch);
                         }
                         ::rusty_lr::TreeStr::NonTerminal(rustylr_macro_generated_ruleid__, children, beg, end) => {
-                            for child in children.iter() {
+                            for child in children.iter().rev() {
                                 self.reduce_impl(terms, child, #user_data_var);
                             }
                             // slice of this tree
@@ -574,7 +831,7 @@ impl Grammar {
                 pub fn reduce(&mut self, terms: &str, tree: &::rusty_lr::TreeStr, #user_data_parameter_def)-> #start_rule_typename
                 {
                     self.reduce_impl(terms, tree, #user_data_var);
-                    self.#start_rule_stack_name.pop().unwrap()
+                    #pop_from_start_rule_stack
                 }
             }
 

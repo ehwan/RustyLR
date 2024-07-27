@@ -18,14 +18,14 @@ impl Tree {
     }
 
     /// get the begin index of input sequence that this tree represents
-    pub(crate) fn begin(&self) -> usize {
+    pub fn begin(&self) -> usize {
         match self {
             Tree::Terminal(idx) => *idx,
             Tree::NonTerminal(_, _children, idx) => *idx,
         }
     }
     /// get the end index of input sequence that this tree represents
-    pub(crate) fn end(&self) -> usize {
+    pub fn end(&self) -> usize {
         match self {
             Tree::Terminal(idx) => *idx + 1,
             Tree::NonTerminal(_, children, idx) => children.last().map(|x| x.end()).unwrap_or(*idx),
@@ -53,14 +53,14 @@ impl TreeStr {
     }
 
     /// get the begin index of input sequence that this tree represents
-    pub(crate) fn begin(&self) -> usize {
+    pub fn begin(&self) -> usize {
         match self {
             TreeStr::Terminal(beg, _end) => *beg,
             TreeStr::NonTerminal(_rule, _children, beg, _end) => *beg,
         }
     }
     /// get the end index of input sequence that this tree represents
-    pub(crate) fn end(&self) -> usize {
+    pub fn end(&self) -> usize {
         match self {
             TreeStr::Terminal(_beg, end) => *end,
             TreeStr::NonTerminal(_rule, children, _beg, end) => {

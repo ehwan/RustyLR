@@ -3,8 +3,8 @@ LR(1) and LALR(1) parser code generator for Rust
 
 ```
 [dependencies]
-rusty_lr = "0.4.1"
-rusty_lr_derive = "0.4.0"
+rusty_lr = "0.5.0"
+rusty_lr_derive = "0.5.0"
 ```
 
 ## Features
@@ -26,27 +26,8 @@ use rusty_lr_derive::lalr1_str;
 // this define struct `EParser`
 // where 'E' is the start symbol
 lalr1_str! {
-    // define type of user data
+        // define type of user data
     %userdata i32;
-
-    // define terminal symbols
-    // the TokenStream will be copied to the generated code
-    %token add '+';
-    %token mul '*';
-    %token lparen '(';
-    %token rparen ')';
-    %token eof '\0';
-    %token zero '0';
-    %token one '1';
-    %token two '2';
-    %token three '3';
-    %token four '4';
-    %token five '5';
-    %token six '6';
-    %token seven '7';
-    %token eight '8';
-    %token nine '9';
-    %token ws ' ';
 
     // start symbol ( for final reduction )
     %start E;
@@ -58,31 +39,31 @@ lalr1_str! {
     // s{N} is the &str(or &[Term]) of the N-th symbol
     // (%left|%reduce|%right|%shift) to resolve shift/reduce conflict
     // reduce action must be evaluated into type (`i32` in this case) you provided
-    A(i32): A add A %left { println!("{:?}+{:?}={:?}", s0, s2, s); v0 + v2 }
+    A(i32): A r"+" A %left { println!("A: {:?}+{:?}={:?}", s0, s2, s); v0 + v2 }
           | M { v0 }
           ;
-    M(i32): M mul M %left { v0 * v2 }
+    M(i32): M '*' M %left { v0 * v2 }
           | P { v0 }
           ;
     P(i32): Num { v0 }
-          | WS lparen E rparen WS { v2 }
+          | WS '(' E ')' WS { v2 }
           ;
     Num(i32): WS Num0 WS { *data += 1; s1.parse().unwrap() }; // user data can be accessed by `data`
     Num0: Digit Num0
        | Digit
        ;
-    Digit : zero | one | two | three | four | five | six | seven | eight | nine
+    Digit : '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
           ;
     E(i32): A { v0 }
           ;
 
-    WS1: ws WS1
-      | ws
+    WS1: " " WS1
+      | b" "
       ;
     WS: WS1
       |
       ;
-    Augmented : E eof
+    Augmented : E '\0'
               ;
 }
 ```
