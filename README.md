@@ -16,6 +16,8 @@ rusty_lr_derive = "0.5.2"
  - construct Tree from parsing result
 
 ## Sample
+
+### 1. `char` Terminals with `&str` input
 In [`example/calculator/parser.rs`](example/calculator/src/parser.rs),
 ```rust
 // for LR(1) parser, with &str
@@ -96,6 +98,57 @@ The result will be:
 " 1  "+" 2*(3   + 4)  "=" 1  + 2*(3   + 4)  "
 Result: 15
 Number of 'Num' in  1  + 2*(3   + 4)  : 4
+```
+
+### 2. Custom Terminals with `&[Term]` input
+in [`example/calculator/parser2.rs`](example/calculator/src/parser2.rs),
+```rust
+#[derive(Debug, Clone, Copy)]
+pub enum Token {
+    Num(i32),
+    Plus,
+    Star,
+    LParen,
+    RParen,
+    Ignore,
+    Eof,
+}
+///
+/// impl Hash, PartialEq, Eq, PartialOrd, Ord for Token
+/// ........
+/// 
+
+use rusty_lr_derive::lalr1;
+
+lalr1! {
+    %tokentype Token;
+    %start E;
+    %aug Augmented;
+
+    %token num Token::Num(0);
+    %token plus Token::Plus;
+    %token star Token::Star;
+    %token lparen Token::LParen;
+    %token rparen Token::RParen;
+    %token eof Token::Eof;
+
+    A(i32) : A plus A %left { v0 + v2 }
+      | M { v0 }
+      ;
+
+    M(i32) : M star M %left { v0 * v2 }
+      | P { v0 }
+      ;
+
+    P(i32) : num { if let Token::Num(n) = v0 { *n } else { unreachable!(); } }
+      | lparen E rparen { v1 }
+      ;
+
+    E(i32) : A  { v0 } ;
+
+    Augmented : E eof;
+}
+
 ```
 
 ## Build Deterministic Finite Automata (DFA) from Context Free Grammar (CFG)
