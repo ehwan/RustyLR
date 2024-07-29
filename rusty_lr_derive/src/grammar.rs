@@ -519,6 +519,11 @@ impl Grammar {
             vec![Token::Term(TermType::Literal(None))],
             ReduceType::Error,
         );
+        grammar.add_rule(
+            "AnyTokenNoSemi",
+            vec![Token::Term(TermType::Group(None))],
+            ReduceType::Error,
+        );
 
         // AnyTokens: AnyTokens AnyTokenNoSemi
         //          | AnyTokenNoSemi

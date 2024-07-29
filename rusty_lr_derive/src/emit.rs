@@ -278,7 +278,7 @@ impl Grammar {
 
                             if typename_search.is_some() {
                                 token_pop_stream.extend(quote! {
-                                    let #var_name = self.#stack_name.pop().unwrap();
+                                    let mut #var_name = self.#stack_name.pop().unwrap();
                                 });
                             }
                         }
@@ -417,7 +417,7 @@ impl Grammar {
             }
             }
 
-            struct #struct_name {
+            pub struct #struct_name {
                 pub parser: ::rusty_lr::Parser<#term_typename, &'static str>,
             }
             impl #struct_name {
@@ -689,7 +689,7 @@ impl Grammar {
 
                             if typename_search.is_some() {
                                 token_pop_stream.extend(quote! {
-                                    let #var_name = self.#stack_name.pop().unwrap();
+                                    let mut #var_name = self.#stack_name.pop().unwrap();
                                 });
                             }
                             token_pop_stream.extend(quote! {
