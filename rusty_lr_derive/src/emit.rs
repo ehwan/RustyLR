@@ -38,20 +38,21 @@ impl Grammar {
             }
         }
         let augmented = self.augmented.as_ref().unwrap().to_string();
-        let mut parser = match grammar.build(augmented) {
-            Ok(parser) => parser,
-            Err(err) => {
-                return Err(ParseError::GrammarBuildError(format!("{}", err)));
-            }
-        };
-        if lalr {
-            match parser.optimize_lalr() {
-                Ok(_) => {}
+        let parser = if lalr {
+            match grammar.build_lalr(augmented) {
+                Ok(parser) => parser,
                 Err(err) => {
                     return Err(ParseError::GrammarBuildError(format!("{}", err)));
                 }
             }
-        }
+        } else {
+            match grammar.build(augmented) {
+                Ok(parser) => parser,
+                Err(err) => {
+                    return Err(ParseError::GrammarBuildError(format!("{}", err)));
+                }
+            }
+        };
 
         let mut write_parser = quote! {};
 
@@ -474,20 +475,21 @@ impl Grammar {
             }
         }
         let augmented = self.augmented.as_ref().unwrap().to_string();
-        let mut parser = match grammar.build(augmented) {
-            Ok(parser) => parser,
-            Err(err) => {
-                return Err(ParseError::GrammarBuildError(format!("{}", err)));
-            }
-        };
-        if lalr {
-            match parser.optimize_lalr() {
-                Ok(_) => {}
+        let parser = if lalr {
+            match grammar.build_lalr(augmented) {
+                Ok(parser) => parser,
                 Err(err) => {
                     return Err(ParseError::GrammarBuildError(format!("{}", err)));
                 }
             }
-        }
+        } else {
+            match grammar.build(augmented) {
+                Ok(parser) => parser,
+                Err(err) => {
+                    return Err(ParseError::GrammarBuildError(format!("{}", err)));
+                }
+            }
+        };
 
         let mut parser_write = quote! {};
 

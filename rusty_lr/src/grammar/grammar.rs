@@ -83,6 +83,42 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
         })
     }
 
+    /// build LALR(1) parser table from given grammar
+    pub fn build_lalr(
+        &mut self,
+        augmented_name: NonTerm,
+    ) -> Result<Parser<Term, NonTerm>, BuildError<Term, NonTerm>> {
+        self.calculate_first();
+
+        // add main augmented rule
+        let augmented_rule_set = {
+            let augmented_rules = self.search_rules(&augmented_name);
+
+            if augmented_rules.is_empty() {
+                return Err(BuildError::NoAugmented);
+            }
+
+            let mut augmented_rules_set = LookaheadRuleRefSet::new();
+            for rule in augmented_rules.into_iter() {
+                augmented_rules_set
+                    .rules
+                    .insert(ShiftedRuleRef { rule, shifted: 0 }, BTreeSet::new());
+            }
+            augmented_rules_set
+        };
+
+        let mut states = Vec::new();
+        let mut state_map = BTreeMap::new();
+        let main_state =
+            self.build_recursive_lalr(augmented_rule_set, &mut states, &mut state_map)?;
+
+        Ok(Parser {
+            rules: self.rules.clone(),
+            states,
+            main_state,
+        })
+    }
+
     /// search for every production rules with name 'name'
     fn search_rules(&self, name: &NonTerm) -> Vec<usize> {
         let mut ret = Vec::new();
@@ -420,6 +456,225 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
 
         for (next_nonterm, next_rule_set) in next_rules_nonterm.into_iter() {
             let next_state_id = self.build_recursive(next_rule_set, states, state_map)?;
+
+            states[state_id]
+                .shift_goto_map_nonterm
+                .insert(next_nonterm, next_state_id);
+        }
+
+        Ok(state_id)
+    }
+
+    /// build new state with given production rules
+    fn build_recursive_lalr(
+        &self,
+        mut rules: LookaheadRuleRefSet<Term>,
+        states: &mut Vec<State<Term, NonTerm>>,
+        state_map: &mut BTreeMap<BTreeSet<ShiftedRuleRef>, usize>,
+    ) -> Result<usize, BuildError<Term, NonTerm>> {
+        // expand
+        self.expand(&mut rules)?;
+
+        let shifted_rules: BTreeSet<_> = rules.rules.keys().cloned().collect();
+
+        let state_id = *state_map.entry(shifted_rules).or_insert_with(|| {
+            let new_state_id = states.len();
+            states.push(State::new());
+            for (shifted_rule, _) in rules.rules.iter() {
+                states[new_state_id]
+                    .ruleset
+                    .rules
+                    .insert(shifted_rule.clone(), BTreeSet::new());
+            }
+            new_state_id
+        });
+
+        let mut lookaheads_empty = true;
+        let mut next_rules_term = HashMap::new();
+        let mut next_rules_nonterm = HashMap::new();
+        let mut empty_rules = Vec::new();
+        for ((mut rule_ref, mut lookaheads_src), (_, lookaheads_dst)) in rules
+            .rules
+            .into_iter()
+            .zip(states[state_id].ruleset.rules.iter_mut())
+        {
+            let rule = &self.rules[rule_ref.rule];
+            let lookaheads: BTreeSet<_> =
+                lookaheads_src.difference(lookaheads_dst).cloned().collect();
+            lookaheads_empty &= lookaheads.is_empty();
+            lookaheads_dst.append(&mut lookaheads_src);
+            match rule.rule.get(rule_ref.shifted).cloned() {
+                Some(Token::Term(term)) => {
+                    rule_ref.shifted += 1;
+                    next_rules_term
+                        .entry(term)
+                        .or_insert_with(LookaheadRuleRefSet::new)
+                        .add(rule_ref, lookaheads);
+                    // Duplicated rule will be handled in reduce/reduce conflict
+                }
+                Some(Token::NonTerm(nonterm)) => {
+                    rule_ref.shifted += 1;
+                    next_rules_nonterm
+                        .entry(nonterm)
+                        .or_insert(LookaheadRuleRefSet::new())
+                        .add(rule_ref, lookaheads);
+                    // Duplicated rule will be handled in reduce/reduce conflict
+                }
+                None => {
+                    empty_rules.push((rule_ref.rule, lookaheads));
+                }
+            }
+        }
+
+        if lookaheads_empty {
+            return Ok(state_id);
+        }
+
+        // process rules that no more tokens left to shift
+        // if next token is one of lookahead, add reduce action
+        // if there are multiple recude rules for same lookahead, it is a reduce/reduce conflict
+        for (empty_rule, lookaheads) in empty_rules.into_iter() {
+            let state = &mut states[state_id];
+            for lookahead in lookaheads.into_iter() {
+                // check for reduce/reduce conflict
+                if let Some(old) = state.reduce_map.get_mut(&lookahead) {
+                    // same rule, continue
+                    if old == &empty_rule {
+                        continue;
+                    }
+
+                    // check two reduce rules
+                    // old:
+                    // A -> token0 token1 token2 ...
+                    // new:
+                    // B -> token0 token1 token2 ...
+                    // if only one 'A' or 'B' exists in shift non-term map, go for it
+                    // else, it is a conflict
+                    let name_old = &self.rules[*old].name;
+                    let name_new = &self.rules[empty_rule].name;
+
+                    let old_res = next_rules_nonterm.contains_key(name_old);
+                    let new_res = next_rules_nonterm.contains_key(name_new);
+
+                    if (old_res && new_res) || (!old_res && !new_res) {
+                        // conflict
+                        return Err(BuildError::ReduceReduceConflict {
+                            lookahead,
+                            rule1: *old,
+                            rule2: empty_rule,
+                            rules: &self.rules,
+                        });
+                    }
+
+                    if new_res {
+                        // using new rule is right choice
+                        *old = empty_rule;
+                    } else {
+                        // using old rule is right choice
+                        // reduce map is already old, so do nothing
+                    }
+                } else {
+                    state.reduce_map.insert(lookahead, empty_rule);
+                }
+            }
+        }
+
+        // process next rules with token
+        // add shift and goto action
+        // if next_token is in reduce_map, then it is a reduce/shift conflict
+        for (next_term, next_rule_set) in next_rules_term.into_iter() {
+            // check shift/reduce conflict
+            if let Some(reduce_rule) = states[state_id].reduce_map.get(&next_term) {
+                // check if all rules in next_rule_set has same reduce_type
+                // Left => reduce first
+                // Right => shift first
+                // else => error
+
+                // check if there is any Error in reduce_type
+                for (rule, lookaheads) in next_rule_set.rules.iter() {
+                    if self.rules[rule.rule].reduce_type == ReduceType::Error {
+                        return Err(BuildError::ShiftReduceConflictError {
+                            reduce: *reduce_rule,
+                            shift: LookaheadRuleRef {
+                                rule: rule.clone(),
+                                lookaheads: lookaheads.clone(),
+                            },
+                            rules: &self.rules,
+                        });
+                    }
+                }
+
+                // check if all rules in next_rule_set has same reduce_type
+                // ReduceType::Error is filtered above, so only for Left/Right
+                let mut reduce_left = None;
+                let mut reduce_right = None;
+                for (rule, lookaheads) in next_rule_set.rules.iter() {
+                    match self.rules[rule.rule].reduce_type {
+                        ReduceType::Left => {
+                            reduce_left = Some((rule, lookaheads));
+                            if reduce_right.is_some() {
+                                break;
+                            }
+                        }
+                        ReduceType::Right => {
+                            reduce_right = Some((rule, lookaheads));
+                            if reduce_left.is_some() {
+                                break;
+                            }
+                        }
+                        ReduceType::Error => {
+                            // should not reach here
+                            unreachable!("Unreachable code for resolving Shift/Reduce Conflict");
+                        }
+                    }
+                }
+
+                // if both reduce_left and reduce_right is Some, then it is a conflict
+                if reduce_left.is_some() && reduce_right.is_some() {
+                    let (left_rule, left_lookaheads) = reduce_left.unwrap();
+                    let (right_rule, right_lookaheads) = reduce_right.unwrap();
+                    return Err(BuildError::ShiftReduceConflict {
+                        reduce: *reduce_rule,
+                        left: LookaheadRuleRef {
+                            rule: left_rule.clone(),
+                            lookaheads: left_lookaheads.clone(),
+                        },
+                        right: LookaheadRuleRef {
+                            rule: right_rule.clone(),
+                            lookaheads: right_lookaheads.clone(),
+                        },
+                        rules: &self.rules,
+                    });
+                }
+
+                // if it is reduce_left, reduce first, so do nothing
+
+                // if it is reduce_right, shift first,
+                // remove next_term from reduce_map
+                // and add shift action
+                if reduce_right.is_some() {
+                    // remove next_term from reduce_map
+                    states[state_id].reduce_map.remove(&next_term);
+
+                    let next_state_id =
+                        self.build_recursive_lalr(next_rule_set, states, state_map)?;
+
+                    states[state_id]
+                        .shift_goto_map_term
+                        .insert(next_term, next_state_id);
+                }
+            } else {
+                // add shift action
+                let next_state_id = self.build_recursive_lalr(next_rule_set, states, state_map)?;
+
+                states[state_id]
+                    .shift_goto_map_term
+                    .insert(next_term, next_state_id);
+            }
+        }
+
+        for (next_nonterm, next_rule_set) in next_rules_nonterm.into_iter() {
+            let next_state_id = self.build_recursive_lalr(next_rule_set, states, state_map)?;
 
             states[state_id]
                 .shift_goto_map_nonterm

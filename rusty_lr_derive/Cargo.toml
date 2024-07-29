@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_derive"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2021"
 license = "MIT"
 description = "yacc-like macro definitions for parser code generation using rusty_lr"
@@ -16,4 +16,4 @@ proc-macro = true
 syn = "2.0"
 proc-macro2 = "1.0.86"
 quote = "1.0"
-rusty_lr = "0.5.0"
+rusty_lr = "0.5.1"
