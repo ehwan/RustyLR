@@ -20,6 +20,8 @@ fn main() {
     let mut userdata: i32 = 0;
     for token in input {
         match parser.feed(&mut context, token, &mut userdata) {
+            //                          ^^^^^   ^^^^^^^^^^^^ userdata passed here as `&mut i32`
+            //                           |- feed token
             Ok(_) => {}
             Err(e) => {
                 println!("{:?}", e);

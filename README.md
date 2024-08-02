@@ -13,6 +13,7 @@ rusty_lr_derive = "0.6.0"
  - customizable reducing action
  - resolving conflicts of ambiguous grammar
  - tracing parser action with callback, also error handling
+ - readable error messages, both for grammar building and parsing
 
 ## Sample
 
@@ -105,6 +106,8 @@ fn main() {
     let mut userdata: i32 = 0;
     for token in input {
         match parser.feed(&mut context, token, &mut userdata) {
+            //                          ^^^^^   ^^^^^^^^^^^^ userdata passed here as `&mut i32`
+            //                           |- feed token
             Ok(_) => {}
             Err(e) => {
                 println!("{:?}", e);
@@ -208,10 +211,30 @@ let parser:rusty_lr::Parser<Term,NonTerm> = match grammar.build(NonTerm::Augment
 
 You must explicitly specify the Augmented non-terminal symbol, and the production rule `Augmented -> StartSymbol $` must be defined in the grammar.
 
+The returned `Parser` struct contains the DFA and the production rules(cloned). It is completely independent from the `Grammar` struct, so you can drop the `Grammar` struct, or export the `Parser` struct to another module.
+
+### 4. Error messages
 The `Error` type returned from `Grammar::build()` will contain the error information.
 `Grammar` is `Display` if both `Term` and `NonTerm` is `Display`, and It is `Debug` if both `Term` and `NonTerm` is `Debug`.
 
-The returned `Parser` struct contains the DFA and the production rules(cloned). It is completely independent from the `Grammar` struct, so you can drop the `Grammar` struct, or export the `Parser` struct to another module.
+For Shift/Reduce conflicts,
+```
+Build failed: Shift/Reduce Conflict
+NextTerm: '0'
+Reduce Rule:
+"Num" -> "Digit"
+Shift Rules:
+"Digit" -> '0' • /Lookaheads: '\0', '0'
+Try rearanging the rules or set ReduceType to Terminal '0' to resolve the conflict.
+```
+For Reduce/Reduce Conflicts,
+```
+Build failed: Reduce/Reduce Conflict with lookahead: '\0'
+Production Rule1:
+"Num" -> "Digit"
+Production Rule2:
+"Num" -> "Digit"
+```
 
 ## Parse input sequence with generated DFA
 For given input sequence, you can start parsing with `Parser::begin()` method. Once you get the `Context` from `begin()`, you will feed the input sequence to the parser with `parser.feed()` method.
