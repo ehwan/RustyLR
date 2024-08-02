@@ -31,7 +31,7 @@ enum Token {
 lalr1! {
     // type of userdata
     %userdata i32;
-    // typeof token
+    // type of token ( as Terminal symbol )
     %tokentype Token;
 
     // start symbol
