@@ -40,20 +40,21 @@ impl<'a, Term: Display + Clone, NonTerm: Display + Clone> Display
                 lookahead,
                 rule1,
                 rule2,
-                rules: grammar,
+                rules,
             } => write!(
                 f,
                 r#"Reduce/Reduce Conflict with lookahead: {}
+Production Rule1:
 {}
-and
+Production Rule2:
 {}"#,
-                lookahead, grammar[*rule1], grammar[*rule2]
+                lookahead, rules[*rule1], rules[*rule2]
             )?,
             Self::ShiftReduceConflict {
                 reduce,
                 shift,
                 term,
-                rules: grammar,
+                rules,
             } => {
                 write!(
                     f,
@@ -64,7 +65,7 @@ Reduce Rule:
 Shift Rules:
 "#,
                     term,
-                    grammar[*reduce],
+                    rules[*reduce],
                 )?;
                 for (rule, lookaheads) in shift.rules.iter() {
                     writeln!(
@@ -72,7 +73,7 @@ Shift Rules:
                         "{}",
                         LookaheadRule {
                             rule: ShiftedRule {
-                                rule: grammar[rule.rule].clone(),
+                                rule: rules[rule.rule].clone(),
                                 shifted: rule.shifted,
                             },
                             lookaheads: lookaheads.clone(),
@@ -80,7 +81,8 @@ Shift Rules:
                     )?;
                 }
                 write!(f, 
-                    "Try rearanging the rules or set ReduceType to Terminal to resolve the conflict.",
+                    "Try rearanging the rules or set ReduceType to Terminal {} to resolve the conflict.",
+                    term
                 )?;
             }
             Self::NoAugmented => {
@@ -103,20 +105,21 @@ impl<'a, Term: Debug + Clone, NonTerm: Debug + Clone> Debug for BuildError<'a, T
                 lookahead,
                 rule1,
                 rule2,
-                rules: grammar,
+                rules,
             } => write!(
                 f,
                 r#"Reduce/Reduce Conflict with lookahead: {:?}
+Production Rule1:
 {:?}
-and
+Production Rule2:
 {:?}"#,
-                lookahead, grammar[*rule1], grammar[*rule2]
+                lookahead, rules[*rule1], rules[*rule2]
             )?,
             Self::ShiftReduceConflict {
                 reduce,
                 shift,
                 term,
-                rules: grammar,
+                rules,
             } => {
                 write!(
                     f,
@@ -127,7 +130,7 @@ Reduce Rule:
 Shift Rules:
 "#,
                     term,
-                    grammar[*reduce],
+                    rules[*reduce],
                 )?;
                 for (rule, lookaheads) in shift.rules.iter() {
                     writeln!(
@@ -135,7 +138,7 @@ Shift Rules:
                         "{:?}",
                         LookaheadRule {
                             rule: ShiftedRule {
-                                rule: grammar[rule.rule].clone(),
+                                rule: rules[rule.rule].clone(),
                                 shifted: rule.shifted,
                             },
                             lookaheads: lookaheads.clone(),
@@ -143,7 +146,8 @@ Shift Rules:
                     )?;
                 }
                 write!(f, 
-                    "Try rearanging the rules or set ReduceType to Terminal to resolve the conflict.",
+                    "Try rearanging the rules or set ReduceType to Terminal {:?} to resolve the conflict.",
+                    term
                 )?;
             }
             Self::NoAugmented => {

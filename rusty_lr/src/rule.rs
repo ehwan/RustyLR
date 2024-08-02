@@ -77,7 +77,7 @@ impl<Term: Display, NonTerm: Display> Display for ShiftedRule<Term, NonTerm> {
         write!(f, "{} -> ", self.rule.name)?;
         for (id, token) in self.rule.rule.iter().enumerate() {
             if id == self.shifted {
-                write!(f, ". ")?;
+                write!(f, "• ")?;
             }
             write!(f, "{}", token)?;
             if id < self.rule.rule.len() - 1 {
@@ -85,7 +85,7 @@ impl<Term: Display, NonTerm: Display> Display for ShiftedRule<Term, NonTerm> {
             }
         }
         if self.shifted == self.rule.rule.len() {
-            write!(f, " .")?;
+            write!(f, " •")?;
         }
         Ok(())
     }
@@ -95,7 +95,7 @@ impl<Term: Debug, NonTerm: Debug> Debug for ShiftedRule<Term, NonTerm> {
         write!(f, "{:?} -> ", self.rule.name)?;
         for (id, token) in self.rule.rule.iter().enumerate() {
             if id == self.shifted {
-                write!(f, ". ")?;
+                write!(f, "• ")?;
             }
             write!(f, "{:?}", token)?;
             if id < self.rule.rule.len() - 1 {
@@ -103,7 +103,7 @@ impl<Term: Debug, NonTerm: Debug> Debug for ShiftedRule<Term, NonTerm> {
             }
         }
         if self.shifted == self.rule.rule.len() {
-            write!(f, " .")?;
+            write!(f, " •")?;
         }
         Ok(())
     }

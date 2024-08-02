@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 use std::fmt::Display;
 
+use crate::rule::LookaheadRule;
 use crate::rule::ShiftedRule;
 use crate::state::State;
 use crate::ProductionRule;
@@ -62,11 +63,11 @@ impl<'a, Term: Display + Clone, NonTerm: Display + Clone, CallbackError: Display
                             rule: rules[rule.rule].clone(),
                             shifted: rule.shifted,
                         };
-                        write!(f, "{} / ", shifted)?;
-                        for lookahead in lookaheads.iter() {
-                            write!(f, "{}, ", lookahead)?;
-                        }
-                        writeln!(f)?;
+                        let lookaheadrule = LookaheadRule {
+                            rule: shifted,
+                            lookaheads: lookaheads.clone(),
+                        };
+                        writeln!(f, "{}", lookaheadrule)?;
                     }
                     writeln!(f, "{:-^40}", "Prev State")?;
                 }
@@ -101,11 +102,11 @@ impl<'a, Term: Display + Clone, NonTerm: Display + Clone, CallbackError: Display
                             rule: rules[rule.rule].clone(),
                             shifted: rule.shifted,
                         };
-                        write!(f, "{} / ", shifted)?;
-                        for lookahead in lookaheads.iter() {
-                            write!(f, "{}, ", lookahead)?;
-                        }
-                        writeln!(f)?;
+                        let lookaheadrule = LookaheadRule {
+                            rule: shifted,
+                            lookaheads: lookaheads.clone(),
+                        };
+                        writeln!(f, "{}", lookaheadrule)?;
                     }
                     writeln!(f, "{:-^40}", "Prev State")?;
                 }
@@ -155,11 +156,11 @@ impl<'a, Term: Debug + Clone, NonTerm: Debug + Clone, CallbackError: Debug> Debu
                             rule: rules[rule.rule].clone(),
                             shifted: rule.shifted,
                         };
-                        write!(f, "{:?} / ", shifted)?;
-                        for lookahead in lookaheads.iter() {
-                            write!(f, "{:?}, ", lookahead)?;
-                        }
-                        writeln!(f)?;
+                        let lookaheadrule = LookaheadRule {
+                            rule: shifted,
+                            lookaheads: lookaheads.clone(),
+                        };
+                        writeln!(f, "{:?}", lookaheadrule)?;
                     }
                     writeln!(f, "{:-^40}", "Prev State")?;
                 }
@@ -194,11 +195,11 @@ impl<'a, Term: Debug + Clone, NonTerm: Debug + Clone, CallbackError: Debug> Debu
                             rule: rules[rule.rule].clone(),
                             shifted: rule.shifted,
                         };
-                        write!(f, "{:?} / ", shifted)?;
-                        for lookahead in lookaheads.iter() {
-                            write!(f, "{:?}, ", lookahead)?;
-                        }
-                        writeln!(f)?;
+                        let lookaheadrule = LookaheadRule {
+                            rule: shifted,
+                            lookaheads: lookaheads.clone(),
+                        };
+                        writeln!(f, "{:?}", lookaheadrule)?;
                     }
                     writeln!(f, "{:-^40}", "Prev State")?;
                 }
