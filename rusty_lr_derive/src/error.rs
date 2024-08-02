@@ -1,61 +1,75 @@
 use proc_macro2::Ident;
-use proc_macro2::Literal;
+use proc_macro2::Punct;
+use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
+use quote::quote_spanned;
+
+use std::fmt::Display;
 
 #[derive(Debug)]
 pub enum ParseError {
-    MultipleTokenDefinition(Ident, TokenStream),
-    MultipleStartDefinition(Ident, Ident),
-    MultipleAugmentedDefinition(Ident, Ident),
-    MultipleTokenTypeDefinition(TokenStream, TokenStream),
-    MultipleUserDataDefinition(TokenStream, TokenStream),
+    MultipleTokenDefinition(Span, Ident, TokenStream, TokenStream),
+    MultipleStartDefinition(Span, Ident, Ident),
+    MultipleTokenTypeDefinition(Span, TokenStream, TokenStream),
+    MultipleEofDefinition(Span, TokenStream, TokenStream),
+    MultipleUserDataDefinition(Span, TokenStream, TokenStream),
 
-    LiteralInCustomType(Literal),
-    InvalidLiteral(Literal),
+    TerminalNotDefined(Ident),
 
     StartNotDefined,
+    EofNotDefined,
     TokenTypeNotDefined,
-    AugmentedNotDefined,
 
-    InvalidPunct(char),
+    InvalidPunct(Punct),
     GrammarBuildError(String),
 
     // building the grammar for parsing production rules failed
-    InternalGrammarParseError(String),
-    // UnexpectedToken(String),
-    // MultipleDefinition(String),
-    // UnknownReduceType(String),
-    // NonTermNameExistInTerminals(String),
-    // GrammarParseError(String),
+    InternalGrammar(Span, String),
 }
 
 impl ParseError {
     pub fn compile_error(&self) -> TokenStream {
         match self {
-            ParseError::MultipleTokenDefinition(ident, tokens) => {
-                quote! {
-                    compile_error!(concat!("Multiple token definition: ", #ident, " ", #tokens));
+            ParseError::MultipleTokenDefinition(span, ident, tokens0, tokens1) => {
+                let message = format!(
+                    "Multiple token definition: {} ->\n{}\nAND\n{}",
+                    ident, tokens0, tokens1
+                );
+                quote_spanned! {
+                    span.clone() =>
+                    compile_error!(#message);
                 }
             }
-            ParseError::MultipleStartDefinition(ident, start) => {
-                quote! {
-                    compile_error!(concat!("Multiple start definition: ", #ident, " ", #start));
+            ParseError::MultipleStartDefinition(span, start1, start2) => {
+                let message = format!("Multiple start definition: {} AND {}", start1, start2);
+                quote_spanned! {
+                    span.clone() =>
+                    compile_error!(#message);
                 }
             }
-            ParseError::MultipleAugmentedDefinition(ident, aug) => {
-                quote! {
-                    compile_error!(concat!("Multiple augmented definition: ", #ident, " ", #aug));
+            ParseError::MultipleTokenTypeDefinition(span, stream1, stream2) => {
+                let message = format!(
+                    "Multiple token type definition: {} AND {}",
+                    stream1, stream2
+                );
+                quote_spanned! {
+                    span.clone() =>
+                    compile_error!(#message);
                 }
             }
-            ParseError::MultipleTokenTypeDefinition(ident, tokens) => {
-                quote! {
-                    compile_error!(concat!("Multiple token type definition: ", #ident, " ", #tokens));
+            ParseError::MultipleEofDefinition(span, stream1, stream2) => {
+                let message = format!("Multiple eof definition: {} AND {}", stream1, stream2);
+                quote_spanned! {
+                    span.clone() =>
+                    compile_error!(#message);
                 }
             }
-            ParseError::MultipleUserDataDefinition(ident, tokens) => {
-                quote! {
-                    compile_error!(concat!("Multiple user data definition: ", #ident, " ", #tokens));
+            ParseError::MultipleUserDataDefinition(span, ident, tokens) => {
+                let message = format!("Multiple user data definition: {} AND {}", ident, tokens);
+                quote_spanned! {
+                    span.clone() =>
+                    compile_error!(#message);
                 }
             }
             ParseError::StartNotDefined => {
@@ -68,24 +82,22 @@ impl ParseError {
                     compile_error!("Token type not defined for slice Terminal;\n>> %tokentype <RustType>;");
                 }
             }
-            ParseError::AugmentedNotDefined => {
+            ParseError::EofNotDefined => {
                 quote! {
-                    compile_error!("Augmented production rule not defined;\n>> %augmented <RuleName>;");
+                    compile_error!("Eof not defined;\n>> %eof <Terminal>;");
                 }
             }
-            ParseError::LiteralInCustomType(literal) => {
-                quote! {
-                    compile_error!("Literal in custom type: {}", #literal);
-                }
-            }
-            ParseError::InvalidLiteral(literal) => {
-                quote! {
-                    compile_error!("Invalid literal: {}", #literal);
+            ParseError::TerminalNotDefined(ident) => {
+                let message = format!("Terminal not defined: {}", ident);
+                quote_spanned! {
+                    ident.span() =>
+                    compile_error!(#message);
                 }
             }
             ParseError::InvalidPunct(punct) => {
                 let message = format!("Invalid punctuation: {}", punct);
-                quote! {
+                quote_spanned! {
+                    punct.span() =>
                     compile_error!(#message);
                 }
             }
@@ -94,11 +106,17 @@ impl ParseError {
                     compile_error!(#message);
                 }
             }
-            ParseError::InternalGrammarParseError(message) => {
-                quote! {
+            ParseError::InternalGrammar(span, message) => {
+                quote_spanned! {
+                    span.clone() =>
                     compile_error!(#message);
                 }
             }
         }
+    }
+}
+impl Display for ParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.compile_error().to_string().fmt(f)
     }
 }

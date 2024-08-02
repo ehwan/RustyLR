@@ -17,8 +17,6 @@ pub(crate) mod token;
 
 // reexport
 
-pub use parser::lalr;
-
 /// A struct for production rule
 pub use rule::ProductionRule;
 
@@ -40,19 +38,11 @@ pub use grammar::grammar::Grammar;
 
 /// callback trait for tracing the parsing process
 pub use parser::callback::Callback;
-/// callback trait for tracing the parsing process (for `&str`)
-pub use parser::callback::CallbackStr;
+/// default callback that does nothing
+pub use parser::callback::DefaultCallback;
 /// A struct for parsing context
 pub use parser::context::Context;
-/// A struct for parsing context (for `&str`)
-pub use parser::context::ContextStr;
 /// Error type for parsing slice
 pub use parser::error::ParseError;
-/// Error type for parsing str
-pub use parser::error::ParseErrorStr;
 /// A struct for LR parser
 pub use parser::parser::Parser;
-/// A tree struct for result of parsing
-pub use parser::tree::Tree;
-/// A tree struct for result of parsing (for `&str`)
-pub use parser::tree::TreeStr;

@@ -1,72 +1,84 @@
 # RustyLR
-LR(1) and LALR(1) parser code generator for Rust
+RustyLR will provide you a LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from Context Free Grammar (CFGs).
 
 ```
 [dependencies]
-rusty_lr = "0.5.2"
-rusty_lr_derive = "0.5.2"
+rusty_lr = "0.6.0"
+rusty_lr_derive = "0.6.0"
 ```
 
 ## Features
  - pure Rust implementation
- - compile-time DFA construction from CFG ( with yacc-like syntax )
+ - compile-time DFA construction from CFGs ( with proc-macro )
  - customizable reducing action
  - resolving conflicts of ambiguous grammar
  - tracing parser action with callback, also error handling
- - construct Tree from parsing result
 
 ## Sample
 
-### 1. `char` Terminals with `&str` input
 In [`example/calculator/parser.rs`](example/calculator/src/parser.rs),
 ```rust
-// for LR(1) parser, with &str
-use rusty_lr_derive::lr1_str;
-// for LALR(1) parser, with &str
-use rusty_lr_derive::lalr1_str;
+use rusty_lr_derive::lr1;
+use rusty_lr_derive::lalr1;
+
+enum Token {
+    // token definitions
+    ...
+}
 
 // this define struct `EParser`
 // where 'E' is the start symbol
-lalr1_str! {
-        // define type of user data
+lalr1! {
+    // type of userdata
     %userdata i32;
+    // typeof token
+    %tokentype Token;
 
-    // start symbol ( for final reduction )
+    // start symbol
     %start E;
+    // eof symbol; for augmented rule generation
+    %eof Token::Eof;
 
-    // set augmented production rule
-    %augmented Augmented;
+    // define tokens
+    %token num Token::Num(0);
+    %token plus Token::Plus;
+    %token star Token::Star;
+    %token lparen Token::LParen;
+    %token rparen Token::RParen;
 
-    // v{N} is the value of the N-th symbol in the production rule
-    // s{N} is the &str(or &[Term]) of the N-th symbol
-    // (%left|%reduce|%right|%shift) to resolve shift/reduce conflict
-    // reduce action must be evaluated into type (`i32` in this case) you provided
-    A(i32): A r"+" A %left { println!("A: {:?}+{:?}={:?}", s0, s2, s); v0 + v2 }
-          | M { v0 }
-          ;
-    M(i32): M '*' M %left { v0 * v2 }
-          | P { v0 }
-          ;
-    P(i32): Num { v0 }
-          | WS '(' E ')' WS { v2 }
-          ;
-    Num(i32): WS Num0 WS { *data += 1; s1.parse().unwrap() }; // user data can be accessed by `data`
-    Num0: Digit Num0
-       | Digit
-       ;
-    Digit : '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
-          ;
-    E(i32): A { v0 }
-          ;
+    // resolving shift/reduce conflict
+    %left plus;
+    %left star;
 
-    WS1: " " WS1
-      | b" "
+    // s{N} is slice of shifted terminal symbols captured by N'th symbol
+    // v{N} is value of N'th symbol ( if it has value )
+    // s is slice of shifted terminal symbols captured by current rule
+    // userdata canbe accessed by `data` ( &mut i32, for current situation )
+    A(i32) : A plus A {
+            println!("{:?} {:?} {:?}", s0, s1, s2 );
+            //                         ^   ^   ^
+            //                         |   |   |- slice of 2nd 'A'
+            //                         |   |- slice of 'plus'
+            //                         |- slice of 1st 'A'
+            println!( "{:?}", s );
+            *data += 1;
+            v0 + v2 // --> this will be new value of current 'A'
+        //  ^    ^ 
+        //  |    |- value of 2nd 'A'
+        //  |- value of 1st 'A'
+        }
+      | M { v0 }
       ;
-    WS: WS1
-      |
+
+    M(i32) : M star M { v0 * v2 }
+      | P { v0 }
       ;
-    Augmented : E '\0'
-              ;
+
+    P(i32) : num { if let Token::Num(n) = v0 { *n } else { return Err(format!("{:?}", s0)); } }
+      | lparen E rparen { v1 }
+      ;
+
+    E(i32) : A  { v0 };
 }
 ```
 
@@ -75,84 +87,49 @@ In [`example/calculator/src/main.rs`](example/calculator/src/main.rs),
 mod parser;
 
 fn main() {
-    let p = parser::EParser::new();
+    use parser::Token;
+    let input = vec![
+        Token::Num(1),
+        Token::Plus,
+        Token::Num(2),
+        Token::Star,
+        Token::LParen,
+        Token::Num(3),
+        Token::Plus,
+        Token::Num(4),
+        Token::RParen,
+    ];
 
-    let input = " 1  + 2*(3   + 4)  ";
-    let mut number_of_num: i32 = 0;
-    // `number_of_num` passed to parser as user_data
-    let res = match p.parse_str(input, 0 as char, &mut number_of_num) {
-        Ok(res) => res,
-        Err(e) => {
-            println!("Error: {}", e);
-            return;
+    let parser = parser::EParser::new();
+    let mut context = parser.begin();
+    let mut userdata: i32 = 0;
+    for token in input {
+        match parser.feed(&mut context, token, &mut userdata) {
+            Ok(_) => {}
+            Err(e) => {
+                println!("{:?}", e);
+                return;
+            }
         }
-    };
-    println!("Result: {}", res);
-    println!("Number of 'Num' in {}: {}", input, number_of_num);
+    }
+    let res = context.accept();
+    println!("{}", res);
+    println!("userdata: {}", userdata);
 }
 ```
 
 The result will be:
 ```
-"3   "+" 4"="3   + 4"
-" 1  "+" 2*(3   + 4)  "=" 1  + 2*(3   + 4)  "
-Result: 15
-Number of 'Num' in  1  + 2*(3   + 4)  : 4
-```
-
-### 2. Custom Terminals with `&[Term]` input
-in [`example/calculator/parser2.rs`](example/calculator/src/parser2.rs),
-```rust
-#[derive(Debug, Clone, Copy)]
-pub enum Token {
-    Num(i32),
-    Plus,
-    Star,
-    LParen,
-    RParen,
-    Ignore,
-    Eof,
-}
-///
-/// impl Hash, PartialEq, Eq, PartialOrd, Ord for Token
-/// ........
-/// 
-
-use rusty_lr_derive::lalr1;
-
-lalr1! {
-    %tokentype Token;
-    %start E;
-    %aug Augmented;
-
-    %token num Token::Num(0);
-    %token plus Token::Plus;
-    %token star Token::Star;
-    %token lparen Token::LParen;
-    %token rparen Token::RParen;
-    %token eof Token::Eof;
-
-    A(i32) : A plus A %left { v0 + v2 }
-      | M { v0 }
-      ;
-
-    M(i32) : M star M %left { v0 * v2 }
-      | P { v0 }
-      ;
-
-    P(i32) : num { if let Token::Num(n) = v0 { *n } else { unreachable!(); } }
-      | lparen E rparen { v1 }
-      ;
-
-    E(i32) : A  { v0 } ;
-
-    Augmented : E eof;
-}
-
+[Num(3)] [Plus] [Num(4)]
+[Num(3), Plus, Num(4)]
+[Num(1)] [Plus] [Num(2), Star, LParen, Num(3), Plus, Num(4), RParen]
+[Num(1), Plus, Num(2), Star, LParen, Num(3), Plus, Num(4), RParen]
+15
+userdata: 2
 ```
 
 ## Build Deterministic Finite Automata (DFA) from Context Free Grammar (CFG)
-This section will describe how to build DFA from CFG, on runtime.
+This section will describe how to build DFA from CFGs, on runtime.
 
 ### 1. Define terminal and non-terminal symbols
 
@@ -180,7 +157,7 @@ pub enum NonTerm {
 impl Display for TermType { ... }
 impl Display for NonTermType { ... }
 ```
-Or simply, you can use `char` or `u8` as terminal, and `&'static str` as non-terminal.
+Or simply, you can use `char` or `u8` as terminal, and `&'static str` or `String` as non-terminal.
 ***Any type*** that implements traits above can be used as terminal and non-terminal symbols.
 
 ### 2. Define production rules
@@ -200,21 +177,22 @@ let mut grammar = rusty_lr::Grammar::<Term,NonTerm>::new();
 grammar.add_rule(
     NonTerm::A,
     vec![Token::NonTerm(NonTerm::A), Token::Term(Term::Plus), Token::NonTerm(NonTerm::A)],
-    rusty_lr::ReduceType::Left, // reduce left
 );
 grammar.add_rule(
     NonTerm::A,
     vec![Token::NonTerm(NonTerm::M)],
-    rusty_lr::ReduceType::Error,
 );
+
+/// set reduce type
+grammar.set_reduce_type( Term::Plus, ReduceType::Left );
 ```
 
-Note that the production rule `A -> A + A` has a shift/reduce conflict, and the reduce type is set to `ReduceType::Left` to resolve the conflict. Letting the reduce type to `ReduceType::Error` will cause an error when a conflict occurs. This is useful when you want to know unexpected conflicts exist in your grammar.
+Note that the production rule `A -> A + A` has a shift/reduce conflict, and the reduce type is set to `ReduceType::Left` for terminal symbol `Plus` to resolve the conflict. Default will cause an error when a conflict occurs.
 
 reduce/reduce conflict (e.g. duplicated rules) will be always an error.
 
 ### 3. Build DFA
-Calling `grammar.build()` will build the DFA from the CFG.
+Calling `grammar.build()` or `grammar.build_lalr()` will build the DFA from the CFGs.
 
 ```rust
 let parser:rusty_lr::Parser<Term,NonTerm> = match grammar.build(NonTerm::Augmented) {
@@ -235,95 +213,108 @@ The `Error` type returned from `Grammar::build()` will contain the error informa
 The returned `Parser` struct contains the DFA and the production rules(cloned). It is completely independent from the `Grammar` struct, so you can drop the `Grammar` struct, or export the `Parser` struct to another module.
 
 ## Parse input sequence with generated DFA
-### 1. Parse without callback
-For given input sequence, you can parse it with `Parser::parse()` method. The input sequence must be slice of `Term`(`&[Term]`).
-
-If `Term` is `char`, you can use `&str` as input sequence (via `Parser::parse_str()`).
+For given input sequence, you can start parsing with `Parser::begin()` method. Once you get the `Context` from `begin()`, you will feed the input sequence to the parser with `parser.feed()` method.
 
 ```rust
 let terms = vec![ Term::Num, Term::Plus, Term::Num, Term::Mul, Term::LeftParen, Term::Num, Term::Plus, Term::Num, Term::RightParen];
 
-match parser.parse(&terms, Term::Eof) {
-    Ok(tree) => println!("Parse success {:?}", tree.slice(&terms)),
-    // error is Display if Term, NonTerm is Display
-    Err(err) => eprintln!("{:?}", err),
+// start parsing
+let mut context = parser.begin();
+
+// feed input sequence
+for term in terms {
+    match parser.feed(&mut context, term) {
+        Ok(_) => (),
+        Err(err) => {
+            eprintln!("{:?}", err);
+            return;
+        }
+    }
+}
+
+// end parsing
+match parser.end(&mut context, &Term::Eof) {
+    Ok(_) => (),
+    Err(err) => {
+        eprintln!("{:?}", err);
+        return;
+    }
 }
 ```
 
-Note that the given input sequence **must not** ends with `EOF`(the end symbol you provided in Augmented rule). And the final Augmented rule will not be reduced (`EOF` will be only used for lookahead/reduce check, not shifted).
+Not that `EOF` token is not feeded, but passed to `end()` method.
 
-### 2. Parse with callback
-For complex error handling and tracing parser action, you can implement `Callback` trait and pass it to `Parser::parse_with_callback(...)`.
+### Parse with callback
+
+For complex error handling and tracing parser action, you can implement `Callback` trait and pass it to `*_callback(...)` methods.
 
 ```rust
 struct ParserCallback {}
 
 impl rusty_lr::Callback<Term, NonTerm> for ParserCallback {
-    /// terminal symbol shifted and state transitioned
-    fn shift_and_goto(
-        &mut self,
-        parser: &rusty_lr::Parser<Term, NonTerm>,
-        context: &rusty_lr::Context<'_, Term, NonTerm>,
-    ) {
-        // println!("Shift {} and goto State{}", context.term(), context.state());
-    }
-    /// non-terminal symbol shifted and state transitioned
-    fn shift_and_goto_nonterm(
-        &mut self,
-        parser: &rusty_lr::Parser<Term, NonTerm>,
-        context: &rusty_lr::Context<'_, Term, NonTerm>,
-        nonterm: &NonTerm,
-    ) {
-        // println!("Shift {} and goto State{}", nonterm, context.state());
-    }
-    /// set of tokens reduced by rule
-    /// you can access the actual rule struct by parser.rules[rule_id]
+    /// Error type for callback
+    type Error = String;
+
     fn reduce(
         &mut self,
-        parser: &rusty_lr::Parser<Term, NonTerm>,
-        context: &rusty_lr::Context<'_, Term, NonTerm>,
+        rules: &[rusty_lr::ProductionRule<char, String>],
+        states: &[rusty_lr::State<char, String>],
+        state_stack: &[usize],
         rule: usize,
-    ) {
-        // rule is display if term, nonterm is display
-        println!("Reduce by {}", parser.rules[rule]);
+    ) -> Result<(), Self::Error> {
+        println!("Reduce by {}", rules[rule]);
+        Ok(())
     }
-
-    /// error handling
-    fn invalid_term(
+    fn shift_and_goto(
         &mut self,
-        parser: &rusty_lr::Parser<Term, NonTerm>,
-        context: &rusty_lr::Context<'_, Term, NonTerm>,
-    ) {
-        eprintln!(
-            "Invalid terminal {} at state {}",
-            context.term(),
-            context.state()
-        );
+        rules: &[rusty_lr::ProductionRule<char, String>],
+        states: &[rusty_lr::State<char, String>],
+        state_stack: &[usize],
+        term: &char,
+    ) -> Result<(), Self::Error> {
+        Ok(())
     }
-    fn invalid_nonterm(
+    fn shift_and_goto_nonterm(
         &mut self,
-        parser: &rusty_lr::Parser<Term, NonTerm>,
-        context: &rusty_lr::Context<'_, Term, NonTerm>,
-        nonterm: &NonTerm,
-    ) {
-        eprintln!(
-            "Invalid non-terminal {} at state {}",
-            nonterm,
-            context.state()
-        );
+        rules: &[rusty_lr::ProductionRule<char, String>],
+        states: &[rusty_lr::State<char, String>],
+        state_stack: &[usize],
+        nonterm: &String,
+    ) -> Result<(), Self::Error> {
+        Ok(())
     }
 }
 ```
 
 ```rust
-let mut callback = ParserCallback{};
-match parser.parse_with_callback(&terms, &mut callback, Term::Eof) {
-    Ok(tree) => println!("Parse success {:?}", tree.slice(&terms)),
-    Err(err) => eprintln!("{:?}", err),
+let terms = vec![ Term::Num, Term::Plus, Term::Num, Term::Mul, Term::LeftParen, Term::Num, Term::Plus, Term::Num, Term::RightParen];
+
+// start parsing
+let mut context = parser.begin();
+let mut callback = ParserCallback {};
+
+// feed input sequence
+for term in terms {
+    match parser.feed_callback(&mut context, &mut callback, term) {
+        Ok(_) => (),
+        Err(err) => {
+            eprintln!("{:?}", err);
+            return;
+        }
+    }
+}
+
+// end parsing
+match parser.end_callback(&mut context, &mut callback, &Term::Eof) {
+    Ok(_) => (),
+    Err(err) => {
+        eprintln!("{:?}", err);
+        return;
+    }
 }
 ```
 
-The output will be:
+The result will be:
 ```
 Reduce by P -> Num
 Reduce by M -> P
@@ -336,29 +327,12 @@ Reduce by A -> M
 Reduce by P -> Num
 Reduce by M -> P
 Reduce by A -> M
-Reduce by A -> A + A (Left)
+Reduce by A -> A + A
 Reduce by E -> A
 Reduce by P -> ( E )
 Reduce by M -> P
-Reduce by M -> M * M (Left)
+Reduce by M -> M * M
 Reduce by A -> M
-Reduce by A -> A + A (Left)
+Reduce by A -> A + A
 Reduce by E -> A
-Parse success [Num, Plus, Num, Mul, LeftParen, Num, Plus, Num, RightParen]
-```
-
-### 3. `Tree` struct as parsing result
-`Tree` struct is constructed from parsing result. You can access the reduced rule as tree structure.
-
-```rust
-// get slice of input sequence that this tree holds
-let slc = tree.slice(&terms);
-
-match tree {
-    Tree::Terminal( terminal_index:usize ) => { println!("Terminal {:?}", terms[terminal_index]); }
-    Tree::NonTerminal( rule_index:usize, reduced_tokens:Vec<Tree>, begin_index:usize ) => {
-        let rule = &parser.rules[rule_index];
-        ...
-    }
-}
 ```

@@ -2,7 +2,7 @@ use std::fmt::Debug;
 use std::fmt::Display;
 
 use crate::rule::LookaheadRule;
-use crate::rule::LookaheadRuleRef;
+use crate::rule::LookaheadRuleRefSet;
 use crate::rule::ShiftedRule;
 use crate::ProductionRule;
 
@@ -16,22 +16,18 @@ pub enum BuildError<'a, Term, NonTerm> {
         rules: &'a Vec<ProductionRule<Term, NonTerm>>,
     },
 
-    /// shift/reduce conflict, one of the rule have ReduceType::Error
-    ShiftReduceConflictError {
-        reduce: usize,
-        shift: LookaheadRuleRef<Term>,
-        rules: &'a Vec<ProductionRule<Term, NonTerm>>,
-    },
-
-    /// shift/reduce conflict, one has ReduceType::Left and other has ReduceType::Right
+    /// shift/reduce conflict
     ShiftReduceConflict {
         reduce: usize,
-        left: LookaheadRuleRef<Term>,
-        right: LookaheadRuleRef<Term>,
+        shift: LookaheadRuleRefSet<Term>,
+        term: Term,
         rules: &'a Vec<ProductionRule<Term, NonTerm>>,
     },
 
     NoAugmented,
+
+    /// different reduce type assigned to same terminal symbol
+    MultipleReduceType(Term),
 }
 
 impl<'a, Term: Display + Clone, NonTerm: Display + Clone> Display
@@ -53,60 +49,46 @@ and
 {}"#,
                 lookahead, grammar[*rule1], grammar[*rule2]
             )?,
-            Self::ShiftReduceConflictError {
-                reduce,
-                shift,
-                rules: grammar,
-            } => write!(
-                f,
-                r#"Shift/Reduce Conflict
-This rule has ReduceType::Error:
-{}
-and the reduce rule is:
-{}
-Try rearanging the rules or change ReduceType to Left or Right."#,
-                LookaheadRule {
-                    rule: ShiftedRule {
-                        rule: grammar[shift.rule.rule].clone(),
-                        shifted: shift.rule.shifted,
-                    },
-                    lookaheads: shift.lookaheads.clone(),
-                },
-                grammar[*reduce],
-            )?,
             Self::ShiftReduceConflict {
                 reduce,
-                left,
-                right,
+                shift,
+                term,
                 rules: grammar,
-            } => write!(
-                f,
-                r#"Shift/Reduce Conflict
-This rule has ReduceType::Left:
+            } => {
+                write!(
+                    f,
+                    r#"Shift/Reduce Conflict
+NextTerm: {}
+Reduce Rule:
 {}
-this rule has ReduceType::Right:
-{}
-and the reduce rule is:
-{}
-Try rearanging the rules or change ReduceType to Left or Right."#,
-                LookaheadRule {
-                    rule: ShiftedRule {
-                        rule: grammar[left.rule.rule].clone(),
-                        shifted: left.rule.shifted,
-                    },
-                    lookaheads: left.lookaheads.clone(),
-                },
-                LookaheadRule {
-                    rule: ShiftedRule {
-                        rule: grammar[right.rule.rule].clone(),
-                        shifted: right.rule.shifted,
-                    },
-                    lookaheads: right.lookaheads.clone(),
-                },
-                grammar[*reduce],
-            )?,
+Shift Rules:
+"#,
+                    term,
+                    grammar[*reduce],
+                )?;
+                for (rule, lookaheads) in shift.rules.iter() {
+                    writeln!(
+                        f,
+                        "{}",
+                        LookaheadRule {
+                            rule: ShiftedRule {
+                                rule: grammar[rule.rule].clone(),
+                                shifted: rule.shifted,
+                            },
+                            lookaheads: lookaheads.clone(),
+                        }
+                    )?;
+                }
+                write!(f, 
+                    "Try rearanging the rules or set ReduceType to Terminal to resolve the conflict.",
+                )?;
+            }
             Self::NoAugmented => {
                 write!(f, "No Augmented Rule found.")?;
+            }
+
+            Self::MultipleReduceType(term) => {
+                write!(f, "Multiple ReduceType for terminal symbol: {}", term)?;
             }
         }
         Ok(())
@@ -130,60 +112,45 @@ and
 {:?}"#,
                 lookahead, grammar[*rule1], grammar[*rule2]
             )?,
-            Self::ShiftReduceConflictError {
-                reduce,
-                shift,
-                rules: grammar,
-            } => write!(
-                f,
-                r#"Shift/Reduce Conflict
-This rule has ReduceType::Error:
-{:?}
-and the reduce rule is:
-{:?}
-Try rearanging the rules or change ReduceType to Left or Right."#,
-                LookaheadRule {
-                    rule: ShiftedRule {
-                        rule: grammar[shift.rule.rule].clone(),
-                        shifted: shift.rule.shifted,
-                    },
-                    lookaheads: shift.lookaheads.clone(),
-                },
-                grammar[*reduce],
-            )?,
             Self::ShiftReduceConflict {
                 reduce,
-                left,
-                right,
+                shift,
+                term,
                 rules: grammar,
-            } => write!(
-                f,
-                r#"Shift/Reduce Conflict
-This rule has ReduceType::Left:
+            } => {
+                write!(
+                    f,
+                    r#"Shift/Reduce Conflict
+NextTerm: {:?}
+Reduce Rule:
 {:?}
-this rule has ReduceType::Right:
-{:?}
-and the reduce rule is:
-{:?}
-Try rearanging the rules or change ReduceType to Left or Right."#,
-                LookaheadRule {
-                    rule: ShiftedRule {
-                        rule: grammar[left.rule.rule].clone(),
-                        shifted: left.rule.shifted,
-                    },
-                    lookaheads: left.lookaheads.clone(),
-                },
-                LookaheadRule {
-                    rule: ShiftedRule {
-                        rule: grammar[right.rule.rule].clone(),
-                        shifted: right.rule.shifted,
-                    },
-                    lookaheads: right.lookaheads.clone(),
-                },
-                grammar[*reduce],
-            )?,
+Shift Rules:
+"#,
+                    term,
+                    grammar[*reduce],
+                )?;
+                for (rule, lookaheads) in shift.rules.iter() {
+                    writeln!(
+                        f,
+                        "{:?}",
+                        LookaheadRule {
+                            rule: ShiftedRule {
+                                rule: grammar[rule.rule].clone(),
+                                shifted: rule.shifted,
+                            },
+                            lookaheads: lookaheads.clone(),
+                        }
+                    )?;
+                }
+                write!(f, 
+                    "Try rearanging the rules or set ReduceType to Terminal to resolve the conflict.",
+                )?;
+            }
             Self::NoAugmented => {
                 write!(f, "No Augmented Rule found.")?;
+            }
+            Self::MultipleReduceType(term) => {
+                write!(f, "Multiple ReduceType for terminal symbol: {:?}", term)?;
             }
         }
         Ok(())

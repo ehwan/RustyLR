@@ -1,48 +1,102 @@
 #![allow(unused_imports)]
 
-use rusty_lr_derive::lalr1_str;
-use rusty_lr_derive::lr1_str;
+use rusty_lr_derive::lalr1;
+use rusty_lr_derive::lr1;
+
+#[derive(Debug, Clone, Copy)]
+pub enum Token {
+    Num(i32),
+    Plus,
+    Star,
+    LParen,
+    RParen,
+    Eof,
+}
+impl Token {
+    pub fn enum_index(&self) -> usize {
+        match self {
+            Token::Num(_) => 0,
+            Token::Plus => 1,
+            Token::Star => 2,
+            Token::LParen => 3,
+            Token::RParen => 4,
+            Token::Eof => 5,
+        }
+    }
+}
+impl std::hash::Hash for Token {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.enum_index().hash(state);
+    }
+}
+impl std::cmp::PartialEq for Token {
+    fn eq(&self, other: &Self) -> bool {
+        self.enum_index() == other.enum_index()
+    }
+}
+impl std::cmp::Eq for Token {}
+impl PartialOrd for Token {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.enum_index().partial_cmp(&other.enum_index())
+    }
+}
+impl Ord for Token {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.enum_index().cmp(&other.enum_index())
+    }
+}
 
 // this define struct `EParser`
 // where 'E' is the start symbol
-lalr1_str! {
-    // define type of user data
+lalr1! {
+    // type of userdata
     %userdata i32;
+    // typeof token
+    %tokentype Token;
 
-    // start symbol ( for final reduction )
+    // start symbol
     %start E;
+    // eof symbol; for augmented rule generation
+    %eof Token::Eof;
 
-    // set augmented production rule
-    %augmented Augmented;
+    // define tokens
+    %token num Token::Num(0);
+    %token plus Token::Plus;
+    %token star Token::Star;
+    %token lparen Token::LParen;
+    %token rparen Token::RParen;
 
-    // v{N} is the value of the N-th symbol in the production rule
-    // s{N} is the &str(or &[Term]) of the N-th symbol
-    // (%left|%reduce|%right|%shift) to resolve shift/reduce conflict
-    // reduce action must be evaluated into type (`i32` in this case) you provided
-    A(i32): A r"+" A %left { println!("A: {:?}+{:?}={:?}", s0, s2, s); v0 + v2 }
-          | M { v0 }
-          ;
-    M(i32): M '*' M %left { v0 * v2 }
-          | P { v0 }
-          ;
-    P(i32): Num { v0 }
-          | WS '(' E ')' WS { v2 }
-          ;
-    Num(i32): WS Num0 WS { *data += 1; s1.parse().unwrap() }; // user data can be accessed by `data`
-    Num0: Digit Num0
-       | Digit
-       ;
-    Digit : '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
-          ;
-    E(i32): A { v0 }
-          ;
+    // resolving shift/reduce conflict
+    %left plus;
+    %left star;
 
-    WS1: " " WS1
-      | b" "
+    // s{N} is slice of shifted terminal symbols captured by N'th symbol
+    // v{N} is value of N'th symbol ( if it has value )
+    // s is slice of shifted terminal symbols captured by current rule
+    // userdata canbe accessed by `data` ( &mut i32, for current situation )
+    A(i32) : A plus A {
+            println!("{:?} {:?} {:?}", s0, s1, s2 );
+            //                         ^   ^   ^
+            //                         |   |   |- slice of 2nd 'A'
+            //                         |   |- slice of 'plus'
+            //                         |- slice of 1st 'A'
+            println!( "{:?}", s );
+            *data += 1;
+            v0 + v2 // --> this will be new value of current 'A'
+        //  ^    ^
+        //  |    |- value of 2nd 'A'
+        //  |- value of 1st 'A'
+        }
+      | M { v0 }
       ;
-    WS: WS1
-      |
+
+    M(i32) : M star M { v0 * v2 }
+      | P { v0 }
       ;
-    Augmented : E '\0'
-              ;
+
+    P(i32) : num { if let Token::Num(n) = v0 { *n } else { return Err(format!("{:?}", s0)); } }
+      | lparen E rparen { v1 }
+      ;
+
+    E(i32) : A  { v0 };
 }

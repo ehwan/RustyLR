@@ -33,7 +33,7 @@ impl<Term: Hash + Eq, NonTerm: Hash + Eq> State<Term, NonTerm> {
         self.shift_goto_map_nonterm.get(nonterm).copied()
     }
     /// feed one token and get action
-    pub fn reduce<'a>(&'a self, term: &Term) -> Option<usize> {
+    pub fn reduce(&self, term: &Term) -> Option<usize> {
         self.reduce_map.get(term).copied()
     }
 }

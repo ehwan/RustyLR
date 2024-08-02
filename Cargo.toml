@@ -1,2 +1,7 @@
 [workspace]
-members = ["rusty_lr", "example/calculator", "rusty_lr_derive"]
+members = [
+  "rusty_lr",
+  "example/calculator",
+  "rusty_lr_derive",
+  "example/lrtest",
+]

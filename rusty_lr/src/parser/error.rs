@@ -1,54 +1,50 @@
 use std::fmt::Debug;
 use std::fmt::Display;
 
-use super::context::Context;
-use super::context::ContextStr;
-use super::parser::Parser;
 use crate::rule::ShiftedRule;
+use crate::state::State;
+use crate::ProductionRule;
 
-pub enum ParseError<'a, Term, NonTerm> {
-    // #[error("Invalid Non-Terminal: {0}")]
+pub enum ParseError<'a, Term, NonTerm, CallbackError> {
     InvalidNonTerminal(
-        NonTerm,
-        &'a Parser<Term, NonTerm>,
-        Context<'a, Term, NonTerm>,
+        &'a NonTerm,
+        &'a [ProductionRule<Term, NonTerm>],
+        &'a [State<Term, NonTerm>],
+        Vec<usize>,
     ),
 
-    // #[error("Invalid Terminal: {0}")]
     InvalidTerminal(
-        &'a Term,
-        &'a Parser<Term, NonTerm>,
-        Context<'a, Term, NonTerm>,
+        Term,
+        &'a [ProductionRule<Term, NonTerm>],
+        &'a [State<Term, NonTerm>],
+        Vec<usize>,
     ),
 
-    // #[error("State Stack is empty; This should not be happened if DFA is generated correctly")]
-    StateStackEmpty,
+    /// Error from callback trait
+    Callback(CallbackError),
 
-    // #[error("State Stack is not enough for reduce; This should not be happened if DFA is generated correctly")]
-    StateStackNotEnough,
-
-    // #[error("Invalid State: Goto {0}; This should not be happened if DFA is generated correctly")]
-    InvalidState(usize),
+    /// Error from macro reduce action
+    CustomMessage(String),
 }
 
-impl<'a, Term: Display + Clone, NonTerm: Display + Clone> Display
-    for ParseError<'a, Term, NonTerm>
+impl<'a, Term: Display + Clone, NonTerm: Display + Clone, CallbackError: Display> Display
+    for ParseError<'a, Term, NonTerm, CallbackError>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ParseError::InvalidNonTerminal(nonterm, parser, context) => {
+            ParseError::InvalidNonTerminal(nonterm, rules, states, state_stack) => {
                 writeln!(
                     f,
                     "Invalid Non-Terminal: {} at state {}",
                     nonterm,
-                    context.state()
+                    state_stack.last().unwrap()
                 )?;
-                let state = context.state();
-                let state = &parser.states[state];
+                let state = *state_stack.last().unwrap();
+                let state = &states[state];
 
                 writeln!(f, "Terminals for reduce:")?;
                 for (reduce_token, ruleid) in state.reduce_map.iter() {
-                    writeln!(f, "{}: {}", reduce_token, parser.rules[*ruleid])?;
+                    writeln!(f, "{}: {}", reduce_token, rules[*ruleid])?;
                 }
                 writeln!(f, "Terminals for shift:")?;
                 for (shift_token, next_state) in state.shift_goto_map_term.iter() {
@@ -59,11 +55,11 @@ impl<'a, Term: Display + Clone, NonTerm: Display + Clone> Display
                     writeln!(f, "{}: {}", shift_token, next_state)?;
                 }
                 writeln!(f, "Backtrace states:")?;
-                for state_id in context.state_stack.iter().rev() {
-                    let state = &parser.states[*state_id];
+                for state_id in state_stack.iter().rev() {
+                    let state = &states[*state_id];
                     for (rule, lookaheads) in state.ruleset.rules.iter() {
                         let shifted = ShiftedRule {
-                            rule: parser.rules[rule.rule].clone(),
+                            rule: rules[rule.rule].clone(),
                             shifted: rule.shifted,
                         };
                         write!(f, "{} / ", shifted)?;
@@ -75,303 +71,73 @@ impl<'a, Term: Display + Clone, NonTerm: Display + Clone> Display
                     writeln!(f, "{:-^40}", "Prev State")?;
                 }
             }
-            ParseError::InvalidTerminal(term, parser, context) => {
-                writeln!(f, "Invalid Terminal: {} at state {}", term, context.state())?;
-                let state = context.state();
-                let state = &parser.states[state];
-
-                writeln!(f, "Terminals for reduce:")?;
-                for (reduce_token, ruleid) in state.reduce_map.iter() {
-                    writeln!(f, "{}: {}", reduce_token, parser.rules[*ruleid])?;
-                }
-                writeln!(f, "Terminals for shift:")?;
-                for (shift_token, next_state) in state.shift_goto_map_term.iter() {
-                    writeln!(f, "{}: {}", shift_token, next_state)?;
-                }
-                writeln!(f, "NonTerminals for shift:")?;
-                for (shift_token, next_state) in state.shift_goto_map_nonterm.iter() {
-                    writeln!(f, "{}: {}", shift_token, next_state)?;
-                }
-                writeln!(f, "Backtrace states:")?;
-                for state_id in context.state_stack.iter().rev() {
-                    let state = &parser.states[*state_id];
-                    for (rule, lookaheads) in state.ruleset.rules.iter() {
-                        let shifted = ShiftedRule {
-                            rule: parser.rules[rule.rule].clone(),
-                            shifted: rule.shifted,
-                        };
-                        write!(f, "{} / ", shifted)?;
-                        for lookahead in lookaheads.iter() {
-                            write!(f, "{}, ", lookahead)?;
-                        }
-                        writeln!(f)?;
-                    }
-                    writeln!(f, "{:-^40}", "Prev State")?;
-                }
-            }
-            ParseError::StateStackEmpty => {
-                write!(
-                f,
-                "State Stack is empty; This should not be happened if DFA is generated correctly"
-            )?;
-            }
-            ParseError::StateStackNotEnough => {
-                write!(
-                f,
-                "State Stack is not enough for reduce; This should not be happened if DFA is generated correctly"
-            )?;
-            }
-            ParseError::InvalidState(state) => {
-                write!(f, "Invalid State: Goto {}; This should not be happened if DFA is generated correctly", state)?;
-            }
-        }
-        Ok(())
-    }
-}
-impl<'a, Term: Debug + Clone, NonTerm: Debug + Clone> Debug for ParseError<'a, Term, NonTerm> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ParseError::InvalidNonTerminal(nonterm, parser, context) => {
+            ParseError::InvalidTerminal(term, rules, states, state_stack) => {
                 writeln!(
                     f,
-                    "Invalid Non-Terminal: {:?} at state {}",
-                    nonterm,
-                    context.state()
-                )?;
-                let state = context.state();
-                let state = &parser.states[state];
-
-                writeln!(f, "Terminals for reduce:")?;
-                for (reduce_token, ruleid) in state.reduce_map.iter() {
-                    writeln!(f, "{:?}: {:?}", reduce_token, parser.rules[*ruleid])?;
-                }
-                writeln!(f, "Terminals for shift:")?;
-                for (shift_token, next_state) in state.shift_goto_map_term.iter() {
-                    writeln!(f, "{:?}: {}", shift_token, next_state)?;
-                }
-                writeln!(f, "NonTerminals for shift:")?;
-                for (shift_token, next_state) in state.shift_goto_map_nonterm.iter() {
-                    writeln!(f, "{:?}: {}", shift_token, next_state)?;
-                }
-                writeln!(f, "Backtrace states:")?;
-                for state_id in context.state_stack.iter().rev() {
-                    let state = &parser.states[*state_id];
-                    for (rule, lookaheads) in state.ruleset.rules.iter() {
-                        let shifted = ShiftedRule {
-                            rule: parser.rules[rule.rule].clone(),
-                            shifted: rule.shifted,
-                        };
-                        write!(f, "{:?} / ", shifted)?;
-                        for lookahead in lookaheads.iter() {
-                            write!(f, "{:?}, ", lookahead)?;
-                        }
-                        writeln!(f)?;
-                    }
-                    writeln!(f, "{:-^40}", "Prev State")?;
-                }
-            }
-            ParseError::InvalidTerminal(term, parser, context) => {
-                writeln!(
-                    f,
-                    "Invalid Terminal: {:?} at state {}",
+                    "Invalid Terminal: {} at state {}",
                     term,
-                    context.state()
+                    state_stack.last().unwrap()
                 )?;
-                let state = context.state();
-                let state = &parser.states[state];
+                let state = *state_stack.last().unwrap();
+                let state = &states[state];
 
                 writeln!(f, "Terminals for reduce:")?;
                 for (reduce_token, ruleid) in state.reduce_map.iter() {
-                    writeln!(f, "{:?}: {:?}", reduce_token, parser.rules[*ruleid])?;
+                    writeln!(f, "{}: {}", reduce_token, rules[*ruleid])?;
                 }
                 writeln!(f, "Terminals for shift:")?;
                 for (shift_token, next_state) in state.shift_goto_map_term.iter() {
-                    writeln!(f, "{:?}: {}", shift_token, next_state)?;
+                    writeln!(f, "{}: {}", shift_token, next_state)?;
                 }
                 writeln!(f, "NonTerminals for shift:")?;
                 for (shift_token, next_state) in state.shift_goto_map_nonterm.iter() {
-                    writeln!(f, "{:?}: {}", shift_token, next_state)?;
+                    writeln!(f, "{}: {}", shift_token, next_state)?;
                 }
                 writeln!(f, "Backtrace states:")?;
-                for state_id in context.state_stack.iter().rev() {
-                    let state = &parser.states[*state_id];
+                for state_id in state_stack.iter().rev() {
+                    let state = &states[*state_id];
                     for (rule, lookaheads) in state.ruleset.rules.iter() {
                         let shifted = ShiftedRule {
-                            rule: parser.rules[rule.rule].clone(),
+                            rule: rules[rule.rule].clone(),
                             shifted: rule.shifted,
                         };
-                        write!(f, "{:?} / ", shifted)?;
+                        write!(f, "{} / ", shifted)?;
                         for lookahead in lookaheads.iter() {
-                            write!(f, "{:?}, ", lookahead)?;
+                            write!(f, "{}, ", lookahead)?;
                         }
                         writeln!(f)?;
                     }
                     writeln!(f, "{:-^40}", "Prev State")?;
                 }
             }
-            ParseError::StateStackEmpty => {
-                write!(
-                f,
-                "State Stack is empty; This should not be happened if DFA is generated correctly"
-            )?;
+            ParseError::Callback(message) => {
+                write!(f, "Callback Error: {}", message)?;
             }
-            ParseError::StateStackNotEnough => {
-                write!(
-                f,
-                "State Stack is not enough for reduce; This should not be happened if DFA is generated correctly"
-            )?;
-            }
-            ParseError::InvalidState(state) => {
-                write!(f, "Invalid State: Goto {}; This should not be happened if DFA is generated correctly", state)?;
+            ParseError::CustomMessage(message) => {
+                write!(f, "{}", message)?;
             }
         }
         Ok(())
     }
 }
-
-pub enum ParseErrorStr<'a, Term, NonTerm> {
-    // #[error("Invalid Non-Terminal: {0}")]
-    InvalidNonTerminal(
-        NonTerm,
-        &'a Parser<Term, NonTerm>,
-        ContextStr<'a, Term, NonTerm>,
-    ),
-
-    // #[error("Invalid Terminal: {0}")]
-    InvalidTerminal(
-        char,
-        &'a Parser<Term, NonTerm>,
-        ContextStr<'a, Term, NonTerm>,
-    ),
-
-    // #[error("State Stack is empty; This should not be happened if DFA is generated correctly")]
-    StateStackEmpty,
-
-    // #[error("State Stack is not enough for reduce; This should not be happened if DFA is generated correctly")]
-    StateStackNotEnough,
-
-    // #[error("Invalid State: Goto {0}; This should not be happened if DFA is generated correctly")]
-    InvalidState(usize),
-}
-
-impl<'a, Term: Display + Clone, NonTerm: Display + Clone> Display
-    for ParseErrorStr<'a, Term, NonTerm>
+impl<'a, Term: Debug + Clone, NonTerm: Debug + Clone, CallbackError: Debug> Debug
+    for ParseError<'a, Term, NonTerm, CallbackError>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ParseErrorStr::InvalidNonTerminal(nonterm, parser, context) => {
-                writeln!(
-                    f,
-                    "Invalid Non-Terminal: {} at state {}",
-                    nonterm,
-                    context.state()
-                )?;
-                let state = context.state();
-                let state = &parser.states[state];
-
-                writeln!(f, "Terminals for reduce:")?;
-                for (reduce_token, ruleid) in state.reduce_map.iter() {
-                    writeln!(f, "{}: {}", reduce_token, parser.rules[*ruleid])?;
-                }
-                writeln!(f, "Terminals for shift:")?;
-                for (shift_token, next_state) in state.shift_goto_map_term.iter() {
-                    writeln!(f, "{}: {}", shift_token, next_state)?;
-                }
-                writeln!(f, "NonTerminals for shift:")?;
-                for (shift_token, next_state) in state.shift_goto_map_nonterm.iter() {
-                    writeln!(f, "{}: {}", shift_token, next_state)?;
-                }
-                writeln!(f, "Backtrace states:")?;
-                for state_id in context.state_stack.iter().rev() {
-                    let state = &parser.states[*state_id];
-                    for (rule, lookaheads) in state.ruleset.rules.iter() {
-                        let shifted = ShiftedRule {
-                            rule: parser.rules[rule.rule].clone(),
-                            shifted: rule.shifted,
-                        };
-                        write!(f, "{} / ", shifted)?;
-                        for lookahead in lookaheads.iter() {
-                            write!(f, "{}, ", lookahead)?;
-                        }
-                        writeln!(f)?;
-                    }
-                    writeln!(f, "{:-^40}", "Prev State")?;
-                }
-            }
-            ParseErrorStr::InvalidTerminal(term, parser, context) => {
-                writeln!(
-                    f,
-                    "Invalid Terminal: '{}' at state {}",
-                    term,
-                    context.state()
-                )?;
-                let state = context.state();
-                let state = &parser.states[state];
-
-                writeln!(f, "Terminals for reduce:")?;
-                for (reduce_token, ruleid) in state.reduce_map.iter() {
-                    writeln!(f, "{}: {}", reduce_token, parser.rules[*ruleid])?;
-                }
-                writeln!(f, "Terminals for shift:")?;
-                for (shift_token, next_state) in state.shift_goto_map_term.iter() {
-                    writeln!(f, "'{}': {}", shift_token, next_state)?;
-                }
-                writeln!(f, "NonTerminals for shift:")?;
-                for (shift_token, next_state) in state.shift_goto_map_nonterm.iter() {
-                    writeln!(f, "{}: {}", shift_token, next_state)?;
-                }
-                writeln!(f, "Backtrace states:")?;
-                for state_id in context.state_stack.iter().rev() {
-                    let state = &parser.states[*state_id];
-                    for (rule, lookaheads) in state.ruleset.rules.iter() {
-                        let shifted = ShiftedRule {
-                            rule: parser.rules[rule.rule].clone(),
-                            shifted: rule.shifted,
-                        };
-                        write!(f, "{} / ", shifted)?;
-                        for lookahead in lookaheads.iter() {
-                            write!(f, "'{}', ", lookahead)?;
-                        }
-                        writeln!(f)?;
-                    }
-                    writeln!(f, "{:-^40}", "Prev State")?;
-                }
-            }
-            ParseErrorStr::StateStackEmpty => {
-                write!(
-                f,
-                "State Stack is empty; This should not be happened if DFA is generated correctly"
-            )?;
-            }
-            ParseErrorStr::StateStackNotEnough => {
-                write!(
-                f,
-                "State Stack is not enough for reduce; This should not be happened if DFA is generated correctly"
-            )?;
-            }
-            ParseErrorStr::InvalidState(state) => {
-                write!(f, "Invalid State: Goto {}; This should not be happened if DFA is generated correctly", state)?;
-            }
-        }
-        Ok(())
-    }
-}
-impl<'a, Term: Debug + Clone, NonTerm: Debug + Clone> Debug for ParseErrorStr<'a, Term, NonTerm> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ParseErrorStr::InvalidNonTerminal(nonterm, parser, context) => {
+            ParseError::InvalidNonTerminal(nonterm, rules, states, state_stack) => {
                 writeln!(
                     f,
                     "Invalid Non-Terminal: {:?} at state {}",
                     nonterm,
-                    context.state()
+                    state_stack.last().unwrap()
                 )?;
-                let state = context.state();
-                let state = &parser.states[state];
+                let state = *state_stack.last().unwrap();
+                let state = &states[state];
 
                 writeln!(f, "Terminals for reduce:")?;
                 for (reduce_token, ruleid) in state.reduce_map.iter() {
-                    writeln!(f, "{:?}: {:?}", reduce_token, parser.rules[*ruleid])?;
+                    writeln!(f, "{:?}: {:?}", reduce_token, rules[*ruleid])?;
                 }
                 writeln!(f, "Terminals for shift:")?;
                 for (shift_token, next_state) in state.shift_goto_map_term.iter() {
@@ -382,11 +148,11 @@ impl<'a, Term: Debug + Clone, NonTerm: Debug + Clone> Debug for ParseErrorStr<'a
                     writeln!(f, "{:?}: {}", shift_token, next_state)?;
                 }
                 writeln!(f, "Backtrace states:")?;
-                for state_id in context.state_stack.iter().rev() {
-                    let state = &parser.states[*state_id];
+                for state_id in state_stack.iter().rev() {
+                    let state = &states[*state_id];
                     for (rule, lookaheads) in state.ruleset.rules.iter() {
                         let shifted = ShiftedRule {
-                            rule: parser.rules[rule.rule].clone(),
+                            rule: rules[rule.rule].clone(),
                             shifted: rule.shifted,
                         };
                         write!(f, "{:?} / ", shifted)?;
@@ -398,19 +164,19 @@ impl<'a, Term: Debug + Clone, NonTerm: Debug + Clone> Debug for ParseErrorStr<'a
                     writeln!(f, "{:-^40}", "Prev State")?;
                 }
             }
-            ParseErrorStr::InvalidTerminal(term, parser, context) => {
+            ParseError::InvalidTerminal(term, rules, states, state_stack) => {
                 writeln!(
                     f,
                     "Invalid Terminal: {:?} at state {}",
                     term,
-                    context.state()
+                    state_stack.last().unwrap()
                 )?;
-                let state = context.state();
-                let state = &parser.states[state];
+                let state = *state_stack.last().unwrap();
+                let state = &states[state];
 
                 writeln!(f, "Terminals for reduce:")?;
                 for (reduce_token, ruleid) in state.reduce_map.iter() {
-                    writeln!(f, "{:?}: {:?}", reduce_token, parser.rules[*ruleid])?;
+                    writeln!(f, "{:?}: {:?}", reduce_token, rules[*ruleid])?;
                 }
                 writeln!(f, "Terminals for shift:")?;
                 for (shift_token, next_state) in state.shift_goto_map_term.iter() {
@@ -421,11 +187,11 @@ impl<'a, Term: Debug + Clone, NonTerm: Debug + Clone> Debug for ParseErrorStr<'a
                     writeln!(f, "{:?}: {}", shift_token, next_state)?;
                 }
                 writeln!(f, "Backtrace states:")?;
-                for state_id in context.state_stack.iter().rev() {
-                    let state = &parser.states[*state_id];
+                for state_id in state_stack.iter().rev() {
+                    let state = &states[*state_id];
                     for (rule, lookaheads) in state.ruleset.rules.iter() {
                         let shifted = ShiftedRule {
-                            rule: parser.rules[rule.rule].clone(),
+                            rule: rules[rule.rule].clone(),
                             shifted: rule.shifted,
                         };
                         write!(f, "{:?} / ", shifted)?;
@@ -437,20 +203,11 @@ impl<'a, Term: Debug + Clone, NonTerm: Debug + Clone> Debug for ParseErrorStr<'a
                     writeln!(f, "{:-^40}", "Prev State")?;
                 }
             }
-            ParseErrorStr::StateStackEmpty => {
-                write!(
-                f,
-                "State Stack is empty; This should not be happened if DFA is generated correctly"
-            )?;
+            ParseError::Callback(message) => {
+                write!(f, "Callback Error: {:?}", message)?;
             }
-            ParseErrorStr::StateStackNotEnough => {
-                write!(
-                f,
-                "State Stack is not enough for reduce; This should not be happened if DFA is generated correctly"
-            )?;
-            }
-            ParseErrorStr::InvalidState(state) => {
-                write!(f, "Invalid State: Goto {}; This should not be happened if DFA is generated correctly", state)?;
+            ParseError::CustomMessage(message) => {
+                write!(f, "{}", message)?;
             }
         }
         Ok(())

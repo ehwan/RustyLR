@@ -11,15 +11,12 @@ use crate::token::Token;
 pub enum ReduceType {
     Left,
     Right,
-    /// error when conflict occurs
-    Error,
 }
 impl Display for ReduceType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ReduceType::Left => write!(f, "Left"),
             ReduceType::Right => write!(f, "Right"),
-            ReduceType::Error => write!(f, "Error"),
         }
     }
 }
@@ -30,7 +27,6 @@ impl Display for ReduceType {
 pub struct ProductionRule<Term, NonTerm> {
     pub name: NonTerm,
     pub rule: Vec<Token<Term, NonTerm>>,
-    pub reduce_type: ReduceType,
 }
 impl<Term: Display, NonTerm: Display> Display for ProductionRule<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -40,11 +36,6 @@ impl<Term: Display, NonTerm: Display> Display for ProductionRule<Term, NonTerm> 
             if id < self.rule.len() - 1 {
                 write!(f, " ")?;
             }
-        }
-        match self.reduce_type {
-            ReduceType::Left => write!(f, " (Left)")?,
-            ReduceType::Right => write!(f, " (Right)")?,
-            ReduceType::Error => {}
         }
         Ok(())
     }
@@ -57,11 +48,6 @@ impl<Term: Debug, NonTerm: Debug> Debug for ProductionRule<Term, NonTerm> {
             if id < self.rule.len() - 1 {
                 write!(f, " ")?;
             }
-        }
-        match self.reduce_type {
-            ReduceType::Left => write!(f, " (Left)")?,
-            ReduceType::Right => write!(f, " (Right)")?,
-            ReduceType::Error => {}
         }
         Ok(())
     }
@@ -101,11 +87,6 @@ impl<Term: Display, NonTerm: Display> Display for ShiftedRule<Term, NonTerm> {
         if self.shifted == self.rule.rule.len() {
             write!(f, " .")?;
         }
-        match self.rule.reduce_type {
-            ReduceType::Left => write!(f, " (Left)")?,
-            ReduceType::Right => write!(f, " (Right)")?,
-            ReduceType::Error => {}
-        }
         Ok(())
     }
 }
@@ -123,11 +104,6 @@ impl<Term: Debug, NonTerm: Debug> Debug for ShiftedRule<Term, NonTerm> {
         }
         if self.shifted == self.rule.rule.len() {
             write!(f, " .")?;
-        }
-        match self.rule.reduce_type {
-            ReduceType::Left => write!(f, " (Left)")?,
-            ReduceType::Right => write!(f, " (Right)")?,
-            ReduceType::Error => {}
         }
         Ok(())
     }
@@ -147,7 +123,7 @@ pub struct LookaheadRule<Term, NonTerm> {
 }
 impl<Term: Display, NonTerm: Display> Display for LookaheadRule<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} / ", self.rule)?;
+        write!(f, "{} /Lookaheads: ", self.rule)?;
         for (id, lookahead) in self.lookaheads.iter().enumerate() {
             write!(f, "{}", lookahead)?;
             if id < self.lookaheads.len() - 1 {
@@ -159,7 +135,7 @@ impl<Term: Display, NonTerm: Display> Display for LookaheadRule<Term, NonTerm> {
 }
 impl<Term: Debug, NonTerm: Debug> Debug for LookaheadRule<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?} / ", self.rule)?;
+        write!(f, "{:?} /Lookaheads: ", self.rule)?;
         for (id, lookahead) in self.lookaheads.iter().enumerate() {
             write!(f, "{:?}", lookahead)?;
             if id < self.lookaheads.len() - 1 {

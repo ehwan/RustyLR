@@ -1,9 +1,9 @@
 [package]
 name = "rusty_lr_derive"
-version = "0.5.2"
+version = "0.6.0"
 edition = "2021"
 license = "MIT"
-description = "yacc-like macro definitions for parser code generation using rusty_lr"
+description = "yacc-like proc-macro definitions for code generation for rusty_lr"
 repository = "https://github.com/ehwan/RustyLR"
 readme = "../README.md"
 keywords = ["parser", "yacc", "context-free-grammar", "lr", "compiler"]
@@ -13,7 +13,6 @@ categories = ["parsing"]
 proc-macro = true
 
 [dependencies]
-syn = "2.0"
 proc-macro2 = "1.0.86"
 quote = "1.0"
-rusty_lr = "0.5.2"
+rusty_lr = "0.6.0"
