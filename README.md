@@ -112,6 +112,7 @@ fn main() {
             }
         }
     }
+    // res = value of start symbol ( E(i32) )
     let res = context.accept();
     println!("{}", res);
     println!("userdata: {}", userdata);
@@ -216,7 +217,7 @@ The returned `Parser` struct contains the DFA and the production rules(cloned). 
 For given input sequence, you can start parsing with `Parser::begin()` method. Once you get the `Context` from `begin()`, you will feed the input sequence to the parser with `parser.feed()` method.
 
 ```rust
-let terms = vec![ Term::Num, Term::Plus, Term::Num, Term::Mul, Term::LeftParen, Term::Num, Term::Plus, Term::Num, Term::RightParen];
+let terms = vec![ Term::Num, Term::Plus, Term::Num, Term::Mul, Term::LeftParen, Term::Num, Term::Plus, Term::Num, Term::RightParen, Term::Eof];
 
 // start parsing
 let mut context = parser.begin();
@@ -231,18 +232,9 @@ for term in terms {
         }
     }
 }
-
-// end parsing
-match parser.end(&mut context, &Term::Eof) {
-    Ok(_) => (),
-    Err(err) => {
-        eprintln!("{:?}", err);
-        return;
-    }
-}
 ```
 
-Not that `EOF` token is not feeded, but passed to `end()` method.
+Note that `EOF` token is feeded at the end of sequence, and the augmented rule `Augmented -> StartSymbol $` will not be reduced since there are no lookahead symbols.
 
 ### Parse with callback
 
@@ -258,10 +250,15 @@ impl rusty_lr::Callback<Term, NonTerm> for ParserCallback {
     fn reduce(
         &mut self,
         rules: &[rusty_lr::ProductionRule<char, String>],
+        //                                  ^     |- NonTerm
+        //                                  |- Term
         states: &[rusty_lr::State<char, String>],
+        //                         ^     |- NonTerm
+        //                         |- Term
         state_stack: &[usize],
         rule: usize,
     ) -> Result<(), Self::Error> {
+        // `Rule` is Display if Term, NonTerm is Display
         println!("Reduce by {}", rules[rule]);
         Ok(())
     }
@@ -287,7 +284,7 @@ impl rusty_lr::Callback<Term, NonTerm> for ParserCallback {
 ```
 
 ```rust
-let terms = vec![ Term::Num, Term::Plus, Term::Num, Term::Mul, Term::LeftParen, Term::Num, Term::Plus, Term::Num, Term::RightParen];
+let terms = vec![ Term::Num, Term::Plus, Term::Num, Term::Mul, Term::LeftParen, Term::Num, Term::Plus, Term::Num, Term::RightParen, Term::Eof];
 
 // start parsing
 let mut context = parser.begin();
@@ -301,15 +298,6 @@ for term in terms {
             eprintln!("{:?}", err);
             return;
         }
-    }
-}
-
-// end parsing
-match parser.end_callback(&mut context, &mut callback, &Term::Eof) {
-    Ok(_) => (),
-    Err(err) => {
-        eprintln!("{:?}", err);
-        return;
     }
 }
 ```
