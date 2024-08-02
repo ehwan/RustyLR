@@ -99,6 +99,7 @@ fn main() {
         Token::Plus,
         Token::Num(4),
         Token::RParen,
+        Token::Eof,
     ];
 
     let parser = parser::EParser::new();
