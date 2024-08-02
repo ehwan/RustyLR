@@ -3,11 +3,11 @@
 //!
 //! ## Features
 //!  - pure Rust implementation
-//!  - compile-time DFA construction from CFG ( with yacc-like syntax )
+//!  - compile-time DFA construction from CFGs ( with proc-macro )
 //!  - customizable reducing action
 //!  - resolving conflicts of ambiguous grammar
 //!  - tracing parser action with callback, also error handling
-//!  - construct Tree from parsing result
+//!  - readable error messages, both for grammar building and parsing
 
 pub(crate) mod grammar;
 pub(crate) mod parser;

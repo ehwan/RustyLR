@@ -3,8 +3,8 @@ RustyLR will provide you a LR(1) and LALR(1) Deterministic Finite Automata (DFA)
 
 ```
 [dependencies]
-rusty_lr = "0.6.0"
-rusty_lr_derive = "0.6.0"
+rusty_lr = "0.6.1"
+rusty_lr_derive = "0.6.1"
 ```
 
 ## Features
