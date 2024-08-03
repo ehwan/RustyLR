@@ -12,16 +12,6 @@ use rusty_lr_core as rlr;
 /// emit Rust code for the parser
 impl Grammar {
     pub fn emit(&self, lalr: bool) -> Result<TokenStream, ParseError> {
-        if self.eof.is_none() {
-            return Err(ParseError::EofNotDefined);
-        }
-        if self.start_rule_name.is_none() {
-            return Err(ParseError::StartNotDefined);
-        }
-        if self.token_typename.is_none() {
-            return Err(ParseError::TokenTypeNotDefined);
-        }
-
         let mut grammar: rlr::Grammar<String, String> = rlr::Grammar::new();
 
         for (term, (ident, reduce_type)) in self.reduce_types.iter() {
@@ -36,7 +26,7 @@ impl Grammar {
             }
         }
 
-        for (name, _typename, rules) in self.rules.iter() {
+        for (name, (_name_ident, _typename, rules)) in self.rules.iter() {
             for rule in rules.rule_lines.iter() {
                 let mut tokens = Vec::with_capacity(rule.tokens.len());
                 for token in rule.tokens.iter() {
@@ -50,7 +40,7 @@ impl Grammar {
                     }
                 }
 
-                grammar.add_rule(name.to_string(), tokens);
+                grammar.add_rule(name.clone(), tokens);
             }
         }
 
@@ -212,9 +202,9 @@ impl Grammar {
         let terms_stack_name = Self::stack_name(&format_ident! {"rl_terms"});
         let term_typename = self.token_typename.as_ref().unwrap();
 
-        for (name, typename, rules) in self.rules.iter() {
+        for (_name, (name_ident, typename, rules)) in self.rules.iter() {
             // push result to this stack
-            let stack_name = Self::stack_name(name);
+            let stack_name = Self::stack_name(name_ident);
 
             for rule in rules.rule_lines.iter() {
                 let action = if let Some(action) = &rule.reduce_action {
@@ -250,15 +240,8 @@ impl Grammar {
                                 let #slice_name = &self.#terms_stack_name[self.#range_stack_name.pop().unwrap()];
                             });
 
-                            // if typename is defined, pop from stack and assign to v{i}
-                            let mut typename_search = None;
-                            for (name, typename, _) in self.rules.iter() {
-                                if name.to_string() == nonterm.to_string() {
-                                    typename_search = typename.clone();
-                                    break;
-                                }
-                            }
-                            if typename_search.is_some() {
+                            // if typename is defined for this nonterm, pop from stack and assign to v{i}
+                            if self.rules.get(&nonterm.to_string()).unwrap().1.is_some() {
                                 let stack_name = Self::stack_name(nonterm);
                                 token_pop_stream.extend(quote! {
                                     let mut #var_name = self.#stack_name.pop().unwrap();
@@ -301,17 +284,10 @@ impl Grammar {
 
         let start_rule_name = self.start_rule_name.as_ref().unwrap();
         let (start_rule_typename, pop_from_start_rule_stack) = {
-            let start_rule_stack_name = Self::stack_name(start_rule_name);
-            let mut start_rule_typename = None;
-            for (name, typename, _) in self.rules.iter() {
-                if name == self.start_rule_name.as_ref().unwrap() {
-                    start_rule_typename = typename.clone();
-                    break;
-                }
-            }
-            if let Some(start_rule_typename) = start_rule_typename {
+            if let Some(start_typename) = &self.rules.get(&start_rule_name.to_string()).unwrap().1 {
+                let start_rule_stack_name = Self::stack_name(start_rule_name);
                 (
-                    start_rule_typename,
+                    start_typename.clone(),
                     quote! {
                         self.#start_rule_stack_name.pop().unwrap()
                     },
@@ -323,7 +299,7 @@ impl Grammar {
 
         let mut stack_def_streams = quote! {};
         let mut stack_init_streams = quote! {};
-        for (name, typename, _rules) in self.rules.iter() {
+        for (_name, (name, typename, _rules)) in self.rules.iter() {
             // push result to this stack
             let stack_name = Self::stack_name(name);
 

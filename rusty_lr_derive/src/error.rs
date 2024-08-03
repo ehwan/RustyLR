@@ -14,6 +14,10 @@ pub enum ParseError {
     MultipleTokenTypeDefinition(Span, TokenStream, TokenStream),
     MultipleEofDefinition(Span, TokenStream, TokenStream),
     MultipleUserDataDefinition(Span, TokenStream, TokenStream),
+    MultipleRuleDefinition(Span, String),
+
+    // same name for terminal and non-terminal exists
+    TermNonTermConflict(Span, String),
 
     TerminalNotDefined(Ident),
     NonTerminalNotDefined(Ident),
@@ -68,6 +72,23 @@ impl ParseError {
             }
             ParseError::MultipleUserDataDefinition(span, ident, tokens) => {
                 let message = format!("Multiple user data definition: {} AND {}", ident, tokens);
+                quote_spanned! {
+                    span.clone() =>
+                    compile_error!(#message);
+                }
+            }
+            ParseError::MultipleRuleDefinition(span, name) => {
+                let message = format!("Multiple rule definition: {}", name);
+                quote_spanned! {
+                    span.clone() =>
+                    compile_error!(#message);
+                }
+            }
+            ParseError::TermNonTermConflict(span, name) => {
+                let message = format!(
+                    "Same token name for Terminal and Non-Terminal symbol exists: {}",
+                    name
+                );
                 quote_spanned! {
                     span.clone() =>
                     compile_error!(#message);

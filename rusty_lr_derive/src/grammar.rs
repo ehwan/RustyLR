@@ -27,8 +27,8 @@ pub struct Grammar {
     pub terminals: HashMap<String, (Ident, TokenStream)>,
     pub reduce_types: HashMap<String, (Ident, rlr::ReduceType)>,
 
-    pub rules: Vec<(Ident, Option<TokenStream>, RuleLines)>,
-    //              name       typename           rules
+    pub rules: HashMap<String, (Ident, Option<TokenStream>, RuleLines)>,
+    //                          name       typename           rules
 }
 
 impl Grammar {
@@ -43,7 +43,7 @@ impl Grammar {
             terminals: HashMap::new(),
             reduce_types: HashMap::new(),
 
-            rules: Vec::new(),
+            rules: HashMap::new(),
         }
     }
     pub fn stack_name(name: &Ident) -> Ident {
@@ -345,7 +345,7 @@ impl Grammar {
         let mut grammar = callback.grammar;
 
         // replace all terminal Ident with Term
-        for (_name, _ruletype, rules) in grammar.rules.iter_mut() {
+        for (_, (_name, _ruletype, rules)) in grammar.rules.iter_mut() {
             for rule in rules.rule_lines.iter_mut() {
                 for token in rule.tokens.iter_mut() {
                     if let Token::NonTerm(ident) = token.clone() {
@@ -372,19 +372,17 @@ impl Grammar {
             return Err(ParseError::EofNotDefined);
         }
 
+        // check token_typename is defined
+        if grammar.token_typename.is_none() {
+            return Err(ParseError::TokenTypeNotDefined);
+        }
+
         // check all NonTerminals are defined
-        for (_name, _ruletype, rules) in grammar.rules.iter() {
+        for (_, (_name, _ruletype, rules)) in grammar.rules.iter() {
             for rule in rules.rule_lines.iter() {
                 for token in rule.tokens.iter() {
                     if let Token::NonTerm(ident) = token {
-                        let mut found = false;
-                        for (name, _ruletype, _rules) in grammar.rules.iter() {
-                            if name.to_string() == ident.to_string() {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if found == false {
+                        if !grammar.rules.contains_key(&ident.to_string()) {
                             return Err(ParseError::NonTerminalNotDefined(ident.clone()));
                         }
                     }

@@ -67,9 +67,24 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
 
                 let rulelines = self.rulelines_stack.pop().expect("Rule0 - RuleLines");
 
-                self.grammar
+                let span = ident.span();
+                let name = ident.to_string();
+
+                if self.grammar.terminals.contains_key(&name) {
+                    return Err(ParseError::TermNonTermConflict(span, name));
+                }
+
+                if self
+                    .grammar
                     .rules
-                    .push((ident, ruletype.map(|t| t.to_token_stream()), rulelines));
+                    .insert(
+                        name.clone(),
+                        (ident, ruletype.map(|t| t.to_token_stream()), rulelines),
+                    )
+                    .is_some()
+                {
+                    return Err(ParseError::MultipleRuleDefinition(span, name));
+                }
             }
 
             // RuleType: Group
@@ -222,11 +237,16 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
                 // '%token'
                 self.termstack.pop();
                 let span = ident.span();
+                let name = ident.to_string();
+
+                if self.grammar.rules.contains_key(&name) {
+                    return Err(ParseError::TermNonTermConflict(span, name));
+                }
 
                 if let Some(old) = self
                     .grammar
                     .terminals
-                    .insert(ident.to_string(), (ident, rustcode.clone()))
+                    .insert(name.clone(), (ident, rustcode.clone()))
                 {
                     return Err(ParseError::MultipleTokenDefinition(
                         span, old.0, old.1, rustcode,
