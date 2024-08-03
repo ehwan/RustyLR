@@ -1,5 +1,4 @@
 use proc_macro2::Ident;
-use proc_macro2::Punct;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
@@ -16,6 +15,9 @@ pub enum ParseError {
     MultipleUserDataDefinition(Span, TokenStream, TokenStream),
     MultipleRuleDefinition(Span, String),
 
+    InvalidRuletypeDelimiter(Span),
+    InvliadReduceActionDelimiter(Span),
+
     // same name for terminal and non-terminal exists
     TermNonTermConflict(Span, String),
 
@@ -26,7 +28,6 @@ pub enum ParseError {
     EofNotDefined,
     TokenTypeNotDefined,
 
-    InvalidPunct(Punct),
     GrammarBuildError(String),
 
     // building the grammar for parsing production rules failed
@@ -84,6 +85,18 @@ impl ParseError {
                     compile_error!(#message);
                 }
             }
+            ParseError::InvalidRuletypeDelimiter(span) => {
+                quote_spanned! {
+                    span.clone() =>
+                    compile_error!("rule type must be enclosed with '(' and ')'");
+                }
+            }
+            ParseError::InvliadReduceActionDelimiter(span) => {
+                quote_spanned! {
+                    span.clone() =>
+                    compile_error!("reduce action must be enclosed with '{' and '}'");
+                }
+            }
             ParseError::TermNonTermConflict(span, name) => {
                 let message = format!(
                     "Same token name for Terminal and Non-Terminal symbol exists: {}",
@@ -120,13 +133,6 @@ impl ParseError {
                 let message = format!("Non-terminal not defined: {}", ident);
                 quote_spanned! {
                     ident.span() =>
-                    compile_error!(#message);
-                }
-            }
-            ParseError::InvalidPunct(punct) => {
-                let message = format!("Invalid punctuation: {}", punct);
-                quote_spanned! {
-                    punct.span() =>
                     compile_error!(#message);
                 }
             }

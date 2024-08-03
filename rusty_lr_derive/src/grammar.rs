@@ -194,6 +194,10 @@ impl Grammar {
         );
         grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Group(None))]);
         grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Literal(None))]);
+        grammar.add_rule(
+            "AnyTokenNoSemi",
+            vec![Token::Term(TermType::OtherPunct(None))],
+        );
 
         grammar.add_rule(
             "AnyTokens",
@@ -315,7 +319,7 @@ impl Grammar {
         let parser = Self::build_parser();
         let mut context = parser.begin();
 
-        while let Some(token) = tokenizer.next_token()? {
+        while let Some(token) = tokenizer.next_token() {
             let span = token.span().unwrap();
             match parser.feed_callback(&mut context, &mut callback, token) {
                 Ok(_) => {}
@@ -358,11 +362,6 @@ impl Grammar {
             }
         }
 
-        // check start is defined
-        if grammar.start_rule_name.is_none() {
-            return Err(ParseError::StartNotDefined);
-        }
-
         // check eof is defined
         if let Some(eof) = &grammar.eof {
             grammar
@@ -388,6 +387,15 @@ impl Grammar {
                     }
                 }
             }
+        }
+
+        // check start rule is defined
+        if let Some(start_rule) = &grammar.start_rule_name {
+            if !grammar.rules.contains_key(&start_rule.to_string()) {
+                return Err(ParseError::NonTerminalNotDefined(start_rule.clone()));
+            }
+        } else {
+            return Err(ParseError::StartNotDefined);
         }
 
         Ok(grammar)

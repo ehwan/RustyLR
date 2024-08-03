@@ -90,6 +90,14 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             // RuleType: Group
             1 => {
                 if let Some(TermType::Group(ruletype)) = self.termstack.pop() {
+                    if let Some(ruletype) = &ruletype {
+                        // check if ruletype is enclosed with '(' and ')'
+                        if ruletype.delimiter() != proc_macro2::Delimiter::Parenthesis {
+                            return Err(ParseError::InvalidRuletypeDelimiter(ruletype.span()));
+                        }
+                    } else {
+                        unreachable!("Rule1 - Group");
+                    }
                     self.ruletype_stack.push(ruletype);
                 } else {
                     unreachable!("Rule1");
@@ -203,10 +211,18 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             // Action: Group
             12 => match self.termstack.pop() {
                 Some(TermType::Group(group)) => {
+                    if let Some(action) = &group {
+                        // check if action is enclosed with '{' and '}'
+                        if action.delimiter() != proc_macro2::Delimiter::Brace {
+                            return Err(ParseError::InvliadReduceActionDelimiter(action.span()));
+                        }
+                    } else {
+                        unreachable!("Rule12 - Group");
+                    }
                     self.action_stack.push(group);
                 }
                 _ => {
-                    unreachable!("Rule13 - Group");
+                    unreachable!("Rule12 - Group");
                 }
             },
 
@@ -226,12 +242,12 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
                 // Ident
                 let ident = match self.termstack.pop() {
                     Some(TermType::Ident(ident)) => ident.unwrap(),
-                    _ => unreachable!("Rule15 - Ident"),
+                    _ => unreachable!("Rule14 - Ident"),
                 };
 
                 let rustcode = match self.rustcode_stack.pop() {
                     Some(rustcode) => rustcode,
-                    _ => unreachable!("Rule15 - RustCode"),
+                    _ => unreachable!("Rule14 - RustCode"),
                 };
 
                 // '%token'
@@ -268,9 +284,10 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             25 => {}
             26 => {}
             27 => {}
+            28 => {}
 
             // AnyTokens: AnyTokenNoSemi AnyTokens
-            28 => {
+            29 => {
                 // AnyTokenNoSemi
                 let token = match self.termstack.pop() {
                     Some(token) => token.stream(),
@@ -286,7 +303,7 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             }
 
             // AnyTokens: AnyTokenNoSemi
-            29 => {
+            30 => {
                 // AnyTokenNoSemi
                 let token = match self.termstack.pop() {
                     Some(token) => token.stream(),
@@ -296,10 +313,10 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             }
 
             // RustCode: AnyTokens
-            30 => {}
+            31 => {}
 
             // StartDef: '%start' Ident ';'
-            31 => {
+            32 => {
                 // ';'
                 self.termstack.pop();
 
@@ -325,7 +342,7 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             }
 
             // EofDef: '%eof' RustCode ';'
-            32 => {
+            33 => {
                 // ';'
                 self.termstack.pop();
 
@@ -350,7 +367,7 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             }
 
             // TokenTypeDef: '%tokentype' RustCode ';'
-            33 => {
+            34 => {
                 // ';'
                 self.termstack.pop();
 
@@ -375,7 +392,7 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             }
 
             // UserDataDef: '%userdata' RustCode ';'
-            34 => {
+            35 => {
                 // ';'
                 self.termstack.pop();
 
@@ -400,7 +417,7 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             }
 
             // ReduceDef: '%left' Ident ';'
-            35 => {
+            36 => {
                 // ';'
                 self.termstack.pop();
 
@@ -418,14 +435,14 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             }
 
             // ReduceDef: '%right' Ident ';'
-            36 => {
+            37 => {
                 // ';'
                 self.termstack.pop();
 
                 // Ident
                 let ident = match self.termstack.pop() {
                     Some(TermType::Ident(ident)) => ident.unwrap(),
-                    _ => unreachable!("Rule38 - Ident"),
+                    _ => unreachable!("Rule37 - Ident"),
                 };
                 self.grammar
                     .reduce_types
@@ -436,46 +453,46 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             }
 
             // Grammar: Rule Grammar
-            37 => {}
-
-            // Grammar: Rule
             38 => {}
 
-            // Grammar: TokenDef Grammar
+            // Grammar: Rule
             39 => {}
 
-            // Grammar: TokenDef
+            // Grammar: TokenDef Grammar
             40 => {}
 
-            // Grammar: StartDef Grammar
+            // Grammar: TokenDef
             41 => {}
 
-            // Grammar: StartDef
+            // Grammar: StartDef Grammar
             42 => {}
 
-            // Grammar: EofDef Grammar
+            // Grammar: StartDef
             43 => {}
 
-            // Grammar: EofDef
+            // Grammar: EofDef Grammar
             44 => {}
 
-            // Grammar: TokenTypeDef Grammar
+            // Grammar: EofDef
             45 => {}
 
-            // Grammar: TokenTypeDef
+            // Grammar: TokenTypeDef Grammar
             46 => {}
 
-            // Grammar: UserDataDef Grammar
+            // Grammar: TokenTypeDef
             47 => {}
 
-            // Grammar: UserDataDef
+            // Grammar: UserDataDef Grammar
             48 => {}
 
-            // Grammar: ReduceDef Grammar
+            // Grammar: UserDataDef
             49 => {}
 
-            // Grammar: ReduceDef
+            // Grammar: ReduceDef Grammar
             50 => {}
+
+            // Grammar: ReduceDef
+            51 => {}
 
             _ => unreachable!("Invalid RuleID: {}", rule),
         }
