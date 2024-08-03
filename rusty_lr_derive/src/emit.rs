@@ -48,7 +48,7 @@ impl Grammar {
             "<Augmented>".to_string(),
             vec![
                 rlr::Token::NonTerm(self.start_rule_name.as_ref().unwrap().to_string()),
-                rlr::Token::Term("<eof>".to_string()),
+                rlr::Token::Term("eof".to_string()),
             ],
         );
 

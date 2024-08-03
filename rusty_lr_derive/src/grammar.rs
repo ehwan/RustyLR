@@ -348,6 +348,18 @@ impl Grammar {
 
         let mut grammar = callback.grammar;
 
+        // check eof is defined
+        if let Some(eof) = &grammar.eof {
+            if let Some((ident, _)) = grammar
+                .terminals
+                .insert("eof".to_string(), (format_ident!("eof"), eof.clone()))
+            {
+                return Err(ParseError::EofDefined(ident));
+            }
+        } else {
+            return Err(ParseError::EofNotDefined);
+        }
+
         // replace all terminal Ident with Term
         for (_, (_name, _ruletype, rules)) in grammar.rules.iter_mut() {
             for rule in rules.rule_lines.iter_mut() {
@@ -360,15 +372,6 @@ impl Grammar {
                     }
                 }
             }
-        }
-
-        // check eof is defined
-        if let Some(eof) = &grammar.eof {
-            grammar
-                .terminals
-                .insert("<eof>".to_string(), (format_ident!("eof"), eof.clone()));
-        } else {
-            return Err(ParseError::EofNotDefined);
         }
 
         // check token_typename is defined

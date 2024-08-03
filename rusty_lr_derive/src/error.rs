@@ -23,6 +23,7 @@ pub enum ParseError {
 
     TerminalNotDefined(Ident),
     NonTerminalNotDefined(Ident),
+    EofDefined(Ident),
 
     StartNotDefined,
     EofNotDefined,
@@ -134,6 +135,12 @@ impl ParseError {
                 quote_spanned! {
                     ident.span() =>
                     compile_error!(#message);
+                }
+            }
+            ParseError::EofDefined(ident) => {
+                quote_spanned! {
+                    ident.span() =>
+                    compile_error!("'eof' is reserved name for terminal symbol");
                 }
             }
             ParseError::GrammarBuildError(message) => {

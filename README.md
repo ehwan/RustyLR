@@ -388,6 +388,7 @@ Define the start symbol of the grammar.
 ```
 Define the `eof` terminal symbol.
 `<RustExpr>` must be accessible at the point where the macro is called.
+'eof' terminal symbol will be automatically added to the grammar.
 
 ### Userdata type <sub><sup>(optional)</sup></sub>
 ```
