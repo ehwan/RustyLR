@@ -3,24 +3,23 @@ RustyLR will provide you a LR(1) and LALR(1) Deterministic Finite Automata (DFA)
 
 ```
 [dependencies]
-rusty_lr = "0.6.1"
-rusty_lr_derive = "0.6.1"
+rusty_lr = "0.7.0"
 ```
 
 ## Features
  - pure Rust implementation
+ - readable error messages, both for grammar building and parsing
  - compile-time DFA construction from CFGs ( with proc-macro )
  - customizable reducing action
  - resolving conflicts of ambiguous grammar
  - tracing parser action with callback, also error handling
- - readable error messages, both for grammar building and parsing
 
 ## Sample
 
 In [`example/calculator/parser.rs`](example/calculator/src/parser.rs),
 ```rust
-use rusty_lr_derive::lr1;
-use rusty_lr_derive::lalr1;
+use rusty_lr::lr1;
+use rusty_lr::lalr1;
 
 enum Token {
     // token definitions
@@ -41,7 +40,7 @@ lalr1! {
     %eof Token::Eof;
 
     // define tokens
-    %token num Token::Num(0);
+    %token num Token::Num(0); // `num` maps to `Token::Num(0)`
     %token plus Token::Plus;
     %token star Token::Star;
     %token lparen Token::LParen;
@@ -75,7 +74,11 @@ lalr1! {
       | P { v0 }
       ;
 
-    P(i32) : num { if let Token::Num(n) = v0 { *n } else { return Err(format!("{:?}", s0)); } }
+    P(i32) : num {
+        if let Token::Num(n) = v0 { *n }
+        else { return Err(format!("{:?}", s0)); }
+        //            ^^^^^^^^^ reduce action returns Result<(), String>
+    }
       | lparen E rparen { v1 }
       ;
 
@@ -210,13 +213,17 @@ let parser:rusty_lr::Parser<Term,NonTerm> = match grammar.build(NonTerm::Augment
 };
 ```
 
-You must explicitly specify the Augmented non-terminal symbol, and the production rule `Augmented -> StartSymbol $` must be defined in the grammar.
+You must explicitly specify the Augmented non-terminal symbol, and the production rule
+```
+Augmented -> StartSymbol $
+```
+must be defined in the grammar.
 
 The returned `Parser` struct contains the DFA and the production rules(cloned). It is completely independent from the `Grammar` struct, so you can drop the `Grammar` struct, or export the `Parser` struct to another module.
 
 ### 4. Error messages
 The `Error` type returned from `Grammar::build()` will contain the error information.
-`Grammar` is `Display` if both `Term` and `NonTerm` is `Display`, and It is `Debug` if both `Term` and `NonTerm` is `Debug`.
+`Error` is `Display` if both `Term` and `NonTerm` is `Display`, and It is `Debug` if both `Term` and `NonTerm` is `Debug`.
 
 For Shift/Reduce conflicts,
 ```

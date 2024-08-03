@@ -4,9 +4,7 @@ use std::hash::Hash;
 
 use super::rule::LookaheadRuleRefSet;
 
-/// A struct for state in LR(1) parser
-/// normally, the keys in shift_goto_map and reduce_map don't overlap
-/// but in some case, they may overlap and need to be resolved by config(TODO)
+/// A struct for state in LR(1) parser.
 #[derive(Debug, Clone)]
 pub struct State<Term, NonTerm> {
     pub shift_goto_map_term: HashMap<Term, usize>,

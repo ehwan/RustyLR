@@ -8,6 +8,9 @@ use super::error::ParseError;
 use crate::rule::ProductionRule;
 use crate::state::State;
 
+/// struct for Deterministic Finite Automaton (DFA).
+///
+/// It contains Vec of production rules and states.
 pub struct Parser<Term, NonTerm> {
     pub rules: Vec<ProductionRule<Term, NonTerm>>,
     pub states: Vec<State<Term, NonTerm>>,

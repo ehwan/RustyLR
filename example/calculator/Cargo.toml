@@ -5,4 +5,3 @@ edition = "2021"
 
 [dependencies]
 rusty_lr = { path = "../../rusty_lr" }
-rusty_lr_derive = { path = "../../rusty_lr_derive" }

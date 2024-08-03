@@ -1,5 +1,5 @@
 [package]
-name = "rusty_lr"
+name = "rusty_lr_core"
 version = "0.7.0"
 edition = "2021"
 license = "MIT"
@@ -8,14 +8,3 @@ repository = "https://github.com/ehwan/RustyLR"
 readme = "../README.md"
 keywords = ["parser", "yacc", "context-free-grammar", "lr", "compiler"]
 categories = ["parsing"]
-
-[dependencies]
-rusty_lr_core = "0.7.0"
-rusty_lr_derive = "0.7.0"
-# rusty_lr_core = { path = "../rusty_lr_core" }
-# rusty_lr_derive = { path = "../rusty_lr_derive" }
-
-# [features]
-# default = ["core", "derive"]
-# core = ["rusty_lr_core"]
-# derive = ["rusty_lr_derive"]

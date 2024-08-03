@@ -9,7 +9,9 @@ use crate::token::Token;
 /// wheather to reduce to the left or right, for reduce/shift conflict resolving
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ReduceType {
+    /// reduce to the left, i.e. reduce first
     Left,
+    /// reduce to the right, i.e. shift first
     Right,
 }
 impl Display for ReduceType {
@@ -53,9 +55,12 @@ impl<Term: Debug, NonTerm: Debug> Debug for ProductionRule<Term, NonTerm> {
     }
 }
 
-/// A struct for single shifted named production rule
+/// A struct for single shifted named production rule.
+///
 /// name -> Token1 Token2 . Token3
+///
 ///         ^^^^^^^^^^^^^ shifted = 2
+///
 /// This struct has index of the Rule in Grammar::rules
 /// and it will be used for Eq, Ord, Hash
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -65,7 +70,9 @@ pub struct ShiftedRuleRef {
 }
 
 /// A struct for single shifted named production rule
+///
 /// name -> Token1 Token2 . Token3
+///
 ///         ^^^^^^^^^^^^^ shifted = 2
 #[derive(Clone)]
 pub struct ShiftedRule<Term, NonTerm> {

@@ -1,7 +1,7 @@
 #![allow(unused_imports)]
 
-use rusty_lr_derive::lalr1;
-use rusty_lr_derive::lr1;
+use rusty_lr::lalr1;
+use rusty_lr::lr1;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Token {
@@ -60,7 +60,7 @@ lalr1! {
     %eof Token::Eof;
 
     // define tokens
-    %token num Token::Num(0);
+    %token num Token::Num(0); // `num` maps to `Token::Num(0)`
     %token plus Token::Plus;
     %token star Token::Star;
     %token lparen Token::LParen;
@@ -94,7 +94,11 @@ lalr1! {
       | P { v0 }
       ;
 
-    P(i32) : num { if let Token::Num(n) = v0 { *n } else { return Err(format!("{:?}", s0)); } }
+    P(i32) : num {
+        if let Token::Num(n) = v0 { *n }
+        else { return Err(format!("{:?}", s0)); }
+        //            ^^^^^^^^^ reduce action returns Result<(), String>
+    }
       | lparen E rparen { v1 }
       ;
 

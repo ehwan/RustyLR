@@ -39,12 +39,12 @@ impl Callback {
     }
 }
 
-impl rusty_lr::Callback<TermType, &'static str> for Callback {
+impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
     type Error = ParseError;
     fn reduce(
         &mut self,
-        _rules: &[rusty_lr::ProductionRule<TermType, &'static str>],
-        _states: &[rusty_lr::State<TermType, &'static str>],
+        _rules: &[rusty_lr_core::ProductionRule<TermType, &'static str>],
+        _states: &[rusty_lr_core::State<TermType, &'static str>],
         _state_stack: &[usize],
         rule: usize,
     ) -> Result<(), Self::Error> {
@@ -391,7 +391,7 @@ impl rusty_lr::Callback<TermType, &'static str> for Callback {
                 };
                 self.grammar
                     .reduce_types
-                    .insert(ident.to_string(), (ident, rusty_lr::ReduceType::Left));
+                    .insert(ident.to_string(), (ident, rusty_lr_core::ReduceType::Left));
 
                 // '%left'
                 self.termstack.pop();
@@ -409,7 +409,7 @@ impl rusty_lr::Callback<TermType, &'static str> for Callback {
                 };
                 self.grammar
                     .reduce_types
-                    .insert(ident.to_string(), (ident, rusty_lr::ReduceType::Left));
+                    .insert(ident.to_string(), (ident, rusty_lr_core::ReduceType::Left));
 
                 // '%right'
                 self.termstack.pop();
@@ -463,8 +463,8 @@ impl rusty_lr::Callback<TermType, &'static str> for Callback {
     }
     fn shift_and_goto(
         &mut self,
-        _rules: &[rusty_lr::ProductionRule<TermType, &'static str>],
-        _states: &[rusty_lr::State<TermType, &'static str>],
+        _rules: &[rusty_lr_core::ProductionRule<TermType, &'static str>],
+        _states: &[rusty_lr_core::State<TermType, &'static str>],
         _state_stack: &[usize],
         term: &TermType,
     ) -> Result<(), Self::Error> {
@@ -473,8 +473,8 @@ impl rusty_lr::Callback<TermType, &'static str> for Callback {
     }
     fn shift_and_goto_nonterm(
         &mut self,
-        _rules: &[rusty_lr::ProductionRule<TermType, &'static str>],
-        _states: &[rusty_lr::State<TermType, &'static str>],
+        _rules: &[rusty_lr_core::ProductionRule<TermType, &'static str>],
+        _states: &[rusty_lr_core::State<TermType, &'static str>],
         _state_stack: &[usize],
         _nonterm: &&'static str,
     ) -> Result<(), Self::Error> {

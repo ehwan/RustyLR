@@ -1,9 +1,9 @@
 [package]
 name = "rusty_lr_derive"
-version = "0.6.1"
+version = "0.7.0"
 edition = "2021"
 license = "MIT"
-description = "yacc-like proc-macro definitions for code generation for rusty_lr"
+description = "yacc-like proc-macro definitions for parser code generation"
 repository = "https://github.com/ehwan/RustyLR"
 readme = "../README.md"
 keywords = ["parser", "yacc", "context-free-grammar", "lr", "compiler"]
@@ -15,4 +15,5 @@ proc-macro = true
 [dependencies]
 proc-macro2 = "1.0.86"
 quote = "1.0"
-rusty_lr = "0.6.1"
+rusty_lr_core = "0.7.0"
+# rusty_lr_core = { path = "../rusty_lr_core" }

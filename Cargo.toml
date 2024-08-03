@@ -1,7 +1,8 @@
 [workspace]
 members = [
+  "rusty_lr_core",
+  "rusty_lr_derive",
   "rusty_lr",
   "example/calculator",
-  "rusty_lr_derive",
   "example/lrtest",
 ]

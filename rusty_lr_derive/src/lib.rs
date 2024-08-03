@@ -9,7 +9,7 @@ mod term;
 mod token;
 mod tokenizer;
 
-/// build a lr1 Deterministic Finite Automaton (DFA) parser for Slice of TokenStream
+/// build a lr1 Deterministic Finite Automaton (DFA) parser
 #[proc_macro]
 pub fn lr1(input: TokenStream) -> TokenStream {
     let input = proc_macro2::TokenStream::from(input);
@@ -24,7 +24,7 @@ pub fn lr1(input: TokenStream) -> TokenStream {
     }
 }
 
-/// build a lr1 Deterministic Finite Automaton (DFA) parser for &str
+/// build a lalr1 Deterministic Finite Automaton (DFA) parser
 #[proc_macro]
 pub fn lalr1(input: TokenStream) -> TokenStream {
     let input = proc_macro2::TokenStream::from(input);

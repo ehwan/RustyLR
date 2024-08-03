@@ -16,6 +16,7 @@ pub enum ParseError {
     MultipleUserDataDefinition(Span, TokenStream, TokenStream),
 
     TerminalNotDefined(Ident),
+    NonTerminalNotDefined(Ident),
 
     StartNotDefined,
     EofNotDefined,
@@ -89,6 +90,13 @@ impl ParseError {
             }
             ParseError::TerminalNotDefined(ident) => {
                 let message = format!("Terminal not defined: {}", ident);
+                quote_spanned! {
+                    ident.span() =>
+                    compile_error!(#message);
+                }
+            }
+            ParseError::NonTerminalNotDefined(ident) => {
+                let message = format!("Non-terminal not defined: {}", ident);
                 quote_spanned! {
                     ident.span() =>
                     compile_error!(#message);

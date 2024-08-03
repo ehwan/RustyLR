@@ -7,7 +7,7 @@ use crate::error::ParseError;
 use crate::grammar::Grammar;
 use crate::token::Token;
 
-use rusty_lr as rlr;
+use rusty_lr_core as rlr;
 
 /// emit Rust code for the parser
 impl Grammar {

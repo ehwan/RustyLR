@@ -6,7 +6,7 @@ use quote::format_ident;
 
 use std::collections::HashMap;
 
-use rusty_lr as rlr;
+use rusty_lr_core as rlr;
 
 use crate::tokenizer::Tokenizer;
 
@@ -307,6 +307,7 @@ impl Grammar {
         }
     }
 
+    /// parse the input TokenStream and return a parsed Grammar
     pub fn parse(input: TokenStream) -> Result<Self, ParseError> {
         let mut tokenizer = Tokenizer::new(input);
         let mut callback = Callback::new();
@@ -343,23 +344,52 @@ impl Grammar {
 
         let mut grammar = callback.grammar;
 
+        // replace all terminal Ident with Term
         for (_name, _ruletype, rules) in grammar.rules.iter_mut() {
             for rule in rules.rule_lines.iter_mut() {
                 for token in rule.tokens.iter_mut() {
                     if let Token::NonTerm(ident) = token.clone() {
                         if grammar.terminals.contains_key(&ident.to_string()) {
+                            // set the token to Term
                             *token = Token::Term(ident);
                         }
                     }
                 }
             }
         }
+
+        // check start is defined
+        if grammar.start_rule_name.is_none() {
+            return Err(ParseError::StartNotDefined);
+        }
+
+        // check eof is defined
         if let Some(eof) = &grammar.eof {
             grammar
                 .terminals
                 .insert("<eof>".to_string(), (format_ident!("eof"), eof.clone()));
         } else {
             return Err(ParseError::EofNotDefined);
+        }
+
+        // check all NonTerminals are defined
+        for (_name, _ruletype, rules) in grammar.rules.iter() {
+            for rule in rules.rule_lines.iter() {
+                for token in rule.tokens.iter() {
+                    if let Token::NonTerm(ident) = token {
+                        let mut found = false;
+                        for (name, _ruletype, _rules) in grammar.rules.iter() {
+                            if name.to_string() == ident.to_string() {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if found == false {
+                            return Err(ParseError::NonTerminalNotDefined(ident.clone()));
+                        }
+                    }
+                }
+            }
         }
 
         Ok(grammar)

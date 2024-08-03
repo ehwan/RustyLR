@@ -1,5 +1,6 @@
 use crate::{ProductionRule, State};
 
+/// Callback trait for parser
 pub trait Callback<Term, NonTerm> {
     /// Error type returned by callback
     type Error;
