@@ -16,14 +16,18 @@ pub struct Parser<Term, NonTerm> {
     pub states: Vec<State<Term, NonTerm>>,
 }
 
-impl<Term: Hash + Eq, NonTerm: Clone + Hash + Eq> Parser<Term, NonTerm> {
+impl<Term, NonTerm> Parser<Term, NonTerm> {
     /// give lookahead token to parser, and check if there is any reduce action
     fn lookahead<'a, C: Callback<Term, NonTerm>>(
         &'a self,
         context: &mut Context,
         callback: &mut C,
         term: &Term,
-    ) -> Result<(), ParseError<'a, Term, NonTerm, C::Error>> {
+    ) -> Result<(), ParseError<'a, Term, NonTerm, C::Error>>
+    where
+        Term: Hash + Eq,
+        NonTerm: Hash + Eq,
+    {
         // fetch state from state stack
         let state = &self.states[*context.state_stack.last().unwrap()];
 
@@ -61,7 +65,11 @@ impl<Term: Hash + Eq, NonTerm: Clone + Hash + Eq> Parser<Term, NonTerm> {
         &'a self,
         context: &mut Context,
         term: Term,
-    ) -> Result<(), ParseError<'a, Term, NonTerm, ()>> {
+    ) -> Result<(), ParseError<'a, Term, NonTerm, ()>>
+    where
+        Term: Hash + Eq,
+        NonTerm: Hash + Eq,
+    {
         self.feed_callback(context, &mut DefaultCallback {}, term)
     }
     /// feed one terminal to parser, and update state stack
@@ -70,7 +78,11 @@ impl<Term: Hash + Eq, NonTerm: Clone + Hash + Eq> Parser<Term, NonTerm> {
         context: &mut Context,
         callback: &mut C,
         term: Term,
-    ) -> Result<(), ParseError<'a, Term, NonTerm, C::Error>> {
+    ) -> Result<(), ParseError<'a, Term, NonTerm, C::Error>>
+    where
+        Term: Hash + Eq,
+        NonTerm: Hash + Eq,
+    {
         // reduce if possible
         self.lookahead(context, callback, &term)?;
 
@@ -101,7 +113,10 @@ impl<Term: Hash + Eq, NonTerm: Clone + Hash + Eq> Parser<Term, NonTerm> {
         context: &mut Context,
         callback: &mut C,
         nonterm: &'a NonTerm,
-    ) -> Result<(), ParseError<'a, Term, NonTerm, C::Error>> {
+    ) -> Result<(), ParseError<'a, Term, NonTerm, C::Error>>
+    where
+        NonTerm: Hash + Eq,
+    {
         // fetch state from state stack
         let state = &self.states[*context.state_stack.last().unwrap()];
 

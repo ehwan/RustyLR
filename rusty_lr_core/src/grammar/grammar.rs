@@ -26,7 +26,7 @@ pub struct Grammar<Term, NonTerm> {
     reduce_types: HashMap<Term, ReduceType>,
 }
 
-impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, NonTerm> {
+impl<Term, NonTerm> Grammar<Term, NonTerm> {
     pub fn new() -> Self {
         Grammar {
             rules: Vec::new(),
@@ -38,10 +38,7 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
     /// add new production rule for given nonterminal 'name'
     pub fn add_rule(&mut self, name: NonTerm, rule: Vec<Token<Term, NonTerm>>) -> usize {
         let id = self.rules.len();
-        let rule = ProductionRule {
-            name: name.clone(),
-            rule,
-        };
+        let rule = ProductionRule { name, rule };
         self.rules.push(rule);
         id
     }
@@ -50,8 +47,11 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
         &mut self,
         term: Term,
         reduce_type: ReduceType,
-    ) -> Result<(), BuildError<'static, Term, NonTerm>> {
-        if let Some(old) = self.reduce_types.insert(term.clone(), reduce_type.clone()) {
+    ) -> Result<(), BuildError<'static, Term, NonTerm>>
+    where
+        Term: Hash + Eq + Clone,
+    {
+        if let Some(old) = self.reduce_types.insert(term.clone(), reduce_type) {
             if old == reduce_type {
                 Ok(())
             } else {
@@ -66,7 +66,11 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
     pub fn build(
         &mut self,
         augmented_name: NonTerm,
-    ) -> Result<Parser<Term, NonTerm>, BuildError<Term, NonTerm>> {
+    ) -> Result<Parser<Term, NonTerm>, BuildError<Term, NonTerm>>
+    where
+        Term: Clone + Ord + Hash,
+        NonTerm: Clone + Hash + Eq,
+    {
         self.calculate_first();
 
         // add main augmented rule
@@ -103,7 +107,11 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
     pub fn build_lalr(
         &mut self,
         augmented_name: NonTerm,
-    ) -> Result<Parser<Term, NonTerm>, BuildError<Term, NonTerm>> {
+    ) -> Result<Parser<Term, NonTerm>, BuildError<Term, NonTerm>>
+    where
+        Term: Clone + Ord + Hash,
+        NonTerm: Clone + Hash + Eq,
+    {
         self.calculate_first();
 
         // add main augmented rule
@@ -138,7 +146,10 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
     }
 
     /// search for every production rules with name 'name'
-    fn search_rules(&self, name: &NonTerm) -> Vec<usize> {
+    fn search_rules(&self, name: &NonTerm) -> Vec<usize>
+    where
+        NonTerm: PartialEq,
+    {
         let mut ret = Vec::new();
         for (id, rule) in self.rules.iter().enumerate() {
             if &rule.name == name {
@@ -148,7 +159,11 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
         ret
     }
     /// calculate first terminals for each nonterminals
-    fn calculate_first(&mut self) {
+    fn calculate_first(&mut self)
+    where
+        Term: Clone + Ord,
+        NonTerm: Hash + Eq + Clone,
+    {
         loop {
             let mut changed = false;
             for rule in self.rules.iter() {
@@ -214,7 +229,11 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
         &self,
         follow_tokens: &[Token<Term, NonTerm>],
         lookahead: &BTreeSet<Term>,
-    ) -> Result<BTreeSet<Term>, BuildError<Term, NonTerm>> {
+    ) -> Result<BTreeSet<Term>, BuildError<Term, NonTerm>>
+    where
+        Term: Ord + Clone,
+        NonTerm: Clone + Hash + Eq,
+    {
         let mut ret = BTreeSet::new();
         for token in follow_tokens.iter() {
             match token {
@@ -241,10 +260,11 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
 
     /// for given set of production rules,
     /// if the first token of each rule is nonterminal, attach its production rules
-    fn expand(
-        &self,
-        rules: &mut LookaheadRuleRefSet<Term>,
-    ) -> Result<(), BuildError<Term, NonTerm>> {
+    fn expand(&self, rules: &mut LookaheadRuleRefSet<Term>) -> Result<(), BuildError<Term, NonTerm>>
+    where
+        Term: Clone + Ord,
+        NonTerm: Clone + Hash + Eq,
+    {
         loop {
             let mut new_rules = Vec::new();
             for (rule_ref, lookaheads) in rules.rules.iter() {
@@ -287,7 +307,11 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
         mut rules: LookaheadRuleRefSet<Term>,
         states: &mut Vec<State<Term, NonTerm>>,
         state_map: &mut BTreeMap<LookaheadRuleRefSet<Term>, usize>,
-    ) -> Result<usize, BuildError<Term, NonTerm>> {
+    ) -> Result<usize, BuildError<Term, NonTerm>>
+    where
+        Term: Hash + Eq + Ord + Clone,
+        NonTerm: Hash + Eq + Clone,
+    {
         // expand
         self.expand(&mut rules)?;
 
@@ -307,7 +331,7 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
         let mut empty_rules = Vec::new();
         for (mut rule_ref, lookaheads) in rules.rules.into_iter() {
             let rule = &self.rules[rule_ref.rule];
-            match rule.rule.get(rule_ref.shifted).cloned() {
+            match rule.rule.get(rule_ref.shifted) {
                 Some(Token::Term(term)) => {
                     rule_ref.shifted += 1;
                     next_rules_term
@@ -406,14 +430,14 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
 
                         states[state_id]
                             .shift_goto_map_term
-                            .insert(next_term, next_state_id);
+                            .insert(next_term.clone(), next_state_id);
                     }
                     None => {
                         // shift/reduce error
                         return Err(BuildError::ShiftReduceConflict {
                             reduce: *reduce_rule,
                             shift: next_rule_set,
-                            term: next_term,
+                            term: next_term.clone(),
                             rules: &self.rules,
                         });
                     }
@@ -424,7 +448,7 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
 
                 states[state_id]
                     .shift_goto_map_term
-                    .insert(next_term, next_state_id);
+                    .insert(next_term.clone(), next_state_id);
             }
         }
 
@@ -433,7 +457,7 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
 
             states[state_id]
                 .shift_goto_map_nonterm
-                .insert(next_nonterm, next_state_id);
+                .insert(next_nonterm.clone(), next_state_id);
         }
 
         Ok(state_id)
@@ -445,7 +469,11 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
         mut rules: LookaheadRuleRefSet<Term>,
         states: &mut Vec<State<Term, NonTerm>>,
         state_map: &mut BTreeMap<BTreeSet<ShiftedRuleRef>, usize>,
-    ) -> Result<usize, BuildError<Term, NonTerm>> {
+    ) -> Result<usize, BuildError<Term, NonTerm>>
+    where
+        Term: Hash + Eq + Ord + Clone,
+        NonTerm: Hash + Eq + Clone,
+    {
         // expand
         self.expand(&mut rules)?;
 
@@ -475,17 +503,17 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
             .zip(states[state_id].ruleset.rules.iter_mut())
         {
             let rule = &self.rules[rule_ref.rule];
-            let lookaheads: BTreeSet<_> =
+            let lookaheads_diff: BTreeSet<_> =
                 lookaheads_src.difference(lookaheads_dst).cloned().collect();
-            lookaheads_empty &= lookaheads.is_empty();
+            lookaheads_empty &= lookaheads_diff.is_empty();
             lookaheads_dst.append(&mut lookaheads_src);
-            match rule.rule.get(rule_ref.shifted).cloned() {
+            match rule.rule.get(rule_ref.shifted) {
                 Some(Token::Term(term)) => {
                     rule_ref.shifted += 1;
                     next_rules_term
                         .entry(term)
                         .or_insert_with(LookaheadRuleRefSet::new)
-                        .add(rule_ref, lookaheads);
+                        .add(rule_ref, lookaheads_diff);
                     // Duplicated rule will be handled in reduce/reduce conflict
                 }
                 Some(Token::NonTerm(nonterm)) => {
@@ -493,11 +521,11 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
                     next_rules_nonterm
                         .entry(nonterm)
                         .or_insert(LookaheadRuleRefSet::new())
-                        .add(rule_ref, lookaheads);
+                        .add(rule_ref, lookaheads_diff);
                     // Duplicated rule will be handled in reduce/reduce conflict
                 }
                 None => {
-                    empty_rules.push((rule_ref.rule, lookaheads));
+                    empty_rules.push((rule_ref.rule, lookaheads_diff));
                 }
             }
         }
@@ -582,14 +610,14 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
 
                         states[state_id]
                             .shift_goto_map_term
-                            .insert(next_term, next_state_id);
+                            .insert(next_term.clone(), next_state_id);
                     }
                     None => {
                         // shift/reduce error
                         return Err(BuildError::ShiftReduceConflict {
                             reduce: *reduce_rule,
                             shift: next_rule_set,
-                            term: next_term,
+                            term: next_term.clone(),
                             rules: &self.rules,
                         });
                     }
@@ -600,7 +628,7 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
 
                 states[state_id]
                     .shift_goto_map_term
-                    .insert(next_term, next_state_id);
+                    .insert(next_term.clone(), next_state_id);
             }
         }
 
@@ -609,7 +637,7 @@ impl<Term: Clone + Hash + Eq + Ord, NonTerm: Clone + Hash + Eq> Grammar<Term, No
 
             states[state_id]
                 .shift_goto_map_nonterm
-                .insert(next_nonterm, next_state_id);
+                .insert(next_nonterm.clone(), next_state_id);
         }
 
         Ok(state_id)

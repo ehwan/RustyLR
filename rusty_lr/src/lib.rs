@@ -1,5 +1,7 @@
 //! # RustyLR
-//! LR(1) Parser generator in Rust
+//! LR(1) and LALR(1) code generator in Rust
+//!
+//! For more information, please refer to the [GitHub repository](https://github.com/ehwan/RustyLR)
 //!
 //! ## Features
 //!  - pure Rust implementation

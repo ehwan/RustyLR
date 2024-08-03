@@ -12,7 +12,7 @@ pub struct State<Term, NonTerm> {
     pub reduce_map: HashMap<Term, usize>,
     pub ruleset: LookaheadRuleRefSet<Term>,
 }
-impl<Term: Hash + Eq, NonTerm: Hash + Eq> State<Term, NonTerm> {
+impl<Term, NonTerm> State<Term, NonTerm> {
     pub fn new() -> Self {
         State {
             shift_goto_map_term: HashMap::new(),
@@ -23,15 +23,24 @@ impl<Term: Hash + Eq, NonTerm: Hash + Eq> State<Term, NonTerm> {
     }
 
     /// feed one teminal and get action
-    pub fn shift_goto_term(&self, term: &Term) -> Option<usize> {
+    pub fn shift_goto_term(&self, term: &Term) -> Option<usize>
+    where
+        Term: Hash + Eq,
+    {
         self.shift_goto_map_term.get(term).copied()
     }
     /// feed one non-teminal and get action
-    pub fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize> {
+    pub fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
+    where
+        NonTerm: Hash + Eq,
+    {
         self.shift_goto_map_nonterm.get(nonterm).copied()
     }
     /// feed one token and get action
-    pub fn reduce(&self, term: &Term) -> Option<usize> {
+    pub fn reduce(&self, term: &Term) -> Option<usize>
+    where
+        Term: Hash + Eq,
+    {
         self.reduce_map.get(term).copied()
     }
 }
