@@ -92,6 +92,7 @@ mod parser;
 
 fn main() {
     use parser::Token;
+    // 1 + 2 * ( 3 + 4 ) = 15
     let input = vec![
         Token::Num(1),
         Token::Plus,
@@ -315,6 +316,7 @@ impl rusty_lr::Callback<Term, NonTerm> for ParserCallback {
 ```
 
 ```rust
+// Num + Num * ( Num + Num )
 let terms = vec![ Term::Num, Term::Plus, Term::Num, Term::Mul, Term::LeftParen, Term::Num, Term::Plus, Term::Num, Term::RightParen, Term::Eof];
 
 // start parsing
@@ -354,4 +356,124 @@ Reduce by M -> M * M
 Reduce by A -> M
 Reduce by A -> A + A
 Reduce by E -> A
+```
+
+## proc-macro `lr1!` and `lalr1!`
+`lr1!` and `lalr1!` are procedural macros that will generate `Parser` struct from CFGs at compile time.
+Every line in the macro must follow the syntax below.
+
+### Token type <sub><sup>(must defined)</sup></sub>
+```
+'%tokentype' <RustType> ';'
+```
+Define the type of terminal symbols.
+`<RustType>` must be accessible at the point where the macro is called.
+
+### Token definition <sub><sup>(must defined)</sup></sub>
+```
+'%token' <Ident> <RustExpr> ';'
+```
+Map terminal symbols' name `<Ident>` to the actual value `<RustExpr>`.
+`<RustExpr>` must be accessible at the point where the macro is called.
+
+### Start symbol <sub><sup>(must defined)</sup></sub>
+```
+'%start' <Ident> ';'
+```
+Define the start symbol of the grammar.
+
+### Eof symbol <sub><sup>(must defined)</sup></sub>
+```
+'%eof' <RustExpr> ';'
+```
+Define the `eof` terminal symbol.
+`<RustExpr>` must be accessible at the point where the macro is called.
+
+### Userdata type <sub><sup>(optional)</sup></sub>
+```
+'%userdata' <RustType> ';'
+```
+Define the type of userdata passed to `feed()` function.
+
+### Reduce type <sub><sup>(optional)</sup></sub>
+```
+'%left' <Ident> ';'
+'%right' <Ident> ';'
+```
+Set the reduce precedence of terminal symbols. `<Ident>` must be defined in `%token`.
+
+### Production rules
+```
+<Ident><RuleType>
+  ':' <Ident>* <ReduceAction> 
+  '|' <Ident>* <ReduceAction> 
+  ...
+  ';'
+```
+Define the production rules.
+`<Ident>` must be valid terminal or non-terminal symbols.
+
+```
+(optional)
+<RuleType> : '(' <RustType> ')'
+           |
+           ;
+```
+`<RuleType>` is optional, this will define the type of value that this production rule will contains.
+
+```
+(optional)
+<ReduceAction> : '{' <RustExpr> '}'
+               |
+               ;
+```
+`<ReduceAction>` is optional,
+this will define the action to be executed when the rule is reduced.
+If `<RuleType>` is defined, `<ReduceAction>` itself must be the value of `<RuleType>` (i.e. no semicolon at the end of the statement).
+
+Predefined variables can be used in `<ReduceAction>`:
+ - `s0`, `s1`, `s2`, ... : slice of shifted terminal symbols `&[<TermType>]` captured by N'th symbol
+ - `s` : slice of shifted terminal symbols `&[<TermType>]` captured by current rule.
+ - `v0`, `v1`, `v2`, ... : value of N'th symbol. 
+ If i'th symbol is Terminal, it will be `&<TermType>`, 
+ and if it is NonTerminal, it will be `mut <RuleType>`.
+ - `data` : userdata passed to `feed()` function.
+
+`Result<(), String>` can be returned from `<ReduceAction>`, which will be treated as error.
+
+## Start Parsing
+`lr1!` and `lalr1!` will generate struct `<StartSymbol>Parser` where `<StartSymbol>` is the name of the start symbol in the grammar.
+
+The struct will have the following methods:
+ - `new()` : create new parser
+ - `begin()` : create new context
+ - `feed(&self, &mut Context, TermType, &mut UserData) -> Result<(), ParseError>` : feed token to the parser
+ - `feed_callback(&self, &mut Context, TermType, &mut UserData) -> Result<(), ParseError>` : feed token with callback
+
+Note that `&mut UserData` is omitted if `%userdata` is not defined.
+Once the input sequence (including `eof` token) is feeded, without errors, you can get the value of start symbol by calling `context.accept()`.
+
+```rust
+let parser = parser::EParser::new();
+// create context
+let mut context = parser.begin();
+// define userdata
+let mut userdata: i32 = 0;
+
+// start feeding tokens
+for token in input_sequence {
+    match parser.feed(&mut context, token, &mut userdata) {
+        //                          ^^^^^   ^^^^^^^^^^^^ userdata passed here as `&mut i32`
+        //                           |- feed token
+        Ok(_) => {}
+        Err(e) => {
+            println!("{:?}", e);
+            return;
+        }
+    }
+}
+// res = value of start symbol
+let res = context.accept();
+println!("{}", res);
+println!("userdata: {}", userdata);
 ```
