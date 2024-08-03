@@ -12,7 +12,12 @@ rusty_lr = "0.7.3"
  - compile-time DFA construction from CFGs ( with proc-macro )
  - customizable reducing action
  - resolving conflicts of ambiguous grammar
- - tracing parser action with callback, also error handling
+ - tracing parser action with callback
+
+#### Why proc-macro, not external executable?
+ - Decent built-in lexer, with consideration of unicode.
+ - Can generate *pretty* error messages, by just passing `Span` data.
+ - With modern IDE, can see errors in real-time with specific location.
 
 ## Sample
 
