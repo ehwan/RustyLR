@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_derive"
-version = "0.7.0"
+version = "0.7.2"
 edition = "2021"
 license = "MIT"
 description = "yacc-like proc-macro definitions for parser code generation"
@@ -15,5 +15,5 @@ proc-macro = true
 [dependencies]
 proc-macro2 = "1.0.86"
 quote = "1.0"
-rusty_lr_core = "0.7.0"
+rusty_lr_core = "0.7.2"
 # rusty_lr_core = { path = "../rusty_lr_core" }

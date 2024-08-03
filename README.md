@@ -3,7 +3,7 @@ RustyLR will provide you a LR(1) and LALR(1) Deterministic Finite Automata (DFA)
 
 ```
 [dependencies]
-rusty_lr = "0.7.0"
+rusty_lr = "0.7.2"
 ```
 
 ## Features
@@ -435,7 +435,7 @@ Predefined variables can be used in `<ReduceAction>`:
  - `s0`, `s1`, `s2`, ... : slice of shifted terminal symbols `&[<TermType>]` captured by N'th symbol
  - `s` : slice of shifted terminal symbols `&[<TermType>]` captured by current rule.
  - `v0`, `v1`, `v2`, ... : value of N'th symbol. 
- If i'th symbol is Terminal, it will be `&<TermType>`, 
+ If N'th symbol is Terminal, it will be `&<TermType>`, 
  and if it is NonTerminal, it will be `mut <RuleType>`.
  - `data` : userdata passed to `feed()` function.
 
