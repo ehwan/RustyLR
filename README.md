@@ -462,7 +462,7 @@ The struct has the following functions:
  - `new()` : create new parser
  - `begin(&self)` : create new context
  - `feed(&self, &mut Context, TermType, &mut UserData) -> Result<(), ParseError>` : feed token to the parser
- - `feed_callback(&self, &mut Context, TermType, &mut UserData) -> Result<(), ParseError>` : feed token with callback
+ - `feed_callback(&self, &mut Context, &mut C: Callback, TermType, &mut UserData) -> Result<(), ParseError>` : feed token with callback
 
 Note that the parameter `&mut UserData` is omitted if `%userdata` is not defined.
 Once the input sequence (including `eof` token) is feeded, without errors, you can get the value of start symbol by calling `context.accept()`.
