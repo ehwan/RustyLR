@@ -70,37 +70,37 @@ lalr1! {
     %left plus;
     %left star;
 
-    // s{N} is slice of shifted terminal symbols captured by N'th symbol
-    // v{N} is value of N'th symbol ( if it has value )
+    // data that each token holds can be accessed by its name
     // s is slice of shifted terminal symbols captured by current rule
-    // userdata canbe accessed by `data` ( &mut i32, for current situation )
-    A(i32) : A plus A {
-            println!("{:?} {:?} {:?}", s0, s1, s2 );
-            //                         ^   ^   ^
-            //                         |   |   |- slice of 2nd 'A'
-            //                         |   |- slice of 'plus'
+    // userdata can be accessed by `data` ( &mut i32, for this situation )
+    A(i32) : A plus a2=A {
+            println!("{:?} {:?} {:?}", A.slice, *plus, a2.slice );
+            //                         ^        ^     ^
+            //                         |        |     |- slice of 2nd 'A'
+            //                         |        |- &Token
             //                         |- slice of 1st 'A'
             println!( "{:?}", s );
             *data += 1;
-            v0 + v2 // --> this will be new value of current 'A'
-        //  ^    ^
-        //  |    |- value of 2nd 'A'
+            A.value + a2.value // --> this will be new value of current 'A'
+        //  ^         ^
+        //  |         |- value of 2nd 'A'
         //  |- value of 1st 'A'
         }
-      | M { v0 }
+      | M { M.value }
       ;
 
-    M(i32) : M star M { v0 * v2 }
-      | P { v0 }
+    M(i32) : M star m2=M { *M * *m2 }
+      | P { *P }
       ;
 
     P(i32) : num {
-        if let Token::Num(n) = v0 { *n }
-        else { return Err(format!("{:?}", s0)); }
-        //            ^^^^^^^^^ reduce action returns Result<(), String>
+        if let Token::Num(n) = *num { *n }
+        else { return Err(format!("{:?}", num)); }
+        //            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        //             reduce action returns Result<(), String>
     }
-      | lparen E rparen { v1 }
+      | lparen E rparen { *E }
       ;
 
-    E(i32) : A  { v0 };
+    E(i32) : A  { *A };
 }

@@ -1,9 +1,9 @@
-use super::token::Token;
+use super::token::TokenMapped;
 use proc_macro2::TokenStream;
 
 #[derive(Debug)]
 pub struct RuleLine {
-    pub tokens: Vec<Token>,
+    pub tokens: Vec<TokenMapped>,
     pub reduce_action: Option<TokenStream>,
 }
 

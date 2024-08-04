@@ -19,6 +19,7 @@ pub(crate) enum TermType {
     UserData(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %userdata
     Group(Option<proc_macro2::Group>),
     Literal(Option<proc_macro2::Literal>),
+    Equal(Option<proc_macro2::Punct>),
     OtherPunct(Option<proc_macro2::Punct>),
     Eof,
 }
@@ -39,8 +40,9 @@ impl TermType {
             TermType::UserData(_) => 12,
             TermType::Group(_) => 13,
             TermType::Literal(_) => 14,
-            TermType::OtherPunct(_) => 15,
-            TermType::Eof => 16,
+            TermType::Equal(_) => 15,
+            TermType::OtherPunct(_) => 16,
+            TermType::Eof => 17,
         }
     }
     pub fn stream(self) -> TokenStream {
@@ -80,6 +82,7 @@ impl TermType {
             }
             TermType::Group(group) => group.unwrap().to_token_stream(),
             TermType::Literal(lit) => lit.unwrap().to_token_stream(),
+            TermType::Equal(punct) => punct.unwrap().to_token_stream(),
             TermType::OtherPunct(punct) => punct.unwrap().to_token_stream(),
             TermType::Eof => unreachable!("Eof should not be converted to TokenStream"),
         }
@@ -101,6 +104,7 @@ impl TermType {
             TermType::UserData(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
             TermType::Group(group) => group.as_ref().map(|g| g.span()),
             TermType::Literal(lit) => lit.as_ref().map(|l| l.span()),
+            TermType::Equal(punct) => punct.as_ref().map(|p| p.span()),
             TermType::OtherPunct(punct) => punct.as_ref().map(|p| p.span()),
             TermType::Eof => None,
         }
@@ -123,6 +127,7 @@ impl std::fmt::Display for TermType {
             TermType::UserData(_) => write!(f, "%userdata"),
             TermType::Group(_) => write!(f, "TokenTree::Group"),
             TermType::Literal(_) => write!(f, "TokenTree::Literal"),
+            TermType::Equal(_) => write!(f, "="),
             TermType::OtherPunct(_) => write!(f, "TokenTree::Punct"),
             TermType::Eof => write!(f, "$"),
         }

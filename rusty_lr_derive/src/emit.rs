@@ -30,7 +30,7 @@ impl Grammar {
             for rule in rules.rule_lines.iter() {
                 let mut tokens = Vec::with_capacity(rule.tokens.len());
                 for token in rule.tokens.iter() {
-                    match token {
+                    match &token.token {
                         Token::Term(term) => {
                             tokens.push(rlr::Token::Term(term.to_string()));
                         }
@@ -225,26 +225,39 @@ impl Grammar {
                         let s = &self.#terms_stack_name[rusty_lr_macro_generated_new_begin..rusty_lr_macro_generated_new_end];
                     });
                 }
-                for (idx, token) in rule.tokens.iter().enumerate().rev() {
-                    let var_name = format_ident!("v{}", idx);
-                    let slice_name = format_ident!("s{}", idx);
-                    match token {
-                        Token::Term(_) => {
+                for token in rule.tokens.iter().rev() {
+                    match &token.token {
+                        Token::Term(term) => {
+                            let mapped = token.mapped.as_ref().unwrap_or(term);
                             token_pop_stream.extend(quote! {
-                                let #slice_name = &self.#terms_stack_name[self.#range_stack_name.pop().unwrap()];
-                                let #var_name = &#slice_name[0];
+                                let index = self.#range_stack_name.pop().unwrap().start;
+                                let #mapped = ::rusty_lr::TermData::new(
+                                    &self.#terms_stack_name[index],
+                                    index
+                                );
                             });
                         }
                         Token::NonTerm(nonterm) => {
-                            token_pop_stream.extend(quote! {
-                                let #slice_name = &self.#terms_stack_name[self.#range_stack_name.pop().unwrap()];
-                            });
-
+                            let mapped = token.mapped.as_ref().unwrap_or(nonterm);
                             // if typename is defined for this nonterm, pop from stack and assign to v{i}
                             if self.rules.get(&nonterm.to_string()).unwrap().1.is_some() {
                                 let stack_name = Self::stack_name(nonterm);
                                 token_pop_stream.extend(quote! {
-                                    let mut #var_name = self.#stack_name.pop().unwrap();
+                                    let range = self.#range_stack_name.pop().unwrap();
+                                    let #mapped = ::rusty_lr::NonTermData::new(
+                                        &self.#terms_stack_name[range.clone()],
+                                        self.#stack_name.pop().unwrap(),
+                                        range,
+                                    );
+                                });
+                            } else {
+                                token_pop_stream.extend(quote! {
+                                    let range = self.#range_stack_name.pop().unwrap();
+                                    let #mapped = ::rusty_lr::NonTermData::new(
+                                        &self.#terms_stack_name[range],
+                                        (),
+                                        range,
+                                    );
                                 });
                             }
                         }
@@ -325,14 +338,14 @@ impl Grammar {
             };
 
         Ok(quote! {
-        #[allow(unused_braces, unused_parens)]
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case)]
         pub struct #stack_struct_name {
             pub #terms_stack_name: Vec<#term_typename>,
             pub #range_stack_name: Vec<std::ops::Range<usize>>,
             pub state_stack: Vec<usize>,
             #stack_def_streams
         }
-        #[allow(unused_braces, unused_parens)]
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case)]
         impl #stack_struct_name {
             pub fn new() -> Self {
                 Self {
@@ -360,12 +373,12 @@ impl Grammar {
                 self.#range_stack_name.push(l..l+1);
             }
         }
-        #[allow(unused_braces, unused_parens)]
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case)]
         pub struct #struct_name {
             pub rules: Vec<::rusty_lr::ProductionRule<#term_typename, &'static str>>,
             pub states: Vec<::rusty_lr::State<#term_typename, &'static str>>,
         }
-        #[allow(unused_braces, unused_parens)]
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case)]
         impl #struct_name {
             pub fn new() -> Self {
                 #write_parser

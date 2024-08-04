@@ -54,6 +54,7 @@ impl Tokenizer {
                         }
                         ret
                     }
+                    '=' => Some(TermType::Equal(Some(punct))),
 
                     _ => Some(TermType::OtherPunct(Some(punct))),
                 },

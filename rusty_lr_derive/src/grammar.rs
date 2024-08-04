@@ -48,7 +48,6 @@ impl Grammar {
     }
     pub fn stack_name(name: &Ident) -> Ident {
         let span = name.span();
-        let name = name.to_string().to_lowercase();
         let mut ident = format_ident!("rustylr_macro_generated_{}_stack", name);
         ident.set_span(span);
         ident
@@ -78,6 +77,7 @@ impl Grammar {
         //          ;
         //
         // Token: Ident ;
+        // Token: Ident '=' Ident ;
         //
         // Action: Group
         //       |
@@ -161,6 +161,14 @@ impl Grammar {
         grammar.add_rule("TokensOne", vec![Token::NonTerm("Token")]);
 
         grammar.add_rule("Token", vec![Token::Term(TermType::Ident(None))]);
+        grammar.add_rule(
+            "Token",
+            vec![
+                Token::Term(TermType::Ident(None)),
+                Token::Term(TermType::Equal(None)),
+                Token::Term(TermType::Ident(None)),
+            ],
+        );
 
         grammar.add_rule("Action", vec![Token::Term(TermType::Group(None))]);
         grammar.add_rule("Action", vec![]);
@@ -194,6 +202,7 @@ impl Grammar {
         );
         grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Group(None))]);
         grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Literal(None))]);
+        grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Equal(None))]);
         grammar.add_rule(
             "AnyTokenNoSemi",
             vec![Token::Term(TermType::OtherPunct(None))],
@@ -364,10 +373,10 @@ impl Grammar {
         for (_, (_name, _ruletype, rules)) in grammar.rules.iter_mut() {
             for rule in rules.rule_lines.iter_mut() {
                 for token in rule.tokens.iter_mut() {
-                    if let Token::NonTerm(ident) = token.clone() {
+                    if let Token::NonTerm(ident) = token.token.clone() {
                         if grammar.terminals.contains_key(&ident.to_string()) {
                             // set the token to Term
-                            *token = Token::Term(ident);
+                            token.token = Token::Term(ident);
                         }
                     }
                 }
@@ -383,7 +392,7 @@ impl Grammar {
         for (_, (_name, _ruletype, rules)) in grammar.rules.iter() {
             for rule in rules.rule_lines.iter() {
                 for token in rule.tokens.iter() {
-                    if let Token::NonTerm(ident) = token {
+                    if let Token::NonTerm(ident) = &token.token {
                         if !grammar.rules.contains_key(&ident.to_string()) {
                             return Err(ParseError::NonTerminalNotDefined(ident.clone()));
                         }

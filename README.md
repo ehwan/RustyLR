@@ -3,19 +3,19 @@ RustyLR will provide you a LR(1) and LALR(1) Deterministic Finite Automata (DFA)
 
 ```
 [dependencies]
-rusty_lr = "0.7.3"
+rusty_lr = "0.8.0"
 ```
 
 ## Features
  - pure Rust implementation
  - readable error messages, both for grammar building and parsing
  - compile-time DFA construction from CFGs ( with proc-macro )
- - customizable reducing action
+ - customizable reduce action
  - resolving conflicts of ambiguous grammar
  - tracing parser action with callback
 
 #### Why proc-macro, not external executable?
- - Decent built-in lexer, with consideration of unicode.
+ - Decent built-in lexer, with consideration of unicode and comments.
  - Can generate *pretty* error messages, by just passing `Span` data.
  - With modern IDE, can see errors in real-time with specific location.
 
@@ -55,39 +55,39 @@ lalr1! {
     %left plus;
     %left star;
 
-    // s{N} is slice of shifted terminal symbols captured by N'th symbol
-    // v{N} is value of N'th symbol ( if it has value )
+    // data that each token holds can be accessed by its name
     // s is slice of shifted terminal symbols captured by current rule
-    // userdata canbe accessed by `data` ( &mut i32, for current situation )
-    A(i32) : A plus A {
-            println!("{:?} {:?} {:?}", s0, s1, s2 );
-            //                         ^   ^   ^
-            //                         |   |   |- slice of 2nd 'A'
-            //                         |   |- slice of 'plus'
+    // userdata can be accessed by `data` ( &mut i32, for this situation )
+    A(i32) : A plus a2=A {
+            println!("{:?} {:?} {:?}", A.slice, *plus, a2.slice );
+            //                         ^        ^      ^
+            //                         |        |      |- slice of 2nd 'A'
+            //                         |        |- &Token
             //                         |- slice of 1st 'A'
             println!( "{:?}", s );
             *data += 1;
-            v0 + v2 // --> this will be new value of current 'A'
-        //  ^    ^ 
-        //  |    |- value of 2nd 'A'
+            A.value + a2.value // --> this will be new value of current 'A'
+        //  ^         ^
+        //  |         |- value of 2nd 'A'
         //  |- value of 1st 'A'
         }
-      | M { v0 }
+      | M { M.value }
       ;
 
-    M(i32) : M star M { v0 * v2 }
-      | P { v0 }
+    M(i32) : M star m2=M { *M * *m2 }
+      | P { *P }
       ;
 
     P(i32) : num {
-        if let Token::Num(n) = v0 { *n }
-        else { return Err(format!("{:?}", s0)); }
-        //            ^^^^^^^^^ reduce action returns Result<(), String>
+        if let Token::Num(n) = *num { *n }
+        else { return Err(format!("{:?}", num)); }
+        //            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        //             reduce action returns Result<(), String>
     }
-      | lparen E rparen { v1 }
+      | lparen E rparen { *E }
       ;
 
-    E(i32) : A  { v0 };
+    E(i32) : A  { *A };
 }
 ```
 
@@ -134,9 +134,9 @@ fn main() {
 
 The result will be:
 ```
-[Num(3)] [Plus] [Num(4)]
+[Num(3)] Plus [Num(4)]
 [Num(3), Plus, Num(4)]
-[Num(1)] [Plus] [Num(2), Star, LParen, Num(3), Plus, Num(4), RParen]
+[Num(1)] Plus [Num(2), Star, LParen, Num(3), Plus, Num(4), RParen]
 [Num(1), Plus, Num(2), Star, LParen, Num(3), Plus, Num(4), RParen]
 15
 userdata: 2
@@ -413,44 +413,72 @@ Define the type of userdata passed to `feed()` function.
 '%left' <Ident> ';'
 '%right' <Ident> ';'
 ```
-Set the shift/reduce precedence of terminal symbols. `<Ident>` must be defined in `%token`.
+Set the shift/reduce precedence for terminal symbols. `<Ident>` must be defined in `%token`.
 
 #### Production rules
 ```
 <Ident><RuleType>
-  ':' <Ident>* <ReduceAction> 
-  '|' <Ident>* <ReduceAction> 
+  ':' <Token>* <ReduceAction>
+  '|' <Token>* <ReduceAction>
   ...
   ';'
 ```
 Define the production rules.
-`<Ident>` must be valid terminal or non-terminal symbols.
 
 ```
-(optional)
+<Token> : <Ident as Term or Non-Term>                                ... (1)
+        | <Ident as variable name> '=' <Ident as Term or Non-Term>   ... (2)
+        ;
+```
+For (1), `<Ident>` must be valid terminal or non-terminal symbols. In this case, the data of the token will be mapped to the variable with the same name as `<Ident>`.
+For (2), the data of the token will be mapped to the variable on the left side of '='.
+For more information about the token data and variable, refer to the [reduce action](#reduceaction) below.
+
+#### RuleType <sub><sup>(optional)</sup></sub>
+```
 <RuleType> : '(' <RustType> ')'
            |
            ;
 ```
-`<RuleType>` is optional, this will define the type of value that this production rule holds.
+Define the type of value that this production rule holds.
 
+#### ReduceAction
 ```
-(optional)
 <ReduceAction> : '{' <RustExpr> '}'
                |
                ;
 ```
-`<ReduceAction>` is optional,
-this will define the action to be executed when the rule is matched and reduced.
+Define the action to be executed when the rule is matched and reduced.
 If `<RuleType>` is defined, `<ReduceAction>` itself must be the value of `<RuleType>` (i.e. no semicolon at the end of the statement).
 
-**Predefined variables** can be used in `<ReduceAction>`:
- - `s0`, `s1`, `s2`, ... : slice of shifted terminal symbols `&[<TermType>]` captured by N'th symbol
+**predefined variables** can be used in `<ReduceAction>`:
  - `s` : slice of shifted terminal symbols `&[<TermType>]` captured by current rule.
- - `v0`, `v1`, `v2`, ... : value of N'th symbol. 
- If N'th symbol is Terminal, it will be `&<TermType>`, 
- and if it is NonTerminal, it will be `mut <RuleType>`.
  - `data` : userdata passed to `feed()` function.
+
+To access the data of each token, you can directly use the name of the token as a variable.
+For non-terminal symbols, the type of data is [`rusty_lr::NonTermData<'a, TermType, RuleType>`](rusty_lr/src/nontermdata.rs).
+For terminal symbols, the type of data is [`rusty_lr::TermData<'a, TermType>`](rusty_lr/src/termdata.rs).
+If multiple variables are defined with the same name, the variable on the front-most will be used.
+
+For example, following code will print the value of each `A`, and the slice of each `A` and `plus` token in the production rule `E -> A plus A`.
+```rust
+%token plus ...;
+
+E : A plus a2=A
+  {
+    println!("Value of 1st A: {}", A.value);  // A.value or *A
+    println!("Slice of 1st A: {:?}", A.slice);
+    println!("Value of 2nd A: {}", a2.value); // a2.value or *a2
+    println!("Slice of 2nd A: {:?}", a2.slice);
+
+    if let Token::Plus(plus) = *plus {
+        println!( "Plus token: {:?}", plus );
+    }
+  }
+  ;
+
+A(i32): ... ;
+```
 
 `Result<(), String>` can be returned from `<ReduceAction>`.
 Returned `Err` will be delivered to the caller of `feed()` function.

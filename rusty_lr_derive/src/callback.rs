@@ -4,6 +4,7 @@ use super::rule::RuleLine;
 use super::rule::RuleLines;
 use super::term::TermType;
 use super::token::Token;
+use super::token::TokenMapped;
 
 use proc_macro2::Group;
 use proc_macro2::TokenStream;
@@ -17,8 +18,8 @@ pub struct Callback {
     pub ruletype_stack: Vec<Option<Group>>,
     pub rulelines_stack: Vec<RuleLines>,
     pub ruleline_stack: Vec<RuleLine>,
-    pub tokens_stack: Vec<Vec<Token>>,
-    pub token_stack: Vec<Token>,
+    pub tokens_stack: Vec<Vec<TokenMapped>>,
+    pub token_stack: Vec<TokenMapped>,
     pub action_stack: Vec<Option<Group>>,
     pub rustcode_stack: Vec<TokenStream>,
 }
@@ -60,12 +61,20 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
                 // Ident
                 let ident = match self.termstack.pop() {
                     Some(TermType::Ident(ident)) => ident.unwrap(),
-                    _ => unreachable!("Rule0 - Ident"),
+                    _ => unreachable!("Rule{} - Ident", rule),
                 };
 
-                let ruletype = self.ruletype_stack.pop().expect("Rule0 - RuleType");
+                let ruletype = if let Some(rt) = self.ruletype_stack.pop() {
+                    rt
+                } else {
+                    unreachable!("Rule{} - RuleType", rule);
+                };
 
-                let rulelines = self.rulelines_stack.pop().expect("Rule0 - RuleLines");
+                let rulelines = if let Some(rl) = self.rulelines_stack.pop() {
+                    rl
+                } else {
+                    unreachable!("Rule{} - RuleLines", rule);
+                };
 
                 let span = ident.span();
                 let name = ident.to_string();
@@ -96,11 +105,11 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
                             return Err(ParseError::InvalidRuletypeDelimiter(ruletype.span()));
                         }
                     } else {
-                        unreachable!("Rule1 - Group");
+                        unreachable!("Rule{} - Group", rule);
                     }
                     self.ruletype_stack.push(ruletype);
                 } else {
-                    unreachable!("Rule1");
+                    unreachable!("Rule{}", rule);
                 }
             }
 
@@ -121,10 +130,10 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
                         rulelines.rule_lines.push(ruleline);
                         self.rulelines_stack.push(rulelines);
                     } else {
-                        unreachable!("Rule3 - 2");
+                        unreachable!("Rule{} - 2", rule);
                     }
                 } else {
-                    unreachable!("Rule3 - 1");
+                    unreachable!("Rule{} - 1", rule);
                 }
             }
 
@@ -137,7 +146,7 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
                     };
                     self.rulelines_stack.push(rulelines);
                 } else {
-                    unreachable!("Rule4");
+                    unreachable!("Rule{}", rule);
                 }
             }
 
@@ -147,13 +156,13 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
                 // Action
                 let action = match self.action_stack.pop() {
                     Some(action) => action,
-                    None => unreachable!("Rule5 - Action"),
+                    None => unreachable!("Rule{} - Action", rule),
                 };
 
                 // RuleDef
                 let mut tokens = match self.tokens_stack.pop() {
                     Some(tokens) => tokens,
-                    _ => unreachable!("Rule5 - RuleDef"),
+                    _ => unreachable!("Rule{} - RuleDef", rule),
                 };
                 tokens.reverse();
 
@@ -178,12 +187,12 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             9 => {
                 let token = match self.token_stack.pop() {
                     Some(token) => token,
-                    _ => unreachable!("Rule9 - Token"),
+                    _ => unreachable!("Rule{} - Token", rule),
                 };
 
                 let mut tokens = match self.tokens_stack.pop() {
                     Some(tokens) => tokens,
-                    _ => unreachable!("Rule9 - Tokens"),
+                    _ => unreachable!("Rule{} - Tokens", rule),
                 };
                 tokens.push(token);
                 self.tokens_stack.push(tokens);
@@ -193,7 +202,7 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             10 => {
                 let token = match self.token_stack.pop() {
                     Some(token) => token,
-                    _ => unreachable!("Rule9 - Token"),
+                    _ => unreachable!("Rule{} - Token", rule),
                 };
                 self.tokens_stack.push(vec![token]);
             }
@@ -201,15 +210,39 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             // Token: Ident
             11 => match self.termstack.pop() {
                 Some(TermType::Ident(ident)) => {
-                    self.token_stack.push(Token::NonTerm(ident.unwrap()));
+                    self.token_stack.push(TokenMapped {
+                        token: Token::NonTerm(ident.unwrap()),
+                        mapped: None,
+                    });
                 }
                 _ => {
-                    unreachable!("Rule11 - Ident");
+                    unreachable!("Rule{} - Ident", rule);
                 }
             },
+            // Token: Ident '=' Ident
+            12 => {
+                let ident = if let Some(TermType::Ident(ident)) = self.termstack.pop() {
+                    ident.unwrap()
+                } else {
+                    unreachable!("Rule{} - Ident1", rule);
+                };
+                // '='
+                self.termstack.pop();
+
+                let mapped = if let Some(TermType::Ident(ident)) = self.termstack.pop() {
+                    ident.unwrap()
+                } else {
+                    unreachable!("Rule{} - Ident2", rule);
+                };
+
+                self.token_stack.push(TokenMapped {
+                    token: Token::NonTerm(ident),
+                    mapped: Some(mapped),
+                });
+            }
 
             // Action: Group
-            12 => match self.termstack.pop() {
+            13 => match self.termstack.pop() {
                 Some(TermType::Group(group)) => {
                     if let Some(action) = &group {
                         // check if action is enclosed with '{' and '}'
@@ -217,22 +250,22 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
                             return Err(ParseError::InvliadReduceActionDelimiter(action.span()));
                         }
                     } else {
-                        unreachable!("Rule12 - Group");
+                        unreachable!("Rule{} - Group", rule);
                     }
                     self.action_stack.push(group);
                 }
                 _ => {
-                    unreachable!("Rule12 - Group");
+                    unreachable!("Rule{} - Group", rule);
                 }
             },
 
             // Action:
-            13 => {
+            14 => {
                 self.action_stack.push(None);
             }
 
             // TokenDef: '%token' Ident RustCode ';'
-            14 => {
+            15 => {
                 // ';'
                 self.termstack.pop();
 
@@ -242,12 +275,12 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
                 // Ident
                 let ident = match self.termstack.pop() {
                     Some(TermType::Ident(ident)) => ident.unwrap(),
-                    _ => unreachable!("Rule14 - Ident"),
+                    _ => unreachable!("Rule{} - Ident", rule),
                 };
 
                 let rustcode = match self.rustcode_stack.pop() {
                     Some(rustcode) => rustcode,
-                    _ => unreachable!("Rule14 - RustCode"),
+                    _ => unreachable!("Rule{} - RustCode", rule),
                 };
 
                 // '%token'
@@ -271,7 +304,6 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             }
 
             // AnyTokenNoSemi: <Any Token Except Semicolon>
-            15 => {}
             16 => {}
             17 => {}
             18 => {}
@@ -285,45 +317,47 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             26 => {}
             27 => {}
             28 => {}
+            29 => {}
+            30 => {}
 
             // AnyTokens: AnyTokenNoSemi AnyTokens
-            29 => {
+            31 => {
                 // AnyTokenNoSemi
                 let token = match self.termstack.pop() {
                     Some(token) => token.stream(),
-                    _ => unreachable!("Rule29 - AnyTokenNoSemi"),
+                    _ => unreachable!("Rule{} - AnyTokenNoSemi", rule),
                 };
 
                 // AnyTokens
                 let rustcode = match self.rustcode_stack.pop() {
                     Some(tokens) => tokens,
-                    _ => unreachable!("Rule29 - AnyTokens"),
+                    _ => unreachable!("Rule{} - AnyTokens", rule),
                 };
                 self.rustcode_stack.push(quote! { #token #rustcode });
             }
 
             // AnyTokens: AnyTokenNoSemi
-            30 => {
+            32 => {
                 // AnyTokenNoSemi
                 let token = match self.termstack.pop() {
                     Some(token) => token.stream(),
-                    _ => unreachable!("Rule29 - AnyTokenNoSemi"),
+                    _ => unreachable!("Rule{} - AnyTokenNoSemi", rule),
                 };
                 self.rustcode_stack.push(token);
             }
 
             // RustCode: AnyTokens
-            31 => {}
+            33 => {}
 
             // StartDef: '%start' Ident ';'
-            32 => {
+            34 => {
                 // ';'
                 self.termstack.pop();
 
                 // Ident
                 let ident = match self.termstack.pop() {
                     Some(TermType::Ident(ident)) => ident.unwrap(),
-                    _ => unreachable!("Rule32 - Ident"),
+                    _ => unreachable!("Rule{} - Ident", rule),
                 };
 
                 // '%start'
@@ -342,14 +376,14 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             }
 
             // EofDef: '%eof' RustCode ';'
-            33 => {
+            35 => {
                 // ';'
                 self.termstack.pop();
 
                 // RustCode
                 let rustcode = match self.rustcode_stack.pop() {
                     Some(rustcode) => rustcode,
-                    _ => unreachable!("Rule33 - RustCode"),
+                    _ => unreachable!("Rule{} - RustCode", rule),
                 };
 
                 // '%eof'
@@ -367,14 +401,14 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             }
 
             // TokenTypeDef: '%tokentype' RustCode ';'
-            34 => {
+            36 => {
                 // ';'
                 self.termstack.pop();
 
                 // RustCode
                 let rustcode = match self.rustcode_stack.pop() {
                     Some(rustcode) => rustcode,
-                    _ => unreachable!("Rule34 - RustCode"),
+                    _ => unreachable!("Rule{} - RustCode", rule),
                 };
 
                 // '%tokentype'
@@ -392,14 +426,14 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             }
 
             // UserDataDef: '%userdata' RustCode ';'
-            35 => {
+            37 => {
                 // ';'
                 self.termstack.pop();
 
                 // RustCode
                 let rustcode = match self.rustcode_stack.pop() {
                     Some(rustcode) => rustcode,
-                    _ => unreachable!("Rule35 - RustCode"),
+                    _ => unreachable!("Rule{} - RustCode", rule),
                 };
 
                 // '%userdata'
@@ -417,14 +451,14 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             }
 
             // ReduceDef: '%left' Ident ';'
-            36 => {
+            38 => {
                 // ';'
                 self.termstack.pop();
 
                 // Ident
                 let ident = match self.termstack.pop() {
                     Some(TermType::Ident(ident)) => ident.unwrap(),
-                    _ => unreachable!("Rule36 - Ident"),
+                    _ => unreachable!("Rule{} - Ident", rule),
                 };
                 self.grammar
                     .reduce_types
@@ -435,14 +469,14 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             }
 
             // ReduceDef: '%right' Ident ';'
-            37 => {
+            39 => {
                 // ';'
                 self.termstack.pop();
 
                 // Ident
                 let ident = match self.termstack.pop() {
                     Some(TermType::Ident(ident)) => ident.unwrap(),
-                    _ => unreachable!("Rule37 - Ident"),
+                    _ => unreachable!("Rule{} - Ident", rule),
                 };
                 self.grammar
                     .reduce_types
@@ -453,46 +487,46 @@ impl rusty_lr_core::Callback<TermType, &'static str> for Callback {
             }
 
             // Grammar: Rule Grammar
-            38 => {}
-
-            // Grammar: Rule
-            39 => {}
-
-            // Grammar: TokenDef Grammar
             40 => {}
 
-            // Grammar: TokenDef
+            // Grammar: Rule
             41 => {}
 
-            // Grammar: StartDef Grammar
+            // Grammar: TokenDef Grammar
             42 => {}
 
-            // Grammar: StartDef
+            // Grammar: TokenDef
             43 => {}
 
-            // Grammar: EofDef Grammar
+            // Grammar: StartDef Grammar
             44 => {}
 
-            // Grammar: EofDef
+            // Grammar: StartDef
             45 => {}
 
-            // Grammar: TokenTypeDef Grammar
+            // Grammar: EofDef Grammar
             46 => {}
 
-            // Grammar: TokenTypeDef
+            // Grammar: EofDef
             47 => {}
 
-            // Grammar: UserDataDef Grammar
+            // Grammar: TokenTypeDef Grammar
             48 => {}
 
-            // Grammar: UserDataDef
+            // Grammar: TokenTypeDef
             49 => {}
 
-            // Grammar: ReduceDef Grammar
+            // Grammar: UserDataDef Grammar
             50 => {}
 
-            // Grammar: ReduceDef
+            // Grammar: UserDataDef
             51 => {}
+
+            // Grammar: ReduceDef Grammar
+            52 => {}
+
+            // Grammar: ReduceDef
+            53 => {}
 
             _ => unreachable!("Invalid RuleID: {}", rule),
         }
