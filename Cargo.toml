@@ -4,5 +4,6 @@ members = [
   "rusty_lr_derive",
   "rusty_lr",
   "example/calculator",
+  "example/calculator_u8",
   "example/lrtest",
 ]

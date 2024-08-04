@@ -3,7 +3,7 @@ RustyLR will provide you a LR(1) and LALR(1) Deterministic Finite Automata (DFA)
 
 ```
 [dependencies]
-rusty_lr = "0.8.0"
+rusty_lr = "0.8.1"
 ```
 
 ## Features
@@ -20,6 +20,8 @@ rusty_lr = "0.8.0"
  - With modern IDE, can see errors in real-time with specific location.
 
 ## Sample
+
+Please refer to the [example](example) directory for the full example.
 
 In [`example/calculator/parser.rs`](example/calculator/src/parser.rs),
 ```rust

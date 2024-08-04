@@ -198,7 +198,8 @@ impl Grammar {
 
         let mut ruleid: usize = 0;
         let mut case_streams = quote! {};
-        let range_stack_name = Self::stack_name(&format_ident! {"rl_range"});
+        // stack for end index of each rule in term stack
+        let end_stack_name = Self::stack_name(&format_ident! {"rl_end"});
         let terms_stack_name = Self::stack_name(&format_ident! {"rl_terms"});
         let term_typename = self.token_typename.as_ref().unwrap();
 
@@ -214,23 +215,21 @@ impl Grammar {
                 };
                 let mut token_pop_stream = TokenStream::new();
                 let rulelen = rule.tokens.len();
-                if rulelen == 0 {
-                    token_pop_stream.extend(quote! {
-                        let s = &terms[0..0];
-                    });
-                } else {
-                    token_pop_stream.extend(quote! {
-                        rusty_lr_macro_generated_new_begin = self.#range_stack_name[self.#range_stack_name.len() - #rulelen].start;
-                        rusty_lr_macro_generated_new_end = self.#range_stack_name[self.#range_stack_name.len() - 1].end;
-                        let s = &self.#terms_stack_name[rusty_lr_macro_generated_new_begin..rusty_lr_macro_generated_new_end];
-                    });
-                }
+                token_pop_stream.extend(quote! {
+                    rusty_lr_macro_generated_new_begin = if self.#end_stack_name.len() == #rulelen {
+                        0usize
+                    } else {
+                        *self.#end_stack_name.get( self.#end_stack_name.len() - #rulelen - 1 ).unwrap()
+                    };
+                    rusty_lr_macro_generated_new_end = self.#end_stack_name.last().copied().unwrap_or(0usize);
+                    let s = &self.#terms_stack_name[rusty_lr_macro_generated_new_begin..rusty_lr_macro_generated_new_end];
+                });
                 for token in rule.tokens.iter().rev() {
                     match &token.token {
                         Token::Term(term) => {
                             let mapped = token.mapped.as_ref().unwrap_or(term);
                             token_pop_stream.extend(quote! {
-                                let index = self.#range_stack_name.pop().unwrap().start;
+                                let index = self.#end_stack_name.pop().unwrap()-1;
                                 let #mapped = ::rusty_lr::TermData::new(
                                     &self.#terms_stack_name[index],
                                     index
@@ -243,20 +242,22 @@ impl Grammar {
                             if self.rules.get(&nonterm.to_string()).unwrap().1.is_some() {
                                 let stack_name = Self::stack_name(nonterm);
                                 token_pop_stream.extend(quote! {
-                                    let range = self.#range_stack_name.pop().unwrap();
+                                    let end = self.#end_stack_name.pop().unwrap_or(0);
+                                    let begin = self.#end_stack_name.last().copied().unwrap_or(0);
                                     let #mapped = ::rusty_lr::NonTermData::new(
-                                        &self.#terms_stack_name[range.clone()],
+                                        &self.#terms_stack_name[begin..end],
                                         self.#stack_name.pop().unwrap(),
-                                        range,
+                                        begin..end,
                                     );
                                 });
                             } else {
                                 token_pop_stream.extend(quote! {
-                                    let range = self.#range_stack_name.pop().unwrap();
+                                    let end = self.#end_stack_name.pop().unwrap_or(0);
+                                    let begin = self.#end_stack_name.last().copied().unwrap_or(0);
                                     let #mapped = ::rusty_lr::NonTermData::new(
-                                        &self.#terms_stack_name[range],
+                                        &self.#terms_stack_name[begin..end],
                                         (),
-                                        range,
+                                        begin..end,
                                     );
                                 });
                             }
@@ -284,15 +285,15 @@ impl Grammar {
         }
         case_streams.extend(quote! {});
         let match_streams = quote! {
-            let mut rusty_lr_macro_generated_new_begin: usize = 0;
-            let mut rusty_lr_macro_generated_new_end: usize = 0;
+            let mut rusty_lr_macro_generated_new_begin: usize = self.#terms_stack_name.len();
+            let mut rusty_lr_macro_generated_new_end: usize = rusty_lr_macro_generated_new_begin;
             match rustylr_macro_generated_ruleid__ {
                 #case_streams
                 _ => {
                     unreachable!( "Invalid Rule: {}", rustylr_macro_generated_ruleid__ );
                 }
             }
-            self.#range_stack_name.push(rusty_lr_macro_generated_new_begin..rusty_lr_macro_generated_new_end);
+            self.#end_stack_name.push(rusty_lr_macro_generated_new_end);
         };
 
         let start_rule_name = self.start_rule_name.as_ref().unwrap();
@@ -341,7 +342,7 @@ impl Grammar {
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case)]
         pub struct #stack_struct_name {
             pub #terms_stack_name: Vec<#term_typename>,
-            pub #range_stack_name: Vec<std::ops::Range<usize>>,
+            pub #end_stack_name: Vec<usize>,
             pub state_stack: Vec<usize>,
             #stack_def_streams
         }
@@ -350,7 +351,7 @@ impl Grammar {
             pub fn new() -> Self {
                 Self {
                     #terms_stack_name: Vec::new(),
-                    #range_stack_name: Vec::new(),
+                    #end_stack_name: Vec::new(),
                     state_stack: vec![0],
                     #stack_init_streams
                 }
@@ -368,9 +369,8 @@ impl Grammar {
             }
 
             pub fn push( &mut self, term: #term_typename ) {
-                let l = self.#terms_stack_name.len();
                 self.#terms_stack_name.push(term);
-                self.#range_stack_name.push(l..l+1);
+                self.#end_stack_name.push(self.#terms_stack_name.len());
             }
         }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case)]
