@@ -14,6 +14,7 @@ pub enum ParseError {
     MultipleEofDefinition(Span, TokenStream, TokenStream),
     MultipleUserDataDefinition(Span, TokenStream, TokenStream),
     MultipleRuleDefinition(Span, String),
+    MultipleErrorDefinition(Span, TokenStream, TokenStream),
 
     InvalidRuletypeDelimiter(Span),
     InvliadReduceActionDelimiter(Span),
@@ -81,6 +82,13 @@ impl ParseError {
             }
             ParseError::MultipleRuleDefinition(span, name) => {
                 let message = format!("Multiple rule definition: {}", name);
+                quote_spanned! {
+                    span.clone() =>
+                    compile_error!(#message);
+                }
+            }
+            ParseError::MultipleErrorDefinition(span, err1, err2) => {
+                let message = format!("Multiple error type definition: {} AND {}", err1, err2);
                 quote_spanned! {
                     span.clone() =>
                     compile_error!(#message);

@@ -6,7 +6,9 @@ use crate::rule::ShiftedRule;
 use crate::state::State;
 use crate::ProductionRule;
 
-pub enum ParseError<'a, Term, NonTerm, CallbackError> {
+/// Error type for feed()
+pub enum ParseError<'a, Term, NonTerm, CallbackError, ReduceActionError> {
+    /// Invalid non-terminal feeded. This must not occur if the grammar is correct
     InvalidNonTerminal(
         &'a NonTerm,
         &'a [ProductionRule<Term, NonTerm>],
@@ -14,6 +16,7 @@ pub enum ParseError<'a, Term, NonTerm, CallbackError> {
         Vec<usize>,
     ),
 
+    /// Invalid terminal feeded
     InvalidTerminal(
         Term,
         &'a [ProductionRule<Term, NonTerm>],
@@ -25,11 +28,16 @@ pub enum ParseError<'a, Term, NonTerm, CallbackError> {
     Callback(CallbackError),
 
     /// Error from macro reduce action
-    CustomMessage(String),
+    ReduceAction(ReduceActionError),
 }
 
-impl<'a, Term: Display + Clone, NonTerm: Display + Clone, CallbackError: Display> Display
-    for ParseError<'a, Term, NonTerm, CallbackError>
+impl<
+        'a,
+        Term: Display + Clone,
+        NonTerm: Display + Clone,
+        CallbackError: Display,
+        ReduceActionError: Display,
+    > Display for ParseError<'a, Term, NonTerm, CallbackError, ReduceActionError>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -114,15 +122,20 @@ impl<'a, Term: Display + Clone, NonTerm: Display + Clone, CallbackError: Display
             ParseError::Callback(message) => {
                 write!(f, "Callback Error: {}", message)?;
             }
-            ParseError::CustomMessage(message) => {
+            ParseError::ReduceAction(message) => {
                 write!(f, "{}", message)?;
             }
         }
         Ok(())
     }
 }
-impl<'a, Term: Debug + Clone, NonTerm: Debug + Clone, CallbackError: Debug> Debug
-    for ParseError<'a, Term, NonTerm, CallbackError>
+impl<
+        'a,
+        Term: Debug + Clone,
+        NonTerm: Debug + Clone,
+        CallbackError: Debug,
+        ReduceActionError: Debug,
+    > Debug for ParseError<'a, Term, NonTerm, CallbackError, ReduceActionError>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -207,8 +220,8 @@ impl<'a, Term: Debug + Clone, NonTerm: Debug + Clone, CallbackError: Debug> Debu
             ParseError::Callback(message) => {
                 write!(f, "Callback Error: {:?}", message)?;
             }
-            ParseError::CustomMessage(message) => {
-                write!(f, "{}", message)?;
+            ParseError::ReduceAction(message) => {
+                write!(f, "{:?}", message)?;
             }
         }
         Ok(())

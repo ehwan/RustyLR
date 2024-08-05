@@ -1,3 +1,4 @@
+/// struct for parsing context
 #[derive(Debug, Clone)]
 pub struct Context {
     /// stack for state transition

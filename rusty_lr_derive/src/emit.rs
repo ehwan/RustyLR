@@ -214,16 +214,6 @@ impl Grammar {
                     quote! {}
                 };
                 let mut token_pop_stream = TokenStream::new();
-                let rulelen = rule.tokens.len();
-                token_pop_stream.extend(quote! {
-                    rusty_lr_macro_generated_new_begin = if self.#end_stack_name.len() == #rulelen {
-                        0usize
-                    } else {
-                        *self.#end_stack_name.get( self.#end_stack_name.len() - #rulelen - 1 ).unwrap()
-                    };
-                    rusty_lr_macro_generated_new_end = self.#end_stack_name.last().copied().unwrap_or(0usize);
-                    let s = &self.#terms_stack_name[rusty_lr_macro_generated_new_begin..rusty_lr_macro_generated_new_end];
-                });
                 for token in rule.tokens.iter().rev() {
                     match &token.token {
                         Token::Term(term) => {
@@ -238,29 +228,32 @@ impl Grammar {
                         }
                         Token::NonTerm(nonterm) => {
                             let mapped = token.mapped.as_ref().unwrap_or(nonterm);
-                            // if typename is defined for this nonterm, pop from stack and assign to v{i}
-                            if self.rules.get(&nonterm.to_string()).unwrap().1.is_some() {
-                                let stack_name = Self::stack_name(nonterm);
-                                token_pop_stream.extend(quote! {
-                                    let end = self.#end_stack_name.pop().unwrap_or(0);
-                                    let begin = self.#end_stack_name.last().copied().unwrap_or(0);
-                                    let #mapped = ::rusty_lr::NonTermData::new(
-                                        &self.#terms_stack_name[begin..end],
-                                        self.#stack_name.pop().unwrap(),
-                                        begin..end,
-                                    );
-                                });
-                            } else {
-                                token_pop_stream.extend(quote! {
-                                    let end = self.#end_stack_name.pop().unwrap_or(0);
-                                    let begin = self.#end_stack_name.last().copied().unwrap_or(0);
-                                    let #mapped = ::rusty_lr::NonTermData::new(
-                                        &self.#terms_stack_name[begin..end],
-                                        (),
-                                        begin..end,
-                                    );
-                                });
-                            }
+
+                            // pop value from stack of 'nonterm'
+                            let stack_pop_stream =
+                                // if <RuleType> is defined for this nonterm
+                                if self.rules.get(&nonterm.to_string()).unwrap().1.is_some() {
+                                    // stack name of this token
+                                    let stack_name = Self::stack_name(nonterm);
+                                    quote! {
+                                        self.#stack_name.pop().unwrap()
+                                    }
+                                } else {
+                                    quote! {
+                                        ()
+                                    }
+                                };
+
+                            token_pop_stream.extend(quote! {
+                                // TODO unreachable! if stack is empty
+                                let end = self.#end_stack_name.pop().unwrap();
+                                let begin = *self.#end_stack_name.last().unwrap();
+                                let #mapped = ::rusty_lr::NonTermData::new(
+                                    &self.#terms_stack_name[begin..end],
+                                    #stack_pop_stream,
+                                    begin..end,
+                                );
+                            });
                         }
                     }
                 }
@@ -283,18 +276,6 @@ impl Grammar {
                 ruleid += 1;
             }
         }
-        case_streams.extend(quote! {});
-        let match_streams = quote! {
-            let mut rusty_lr_macro_generated_new_begin: usize = self.#terms_stack_name.len();
-            let mut rusty_lr_macro_generated_new_end: usize = rusty_lr_macro_generated_new_begin;
-            match rustylr_macro_generated_ruleid__ {
-                #case_streams
-                _ => {
-                    unreachable!( "Invalid Rule: {}", rustylr_macro_generated_ruleid__ );
-                }
-            }
-            self.#end_stack_name.push(rusty_lr_macro_generated_new_end);
-        };
 
         let start_rule_name = self.start_rule_name.as_ref().unwrap();
         let (start_rule_typename, pop_from_start_rule_stack) = {
@@ -331,6 +312,14 @@ impl Grammar {
         struct_name.set_span(start_rule_name.span());
         let mut stack_struct_name = format_ident!("{}Context", start_rule_name);
         stack_struct_name.set_span(start_rule_name.span());
+
+        // error typename from '%error'
+        let error_typename = if let Some(error_typename) = &self.error_typename {
+            error_typename.clone()
+        } else {
+            quote! { String }
+        };
+
         let (user_data_parameter_def, user_data_var) =
             if let Some(user_data) = &self.userdata_typename {
                 (quote! { data: &mut #user_data, }, quote! { data, })
@@ -351,17 +340,29 @@ impl Grammar {
             pub fn new() -> Self {
                 Self {
                     #terms_stack_name: Vec::new(),
-                    #end_stack_name: Vec::new(),
+                    #end_stack_name: vec![0],
                     state_stack: vec![0],
                     #stack_init_streams
                 }
             }
 
             pub fn reduce(&mut self,
+                rulelen: usize,
                 rustylr_macro_generated_ruleid__: usize,
                 #user_data_parameter_def
-            ) -> Result<(), String> {
-                #match_streams
+            ) -> Result<(), #error_typename> {
+                // get range of current rule
+                // TODO unreachable! if stack is empty
+                let rusty_lr_macro_generated_new_begin = *self.#end_stack_name.get( self.#end_stack_name.len() - rulelen-1 ).unwrap();
+                let rusty_lr_macro_generated_new_end = *self.#end_stack_name.last().unwrap();
+                let s = &self.#terms_stack_name[rusty_lr_macro_generated_new_begin..rusty_lr_macro_generated_new_end];
+                match rustylr_macro_generated_ruleid__ {
+                    #case_streams
+                    _ => {
+                        unreachable!( "Invalid Rule: {}", rustylr_macro_generated_ruleid__ );
+                    }
+                }
+                self.#end_stack_name.push(rusty_lr_macro_generated_new_end);
                 Ok(())
             }
             pub fn accept(&mut self) -> #start_rule_typename {
@@ -395,7 +396,7 @@ impl Grammar {
                 callback: &mut C,
                 term: &#term_typename,
                 #user_data_parameter_def
-            ) -> Result<(), ::rusty_lr::ParseError<'a, #term_typename, &'static str, C::Error>> {
+            ) -> Result<(), ::rusty_lr::ParseError<'a, #term_typename, &'static str, C::Error, #error_typename>> {
                 // fetch state from state stack
                 let state = &self.states[*context.state_stack.last().unwrap()];
 
@@ -415,7 +416,11 @@ impl Grammar {
                     context
                         .state_stack
                         .truncate(context.state_stack.len() - rule.rule.len());
-                    context.reduce(reduce_rule, #user_data_var).map_err(|e| ::rusty_lr::ParseError::CustomMessage(e))?;
+                    context.reduce(
+                        self.rules[reduce_rule].rule.len(),
+                        reduce_rule,
+                        #user_data_var
+                    ).map_err(|e| ::rusty_lr::ParseError::ReduceAction(e))?;
                     callback
                         .reduce(&self.rules, &self.states, &context.state_stack, reduce_rule)
                         .map_err(|e| ::rusty_lr::ParseError::Callback(e))?;
@@ -435,7 +440,7 @@ impl Grammar {
                 context: &mut #stack_struct_name,
                 term: #term_typename,
                 #user_data_parameter_def
-            ) -> Result<(), ::rusty_lr::ParseError<'a, #term_typename, &'static str, ()>> {
+            ) -> Result<(), ::rusty_lr::ParseError<'a, #term_typename, &'static str, u8, #error_typename>> {
                 self.feed_callback( context, &mut ::rusty_lr::DefaultCallback {}, term, #user_data_var )
             }
             /// feed one terminal to parser, and update state stack
@@ -445,7 +450,7 @@ impl Grammar {
                 callback: &mut C,
                 term: #term_typename,
                 #user_data_parameter_def
-            ) -> Result<(), ::rusty_lr::ParseError<'a, #term_typename, &'static str, C::Error>> {
+            ) -> Result<(), ::rusty_lr::ParseError<'a, #term_typename, &'static str, C::Error, #error_typename>> {
                 // reduce if possible
                 self.lookahead(context, callback, &term, #user_data_var)?;
 
@@ -480,7 +485,7 @@ impl Grammar {
                 context: &mut #stack_struct_name,
                 callback: &mut C,
                 nonterm: &'a &'static str,
-            ) -> Result<(), ::rusty_lr::ParseError<'a, #term_typename, &'static str, C::Error>> {
+            ) -> Result<(), ::rusty_lr::ParseError<'a, #term_typename, &'static str, C::Error, #error_typename>> {
                 // fetch state from state stack
                 let state = &self.states[*context.state_stack.last().unwrap()];
 

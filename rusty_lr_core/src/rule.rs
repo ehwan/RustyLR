@@ -6,7 +6,7 @@ use std::fmt::Display;
 
 use crate::token::Token;
 
-/// wheather to reduce to the left or right, for reduce/shift conflict resolving
+/// for resolving shift/reduce conflict
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ReduceType {
     /// reduce to the left, i.e. reduce first
@@ -24,6 +24,7 @@ impl Display for ReduceType {
 }
 
 /// Production rule.
+///
 /// name -> Token0 Token1 Token2 ...
 #[derive(Clone)]
 pub struct ProductionRule<Term, NonTerm> {

@@ -45,6 +45,10 @@ impl Tokenizer {
                                 "userdata" => {
                                     (Some(TermType::UserData(Some((punct, ident.clone())))), true)
                                 }
+                                "err" | "error" => (
+                                    Some(TermType::ErrorType(Some((punct, ident.clone())))),
+                                    true,
+                                ),
                                 _ => (Some(TermType::Percent(Some(punct))), false),
                             },
                             _ => (Some(TermType::Percent(Some(punct))), false),

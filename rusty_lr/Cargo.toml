@@ -1,17 +1,17 @@
 [package]
 name = "rusty_lr"
-version = "0.8.1"
+version = "0.9.0"
 edition = "2021"
 license = "MIT"
-description = "LR(1) and LALR(1) parser generator and code generation"
+description = "yacc-like, proc-macro based LR(1) and LALR(1) parser generator and code generation"
 repository = "https://github.com/ehwan/RustyLR"
 readme = "../README.md"
 keywords = ["parser", "yacc", "context-free-grammar", "lr", "compiler"]
 categories = ["parsing"]
 
 [dependencies]
-rusty_lr_core = "0.7.2"
-rusty_lr_derive = "0.8.1"
+rusty_lr_core = "0.8.0"
+rusty_lr_derive = "0.9.0"
 # rusty_lr_core = { path = "../rusty_lr_core" }
 # rusty_lr_derive = { path = "../rusty_lr_derive" }
 

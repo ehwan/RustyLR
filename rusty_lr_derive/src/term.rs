@@ -17,6 +17,7 @@ pub(crate) enum TermType {
     EofDef(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %eof
     TokenType(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %tokentype
     UserData(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %userdata
+    ErrorType(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %err %error
     Group(Option<proc_macro2::Group>),
     Literal(Option<proc_macro2::Literal>),
     Equal(Option<proc_macro2::Punct>),
@@ -38,11 +39,12 @@ impl TermType {
             TermType::EofDef(_) => 10,
             TermType::TokenType(_) => 11,
             TermType::UserData(_) => 12,
-            TermType::Group(_) => 13,
-            TermType::Literal(_) => 14,
-            TermType::Equal(_) => 15,
-            TermType::OtherPunct(_) => 16,
-            TermType::Eof => 17,
+            TermType::ErrorType(_) => 13,
+            TermType::Group(_) => 14,
+            TermType::Literal(_) => 15,
+            TermType::Equal(_) => 16,
+            TermType::OtherPunct(_) => 17,
+            TermType::Eof => 18,
         }
     }
     pub fn stream(self) -> TokenStream {
@@ -80,6 +82,10 @@ impl TermType {
                 let (punct, ident) = punct_ident.unwrap();
                 quote! { #punct #ident }
             }
+            TermType::ErrorType(punct_ident) => {
+                let (punct, ident) = punct_ident.unwrap();
+                quote! { #punct #ident }
+            }
             TermType::Group(group) => group.unwrap().to_token_stream(),
             TermType::Literal(lit) => lit.unwrap().to_token_stream(),
             TermType::Equal(punct) => punct.unwrap().to_token_stream(),
@@ -102,6 +108,7 @@ impl TermType {
             TermType::EofDef(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
             TermType::TokenType(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
             TermType::UserData(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
+            TermType::ErrorType(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
             TermType::Group(group) => group.as_ref().map(|g| g.span()),
             TermType::Literal(lit) => lit.as_ref().map(|l| l.span()),
             TermType::Equal(punct) => punct.as_ref().map(|p| p.span()),
@@ -125,6 +132,7 @@ impl std::fmt::Display for TermType {
             TermType::EofDef(_) => write!(f, "%eof"),
             TermType::TokenType(_) => write!(f, "%tokentype"),
             TermType::UserData(_) => write!(f, "%userdata"),
+            TermType::ErrorType(_) => write!(f, "%error"),
             TermType::Group(_) => write!(f, "TokenTree::Group"),
             TermType::Literal(_) => write!(f, "TokenTree::Literal"),
             TermType::Equal(_) => write!(f, "="),

@@ -23,7 +23,7 @@ impl<Term, NonTerm> Parser<Term, NonTerm> {
         context: &mut Context,
         callback: &mut C,
         term: &Term,
-    ) -> Result<(), ParseError<'a, Term, NonTerm, C::Error>>
+    ) -> Result<(), ParseError<'a, Term, NonTerm, C::Error, u8>>
     where
         Term: Hash + Eq,
         NonTerm: Hash + Eq,
@@ -65,7 +65,7 @@ impl<Term, NonTerm> Parser<Term, NonTerm> {
         &'a self,
         context: &mut Context,
         term: Term,
-    ) -> Result<(), ParseError<'a, Term, NonTerm, ()>>
+    ) -> Result<(), ParseError<'a, Term, NonTerm, u8, u8>>
     where
         Term: Hash + Eq,
         NonTerm: Hash + Eq,
@@ -78,7 +78,7 @@ impl<Term, NonTerm> Parser<Term, NonTerm> {
         context: &mut Context,
         callback: &mut C,
         term: Term,
-    ) -> Result<(), ParseError<'a, Term, NonTerm, C::Error>>
+    ) -> Result<(), ParseError<'a, Term, NonTerm, C::Error, u8>>
     where
         Term: Hash + Eq,
         NonTerm: Hash + Eq,
@@ -113,7 +113,7 @@ impl<Term, NonTerm> Parser<Term, NonTerm> {
         context: &mut Context,
         callback: &mut C,
         nonterm: &'a NonTerm,
-    ) -> Result<(), ParseError<'a, Term, NonTerm, C::Error>>
+    ) -> Result<(), ParseError<'a, Term, NonTerm, C::Error, u8>>
     where
         NonTerm: Hash + Eq,
     {

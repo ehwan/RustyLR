@@ -4,7 +4,7 @@ use std::hash::Hash;
 
 use super::rule::LookaheadRuleRefSet;
 
-/// A struct for state in LR(1) parser.
+/// state in DFA
 #[derive(Debug, Clone)]
 pub struct State<Term, NonTerm> {
     pub shift_goto_map_term: HashMap<Term, usize>,

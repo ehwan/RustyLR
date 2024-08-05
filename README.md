@@ -1,9 +1,9 @@
 # RustyLR
-RustyLR will provide you a LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from Context Free Grammar (CFGs).
+LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from Context Free Grammar (CFGs).
 
 ```
 [dependencies]
-rusty_lr = "0.8.1"
+rusty_lr = "0.9.0"
 ```
 
 ## Features
@@ -412,8 +412,15 @@ Define the type of userdata passed to `feed()` function.
 
 #### Reduce type <sub><sup>(optional)</sup></sub>
 ```
+// reduce first
 '%left' <Ident> ';'
+'%l' <Ident> ';'
+'%reduce' <Ident> ';'
+
+// shift first
 '%right' <Ident> ';'
+'%r' <Ident> ';'
+'%shift' <Ident> ';'
 ```
 Set the shift/reduce precedence for terminal symbols. `<Ident>` must be defined in `%token`.
 
@@ -484,6 +491,13 @@ A(i32): ... ;
 
 `Result<(), String>` can be returned from `<ReduceAction>`.
 Returned `Err` will be delivered to the caller of `feed()` function.
+
+#### Error type <sub><sup>(optional)</sup></sub>
+```
+'%err' <RustType> ';'
+'%error' <RustType> ';'
+```
+Define the type of `Err` variant in `Result<(), Err>` returned from `<ReduceAction>`. If not defined, `String` will be used.
 
 ## Start Parsing
 `lr1!` and `lalr1!` will generate struct `<StartSymbol>Parser`.

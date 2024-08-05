@@ -12,7 +12,7 @@ use crate::rule::*;
 use crate::state::State;
 use crate::token::Token;
 
-/// A set of production rules and main entry point
+/// A struct for Context Free Grammar and DFA construction
 #[derive(Debug, Clone)]
 pub struct Grammar<Term, NonTerm> {
     /// set of production rules

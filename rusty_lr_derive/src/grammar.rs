@@ -27,6 +27,8 @@ pub struct Grammar {
     pub terminals: HashMap<String, (Ident, TokenStream)>,
     pub reduce_types: HashMap<String, (Ident, rlr::ReduceType)>,
 
+    pub error_typename: Option<TokenStream>,
+
     pub rules: HashMap<String, (Ident, Option<TokenStream>, RuleLines)>,
     //                          name       typename           rules
 }
@@ -42,6 +44,8 @@ impl Grammar {
 
             terminals: HashMap::new(),
             reduce_types: HashMap::new(),
+
+            error_typename: None,
 
             rules: HashMap::new(),
         }
@@ -105,6 +109,9 @@ impl Grammar {
         //          | '%right' Ident';'
         //          ;
         //
+        // ErrorDef: '%error' RustCode ';'
+        //         ;
+        //
         // Grammar: Rule Grammar
         //        | Rule
         //        | TokenDef Grammar
@@ -119,6 +126,8 @@ impl Grammar {
         //        | UserDataDef
         //        | ReduceDef Grammar
         //        | ReduceDef
+        //        | ErrorDef Grammar
+        //        | ErrorDef
         //        ;
 
         grammar.add_rule(
@@ -200,6 +209,10 @@ impl Grammar {
             "AnyTokenNoSemi",
             vec![Token::Term(TermType::UserData(None))],
         );
+        grammar.add_rule(
+            "AnyTokenNoSemi",
+            vec![Token::Term(TermType::ErrorType(None))],
+        );
         grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Group(None))]);
         grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Literal(None))]);
         grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Equal(None))]);
@@ -269,6 +282,16 @@ impl Grammar {
                 Token::Term(TermType::Semicolon(None)),
             ],
         );
+
+        grammar.add_rule(
+            "ErrorDef",
+            vec![
+                Token::Term(TermType::ErrorType(None)),
+                Token::NonTerm("RustCode"),
+                Token::Term(TermType::Semicolon(None)),
+            ],
+        );
+
         grammar.add_rule(
             "Grammar",
             vec![Token::NonTerm("Rule"), Token::NonTerm("Grammar")],
@@ -306,6 +329,11 @@ impl Grammar {
             vec![Token::NonTerm("ReduceDef"), Token::NonTerm("Grammar")],
         );
         grammar.add_rule("Grammar", vec![Token::NonTerm("ReduceDef")]);
+        grammar.add_rule(
+            "Grammar",
+            vec![Token::NonTerm("ErrorDef"), Token::NonTerm("Grammar")],
+        );
+        grammar.add_rule("Grammar", vec![Token::NonTerm("ErrorDef")]);
 
         grammar.add_rule(
             "Augmented",

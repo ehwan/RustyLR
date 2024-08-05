@@ -1,6 +1,6 @@
 use crate::{ProductionRule, State};
 
-/// Callback trait for parser
+/// callback trait for tracing parser actions
 pub trait Callback<Term, NonTerm> {
     /// Error type returned by callback
     type Error;
@@ -46,14 +46,15 @@ pub trait Callback<Term, NonTerm> {
 pub struct DefaultCallback {}
 #[allow(unused_variables)]
 impl<Term, NonTerm> Callback<Term, NonTerm> for DefaultCallback {
-    type Error = ();
+    /// default Display-able error type
+    type Error = u8;
     fn reduce(
         &mut self,
         rules: &[ProductionRule<Term, NonTerm>],
         states: &[State<Term, NonTerm>],
         state_stack: &[usize],
         rule: usize,
-    ) -> Result<(), ()> {
+    ) -> Result<(), Self::Error> {
         Ok(())
     }
     fn shift_and_goto(
@@ -62,7 +63,7 @@ impl<Term, NonTerm> Callback<Term, NonTerm> for DefaultCallback {
         states: &[State<Term, NonTerm>],
         state_stack: &[usize],
         term: &Term,
-    ) -> Result<(), ()> {
+    ) -> Result<(), Self::Error> {
         Ok(())
     }
     fn shift_and_goto_nonterm(
@@ -71,7 +72,7 @@ impl<Term, NonTerm> Callback<Term, NonTerm> for DefaultCallback {
         states: &[State<Term, NonTerm>],
         state_stack: &[usize],
         nonterm: &NonTerm,
-    ) -> Result<(), ()> {
+    ) -> Result<(), Self::Error> {
         Ok(())
     }
 }

@@ -6,6 +6,7 @@ use crate::rule::LookaheadRuleRefSet;
 use crate::rule::ShiftedRule;
 use crate::ProductionRule;
 
+/// Error type for grammar.build()
 pub enum BuildError<'a, Term, NonTerm> {
     RuleNotFound(NonTerm),
 

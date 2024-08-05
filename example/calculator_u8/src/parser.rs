@@ -32,21 +32,21 @@ lr1! {
 
     Number(i32): WS0 Digits WS0 { std::str::from_utf8(Digits.slice).unwrap().parse().unwrap() };
 
-    A(i32): A plus a2=A {
+    A(f32): A plus a2=A {
         println!( "{:?} {:?} {:?}", A.slice, *plus, a2.slice );
         *A + *a2
     }
     | M { *M }
     ;
 
-    M(i32): M star m2=M { *M * *m2 }
+    M(f32): M star m2=M { *M * *m2 }
     | P { *P }
     ;
 
-    P(i32): Number { *Number }
+    P(f32): Number { *Number as f32 }
     | WS0 lparen E rparen WS0 { *E }
     ;
 
-    E(i32) : A { *A };
+    E(f32) : A { *A };
 
 }

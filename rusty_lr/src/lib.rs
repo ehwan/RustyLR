@@ -1,7 +1,7 @@
 //! # RustyLR
 //! LR(1) and LALR(1) code generator in Rust
 //!
-//! For more information, please refer to the [GitHub repository](https://github.com/ehwan/RustyLR)
+//! For sample and examples, please refer to the [GitHub repository](https://github.com/ehwan/RustyLR)
 //!
 //! ## Features
 //!  - pure Rust implementation
@@ -20,10 +20,9 @@ pub(crate) mod nontermdata;
 pub(crate) mod termdata;
 
 // re-exports
+
 pub use rusty_lr_core::*;
 pub use rusty_lr_derive::*;
 
-/// type for NonTerminal data in reduce action
 pub use nontermdata::NonTermData;
-/// type for Terminal data in reduce action
 pub use termdata::TermData;
