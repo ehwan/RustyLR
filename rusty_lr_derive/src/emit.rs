@@ -7,12 +7,17 @@ use crate::error::ParseError;
 use crate::grammar::Grammar;
 use crate::token::Token;
 
-use rusty_lr_core as rlr;
+use rusty_lr as rlr;
 
 /// emit Rust code for the parser
 impl Grammar {
     pub fn emit(&self, lalr: bool) -> Result<TokenStream, ParseError> {
         let mut grammar: rlr::Grammar<String, String> = rlr::Grammar::new();
+        let module_prefix = self
+            .module_prefix
+            .as_ref()
+            .cloned()
+            .unwrap_or_else(|| quote! {::rusty_lr});
 
         for (term, (ident, reduce_type)) in self.reduce_types.iter() {
             if !self.terminals.contains_key(term) {
@@ -83,11 +88,11 @@ impl Grammar {
                     rlr::Token::Term(term) => {
                         let (_, term_stream) = self.terminals.get(term).unwrap();
                         comma_separated_tokens
-                            .extend(quote! {::rusty_lr::Token::Term(#term_stream),});
+                            .extend(quote! {#module_prefix::Token::Term(#term_stream),});
                     }
                     rlr::Token::NonTerm(nonterm) => {
                         comma_separated_tokens
-                            .extend(quote! {::rusty_lr::Token::NonTerm(#nonterm),});
+                            .extend(quote! {#module_prefix::Token::NonTerm(#nonterm),});
                     }
                 }
             }
@@ -96,7 +101,7 @@ impl Grammar {
 
             write_parser.extend(quote! {
                 {
-                let production_rule = ::rusty_lr::ProductionRule {
+                let production_rule = #module_prefix::ProductionRule {
                     name: #nonterm,
                     rule: vec![#comma_separated_tokens],
                 };
@@ -146,7 +151,7 @@ impl Grammar {
 
             let mut init_ruleset = quote! {};
             init_ruleset.extend(quote! {
-                let mut ruleset = ::rusty_lr::LookaheadRuleRefSet::new();
+                let mut ruleset = #module_prefix::LookaheadRuleRefSet::new();
             });
             for (rule, lookaheads) in state.ruleset.rules.iter() {
                 let mut init_lookaheads = quote! {
@@ -163,7 +168,7 @@ impl Grammar {
                 let shifted = rule.shifted;
                 init_ruleset.extend(quote! {
                     {
-                    let shifted_rule = ::rusty_lr::ShiftedRuleRef {
+                    let shifted_rule = #module_prefix::ShiftedRuleRef {
                         rule: #rule_id,
                         shifted: #shifted,
                     };
@@ -181,7 +186,7 @@ impl Grammar {
                     #init_shift_goto_map_nonterm
                     #init_reduce_map
                     #init_ruleset
-                    let state = ::rusty_lr::State {
+                    let state = #module_prefix::State {
                         shift_goto_map_term,
                         shift_goto_map_nonterm,
                         reduce_map,
@@ -220,7 +225,7 @@ impl Grammar {
                             let mapped = token.mapped.as_ref().unwrap_or(term);
                             token_pop_stream.extend(quote! {
                                 let index = self.#end_stack_name.pop().unwrap()-1;
-                                let #mapped = ::rusty_lr::TermData::new(
+                                let mut #mapped = #module_prefix::TermData::new(
                                     &self.#terms_stack_name[index],
                                     index
                                 );
@@ -248,7 +253,7 @@ impl Grammar {
                                 // TODO unreachable! if stack is empty
                                 let end = self.#end_stack_name.pop().unwrap();
                                 let begin = *self.#end_stack_name.last().unwrap();
-                                let #mapped = ::rusty_lr::NonTermData::new(
+                                let mut #mapped = #module_prefix::NonTermData::new(
                                     &self.#terms_stack_name[begin..end],
                                     #stack_pop_stream,
                                     begin..end,
@@ -376,8 +381,8 @@ impl Grammar {
         }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case)]
         pub struct #struct_name {
-            pub rules: Vec<::rusty_lr::ProductionRule<#term_typename, &'static str>>,
-            pub states: Vec<::rusty_lr::State<#term_typename, &'static str>>,
+            pub rules: Vec<#module_prefix::ProductionRule<#term_typename, &'static str>>,
+            pub states: Vec<#module_prefix::State<#term_typename, &'static str>>,
         }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case)]
         impl #struct_name {
@@ -390,13 +395,13 @@ impl Grammar {
             }
 
             /// give lookahead token to parser, and check if there is any reduce action
-            fn lookahead<'a, C: ::rusty_lr::Callback<#term_typename, &'static str>>(
+            fn lookahead<'a, C: #module_prefix::Callback<#term_typename, &'static str>>(
                 &'a self,
                 context: &mut #stack_struct_name,
                 callback: &mut C,
                 term: &#term_typename,
                 #user_data_parameter_def
-            ) -> Result<(), ::rusty_lr::ParseError<'a, #term_typename, &'static str, C::Error, #error_typename>> {
+            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, &'static str, C::Error, #error_typename>> {
                 // fetch state from state stack
                 let state = &self.states[*context.state_stack.last().unwrap()];
 
@@ -420,10 +425,10 @@ impl Grammar {
                         self.rules[reduce_rule].rule.len(),
                         reduce_rule,
                         #user_data_var
-                    ).map_err(|e| ::rusty_lr::ParseError::ReduceAction(e))?;
+                    ).map_err(|e| #module_prefix::ParseError::ReduceAction(e))?;
                     callback
                         .reduce(&self.rules, &self.states, &context.state_stack, reduce_rule)
-                        .map_err(|e| ::rusty_lr::ParseError::Callback(e))?;
+                        .map_err(|e| #module_prefix::ParseError::Callback(e))?;
 
 
                     // feed reduced token
@@ -440,17 +445,17 @@ impl Grammar {
                 context: &mut #stack_struct_name,
                 term: #term_typename,
                 #user_data_parameter_def
-            ) -> Result<(), ::rusty_lr::ParseError<'a, #term_typename, &'static str, u8, #error_typename>> {
-                self.feed_callback( context, &mut ::rusty_lr::DefaultCallback {}, term, #user_data_var )
+            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, &'static str, u8, #error_typename>> {
+                self.feed_callback( context, &mut #module_prefix::DefaultCallback {}, term, #user_data_var )
             }
             /// feed one terminal to parser, and update state stack
-            pub fn feed_callback<'a, C: ::rusty_lr::Callback<#term_typename, &'static str>>(
+            pub fn feed_callback<'a, C: #module_prefix::Callback<#term_typename, &'static str>>(
                 &'a self,
                 context: &mut #stack_struct_name,
                 callback: &mut C,
                 term: #term_typename,
                 #user_data_parameter_def
-            ) -> Result<(), ::rusty_lr::ParseError<'a, #term_typename, &'static str, C::Error, #error_typename>> {
+            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, &'static str, C::Error, #error_typename>> {
                 // reduce if possible
                 self.lookahead(context, callback, &term, #user_data_var)?;
 
@@ -464,13 +469,13 @@ impl Grammar {
                     context.state_stack.push(next_state_id);
                     callback
                         .shift_and_goto(&self.rules, &self.states, &context.state_stack, &term)
-                        .map_err(|e| ::rusty_lr::ParseError::Callback(e))?;
+                        .map_err(|e| #module_prefix::ParseError::Callback(e))?;
 
                     context.push( term );
 
                     Ok(())
                 }else {
-                    Err(::rusty_lr::ParseError::InvalidTerminal(
+                    Err(#module_prefix::ParseError::InvalidTerminal(
                         term,
                         &self.rules,
                         &self.states,
@@ -480,12 +485,12 @@ impl Grammar {
             }
 
             /// feed one non-terminal to parser, and update state stack
-            fn feed_nonterm<'a, C: ::rusty_lr::Callback<#term_typename, &'static str>>(
+            fn feed_nonterm<'a, C: #module_prefix::Callback<#term_typename, &'static str>>(
                 &'a self,
                 context: &mut #stack_struct_name,
                 callback: &mut C,
                 nonterm: &'a &'static str,
-            ) -> Result<(), ::rusty_lr::ParseError<'a, #term_typename, &'static str, C::Error, #error_typename>> {
+            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, &'static str, C::Error, #error_typename>> {
                 // fetch state from state stack
                 let state = &self.states[*context.state_stack.last().unwrap()];
 
@@ -495,10 +500,10 @@ impl Grammar {
                     context.state_stack.push(next_state_id);
                     callback
                         .shift_and_goto_nonterm(&self.rules, &self.states, &context.state_stack, nonterm)
-                        .map_err(|e| ::rusty_lr::ParseError::Callback(e))?;
+                        .map_err(|e| #module_prefix::ParseError::Callback(e))?;
                     Ok(())
                 }else {
-                    Err(::rusty_lr::ParseError::InvalidNonTerminal(
+                    Err(#module_prefix::ParseError::InvalidNonTerminal(
                         &nonterm,
                         &self.rules,
                         &self.states,

@@ -49,6 +49,10 @@ impl Tokenizer {
                                     Some(TermType::ErrorType(Some((punct, ident.clone())))),
                                     true,
                                 ),
+                                "moduleprefix" => (
+                                    Some(TermType::ModulePrefix(Some((punct, ident.clone())))),
+                                    true,
+                                ),
                                 _ => (Some(TermType::Percent(Some(punct))), false),
                             },
                             _ => (Some(TermType::Percent(Some(punct))), false),

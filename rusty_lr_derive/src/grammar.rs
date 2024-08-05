@@ -1,3 +1,5 @@
+use rusty_lr as rlr;
+
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
@@ -5,19 +7,21 @@ use proc_macro2::TokenStream;
 use quote::format_ident;
 
 use std::collections::HashMap;
-
-use rusty_lr_core as rlr;
+use std::collections::HashSet;
 
 use crate::tokenizer::Tokenizer;
 
-use super::callback::Callback;
 use super::error::ParseError;
+use super::parser::GrammarParser;
 use super::rule::RuleLines;
 use super::term::TermType;
 use super::token::Token;
 
 #[derive(Debug)]
 pub struct Grammar {
+    /// for bootstrapping the generated code; the prefix for the '::rusty_lr' module
+    pub module_prefix: Option<TokenStream>,
+
     pub token_typename: Option<TokenStream>,
     pub userdata_typename: Option<TokenStream>,
 
@@ -36,6 +40,8 @@ pub struct Grammar {
 impl Grammar {
     pub fn new() -> Self {
         Self {
+            module_prefix: None,
+
             token_typename: None,
             userdata_typename: None,
 
@@ -56,312 +62,20 @@ impl Grammar {
         ident.set_span(span);
         ident
     }
-    pub(crate) fn build_parser() -> rlr::Parser<TermType, &'static str> {
-        use rlr::*;
-
-        let mut grammar = Grammar::new();
-
-        // Rule : Ident RuleType ':' RuleLines ';' ;
-        //
-        // RuleType: Group | ;
-        //
-        // RuleLines: RuleLine '|' RuleLines
-        //          | RuleLine
-        //          ;
-        //
-        // RuleLine: RuleDef Action ;
-        //
-        // RuleDef: Tokens ;
-        //
-        // Tokens: TokensOne
-        //       |
-        //       ;
-        // TokensOne: Token TokensOne
-        //          | Token
-        //          ;
-        //
-        // Token: Ident ;
-        // Token: Ident '=' Ident ;
-        //
-        // Action: Group
-        //       |
-        //       ;
-        //
-        // TokenDef: '%token' Ident RustCode ';'
-        //         ;
-        // AnyTokenNoSemi: <Any Token Except Semicolon> ;
-        // AnyTokens: AnyTokenNoSemi AnyTokens
-        //          | AnyTokenNoSemi
-        //          ;
-        //
-        // RustCode: AnyTokens
-        //         ;
-        //
-        // StartDef: '%start' Ident ';'
-        //         ;
-        // EofDef: '%eof' RustCode ';'
-        //       ;
-        // TokenTypeDef: '%tokentype' RustCode ';'
-        //             ;
-        // UserDataDef: '%userdata' RustCode ';'
-        //            ;
-        // ReduceDef: '%left' Ident ';'
-        //          | '%right' Ident';'
-        //          ;
-        //
-        // ErrorDef: '%error' RustCode ';'
-        //         ;
-        //
-        // Grammar: Rule Grammar
-        //        | Rule
-        //        | TokenDef Grammar
-        //        | TokenDef
-        //        | StartDef Grammar
-        //        | StartDef
-        //        | EofDef Grammar
-        //        | EofDef
-        //        | TokenTypeDef Grammar
-        //        | TokenTypeDef
-        //        | UserDataDef Grammar
-        //        | UserDataDef
-        //        | ReduceDef Grammar
-        //        | ReduceDef
-        //        | ErrorDef Grammar
-        //        | ErrorDef
-        //        ;
-
-        grammar.add_rule(
-            "Rule",
-            vec![
-                Token::Term(TermType::Ident(None)),
-                Token::NonTerm("RuleType"),
-                Token::Term(TermType::Colon(None)),
-                Token::NonTerm("RuleLines"),
-                Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-        grammar.add_rule("RuleType", vec![Token::Term(TermType::Group(None))]);
-        grammar.add_rule("RuleType", vec![]);
-
-        grammar.add_rule(
-            "RuleLines",
-            vec![
-                Token::NonTerm("RuleLine"),
-                Token::Term(TermType::Pipe(None)),
-                Token::NonTerm("RuleLines"),
-            ],
-        );
-        grammar.add_rule("RuleLines", vec![Token::NonTerm("RuleLine")]);
-
-        grammar.add_rule(
-            "RuleLine",
-            vec![Token::NonTerm("RuleDef"), Token::NonTerm("Action")],
-        );
-
-        grammar.add_rule("RuleDef", vec![Token::NonTerm("Tokens")]);
-
-        grammar.add_rule("Tokens", vec![Token::NonTerm("TokensOne")]);
-        grammar.add_rule("Tokens", vec![]);
-
-        grammar.add_rule(
-            "TokensOne",
-            vec![Token::NonTerm("Token"), Token::NonTerm("TokensOne")],
-        );
-        grammar.add_rule("TokensOne", vec![Token::NonTerm("Token")]);
-
-        grammar.add_rule("Token", vec![Token::Term(TermType::Ident(None))]);
-        grammar.add_rule(
-            "Token",
-            vec![
-                Token::Term(TermType::Ident(None)),
-                Token::Term(TermType::Equal(None)),
-                Token::Term(TermType::Ident(None)),
-            ],
-        );
-
-        grammar.add_rule("Action", vec![Token::Term(TermType::Group(None))]);
-        grammar.add_rule("Action", vec![]);
-
-        grammar.add_rule(
-            "TokenDef",
-            vec![
-                Token::Term(TermType::Token(None)),
-                Token::Term(TermType::Ident(None)),
-                Token::NonTerm("RustCode"),
-                Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-
-        grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Ident(None))]);
-        grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Colon(None))]);
-        grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Pipe(None))]);
-        grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Percent(None))]);
-        grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Left(None))]);
-        grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Right(None))]);
-        grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Token(None))]);
-        grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Start(None))]);
-        grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::EofDef(None))]);
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![Token::Term(TermType::TokenType(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![Token::Term(TermType::UserData(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![Token::Term(TermType::ErrorType(None))],
-        );
-        grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Group(None))]);
-        grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Literal(None))]);
-        grammar.add_rule("AnyTokenNoSemi", vec![Token::Term(TermType::Equal(None))]);
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![Token::Term(TermType::OtherPunct(None))],
-        );
-
-        grammar.add_rule(
-            "AnyTokens",
-            vec![
-                Token::NonTerm("AnyTokenNoSemi"),
-                Token::NonTerm("AnyTokens"),
-            ],
-        );
-        grammar.add_rule("AnyTokens", vec![Token::NonTerm("AnyTokenNoSemi")]);
-
-        grammar.add_rule("RustCode", vec![Token::NonTerm("AnyTokens")]);
-
-        grammar.add_rule(
-            "StartDef",
-            vec![
-                Token::Term(TermType::Start(None)),
-                Token::Term(TermType::Ident(None)),
-                Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-
-        grammar.add_rule(
-            "EofDef",
-            vec![
-                Token::Term(TermType::EofDef(None)),
-                Token::NonTerm("RustCode"),
-                Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-        grammar.add_rule(
-            "TokenTypeDef",
-            vec![
-                Token::Term(TermType::TokenType(None)),
-                Token::NonTerm("RustCode"),
-                Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-        grammar.add_rule(
-            "UserDataDef",
-            vec![
-                Token::Term(TermType::UserData(None)),
-                Token::NonTerm("RustCode"),
-                Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-
-        grammar.add_rule(
-            "ReduceDef",
-            vec![
-                Token::Term(TermType::Left(None)),
-                Token::Term(TermType::Ident(None)),
-                Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-        grammar.add_rule(
-            "ReduceDef",
-            vec![
-                Token::Term(TermType::Right(None)),
-                Token::Term(TermType::Ident(None)),
-                Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-
-        grammar.add_rule(
-            "ErrorDef",
-            vec![
-                Token::Term(TermType::ErrorType(None)),
-                Token::NonTerm("RustCode"),
-                Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-
-        grammar.add_rule(
-            "Grammar",
-            vec![Token::NonTerm("Rule"), Token::NonTerm("Grammar")],
-        );
-        grammar.add_rule("Grammar", vec![Token::NonTerm("Rule")]);
-
-        grammar.add_rule(
-            "Grammar",
-            vec![Token::NonTerm("TokenDef"), Token::NonTerm("Grammar")],
-        );
-        grammar.add_rule("Grammar", vec![Token::NonTerm("TokenDef")]);
-
-        grammar.add_rule(
-            "Grammar",
-            vec![Token::NonTerm("StartDef"), Token::NonTerm("Grammar")],
-        );
-        grammar.add_rule("Grammar", vec![Token::NonTerm("StartDef")]);
-        grammar.add_rule(
-            "Grammar",
-            vec![Token::NonTerm("EofDef"), Token::NonTerm("Grammar")],
-        );
-        grammar.add_rule("Grammar", vec![Token::NonTerm("EofDef")]);
-        grammar.add_rule(
-            "Grammar",
-            vec![Token::NonTerm("TokenTypeDef"), Token::NonTerm("Grammar")],
-        );
-        grammar.add_rule("Grammar", vec![Token::NonTerm("TokenTypeDef")]);
-        grammar.add_rule(
-            "Grammar",
-            vec![Token::NonTerm("UserDataDef"), Token::NonTerm("Grammar")],
-        );
-        grammar.add_rule("Grammar", vec![Token::NonTerm("UserDataDef")]);
-        grammar.add_rule(
-            "Grammar",
-            vec![Token::NonTerm("ReduceDef"), Token::NonTerm("Grammar")],
-        );
-        grammar.add_rule("Grammar", vec![Token::NonTerm("ReduceDef")]);
-        grammar.add_rule(
-            "Grammar",
-            vec![Token::NonTerm("ErrorDef"), Token::NonTerm("Grammar")],
-        );
-        grammar.add_rule("Grammar", vec![Token::NonTerm("ErrorDef")]);
-
-        grammar.add_rule(
-            "Augmented",
-            vec![Token::NonTerm("Grammar"), Token::Term(TermType::Eof)],
-        );
-
-        match grammar.build("Augmented") {
-            Ok(parser) => parser,
-            Err(err) => {
-                panic!("{}", err);
-            }
-        }
-    }
 
     /// parse the input TokenStream and return a parsed Grammar
     pub fn parse(input: TokenStream) -> Result<Self, ParseError> {
         let mut tokenizer = Tokenizer::new(input);
-        let mut callback = Callback::new();
 
-        let parser = Self::build_parser();
+        let parser = GrammarParser::new();
         let mut context = parser.begin();
 
         while let Some(token) = tokenizer.next_token() {
             let span = token.span().unwrap();
-            match parser.feed_callback(&mut context, &mut callback, token) {
+            match parser.feed(&mut context, token) {
                 Ok(_) => {}
                 Err(err) => match err {
-                    rlr::ParseError::Callback(err) => {
+                    rlr::ParseError::ReduceAction(err) => {
                         return Err(err);
                     }
                     _ => {
@@ -370,10 +84,10 @@ impl Grammar {
                 },
             }
         }
-        match parser.feed_callback(&mut context, &mut callback, TermType::Eof) {
+        match parser.feed(&mut context, TermType::Eof) {
             Ok(_) => {}
             Err(err) => match err {
-                rlr::ParseError::Callback(err) => {
+                rlr::ParseError::ReduceAction(err) => {
                     return Err(err);
                 }
                 _ => {
@@ -383,7 +97,7 @@ impl Grammar {
             },
         }
 
-        let mut grammar = callback.grammar;
+        let mut grammar = context.accept();
 
         // check eof is defined
         if let Some(eof) = &grammar.eof {
@@ -397,12 +111,21 @@ impl Grammar {
             return Err(ParseError::EofNotDefined);
         }
 
+        // check if there are same names for terminals and non-terminals
+        for (name, (ident, _, _)) in grammar.rules.iter() {
+            if grammar.terminals.contains_key(name) {
+                return Err(ParseError::TermNonTermConflict(ident.span(), name.clone()));
+            }
+        }
+
         // replace all terminal Ident with Term
+        let terminals: HashSet<String> = grammar.terminals.keys().cloned().collect();
         for (_, (_name, _ruletype, rules)) in grammar.rules.iter_mut() {
             for rule in rules.rule_lines.iter_mut() {
                 for token in rule.tokens.iter_mut() {
                     if let Token::NonTerm(ident) = token.token.clone() {
-                        if grammar.terminals.contains_key(&ident.to_string()) {
+                        let name = ident.to_string();
+                        if terminals.contains(&name) {
                             // set the token to Term
                             token.token = Token::Term(ident);
                         }

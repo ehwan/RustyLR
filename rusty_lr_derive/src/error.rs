@@ -15,9 +15,10 @@ pub enum ParseError {
     MultipleUserDataDefinition(Span, TokenStream, TokenStream),
     MultipleRuleDefinition(Span, String),
     MultipleErrorDefinition(Span, TokenStream, TokenStream),
+    MultipleReduceDefinition(Span, String),
 
     InvalidRuletypeDelimiter(Span),
-    InvliadReduceActionDelimiter(Span),
+    InvalidReduceActionDelimiter(Span),
 
     // same name for terminal and non-terminal exists
     TermNonTermConflict(Span, String),
@@ -94,13 +95,20 @@ impl ParseError {
                     compile_error!(#message);
                 }
             }
+            ParseError::MultipleReduceDefinition(span, name) => {
+                let message = format!("Multiple reduce type definition: {}", name);
+                quote_spanned! {
+                    span.clone() =>
+                    compile_error!(#message);
+                }
+            }
             ParseError::InvalidRuletypeDelimiter(span) => {
                 quote_spanned! {
                     span.clone() =>
                     compile_error!("rule type must be enclosed with '(' and ')'");
                 }
             }
-            ParseError::InvliadReduceActionDelimiter(span) => {
+            ParseError::InvalidReduceActionDelimiter(span) => {
                 quote_spanned! {
                     span.clone() =>
                     compile_error!("reduce action must be enclosed with '{' and '}'");
@@ -123,7 +131,7 @@ impl ParseError {
             }
             ParseError::TokenTypeNotDefined => {
                 quote! {
-                    compile_error!("Token type not defined for slice Terminal;\n>> %tokentype <RustType>;");
+                    compile_error!("Token type not defined for Terminal;\n>> %tokentype <RustType>;");
                 }
             }
             ParseError::EofNotDefined => {

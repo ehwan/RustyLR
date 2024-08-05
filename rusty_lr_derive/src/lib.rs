@@ -1,9 +1,10 @@
 use proc_macro::TokenStream;
 
-mod callback;
+// mod callback;
 mod emit;
 mod error;
 mod grammar;
+mod parser;
 mod rule;
 mod term;
 mod token;

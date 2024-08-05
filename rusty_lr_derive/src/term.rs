@@ -18,6 +18,7 @@ pub(crate) enum TermType {
     TokenType(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %tokentype
     UserData(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %userdata
     ErrorType(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %err %error
+    ModulePrefix(Option<(proc_macro2::Punct, proc_macro2::Ident)>),
     Group(Option<proc_macro2::Group>),
     Literal(Option<proc_macro2::Literal>),
     Equal(Option<proc_macro2::Punct>),
@@ -40,11 +41,12 @@ impl TermType {
             TermType::TokenType(_) => 11,
             TermType::UserData(_) => 12,
             TermType::ErrorType(_) => 13,
-            TermType::Group(_) => 14,
-            TermType::Literal(_) => 15,
-            TermType::Equal(_) => 16,
-            TermType::OtherPunct(_) => 17,
-            TermType::Eof => 18,
+            TermType::ModulePrefix(_) => 14,
+            TermType::Group(_) => 15,
+            TermType::Literal(_) => 16,
+            TermType::Equal(_) => 17,
+            TermType::OtherPunct(_) => 18,
+            TermType::Eof => 19,
         }
     }
     pub fn stream(self) -> TokenStream {
@@ -86,6 +88,10 @@ impl TermType {
                 let (punct, ident) = punct_ident.unwrap();
                 quote! { #punct #ident }
             }
+            TermType::ModulePrefix(punct_ident) => {
+                let (punct, ident) = punct_ident.unwrap();
+                quote! { #punct #ident }
+            }
             TermType::Group(group) => group.unwrap().to_token_stream(),
             TermType::Literal(lit) => lit.unwrap().to_token_stream(),
             TermType::Equal(punct) => punct.unwrap().to_token_stream(),
@@ -109,6 +115,7 @@ impl TermType {
             TermType::TokenType(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
             TermType::UserData(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
             TermType::ErrorType(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
+            TermType::ModulePrefix(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
             TermType::Group(group) => group.as_ref().map(|g| g.span()),
             TermType::Literal(lit) => lit.as_ref().map(|l| l.span()),
             TermType::Equal(punct) => punct.as_ref().map(|p| p.span()),
@@ -120,11 +127,11 @@ impl TermType {
 impl std::fmt::Display for TermType {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            TermType::Ident(_) => write!(f, "TokenTree::Ident"),
-            TermType::Colon(_) => write!(f, ":"),
-            TermType::Semicolon(_) => write!(f, ";"),
-            TermType::Pipe(_) => write!(f, "|"),
-            TermType::Percent(_) => write!(f, "%"),
+            TermType::Ident(_) => write!(f, "<Ident>"),
+            TermType::Colon(_) => write!(f, "':'"),
+            TermType::Semicolon(_) => write!(f, "';'"),
+            TermType::Pipe(_) => write!(f, "'|'"),
+            TermType::Percent(_) => write!(f, "'%'"),
             TermType::Left(_) => write!(f, "%left"),
             TermType::Right(_) => write!(f, "%right"),
             TermType::Token(_) => write!(f, "%token"),
@@ -133,11 +140,12 @@ impl std::fmt::Display for TermType {
             TermType::TokenType(_) => write!(f, "%tokentype"),
             TermType::UserData(_) => write!(f, "%userdata"),
             TermType::ErrorType(_) => write!(f, "%error"),
-            TermType::Group(_) => write!(f, "TokenTree::Group"),
-            TermType::Literal(_) => write!(f, "TokenTree::Literal"),
-            TermType::Equal(_) => write!(f, "="),
-            TermType::OtherPunct(_) => write!(f, "TokenTree::Punct"),
-            TermType::Eof => write!(f, "$"),
+            TermType::ModulePrefix(_) => write!(f, "%moduleprefix"),
+            TermType::Group(_) => write!(f, "<Group>"),
+            TermType::Literal(_) => write!(f, "<Literal>"),
+            TermType::Equal(_) => write!(f, "'='"),
+            TermType::OtherPunct(_) => write!(f, "<Punct>"),
+            TermType::Eof => write!(f, "<eof>"),
         }
     }
 }
