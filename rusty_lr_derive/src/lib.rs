@@ -1,20 +1,10 @@
 use proc_macro::TokenStream;
 
-// mod callback;
-mod emit;
-mod error;
-mod grammar;
-mod parser;
-mod rule;
-mod term;
-mod token;
-mod tokenizer;
-
 /// build a lr1 Deterministic Finite Automaton (DFA) parser
 #[proc_macro]
 pub fn lr1(input: TokenStream) -> TokenStream {
     let input = proc_macro2::TokenStream::from(input);
-    let g = match grammar::Grammar::parse(input) {
+    let g = match rusty_lr_parser::grammar::Grammar::parse(input) {
         Ok(grammar) => grammar,
         Err(e) => return e.compile_error().into(),
     };
@@ -29,7 +19,7 @@ pub fn lr1(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn lalr1(input: TokenStream) -> TokenStream {
     let input = proc_macro2::TokenStream::from(input);
-    let g = match grammar::Grammar::parse(input) {
+    let g = match rusty_lr_parser::grammar::Grammar::parse(input) {
         Ok(grammar) => grammar,
         Err(e) => return e.compile_error().into(),
     };

@@ -4,7 +4,7 @@ use quote::quote;
 use quote::ToTokens;
 
 #[derive(Clone, Debug)]
-pub(crate) enum TermType {
+pub enum TermType {
     Ident(Option<proc_macro2::Ident>),
     Colon(Option<proc_macro2::Punct>),
     Semicolon(Option<proc_macro2::Punct>),

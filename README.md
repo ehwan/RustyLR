@@ -3,7 +3,7 @@ LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from Context Fre
 
 ```
 [dependencies]
-rusty_lr = "0.10.0"
+rusty_lr = "0.10.1"
 ```
 
 ## Features
@@ -23,7 +23,7 @@ rusty_lr = "0.10.0"
 
  - [Calculator](example/calculator): calculator with enum `Token`
  - [Calculator with `u8`](example/calculator_u8): calculator with `u8`
- - [Bootstrap](rusty_lr_derive/src/parser.rs): bootstrap of `lr1!` and `lalr1!` macro
+ - [Bootstrap](rusty_lr_parser/src/parser.rs): bootstrap of `lr1!` and `lalr1!` macro
 
 Please refer to the [example](example) directory for the full example.
 
@@ -378,7 +378,7 @@ Reduce by E -> A
 `lr1!` and `lalr1!` are procedural macros that will build `Parser` struct from CFGs at compile time.
 Please refer to the [Sample](#sample) section for actual usage.
 
-Every line in the macro must follow the syntax below. The syntax can be also found in the [bootstrap](rusty_lr_derive/src/parser.rs) file.
+Every line in the macro must follow the syntax below. The syntax can be also found in the [bootstrap](rusty_lr_parser/src/parser.rs) file.
 
 #### Token type <sub><sup>(must defined)</sup></sub>
 ```
