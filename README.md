@@ -3,7 +3,7 @@ LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from Context Fre
 
 ```
 [dependencies]
-rusty_lr = "0.11.2"
+rusty_lr = "0.12.0"
 ```
 
 ## Features
@@ -164,7 +164,7 @@ pub enum Term {
     Eof,
 }
 
-#[derive(Clone, Hash, PartialEq, Eq)] // must implement these traits
+#[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)] // must implement these traits
 pub enum NonTerm {
     E,
     A,

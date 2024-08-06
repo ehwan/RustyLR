@@ -6,7 +6,7 @@ use proc_macro2::TokenStream;
 
 use quote::format_ident;
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::collections::HashSet;
 
 use crate::tokenizer::Tokenizer;
@@ -29,12 +29,12 @@ pub struct Grammar {
     pub start_rule_name: Option<Ident>,
     pub eof: Option<TokenStream>,
 
-    pub terminals: HashMap<String, (Ident, TokenStream)>,
-    pub reduce_types: HashMap<String, (Ident, rlr::ReduceType)>,
+    pub terminals: BTreeMap<String, (Ident, TokenStream)>,
+    pub reduce_types: BTreeMap<String, (Ident, rlr::ReduceType)>,
 
     pub error_typename: Option<TokenStream>,
 
-    pub rules: HashMap<String, (Ident, Option<TokenStream>, RuleLines)>,
+    pub rules: BTreeMap<String, (Ident, Option<TokenStream>, RuleLines)>,
     //                          name       typename           rules
 }
 
@@ -49,12 +49,12 @@ impl Grammar {
             start_rule_name: None,
             eof: None,
 
-            terminals: HashMap::new(),
-            reduce_types: HashMap::new(),
+            terminals: BTreeMap::new(),
+            reduce_types: BTreeMap::new(),
 
             error_typename: None,
 
-            rules: HashMap::new(),
+            rules: BTreeMap::new(),
         }
     }
     pub fn stack_name(name: &Ident) -> Ident {

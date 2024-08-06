@@ -69,7 +69,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     ) -> Result<Parser<Term, NonTerm>, BuildError<Term, NonTerm>>
     where
         Term: Clone + Ord + Hash,
-        NonTerm: Clone + Hash + Eq,
+        NonTerm: Clone + Hash + Ord,
     {
         self.calculate_first();
 
@@ -110,7 +110,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     ) -> Result<Parser<Term, NonTerm>, BuildError<Term, NonTerm>>
     where
         Term: Clone + Ord + Hash,
-        NonTerm: Clone + Hash + Eq,
+        NonTerm: Clone + Hash + Ord,
     {
         self.calculate_first();
 
@@ -309,8 +309,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         state_map: &mut BTreeMap<LookaheadRuleRefSet<Term>, usize>,
     ) -> Result<usize, BuildError<Term, NonTerm>>
     where
-        Term: Hash + Eq + Ord + Clone,
-        NonTerm: Hash + Eq + Clone,
+        Term: Hash + Ord + Clone,
+        NonTerm: Hash + Ord + Clone,
     {
         // expand
         self.expand(&mut rules)?;
@@ -326,8 +326,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         states.push(State::new());
         states[state_id].ruleset = rules.clone();
 
-        let mut next_rules_term = HashMap::new();
-        let mut next_rules_nonterm = HashMap::new();
+        let mut next_rules_term = BTreeMap::new();
+        let mut next_rules_nonterm = BTreeMap::new();
         let mut empty_rules = Vec::new();
         for (mut rule_ref, lookaheads) in rules.rules.into_iter() {
             let rule = &self.rules[rule_ref.rule];
@@ -481,7 +481,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     ) -> Result<usize, BuildError<Term, NonTerm>>
     where
         Term: Hash + Eq + Ord + Clone,
-        NonTerm: Hash + Eq + Clone,
+        NonTerm: Hash + Eq + Ord + Clone,
     {
         // expand
         self.expand(&mut rules)?;
@@ -503,8 +503,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         });
 
         let mut lookaheads_empty = true;
-        let mut next_rules_term = HashMap::new();
-        let mut next_rules_nonterm = HashMap::new();
+        let mut next_rules_term = BTreeMap::new();
+        let mut next_rules_nonterm = BTreeMap::new();
         let mut empty_rules = Vec::new();
         for ((mut rule_ref, mut lookaheads_src), (_, lookaheads_dst)) in rules
             .rules

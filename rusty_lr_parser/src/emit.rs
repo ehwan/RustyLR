@@ -9,6 +9,8 @@ use crate::token::Token;
 
 use rusty_lr_core as rlr;
 
+use std::collections::BTreeMap;
+
 /// emit Rust code for the parser
 impl Grammar {
     // build grammar at compile time
@@ -124,7 +126,9 @@ impl Grammar {
             init_shift_goto_map_term.extend(quote! {
                 let mut shift_goto_map_term = std::collections::HashMap::new();
             });
-            for (term, goto) in state.shift_goto_map_term.iter() {
+            // use BTreeMap to sort keys, for consistent output
+            let shift_goto_map_term: BTreeMap<_, _> = state.shift_goto_map_term.iter().collect();
+            for (term, goto) in shift_goto_map_term.into_iter() {
                 let (_, term_stream) = self.terminals.get(&term.to_string()).unwrap();
                 init_shift_goto_map_term.extend(quote! {
                     shift_goto_map_term.insert( #term_stream, #goto);
@@ -135,7 +139,10 @@ impl Grammar {
             init_shift_goto_map_nonterm.extend(quote! {
                 let mut shift_goto_map_nonterm = std::collections::HashMap::new();
             });
-            for (nonterm, goto) in state.shift_goto_map_nonterm.iter() {
+            // use BTreeMap to sort keys, for consistent output
+            let shift_goto_map_nonterm: BTreeMap<_, _> =
+                state.shift_goto_map_nonterm.iter().collect();
+            for (nonterm, goto) in shift_goto_map_nonterm.into_iter() {
                 init_shift_goto_map_nonterm.extend(quote! {
                     shift_goto_map_nonterm.insert( #nonterm, #goto);
                 });
@@ -145,7 +152,9 @@ impl Grammar {
             init_reduce_map.extend(quote! {
                 let mut reduce_map = std::collections::HashMap::new();
             });
-            for (term, ruleid) in state.reduce_map.iter() {
+            // use BTreeMap to sort keys, for consistent output
+            let reduce_map: BTreeMap<_, _> = state.reduce_map.iter().collect();
+            for (term, ruleid) in reduce_map.into_iter() {
                 let (_, term_stream) = self.terminals.get(&term.to_string()).unwrap();
                 init_reduce_map.extend(quote! {
                     reduce_map.insert( #term_stream, #ruleid);
