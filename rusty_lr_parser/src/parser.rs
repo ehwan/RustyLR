@@ -14,7 +14,7 @@ use quote::ToTokens;
 
 use rusty_lr_core::ReduceType;
 
-// bootstrap the parser for the grammar; with rusty_lr 0.9.0
+// bootstrap the parser for the grammar
 // this define the actual parser for proc-macro line parsing
 
 // rusty_lr_expand parser.rs parser_expanded.rs
@@ -41,6 +41,9 @@ use rusty_lr_core::ReduceType;
 %token group TermType::Group(None);
 %token literal TermType::Literal(None);
 %token equal TermType::Equal(None);
+%token plus TermType::Plus(None);
+%token star TermType::Star(None);
+%token question TermType::Question(None);
 %token otherpunct TermType::OtherPunct(None);
 %token moduleprefix TermType::ModulePrefix(None);
 %eof TermType::Eof;
@@ -95,47 +98,61 @@ RuleLine(RuleLine): RuleDef Action
 }
 ;
 
-RuleDef(Vec<TokenMapped>): Tokens { Tokens.value };
+RuleDef(Vec<TokenMapped>): TokenMapped* { TokenMapped.value };
 
-Tokens(Vec<TokenMapped>): TokensOne  { TokensOne.value }
-        | { vec![] }
-        ;
-TokensOne(Vec<TokenMapped>): TokensOne Token {
-    let mut v = TokensOne.value;
-    v.push( Token.value );
-    v
+SymbolPattern(Token): ident {
+    if let TermType::Ident(ident) = ident.value {
+        let ident = ident.as_ref().unwrap();
+        Token::NonTerm( ident.clone() )
+    }else {
+        unreachable!( "SymbolPattern-Ident" );
+    }
 }
-| Token { vec![Token.value] }
+| ident star {
+    if let TermType::Ident(ident) = ident.value {
+        let ident = ident.as_ref().unwrap();
+        Token::Star( ident.clone() )
+    }else {
+        unreachable!( "SymbolPattern-Star" );
+    }
+}
+| ident plus {
+    if let TermType::Ident(ident) = ident.value {
+        let ident = ident.as_ref().unwrap();
+        Token::Plus( ident.clone() )
+    }else {
+        unreachable!( "SymbolPattern-Plus" );
+    }
+}
+| ident question {
+    if let TermType::Ident(ident) = ident.value {
+        let ident = ident.as_ref().unwrap();
+        Token::Question( ident.clone() )
+    }else {
+        unreachable!( "SymbolPattern-Question" );
+    }
+}
 ;
 
-Token(TokenMapped): ident {
-    if let TermType::Ident(ident) = *ident {
+TokenMapped(TokenMapped): SymbolPattern {
+    let mapto = SymbolPattern.value.ident();
+    TokenMapped {
+        token: SymbolPattern.value,
+        mapto
+    }
+}
+| ident equal SymbolPattern {
+    if let TermType::Ident(ident) = ident.value {
+        let ident = ident.as_ref().unwrap();
         TokenMapped {
-            token: Token::NonTerm( ident.as_ref().unwrap().clone() ),
-            mapped: None
+            token: SymbolPattern.value,
+            mapto: ident.clone(),
         }
     }else {
         unreachable!( "Token-Ident" );
     }
 }
-| mapto=ident equal ident {
-    let ident = if let TermType::Ident(ident) = *ident {
-        ident.as_ref().unwrap().clone()
-    }else {
-        unreachable!( "Token-Ident2" );
-    };
-    let mapto = if let TermType::Ident(mapto) = *mapto {
-        mapto.as_ref().unwrap().clone()
-    }else {
-        unreachable!( "Token-Ident3" );
-    };
-
-    TokenMapped {
-        token: Token::NonTerm( ident ),
-        mapped: Some(mapto)
-    }
-}
-        ;
+;
 
 Action(Option<Group>): group {
     if let TermType::Group(group) = *group {
@@ -180,17 +197,16 @@ AnyTokenNoSemi:
     | group
     | literal
     | equal
+    | plus
+    | star
+    | question
     | otherpunct
     | moduleprefix
     ;
 
-AnyTokens: AnyTokenNoSemi AnyTokens
-            | AnyTokenNoSemi
-            ;
-
-RustCode(TokenStream): AnyTokens {
+RustCode(TokenStream): AnyTokenNoSemi+ {
     let mut tokens = TokenStream::new();
-    for token in AnyTokens.slice.iter() {
+    for token in AnyTokenNoSemi.slice.iter() {
         tokens.extend( token.clone().stream() );
     }
     tokens

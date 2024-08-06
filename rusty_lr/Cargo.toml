@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr"
-version = "0.12.0"
+version = "0.12.1"
 edition = "2021"
 license = "MIT"
 description = "yacc-like, proc-macro based LR(1) and LALR(1) parser generator and code generation"
@@ -11,7 +11,7 @@ categories = ["parsing"]
 
 [dependencies]
 rusty_lr_core = "0.10.0"
-rusty_lr_derive = "0.11.3"
+rusty_lr_derive = "0.11.4"
 # rusty_lr_core = { path = "../rusty_lr_core" }
 # rusty_lr_derive = { path = "../rusty_lr_derive" }
 

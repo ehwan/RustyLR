@@ -44,6 +44,10 @@ impl Grammar {
                         Token::NonTerm(nonterm) => {
                             tokens.push(rlr::Token::NonTerm(nonterm.to_string()));
                         }
+
+                        _ => {
+                            unreachable!("Only Term and NonTerm should be in rule");
+                        }
                     }
                 }
 
@@ -267,6 +271,10 @@ impl Grammar {
                             comma_separated_tokens
                                 .extend(quote! {#module_prefix::Token::NonTerm(#nonterm_stream),});
                         }
+
+                        _ => {
+                            unreachable!("Only Term and NonTerm should be in rule");
+                        }
                     }
                 }
 
@@ -349,18 +357,18 @@ impl Grammar {
                 let mut token_pop_stream = TokenStream::new();
                 for token in rule.tokens.iter().rev() {
                     match &token.token {
-                        Token::Term(term) => {
-                            let mapped = token.mapped.as_ref().unwrap_or(term);
+                        Token::Term(_) => {
+                            let mapto = &token.mapto;
                             token_pop_stream.extend(quote! {
                                 let index = self.#end_stack_name.pop().unwrap()-1;
-                                let mut #mapped = #module_prefix::TermData::new(
+                                let mut #mapto = #module_prefix::TermData::new(
                                     &self.#terms_stack_name[index],
                                     index
                                 );
                             });
                         }
                         Token::NonTerm(nonterm) => {
-                            let mapped = token.mapped.as_ref().unwrap_or(nonterm);
+                            let mapto = &token.mapto;
 
                             // pop value from stack of 'nonterm'
                             let stack_pop_stream =
@@ -381,12 +389,15 @@ impl Grammar {
                                 // TODO unreachable! if stack is empty
                                 let end = self.#end_stack_name.pop().unwrap();
                                 let begin = *self.#end_stack_name.last().unwrap();
-                                let mut #mapped = #module_prefix::NonTermData::new(
+                                let mut #mapto = #module_prefix::NonTermData::new(
                                     &self.#terms_stack_name[begin..end],
                                     #stack_pop_stream,
                                     begin..end,
                                 );
                             });
+                        }
+                        _ => {
+                            unreachable!("Only Term and NonTerm should be in rule");
                         }
                     }
                 }
@@ -433,7 +444,7 @@ impl Grammar {
 
             if let Some(typename) = typename {
                 stack_def_streams.extend(quote! {
-                    pub #stack_name : Vec<#typename>,
+                    #stack_name : Vec<#typename>,
                 });
                 stack_init_streams.extend(quote! {
                     #stack_name : Vec::new(),

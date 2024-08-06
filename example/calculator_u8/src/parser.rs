@@ -1,6 +1,7 @@
 use rusty_lr::lr1;
 
 lr1! {
+    %userdata i32;
     %tokentype u8;
     %start E;
     %eof b'\0';
@@ -24,15 +25,14 @@ lr1! {
     %left plus;
     %left star;
 
-    WS : space | space WS;
-    WS0: WS | ;
+    WS0: space*;
 
     Digit: zero | one | two | three | four | five | six | seven | eight | nine;
-    Digits: Digit | Digit Digits;
 
-    Number(i32): WS0 Digits WS0 { std::str::from_utf8(Digits.slice).unwrap().parse().unwrap() };
+    Number(i32): WS0 Digit+ WS0 { std::str::from_utf8(Digit.slice).unwrap().parse().unwrap() };
 
     A(f32): A plus a2=A {
+        *data += 1; // access userdata by `data`
         println!( "{:?} {:?} {:?}", A.slice, *plus, a2.slice );
         *A + *a2
     }

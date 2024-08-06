@@ -5,10 +5,14 @@ use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
 use quote::format_ident;
+use quote::quote;
 
 use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::collections::HashSet;
 
+use crate::rule::RuleLine;
+use crate::token::TokenMapped;
 use crate::tokenizer::Tokenizer;
 
 use super::error::ParseError;
@@ -62,6 +66,183 @@ impl Grammar {
         let mut ident = format_ident!("rustylr_macro_generated_{}_stack", name);
         ident.set_span(span);
         ident
+    }
+
+    // make A+ -> A A+ | A
+    fn new_plus_rule(
+        ident: &Ident,
+        ruletype: Option<&TokenStream>, // if A is term, then None
+    ) -> (Ident, Option<TokenStream>, RuleLines) {
+        let new_ident = Ident::new(&format!("__{}__plus_", ident), ident.span());
+        if let Some(ruletype) = ruletype {
+            // ruletype exists,
+            // A+ -> A+ A { Ap.value.push(A.value); Ap.value }
+            //     | A    { vec![A.value] }
+            let line1 = RuleLine {
+                tokens: vec![TokenMapped {
+                    token: Token::NonTerm(ident.clone()),
+                    mapto: Ident::new("A", ident.span()),
+                }],
+                reduce_action: Some(quote! {
+                    { vec![A.value] }
+                }),
+            };
+            let line2 = RuleLine {
+                tokens: vec![
+                    TokenMapped {
+                        token: Token::NonTerm(new_ident.clone()),
+                        mapto: Ident::new("Ap", ident.span()),
+                    },
+                    TokenMapped {
+                        token: Token::NonTerm(ident.clone()),
+                        mapto: Ident::new("A", ident.span()),
+                    },
+                ],
+                reduce_action: Some(quote! {
+                    { Ap.value.push(A.value); Ap.value }
+                }),
+            };
+            let rule_lines = RuleLines {
+                rule_lines: vec![line1, line2],
+            };
+
+            (new_ident, Some(quote! { (Vec<#ruletype>) }), rule_lines)
+        } else {
+            // ruletype not exist,
+            // A+ -> A A+
+            //     | A
+            let line1 = RuleLine {
+                tokens: vec![TokenMapped {
+                    token: Token::NonTerm(ident.clone()),
+                    mapto: Ident::new("A", ident.span()),
+                }],
+                reduce_action: None,
+            };
+            let line2 = RuleLine {
+                tokens: vec![
+                    TokenMapped {
+                        token: Token::NonTerm(ident.clone()),
+                        mapto: Ident::new("A", ident.span()),
+                    },
+                    TokenMapped {
+                        token: Token::NonTerm(new_ident.clone()),
+                        mapto: Ident::new("Ap", ident.span()),
+                    },
+                ],
+                reduce_action: None,
+            };
+            let rule_lines = RuleLines {
+                rule_lines: vec![line1, line2],
+            };
+            (new_ident, None, rule_lines)
+        }
+    }
+
+    // make A* -> A+ | ε
+    fn new_star_rule(
+        ident: &Ident,
+        ruletype: Option<&TokenStream>, // if A is term, then None
+    ) -> (Ident, Option<TokenStream>, RuleLines) {
+        let plus_ident = Ident::new(&format!("__{}__plus_", ident), ident.span());
+        let new_ident = Ident::new(&format!("__{}__star_", ident), ident.span());
+        if let Some(ruletype) = ruletype {
+            // ruletype exists,
+            // A* -> A+ { Ap.value }
+            //     |    { vec![] }
+            let line1 = RuleLine {
+                tokens: vec![],
+                reduce_action: Some(quote! {
+                    { vec![] }
+                }),
+            };
+            let line2 = RuleLine {
+                tokens: vec![TokenMapped {
+                    token: Token::NonTerm(plus_ident),
+                    mapto: Ident::new("Ap", ident.span()),
+                }],
+                reduce_action: Some(quote! {
+                    { Ap.value }
+                }),
+            };
+            let rule_lines = RuleLines {
+                rule_lines: vec![line1, line2],
+            };
+
+            (new_ident, Some(quote! { (Vec<#ruletype>) }), rule_lines)
+        } else {
+            // ruletype not exist,
+            // A* -> A+
+            //     |
+            let line1 = RuleLine {
+                tokens: vec![],
+                reduce_action: None,
+            };
+            let line2 = RuleLine {
+                tokens: vec![TokenMapped {
+                    token: Token::NonTerm(plus_ident),
+                    mapto: Ident::new("Ap", ident.span()),
+                }],
+                reduce_action: None,
+            };
+            let rule_lines = RuleLines {
+                rule_lines: vec![line1, line2],
+            };
+
+            (new_ident, None, rule_lines)
+        }
+    }
+
+    // make A? -> A | ε
+    fn new_question_rule(
+        ident: &Ident,
+        ruletype: Option<&TokenStream>, // if A is term, then None
+    ) -> (Ident, Option<TokenStream>, RuleLines) {
+        let new_ident = Ident::new(&format!("__{}__question_", ident), ident.span());
+        if let Some(ruletype) = ruletype {
+            // ruletype exists,
+            // A? -> A { Some(Ap.value) }
+            //     |   { None }
+            let line1 = RuleLine {
+                tokens: vec![],
+                reduce_action: Some(quote! {
+                    { None }
+                }),
+            };
+            let line2 = RuleLine {
+                tokens: vec![TokenMapped {
+                    token: Token::NonTerm(ident.clone()),
+                    mapto: Ident::new("A", ident.span()),
+                }],
+                reduce_action: Some(quote! {
+                    { Some(A.value) }
+                }),
+            };
+            let rule_lines = RuleLines {
+                rule_lines: vec![line1, line2],
+            };
+
+            (new_ident, Some(quote! { (Option<#ruletype>) }), rule_lines)
+        } else {
+            // ruletype not exist,
+            // A? -> A
+            //     |
+            let line1 = RuleLine {
+                tokens: vec![],
+                reduce_action: None,
+            };
+            let line2 = RuleLine {
+                tokens: vec![TokenMapped {
+                    token: Token::NonTerm(ident.clone()),
+                    mapto: Ident::new("A", ident.span()),
+                }],
+                reduce_action: None,
+            };
+            let rule_lines = RuleLines {
+                rule_lines: vec![line1, line2],
+            };
+
+            (new_ident, None, rule_lines)
+        }
     }
 
     /// parse the input TokenStream and return a parsed Grammar
@@ -119,15 +300,147 @@ impl Grammar {
             }
         }
 
-        // check all terminal symbols are defined in '%left', '%right'
+        // check all terminal symbols in '%left', '%right' are defined
         for (name, (ident, _)) in grammar.reduce_types.iter() {
             if !grammar.terminals.contains_key(name) {
                 return Err(ParseError::TerminalNotDefined(ident.clone()));
             }
         }
 
-        // replace all terminal Ident with Term
+        // check token_typename is defined
+        if grammar.token_typename.is_none() {
+            return Err(ParseError::TokenTypeNotDefined);
+        }
+
+        // check start rule is defined
+        if let Some(start_rule) = &grammar.start_rule_name {
+            if !grammar.rules.contains_key(&start_rule.to_string()) {
+                return Err(ParseError::NonTerminalNotDefined(start_rule.clone()));
+            }
+        } else {
+            return Err(ParseError::StartNotDefined);
+        }
+
+        // too many mutable borrow below;
         let terminals: HashSet<String> = grammar.terminals.keys().cloned().collect();
+
+        // check Token::Plus, Token::Star, Token::Question tokens
+        // and define new rules for them
+        // A+ -> A+ A | A
+        // A* -> A+ | ε
+        // A? -> A | ε
+        //
+        // <RuleType>
+        // if A is nonterm and A has ruletype T,
+        // then A+ -> Vec<T>, A* -> Vec<T>, A? -> Option<T>
+        // if A does not have ruletype, then ()
+        //
+        // if A is term, then () since we can always trace terminals by slice
+
+        {
+            // check if new rule 'name' is already defined
+            let mut new_rules = HashMap::new();
+            for (_, (_name, _ruletype, rules)) in grammar.rules.iter() {
+                for rule in rules.rule_lines.iter() {
+                    for token in rule.tokens.iter() {
+                        match &token.token {
+                            Token::Plus(ident) => {
+                                let ident_str = ident.to_string();
+                                let ruletype = if grammar.terminals.contains_key(&ident_str) {
+                                    None
+                                } else {
+                                    match grammar.rules.get(&ident_str) {
+                                        Some((_name, ruletype, _rules)) => ruletype.as_ref(),
+                                        None => {
+                                            return Err(ParseError::NonTerminalNotDefined(
+                                                ident.clone(),
+                                            ));
+                                        }
+                                    }
+                                };
+
+                                let new_rule = Self::new_plus_rule(&ident, ruletype);
+                                new_rules.insert(new_rule.0.to_string(), new_rule);
+                            }
+                            Token::Star(ident) => {
+                                let ident_str = ident.to_string();
+                                let ruletype = if grammar.terminals.contains_key(&ident_str) {
+                                    None
+                                } else {
+                                    match grammar.rules.get(&ident_str) {
+                                        Some((_name, ruletype, _rules)) => ruletype.as_ref(),
+                                        None => {
+                                            return Err(ParseError::NonTerminalNotDefined(
+                                                ident.clone(),
+                                            ));
+                                        }
+                                    }
+                                };
+
+                                let new_rule = Self::new_plus_rule(&ident, ruletype);
+                                new_rules.insert(new_rule.0.to_string(), new_rule);
+
+                                let new_rule = Self::new_star_rule(&ident, ruletype);
+                                new_rules.insert(new_rule.0.to_string(), new_rule);
+                            }
+                            Token::Question(ident) => {
+                                let ident_str = ident.to_string();
+                                let ruletype = if grammar.terminals.contains_key(&ident_str) {
+                                    None
+                                } else {
+                                    match grammar.rules.get(&ident_str) {
+                                        Some((_name, ruletype, _rules)) => ruletype.as_ref(),
+                                        None => {
+                                            return Err(ParseError::NonTerminalNotDefined(
+                                                ident.clone(),
+                                            ));
+                                        }
+                                    }
+                                };
+                                let new_rule = Self::new_question_rule(&ident, ruletype);
+                                new_rules.insert(new_rule.0.to_string(), new_rule);
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+            }
+            for (name, rule_lines) in new_rules {
+                grammar.rules.insert(name, rule_lines);
+            }
+        }
+
+        // replace all Plus, Star, Question to NonTerm
+        // check if new rule 'name' is already defined
+        for (_, (_name, _ruletype, rules)) in grammar.rules.iter_mut() {
+            for rule in rules.rule_lines.iter_mut() {
+                for token in rule.tokens.iter_mut() {
+                    match token.token.clone() {
+                        Token::Plus(ident) => {
+                            token.token = Token::NonTerm(Ident::new(
+                                &format!("__{}__plus_", ident),
+                                ident.span(),
+                            ));
+                        }
+                        Token::Star(ident) => {
+                            token.token = Token::NonTerm(Ident::new(
+                                &format!("__{}__star_", ident),
+                                ident.span(),
+                            ));
+                        }
+                        Token::Question(ident) => {
+                            token.token = Token::NonTerm(Ident::new(
+                                &format!("__{}__question_", ident),
+                                ident.span(),
+                            ));
+                        }
+                        _ => {}
+                    }
+                }
+            }
+        }
+
+        // replace all NonTerm to Term if it is in terminals
         for (_, (_name, _ruletype, rules)) in grammar.rules.iter_mut() {
             for rule in rules.rule_lines.iter_mut() {
                 for token in rule.tokens.iter_mut() {
@@ -142,11 +455,6 @@ impl Grammar {
             }
         }
 
-        // check token_typename is defined
-        if grammar.token_typename.is_none() {
-            return Err(ParseError::TokenTypeNotDefined);
-        }
-
         // check all NonTerminals are defined
         for (_, (_name, _ruletype, rules)) in grammar.rules.iter() {
             for rule in rules.rule_lines.iter() {
@@ -158,15 +466,6 @@ impl Grammar {
                     }
                 }
             }
-        }
-
-        // check start rule is defined
-        if let Some(start_rule) = &grammar.start_rule_name {
-            if !grammar.rules.contains_key(&start_rule.to_string()) {
-                return Err(ParseError::NonTerminalNotDefined(start_rule.clone()));
-            }
-        } else {
-            return Err(ParseError::StartNotDefined);
         }
 
         Ok(grammar)

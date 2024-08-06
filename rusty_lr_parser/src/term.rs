@@ -22,6 +22,9 @@ pub enum TermType {
     Group(Option<proc_macro2::Group>),
     Literal(Option<proc_macro2::Literal>),
     Equal(Option<proc_macro2::Punct>),
+    Plus(Option<proc_macro2::Punct>),
+    Star(Option<proc_macro2::Punct>),
+    Question(Option<proc_macro2::Punct>),
     OtherPunct(Option<proc_macro2::Punct>),
     Eof,
 }
@@ -45,8 +48,11 @@ impl TermType {
             TermType::Group(_) => 15,
             TermType::Literal(_) => 16,
             TermType::Equal(_) => 17,
-            TermType::OtherPunct(_) => 18,
-            TermType::Eof => 19,
+            TermType::Plus(_) => 18,
+            TermType::Star(_) => 19,
+            TermType::Question(_) => 20,
+            TermType::OtherPunct(_) => 21,
+            TermType::Eof => 22,
         }
     }
     pub fn stream(self) -> TokenStream {
@@ -95,6 +101,9 @@ impl TermType {
             TermType::Group(group) => group.unwrap().to_token_stream(),
             TermType::Literal(lit) => lit.unwrap().to_token_stream(),
             TermType::Equal(punct) => punct.unwrap().to_token_stream(),
+            TermType::Plus(punct) => punct.unwrap().to_token_stream(),
+            TermType::Star(punct) => punct.unwrap().to_token_stream(),
+            TermType::Question(punct) => punct.unwrap().to_token_stream(),
             TermType::OtherPunct(punct) => punct.unwrap().to_token_stream(),
             TermType::Eof => unreachable!("Eof should not be converted to TokenStream"),
         }
@@ -119,6 +128,9 @@ impl TermType {
             TermType::Group(group) => group.as_ref().map(|g| g.span()),
             TermType::Literal(lit) => lit.as_ref().map(|l| l.span()),
             TermType::Equal(punct) => punct.as_ref().map(|p| p.span()),
+            TermType::Plus(punct) => punct.as_ref().map(|p| p.span()),
+            TermType::Star(punct) => punct.as_ref().map(|p| p.span()),
+            TermType::Question(punct) => punct.as_ref().map(|p| p.span()),
             TermType::OtherPunct(punct) => punct.as_ref().map(|p| p.span()),
             TermType::Eof => None,
         }
@@ -144,6 +156,9 @@ impl std::fmt::Display for TermType {
             TermType::Group(_) => write!(f, "<Group>"),
             TermType::Literal(_) => write!(f, "<Literal>"),
             TermType::Equal(_) => write!(f, "'='"),
+            TermType::Plus(_) => write!(f, "'+'"),
+            TermType::Star(_) => write!(f, "'*'"),
+            TermType::Question(_) => write!(f, "'?'"),
             TermType::OtherPunct(_) => write!(f, "<Punct>"),
             TermType::Eof => write!(f, "<eof>"),
         }

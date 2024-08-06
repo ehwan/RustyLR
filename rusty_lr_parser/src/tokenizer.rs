@@ -20,6 +20,9 @@ impl Tokenizer {
                     ':' => Some(TermType::Colon(Some(punct))),
                     ';' => Some(TermType::Semicolon(Some(punct))),
                     '|' => Some(TermType::Pipe(Some(punct))),
+                    '+' => Some(TermType::Plus(Some(punct))),
+                    '*' => Some(TermType::Star(Some(punct))),
+                    '?' => Some(TermType::Question(Some(punct))),
                     '%' => {
                         let (ret, shift) = match self.iter.peek() {
                             Some(TokenTree::Ident(ident)) => match ident.to_string().as_str() {

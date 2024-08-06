@@ -1,9 +1,9 @@
 # RustyLR
-LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from Context Free Grammar (CFGs).
+yacc-like LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from Context Free Grammar (CFGs).
 
 ```
 [dependencies]
-rusty_lr = "0.12.0"
+rusty_lr = "0.12.1"
 ```
 
 ## Features
@@ -23,130 +23,406 @@ rusty_lr = "0.12.0"
 
  - [Calculator](example/calculator): calculator with enum `Token`
  - [Calculator with `u8`](example/calculator_u8): calculator with `u8`
- - [Bootstrap](rusty_lr_parser/src/parser.rs): bootstrap of `lr1!` and `lalr1!` macro
+ - [Bootstrap](rusty_lr_parser/src/parser.rs): bootstrapped line parser of `lr1!` and `lalr1!` macro
 
 Please refer to the [example](example) directory for the full example.
 
-In [`example/calculator/parser.rs`](example/calculator/src/parser.rs),
+In [`example/calculator_u8/parser.rs`](example/calculator_u8/src/parser.rs),
 ```rust
 use rusty_lr::lr1;
 use rusty_lr::lalr1;
 
-enum Token {
-    // token definitions
-    ...
-}
-
 // this define struct `EParser`
 // where 'E' is the start symbol
-lalr1! {
-    // type of userdata
+lr1! {
     %userdata i32;
-    // type of token ( as Terminal symbol )
-    %tokentype Token;
-
-    // start symbol
+    %tokentype u8;
     %start E;
-    // eof symbol; for augmented rule generation
-    %eof Token::Eof;
+    %eof b'\0';
 
-    // define tokens
-    %token num Token::Num(0); // `num` maps to `Token::Num(0)`
-    %token plus Token::Plus;
-    %token star Token::Star;
-    %token lparen Token::LParen;
-    %token rparen Token::RParen;
+    %token zero b'0';
+    %token one b'1';
+    %token two b'2';
+    %token three b'3';
+    %token four b'4';
+    %token five b'5';
+    %token six b'6';
+    %token seven b'7';
+    %token eight b'8';
+    %token nine b'9';
+    %token plus b'+';
+    %token star b'*';
+    %token lparen b'(';
+    %token rparen b')';
+    %token space b' ';
 
-    // resolving shift/reduce conflict
     %left plus;
     %left star;
 
-    // data that each token holds can be accessed by its name
-    // s is slice of shifted terminal symbols captured by current rule
-    // userdata can be accessed by `data` ( &mut i32, for this situation )
-    A(i32) : A plus a2=A {
-            println!("{:?} {:?} {:?}", A.slice, *plus, a2.slice );
-            //                         ^        ^      ^
-            //                         |        |      |- slice of 2nd 'A'
-            //                         |        |- &Token
-            //                         |- slice of 1st 'A'
-            println!( "{:?}", s );
-            *data += 1;
-            A.value + a2.value // --> this will be new value of current 'A'
-        //  ^         ^
-        //  |         |- value of 2nd 'A'
-        //  |- value of 1st 'A'
-        }
-      | M { M.value }
-      ;
+    WS0: space*;
 
-    M(i32) : M star m2=M { *M * *m2 }
-      | P { *P }
-      ;
+    Digit: zero | one | two | three | four | five | six | seven | eight | nine;
 
-    P(i32) : num {
-        if let Token::Num(n) = *num { *n }
-        else { return Err(format!("{:?}", num)); }
-        //            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-        //             reduce action returns Result<(), String>
+    Number(i32): WS0 Digit+ WS0 { std::str::from_utf8(Digit.slice).unwrap().parse().unwrap() };
+
+    A(f32): A plus a2=A {
+        *data += 1; // access userdata by `data`
+        println!( "{:?} {:?} {:?}", A.slice, *plus, a2.slice );
+        *A + *a2
     }
-      | lparen E rparen { *E }
-      ;
+    | M { *M }
+    ;
 
-    E(i32) : A  { *A };
+    M(f32): M star m2=M { *M * *m2 }
+    | P { *P }
+    ;
+
+    P(f32): Number { *Number as f32 }
+    | WS0 lparen E rparen WS0 { *E }
+    ;
+
+    E(f32) : A { *A };
+
 }
 ```
 
-In [`example/calculator/src/main.rs`](example/calculator/src/main.rs),
+In [`example/calculator_u8/src/main.rs`](example/calculator_u8/src/main.rs),
 ```rust
-mod parser;
+pub mod parser;
 
 fn main() {
-    use parser::Token;
-    // 1 + 2 * ( 3 + 4 ) = 15
-    let input = vec![
-        Token::Num(1),
-        Token::Plus,
-        Token::Num(2),
-        Token::Star,
-        Token::LParen,
-        Token::Num(3),
-        Token::Plus,
-        Token::Num(4),
-        Token::RParen,
-        Token::Eof,
-    ];
+    let input = "  1 +  20 *   (3 + 4 )   ";
 
     let parser = parser::EParser::new();
     let mut context = parser.begin();
     let mut userdata: i32 = 0;
-    for token in input {
-        match parser.feed(&mut context, token, &mut userdata) {
-            //                          ^^^^^   ^^^^^^^^^^^^ userdata passed here as `&mut i32`
-            //                           |- feed token
+    for b in input.as_bytes().iter() {
+        match parser.feed(&mut context, *b, &mut userdata) {
+            // feed userdata here
             Ok(_) => {}
             Err(e) => {
-                println!("{:?}", e);
+                eprintln!("error: {:?}", e);
                 return;
             }
         }
     }
-    // res = value of start symbol ( E(i32) )
-    let res = context.accept();
-    println!("{}", res);
+    parser.feed(&mut context, 0, &mut userdata).unwrap(); // feed EOF
+
+    let result = context.accept(); // get value of start 'E'
+    println!("result: {}", result);
     println!("userdata: {}", userdata);
 }
 ```
 
 The result will be:
 ```
-[Num(3)] Plus [Num(4)]
-[Num(3), Plus, Num(4)]
-[Num(1)] Plus [Num(2), Star, LParen, Num(3), Plus, Num(4), RParen]
-[Num(1), Plus, Num(2), Star, LParen, Num(3), Plus, Num(4), RParen]
-15
+[51, 32] 43 [32, 52, 32]
+[32, 32, 49, 32] 43 [32, 32, 50, 48, 32, 42, 32, 32, 32, 40, 51, 32, 43, 32, 52, 32, 41, 32, 32, 32]
+result: 141
 userdata: 2
 ```
+
+
+
+
+
+## proc-macro `lr1!`, `lalr1!`, `lr1_runtime!`, and `lalr1_runtime!`
+`lr1!`, `lalr1!`, `lr1_runtime!`, and `lalr1_runtime!` are procedural macros that will build `Parser` struct from CFGs.
+Please refer to the [Sample](#sample) section for actual usage.
+
+### Compile-time vs Runtime
+Former two macros (those without '_runtime' suffix) will generate `Parser` struct at compile-time, which `build()` is called at compile-time and the generated code will be *TONS* of `insert` of tokens one by one.
+Latter two (those with '_runtime' suffix) will generate `Parser` struct at runtime, the `build()` is called on `Parser::new()`.
+
+
+### Syntax
+Every line in the macro must follow the syntax below. The syntax can be also found in the [bootstrap](rusty_lr_parser/src/parser.rs) file.
+
+### Token type <sub><sup>(must defined)</sup></sub>
+```
+'%tokentype' <RustType> ';'
+```
+Define the type of terminal symbols.
+`<RustType>` must be accessible at the point where the macro is called.
+
+### Token definition <sub><sup>(must defined)</sup></sub>
+```
+'%token' <Ident> <RustExpr> ';'
+```
+Map terminal symbol's name `<Ident>` to the actual value `<RustExpr>`.
+`<RustExpr>` must be accessible at the point where the macro is called.
+
+### Start symbol <sub><sup>(must defined)</sup></sub>
+```
+'%start' <Ident> ';'
+```
+Define the start symbol of the grammar.
+
+### Eof symbol <sub><sup>(must defined)</sup></sub>
+```
+'%eof' <RustExpr> ';'
+```
+Define the `eof` terminal symbol.
+`<RustExpr>` must be accessible at the point where the macro is called.
+'eof' terminal symbol will be automatically added to the grammar.
+
+### Userdata type <sub><sup>(optional)</sup></sub>
+```
+'%userdata' <RustType> ';'
+```
+Define the type of userdata passed to `feed()` function.
+
+### Reduce type <sub><sup>(optional)</sup></sub>
+```
+// reduce first
+'%left' <Ident> ';'
+'%l' <Ident> ';'
+'%reduce' <Ident> ';'
+
+// shift first
+'%right' <Ident> ';'
+'%r' <Ident> ';'
+'%shift' <Ident> ';'
+```
+Set the shift/reduce precedence for terminal symbols. `<Ident>` must be defined in `%token`.
+
+### Production rules
+```
+<Ident><RuleType>
+  ':' <TokenMapped>* <ReduceAction>
+  '|' <TokenMapped>* <ReduceAction>
+  ...
+  ';'
+```
+Define the production rules.
+
+```
+<TokenMapped> : <Ident as var_name> '=' <TokenPattern>
+              | <TokenPattern>
+              ;
+```
+```
+<TokenPattern> : <Ident as terminal or non-terminal>
+               | <Ident as terminal or non-terminal> '*'  (zero or more)
+               | <Ident as terminal or non-terminal> '+'  (one or more)
+               | <Ident as terminal or non-terminal> '?'  (zero or one)
+               ;
+```
+
+Example:
+```
+E: A plus* d=D ;
+```
+This production rule defines non-terminal `E` to be `A`, then zero or more `plus`, then `D` mapped to variable `d`.
+For more information, please refer to the [Accessing token data in ReduceAction](#accessing-token-data-in-reduceaction) section.
+
+
+### RuleType <sub><sup>(optional)</sup></sub>
+```
+<RuleType> : '(' <RustType> ')'
+           |
+           ;
+```
+Define the type of value that this production rule holds.
+
+### ReduceAction <sub><sup>(optional)</sup></sub>
+```
+<ReduceAction> : '{' <RustExpr> '}'
+               |
+               ;
+```
+
+Define the action to be executed when the rule is matched and reduced.
+If `<RuleType>` is defined, `<ReduceAction>` itself must be the value of `<RuleType>` (i.e. no semicolon at the end of the statement).
+
+### Accessing token data in ReduceAction
+
+**predefined variables** can be used in `<ReduceAction>`:
+ - `s` : slice of shifted terminal symbols `&[<TermType>]` captured by current rule.
+ - `data` : userdata passed to `feed()` function.
+
+To access the data of each token, you can directly use the name of the token as a variable.
+For non-terminal symbols, the type of data is [`rusty_lr::NonTermData`](rusty_lr_core/src/nontermdata.rs).
+You can access the value of `<RuleType>` by `NonTerm.value`(by value) or `*NonTerm`(by `Deref`), slice by `NonTerm.slice`.
+For terminal symbols, the type of data is [`rusty_lr::TermData`](rusty_lr_core/src/termdata.rs).
+You can access the shifted terminal symbol by `Term.value`(`&TermType`) or `*Term`(`&TermType`).
+
+If multiple variables are defined with the same name, the variable on the front-most will be used.
+
+For regex-like pattern, `<RuleType>` will be modified by following:
+ | Pattern | Non-Terminal<br/>`<RuleType>=T` | Non-Terminal<br/>`<RuleType>=(not defined)` | Terminal |
+ |:-------:|:--------------:|:--------------------------:|:--------:|
+ | '*'     | `Vec<T>`       | (not defined)              | (not defined) |
+ | '+'     | `Vec<T>`       | (not defined)              | (not defined) |
+ | '?'     | `Option<T>`    | (not defined)              | (not defined) |
+
+For example, following code will print the value of each `A`, and the slice of each `A` and `plus` token in the production rule `E -> A plus A`.
+```rust
+%token plus ...;
+
+E : A plus? a2=A*
+  {
+    println!("Value of 1st A: {}", A.value); // i32
+    println!("Slice of 1st A: {:?}", A.slice);
+    println!("Value of 2nd As: {:?}", a2.value); // Vec<i32>
+    println!("Slice of 2nd As: {:?}", a2.slice);
+
+    if let plus.slice.len() == 0 {
+        // plus is not captured
+    }else {
+        // plus is captured
+    }
+  }
+  ;
+
+A(i32): ... ;
+```
+
+`Result<(), String>` can be returned from `<ReduceAction>`.
+Returned `Err` will be delivered to the caller of `feed()` function.
+
+#### Error type <sub><sup>(optional)</sup></sub>
+```
+'%err' <RustType> ';'
+'%error' <RustType> ';'
+```
+Define the type of `Err` variant in `Result<(), Err>` returned from `<ReduceAction>`. If not defined, `String` will be used.
+
+## Start Parsing
+`lr1!` and `lalr1!` will generate struct `<StartSymbol>Parser`.
+
+The struct has the following functions:
+ - `new()` : create new parser
+ - `begin(&self)` : create new context
+ - `feed(&self, &mut Context, TermType, &mut UserData) -> Result<(), ParseError>` : feed token to the parser
+ - `feed_callback(&self, &mut Context, &mut C: Callback, TermType, &mut UserData) -> Result<(), ParseError>` : feed token with callback
+
+Note that the parameter `&mut UserData` is omitted if `%userdata` is not defined.
+Once the input sequence (including `eof` token) is feeded, without errors, you can get the value of start symbol by calling `context.accept()`.
+
+```rust
+let parser = parser::EParser::new();
+// create context
+let mut context = parser.begin();
+// define userdata
+let mut userdata: i32 = 0;
+
+// start feeding tokens
+for token in input_sequence {
+    match parser.feed(&mut context, token, &mut userdata) {
+        //                          ^^^^^   ^^^^^^^^^^^^ userdata passed here as `&mut i32`
+        //                           |- feed token
+        Ok(_) => {}
+        Err(e) => {
+            println!("{:?}", e);
+            return;
+        }
+    }
+}
+// res = value of start symbol
+let res = context.accept();
+println!("{}", res);
+println!("userdata: {}", userdata);
+```
+
+
+
+## Parse with callback
+
+For tracing parser action, you can implement `Callback` trait and pass it to `parser.feed_callback()`.
+
+```rust
+struct ParserCallback {}
+
+impl rusty_lr::Callback<Term, NonTerm> for ParserCallback {
+    /// Error type for callback
+    type Error = String;
+
+    fn reduce(
+        &mut self,
+        rules: &[rusty_lr::ProductionRule<char, String>],
+        //                                  ^     |- NonTerm
+        //                                  |- Term
+        states: &[rusty_lr::State<char, String>],
+        //                         ^     |- NonTerm
+        //                         |- Term
+        state_stack: &[usize],
+        rule: usize,
+    ) -> Result<(), Self::Error> {
+        // `Rule` is Display if Term, NonTerm is Display
+        println!("Reduce by {}", rules[rule]);
+        Ok(())
+    }
+    fn shift_and_goto(
+        &mut self,
+        rules: &[rusty_lr::ProductionRule<char, String>],
+        states: &[rusty_lr::State<char, String>],
+        state_stack: &[usize],
+        term: &char,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+    fn shift_and_goto_nonterm(
+        &mut self,
+        rules: &[rusty_lr::ProductionRule<char, String>],
+        states: &[rusty_lr::State<char, String>],
+        state_stack: &[usize],
+        nonterm: &String,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+}
+```
+
+```rust
+// Num + Num * ( Num + Num )
+let terms = vec![ Term::Num, Term::Plus, Term::Num, Term::Mul, Term::LeftParen, Term::Num, Term::Plus, Term::Num, Term::RightParen, Term::Eof];
+
+// start parsing
+let mut context = parser.begin();
+let mut callback = ParserCallback {};
+
+// feed input sequence
+for term in terms {
+    match parser.feed_callback(&mut context, &mut callback, term) {
+        Ok(_) => (),
+        Err(err) => {
+            eprintln!("{:?}", err);
+            return;
+        }
+    }
+}
+```
+
+The result will be:
+```
+Reduce by P -> Num
+Reduce by M -> P
+Reduce by A -> M
+Reduce by P -> Num
+Reduce by M -> P
+Reduce by P -> Num
+Reduce by M -> P
+Reduce by A -> M
+Reduce by P -> Num
+Reduce by M -> P
+Reduce by A -> M
+Reduce by A -> A + A
+Reduce by E -> A
+Reduce by P -> ( E )
+Reduce by M -> P
+Reduce by M -> M * M
+Reduce by A -> M
+Reduce by A -> A + A
+Reduce by E -> A
+```
+
+
+
+
+
+
+
 
 ## Build Deterministic Finite Automata (DFA) from Context Free Grammar (CFG)
 This section will describe how to build DFA from CFGs, on runtime.
@@ -283,265 +559,3 @@ for term in terms {
 ```
 
 `EOF` token is feeded at the end of sequence, and the augmented rule `Augmented -> StartSymbol $` will not be reduced since there are no lookahead symbols.
-
-### Parse with callback
-
-For tracing parser action, you can implement `Callback` trait and pass it to `parser.feed_callback()`.
-
-```rust
-struct ParserCallback {}
-
-impl rusty_lr::Callback<Term, NonTerm> for ParserCallback {
-    /// Error type for callback
-    type Error = String;
-
-    fn reduce(
-        &mut self,
-        rules: &[rusty_lr::ProductionRule<char, String>],
-        //                                  ^     |- NonTerm
-        //                                  |- Term
-        states: &[rusty_lr::State<char, String>],
-        //                         ^     |- NonTerm
-        //                         |- Term
-        state_stack: &[usize],
-        rule: usize,
-    ) -> Result<(), Self::Error> {
-        // `Rule` is Display if Term, NonTerm is Display
-        println!("Reduce by {}", rules[rule]);
-        Ok(())
-    }
-    fn shift_and_goto(
-        &mut self,
-        rules: &[rusty_lr::ProductionRule<char, String>],
-        states: &[rusty_lr::State<char, String>],
-        state_stack: &[usize],
-        term: &char,
-    ) -> Result<(), Self::Error> {
-        Ok(())
-    }
-    fn shift_and_goto_nonterm(
-        &mut self,
-        rules: &[rusty_lr::ProductionRule<char, String>],
-        states: &[rusty_lr::State<char, String>],
-        state_stack: &[usize],
-        nonterm: &String,
-    ) -> Result<(), Self::Error> {
-        Ok(())
-    }
-}
-```
-
-```rust
-// Num + Num * ( Num + Num )
-let terms = vec![ Term::Num, Term::Plus, Term::Num, Term::Mul, Term::LeftParen, Term::Num, Term::Plus, Term::Num, Term::RightParen, Term::Eof];
-
-// start parsing
-let mut context = parser.begin();
-let mut callback = ParserCallback {};
-
-// feed input sequence
-for term in terms {
-    match parser.feed_callback(&mut context, &mut callback, term) {
-        Ok(_) => (),
-        Err(err) => {
-            eprintln!("{:?}", err);
-            return;
-        }
-    }
-}
-```
-
-The result will be:
-```
-Reduce by P -> Num
-Reduce by M -> P
-Reduce by A -> M
-Reduce by P -> Num
-Reduce by M -> P
-Reduce by P -> Num
-Reduce by M -> P
-Reduce by A -> M
-Reduce by P -> Num
-Reduce by M -> P
-Reduce by A -> M
-Reduce by A -> A + A
-Reduce by E -> A
-Reduce by P -> ( E )
-Reduce by M -> P
-Reduce by M -> M * M
-Reduce by A -> M
-Reduce by A -> A + A
-Reduce by E -> A
-```
-
-## proc-macro `lr1!`, `lalr1!`, `lr1_runtime!`, and `lalr1_runtime!`
-`lr1!`, `lalr1!`, `lr1_runtime!`, and `lalr1_runtime!` are procedural macros that will build `Parser` struct from CFGs.
-Please refer to the [Sample](#sample) section for actual usage.
-
-### Compile-time vs Runtime
-Former two macros (those without '_runtime' suffix) will generate `Parser` struct at compile-time, which `build()` is called at compile-time and the generated code will be *TONS* of `insert` of tokens one by one.
-Latter two (those with '_runtime' suffix) will generate `Parser` struct at runtime, the `build()` is called on `Parser::new()`.
-
-
-### Syntax
-Every line in the macro must follow the syntax below. The syntax can be also found in the [bootstrap](rusty_lr_parser/src/parser.rs) file.
-
-#### Token type <sub><sup>(must defined)</sup></sub>
-```
-'%tokentype' <RustType> ';'
-```
-Define the type of terminal symbols.
-`<RustType>` must be accessible at the point where the macro is called.
-
-#### Token definition <sub><sup>(must defined)</sup></sub>
-```
-'%token' <Ident> <RustExpr> ';'
-```
-Map terminal symbol's name `<Ident>` to the actual value `<RustExpr>`.
-`<RustExpr>` must be accessible at the point where the macro is called.
-
-#### Start symbol <sub><sup>(must defined)</sup></sub>
-```
-'%start' <Ident> ';'
-```
-Define the start symbol of the grammar.
-
-#### Eof symbol <sub><sup>(must defined)</sup></sub>
-```
-'%eof' <RustExpr> ';'
-```
-Define the `eof` terminal symbol.
-`<RustExpr>` must be accessible at the point where the macro is called.
-'eof' terminal symbol will be automatically added to the grammar.
-
-#### Userdata type <sub><sup>(optional)</sup></sub>
-```
-'%userdata' <RustType> ';'
-```
-Define the type of userdata passed to `feed()` function.
-
-#### Reduce type <sub><sup>(optional)</sup></sub>
-```
-// reduce first
-'%left' <Ident> ';'
-'%l' <Ident> ';'
-'%reduce' <Ident> ';'
-
-// shift first
-'%right' <Ident> ';'
-'%r' <Ident> ';'
-'%shift' <Ident> ';'
-```
-Set the shift/reduce precedence for terminal symbols. `<Ident>` must be defined in `%token`.
-
-#### Production rules
-```
-<Ident><RuleType>
-  ':' <Token>* <ReduceAction>
-  '|' <Token>* <ReduceAction>
-  ...
-  ';'
-```
-Define the production rules.
-
-```
-<Token> : <Ident as Term or Non-Term>                                ... (1)
-        | <Ident as variable name> '=' <Ident as Term or Non-Term>   ... (2)
-        ;
-```
-For (1), `<Ident>` must be valid terminal or non-terminal symbols. In this case, the data of the token will be mapped to the variable with the same name as `<Ident>`.
-For (2), the data of the token will be mapped to the variable on the left side of '='.
-For more information about the token data and variable, refer to the [reduce action](#reduceaction) below.
-
-#### RuleType <sub><sup>(optional)</sup></sub>
-```
-<RuleType> : '(' <RustType> ')'
-           |
-           ;
-```
-Define the type of value that this production rule holds.
-
-#### ReduceAction
-```
-<ReduceAction> : '{' <RustExpr> '}'
-               |
-               ;
-```
-Define the action to be executed when the rule is matched and reduced.
-If `<RuleType>` is defined, `<ReduceAction>` itself must be the value of `<RuleType>` (i.e. no semicolon at the end of the statement).
-
-**predefined variables** can be used in `<ReduceAction>`:
- - `s` : slice of shifted terminal symbols `&[<TermType>]` captured by current rule.
- - `data` : userdata passed to `feed()` function.
-
-To access the data of each token, you can directly use the name of the token as a variable.
-For non-terminal symbols, the type of data is [`rusty_lr::NonTermData<'a, TermType, RuleType>`](rusty_lr_core/src/nontermdata.rs).
-For terminal symbols, the type of data is [`rusty_lr::TermData<'a, TermType>`](rusty_lr_core/src/termdata.rs).
-If multiple variables are defined with the same name, the variable on the front-most will be used.
-
-For example, following code will print the value of each `A`, and the slice of each `A` and `plus` token in the production rule `E -> A plus A`.
-```rust
-%token plus ...;
-
-E : A plus a2=A
-  {
-    println!("Value of 1st A: {}", A.value);  // A.value or *A
-    println!("Slice of 1st A: {:?}", A.slice);
-    println!("Value of 2nd A: {}", a2.value); // a2.value or *a2
-    println!("Slice of 2nd A: {:?}", a2.slice);
-
-    if let Token::Plus(plus) = *plus {
-        println!( "Plus token: {:?}", plus );
-    }
-  }
-  ;
-
-A(i32): ... ;
-```
-
-`Result<(), String>` can be returned from `<ReduceAction>`.
-Returned `Err` will be delivered to the caller of `feed()` function.
-
-#### Error type <sub><sup>(optional)</sup></sub>
-```
-'%err' <RustType> ';'
-'%error' <RustType> ';'
-```
-Define the type of `Err` variant in `Result<(), Err>` returned from `<ReduceAction>`. If not defined, `String` will be used.
-
-## Start Parsing
-`lr1!` and `lalr1!` will generate struct `<StartSymbol>Parser`.
-
-The struct has the following functions:
- - `new()` : create new parser
- - `begin(&self)` : create new context
- - `feed(&self, &mut Context, TermType, &mut UserData) -> Result<(), ParseError>` : feed token to the parser
- - `feed_callback(&self, &mut Context, &mut C: Callback, TermType, &mut UserData) -> Result<(), ParseError>` : feed token with callback
-
-Note that the parameter `&mut UserData` is omitted if `%userdata` is not defined.
-Once the input sequence (including `eof` token) is feeded, without errors, you can get the value of start symbol by calling `context.accept()`.
-
-```rust
-let parser = parser::EParser::new();
-// create context
-let mut context = parser.begin();
-// define userdata
-let mut userdata: i32 = 0;
-
-// start feeding tokens
-for token in input_sequence {
-    match parser.feed(&mut context, token, &mut userdata) {
-        //                          ^^^^^   ^^^^^^^^^^^^ userdata passed here as `&mut i32`
-        //                           |- feed token
-        Ok(_) => {}
-        Err(e) => {
-            println!("{:?}", e);
-            return;
-        }
-    }
-}
-// res = value of start symbol
-let res = context.accept();
-println!("{}", res);
-println!("userdata: {}", userdata);
-```
