@@ -1,4 +1,4 @@
-use rusty_lr as rlr;
+use rusty_lr_core as rlr;
 
 use proc_macro2::Ident;
 use proc_macro2::Span;
@@ -12,7 +12,8 @@ use std::collections::HashSet;
 use crate::tokenizer::Tokenizer;
 
 use super::error::ParseError;
-use super::parser::GrammarParser;
+// use super::parser::GrammarParser;
+use super::parser_expanded::GrammarParser;
 use super::rule::RuleLines;
 use super::term::TermType;
 use super::token::Token;

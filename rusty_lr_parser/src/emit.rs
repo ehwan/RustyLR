@@ -7,7 +7,7 @@ use crate::error::ParseError;
 use crate::grammar::Grammar;
 use crate::token::Token;
 
-use rusty_lr as rlr;
+use rusty_lr_core as rlr;
 
 /// emit Rust code for the parser
 impl Grammar {
@@ -333,14 +333,14 @@ impl Grammar {
             };
 
         Ok(quote! {
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case)]
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         pub struct #stack_struct_name {
             pub #terms_stack_name: Vec<#term_typename>,
             pub #end_stack_name: Vec<usize>,
             pub state_stack: Vec<usize>,
             #stack_def_streams
         }
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case)]
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         impl #stack_struct_name {
             pub fn new() -> Self {
                 Self {
@@ -379,12 +379,12 @@ impl Grammar {
                 self.#end_stack_name.push(self.#terms_stack_name.len());
             }
         }
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case)]
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         pub struct #struct_name {
             pub rules: Vec<#module_prefix::ProductionRule<#term_typename, &'static str>>,
             pub states: Vec<#module_prefix::State<#term_typename, &'static str>>,
         }
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case)]
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         impl #struct_name {
             pub fn new() -> Self {
                 #write_parser

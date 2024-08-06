@@ -3,7 +3,7 @@ LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from Context Fre
 
 ```
 [dependencies]
-rusty_lr = "0.10.1"
+rusty_lr = "0.11.1"
 ```
 
 ## Features
@@ -469,8 +469,8 @@ If `<RuleType>` is defined, `<ReduceAction>` itself must be the value of `<RuleT
  - `data` : userdata passed to `feed()` function.
 
 To access the data of each token, you can directly use the name of the token as a variable.
-For non-terminal symbols, the type of data is [`rusty_lr::NonTermData<'a, TermType, RuleType>`](rusty_lr/src/nontermdata.rs).
-For terminal symbols, the type of data is [`rusty_lr::TermData<'a, TermType>`](rusty_lr/src/termdata.rs).
+For non-terminal symbols, the type of data is [`rusty_lr::NonTermData<'a, TermType, RuleType>`](rusty_lr_core/src/nontermdata.rs).
+For terminal symbols, the type of data is [`rusty_lr::TermData<'a, TermType>`](rusty_lr_core/src/termdata.rs).
 If multiple variables are defined with the same name, the variable on the front-most will be used.
 
 For example, following code will print the value of each `A`, and the slice of each `A` and `plus` token in the production rule `E -> A plus A`.

@@ -1,0 +1,9 @@
+[package]
+name = "rusty_lr_expand"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+proc-macro2 = "1.0.86"
+quote = "1.0"
+rusty_lr_parser = { path = "../rusty_lr_parser" }

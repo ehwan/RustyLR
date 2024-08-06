@@ -16,13 +16,7 @@
 //!  - Can generate *pretty* error messages, by just passing `Span` data.
 //!  - With modern IDE, can see errors in real-time with specific location.
 
-pub(crate) mod nontermdata;
-pub(crate) mod termdata;
-
 // re-exports
 
 pub use rusty_lr_core::*;
 pub use rusty_lr_derive::*;
-
-pub use nontermdata::NonTermData;
-pub use termdata::TermData;
