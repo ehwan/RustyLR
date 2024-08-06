@@ -119,6 +119,13 @@ impl Grammar {
             }
         }
 
+        // check all terminal symbols are defined in '%left', '%right'
+        for (name, (ident, _)) in grammar.reduce_types.iter() {
+            if !grammar.terminals.contains_key(name) {
+                return Err(ParseError::TerminalNotDefined(ident.clone()));
+            }
+        }
+
         // replace all terminal Ident with Term
         let terminals: HashSet<String> = grammar.terminals.keys().cloned().collect();
         for (_, (_name, _ruletype, rules)) in grammar.rules.iter_mut() {

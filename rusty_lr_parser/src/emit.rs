@@ -11,7 +11,8 @@ use rusty_lr_core as rlr;
 
 /// emit Rust code for the parser
 impl Grammar {
-    pub fn emit(&self, lalr: bool) -> Result<TokenStream, ParseError> {
+    // build grammar at compile time
+    fn emit_grammar_compiletime(&self, lalr: bool) -> Result<TokenStream, ParseError> {
         let mut grammar: rlr::Grammar<String, String> = rlr::Grammar::new();
         let module_prefix = self
             .module_prefix
@@ -19,10 +20,8 @@ impl Grammar {
             .cloned()
             .unwrap_or_else(|| quote! {::rusty_lr});
 
-        for (term, (ident, reduce_type)) in self.reduce_types.iter() {
-            if !self.terminals.contains_key(term) {
-                return Err(ParseError::TerminalNotDefined(ident.clone()));
-            }
+        // reduce types
+        for (term, (_, reduce_type)) in self.reduce_types.iter() {
             match grammar.set_reduce_type(term.clone(), *reduce_type) {
                 Ok(_) => {}
                 Err(err) => {
@@ -31,6 +30,7 @@ impl Grammar {
             }
         }
 
+        // rules
         for (name, (_name_ident, _typename, rules)) in self.rules.iter() {
             for rule in rules.rule_lines.iter() {
                 let mut tokens = Vec::with_capacity(rule.tokens.len());
@@ -49,6 +49,7 @@ impl Grammar {
             }
         }
 
+        // augmented rule
         grammar.add_rule(
             "<Augmented>".to_string(),
             vec![
@@ -57,6 +58,7 @@ impl Grammar {
             ],
         );
 
+        // build
         let parser = if lalr {
             match grammar.build_lalr("<Augmented>".to_string()) {
                 Ok(parser) => parser,
@@ -75,6 +77,7 @@ impl Grammar {
 
         let mut write_parser = quote! {};
 
+        // generate code that copy rules and states to parser
         // =====================================================================
         // ==================Writing Production Rules===========================
         // =====================================================================
@@ -197,6 +200,122 @@ impl Grammar {
             });
         }
 
+        Ok(write_parser)
+    }
+
+    /// emit code that build grammar at runtime
+    fn emit_grammar_runtime(&self, lalr: bool) -> Result<TokenStream, ParseError> {
+        let module_prefix = self
+            .module_prefix
+            .as_ref()
+            .cloned()
+            .unwrap_or_else(|| quote! {::rusty_lr});
+
+        let mut build_grammar_stream = quote! {
+            let mut grammar = #module_prefix::Grammar::new();
+        };
+
+        // reduce types
+        for (term, (_, reduce_type)) in self.reduce_types.iter() {
+            let stream = &self.terminals.get(term).unwrap().1;
+            match reduce_type {
+                rlr::ReduceType::Left => {
+                    build_grammar_stream.extend(quote! {
+                        match grammar.set_reduce_type(#stream, #module_prefix::ReduceType::Left) {
+                            Ok(_) => {},
+                            Err(err) => {
+                                panic!( "Error setting reduce type:\n{:?}", err );
+                            }
+                        }
+                    });
+                }
+                rlr::ReduceType::Right => {
+                    build_grammar_stream.extend(quote! {
+                        match grammar.set_reduce_type(#stream, #module_prefix::ReduceType::Right) {
+                            Ok(_) => {},
+                            Err(err) => {
+                                panic!( "Error setting reduce type:\n{:?}", err );
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        // rules
+        for (name, (_name_ident, _typename, rules)) in self.rules.iter() {
+            for rule in rules.rule_lines.iter() {
+                let mut comma_separated_tokens = quote! {};
+                for token in rule.tokens.iter() {
+                    match &token.token {
+                        Token::Term(term) => {
+                            let term_stream = &self.terminals.get(&term.to_string()).unwrap().1;
+                            comma_separated_tokens
+                                .extend(quote! {#module_prefix::Token::Term(#term_stream),});
+                        }
+                        Token::NonTerm(nonterm) => {
+                            let nonterm_stream = nonterm.to_string();
+                            comma_separated_tokens
+                                .extend(quote! {#module_prefix::Token::NonTerm(#nonterm_stream),});
+                        }
+                    }
+                }
+
+                build_grammar_stream.extend(quote! {
+                    grammar.add_rule(#name, vec![#comma_separated_tokens]);
+                });
+            }
+        }
+
+        // augmented rule
+        {
+            let start_name = self.start_rule_name.as_ref().unwrap().to_string();
+            let eof_stream = self.eof.as_ref().unwrap();
+            build_grammar_stream.extend(quote! {
+                grammar.add_rule(
+                    "<Augmented>",
+                    vec![
+                        #module_prefix::Token::NonTerm(#start_name),
+                        #module_prefix::Token::Term(#eof_stream),
+                    ],
+                );
+            });
+        }
+
+        // build grammar
+        if lalr {
+            build_grammar_stream.extend(quote! {
+                let parser = match grammar.build_lalr("<Augmented>") {
+                    Ok(parser) => parser,
+                    Err(err) => {
+                        panic!( "Error building LALR parser:\n{:?}", err );
+                    }
+                };
+            });
+        } else {
+            build_grammar_stream.extend(quote! {
+                let parser = match grammar.build_lalr("<Augmented>") {
+                    Ok(parser) => parser,
+                    Err(err) => {
+                        panic!( "Error building LR parser:\n{:?}", err );
+                    }
+                };
+            });
+        }
+
+        build_grammar_stream.extend(quote! {
+            let rules = parser.rules;
+            let states = parser.states;
+        });
+        Ok(build_grammar_stream)
+    }
+
+    fn emit_parser(&self, grammar_emit: TokenStream) -> Result<TokenStream, ParseError> {
+        let module_prefix = self
+            .module_prefix
+            .as_ref()
+            .cloned()
+            .unwrap_or_else(|| quote! {::rusty_lr});
         // =====================================================================
         // =========================Writing Parser==============================
         // =====================================================================
@@ -387,7 +506,7 @@ impl Grammar {
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         impl #struct_name {
             pub fn new() -> Self {
-                #write_parser
+                #grammar_emit
                 Self {
                     rules,
                     states,
@@ -517,5 +636,16 @@ impl Grammar {
             }
         }
         })
+    }
+
+    pub fn emit_compiletime(&self, lalr: bool) -> Result<TokenStream, ParseError> {
+        let grammar_emit = self.emit_grammar_compiletime(lalr)?;
+        let parser_emit = self.emit_parser(grammar_emit)?;
+        Ok(parser_emit)
+    }
+    pub fn emit_runtime(&self, lalr: bool) -> Result<TokenStream, ParseError> {
+        let grammar_emit = self.emit_grammar_runtime(lalr)?;
+        let parser_emit = self.emit_parser(grammar_emit)?;
+        Ok(parser_emit)
     }
 }

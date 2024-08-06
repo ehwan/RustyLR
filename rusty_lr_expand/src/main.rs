@@ -21,6 +21,33 @@ fn is_percent(token: &TokenTree) -> bool {
     }
 }
 
+// split stream by '%%'
+fn split_stream(token_stream: TokenStream) -> (TokenStream, TokenStream) {
+    // input stream
+    let mut token_stream = token_stream.into_iter().peekable();
+    // before '%%'
+    let mut output_stream = TokenStream::new();
+    // after '%%'
+    let mut macro_stream = TokenStream::new();
+
+    while let Some(token) = token_stream.next() {
+        let next = token_stream.peek().clone();
+        if next.is_none() {
+            output_stream.append(token);
+        } else {
+            let next = next.unwrap();
+            if is_percent(&token) && is_percent(next) {
+                token_stream.next();
+                macro_stream.extend(token_stream);
+                break;
+            } else {
+                output_stream.append(token);
+            }
+        }
+    }
+    (output_stream, macro_stream)
+}
+
 fn main() {
     let mut args = args();
     args.next();
@@ -51,24 +78,7 @@ fn main() {
         }
     };
 
-    let mut output_stream = TokenStream::new();
-    let mut token_stream = token_stream.into_iter().peekable();
-    let mut macro_stream = TokenStream::new();
-    while let Some(token) = token_stream.next() {
-        let next = token_stream.peek().clone();
-        if next.is_none() {
-            output_stream.append(token);
-        } else {
-            let next = next.unwrap();
-            if is_percent(&token) && is_percent(next) {
-                token_stream.next();
-                macro_stream.extend(token_stream);
-                break;
-            } else {
-                output_stream.append(token);
-            }
-        }
-    }
+    let (output_stream, macro_stream) = split_stream(token_stream);
 
     let g = match rusty_lr_parser::grammar::Grammar::parse(macro_stream) {
         Ok(grammar) => grammar,
@@ -78,7 +88,7 @@ fn main() {
         }
     };
 
-    let expanded_stream = match g.emit(false) {
+    let expanded_stream = match g.emit_runtime(false) {
         Ok(parser) => parser,
         Err(e) => {
             println!("{}", e.compile_error());

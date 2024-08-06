@@ -3,7 +3,7 @@ LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from Context Fre
 
 ```
 [dependencies]
-rusty_lr = "0.11.1"
+rusty_lr = "0.11.2"
 ```
 
 ## Features
@@ -374,10 +374,16 @@ Reduce by A -> A + A
 Reduce by E -> A
 ```
 
-## proc-macro `lr1!` and `lalr1!`
-`lr1!` and `lalr1!` are procedural macros that will build `Parser` struct from CFGs at compile time.
+## proc-macro `lr1!`, `lalr1!`, `lr1_runtime!`, and `lalr1_runtime!`
+`lr1!`, `lalr1!`, `lr1_runtime!`, and `lalr1_runtime!` are procedural macros that will build `Parser` struct from CFGs.
 Please refer to the [Sample](#sample) section for actual usage.
 
+### Compile-time vs Runtime
+Former two macros (those without '_runtime' suffix) will generate `Parser` struct at compile-time, which `build()` is called at compile-time and the generated code will be *TONS* of `insert` of tokens one by one.
+Latter two (those with '_runtime' suffix) will generate `Parser` struct at runtime, the `build()` is called on `Parser::new()`.
+
+
+### Syntax
 Every line in the macro must follow the syntax below. The syntax can be also found in the [bootstrap](rusty_lr_parser/src/parser.rs) file.
 
 #### Token type <sub><sup>(must defined)</sup></sub>
