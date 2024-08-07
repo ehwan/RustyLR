@@ -1,7 +1,6 @@
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
-use quote::quote;
 use quote::quote_spanned;
 
 use std::fmt::Display;
@@ -37,144 +36,113 @@ pub enum ParseError {
     InternalGrammar(Span, String),
 }
 
-impl ParseError {
-    pub fn compile_error(&self) -> TokenStream {
+impl Display for ParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ParseError::MultipleTokenDefinition(span, ident, tokens0, tokens1) => {
-                let message = format!(
+            ParseError::MultipleTokenDefinition(_, ident, tokens0, tokens1) => {
+                write!(
+                    f,
                     "Multiple token definition: {} ->\n{}\nAND\n{}",
                     ident, tokens0, tokens1
-                );
-                quote_spanned! {
-                    span.clone() =>
-                    compile_error!(#message);
-                }
+                )
             }
-            ParseError::MultipleStartDefinition(span, start1, start2) => {
-                let message = format!("Multiple start definition: {} AND {}", start1, start2);
-                quote_spanned! {
-                    span.clone() =>
-                    compile_error!(#message);
-                }
+            ParseError::MultipleStartDefinition(_, start1, start2) => {
+                write!(f, "Multiple start definition: {} AND {}", start1, start2)
             }
-            ParseError::MultipleTokenTypeDefinition(span, stream1, stream2) => {
-                let message = format!(
+            ParseError::MultipleTokenTypeDefinition(_, stream1, stream2) => {
+                write!(
+                    f,
                     "Multiple token type definition: {} AND {}",
                     stream1, stream2
-                );
-                quote_spanned! {
-                    span.clone() =>
-                    compile_error!(#message);
-                }
+                )
             }
-            ParseError::MultipleEofDefinition(span, stream1, stream2) => {
-                let message = format!("Multiple eof definition: {} AND {}", stream1, stream2);
-                quote_spanned! {
-                    span.clone() =>
-                    compile_error!(#message);
-                }
+            ParseError::MultipleEofDefinition(_, stream1, stream2) => {
+                write!(f, "Multiple eof definition: {} AND {}", stream1, stream2)
             }
-            ParseError::MultipleUserDataDefinition(span, ident, tokens) => {
-                let message = format!("Multiple user data definition: {} AND {}", ident, tokens);
-                quote_spanned! {
-                    span.clone() =>
-                    compile_error!(#message);
-                }
+            ParseError::MultipleUserDataDefinition(_, ident, tokens) => {
+                write!(f, "Multiple user data definition: {} AND {}", ident, tokens)
             }
-            ParseError::MultipleRuleDefinition(span, name) => {
-                let message = format!("Multiple rule definition: {}", name);
-                quote_spanned! {
-                    span.clone() =>
-                    compile_error!(#message);
-                }
+            ParseError::MultipleRuleDefinition(_, name) => {
+                write!(f, "Multiple rule definition: {}", name)
             }
-            ParseError::MultipleErrorDefinition(span, err1, err2) => {
-                let message = format!("Multiple error type definition: {} AND {}", err1, err2);
-                quote_spanned! {
-                    span.clone() =>
-                    compile_error!(#message);
-                }
+            ParseError::MultipleErrorDefinition(_, err1, err2) => {
+                write!(f, "Multiple error type definition: {} AND {}", err1, err2)
             }
-            ParseError::MultipleReduceDefinition(span, name) => {
-                let message = format!("Multiple reduce type definition: {}", name);
-                quote_spanned! {
-                    span.clone() =>
-                    compile_error!(#message);
-                }
+            ParseError::MultipleReduceDefinition(_, name) => {
+                write!(f, "Multiple reduce type definition: {}", name)
             }
-            ParseError::InvalidRuletypeDelimiter(span) => {
-                quote_spanned! {
-                    span.clone() =>
-                    compile_error!("rule type must be enclosed with '(' and ')'");
-                }
+            ParseError::InvalidRuletypeDelimiter(_) => {
+                write!(f, "rule type must be enclosed with '(' and ')'")
             }
-            ParseError::InvalidReduceActionDelimiter(span) => {
-                quote_spanned! {
-                    span.clone() =>
-                    compile_error!("reduce action must be enclosed with '{' and '}'");
-                }
+            ParseError::InvalidReduceActionDelimiter(_) => {
+                write!(f, "reduce action must be enclosed with '{{' and '}}'")
             }
-            ParseError::TermNonTermConflict(span, name) => {
-                let message = format!(
+            ParseError::TermNonTermConflict(_, name) => {
+                write!(
+                    f,
                     "Same token name for Terminal and Non-Terminal symbol exists: {}",
                     name
-                );
-                quote_spanned! {
-                    span.clone() =>
-                    compile_error!(#message);
-                }
+                )
             }
             ParseError::StartNotDefined => {
-                quote! {
-                    compile_error!("Start production rule not defined;\n>> %start <RuleName>;");
-                }
+                write!(
+                    f,
+                    "Start production rule not defined;\n>> %start <RuleName>;"
+                )
             }
             ParseError::TokenTypeNotDefined => {
-                quote! {
-                    compile_error!("Token type not defined for Terminal;\n>> %tokentype <RustType>;");
-                }
+                write!(
+                    f,
+                    "Token type not defined for Terminal;\n>> %tokentype <RustType>;"
+                )
             }
             ParseError::EofNotDefined => {
-                quote! {
-                    compile_error!("Eof not defined;\n>> %eof <Terminal>;");
-                }
+                write!(f, "Eof not defined;\n>> %eof <RustCode>;")
             }
             ParseError::TerminalNotDefined(ident) => {
-                let message = format!("Terminal not defined: {}", ident);
-                quote_spanned! {
-                    ident.span() =>
-                    compile_error!(#message);
-                }
+                write!(f, "Terminal not defined: {}", ident)
             }
             ParseError::NonTerminalNotDefined(ident) => {
-                let message = format!("Non-terminal not defined: {}", ident);
-                quote_spanned! {
-                    ident.span() =>
-                    compile_error!(#message);
-                }
+                write!(f, "Non-terminal not defined: {}", ident)
             }
-            ParseError::EofDefined(ident) => {
-                quote_spanned! {
-                    ident.span() =>
-                    compile_error!("'eof' is reserved name for terminal symbol");
-                }
+            ParseError::EofDefined(_) => {
+                write!(f, "'eof' is reserved name for terminal symbol")
             }
             ParseError::GrammarBuildError(message) => {
-                quote! {
-                    compile_error!(#message);
-                }
+                write!(f, "{}", message)
             }
-            ParseError::InternalGrammar(span, message) => {
-                quote_spanned! {
-                    span.clone() =>
-                    compile_error!(#message);
-                }
-            }
+            ParseError::InternalGrammar(_, message) => write!(f, "{}", message),
         }
     }
 }
-impl Display for ParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.compile_error().to_string().fmt(f)
+impl ParseError {
+    pub fn span(&self) -> Span {
+        match self {
+            ParseError::MultipleTokenDefinition(span, _, _, _) => span.clone(),
+            ParseError::MultipleStartDefinition(span, _, _) => span.clone(),
+            ParseError::MultipleTokenTypeDefinition(span, _, _) => span.clone(),
+            ParseError::MultipleEofDefinition(span, _, _) => span.clone(),
+            ParseError::MultipleUserDataDefinition(span, _, _) => span.clone(),
+            ParseError::MultipleRuleDefinition(span, _) => span.clone(),
+            ParseError::MultipleErrorDefinition(span, _, _) => span.clone(),
+            ParseError::MultipleReduceDefinition(span, _) => span.clone(),
+            ParseError::InvalidRuletypeDelimiter(span) => span.clone(),
+            ParseError::InvalidReduceActionDelimiter(span) => span.clone(),
+            ParseError::TermNonTermConflict(span, _) => span.clone(),
+            ParseError::StartNotDefined => Span::call_site(),
+            ParseError::TokenTypeNotDefined => Span::call_site(),
+            ParseError::EofNotDefined => Span::call_site(),
+            ParseError::TerminalNotDefined(ident) => ident.span(),
+            ParseError::NonTerminalNotDefined(ident) => ident.span(),
+            ParseError::EofDefined(ident) => ident.span(),
+            ParseError::GrammarBuildError(_) => Span::call_site(),
+            ParseError::InternalGrammar(span, _) => span.clone(),
+        }
+    }
+    pub fn compile_error(&self) -> TokenStream {
+        let message = format!("{}", self);
+        quote_spanned! {
+            self.span() => compile_error!(#message);
+        }
     }
 }

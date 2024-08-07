@@ -3,7 +3,7 @@ yacc-like LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from C
 
 ```
 [dependencies]
-rusty_lr = "0.12.2"
+rusty_lr = "0.12.3"
 ```
 
 ## Features
@@ -419,6 +419,33 @@ Reduce by E -> A
 
 
 
+
+## Macro expand executable [`rusty_lr_expand`](rusty_lr_expand)
+This executable is on development, and not `cargo publish`ed yet.
+```
+Usage: rusty_lr_expand <INPUT_FILE> [OUTPUT_FILE]
+
+Options:
+      --no-format
+          do not rustfmt the output
+
+  -r, --runtime
+          call `grammar.build()` at runtime
+
+  -l, --lalr
+          build LALR(1) parser
+```
+
+The input file must be consisted of two parts: Rust codes and CFGs, separated by `%%`.
+```
+// <Rust Codes...>
+
+%%
+
+// <CFGs...>
+```
+
+The output file will be generated `<StartSymbol>Parser` struct with the given CFGs.
 
 
 
