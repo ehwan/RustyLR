@@ -26,6 +26,8 @@ pub enum ParseError {
     NonTerminalNotDefined(Ident),
     EofDefined(Ident),
 
+    RuleTypeDefinedButActionNotDefined(Ident),
+
     StartNotDefined,
     EofNotDefined,
     TokenTypeNotDefined,
@@ -108,6 +110,13 @@ impl Display for ParseError {
             ParseError::EofDefined(_) => {
                 write!(f, "'eof' is reserved name for terminal symbol")
             }
+            ParseError::RuleTypeDefinedButActionNotDefined(ident) => {
+                write!(
+                    f,
+                    "<RuleType> is defined but <ReduceAction> is not defined: {}",
+                    ident
+                )
+            }
             ParseError::GrammarBuildError(message) => {
                 write!(f, "{}", message)
             }
@@ -135,6 +144,7 @@ impl ParseError {
             ParseError::TerminalNotDefined(ident) => ident.span(),
             ParseError::NonTerminalNotDefined(ident) => ident.span(),
             ParseError::EofDefined(ident) => ident.span(),
+            ParseError::RuleTypeDefinedButActionNotDefined(ident) => ident.span(),
             ParseError::GrammarBuildError(_) => Span::call_site(),
             ParseError::InternalGrammar(span, _) => span.clone(),
         }

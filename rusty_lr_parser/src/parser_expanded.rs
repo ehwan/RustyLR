@@ -19,10 +19,10 @@ use rusty_lr_core::ReduceType;
     unused_mut
 )]
 pub struct GrammarContext {
-    rustylr_macro_generated_rl_terms_stack: Vec<TermType>,
-    rustylr_macro_generated_rl_end_stack: Vec<usize>,
     pub state_stack: Vec<usize>,
+    rustylr_macro_generated_rl_terms_stack: Vec<TermType>,
     rustylr_macro_generated_Action_stack: Vec<(Option<Group>)>,
+    rustylr_macro_generated_AnyTokenNoSemi_stack: Vec<(TermType)>,
     rustylr_macro_generated_EofDef_stack: Vec<((Span, TokenStream))>,
     rustylr_macro_generated_ErrorDef_stack: Vec<((Span, TokenStream))>,
     rustylr_macro_generated_Grammar_stack: Vec<(Grammar)>,
@@ -40,6 +40,7 @@ pub struct GrammarContext {
     rustylr_macro_generated_TokenMapped_stack: Vec<(TokenMapped)>,
     rustylr_macro_generated_TokenTypeDef_stack: Vec<((Span, TokenStream))>,
     rustylr_macro_generated_UserDataDef_stack: Vec<((Span, TokenStream))>,
+    rustylr_macro_generated___AnyTokenNoSemi__plus__stack: Vec<(Vec<(TermType)>)>,
     rustylr_macro_generated___TokenMapped__plus__stack: Vec<(Vec<(TokenMapped)>)>,
     rustylr_macro_generated___TokenMapped__star__stack: Vec<(Vec<(TokenMapped)>)>,
 }
@@ -53,10 +54,10 @@ pub struct GrammarContext {
 impl GrammarContext {
     pub fn new() -> Self {
         Self {
-            rustylr_macro_generated_rl_terms_stack: Vec::new(),
-            rustylr_macro_generated_rl_end_stack: vec![0],
             state_stack: vec![0],
+            rustylr_macro_generated_rl_terms_stack: Vec::new(),
             rustylr_macro_generated_Action_stack: Vec::new(),
+            rustylr_macro_generated_AnyTokenNoSemi_stack: Vec::new(),
             rustylr_macro_generated_EofDef_stack: Vec::new(),
             rustylr_macro_generated_ErrorDef_stack: Vec::new(),
             rustylr_macro_generated_Grammar_stack: Vec::new(),
@@ -74,6 +75,7 @@ impl GrammarContext {
             rustylr_macro_generated_TokenMapped_stack: Vec::new(),
             rustylr_macro_generated_TokenTypeDef_stack: Vec::new(),
             rustylr_macro_generated_UserDataDef_stack: Vec::new(),
+            rustylr_macro_generated___AnyTokenNoSemi__plus__stack: Vec::new(),
             rustylr_macro_generated___TokenMapped__plus__stack: Vec::new(),
             rustylr_macro_generated___TokenMapped__star__stack: Vec::new(),
         }
@@ -83,30 +85,18 @@ impl GrammarContext {
         rulelen: usize,
         rustylr_macro_generated_ruleid__: usize,
     ) -> Result<(), ParseError> {
-        let rusty_lr_macro_generated_new_begin = *self
-            .rustylr_macro_generated_rl_end_stack
-            .get(self.rustylr_macro_generated_rl_end_stack.len() - rulelen - 1)
-            .unwrap();
-        let rusty_lr_macro_generated_new_end =
-            *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-        let s = &self.rustylr_macro_generated_rl_terms_stack
-            [rusty_lr_macro_generated_new_begin..rusty_lr_macro_generated_new_end];
         match rustylr_macro_generated_ruleid__ {
             0usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut group = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut group = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_Action_stack.push({
-                    if let TermType::Group(group) = *group {
+                    if let TermType::Group(group) = group {
                         if let Some(action) = group {
                             if action.delimiter() != proc_macro2::Delimiter::Brace {
                                 return Err(ParseError::InvalidReduceActionDelimiter(
                                     action.span(),
                                 ));
                             }
-                            Some(action.clone())
+                            Some(action)
                         } else {
                             unreachable!("Action1");
                         }
@@ -119,205 +109,121 @@ impl GrammarContext {
                 self.rustylr_macro_generated_Action_stack.push({ None });
             }
             2usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut ident = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(ident);
             }
             3usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut colon = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut colon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(colon);
             }
             4usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut pipe = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut pipe = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack.push(pipe);
             }
             5usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut percent = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut percent = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(percent);
             }
             6usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut left = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut left = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack.push(left);
             }
             7usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut right = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut right = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(right);
             }
             8usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut token = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut token = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(token);
             }
             9usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut start = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut start = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(start);
             }
             10usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut eofdef = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut eofdef = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(eofdef);
             }
             11usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut tokentype = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut tokentype = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(tokentype);
             }
             12usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut userdata = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut userdata = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(userdata);
             }
             13usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut errortype = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut errortype = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(errortype);
             }
             14usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut group = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut group = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(group);
             }
             15usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut literal = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut literal = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(literal);
             }
             16usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut equal = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut equal = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(equal);
             }
             17usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut plus = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut plus = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack.push(plus);
             }
             18usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut star = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut star = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack.push(star);
             }
             19usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut question = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut question = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(question);
             }
             20usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut otherpunct = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut otherpunct = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(otherpunct);
             }
             21usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut moduleprefix = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut moduleprefix = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                self.rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .push(moduleprefix);
             }
             22usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut semicolon = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut RustCode = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_RustCode_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut eofdef = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut RustCode = self.rustylr_macro_generated_RustCode_stack.pop().unwrap();
+                let mut eofdef = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_EofDef_stack
-                    .push({ (eofdef.value.span().unwrap(), RustCode.value) });
+                    .push({ (eofdef.span().expect("EofDef"), RustCode) });
             }
             23usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut semicolon = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut RustCode = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_RustCode_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut errortype = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut RustCode = self.rustylr_macro_generated_RustCode_stack.pop().unwrap();
+                let mut errortype = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_ErrorDef_stack
-                    .push({ (errortype.value.span().unwrap(), RustCode.value) });
+                    .push({ (errortype.span().expect("ErrorDef"), RustCode) });
             }
             24usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut Grammar = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_Grammar_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut Rule = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_Rule_stack.pop().unwrap(),
-                    begin..end,
-                );
+                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
+                let mut Rule = self.rustylr_macro_generated_Rule_stack.pop().unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
-                    let mut g = Grammar.value;
-                    let r = Rule.value;
+                    let mut g = Grammar;
+                    let r = Rule;
                     let name = r.0.to_string();
                     let span = r.0.span();
                     if let Some(old) = g.rules.insert(name.clone(), r) {
@@ -327,38 +233,20 @@ impl GrammarContext {
                 });
             }
             25usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut Rule = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_Rule_stack.pop().unwrap(),
-                    begin..end,
-                );
+                let mut Rule = self.rustylr_macro_generated_Rule_stack.pop().unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
-                    let r = Rule.value;
+                    let r = Rule;
                     g.rules.insert(r.0.to_string(), r);
                     g
                 });
             }
             26usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut Grammar = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_Grammar_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut TokenDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_TokenDef_stack.pop().unwrap(),
-                    begin..end,
-                );
+                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
+                let mut TokenDef = self.rustylr_macro_generated_TokenDef_stack.pop().unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
-                    let mut g = Grammar.value;
-                    let t = TokenDef.value;
+                    let mut g = Grammar;
+                    let t = TokenDef;
                     let ident = t.0.clone();
                     let stream = t.1.clone();
                     if let Some(old) = g.terminals.insert(t.0.to_string(), t) {
@@ -373,38 +261,20 @@ impl GrammarContext {
                 });
             }
             27usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut TokenDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_TokenDef_stack.pop().unwrap(),
-                    begin..end,
-                );
+                let mut TokenDef = self.rustylr_macro_generated_TokenDef_stack.pop().unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
-                    let t = TokenDef.value;
+                    let t = TokenDef;
                     g.terminals.insert(t.0.to_string(), t);
                     g
                 });
             }
             28usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut Grammar = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_Grammar_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut StartDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_StartDef_stack.pop().unwrap(),
-                    begin..end,
-                );
+                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
+                let mut StartDef = self.rustylr_macro_generated_StartDef_stack.pop().unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
-                    let mut g = Grammar.value;
-                    let start = StartDef.value;
+                    let mut g = Grammar;
+                    let start = StartDef;
                     let span = start.span();
                     if let Some(old) = g.start_rule_name {
                         return Err(ParseError::MultipleStartDefinition(span, old, start));
@@ -414,38 +284,20 @@ impl GrammarContext {
                 });
             }
             29usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut StartDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_StartDef_stack.pop().unwrap(),
-                    begin..end,
-                );
+                let mut StartDef = self.rustylr_macro_generated_StartDef_stack.pop().unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
-                    let start = StartDef.value;
+                    let start = StartDef;
                     g.start_rule_name = Some(start);
                     g
                 });
             }
             30usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut Grammar = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_Grammar_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut EofDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_EofDef_stack.pop().unwrap(),
-                    begin..end,
-                );
+                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
+                let mut EofDef = self.rustylr_macro_generated_EofDef_stack.pop().unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
-                    let mut g = Grammar.value;
-                    let (span, eof) = EofDef.value;
+                    let mut g = Grammar;
+                    let (span, eof) = EofDef;
                     if let Some(old) = g.eof {
                         return Err(ParseError::MultipleEofDefinition(span, old, eof));
                     }
@@ -454,40 +306,23 @@ impl GrammarContext {
                 });
             }
             31usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut EofDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_EofDef_stack.pop().unwrap(),
-                    begin..end,
-                );
+                let mut EofDef = self.rustylr_macro_generated_EofDef_stack.pop().unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
-                    let (span, eof) = EofDef.value;
+                    let (span, eof) = EofDef;
                     g.eof = Some(eof);
                     g
                 });
             }
             32usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut Grammar = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_Grammar_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut TokenTypeDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_TokenTypeDef_stack
-                        .pop()
-                        .unwrap(),
-                    begin..end,
-                );
+                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
+                let mut TokenTypeDef = self
+                    .rustylr_macro_generated_TokenTypeDef_stack
+                    .pop()
+                    .unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
-                    let mut g = Grammar.value;
-                    let (span, token_type) = TokenTypeDef.value;
+                    let mut g = Grammar;
+                    let (span, token_type) = TokenTypeDef;
                     if let Some(old) = g.token_typename {
                         return Err(ParseError::MultipleTokenTypeDefinition(
                             span, old, token_type,
@@ -498,42 +333,26 @@ impl GrammarContext {
                 });
             }
             33usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut TokenTypeDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_TokenTypeDef_stack
-                        .pop()
-                        .unwrap(),
-                    begin..end,
-                );
+                let mut TokenTypeDef = self
+                    .rustylr_macro_generated_TokenTypeDef_stack
+                    .pop()
+                    .unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
-                    let (span, token_type) = TokenTypeDef.value;
+                    let (span, token_type) = TokenTypeDef;
                     g.token_typename = Some(token_type);
                     g
                 });
             }
             34usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut Grammar = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_Grammar_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut UserDataDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_UserDataDef_stack
-                        .pop()
-                        .unwrap(),
-                    begin..end,
-                );
+                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
+                let mut UserDataDef = self
+                    .rustylr_macro_generated_UserDataDef_stack
+                    .pop()
+                    .unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
-                    let mut g = Grammar.value;
-                    let (span, user_data) = UserDataDef.value;
+                    let mut g = Grammar;
+                    let (span, user_data) = UserDataDef;
                     if let Some(old) = g.userdata_typename {
                         return Err(ParseError::MultipleUserDataDefinition(span, old, user_data));
                     }
@@ -542,40 +361,23 @@ impl GrammarContext {
                 });
             }
             35usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut UserDataDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_UserDataDef_stack
-                        .pop()
-                        .unwrap(),
-                    begin..end,
-                );
+                let mut UserDataDef = self
+                    .rustylr_macro_generated_UserDataDef_stack
+                    .pop()
+                    .unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
-                    let (span, user_data) = UserDataDef.value;
+                    let (span, user_data) = UserDataDef;
                     g.userdata_typename = Some(user_data);
                     g
                 });
             }
             36usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut Grammar = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_Grammar_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut ReduceDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_ReduceDef_stack.pop().unwrap(),
-                    begin..end,
-                );
+                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
+                let mut ReduceDef = self.rustylr_macro_generated_ReduceDef_stack.pop().unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
-                    let mut g = Grammar.value;
-                    let reduce = ReduceDef.value;
+                    let mut g = Grammar;
+                    let reduce = ReduceDef;
                     let span = reduce.0.span();
                     let name = reduce.0.to_string();
                     if let Some((ident, ReduceType)) = g.reduce_types.insert(name.clone(), reduce) {
@@ -585,38 +387,20 @@ impl GrammarContext {
                 });
             }
             37usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut ReduceDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_ReduceDef_stack.pop().unwrap(),
-                    begin..end,
-                );
+                let mut ReduceDef = self.rustylr_macro_generated_ReduceDef_stack.pop().unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
-                    let reduce = ReduceDef.value;
+                    let reduce = ReduceDef;
                     g.reduce_types.insert(reduce.0.to_string(), reduce);
                     g
                 });
             }
             38usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut Grammar = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_Grammar_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut ErrorDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_ErrorDef_stack.pop().unwrap(),
-                    begin..end,
-                );
+                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
+                let mut ErrorDef = self.rustylr_macro_generated_ErrorDef_stack.pop().unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
-                    let mut g = Grammar.value;
-                    let (span, error) = ErrorDef.value;
+                    let mut g = Grammar;
+                    let (span, error) = ErrorDef;
                     if let Some(old) = g.error_typename {
                         return Err(ParseError::MultipleErrorDefinition(span, old, error));
                     }
@@ -625,260 +409,131 @@ impl GrammarContext {
                 });
             }
             39usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut ErrorDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_ErrorDef_stack.pop().unwrap(),
-                    begin..end,
-                );
+                let mut ErrorDef = self.rustylr_macro_generated_ErrorDef_stack.pop().unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
-                    let (span, error) = ErrorDef.value;
+                    let (span, error) = ErrorDef;
                     g.error_typename = Some(error);
                     g
                 });
             }
             40usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut Grammar = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_Grammar_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut ModulePrefixDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_ModulePrefixDef_stack
-                        .pop()
-                        .unwrap(),
-                    begin..end,
-                );
+                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
+                let mut ModulePrefixDef = self
+                    .rustylr_macro_generated_ModulePrefixDef_stack
+                    .pop()
+                    .unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
-                    let mut g = Grammar.value;
-                    let (span, module_prefix) = ModulePrefixDef.value;
+                    let mut g = Grammar;
+                    let (span, module_prefix) = ModulePrefixDef;
                     g.module_prefix = Some(module_prefix);
                     g
                 });
             }
             41usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut ModulePrefixDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_ModulePrefixDef_stack
-                        .pop()
-                        .unwrap(),
-                    begin..end,
-                );
+                let mut ModulePrefixDef = self
+                    .rustylr_macro_generated_ModulePrefixDef_stack
+                    .pop()
+                    .unwrap();
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
-                    let (span, module_prefix) = ModulePrefixDef.value;
+                    let (span, module_prefix) = ModulePrefixDef;
                     g.module_prefix = Some(module_prefix);
                     g
                 });
             }
             42usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut semicolon = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut RustCode = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_RustCode_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut moduleprefix = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut RustCode = self.rustylr_macro_generated_RustCode_stack.pop().unwrap();
+                let mut moduleprefix = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_ModulePrefixDef_stack
-                    .push({ (moduleprefix.value.span().unwrap(), RustCode.value) });
+                    .push({ (moduleprefix.span().expect("ModulePrefixDef"), RustCode) });
             }
             43usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut semicolon = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut ident = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut left = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut left = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_ReduceDef_stack.push({
-                    if let TermType::Ident(ident) = *ident {
-                        (ident.as_ref().unwrap().clone(), ReduceType::Left)
+                    if let TermType::Ident(ident) = ident {
+                        (ident.expect("ReduceDef-Left"), ReduceType::Left)
                     } else {
                         unreachable!("ReduceDef-Ident (Left)");
                     }
                 });
             }
             44usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut semicolon = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut ident = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut right = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut right = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_ReduceDef_stack.push({
-                    if let TermType::Ident(ident) = *ident {
-                        (ident.as_ref().unwrap().clone(), ReduceType::Right)
+                    if let TermType::Ident(ident) = ident {
+                        (ident.expect("ReduceDef-Right"), ReduceType::Right)
                     } else {
                         unreachable!("ReduceDef-Ident (Right)");
                     }
                 });
             }
             45usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut semicolon = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut RuleLines = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_RuleLines_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut colon = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut RuleType = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_RuleType_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut ident = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut RuleLines = self.rustylr_macro_generated_RuleLines_stack.pop().unwrap();
+                let mut colon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut RuleType = self.rustylr_macro_generated_RuleType_stack.pop().unwrap();
+                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_Rule_stack.push({
-                    let ident = if let TermType::Ident(ident) = ident.value {
-                        ident.as_ref().unwrap().clone()
+                    let ident = if let TermType::Ident(ident) = ident {
+                        ident.expect("Rule-Ident")
                     } else {
                         unreachable!("Rule-Ident");
                     };
                     (
                         ident,
-                        RuleType.value.map(|t| t.to_token_stream()),
+                        RuleType.map(|t| t.to_token_stream()),
                         RuleLines {
-                            rule_lines: RuleLines.value,
+                            rule_lines: RuleLines,
                         },
                     )
                 });
             }
             46usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut TokenMapped = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated___TokenMapped__star__stack
-                        .pop()
-                        .unwrap(),
-                    begin..end,
-                );
-                self.rustylr_macro_generated_RuleDef_stack
-                    .push({ TokenMapped.value });
+                let mut TokenMapped = self
+                    .rustylr_macro_generated___TokenMapped__star__stack
+                    .pop()
+                    .unwrap();
+                self.rustylr_macro_generated_RuleDef_stack.push(TokenMapped);
             }
             47usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut Action = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_Action_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut RuleDef = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_RuleDef_stack.pop().unwrap(),
-                    begin..end,
-                );
+                let mut Action = self.rustylr_macro_generated_Action_stack.pop().unwrap();
+                let mut RuleDef = self.rustylr_macro_generated_RuleDef_stack.pop().unwrap();
                 self.rustylr_macro_generated_RuleLine_stack.push({
                     RuleLine {
-                        tokens: RuleDef.value,
-                        reduce_action: Action.value.map(|action| action.to_token_stream()),
+                        tokens: RuleDef,
+                        reduce_action: Action.map(|action| action.to_token_stream()),
                     }
                 });
             }
             48usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut RuleLine = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_RuleLine_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut pipe = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut RuleLines = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_RuleLines_stack.pop().unwrap(),
-                    begin..end,
-                );
+                let mut RuleLine = self.rustylr_macro_generated_RuleLine_stack.pop().unwrap();
+                let mut pipe = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut RuleLines = self.rustylr_macro_generated_RuleLines_stack.pop().unwrap();
                 self.rustylr_macro_generated_RuleLines_stack.push({
-                    let mut v = RuleLines.value;
-                    v.push(RuleLine.value);
-                    v
+                    RuleLines.push(RuleLine);
+                    RuleLines
                 });
             }
             49usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut RuleLine = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_RuleLine_stack.pop().unwrap(),
-                    begin..end,
-                );
+                let mut RuleLine = self.rustylr_macro_generated_RuleLine_stack.pop().unwrap();
                 self.rustylr_macro_generated_RuleLines_stack
-                    .push({ vec![RuleLine.value] });
+                    .push({ vec![RuleLine] });
             }
             50usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut group = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut group = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_RuleType_stack.push({
-                    if let TermType::Group(group) = *group {
+                    if let TermType::Group(group) = group {
                         if let Some(group) = group {
                             if group.delimiter() != proc_macro2::Delimiter::Parenthesis {
                                 return Err(ParseError::InvalidRuletypeDelimiter(group.span()));
                             }
-                            Some(group.clone())
+                            Some(group)
                         } else {
                             unreachable!("RuleType - Some");
                         }
@@ -891,195 +546,115 @@ impl GrammarContext {
                 self.rustylr_macro_generated_RuleType_stack.push({ None });
             }
             52usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut AnyTokenNoSemi = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    (),
-                    begin..end,
-                );
+                let mut AnyTokenNoSemi = self
+                    .rustylr_macro_generated___AnyTokenNoSemi__plus__stack
+                    .pop()
+                    .unwrap();
                 self.rustylr_macro_generated_RustCode_stack.push({
                     let mut tokens = TokenStream::new();
-                    for token in AnyTokenNoSemi.slice.iter() {
-                        tokens.extend(token.clone().stream());
+                    for token in AnyTokenNoSemi.into_iter() {
+                        tokens.extend(token.stream());
                     }
                     tokens
                 });
             }
             53usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut semicolon = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut ident = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut start = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut start = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_StartDef_stack.push({
-                    if let TermType::Ident(ident) = *ident {
-                        ident.as_ref().unwrap().clone()
+                    if let TermType::Ident(ident) = ident {
+                        ident.expect("StartDef")
                     } else {
                         unreachable!("StartDef-Ident");
                     }
                 });
             }
             54usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut ident = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_SymbolPattern_stack.push({
-                    if let TermType::Ident(ident) = ident.value {
-                        let ident = ident.as_ref().unwrap();
-                        Token::NonTerm(ident.clone())
+                    if let TermType::Ident(ident) = ident {
+                        Token::NonTerm(ident.expect("SymbolPattern-Ident0"))
                     } else {
                         unreachable!("SymbolPattern-Ident");
                     }
                 });
             }
             55usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut star = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut ident = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut star = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_SymbolPattern_stack.push({
-                    if let TermType::Ident(ident) = ident.value {
-                        let ident = ident.as_ref().unwrap();
-                        Token::Star(ident.clone())
+                    if let TermType::Ident(ident) = ident {
+                        let ident = ident.expect("SymbolPattern-Ident1");
+                        Token::Star(ident)
                     } else {
                         unreachable!("SymbolPattern-Star");
                     }
                 });
             }
             56usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut plus = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut ident = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut plus = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_SymbolPattern_stack.push({
-                    if let TermType::Ident(ident) = ident.value {
-                        let ident = ident.as_ref().unwrap();
-                        Token::Plus(ident.clone())
+                    if let TermType::Ident(ident) = ident {
+                        let ident = ident.expect("SymbolPattern-Plus");
+                        Token::Plus(ident)
                     } else {
                         unreachable!("SymbolPattern-Plus");
                     }
                 });
             }
             57usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut question = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut ident = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut question = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_SymbolPattern_stack.push({
-                    if let TermType::Ident(ident) = ident.value {
-                        let ident = ident.as_ref().unwrap();
-                        Token::Question(ident.clone())
+                    if let TermType::Ident(ident) = ident {
+                        let ident = ident.expect("SymbolPattern-Question");
+                        Token::Question(ident)
                     } else {
                         unreachable!("SymbolPattern-Question");
                     }
                 });
             }
             58usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut semicolon = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut RustCode = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_RustCode_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut ident = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut token = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut RustCode = self.rustylr_macro_generated_RustCode_stack.pop().unwrap();
+                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut token = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_TokenDef_stack.push({
-                    if let TermType::Ident(ident) = *ident {
-                        (ident.as_ref().unwrap().clone(), RustCode.value)
+                    if let TermType::Ident(ident) = ident {
+                        (ident.expect("TokenDef"), RustCode)
                     } else {
                         unreachable!("TokenDef-Ident");
                     }
                 });
             }
             59usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut SymbolPattern = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_SymbolPattern_stack
-                        .pop()
-                        .unwrap(),
-                    begin..end,
-                );
+                let mut SymbolPattern = self
+                    .rustylr_macro_generated_SymbolPattern_stack
+                    .pop()
+                    .unwrap();
                 self.rustylr_macro_generated_TokenMapped_stack.push({
-                    let mapto = SymbolPattern.value.ident();
+                    let mapto = SymbolPattern.ident();
                     TokenMapped {
-                        token: SymbolPattern.value,
+                        token: SymbolPattern,
                         mapto,
                     }
                 });
             }
             60usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut SymbolPattern = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_SymbolPattern_stack
-                        .pop()
-                        .unwrap(),
-                    begin..end,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut equal = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut ident = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut SymbolPattern = self
+                    .rustylr_macro_generated_SymbolPattern_stack
+                    .pop()
+                    .unwrap();
+                let mut equal = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_TokenMapped_stack.push({
-                    if let TermType::Ident(ident) = ident.value {
-                        let ident = ident.as_ref().unwrap();
+                    if let TermType::Ident(ident) = ident {
+                        let ident = ident.expect("TokenMapped-Ident");
                         TokenMapped {
-                            token: SymbolPattern.value,
-                            mapto: ident.clone(),
+                            token: SymbolPattern,
+                            mapto: ident,
                         }
                     } else {
                         unreachable!("Token-Ident");
@@ -1087,108 +662,63 @@ impl GrammarContext {
                 });
             }
             61usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut semicolon = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut RustCode = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_RustCode_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut tokentype = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut RustCode = self.rustylr_macro_generated_RustCode_stack.pop().unwrap();
+                let mut tokentype = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_TokenTypeDef_stack
-                    .push({ (tokentype.value.span().unwrap(), RustCode.value) });
+                    .push({ (tokentype.span().expect("TokenTypedef"), RustCode) });
             }
             62usize => {
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut semicolon = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut RustCode = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_RustCode_stack.pop().unwrap(),
-                    begin..end,
-                );
-                let index = self.rustylr_macro_generated_rl_end_stack.pop().unwrap() - 1;
-                let mut userdata = ::rusty_lr_core::TermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[index],
-                    index,
-                );
+                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut RustCode = self.rustylr_macro_generated_RustCode_stack.pop().unwrap();
+                let mut userdata = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
                 self.rustylr_macro_generated_UserDataDef_stack
-                    .push({ (userdata.value.span().unwrap(), RustCode.value) });
+                    .push({ (userdata.span().expect("UserDataDef"), RustCode) });
             }
             63usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut A = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    (),
-                    begin..end,
-                );
+                let mut A = self
+                    .rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .pop()
+                    .unwrap();
+                self.rustylr_macro_generated___AnyTokenNoSemi__plus__stack
+                    .push({ vec![A] });
             }
             64usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut Ap = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    (),
-                    begin..end,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut A = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    (),
-                    begin..end,
-                );
+                let mut A = self
+                    .rustylr_macro_generated_AnyTokenNoSemi_stack
+                    .pop()
+                    .unwrap();
+                let mut Ap = self
+                    .rustylr_macro_generated___AnyTokenNoSemi__plus__stack
+                    .pop()
+                    .unwrap();
+                self.rustylr_macro_generated___AnyTokenNoSemi__plus__stack
+                    .push({
+                        Ap.push(A);
+                        Ap
+                    });
             }
             65usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut A = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_TokenMapped_stack
-                        .pop()
-                        .unwrap(),
-                    begin..end,
-                );
+                let mut A = self
+                    .rustylr_macro_generated_TokenMapped_stack
+                    .pop()
+                    .unwrap();
                 self.rustylr_macro_generated___TokenMapped__plus__stack
-                    .push({ vec![A.value] });
+                    .push({ vec![A] });
             }
             66usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut A = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated_TokenMapped_stack
-                        .pop()
-                        .unwrap(),
-                    begin..end,
-                );
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut Ap = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated___TokenMapped__plus__stack
-                        .pop()
-                        .unwrap(),
-                    begin..end,
-                );
+                let mut A = self
+                    .rustylr_macro_generated_TokenMapped_stack
+                    .pop()
+                    .unwrap();
+                let mut Ap = self
+                    .rustylr_macro_generated___TokenMapped__plus__stack
+                    .pop()
+                    .unwrap();
                 self.rustylr_macro_generated___TokenMapped__plus__stack
                     .push({
-                        Ap.value.push(A.value);
-                        Ap.value
+                        Ap.push(A);
+                        Ap
                     });
             }
             67usize => {
@@ -1196,24 +726,17 @@ impl GrammarContext {
                     .push({ vec![] });
             }
             68usize => {
-                let end = self.rustylr_macro_generated_rl_end_stack.pop().unwrap();
-                let begin = *self.rustylr_macro_generated_rl_end_stack.last().unwrap();
-                let mut Ap = ::rusty_lr_core::NonTermData::new(
-                    &self.rustylr_macro_generated_rl_terms_stack[begin..end],
-                    self.rustylr_macro_generated___TokenMapped__plus__stack
-                        .pop()
-                        .unwrap(),
-                    begin..end,
-                );
+                let mut Ap = self
+                    .rustylr_macro_generated___TokenMapped__plus__stack
+                    .pop()
+                    .unwrap();
                 self.rustylr_macro_generated___TokenMapped__star__stack
-                    .push({ Ap.value });
+                    .push({ Ap });
             }
             _ => {
                 unreachable!("Invalid Rule: {}", rustylr_macro_generated_ruleid__);
             }
         }
-        self.rustylr_macro_generated_rl_end_stack
-            .push(rusty_lr_macro_generated_new_end);
         Ok(())
     }
     pub fn accept(&mut self) -> (Grammar) {
@@ -1221,8 +744,6 @@ impl GrammarContext {
     }
     pub fn push(&mut self, term: TermType) {
         self.rustylr_macro_generated_rl_terms_stack.push(term);
-        self.rustylr_macro_generated_rl_end_stack
-            .push(self.rustylr_macro_generated_rl_terms_stack.len());
     }
 }
 #[allow(
@@ -1595,8 +1116,8 @@ impl GrammarParser {
             ::rusty_lr_core::ProductionRule {
                 name: "__AnyTokenNoSemi__plus_",
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm("AnyTokenNoSemi"),
                     ::rusty_lr_core::Token::NonTerm("__AnyTokenNoSemi__plus_"),
+                    ::rusty_lr_core::Token::NonTerm("AnyTokenNoSemi"),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
@@ -1948,8 +1469,8 @@ impl GrammarParser {
             ]);
             let shift_goto_map_nonterm = std::collections::HashMap::from([
                 ("AnyTokenNoSemi", 22usize),
-                ("RustCode", 24usize),
-                ("__AnyTokenNoSemi__plus_", 26usize),
+                ("RustCode", 23usize),
+                ("__AnyTokenNoSemi__plus_", 25usize),
             ]);
             let reduce_map = std::collections::HashMap::from([]);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
@@ -2113,14 +1634,14 @@ impl GrammarParser {
                             rule: 63usize,
                             shifted: 0usize,
                         },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
+                        rustylr_macrogenerated_lookaheads_3.clone(),
                     ),
                     (
                         ::rusty_lr_core::ShiftedRuleRef {
                             rule: 64usize,
                             shifted: 0usize,
                         },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
+                        rustylr_macrogenerated_lookaheads_3.clone(),
                     ),
                 ]),
             };
@@ -2993,6 +2514,104 @@ impl GrammarParser {
             states.push(state);
         }
         {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 63usize),
+                (TermType::EofDef(None), 63usize),
+                (TermType::Equal(None), 63usize),
+                (TermType::ErrorType(None), 63usize),
+                (TermType::Group(None), 63usize),
+                (TermType::Ident(None), 63usize),
+                (TermType::Left(None), 63usize),
+                (TermType::Literal(None), 63usize),
+                (TermType::ModulePrefix(None), 63usize),
+                (TermType::OtherPunct(None), 63usize),
+                (TermType::Percent(None), 63usize),
+                (TermType::Pipe(None), 63usize),
+                (TermType::Plus(None), 63usize),
+                (TermType::Question(None), 63usize),
+                (TermType::Right(None), 63usize),
+                (TermType::Semicolon(None), 63usize),
+                (TermType::Star(None), 63usize),
+                (TermType::Start(None), 63usize),
+                (TermType::Token(None), 63usize),
+                (TermType::TokenType(None), 63usize),
+                (TermType::UserData(None), 63usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 63usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Semicolon(None), 24usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 22usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Eof, 22usize),
+                (TermType::EofDef(None), 22usize),
+                (TermType::ErrorType(None), 22usize),
+                (TermType::Ident(None), 22usize),
+                (TermType::Left(None), 22usize),
+                (TermType::ModulePrefix(None), 22usize),
+                (TermType::Right(None), 22usize),
+                (TermType::Start(None), 22usize),
+                (TermType::Token(None), 22usize),
+                (TermType::TokenType(None), 22usize),
+                (TermType::UserData(None), 22usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 22usize,
+                        shifted: 3usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
             let shift_goto_map_term = std::collections::HashMap::from([
                 (TermType::Colon(None), 2usize),
                 (TermType::EofDef(None), 3usize),
@@ -3015,12 +2634,10 @@ impl GrammarParser {
                 (TermType::TokenType(None), 20usize),
                 (TermType::UserData(None), 21usize),
             ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([
-                ("AnyTokenNoSemi", 22usize),
-                ("__AnyTokenNoSemi__plus_", 23usize),
-            ]);
+            let shift_goto_map_nonterm =
+                std::collections::HashMap::from([("AnyTokenNoSemi", 26usize)]);
             let reduce_map =
-                std::collections::HashMap::from([(TermType::Semicolon(None), 63usize)]);
+                std::collections::HashMap::from([(TermType::Semicolon(None), 52usize)]);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -3165,22 +2782,8 @@ impl GrammarParser {
                     ),
                     (
                         ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 63usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 63usize,
+                            rule: 52usize,
                             shifted: 1usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 64usize,
-                            shifted: 0usize,
                         },
                         rustylr_macrogenerated_lookaheads_4.clone(),
                     ),
@@ -3189,7 +2792,7 @@ impl GrammarParser {
                             rule: 64usize,
                             shifted: 1usize,
                         },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
+                        rustylr_macrogenerated_lookaheads_3.clone(),
                     ),
                 ]),
             };
@@ -3204,92 +2807,36 @@ impl GrammarParser {
         {
             let shift_goto_map_term = std::collections::HashMap::from([]);
             let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map =
-                std::collections::HashMap::from([(TermType::Semicolon(None), 64usize)]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 64usize),
+                (TermType::EofDef(None), 64usize),
+                (TermType::Equal(None), 64usize),
+                (TermType::ErrorType(None), 64usize),
+                (TermType::Group(None), 64usize),
+                (TermType::Ident(None), 64usize),
+                (TermType::Left(None), 64usize),
+                (TermType::Literal(None), 64usize),
+                (TermType::ModulePrefix(None), 64usize),
+                (TermType::OtherPunct(None), 64usize),
+                (TermType::Percent(None), 64usize),
+                (TermType::Pipe(None), 64usize),
+                (TermType::Plus(None), 64usize),
+                (TermType::Question(None), 64usize),
+                (TermType::Right(None), 64usize),
+                (TermType::Semicolon(None), 64usize),
+                (TermType::Star(None), 64usize),
+                (TermType::Start(None), 64usize),
+                (TermType::Token(None), 64usize),
+                (TermType::TokenType(None), 64usize),
+                (TermType::UserData(None), 64usize),
+            ]);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
                         rule: 64usize,
                         shifted: 2usize,
                     },
-                    rustylr_macrogenerated_lookaheads_4.clone(),
-                )]),
-            };
-            let state = ::rusty_lr_core::State {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
-        }
-        {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(TermType::Semicolon(None), 25usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 2usize,
-                    },
-                    rustylr_macrogenerated_lookaheads_0.clone(),
-                )]),
-            };
-            let state = ::rusty_lr_core::State {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
-        }
-        {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (TermType::Eof, 22usize),
-                (TermType::EofDef(None), 22usize),
-                (TermType::ErrorType(None), 22usize),
-                (TermType::Ident(None), 22usize),
-                (TermType::Left(None), 22usize),
-                (TermType::ModulePrefix(None), 22usize),
-                (TermType::Right(None), 22usize),
-                (TermType::Start(None), 22usize),
-                (TermType::Token(None), 22usize),
-                (TermType::TokenType(None), 22usize),
-                (TermType::UserData(None), 22usize),
-            ]);
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 3usize,
-                    },
-                    rustylr_macrogenerated_lookaheads_0.clone(),
-                )]),
-            };
-            let state = ::rusty_lr_core::State {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
-        }
-        {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map =
-                std::collections::HashMap::from([(TermType::Semicolon(None), 52usize)]);
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 52usize,
-                        shifted: 1usize,
-                    },
-                    rustylr_macrogenerated_lookaheads_4.clone(),
+                    rustylr_macrogenerated_lookaheads_3.clone(),
                 )]),
             };
             let state = ::rusty_lr_core::State {
@@ -3326,7 +2873,7 @@ impl GrammarParser {
             let shift_goto_map_nonterm = std::collections::HashMap::from([
                 ("AnyTokenNoSemi", 22usize),
                 ("RustCode", 28usize),
-                ("__AnyTokenNoSemi__plus_", 26usize),
+                ("__AnyTokenNoSemi__plus_", 25usize),
             ]);
             let reduce_map = std::collections::HashMap::from([]);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
@@ -3490,14 +3037,14 @@ impl GrammarParser {
                             rule: 63usize,
                             shifted: 0usize,
                         },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
+                        rustylr_macrogenerated_lookaheads_3.clone(),
                     ),
                     (
                         ::rusty_lr_core::ShiftedRuleRef {
                             rule: 64usize,
                             shifted: 0usize,
                         },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
+                        rustylr_macrogenerated_lookaheads_3.clone(),
                     ),
                 ]),
             };
@@ -4658,7 +4205,7 @@ impl GrammarParser {
             let shift_goto_map_nonterm = std::collections::HashMap::from([
                 ("AnyTokenNoSemi", 22usize),
                 ("RustCode", 58usize),
-                ("__AnyTokenNoSemi__plus_", 26usize),
+                ("__AnyTokenNoSemi__plus_", 25usize),
             ]);
             let reduce_map = std::collections::HashMap::from([]);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
@@ -4822,14 +4369,14 @@ impl GrammarParser {
                             rule: 63usize,
                             shifted: 0usize,
                         },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
+                        rustylr_macrogenerated_lookaheads_3.clone(),
                     ),
                     (
                         ::rusty_lr_core::ShiftedRuleRef {
                             rule: 64usize,
                             shifted: 0usize,
                         },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
+                        rustylr_macrogenerated_lookaheads_3.clone(),
                     ),
                 ]),
             };
@@ -5098,7 +4645,7 @@ impl GrammarParser {
             let shift_goto_map_nonterm = std::collections::HashMap::from([
                 ("AnyTokenNoSemi", 22usize),
                 ("RustCode", 68usize),
-                ("__AnyTokenNoSemi__plus_", 26usize),
+                ("__AnyTokenNoSemi__plus_", 25usize),
             ]);
             let reduce_map = std::collections::HashMap::from([]);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
@@ -5262,14 +4809,14 @@ impl GrammarParser {
                             rule: 63usize,
                             shifted: 0usize,
                         },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
+                        rustylr_macrogenerated_lookaheads_3.clone(),
                     ),
                     (
                         ::rusty_lr_core::ShiftedRuleRef {
                             rule: 64usize,
                             shifted: 0usize,
                         },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
+                        rustylr_macrogenerated_lookaheads_3.clone(),
                     ),
                 ]),
             };
@@ -5362,7 +4909,7 @@ impl GrammarParser {
             let shift_goto_map_nonterm = std::collections::HashMap::from([
                 ("AnyTokenNoSemi", 22usize),
                 ("RustCode", 71usize),
-                ("__AnyTokenNoSemi__plus_", 26usize),
+                ("__AnyTokenNoSemi__plus_", 25usize),
             ]);
             let reduce_map = std::collections::HashMap::from([]);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
@@ -5526,14 +5073,14 @@ impl GrammarParser {
                             rule: 63usize,
                             shifted: 0usize,
                         },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
+                        rustylr_macrogenerated_lookaheads_3.clone(),
                     ),
                     (
                         ::rusty_lr_core::ShiftedRuleRef {
                             rule: 64usize,
                             shifted: 0usize,
                         },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
+                        rustylr_macrogenerated_lookaheads_3.clone(),
                     ),
                 ]),
             };
@@ -5626,7 +5173,7 @@ impl GrammarParser {
             let shift_goto_map_nonterm = std::collections::HashMap::from([
                 ("AnyTokenNoSemi", 22usize),
                 ("RustCode", 74usize),
-                ("__AnyTokenNoSemi__plus_", 26usize),
+                ("__AnyTokenNoSemi__plus_", 25usize),
             ]);
             let reduce_map = std::collections::HashMap::from([]);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
@@ -5790,14 +5337,14 @@ impl GrammarParser {
                             rule: 63usize,
                             shifted: 0usize,
                         },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
+                        rustylr_macrogenerated_lookaheads_3.clone(),
                     ),
                     (
                         ::rusty_lr_core::ShiftedRuleRef {
                             rule: 64usize,
                             shifted: 0usize,
                         },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
+                        rustylr_macrogenerated_lookaheads_3.clone(),
                     ),
                 ]),
             };

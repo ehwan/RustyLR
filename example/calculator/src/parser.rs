@@ -74,33 +74,32 @@ lalr1! {
     // s is slice of shifted terminal symbols captured by current rule
     // userdata can be accessed by `data` ( &mut i32, for this situation )
     A(i32) : A plus a2=A {
-            println!("{:?} {:?} {:?}", A.slice, *plus, a2.slice );
-            //                         ^        ^     ^
-            //                         |        |     |- slice of 2nd 'A'
-            //                         |        |- &Token
-            //                         |- slice of 1st 'A'
-            println!( "{:?}", s );
+            println!("{:?} {:?} {:?}", A, plus, a2 );
+            //                         ^    ^    ^
+            //                         |    |    |- value of 2nd 'A'
+            //                         |    |- Token
+            //                         |- value of 1st 'A'
             *data += 1;
-            A.value + a2.value // --> this will be new value of current 'A'
-        //  ^         ^
-        //  |         |- value of 2nd 'A'
+            A + a2 // --> this will be new value of current 'A'
+        //  ^    ^
+        //  |    |- value of 2nd 'A'
         //  |- value of 1st 'A'
         }
-      | M { M.value }
+      | M
       ;
 
-    M(i32) : M star m2=M { *M * *m2 }
-      | P { *P }
+    M(i32) : M star m2=M { M * m2 }
+      | P
       ;
 
     P(i32) : num {
-        if let Token::Num(n) = *num { *n }
+        if let Token::Num(n) = num { n }
         else { return Err(format!("{:?}", num)); }
         //            ^^^^^^^^^^^^^^^^^^^^^^^^^^
         //             reduce action returns Result<(), String>
     }
-      | lparen E rparen { *E }
+      | lparen E rparen { E }
       ;
 
-    E(i32) : A  { *A };
+    E(i32) : A;
 }

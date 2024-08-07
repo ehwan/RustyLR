@@ -46,7 +46,7 @@ impl Grammar {
                             tokens.push(rlr::Token::NonTerm(nonterm.to_string()));
                         }
 
-                        _ => {
+                        Token::Plus(_) | Token::Star(_) | Token::Question(_) => {
                             unreachable!("Only Term and NonTerm should be in rule");
                         }
                     }
@@ -359,81 +359,112 @@ impl Grammar {
         let mut ruleid: usize = 0;
         let mut case_streams = quote! {};
         // stack for end index of each rule in term stack
-        let end_stack_name = Self::stack_name(&format_ident! {"rl_end"});
         let terms_stack_name = Self::stack_name(&format_ident! {"rl_terms"});
         let term_typename = self.token_typename.as_ref().unwrap();
 
         for (_name, (name_ident, typename, rules)) in self.rules.iter() {
-            // push result to this stack
-            let stack_name = Self::stack_name(name_ident);
-
             for rule in rules.rule_lines.iter() {
-                let action = if let Some(action) = &rule.reduce_action {
-                    action.clone()
-                } else {
-                    quote! {}
-                };
                 let mut token_pop_stream = TokenStream::new();
                 for token in rule.tokens.iter().rev() {
                     match &token.token {
                         Token::Term(_) => {
                             let mapto = &token.mapto;
                             token_pop_stream.extend(quote! {
-                                let index = self.#end_stack_name.pop().unwrap()-1;
-                                let mut #mapto = #module_prefix::TermData::new(
-                                    &self.#terms_stack_name[index],
-                                    index
-                                );
+                                let mut #mapto = self.#terms_stack_name.pop().unwrap();
                             });
                         }
                         Token::NonTerm(nonterm) => {
                             let mapto = &token.mapto;
 
-                            // pop value from stack of 'nonterm'
-                            let stack_pop_stream =
-                                // if <RuleType> is defined for this nonterm
-                                if self.rules.get(&nonterm.to_string()).unwrap().1.is_some() {
-                                    // stack name of this token
-                                    let stack_name = Self::stack_name(nonterm);
-                                    quote! {
-                                        self.#stack_name.pop().unwrap()
-                                    }
-                                } else {
-                                    quote! {
-                                        ()
-                                    }
-                                };
-
-                            token_pop_stream.extend(quote! {
-                                // TODO unreachable! if stack is empty
-                                let end = self.#end_stack_name.pop().unwrap();
-                                let begin = *self.#end_stack_name.last().unwrap();
-                                let mut #mapto = #module_prefix::NonTermData::new(
-                                    &self.#terms_stack_name[begin..end],
-                                    #stack_pop_stream,
-                                    begin..end,
-                                );
-                            });
+                            // if <RuleType> is defined for this nonterm,
+                            // pop value from the stack to 'mapto'
+                            let stack_name = Self::stack_name(nonterm);
+                            if self.rules.get(&nonterm.to_string()).unwrap().1.is_some() {
+                                token_pop_stream.extend(quote! {
+                                    let mut #mapto = self.#stack_name.pop().unwrap();
+                                });
+                            }
                         }
-                        _ => {
+                        Token::Plus(_) | Token::Star(_) | Token::Question(_) => {
                             unreachable!("Only Term and NonTerm should be in rule");
                         }
                     }
                 }
+
+                // if typename is defined for this rule, push result of action to stack
+                // else, just execute action
                 if typename.is_some() {
-                    case_streams.extend(quote! {
-                        #ruleid => {
-                            #token_pop_stream
-                            self.#stack_name.push(#action);
+                    // push result to this stack
+                    let stack_name = Self::stack_name(name_ident);
+
+                    // typename is defined, reduce action must be defined
+                    if let Some(action) = &rule.reduce_action {
+                        case_streams.extend(quote! {
+                            #ruleid => {
+                                #token_pop_stream
+                                self.#stack_name.push(#action);
+                            }
+                        });
+                    } else {
+                        // action is not defined,
+
+                        // check for special case:
+                        // only one token in this rule have <RuleType> defined (include terminal)
+                        // the unique value will be pushed to stack
+                        let mut unique_mapto = None;
+                        for token in rule.tokens.iter() {
+                            match &token.token {
+                                Token::Term(_) => {
+                                    if unique_mapto.is_none() {
+                                        unique_mapto = Some(&token.mapto);
+                                    } else {
+                                        unique_mapto = None;
+                                        break;
+                                    }
+                                }
+                                Token::NonTerm(nonterm) => {
+                                    if self.rules.get(&nonterm.to_string()).unwrap().1.is_some() {
+                                        if unique_mapto.is_none() {
+                                            unique_mapto = Some(&token.mapto);
+                                        } else {
+                                            unique_mapto = None;
+                                            break;
+                                        }
+                                    }
+                                }
+                                Token::Plus(_) | Token::Star(_) | Token::Question(_) => {
+                                    unreachable!("Only Term and NonTerm should be in rule");
+                                }
+                            }
                         }
-                    });
+                        if let Some(unique_mapto) = unique_mapto {
+                            case_streams.extend(quote! {
+                                #ruleid => {
+                                    #token_pop_stream
+                                    self.#stack_name.push(#unique_mapto);
+                                }
+                            });
+                        } else {
+                            return Err(ParseError::RuleTypeDefinedButActionNotDefined(
+                                name_ident.clone(),
+                            ));
+                        }
+                    }
                 } else {
-                    case_streams.extend(quote! {
-                        #ruleid => {
-                            #token_pop_stream
-                            #action
-                        }
-                    });
+                    if let Some(action) = &rule.reduce_action {
+                        case_streams.extend(quote! {
+                            #ruleid => {
+                                #token_pop_stream
+                                #action
+                            }
+                        });
+                    } else {
+                        case_streams.extend(quote! {
+                            #ruleid => {
+                                #token_pop_stream
+                            }
+                        });
+                    }
                 }
 
                 ruleid += 1;
@@ -493,18 +524,16 @@ impl Grammar {
         Ok(quote! {
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         pub struct #stack_struct_name {
-            #terms_stack_name: Vec<#term_typename>,
-            #end_stack_name: Vec<usize>,
             pub state_stack: Vec<usize>,
+            #terms_stack_name: Vec<#term_typename>,
             #stack_def_streams
         }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         impl #stack_struct_name {
             pub fn new() -> Self {
                 Self {
-                    #terms_stack_name: Vec::new(),
-                    #end_stack_name: vec![0],
                     state_stack: vec![0],
+                    #terms_stack_name: Vec::new(),
                     #stack_init_streams
                 }
             }
@@ -514,18 +543,12 @@ impl Grammar {
                 rustylr_macro_generated_ruleid__: usize,
                 #user_data_parameter_def
             ) -> Result<(), #error_typename> {
-                // get range of current rule
-                // TODO unreachable! if stack is empty
-                let rusty_lr_macro_generated_new_begin = *self.#end_stack_name.get( self.#end_stack_name.len() - rulelen-1 ).unwrap();
-                let rusty_lr_macro_generated_new_end = *self.#end_stack_name.last().unwrap();
-                let s = &self.#terms_stack_name[rusty_lr_macro_generated_new_begin..rusty_lr_macro_generated_new_end];
                 match rustylr_macro_generated_ruleid__ {
                     #case_streams
                     _ => {
                         unreachable!( "Invalid Rule: {}", rustylr_macro_generated_ruleid__ );
                     }
                 }
-                self.#end_stack_name.push(rusty_lr_macro_generated_new_end);
                 Ok(())
             }
             pub fn accept(&mut self) -> #start_rule_typename {
@@ -534,7 +557,6 @@ impl Grammar {
 
             pub fn push( &mut self, term: #term_typename ) {
                 self.#terms_stack_name.push(term);
-                self.#end_stack_name.push(self.#terms_stack_name.len());
             }
         }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]

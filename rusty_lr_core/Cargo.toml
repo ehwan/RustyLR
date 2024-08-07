@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_core"
-version = "0.10.0"
+version = "1.0.0"
 edition = "2021"
 license = "MIT"
 description = "yacc-like, proc-macro based LR(1) and LALR(1) parser generator and code generation"

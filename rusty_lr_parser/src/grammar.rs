@@ -9,7 +9,6 @@ use quote::quote;
 
 use std::collections::BTreeMap;
 use std::collections::HashMap;
-use std::collections::HashSet;
 
 use crate::rule::RuleLine;
 use crate::token::TokenMapped;
@@ -39,7 +38,7 @@ pub struct Grammar {
     pub error_typename: Option<TokenStream>,
 
     pub rules: BTreeMap<String, (Ident, Option<TokenStream>, RuleLines)>,
-    //                          name       typename           rules
+    //                           name       typename           rules
 }
 
 impl Grammar {
@@ -71,20 +70,20 @@ impl Grammar {
     // make A+ -> A A+ | A
     fn new_plus_rule(
         ident: &Ident,
-        ruletype: Option<&TokenStream>, // if A is term, then None
+        ruletype: Option<&TokenStream>, // if A is term, then TokenStream for termtype
     ) -> (Ident, Option<TokenStream>, RuleLines) {
         let new_ident = Ident::new(&format!("__{}__plus_", ident), ident.span());
         if let Some(ruletype) = ruletype {
             // ruletype exists,
-            // A+ -> A+ A { Ap.value.push(A.value); Ap.value }
-            //     | A    { vec![A.value] }
+            // A+ -> A+ A { Ap.push(A); Ap }
+            //     | A    { vec![A] }
             let line1 = RuleLine {
                 tokens: vec![TokenMapped {
                     token: Token::NonTerm(ident.clone()),
                     mapto: Ident::new("A", ident.span()),
                 }],
                 reduce_action: Some(quote! {
-                    { vec![A.value] }
+                    { vec![A] }
                 }),
             };
             let line2 = RuleLine {
@@ -99,7 +98,7 @@ impl Grammar {
                     },
                 ],
                 reduce_action: Some(quote! {
-                    { Ap.value.push(A.value); Ap.value }
+                    { Ap.push(A); Ap }
                 }),
             };
             let rule_lines = RuleLines {
@@ -141,13 +140,13 @@ impl Grammar {
     // make A* -> A+ | ε
     fn new_star_rule(
         ident: &Ident,
-        ruletype: Option<&TokenStream>, // if A is term, then None
+        ruletype: Option<&TokenStream>, // if A is term, then TokenStream for tokentype
     ) -> (Ident, Option<TokenStream>, RuleLines) {
         let plus_ident = Ident::new(&format!("__{}__plus_", ident), ident.span());
         let new_ident = Ident::new(&format!("__{}__star_", ident), ident.span());
         if let Some(ruletype) = ruletype {
             // ruletype exists,
-            // A* -> A+ { Ap.value }
+            // A* -> A+ { Ap }
             //     |    { vec![] }
             let line1 = RuleLine {
                 tokens: vec![],
@@ -161,7 +160,7 @@ impl Grammar {
                     mapto: Ident::new("Ap", ident.span()),
                 }],
                 reduce_action: Some(quote! {
-                    { Ap.value }
+                    { Ap }
                 }),
             };
             let rule_lines = RuleLines {
@@ -195,12 +194,12 @@ impl Grammar {
     // make A? -> A | ε
     fn new_question_rule(
         ident: &Ident,
-        ruletype: Option<&TokenStream>, // if A is term, then None
+        ruletype: Option<&TokenStream>, // if A is term, then TokenStream for tokentype
     ) -> (Ident, Option<TokenStream>, RuleLines) {
         let new_ident = Ident::new(&format!("__{}__question_", ident), ident.span());
         if let Some(ruletype) = ruletype {
             // ruletype exists,
-            // A? -> A { Some(Ap.value) }
+            // A? -> A { Some(Ap) }
             //     |   { None }
             let line1 = RuleLine {
                 tokens: vec![],
@@ -214,7 +213,7 @@ impl Grammar {
                     mapto: Ident::new("A", ident.span()),
                 }],
                 reduce_action: Some(quote! {
-                    { Some(A.value) }
+                    { Some(A) }
                 }),
             };
             let rule_lines = RuleLines {
@@ -321,9 +320,6 @@ impl Grammar {
             return Err(ParseError::StartNotDefined);
         }
 
-        // too many mutable borrow below;
-        let terminals: HashSet<String> = grammar.terminals.keys().cloned().collect();
-
         // check Token::Plus, Token::Star, Token::Question tokens
         // and define new rules for them
         // A+ -> A+ A | A
@@ -338,7 +334,8 @@ impl Grammar {
         // if A is term, then () since we can always trace terminals by slice
 
         {
-            // check if new rule 'name' is already defined
+            // new non-terminal rules will be generated for Plus, Star, Question
+            // for tracking if new rule 'name' is already defined
             let mut new_rules = HashMap::new();
             for (_, (_name, _ruletype, rules)) in grammar.rules.iter() {
                 for rule in rules.rule_lines.iter() {
@@ -346,8 +343,9 @@ impl Grammar {
                         match &token.token {
                             Token::Plus(ident) => {
                                 let ident_str = ident.to_string();
+                                // get typename for current token
                                 let ruletype = if grammar.terminals.contains_key(&ident_str) {
-                                    None
+                                    grammar.token_typename.as_ref()
                                 } else {
                                     match grammar.rules.get(&ident_str) {
                                         Some((_name, ruletype, _rules)) => ruletype.as_ref(),
@@ -359,13 +357,16 @@ impl Grammar {
                                     }
                                 };
 
+                                // add plus rule
                                 let new_rule = Self::new_plus_rule(&ident, ruletype);
                                 new_rules.insert(new_rule.0.to_string(), new_rule);
                             }
                             Token::Star(ident) => {
                                 let ident_str = ident.to_string();
+
+                                // get typename for current token
                                 let ruletype = if grammar.terminals.contains_key(&ident_str) {
-                                    None
+                                    grammar.token_typename.as_ref()
                                 } else {
                                     match grammar.rules.get(&ident_str) {
                                         Some((_name, ruletype, _rules)) => ruletype.as_ref(),
@@ -377,16 +378,20 @@ impl Grammar {
                                     }
                                 };
 
+                                // add plus rule
                                 let new_rule = Self::new_plus_rule(&ident, ruletype);
                                 new_rules.insert(new_rule.0.to_string(), new_rule);
 
+                                // add star rule
                                 let new_rule = Self::new_star_rule(&ident, ruletype);
                                 new_rules.insert(new_rule.0.to_string(), new_rule);
                             }
                             Token::Question(ident) => {
                                 let ident_str = ident.to_string();
+
+                                // get typename for current token
                                 let ruletype = if grammar.terminals.contains_key(&ident_str) {
-                                    None
+                                    grammar.token_typename.as_ref()
                                 } else {
                                     match grammar.rules.get(&ident_str) {
                                         Some((_name, ruletype, _rules)) => ruletype.as_ref(),
@@ -397,6 +402,8 @@ impl Grammar {
                                         }
                                     }
                                 };
+
+                                // add question rule
                                 let new_rule = Self::new_question_rule(&ident, ruletype);
                                 new_rules.insert(new_rule.0.to_string(), new_rule);
                             }
@@ -445,8 +452,7 @@ impl Grammar {
             for rule in rules.rule_lines.iter_mut() {
                 for token in rule.tokens.iter_mut() {
                     if let Token::NonTerm(ident) = token.token.clone() {
-                        let name = ident.to_string();
-                        if terminals.contains(&name) {
+                        if grammar.terminals.contains_key(&ident.to_string()) {
                             // set the token to Term
                             token.token = Token::Term(ident);
                         }

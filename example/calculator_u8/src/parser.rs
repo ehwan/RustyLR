@@ -27,26 +27,26 @@ lr1! {
 
     WS0: space*;
 
-    Digit: zero | one | two | three | four | five | six | seven | eight | nine;
+    Digit(u8): zero | one | two | three | four | five | six | seven | eight | nine;
 
-    Number(i32): WS0 Digit+ WS0 { std::str::from_utf8(Digit.slice).unwrap().parse().unwrap() };
+    Number(i32): WS0 Digit+ WS0 { std::str::from_utf8(&Digit).unwrap().parse().unwrap() };
 
     A(f32): A plus a2=A {
         *data += 1; // access userdata by `data`
-        println!( "{:?} {:?} {:?}", A.slice, *plus, a2.slice );
-        *A + *a2
+        println!( "{:?} {:?} {:?}", A, plus as char, a2 );
+        A + a2
     }
-    | M { *M }
+    | M
     ;
 
-    M(f32): M star m2=M { *M * *m2 }
-    | P { *P }
+    M(f32): M star m2=M { M * m2 }
+    | P
     ;
 
-    P(f32): Number { *Number as f32 }
-    | WS0 lparen E rparen WS0 { *E }
+    P(f32): Number { Number as f32 }
+    | WS0 lparen E rparen WS0 { E }
     ;
 
-    E(f32) : A { *A };
+    E(f32) : A ;
 
 }

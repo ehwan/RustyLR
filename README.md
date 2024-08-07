@@ -3,7 +3,7 @@ yacc-like LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from C
 
 ```
 [dependencies]
-rusty_lr = "0.12.3"
+rusty_lr = "1.0.0"
 ```
 
 ## Features
@@ -17,12 +17,12 @@ rusty_lr = "0.12.3"
 #### Why proc-macro, not external executable?
  - Decent built-in lexer, with consideration of unicode and comments.
  - Can generate *pretty* error messages, by just passing `Span` data.
- - With modern IDE, can see errors in real-time with specific location.
+ - With modern IDE, auto-completion and error highlighting can be done in real-time.
 
 ## Sample
 
  - [Calculator](example/calculator): calculator with enum `Token`
- - [Calculator with `u8`](example/calculator_u8): calculator with `u8`
+ - [Calculator u8](example/calculator_u8): calculator with `u8`
  - [Bootstrap](rusty_lr_parser/src/parser.rs): bootstrapped line parser of `lr1!` and `lalr1!` macro
 
 Please refer to the [example](example) directory for the full example.
@@ -61,28 +61,27 @@ lr1! {
 
     WS0: space*;
 
-    Digit: zero | one | two | three | four | five | six | seven | eight | nine;
+    Digit(u8): zero | one | two | three | four | five | six | seven | eight | nine;
 
-    Number(i32): WS0 Digit+ WS0 { std::str::from_utf8(Digit.slice).unwrap().parse().unwrap() };
+    Number(i32): WS0 Digit+ WS0 { std::str::from_utf8(&Digit).unwrap().parse().unwrap() };
 
     A(f32): A plus a2=A {
         *data += 1; // access userdata by `data`
-        println!( "{:?} {:?} {:?}", A.slice, *plus, a2.slice );
-        *A + *a2
+        println!( "{:?} {:?} {:?}", A, plus as char, a2 );
+        A + a2
     }
-    | M { *M }
+    | M
     ;
 
-    M(f32): M star m2=M { *M * *m2 }
-    | P { *P }
+    M(f32): M star m2=M { M * m2 }
+    | P
     ;
 
-    P(f32): Number { *Number as f32 }
-    | WS0 lparen E rparen WS0 { *E }
+    P(f32): Number { Number as f32 }
+    | WS0 lparen E rparen WS0 { E }
     ;
 
-    E(f32) : A { *A };
-
+    E(f32) : A ;
 }
 ```
 
@@ -116,8 +115,8 @@ fn main() {
 
 The result will be:
 ```
-[51, 32] 43 [32, 52, 32]
-[32, 32, 49, 32] 43 [32, 32, 50, 48, 32, 42, 32, 32, 32, 40, 51, 32, 43, 32, 52, 32, 41, 32, 32, 32]
+3.0 '+' 4.0
+1.0 '+' 140.0
 result: 141
 userdata: 2
 ```
@@ -235,26 +234,27 @@ Define the type of value that this production rule holds.
 Define the action to be executed when the rule is matched and reduced.
 If `<RuleType>` is defined, `<ReduceAction>` itself must be the value of `<RuleType>` (i.e. no semicolon at the end of the statement).
 
+`<ReduceAction>` can be omitted if:
+  - `<RuleType>` is not defined
+  - Only one token is holding value in the production rule
+
 ### Accessing token data in ReduceAction
 
 **predefined variables** can be used in `<ReduceAction>`:
- - `s` : slice of shifted terminal symbols `&[<TermType>]` captured by current rule.
  - `data` : userdata passed to `feed()` function.
 
 To access the data of each token, you can directly use the name of the token as a variable.
-For non-terminal symbols, the type of data is [`rusty_lr::NonTermData`](rusty_lr_core/src/nontermdata.rs).
-You can access the value of `<RuleType>` by `NonTerm.value`(by value) or `*NonTerm`(by `Deref`), slice by `NonTerm.slice`.
-For terminal symbols, the type of data is [`rusty_lr::TermData`](rusty_lr_core/src/termdata.rs).
-You can access the shifted terminal symbol by `Term.value`(`&TermType`) or `*Term`(`&TermType`).
+For non-terminal symbols, the type of variable is `<RuleType>`.
+For terminal symbols, the type of variable is `%tokentype`.
 
 If multiple variables are defined with the same name, the variable on the front-most will be used.
 
-For regex-like pattern, `<RuleType>` will be modified by following:
+For regex-like pattern, type of variable will be modified by following:
  | Pattern | Non-Terminal<br/>`<RuleType>=T` | Non-Terminal<br/>`<RuleType>=(not defined)` | Terminal |
  |:-------:|:--------------:|:--------------------------:|:--------:|
- | '*'     | `Vec<T>`       | (not defined)              | (not defined) |
- | '+'     | `Vec<T>`       | (not defined)              | (not defined) |
- | '?'     | `Option<T>`    | (not defined)              | (not defined) |
+ | '*'     | `Vec<T>`       | (not defined)              | `Vec<TermType>` |
+ | '+'     | `Vec<T>`       | (not defined)              | `Vec<TermType>` |
+ | '?'     | `Option<T>`    | (not defined)              | `Option<TermType>` |
 
 For example, following code will print the value of each `A`, and the slice of each `A` and `plus` token in the production rule `E -> A plus A`.
 ```rust
@@ -262,16 +262,9 @@ For example, following code will print the value of each `A`, and the slice of e
 
 E : A plus? a2=A*
   {
-    println!("Value of 1st A: {}", A.value); // i32
-    println!("Slice of 1st A: {:?}", A.slice);
-    println!("Value of 2nd As: {:?}", a2.value); // Vec<i32>
-    println!("Slice of 2nd As: {:?}", a2.slice);
-
-    if let plus.slice.len() == 0 {
-        // plus is not captured
-    }else {
-        // plus is captured
-    }
+    println!("Value of 1st A: {}", A); // i32
+    println!("Value of plus: {:?}", plus); // Option<TermType>
+    println!("Value of 2nd As: {:?}", a2); // Vec<i32>
   }
   ;
 
@@ -291,7 +284,7 @@ Define the type of `Err` variant in `Result<(), Err>` returned from `<ReduceActi
 ## Start Parsing
 `lr1!` and `lalr1!` will generate struct `<StartSymbol>Parser`.
 
-The struct has the following functions:
+The parser struct has the following functions:
  - `new()` : create new parser
  - `begin(&self)` : create new context
  - `feed(&self, &mut Context, TermType, &mut UserData) -> Result<(), ParseError>` : feed token to the parser
