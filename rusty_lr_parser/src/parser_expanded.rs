@@ -19,29 +19,29 @@ use rusty_lr_core::ReduceType;
     unused_mut
 )]
 pub struct GrammarContext {
-    pub rustylr_macro_generated_rl_terms_stack: Vec<TermType>,
-    pub rustylr_macro_generated_rl_end_stack: Vec<usize>,
+    rustylr_macro_generated_rl_terms_stack: Vec<TermType>,
+    rustylr_macro_generated_rl_end_stack: Vec<usize>,
     pub state_stack: Vec<usize>,
-    pub rustylr_macro_generated_Action_stack: Vec<(Option<Group>)>,
-    pub rustylr_macro_generated_EofDef_stack: Vec<((Span, TokenStream))>,
-    pub rustylr_macro_generated_ErrorDef_stack: Vec<((Span, TokenStream))>,
-    pub rustylr_macro_generated_Grammar_stack: Vec<(Grammar)>,
-    pub rustylr_macro_generated_ModulePrefixDef_stack: Vec<((Span, TokenStream))>,
-    pub rustylr_macro_generated_ReduceDef_stack: Vec<((Ident, ReduceType))>,
-    pub rustylr_macro_generated_Rule_stack: Vec<((Ident, Option<TokenStream>, RuleLines))>,
-    pub rustylr_macro_generated_RuleDef_stack: Vec<(Vec<TokenMapped>)>,
-    pub rustylr_macro_generated_RuleLine_stack: Vec<(RuleLine)>,
-    pub rustylr_macro_generated_RuleLines_stack: Vec<(Vec<RuleLine>)>,
-    pub rustylr_macro_generated_RuleType_stack: Vec<(Option<Group>)>,
-    pub rustylr_macro_generated_RustCode_stack: Vec<(TokenStream)>,
-    pub rustylr_macro_generated_StartDef_stack: Vec<(Ident)>,
-    pub rustylr_macro_generated_SymbolPattern_stack: Vec<(Token)>,
-    pub rustylr_macro_generated_TokenDef_stack: Vec<((Ident, TokenStream))>,
-    pub rustylr_macro_generated_TokenMapped_stack: Vec<(TokenMapped)>,
-    pub rustylr_macro_generated_TokenTypeDef_stack: Vec<((Span, TokenStream))>,
-    pub rustylr_macro_generated_UserDataDef_stack: Vec<((Span, TokenStream))>,
-    pub rustylr_macro_generated___TokenMapped__plus__stack: Vec<(Vec<(TokenMapped)>)>,
-    pub rustylr_macro_generated___TokenMapped__star__stack: Vec<(Vec<(TokenMapped)>)>,
+    rustylr_macro_generated_Action_stack: Vec<(Option<Group>)>,
+    rustylr_macro_generated_EofDef_stack: Vec<((Span, TokenStream))>,
+    rustylr_macro_generated_ErrorDef_stack: Vec<((Span, TokenStream))>,
+    rustylr_macro_generated_Grammar_stack: Vec<(Grammar)>,
+    rustylr_macro_generated_ModulePrefixDef_stack: Vec<((Span, TokenStream))>,
+    rustylr_macro_generated_ReduceDef_stack: Vec<((Ident, ReduceType))>,
+    rustylr_macro_generated_Rule_stack: Vec<((Ident, Option<TokenStream>, RuleLines))>,
+    rustylr_macro_generated_RuleDef_stack: Vec<(Vec<TokenMapped>)>,
+    rustylr_macro_generated_RuleLine_stack: Vec<(RuleLine)>,
+    rustylr_macro_generated_RuleLines_stack: Vec<(Vec<RuleLine>)>,
+    rustylr_macro_generated_RuleType_stack: Vec<(Option<Group>)>,
+    rustylr_macro_generated_RustCode_stack: Vec<(TokenStream)>,
+    rustylr_macro_generated_StartDef_stack: Vec<(Ident)>,
+    rustylr_macro_generated_SymbolPattern_stack: Vec<(Token)>,
+    rustylr_macro_generated_TokenDef_stack: Vec<((Ident, TokenStream))>,
+    rustylr_macro_generated_TokenMapped_stack: Vec<(TokenMapped)>,
+    rustylr_macro_generated_TokenTypeDef_stack: Vec<((Span, TokenStream))>,
+    rustylr_macro_generated_UserDataDef_stack: Vec<((Span, TokenStream))>,
+    rustylr_macro_generated___TokenMapped__plus__stack: Vec<(Vec<(TokenMapped)>)>,
+    rustylr_macro_generated___TokenMapped__star__stack: Vec<(Vec<(TokenMapped)>)>,
 }
 #[allow(
     unused_braces,
@@ -1245,370 +1245,7088 @@ pub struct GrammarParser {
 )]
 impl GrammarParser {
     pub fn new() -> Self {
-        let mut grammar = ::rusty_lr_core::Grammar::new();
-        grammar.add_rule(
-            "Action",
-            vec![::rusty_lr_core::Token::Term(TermType::Group(None))],
-        );
-        grammar.add_rule("Action", vec![]);
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::Ident(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::Colon(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::Pipe(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::Percent(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::Left(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::Right(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::Token(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::Start(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::EofDef(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::TokenType(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::UserData(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::ErrorType(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::Group(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::Literal(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::Equal(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::Plus(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::Star(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::Question(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::OtherPunct(None))],
-        );
-        grammar.add_rule(
-            "AnyTokenNoSemi",
-            vec![::rusty_lr_core::Token::Term(TermType::ModulePrefix(None))],
-        );
-        grammar.add_rule(
-            "EofDef",
-            vec![
-                ::rusty_lr_core::Token::Term(TermType::EofDef(None)),
-                ::rusty_lr_core::Token::NonTerm("RustCode"),
-                ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-        grammar.add_rule(
-            "ErrorDef",
-            vec![
-                ::rusty_lr_core::Token::Term(TermType::ErrorType(None)),
-                ::rusty_lr_core::Token::NonTerm("RustCode"),
-                ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-        grammar.add_rule(
-            "Grammar",
-            vec![
-                ::rusty_lr_core::Token::NonTerm("Rule"),
-                ::rusty_lr_core::Token::NonTerm("Grammar"),
-            ],
-        );
-        grammar.add_rule("Grammar", vec![::rusty_lr_core::Token::NonTerm("Rule")]);
-        grammar.add_rule(
-            "Grammar",
-            vec![
-                ::rusty_lr_core::Token::NonTerm("TokenDef"),
-                ::rusty_lr_core::Token::NonTerm("Grammar"),
-            ],
-        );
-        grammar.add_rule("Grammar", vec![::rusty_lr_core::Token::NonTerm("TokenDef")]);
-        grammar.add_rule(
-            "Grammar",
-            vec![
-                ::rusty_lr_core::Token::NonTerm("StartDef"),
-                ::rusty_lr_core::Token::NonTerm("Grammar"),
-            ],
-        );
-        grammar.add_rule("Grammar", vec![::rusty_lr_core::Token::NonTerm("StartDef")]);
-        grammar.add_rule(
-            "Grammar",
-            vec![
-                ::rusty_lr_core::Token::NonTerm("EofDef"),
-                ::rusty_lr_core::Token::NonTerm("Grammar"),
-            ],
-        );
-        grammar.add_rule("Grammar", vec![::rusty_lr_core::Token::NonTerm("EofDef")]);
-        grammar.add_rule(
-            "Grammar",
-            vec![
-                ::rusty_lr_core::Token::NonTerm("TokenTypeDef"),
-                ::rusty_lr_core::Token::NonTerm("Grammar"),
-            ],
-        );
-        grammar.add_rule(
-            "Grammar",
-            vec![::rusty_lr_core::Token::NonTerm("TokenTypeDef")],
-        );
-        grammar.add_rule(
-            "Grammar",
-            vec![
-                ::rusty_lr_core::Token::NonTerm("UserDataDef"),
-                ::rusty_lr_core::Token::NonTerm("Grammar"),
-            ],
-        );
-        grammar.add_rule(
-            "Grammar",
-            vec![::rusty_lr_core::Token::NonTerm("UserDataDef")],
-        );
-        grammar.add_rule(
-            "Grammar",
-            vec![
-                ::rusty_lr_core::Token::NonTerm("ReduceDef"),
-                ::rusty_lr_core::Token::NonTerm("Grammar"),
-            ],
-        );
-        grammar.add_rule(
-            "Grammar",
-            vec![::rusty_lr_core::Token::NonTerm("ReduceDef")],
-        );
-        grammar.add_rule(
-            "Grammar",
-            vec![
-                ::rusty_lr_core::Token::NonTerm("ErrorDef"),
-                ::rusty_lr_core::Token::NonTerm("Grammar"),
-            ],
-        );
-        grammar.add_rule("Grammar", vec![::rusty_lr_core::Token::NonTerm("ErrorDef")]);
-        grammar.add_rule(
-            "Grammar",
-            vec![
-                ::rusty_lr_core::Token::NonTerm("ModulePrefixDef"),
-                ::rusty_lr_core::Token::NonTerm("Grammar"),
-            ],
-        );
-        grammar.add_rule(
-            "Grammar",
-            vec![::rusty_lr_core::Token::NonTerm("ModulePrefixDef")],
-        );
-        grammar.add_rule(
-            "ModulePrefixDef",
-            vec![
-                ::rusty_lr_core::Token::Term(TermType::ModulePrefix(None)),
-                ::rusty_lr_core::Token::NonTerm("RustCode"),
-                ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-        grammar.add_rule(
-            "ReduceDef",
-            vec![
-                ::rusty_lr_core::Token::Term(TermType::Left(None)),
-                ::rusty_lr_core::Token::Term(TermType::Ident(None)),
-                ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-        grammar.add_rule(
-            "ReduceDef",
-            vec![
-                ::rusty_lr_core::Token::Term(TermType::Right(None)),
-                ::rusty_lr_core::Token::Term(TermType::Ident(None)),
-                ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-        grammar.add_rule(
-            "Rule",
-            vec![
-                ::rusty_lr_core::Token::Term(TermType::Ident(None)),
-                ::rusty_lr_core::Token::NonTerm("RuleType"),
-                ::rusty_lr_core::Token::Term(TermType::Colon(None)),
-                ::rusty_lr_core::Token::NonTerm("RuleLines"),
-                ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-        grammar.add_rule(
-            "RuleDef",
-            vec![::rusty_lr_core::Token::NonTerm("__TokenMapped__star_")],
-        );
-        grammar.add_rule(
-            "RuleLine",
-            vec![
-                ::rusty_lr_core::Token::NonTerm("RuleDef"),
-                ::rusty_lr_core::Token::NonTerm("Action"),
-            ],
-        );
-        grammar.add_rule(
-            "RuleLines",
-            vec![
-                ::rusty_lr_core::Token::NonTerm("RuleLines"),
-                ::rusty_lr_core::Token::Term(TermType::Pipe(None)),
-                ::rusty_lr_core::Token::NonTerm("RuleLine"),
-            ],
-        );
-        grammar.add_rule(
-            "RuleLines",
-            vec![::rusty_lr_core::Token::NonTerm("RuleLine")],
-        );
-        grammar.add_rule(
-            "RuleType",
-            vec![::rusty_lr_core::Token::Term(TermType::Group(None))],
-        );
-        grammar.add_rule("RuleType", vec![]);
-        grammar.add_rule(
-            "RustCode",
-            vec![::rusty_lr_core::Token::NonTerm("__AnyTokenNoSemi__plus_")],
-        );
-        grammar.add_rule(
-            "StartDef",
-            vec![
-                ::rusty_lr_core::Token::Term(TermType::Start(None)),
-                ::rusty_lr_core::Token::Term(TermType::Ident(None)),
-                ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-        grammar.add_rule(
-            "SymbolPattern",
-            vec![::rusty_lr_core::Token::Term(TermType::Ident(None))],
-        );
-        grammar.add_rule(
-            "SymbolPattern",
-            vec![
-                ::rusty_lr_core::Token::Term(TermType::Ident(None)),
-                ::rusty_lr_core::Token::Term(TermType::Star(None)),
-            ],
-        );
-        grammar.add_rule(
-            "SymbolPattern",
-            vec![
-                ::rusty_lr_core::Token::Term(TermType::Ident(None)),
-                ::rusty_lr_core::Token::Term(TermType::Plus(None)),
-            ],
-        );
-        grammar.add_rule(
-            "SymbolPattern",
-            vec![
-                ::rusty_lr_core::Token::Term(TermType::Ident(None)),
-                ::rusty_lr_core::Token::Term(TermType::Question(None)),
-            ],
-        );
-        grammar.add_rule(
-            "TokenDef",
-            vec![
-                ::rusty_lr_core::Token::Term(TermType::Token(None)),
-                ::rusty_lr_core::Token::Term(TermType::Ident(None)),
-                ::rusty_lr_core::Token::NonTerm("RustCode"),
-                ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-        grammar.add_rule(
-            "TokenMapped",
-            vec![::rusty_lr_core::Token::NonTerm("SymbolPattern")],
-        );
-        grammar.add_rule(
-            "TokenMapped",
-            vec![
-                ::rusty_lr_core::Token::Term(TermType::Ident(None)),
-                ::rusty_lr_core::Token::Term(TermType::Equal(None)),
-                ::rusty_lr_core::Token::NonTerm("SymbolPattern"),
-            ],
-        );
-        grammar.add_rule(
-            "TokenTypeDef",
-            vec![
-                ::rusty_lr_core::Token::Term(TermType::TokenType(None)),
-                ::rusty_lr_core::Token::NonTerm("RustCode"),
-                ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-        grammar.add_rule(
-            "UserDataDef",
-            vec![
-                ::rusty_lr_core::Token::Term(TermType::UserData(None)),
-                ::rusty_lr_core::Token::NonTerm("RustCode"),
-                ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
-            ],
-        );
-        grammar.add_rule(
-            "__AnyTokenNoSemi__plus_",
-            vec![::rusty_lr_core::Token::NonTerm("AnyTokenNoSemi")],
-        );
-        grammar.add_rule(
-            "__AnyTokenNoSemi__plus_",
-            vec![
-                ::rusty_lr_core::Token::NonTerm("AnyTokenNoSemi"),
-                ::rusty_lr_core::Token::NonTerm("__AnyTokenNoSemi__plus_"),
-            ],
-        );
-        grammar.add_rule(
-            "__TokenMapped__plus_",
-            vec![::rusty_lr_core::Token::NonTerm("TokenMapped")],
-        );
-        grammar.add_rule(
-            "__TokenMapped__plus_",
-            vec![
-                ::rusty_lr_core::Token::NonTerm("__TokenMapped__plus_"),
-                ::rusty_lr_core::Token::NonTerm("TokenMapped"),
-            ],
-        );
-        grammar.add_rule("__TokenMapped__star_", vec![]);
-        grammar.add_rule(
-            "__TokenMapped__star_",
-            vec![::rusty_lr_core::Token::NonTerm("__TokenMapped__plus_")],
-        );
-        grammar.add_rule(
-            "<Augmented>",
-            vec![
-                ::rusty_lr_core::Token::NonTerm("Grammar"),
-                ::rusty_lr_core::Token::Term(TermType::Eof),
-            ],
-        );
-        let parser = match grammar.build_lalr("<Augmented>") {
-            Ok(parser) => parser,
-            Err(err) => {
-                panic!("Error building LR parser:\n{:?}", err);
-            }
-        };
-        let rules = parser.rules;
-        let states = parser.states;
+        let rules = vec![
+            ::rusty_lr_core::ProductionRule {
+                name: "Action",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Group(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Action",
+                rule: vec![],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Ident(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Colon(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Pipe(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Percent(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Left(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Right(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Token(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Start(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::EofDef(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::TokenType(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::UserData(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::ErrorType(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Group(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Literal(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Equal(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Plus(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Star(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Question(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::OtherPunct(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "AnyTokenNoSemi",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::ModulePrefix(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "EofDef",
+                rule: vec![
+                    ::rusty_lr_core::Token::Term(TermType::EofDef(None)),
+                    ::rusty_lr_core::Token::NonTerm("RustCode"),
+                    ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "ErrorDef",
+                rule: vec![
+                    ::rusty_lr_core::Token::Term(TermType::ErrorType(None)),
+                    ::rusty_lr_core::Token::NonTerm("RustCode"),
+                    ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![
+                    ::rusty_lr_core::Token::NonTerm("Rule"),
+                    ::rusty_lr_core::Token::NonTerm("Grammar"),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![::rusty_lr_core::Token::NonTerm("Rule")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![
+                    ::rusty_lr_core::Token::NonTerm("TokenDef"),
+                    ::rusty_lr_core::Token::NonTerm("Grammar"),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![::rusty_lr_core::Token::NonTerm("TokenDef")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![
+                    ::rusty_lr_core::Token::NonTerm("StartDef"),
+                    ::rusty_lr_core::Token::NonTerm("Grammar"),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![::rusty_lr_core::Token::NonTerm("StartDef")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![
+                    ::rusty_lr_core::Token::NonTerm("EofDef"),
+                    ::rusty_lr_core::Token::NonTerm("Grammar"),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![::rusty_lr_core::Token::NonTerm("EofDef")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![
+                    ::rusty_lr_core::Token::NonTerm("TokenTypeDef"),
+                    ::rusty_lr_core::Token::NonTerm("Grammar"),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![::rusty_lr_core::Token::NonTerm("TokenTypeDef")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![
+                    ::rusty_lr_core::Token::NonTerm("UserDataDef"),
+                    ::rusty_lr_core::Token::NonTerm("Grammar"),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![::rusty_lr_core::Token::NonTerm("UserDataDef")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![
+                    ::rusty_lr_core::Token::NonTerm("ReduceDef"),
+                    ::rusty_lr_core::Token::NonTerm("Grammar"),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![::rusty_lr_core::Token::NonTerm("ReduceDef")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![
+                    ::rusty_lr_core::Token::NonTerm("ErrorDef"),
+                    ::rusty_lr_core::Token::NonTerm("Grammar"),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![::rusty_lr_core::Token::NonTerm("ErrorDef")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![
+                    ::rusty_lr_core::Token::NonTerm("ModulePrefixDef"),
+                    ::rusty_lr_core::Token::NonTerm("Grammar"),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Grammar",
+                rule: vec![::rusty_lr_core::Token::NonTerm("ModulePrefixDef")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "ModulePrefixDef",
+                rule: vec![
+                    ::rusty_lr_core::Token::Term(TermType::ModulePrefix(None)),
+                    ::rusty_lr_core::Token::NonTerm("RustCode"),
+                    ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "ReduceDef",
+                rule: vec![
+                    ::rusty_lr_core::Token::Term(TermType::Left(None)),
+                    ::rusty_lr_core::Token::Term(TermType::Ident(None)),
+                    ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "ReduceDef",
+                rule: vec![
+                    ::rusty_lr_core::Token::Term(TermType::Right(None)),
+                    ::rusty_lr_core::Token::Term(TermType::Ident(None)),
+                    ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "Rule",
+                rule: vec![
+                    ::rusty_lr_core::Token::Term(TermType::Ident(None)),
+                    ::rusty_lr_core::Token::NonTerm("RuleType"),
+                    ::rusty_lr_core::Token::Term(TermType::Colon(None)),
+                    ::rusty_lr_core::Token::NonTerm("RuleLines"),
+                    ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "RuleDef",
+                rule: vec![::rusty_lr_core::Token::NonTerm("__TokenMapped__star_")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "RuleLine",
+                rule: vec![
+                    ::rusty_lr_core::Token::NonTerm("RuleDef"),
+                    ::rusty_lr_core::Token::NonTerm("Action"),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "RuleLines",
+                rule: vec![
+                    ::rusty_lr_core::Token::NonTerm("RuleLines"),
+                    ::rusty_lr_core::Token::Term(TermType::Pipe(None)),
+                    ::rusty_lr_core::Token::NonTerm("RuleLine"),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "RuleLines",
+                rule: vec![::rusty_lr_core::Token::NonTerm("RuleLine")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "RuleType",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Group(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "RuleType",
+                rule: vec![],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "RustCode",
+                rule: vec![::rusty_lr_core::Token::NonTerm("__AnyTokenNoSemi__plus_")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "StartDef",
+                rule: vec![
+                    ::rusty_lr_core::Token::Term(TermType::Start(None)),
+                    ::rusty_lr_core::Token::Term(TermType::Ident(None)),
+                    ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "SymbolPattern",
+                rule: vec![::rusty_lr_core::Token::Term(TermType::Ident(None))],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "SymbolPattern",
+                rule: vec![
+                    ::rusty_lr_core::Token::Term(TermType::Ident(None)),
+                    ::rusty_lr_core::Token::Term(TermType::Star(None)),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "SymbolPattern",
+                rule: vec![
+                    ::rusty_lr_core::Token::Term(TermType::Ident(None)),
+                    ::rusty_lr_core::Token::Term(TermType::Plus(None)),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "SymbolPattern",
+                rule: vec![
+                    ::rusty_lr_core::Token::Term(TermType::Ident(None)),
+                    ::rusty_lr_core::Token::Term(TermType::Question(None)),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "TokenDef",
+                rule: vec![
+                    ::rusty_lr_core::Token::Term(TermType::Token(None)),
+                    ::rusty_lr_core::Token::Term(TermType::Ident(None)),
+                    ::rusty_lr_core::Token::NonTerm("RustCode"),
+                    ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "TokenMapped",
+                rule: vec![::rusty_lr_core::Token::NonTerm("SymbolPattern")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "TokenMapped",
+                rule: vec![
+                    ::rusty_lr_core::Token::Term(TermType::Ident(None)),
+                    ::rusty_lr_core::Token::Term(TermType::Equal(None)),
+                    ::rusty_lr_core::Token::NonTerm("SymbolPattern"),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "TokenTypeDef",
+                rule: vec![
+                    ::rusty_lr_core::Token::Term(TermType::TokenType(None)),
+                    ::rusty_lr_core::Token::NonTerm("RustCode"),
+                    ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "UserDataDef",
+                rule: vec![
+                    ::rusty_lr_core::Token::Term(TermType::UserData(None)),
+                    ::rusty_lr_core::Token::NonTerm("RustCode"),
+                    ::rusty_lr_core::Token::Term(TermType::Semicolon(None)),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "__AnyTokenNoSemi__plus_",
+                rule: vec![::rusty_lr_core::Token::NonTerm("AnyTokenNoSemi")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "__AnyTokenNoSemi__plus_",
+                rule: vec![
+                    ::rusty_lr_core::Token::NonTerm("AnyTokenNoSemi"),
+                    ::rusty_lr_core::Token::NonTerm("__AnyTokenNoSemi__plus_"),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "__TokenMapped__plus_",
+                rule: vec![::rusty_lr_core::Token::NonTerm("TokenMapped")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "__TokenMapped__plus_",
+                rule: vec![
+                    ::rusty_lr_core::Token::NonTerm("__TokenMapped__plus_"),
+                    ::rusty_lr_core::Token::NonTerm("TokenMapped"),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "__TokenMapped__star_",
+                rule: vec![],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "__TokenMapped__star_",
+                rule: vec![::rusty_lr_core::Token::NonTerm("__TokenMapped__plus_")],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: "<Augmented>",
+                rule: vec![
+                    ::rusty_lr_core::Token::NonTerm("Grammar"),
+                    ::rusty_lr_core::Token::Term(TermType::Eof),
+                ],
+            },
+        ];
+        let rustylr_macrogenerated_lookaheads_0 = std::collections::BTreeSet::from([
+            TermType::Eof,
+            TermType::EofDef(None),
+            TermType::ErrorType(None),
+            TermType::Ident(None),
+            TermType::Left(None),
+            TermType::ModulePrefix(None),
+            TermType::Right(None),
+            TermType::Start(None),
+            TermType::Token(None),
+            TermType::TokenType(None),
+            TermType::UserData(None),
+        ]);
+        let rustylr_macrogenerated_lookaheads_1 = std::collections::BTreeSet::from([TermType::Eof]);
+        let rustylr_macrogenerated_lookaheads_2 = std::collections::BTreeSet::from([]);
+        let rustylr_macrogenerated_lookaheads_3 = std::collections::BTreeSet::from([
+            TermType::Colon(None),
+            TermType::EofDef(None),
+            TermType::Equal(None),
+            TermType::ErrorType(None),
+            TermType::Group(None),
+            TermType::Ident(None),
+            TermType::Left(None),
+            TermType::Literal(None),
+            TermType::ModulePrefix(None),
+            TermType::OtherPunct(None),
+            TermType::Percent(None),
+            TermType::Pipe(None),
+            TermType::Plus(None),
+            TermType::Question(None),
+            TermType::Right(None),
+            TermType::Semicolon(None),
+            TermType::Star(None),
+            TermType::Start(None),
+            TermType::Token(None),
+            TermType::TokenType(None),
+            TermType::UserData(None),
+        ]);
+        let rustylr_macrogenerated_lookaheads_4 =
+            std::collections::BTreeSet::from([TermType::Semicolon(None)]);
+        let rustylr_macrogenerated_lookaheads_5 =
+            std::collections::BTreeSet::from([TermType::Colon(None)]);
+        let rustylr_macrogenerated_lookaheads_6 = std::collections::BTreeSet::from([
+            TermType::Group(None),
+            TermType::Pipe(None),
+            TermType::Semicolon(None),
+        ]);
+        let rustylr_macrogenerated_lookaheads_7 =
+            std::collections::BTreeSet::from([TermType::Pipe(None), TermType::Semicolon(None)]);
+        let rustylr_macrogenerated_lookaheads_8 = std::collections::BTreeSet::from([
+            TermType::Group(None),
+            TermType::Ident(None),
+            TermType::Pipe(None),
+            TermType::Semicolon(None),
+        ]);
+        let mut states = Vec::with_capacity(96usize);
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::EofDef(None), 1usize),
+                (TermType::ErrorType(None), 27usize),
+                (TermType::Ident(None), 30usize),
+                (TermType::Left(None), 54usize),
+                (TermType::ModulePrefix(None), 57usize),
+                (TermType::Right(None), 60usize),
+                (TermType::Start(None), 63usize),
+                (TermType::Token(None), 66usize),
+                (TermType::TokenType(None), 70usize),
+                (TermType::UserData(None), 73usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("EofDef", 76usize),
+                ("ErrorDef", 77usize),
+                ("Grammar", 94usize),
+                ("ModulePrefixDef", 79usize),
+                ("ReduceDef", 81usize),
+                ("Rule", 83usize),
+                ("StartDef", 85usize),
+                ("TokenDef", 87usize),
+                ("TokenTypeDef", 89usize),
+                ("UserDataDef", 91usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 22usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 23usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 24usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 25usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 26usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 27usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 28usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 29usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 30usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 31usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 32usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 33usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 34usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 35usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 36usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 37usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 38usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 39usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 40usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 41usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 42usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 43usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 44usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 45usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 53usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 58usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 61usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 62usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 69usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_2.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::Colon(None), 2usize),
+                (TermType::EofDef(None), 3usize),
+                (TermType::Equal(None), 4usize),
+                (TermType::ErrorType(None), 5usize),
+                (TermType::Group(None), 6usize),
+                (TermType::Ident(None), 7usize),
+                (TermType::Left(None), 8usize),
+                (TermType::Literal(None), 9usize),
+                (TermType::ModulePrefix(None), 10usize),
+                (TermType::OtherPunct(None), 11usize),
+                (TermType::Percent(None), 12usize),
+                (TermType::Pipe(None), 13usize),
+                (TermType::Plus(None), 14usize),
+                (TermType::Question(None), 15usize),
+                (TermType::Right(None), 16usize),
+                (TermType::Star(None), 17usize),
+                (TermType::Start(None), 18usize),
+                (TermType::Token(None), 19usize),
+                (TermType::TokenType(None), 20usize),
+                (TermType::UserData(None), 21usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("AnyTokenNoSemi", 22usize),
+                ("RustCode", 24usize),
+                ("__AnyTokenNoSemi__plus_", 26usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 2usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 3usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 4usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 5usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 6usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 7usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 8usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 9usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 10usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 11usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 12usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 13usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 14usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 15usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 16usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 17usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 18usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 19usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 20usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 21usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 22usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 52usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 63usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 64usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 3usize),
+                (TermType::EofDef(None), 3usize),
+                (TermType::Equal(None), 3usize),
+                (TermType::ErrorType(None), 3usize),
+                (TermType::Group(None), 3usize),
+                (TermType::Ident(None), 3usize),
+                (TermType::Left(None), 3usize),
+                (TermType::Literal(None), 3usize),
+                (TermType::ModulePrefix(None), 3usize),
+                (TermType::OtherPunct(None), 3usize),
+                (TermType::Percent(None), 3usize),
+                (TermType::Pipe(None), 3usize),
+                (TermType::Plus(None), 3usize),
+                (TermType::Question(None), 3usize),
+                (TermType::Right(None), 3usize),
+                (TermType::Semicolon(None), 3usize),
+                (TermType::Star(None), 3usize),
+                (TermType::Start(None), 3usize),
+                (TermType::Token(None), 3usize),
+                (TermType::TokenType(None), 3usize),
+                (TermType::UserData(None), 3usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 3usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 10usize),
+                (TermType::EofDef(None), 10usize),
+                (TermType::Equal(None), 10usize),
+                (TermType::ErrorType(None), 10usize),
+                (TermType::Group(None), 10usize),
+                (TermType::Ident(None), 10usize),
+                (TermType::Left(None), 10usize),
+                (TermType::Literal(None), 10usize),
+                (TermType::ModulePrefix(None), 10usize),
+                (TermType::OtherPunct(None), 10usize),
+                (TermType::Percent(None), 10usize),
+                (TermType::Pipe(None), 10usize),
+                (TermType::Plus(None), 10usize),
+                (TermType::Question(None), 10usize),
+                (TermType::Right(None), 10usize),
+                (TermType::Semicolon(None), 10usize),
+                (TermType::Star(None), 10usize),
+                (TermType::Start(None), 10usize),
+                (TermType::Token(None), 10usize),
+                (TermType::TokenType(None), 10usize),
+                (TermType::UserData(None), 10usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 10usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 16usize),
+                (TermType::EofDef(None), 16usize),
+                (TermType::Equal(None), 16usize),
+                (TermType::ErrorType(None), 16usize),
+                (TermType::Group(None), 16usize),
+                (TermType::Ident(None), 16usize),
+                (TermType::Left(None), 16usize),
+                (TermType::Literal(None), 16usize),
+                (TermType::ModulePrefix(None), 16usize),
+                (TermType::OtherPunct(None), 16usize),
+                (TermType::Percent(None), 16usize),
+                (TermType::Pipe(None), 16usize),
+                (TermType::Plus(None), 16usize),
+                (TermType::Question(None), 16usize),
+                (TermType::Right(None), 16usize),
+                (TermType::Semicolon(None), 16usize),
+                (TermType::Star(None), 16usize),
+                (TermType::Start(None), 16usize),
+                (TermType::Token(None), 16usize),
+                (TermType::TokenType(None), 16usize),
+                (TermType::UserData(None), 16usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 16usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 13usize),
+                (TermType::EofDef(None), 13usize),
+                (TermType::Equal(None), 13usize),
+                (TermType::ErrorType(None), 13usize),
+                (TermType::Group(None), 13usize),
+                (TermType::Ident(None), 13usize),
+                (TermType::Left(None), 13usize),
+                (TermType::Literal(None), 13usize),
+                (TermType::ModulePrefix(None), 13usize),
+                (TermType::OtherPunct(None), 13usize),
+                (TermType::Percent(None), 13usize),
+                (TermType::Pipe(None), 13usize),
+                (TermType::Plus(None), 13usize),
+                (TermType::Question(None), 13usize),
+                (TermType::Right(None), 13usize),
+                (TermType::Semicolon(None), 13usize),
+                (TermType::Star(None), 13usize),
+                (TermType::Start(None), 13usize),
+                (TermType::Token(None), 13usize),
+                (TermType::TokenType(None), 13usize),
+                (TermType::UserData(None), 13usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 13usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 14usize),
+                (TermType::EofDef(None), 14usize),
+                (TermType::Equal(None), 14usize),
+                (TermType::ErrorType(None), 14usize),
+                (TermType::Group(None), 14usize),
+                (TermType::Ident(None), 14usize),
+                (TermType::Left(None), 14usize),
+                (TermType::Literal(None), 14usize),
+                (TermType::ModulePrefix(None), 14usize),
+                (TermType::OtherPunct(None), 14usize),
+                (TermType::Percent(None), 14usize),
+                (TermType::Pipe(None), 14usize),
+                (TermType::Plus(None), 14usize),
+                (TermType::Question(None), 14usize),
+                (TermType::Right(None), 14usize),
+                (TermType::Semicolon(None), 14usize),
+                (TermType::Star(None), 14usize),
+                (TermType::Start(None), 14usize),
+                (TermType::Token(None), 14usize),
+                (TermType::TokenType(None), 14usize),
+                (TermType::UserData(None), 14usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 14usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 2usize),
+                (TermType::EofDef(None), 2usize),
+                (TermType::Equal(None), 2usize),
+                (TermType::ErrorType(None), 2usize),
+                (TermType::Group(None), 2usize),
+                (TermType::Ident(None), 2usize),
+                (TermType::Left(None), 2usize),
+                (TermType::Literal(None), 2usize),
+                (TermType::ModulePrefix(None), 2usize),
+                (TermType::OtherPunct(None), 2usize),
+                (TermType::Percent(None), 2usize),
+                (TermType::Pipe(None), 2usize),
+                (TermType::Plus(None), 2usize),
+                (TermType::Question(None), 2usize),
+                (TermType::Right(None), 2usize),
+                (TermType::Semicolon(None), 2usize),
+                (TermType::Star(None), 2usize),
+                (TermType::Start(None), 2usize),
+                (TermType::Token(None), 2usize),
+                (TermType::TokenType(None), 2usize),
+                (TermType::UserData(None), 2usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 2usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 6usize),
+                (TermType::EofDef(None), 6usize),
+                (TermType::Equal(None), 6usize),
+                (TermType::ErrorType(None), 6usize),
+                (TermType::Group(None), 6usize),
+                (TermType::Ident(None), 6usize),
+                (TermType::Left(None), 6usize),
+                (TermType::Literal(None), 6usize),
+                (TermType::ModulePrefix(None), 6usize),
+                (TermType::OtherPunct(None), 6usize),
+                (TermType::Percent(None), 6usize),
+                (TermType::Pipe(None), 6usize),
+                (TermType::Plus(None), 6usize),
+                (TermType::Question(None), 6usize),
+                (TermType::Right(None), 6usize),
+                (TermType::Semicolon(None), 6usize),
+                (TermType::Star(None), 6usize),
+                (TermType::Start(None), 6usize),
+                (TermType::Token(None), 6usize),
+                (TermType::TokenType(None), 6usize),
+                (TermType::UserData(None), 6usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 6usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 15usize),
+                (TermType::EofDef(None), 15usize),
+                (TermType::Equal(None), 15usize),
+                (TermType::ErrorType(None), 15usize),
+                (TermType::Group(None), 15usize),
+                (TermType::Ident(None), 15usize),
+                (TermType::Left(None), 15usize),
+                (TermType::Literal(None), 15usize),
+                (TermType::ModulePrefix(None), 15usize),
+                (TermType::OtherPunct(None), 15usize),
+                (TermType::Percent(None), 15usize),
+                (TermType::Pipe(None), 15usize),
+                (TermType::Plus(None), 15usize),
+                (TermType::Question(None), 15usize),
+                (TermType::Right(None), 15usize),
+                (TermType::Semicolon(None), 15usize),
+                (TermType::Star(None), 15usize),
+                (TermType::Start(None), 15usize),
+                (TermType::Token(None), 15usize),
+                (TermType::TokenType(None), 15usize),
+                (TermType::UserData(None), 15usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 15usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 21usize),
+                (TermType::EofDef(None), 21usize),
+                (TermType::Equal(None), 21usize),
+                (TermType::ErrorType(None), 21usize),
+                (TermType::Group(None), 21usize),
+                (TermType::Ident(None), 21usize),
+                (TermType::Left(None), 21usize),
+                (TermType::Literal(None), 21usize),
+                (TermType::ModulePrefix(None), 21usize),
+                (TermType::OtherPunct(None), 21usize),
+                (TermType::Percent(None), 21usize),
+                (TermType::Pipe(None), 21usize),
+                (TermType::Plus(None), 21usize),
+                (TermType::Question(None), 21usize),
+                (TermType::Right(None), 21usize),
+                (TermType::Semicolon(None), 21usize),
+                (TermType::Star(None), 21usize),
+                (TermType::Start(None), 21usize),
+                (TermType::Token(None), 21usize),
+                (TermType::TokenType(None), 21usize),
+                (TermType::UserData(None), 21usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 21usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 20usize),
+                (TermType::EofDef(None), 20usize),
+                (TermType::Equal(None), 20usize),
+                (TermType::ErrorType(None), 20usize),
+                (TermType::Group(None), 20usize),
+                (TermType::Ident(None), 20usize),
+                (TermType::Left(None), 20usize),
+                (TermType::Literal(None), 20usize),
+                (TermType::ModulePrefix(None), 20usize),
+                (TermType::OtherPunct(None), 20usize),
+                (TermType::Percent(None), 20usize),
+                (TermType::Pipe(None), 20usize),
+                (TermType::Plus(None), 20usize),
+                (TermType::Question(None), 20usize),
+                (TermType::Right(None), 20usize),
+                (TermType::Semicolon(None), 20usize),
+                (TermType::Star(None), 20usize),
+                (TermType::Start(None), 20usize),
+                (TermType::Token(None), 20usize),
+                (TermType::TokenType(None), 20usize),
+                (TermType::UserData(None), 20usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 20usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 5usize),
+                (TermType::EofDef(None), 5usize),
+                (TermType::Equal(None), 5usize),
+                (TermType::ErrorType(None), 5usize),
+                (TermType::Group(None), 5usize),
+                (TermType::Ident(None), 5usize),
+                (TermType::Left(None), 5usize),
+                (TermType::Literal(None), 5usize),
+                (TermType::ModulePrefix(None), 5usize),
+                (TermType::OtherPunct(None), 5usize),
+                (TermType::Percent(None), 5usize),
+                (TermType::Pipe(None), 5usize),
+                (TermType::Plus(None), 5usize),
+                (TermType::Question(None), 5usize),
+                (TermType::Right(None), 5usize),
+                (TermType::Semicolon(None), 5usize),
+                (TermType::Star(None), 5usize),
+                (TermType::Start(None), 5usize),
+                (TermType::Token(None), 5usize),
+                (TermType::TokenType(None), 5usize),
+                (TermType::UserData(None), 5usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 5usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 4usize),
+                (TermType::EofDef(None), 4usize),
+                (TermType::Equal(None), 4usize),
+                (TermType::ErrorType(None), 4usize),
+                (TermType::Group(None), 4usize),
+                (TermType::Ident(None), 4usize),
+                (TermType::Left(None), 4usize),
+                (TermType::Literal(None), 4usize),
+                (TermType::ModulePrefix(None), 4usize),
+                (TermType::OtherPunct(None), 4usize),
+                (TermType::Percent(None), 4usize),
+                (TermType::Pipe(None), 4usize),
+                (TermType::Plus(None), 4usize),
+                (TermType::Question(None), 4usize),
+                (TermType::Right(None), 4usize),
+                (TermType::Semicolon(None), 4usize),
+                (TermType::Star(None), 4usize),
+                (TermType::Start(None), 4usize),
+                (TermType::Token(None), 4usize),
+                (TermType::TokenType(None), 4usize),
+                (TermType::UserData(None), 4usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 4usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 17usize),
+                (TermType::EofDef(None), 17usize),
+                (TermType::Equal(None), 17usize),
+                (TermType::ErrorType(None), 17usize),
+                (TermType::Group(None), 17usize),
+                (TermType::Ident(None), 17usize),
+                (TermType::Left(None), 17usize),
+                (TermType::Literal(None), 17usize),
+                (TermType::ModulePrefix(None), 17usize),
+                (TermType::OtherPunct(None), 17usize),
+                (TermType::Percent(None), 17usize),
+                (TermType::Pipe(None), 17usize),
+                (TermType::Plus(None), 17usize),
+                (TermType::Question(None), 17usize),
+                (TermType::Right(None), 17usize),
+                (TermType::Semicolon(None), 17usize),
+                (TermType::Star(None), 17usize),
+                (TermType::Start(None), 17usize),
+                (TermType::Token(None), 17usize),
+                (TermType::TokenType(None), 17usize),
+                (TermType::UserData(None), 17usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 17usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 19usize),
+                (TermType::EofDef(None), 19usize),
+                (TermType::Equal(None), 19usize),
+                (TermType::ErrorType(None), 19usize),
+                (TermType::Group(None), 19usize),
+                (TermType::Ident(None), 19usize),
+                (TermType::Left(None), 19usize),
+                (TermType::Literal(None), 19usize),
+                (TermType::ModulePrefix(None), 19usize),
+                (TermType::OtherPunct(None), 19usize),
+                (TermType::Percent(None), 19usize),
+                (TermType::Pipe(None), 19usize),
+                (TermType::Plus(None), 19usize),
+                (TermType::Question(None), 19usize),
+                (TermType::Right(None), 19usize),
+                (TermType::Semicolon(None), 19usize),
+                (TermType::Star(None), 19usize),
+                (TermType::Start(None), 19usize),
+                (TermType::Token(None), 19usize),
+                (TermType::TokenType(None), 19usize),
+                (TermType::UserData(None), 19usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 19usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 7usize),
+                (TermType::EofDef(None), 7usize),
+                (TermType::Equal(None), 7usize),
+                (TermType::ErrorType(None), 7usize),
+                (TermType::Group(None), 7usize),
+                (TermType::Ident(None), 7usize),
+                (TermType::Left(None), 7usize),
+                (TermType::Literal(None), 7usize),
+                (TermType::ModulePrefix(None), 7usize),
+                (TermType::OtherPunct(None), 7usize),
+                (TermType::Percent(None), 7usize),
+                (TermType::Pipe(None), 7usize),
+                (TermType::Plus(None), 7usize),
+                (TermType::Question(None), 7usize),
+                (TermType::Right(None), 7usize),
+                (TermType::Semicolon(None), 7usize),
+                (TermType::Star(None), 7usize),
+                (TermType::Start(None), 7usize),
+                (TermType::Token(None), 7usize),
+                (TermType::TokenType(None), 7usize),
+                (TermType::UserData(None), 7usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 7usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 18usize),
+                (TermType::EofDef(None), 18usize),
+                (TermType::Equal(None), 18usize),
+                (TermType::ErrorType(None), 18usize),
+                (TermType::Group(None), 18usize),
+                (TermType::Ident(None), 18usize),
+                (TermType::Left(None), 18usize),
+                (TermType::Literal(None), 18usize),
+                (TermType::ModulePrefix(None), 18usize),
+                (TermType::OtherPunct(None), 18usize),
+                (TermType::Percent(None), 18usize),
+                (TermType::Pipe(None), 18usize),
+                (TermType::Plus(None), 18usize),
+                (TermType::Question(None), 18usize),
+                (TermType::Right(None), 18usize),
+                (TermType::Semicolon(None), 18usize),
+                (TermType::Star(None), 18usize),
+                (TermType::Start(None), 18usize),
+                (TermType::Token(None), 18usize),
+                (TermType::TokenType(None), 18usize),
+                (TermType::UserData(None), 18usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 18usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 9usize),
+                (TermType::EofDef(None), 9usize),
+                (TermType::Equal(None), 9usize),
+                (TermType::ErrorType(None), 9usize),
+                (TermType::Group(None), 9usize),
+                (TermType::Ident(None), 9usize),
+                (TermType::Left(None), 9usize),
+                (TermType::Literal(None), 9usize),
+                (TermType::ModulePrefix(None), 9usize),
+                (TermType::OtherPunct(None), 9usize),
+                (TermType::Percent(None), 9usize),
+                (TermType::Pipe(None), 9usize),
+                (TermType::Plus(None), 9usize),
+                (TermType::Question(None), 9usize),
+                (TermType::Right(None), 9usize),
+                (TermType::Semicolon(None), 9usize),
+                (TermType::Star(None), 9usize),
+                (TermType::Start(None), 9usize),
+                (TermType::Token(None), 9usize),
+                (TermType::TokenType(None), 9usize),
+                (TermType::UserData(None), 9usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 9usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 8usize),
+                (TermType::EofDef(None), 8usize),
+                (TermType::Equal(None), 8usize),
+                (TermType::ErrorType(None), 8usize),
+                (TermType::Group(None), 8usize),
+                (TermType::Ident(None), 8usize),
+                (TermType::Left(None), 8usize),
+                (TermType::Literal(None), 8usize),
+                (TermType::ModulePrefix(None), 8usize),
+                (TermType::OtherPunct(None), 8usize),
+                (TermType::Percent(None), 8usize),
+                (TermType::Pipe(None), 8usize),
+                (TermType::Plus(None), 8usize),
+                (TermType::Question(None), 8usize),
+                (TermType::Right(None), 8usize),
+                (TermType::Semicolon(None), 8usize),
+                (TermType::Star(None), 8usize),
+                (TermType::Start(None), 8usize),
+                (TermType::Token(None), 8usize),
+                (TermType::TokenType(None), 8usize),
+                (TermType::UserData(None), 8usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 8usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 11usize),
+                (TermType::EofDef(None), 11usize),
+                (TermType::Equal(None), 11usize),
+                (TermType::ErrorType(None), 11usize),
+                (TermType::Group(None), 11usize),
+                (TermType::Ident(None), 11usize),
+                (TermType::Left(None), 11usize),
+                (TermType::Literal(None), 11usize),
+                (TermType::ModulePrefix(None), 11usize),
+                (TermType::OtherPunct(None), 11usize),
+                (TermType::Percent(None), 11usize),
+                (TermType::Pipe(None), 11usize),
+                (TermType::Plus(None), 11usize),
+                (TermType::Question(None), 11usize),
+                (TermType::Right(None), 11usize),
+                (TermType::Semicolon(None), 11usize),
+                (TermType::Star(None), 11usize),
+                (TermType::Start(None), 11usize),
+                (TermType::Token(None), 11usize),
+                (TermType::TokenType(None), 11usize),
+                (TermType::UserData(None), 11usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 11usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Colon(None), 12usize),
+                (TermType::EofDef(None), 12usize),
+                (TermType::Equal(None), 12usize),
+                (TermType::ErrorType(None), 12usize),
+                (TermType::Group(None), 12usize),
+                (TermType::Ident(None), 12usize),
+                (TermType::Left(None), 12usize),
+                (TermType::Literal(None), 12usize),
+                (TermType::ModulePrefix(None), 12usize),
+                (TermType::OtherPunct(None), 12usize),
+                (TermType::Percent(None), 12usize),
+                (TermType::Pipe(None), 12usize),
+                (TermType::Plus(None), 12usize),
+                (TermType::Question(None), 12usize),
+                (TermType::Right(None), 12usize),
+                (TermType::Semicolon(None), 12usize),
+                (TermType::Star(None), 12usize),
+                (TermType::Start(None), 12usize),
+                (TermType::Token(None), 12usize),
+                (TermType::TokenType(None), 12usize),
+                (TermType::UserData(None), 12usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 12usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_3.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::Colon(None), 2usize),
+                (TermType::EofDef(None), 3usize),
+                (TermType::Equal(None), 4usize),
+                (TermType::ErrorType(None), 5usize),
+                (TermType::Group(None), 6usize),
+                (TermType::Ident(None), 7usize),
+                (TermType::Left(None), 8usize),
+                (TermType::Literal(None), 9usize),
+                (TermType::ModulePrefix(None), 10usize),
+                (TermType::OtherPunct(None), 11usize),
+                (TermType::Percent(None), 12usize),
+                (TermType::Pipe(None), 13usize),
+                (TermType::Plus(None), 14usize),
+                (TermType::Question(None), 15usize),
+                (TermType::Right(None), 16usize),
+                (TermType::Star(None), 17usize),
+                (TermType::Start(None), 18usize),
+                (TermType::Token(None), 19usize),
+                (TermType::TokenType(None), 20usize),
+                (TermType::UserData(None), 21usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("AnyTokenNoSemi", 22usize),
+                ("__AnyTokenNoSemi__plus_", 23usize),
+            ]);
+            let reduce_map =
+                std::collections::HashMap::from([(TermType::Semicolon(None), 63usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 2usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 3usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 4usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 5usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 6usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 7usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 8usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 9usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 10usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 11usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 12usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 13usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 14usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 15usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 16usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 17usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 18usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 19usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 20usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 21usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 63usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 63usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 64usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 64usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map =
+                std::collections::HashMap::from([(TermType::Semicolon(None), 64usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 64usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_4.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Semicolon(None), 25usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 22usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Eof, 22usize),
+                (TermType::EofDef(None), 22usize),
+                (TermType::ErrorType(None), 22usize),
+                (TermType::Ident(None), 22usize),
+                (TermType::Left(None), 22usize),
+                (TermType::ModulePrefix(None), 22usize),
+                (TermType::Right(None), 22usize),
+                (TermType::Start(None), 22usize),
+                (TermType::Token(None), 22usize),
+                (TermType::TokenType(None), 22usize),
+                (TermType::UserData(None), 22usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 22usize,
+                        shifted: 3usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map =
+                std::collections::HashMap::from([(TermType::Semicolon(None), 52usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 52usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_4.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::Colon(None), 2usize),
+                (TermType::EofDef(None), 3usize),
+                (TermType::Equal(None), 4usize),
+                (TermType::ErrorType(None), 5usize),
+                (TermType::Group(None), 6usize),
+                (TermType::Ident(None), 7usize),
+                (TermType::Left(None), 8usize),
+                (TermType::Literal(None), 9usize),
+                (TermType::ModulePrefix(None), 10usize),
+                (TermType::OtherPunct(None), 11usize),
+                (TermType::Percent(None), 12usize),
+                (TermType::Pipe(None), 13usize),
+                (TermType::Plus(None), 14usize),
+                (TermType::Question(None), 15usize),
+                (TermType::Right(None), 16usize),
+                (TermType::Star(None), 17usize),
+                (TermType::Start(None), 18usize),
+                (TermType::Token(None), 19usize),
+                (TermType::TokenType(None), 20usize),
+                (TermType::UserData(None), 21usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("AnyTokenNoSemi", 22usize),
+                ("RustCode", 28usize),
+                ("__AnyTokenNoSemi__plus_", 26usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 2usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 3usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 4usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 5usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 6usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 7usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 8usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 9usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 10usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 11usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 12usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 13usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 14usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 15usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 16usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 17usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 18usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 19usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 20usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 21usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 23usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 52usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 63usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 64usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Semicolon(None), 29usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 23usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Eof, 23usize),
+                (TermType::EofDef(None), 23usize),
+                (TermType::ErrorType(None), 23usize),
+                (TermType::Ident(None), 23usize),
+                (TermType::Left(None), 23usize),
+                (TermType::ModulePrefix(None), 23usize),
+                (TermType::Right(None), 23usize),
+                (TermType::Start(None), 23usize),
+                (TermType::Token(None), 23usize),
+                (TermType::TokenType(None), 23usize),
+                (TermType::UserData(None), 23usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 23usize,
+                        shifted: 3usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Group(None), 31usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([("RuleType", 32usize)]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Colon(None), 51usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 45usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 50usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_5.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 51usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_5.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Colon(None), 50usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 50usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_5.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Colon(None), 33usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 45usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Ident(None), 34usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("RuleDef", 41usize),
+                ("RuleLine", 44usize),
+                ("RuleLines", 45usize),
+                ("SymbolPattern", 48usize),
+                ("TokenMapped", 49usize),
+                ("__TokenMapped__plus_", 50usize),
+                ("__TokenMapped__star_", 52usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Group(None), 67usize),
+                (TermType::Pipe(None), 67usize),
+                (TermType::Semicolon(None), 67usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 45usize,
+                            shifted: 3usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 46usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_6.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 47usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_7.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 48usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_7.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 49usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_7.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 54usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 55usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 56usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 57usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 59usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 60usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 65usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 66usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 67usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_6.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 68usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_6.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::Equal(None), 35usize),
+                (TermType::Plus(None), 37usize),
+                (TermType::Question(None), 38usize),
+                (TermType::Star(None), 39usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Group(None), 54usize),
+                (TermType::Ident(None), 54usize),
+                (TermType::Pipe(None), 54usize),
+                (TermType::Semicolon(None), 54usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 54usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 55usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 56usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 57usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 60usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Ident(None), 36usize)]);
+            let shift_goto_map_nonterm =
+                std::collections::HashMap::from([("SymbolPattern", 40usize)]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 54usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 55usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 56usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 57usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 60usize,
+                            shifted: 2usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::Plus(None), 37usize),
+                (TermType::Question(None), 38usize),
+                (TermType::Star(None), 39usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Group(None), 54usize),
+                (TermType::Ident(None), 54usize),
+                (TermType::Pipe(None), 54usize),
+                (TermType::Semicolon(None), 54usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 54usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 55usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 56usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 57usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Group(None), 56usize),
+                (TermType::Ident(None), 56usize),
+                (TermType::Pipe(None), 56usize),
+                (TermType::Semicolon(None), 56usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 56usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_8.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Group(None), 57usize),
+                (TermType::Ident(None), 57usize),
+                (TermType::Pipe(None), 57usize),
+                (TermType::Semicolon(None), 57usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 57usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_8.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Group(None), 55usize),
+                (TermType::Ident(None), 55usize),
+                (TermType::Pipe(None), 55usize),
+                (TermType::Semicolon(None), 55usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 55usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_8.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Group(None), 60usize),
+                (TermType::Ident(None), 60usize),
+                (TermType::Pipe(None), 60usize),
+                (TermType::Semicolon(None), 60usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 60usize,
+                        shifted: 3usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_8.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Group(None), 42usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([("Action", 43usize)]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Pipe(None), 1usize),
+                (TermType::Semicolon(None), 1usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 0usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_7.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 1usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_7.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 47usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_7.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Pipe(None), 0usize),
+                (TermType::Semicolon(None), 0usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 0usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_7.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Pipe(None), 47usize),
+                (TermType::Semicolon(None), 47usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 47usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_7.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Pipe(None), 49usize),
+                (TermType::Semicolon(None), 49usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 49usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_7.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::Pipe(None), 46usize),
+                (TermType::Semicolon(None), 53usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 45usize,
+                            shifted: 4usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 48usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_7.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Ident(None), 34usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("RuleDef", 41usize),
+                ("RuleLine", 47usize),
+                ("SymbolPattern", 48usize),
+                ("TokenMapped", 49usize),
+                ("__TokenMapped__plus_", 50usize),
+                ("__TokenMapped__star_", 52usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Group(None), 67usize),
+                (TermType::Pipe(None), 67usize),
+                (TermType::Semicolon(None), 67usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 46usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_6.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 47usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_7.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 48usize,
+                            shifted: 2usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_7.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 54usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 55usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 56usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 57usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 59usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 60usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 65usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 66usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 67usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_6.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 68usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_6.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Pipe(None), 48usize),
+                (TermType::Semicolon(None), 48usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 48usize,
+                        shifted: 3usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_7.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Group(None), 59usize),
+                (TermType::Ident(None), 59usize),
+                (TermType::Pipe(None), 59usize),
+                (TermType::Semicolon(None), 59usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 59usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_8.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Group(None), 65usize),
+                (TermType::Ident(None), 65usize),
+                (TermType::Pipe(None), 65usize),
+                (TermType::Semicolon(None), 65usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 65usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_8.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Ident(None), 34usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("SymbolPattern", 48usize),
+                ("TokenMapped", 51usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Group(None), 68usize),
+                (TermType::Pipe(None), 68usize),
+                (TermType::Semicolon(None), 68usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 54usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 55usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 56usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 57usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 59usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 60usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 66usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_8.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 68usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_6.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Group(None), 66usize),
+                (TermType::Ident(None), 66usize),
+                (TermType::Pipe(None), 66usize),
+                (TermType::Semicolon(None), 66usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 66usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_8.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Group(None), 46usize),
+                (TermType::Pipe(None), 46usize),
+                (TermType::Semicolon(None), 46usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 46usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_6.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Eof, 45usize),
+                (TermType::EofDef(None), 45usize),
+                (TermType::ErrorType(None), 45usize),
+                (TermType::Ident(None), 45usize),
+                (TermType::Left(None), 45usize),
+                (TermType::ModulePrefix(None), 45usize),
+                (TermType::Right(None), 45usize),
+                (TermType::Start(None), 45usize),
+                (TermType::Token(None), 45usize),
+                (TermType::TokenType(None), 45usize),
+                (TermType::UserData(None), 45usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 45usize,
+                        shifted: 5usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Ident(None), 55usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 43usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Semicolon(None), 56usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 43usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Eof, 43usize),
+                (TermType::EofDef(None), 43usize),
+                (TermType::ErrorType(None), 43usize),
+                (TermType::Ident(None), 43usize),
+                (TermType::Left(None), 43usize),
+                (TermType::ModulePrefix(None), 43usize),
+                (TermType::Right(None), 43usize),
+                (TermType::Start(None), 43usize),
+                (TermType::Token(None), 43usize),
+                (TermType::TokenType(None), 43usize),
+                (TermType::UserData(None), 43usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 43usize,
+                        shifted: 3usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::Colon(None), 2usize),
+                (TermType::EofDef(None), 3usize),
+                (TermType::Equal(None), 4usize),
+                (TermType::ErrorType(None), 5usize),
+                (TermType::Group(None), 6usize),
+                (TermType::Ident(None), 7usize),
+                (TermType::Left(None), 8usize),
+                (TermType::Literal(None), 9usize),
+                (TermType::ModulePrefix(None), 10usize),
+                (TermType::OtherPunct(None), 11usize),
+                (TermType::Percent(None), 12usize),
+                (TermType::Pipe(None), 13usize),
+                (TermType::Plus(None), 14usize),
+                (TermType::Question(None), 15usize),
+                (TermType::Right(None), 16usize),
+                (TermType::Star(None), 17usize),
+                (TermType::Start(None), 18usize),
+                (TermType::Token(None), 19usize),
+                (TermType::TokenType(None), 20usize),
+                (TermType::UserData(None), 21usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("AnyTokenNoSemi", 22usize),
+                ("RustCode", 58usize),
+                ("__AnyTokenNoSemi__plus_", 26usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 2usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 3usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 4usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 5usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 6usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 7usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 8usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 9usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 10usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 11usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 12usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 13usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 14usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 15usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 16usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 17usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 18usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 19usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 20usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 21usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 42usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 52usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 63usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 64usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Semicolon(None), 59usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 42usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Eof, 42usize),
+                (TermType::EofDef(None), 42usize),
+                (TermType::ErrorType(None), 42usize),
+                (TermType::Ident(None), 42usize),
+                (TermType::Left(None), 42usize),
+                (TermType::ModulePrefix(None), 42usize),
+                (TermType::Right(None), 42usize),
+                (TermType::Start(None), 42usize),
+                (TermType::Token(None), 42usize),
+                (TermType::TokenType(None), 42usize),
+                (TermType::UserData(None), 42usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 42usize,
+                        shifted: 3usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Ident(None), 61usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 44usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Semicolon(None), 62usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 44usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Eof, 44usize),
+                (TermType::EofDef(None), 44usize),
+                (TermType::ErrorType(None), 44usize),
+                (TermType::Ident(None), 44usize),
+                (TermType::Left(None), 44usize),
+                (TermType::ModulePrefix(None), 44usize),
+                (TermType::Right(None), 44usize),
+                (TermType::Start(None), 44usize),
+                (TermType::Token(None), 44usize),
+                (TermType::TokenType(None), 44usize),
+                (TermType::UserData(None), 44usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 44usize,
+                        shifted: 3usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Ident(None), 64usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 53usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Semicolon(None), 65usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 53usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Eof, 53usize),
+                (TermType::EofDef(None), 53usize),
+                (TermType::ErrorType(None), 53usize),
+                (TermType::Ident(None), 53usize),
+                (TermType::Left(None), 53usize),
+                (TermType::ModulePrefix(None), 53usize),
+                (TermType::Right(None), 53usize),
+                (TermType::Start(None), 53usize),
+                (TermType::Token(None), 53usize),
+                (TermType::TokenType(None), 53usize),
+                (TermType::UserData(None), 53usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 53usize,
+                        shifted: 3usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Ident(None), 67usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 58usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::Colon(None), 2usize),
+                (TermType::EofDef(None), 3usize),
+                (TermType::Equal(None), 4usize),
+                (TermType::ErrorType(None), 5usize),
+                (TermType::Group(None), 6usize),
+                (TermType::Ident(None), 7usize),
+                (TermType::Left(None), 8usize),
+                (TermType::Literal(None), 9usize),
+                (TermType::ModulePrefix(None), 10usize),
+                (TermType::OtherPunct(None), 11usize),
+                (TermType::Percent(None), 12usize),
+                (TermType::Pipe(None), 13usize),
+                (TermType::Plus(None), 14usize),
+                (TermType::Question(None), 15usize),
+                (TermType::Right(None), 16usize),
+                (TermType::Star(None), 17usize),
+                (TermType::Start(None), 18usize),
+                (TermType::Token(None), 19usize),
+                (TermType::TokenType(None), 20usize),
+                (TermType::UserData(None), 21usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("AnyTokenNoSemi", 22usize),
+                ("RustCode", 68usize),
+                ("__AnyTokenNoSemi__plus_", 26usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 2usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 3usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 4usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 5usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 6usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 7usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 8usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 9usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 10usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 11usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 12usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 13usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 14usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 15usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 16usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 17usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 18usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 19usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 20usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 21usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 52usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 58usize,
+                            shifted: 2usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 63usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 64usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Semicolon(None), 69usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 58usize,
+                        shifted: 3usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Eof, 58usize),
+                (TermType::EofDef(None), 58usize),
+                (TermType::ErrorType(None), 58usize),
+                (TermType::Ident(None), 58usize),
+                (TermType::Left(None), 58usize),
+                (TermType::ModulePrefix(None), 58usize),
+                (TermType::Right(None), 58usize),
+                (TermType::Start(None), 58usize),
+                (TermType::Token(None), 58usize),
+                (TermType::TokenType(None), 58usize),
+                (TermType::UserData(None), 58usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 58usize,
+                        shifted: 4usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::Colon(None), 2usize),
+                (TermType::EofDef(None), 3usize),
+                (TermType::Equal(None), 4usize),
+                (TermType::ErrorType(None), 5usize),
+                (TermType::Group(None), 6usize),
+                (TermType::Ident(None), 7usize),
+                (TermType::Left(None), 8usize),
+                (TermType::Literal(None), 9usize),
+                (TermType::ModulePrefix(None), 10usize),
+                (TermType::OtherPunct(None), 11usize),
+                (TermType::Percent(None), 12usize),
+                (TermType::Pipe(None), 13usize),
+                (TermType::Plus(None), 14usize),
+                (TermType::Question(None), 15usize),
+                (TermType::Right(None), 16usize),
+                (TermType::Star(None), 17usize),
+                (TermType::Start(None), 18usize),
+                (TermType::Token(None), 19usize),
+                (TermType::TokenType(None), 20usize),
+                (TermType::UserData(None), 21usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("AnyTokenNoSemi", 22usize),
+                ("RustCode", 71usize),
+                ("__AnyTokenNoSemi__plus_", 26usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 2usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 3usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 4usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 5usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 6usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 7usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 8usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 9usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 10usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 11usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 12usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 13usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 14usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 15usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 16usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 17usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 18usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 19usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 20usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 21usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 52usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 61usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 63usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 64usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Semicolon(None), 72usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 61usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Eof, 61usize),
+                (TermType::EofDef(None), 61usize),
+                (TermType::ErrorType(None), 61usize),
+                (TermType::Ident(None), 61usize),
+                (TermType::Left(None), 61usize),
+                (TermType::ModulePrefix(None), 61usize),
+                (TermType::Right(None), 61usize),
+                (TermType::Start(None), 61usize),
+                (TermType::Token(None), 61usize),
+                (TermType::TokenType(None), 61usize),
+                (TermType::UserData(None), 61usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 61usize,
+                        shifted: 3usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::Colon(None), 2usize),
+                (TermType::EofDef(None), 3usize),
+                (TermType::Equal(None), 4usize),
+                (TermType::ErrorType(None), 5usize),
+                (TermType::Group(None), 6usize),
+                (TermType::Ident(None), 7usize),
+                (TermType::Left(None), 8usize),
+                (TermType::Literal(None), 9usize),
+                (TermType::ModulePrefix(None), 10usize),
+                (TermType::OtherPunct(None), 11usize),
+                (TermType::Percent(None), 12usize),
+                (TermType::Pipe(None), 13usize),
+                (TermType::Plus(None), 14usize),
+                (TermType::Question(None), 15usize),
+                (TermType::Right(None), 16usize),
+                (TermType::Star(None), 17usize),
+                (TermType::Start(None), 18usize),
+                (TermType::Token(None), 19usize),
+                (TermType::TokenType(None), 20usize),
+                (TermType::UserData(None), 21usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("AnyTokenNoSemi", 22usize),
+                ("RustCode", 74usize),
+                ("__AnyTokenNoSemi__plus_", 26usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 2usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 3usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 4usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 5usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 6usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 7usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 8usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 9usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 10usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 11usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 12usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 13usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 14usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 15usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 16usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 17usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 18usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 19usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 20usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 21usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_3.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 52usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 62usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 63usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 64usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_4.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term =
+                std::collections::HashMap::from([(TermType::Semicolon(None), 75usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 62usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([
+                (TermType::Eof, 62usize),
+                (TermType::EofDef(None), 62usize),
+                (TermType::ErrorType(None), 62usize),
+                (TermType::Ident(None), 62usize),
+                (TermType::Left(None), 62usize),
+                (TermType::ModulePrefix(None), 62usize),
+                (TermType::Right(None), 62usize),
+                (TermType::Start(None), 62usize),
+                (TermType::Token(None), 62usize),
+                (TermType::TokenType(None), 62usize),
+                (TermType::UserData(None), 62usize),
+            ]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 62usize,
+                        shifted: 3usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_0.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::EofDef(None), 1usize),
+                (TermType::ErrorType(None), 27usize),
+                (TermType::Ident(None), 30usize),
+                (TermType::Left(None), 54usize),
+                (TermType::ModulePrefix(None), 57usize),
+                (TermType::Right(None), 60usize),
+                (TermType::Start(None), 63usize),
+                (TermType::Token(None), 66usize),
+                (TermType::TokenType(None), 70usize),
+                (TermType::UserData(None), 73usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("EofDef", 76usize),
+                ("ErrorDef", 77usize),
+                ("Grammar", 93usize),
+                ("ModulePrefixDef", 79usize),
+                ("ReduceDef", 81usize),
+                ("Rule", 83usize),
+                ("StartDef", 85usize),
+                ("TokenDef", 87usize),
+                ("TokenTypeDef", 89usize),
+                ("UserDataDef", 91usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 31usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 22usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 23usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 24usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 25usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 26usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 27usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 28usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 29usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 30usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 30usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 31usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 31usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 32usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 33usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 34usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 35usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 36usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 37usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 38usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 39usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 40usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 41usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 42usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 43usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 44usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 45usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 53usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 58usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 61usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 62usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::EofDef(None), 1usize),
+                (TermType::ErrorType(None), 27usize),
+                (TermType::Ident(None), 30usize),
+                (TermType::Left(None), 54usize),
+                (TermType::ModulePrefix(None), 57usize),
+                (TermType::Right(None), 60usize),
+                (TermType::Start(None), 63usize),
+                (TermType::Token(None), 66usize),
+                (TermType::TokenType(None), 70usize),
+                (TermType::UserData(None), 73usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("EofDef", 76usize),
+                ("ErrorDef", 77usize),
+                ("Grammar", 78usize),
+                ("ModulePrefixDef", 79usize),
+                ("ReduceDef", 81usize),
+                ("Rule", 83usize),
+                ("StartDef", 85usize),
+                ("TokenDef", 87usize),
+                ("TokenTypeDef", 89usize),
+                ("UserDataDef", 91usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 39usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 22usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 23usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 24usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 25usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 26usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 27usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 28usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 29usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 30usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 31usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 32usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 33usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 34usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 35usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 36usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 37usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 38usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 38usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 39usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 39usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 40usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 41usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 42usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 43usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 44usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 45usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 53usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 58usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 61usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 62usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 38usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 38usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_1.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::EofDef(None), 1usize),
+                (TermType::ErrorType(None), 27usize),
+                (TermType::Ident(None), 30usize),
+                (TermType::Left(None), 54usize),
+                (TermType::ModulePrefix(None), 57usize),
+                (TermType::Right(None), 60usize),
+                (TermType::Start(None), 63usize),
+                (TermType::Token(None), 66usize),
+                (TermType::TokenType(None), 70usize),
+                (TermType::UserData(None), 73usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("EofDef", 76usize),
+                ("ErrorDef", 77usize),
+                ("Grammar", 80usize),
+                ("ModulePrefixDef", 79usize),
+                ("ReduceDef", 81usize),
+                ("Rule", 83usize),
+                ("StartDef", 85usize),
+                ("TokenDef", 87usize),
+                ("TokenTypeDef", 89usize),
+                ("UserDataDef", 91usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 41usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 22usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 23usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 24usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 25usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 26usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 27usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 28usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 29usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 30usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 31usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 32usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 33usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 34usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 35usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 36usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 37usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 38usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 39usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 40usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 40usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 41usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 41usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 42usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 43usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 44usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 45usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 53usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 58usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 61usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 62usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 40usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 40usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_1.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::EofDef(None), 1usize),
+                (TermType::ErrorType(None), 27usize),
+                (TermType::Ident(None), 30usize),
+                (TermType::Left(None), 54usize),
+                (TermType::ModulePrefix(None), 57usize),
+                (TermType::Right(None), 60usize),
+                (TermType::Start(None), 63usize),
+                (TermType::Token(None), 66usize),
+                (TermType::TokenType(None), 70usize),
+                (TermType::UserData(None), 73usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("EofDef", 76usize),
+                ("ErrorDef", 77usize),
+                ("Grammar", 82usize),
+                ("ModulePrefixDef", 79usize),
+                ("ReduceDef", 81usize),
+                ("Rule", 83usize),
+                ("StartDef", 85usize),
+                ("TokenDef", 87usize),
+                ("TokenTypeDef", 89usize),
+                ("UserDataDef", 91usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 37usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 22usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 23usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 24usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 25usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 26usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 27usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 28usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 29usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 30usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 31usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 32usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 33usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 34usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 35usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 36usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 36usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 37usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 37usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 38usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 39usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 40usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 41usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 42usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 43usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 44usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 45usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 53usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 58usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 61usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 62usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 36usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 36usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_1.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::EofDef(None), 1usize),
+                (TermType::ErrorType(None), 27usize),
+                (TermType::Ident(None), 30usize),
+                (TermType::Left(None), 54usize),
+                (TermType::ModulePrefix(None), 57usize),
+                (TermType::Right(None), 60usize),
+                (TermType::Start(None), 63usize),
+                (TermType::Token(None), 66usize),
+                (TermType::TokenType(None), 70usize),
+                (TermType::UserData(None), 73usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("EofDef", 76usize),
+                ("ErrorDef", 77usize),
+                ("Grammar", 84usize),
+                ("ModulePrefixDef", 79usize),
+                ("ReduceDef", 81usize),
+                ("Rule", 83usize),
+                ("StartDef", 85usize),
+                ("TokenDef", 87usize),
+                ("TokenTypeDef", 89usize),
+                ("UserDataDef", 91usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 25usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 22usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 23usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 24usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 24usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 25usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 25usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 26usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 27usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 28usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 29usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 30usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 31usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 32usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 33usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 34usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 35usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 36usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 37usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 38usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 39usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 40usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 41usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 42usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 43usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 44usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 45usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 53usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 58usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 61usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 62usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 24usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 24usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_1.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::EofDef(None), 1usize),
+                (TermType::ErrorType(None), 27usize),
+                (TermType::Ident(None), 30usize),
+                (TermType::Left(None), 54usize),
+                (TermType::ModulePrefix(None), 57usize),
+                (TermType::Right(None), 60usize),
+                (TermType::Start(None), 63usize),
+                (TermType::Token(None), 66usize),
+                (TermType::TokenType(None), 70usize),
+                (TermType::UserData(None), 73usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("EofDef", 76usize),
+                ("ErrorDef", 77usize),
+                ("Grammar", 86usize),
+                ("ModulePrefixDef", 79usize),
+                ("ReduceDef", 81usize),
+                ("Rule", 83usize),
+                ("StartDef", 85usize),
+                ("TokenDef", 87usize),
+                ("TokenTypeDef", 89usize),
+                ("UserDataDef", 91usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 29usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 22usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 23usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 24usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 25usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 26usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 27usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 28usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 28usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 29usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 29usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 30usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 31usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 32usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 33usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 34usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 35usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 36usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 37usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 38usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 39usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 40usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 41usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 42usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 43usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 44usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 45usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 53usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 58usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 61usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 62usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 28usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 28usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_1.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::EofDef(None), 1usize),
+                (TermType::ErrorType(None), 27usize),
+                (TermType::Ident(None), 30usize),
+                (TermType::Left(None), 54usize),
+                (TermType::ModulePrefix(None), 57usize),
+                (TermType::Right(None), 60usize),
+                (TermType::Start(None), 63usize),
+                (TermType::Token(None), 66usize),
+                (TermType::TokenType(None), 70usize),
+                (TermType::UserData(None), 73usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("EofDef", 76usize),
+                ("ErrorDef", 77usize),
+                ("Grammar", 88usize),
+                ("ModulePrefixDef", 79usize),
+                ("ReduceDef", 81usize),
+                ("Rule", 83usize),
+                ("StartDef", 85usize),
+                ("TokenDef", 87usize),
+                ("TokenTypeDef", 89usize),
+                ("UserDataDef", 91usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 27usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 22usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 23usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 24usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 25usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 26usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 26usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 27usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 27usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 28usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 29usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 30usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 31usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 32usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 33usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 34usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 35usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 36usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 37usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 38usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 39usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 40usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 41usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 42usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 43usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 44usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 45usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 53usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 58usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 61usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 62usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 26usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 26usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_1.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::EofDef(None), 1usize),
+                (TermType::ErrorType(None), 27usize),
+                (TermType::Ident(None), 30usize),
+                (TermType::Left(None), 54usize),
+                (TermType::ModulePrefix(None), 57usize),
+                (TermType::Right(None), 60usize),
+                (TermType::Start(None), 63usize),
+                (TermType::Token(None), 66usize),
+                (TermType::TokenType(None), 70usize),
+                (TermType::UserData(None), 73usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("EofDef", 76usize),
+                ("ErrorDef", 77usize),
+                ("Grammar", 90usize),
+                ("ModulePrefixDef", 79usize),
+                ("ReduceDef", 81usize),
+                ("Rule", 83usize),
+                ("StartDef", 85usize),
+                ("TokenDef", 87usize),
+                ("TokenTypeDef", 89usize),
+                ("UserDataDef", 91usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 33usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 22usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 23usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 24usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 25usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 26usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 27usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 28usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 29usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 30usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 31usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 32usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 32usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 33usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 33usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 34usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 35usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 36usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 37usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 38usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 39usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 40usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 41usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 42usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 43usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 44usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 45usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 53usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 58usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 61usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 62usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 32usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 32usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_1.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([
+                (TermType::EofDef(None), 1usize),
+                (TermType::ErrorType(None), 27usize),
+                (TermType::Ident(None), 30usize),
+                (TermType::Left(None), 54usize),
+                (TermType::ModulePrefix(None), 57usize),
+                (TermType::Right(None), 60usize),
+                (TermType::Start(None), 63usize),
+                (TermType::Token(None), 66usize),
+                (TermType::TokenType(None), 70usize),
+                (TermType::UserData(None), 73usize),
+            ]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([
+                ("EofDef", 76usize),
+                ("ErrorDef", 77usize),
+                ("Grammar", 92usize),
+                ("ModulePrefixDef", 79usize),
+                ("ReduceDef", 81usize),
+                ("Rule", 83usize),
+                ("StartDef", 85usize),
+                ("TokenDef", 87usize),
+                ("TokenTypeDef", 89usize),
+                ("UserDataDef", 91usize),
+            ]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 35usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 22usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 23usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 24usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 25usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 26usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 27usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 28usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 29usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 30usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 31usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 32usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 33usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 34usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 34usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 35usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 35usize,
+                            shifted: 1usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 36usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 37usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 38usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 39usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 40usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 41usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_1.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 42usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 43usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 44usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 45usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 53usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 58usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 61usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                    (
+                        ::rusty_lr_core::ShiftedRuleRef {
+                            rule: 62usize,
+                            shifted: 0usize,
+                        },
+                        rustylr_macrogenerated_lookaheads_0.clone(),
+                    ),
+                ]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 34usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 34usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_1.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([(TermType::Eof, 30usize)]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 30usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_1.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([(TermType::Eof, 95usize)]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 69usize,
+                        shifted: 1usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_2.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
+        {
+            let shift_goto_map_term = std::collections::HashMap::from([]);
+            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
+            let reduce_map = std::collections::HashMap::from([]);
+            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
+                rules: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 69usize,
+                        shifted: 2usize,
+                    },
+                    rustylr_macrogenerated_lookaheads_2.clone(),
+                )]),
+            };
+            let state = ::rusty_lr_core::State {
+                shift_goto_map_term,
+                shift_goto_map_nonterm,
+                reduce_map,
+                ruleset,
+            };
+            states.push(state);
+        }
         Self { rules, states }
     }
     #[doc = r" give lookahead token to parser, and check if there is any reduce action"]

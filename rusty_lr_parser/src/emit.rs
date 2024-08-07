@@ -1,3 +1,4 @@
+use proc_macro2::Ident;
 use proc_macro2::TokenStream;
 
 use quote::format_ident;
@@ -81,15 +82,11 @@ impl Grammar {
             }
         };
 
-        let mut write_parser = quote! {};
-
         // generate code that copy rules and states to parser
         // =====================================================================
         // ==================Writing Production Rules===========================
         // =====================================================================
-        write_parser.extend(quote! {
-            let mut rules = Vec::new();
-        });
+        let mut comma_separated_rules = TokenStream::new();
         for rule in parser.rules.iter() {
             let mut comma_separated_tokens = quote! {};
             for token in rule.rule.iter() {
@@ -106,102 +103,120 @@ impl Grammar {
                 }
             }
 
-            let nonterm = rule.name.clone();
-
-            write_parser.extend(quote! {
-                {
-                let production_rule = #module_prefix::ProductionRule {
+            let nonterm = &rule.name;
+            comma_separated_rules.extend(quote! {
+                #module_prefix::ProductionRule {
                     name: #nonterm,
                     rule: vec![#comma_separated_tokens],
-                };
-                rules.push(production_rule);
-            }
+                },
             });
         }
+        let write_rules = quote! {
+            let rules = vec![
+                #comma_separated_rules
+            ];
+        };
 
         // =====================================================================
         // =========================Writing States==============================
         // =====================================================================
-        write_parser.extend(quote! {
-            let mut states = Vec::new();
-        });
-        for state in parser.states.iter() {
-            let mut init_shift_goto_map_term = quote! {};
-            init_shift_goto_map_term.extend(quote! {
-                let mut shift_goto_map_term = std::collections::HashMap::new();
+
+        let mut lookaheads_definition_stream = TokenStream::new();
+        let mut lookaheads_map: BTreeMap<_, Ident> = BTreeMap::new();
+        let mut write_states = TokenStream::new();
+
+        {
+            let state_len = parser.states.len();
+            write_states.extend(quote! {
+                let mut states = Vec::with_capacity(#state_len);
             });
+        }
+        for state in parser.states.iter() {
             // use BTreeMap to sort keys, for consistent output
             let shift_goto_map_term: BTreeMap<_, _> = state.shift_goto_map_term.iter().collect();
+            let mut comma_separated_shift_goto_map_term = quote! {};
             for (term, goto) in shift_goto_map_term.into_iter() {
                 let (_, term_stream) = self.terminals.get(&term.to_string()).unwrap();
-                init_shift_goto_map_term.extend(quote! {
-                    shift_goto_map_term.insert( #term_stream, #goto);
+                comma_separated_shift_goto_map_term.extend(quote! {
+                    (#term_stream, #goto),
                 });
             }
 
-            let mut init_shift_goto_map_nonterm = quote! {};
-            init_shift_goto_map_nonterm.extend(quote! {
-                let mut shift_goto_map_nonterm = std::collections::HashMap::new();
-            });
             // use BTreeMap to sort keys, for consistent output
             let shift_goto_map_nonterm: BTreeMap<_, _> =
                 state.shift_goto_map_nonterm.iter().collect();
+            let mut comma_separated_shift_goto_map_nonterm = quote! {};
             for (nonterm, goto) in shift_goto_map_nonterm.into_iter() {
-                init_shift_goto_map_nonterm.extend(quote! {
-                    shift_goto_map_nonterm.insert( #nonterm, #goto);
+                comma_separated_shift_goto_map_nonterm.extend(quote! {
+                    (#nonterm, #goto),
                 });
             }
 
-            let mut init_reduce_map = quote! {};
-            init_reduce_map.extend(quote! {
-                let mut reduce_map = std::collections::HashMap::new();
-            });
             // use BTreeMap to sort keys, for consistent output
             let reduce_map: BTreeMap<_, _> = state.reduce_map.iter().collect();
+            let mut comma_separated_reduce_map = quote! {};
             for (term, ruleid) in reduce_map.into_iter() {
                 let (_, term_stream) = self.terminals.get(&term.to_string()).unwrap();
-                init_reduce_map.extend(quote! {
-                    reduce_map.insert( #term_stream, #ruleid);
+                comma_separated_reduce_map.extend(quote! {
+                    (#term_stream, #ruleid),
                 });
             }
 
-            let mut init_ruleset = quote! {};
-            init_ruleset.extend(quote! {
-                let mut ruleset = #module_prefix::LookaheadRuleRefSet::new();
-            });
+            let mut comma_separated_ruleset = quote! {};
             for (rule, lookaheads) in state.ruleset.rules.iter() {
-                let mut init_lookaheads = quote! {
-                    let mut lookaheads = std::collections::BTreeSet::new();
-                };
-                for lookahead_name in lookaheads.iter() {
-                    let (_, term_stream) = self.terminals.get(&lookahead_name.to_string()).unwrap();
-                    init_lookaheads.extend(quote! {
-                        lookaheads.insert(#term_stream);
+                let lookaheads_ident = if let Some(lookaheads_ident) =
+                    lookaheads_map.get(lookaheads)
+                {
+                    lookaheads_ident.clone()
+                } else {
+                    let new_ident =
+                        format_ident!("rustylr_macrogenerated_lookaheads_{}", lookaheads_map.len());
+                    lookaheads_map.insert(lookaheads.clone(), new_ident.clone());
+
+                    let mut comma_separated_lookaheads = TokenStream::new();
+                    for lookahead_name in lookaheads.iter() {
+                        let (_, term_stream) = self.terminals.get(lookahead_name).unwrap();
+                        comma_separated_lookaheads.extend(quote! {#term_stream,});
+                    }
+
+                    lookaheads_definition_stream.extend(quote! {
+                        let #new_ident = std::collections::BTreeSet::from(
+                            [ #comma_separated_lookaheads ]
+                        );
                     });
-                }
+
+                    new_ident
+                };
 
                 let rule_id = rule.rule;
                 let shifted = rule.shifted;
-                init_ruleset.extend(quote! {
-                    {
-                    let shifted_rule = #module_prefix::ShiftedRuleRef {
-                        rule: #rule_id,
-                        shifted: #shifted,
-                    };
-                    #init_lookaheads
-
-                    ruleset.add( shifted_rule, lookaheads );
-                }
-
+                comma_separated_ruleset.extend(quote! {
+                    (
+                        #module_prefix::ShiftedRuleRef {
+                            rule: #rule_id,
+                            shifted: #shifted,
+                        },
+                        #lookaheads_ident.clone(),
+                    ),
                 });
             }
 
-            write_parser.extend(quote! {
+            write_states.extend(quote! {
                 {
-                    #init_shift_goto_map_term
-                    #init_shift_goto_map_nonterm
-                    #init_reduce_map
-                    #init_ruleset
+                    let shift_goto_map_term = std::collections::HashMap::from(
+                        [ #comma_separated_shift_goto_map_term ]
+                    );
+                    let shift_goto_map_nonterm = std::collections::HashMap::from(
+                        [ #comma_separated_shift_goto_map_nonterm ]
+                    );
+                    let reduce_map = std::collections::HashMap::from(
+                        [ #comma_separated_reduce_map ]
+                    );
+                    let ruleset = #module_prefix::LookaheadRuleRefSet {
+                        rules: std::collections::BTreeMap::from(
+                            [ #comma_separated_ruleset ]
+                        )
+                    };
                     let state = #module_prefix::State {
                         shift_goto_map_term,
                         shift_goto_map_nonterm,
@@ -213,7 +228,11 @@ impl Grammar {
             });
         }
 
-        Ok(write_parser)
+        Ok(quote! {
+            #write_rules
+            #lookaheads_definition_stream
+            #write_states
+        })
     }
 
     /// emit code that build grammar at runtime
@@ -474,8 +493,8 @@ impl Grammar {
         Ok(quote! {
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         pub struct #stack_struct_name {
-            pub #terms_stack_name: Vec<#term_typename>,
-            pub #end_stack_name: Vec<usize>,
+            #terms_stack_name: Vec<#term_typename>,
+            #end_stack_name: Vec<usize>,
             pub state_stack: Vec<usize>,
             #stack_def_streams
         }

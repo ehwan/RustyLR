@@ -7,4 +7,4 @@ edition = "2021"
 proc-macro2 = "1.0.86"
 quote = "1.0"
 # rusty_lr_parser = { path = "../rusty_lr_parser" }
-rusty_lr_parser = "0.3.0"
+rusty_lr_parser = "0.3.1"
