@@ -134,7 +134,7 @@ impl Grammar {
         for state in parser.states.iter() {
             // use BTreeMap to sort keys, for consistent output
             let shift_goto_map_term: BTreeMap<_, _> = state.shift_goto_map_term.iter().collect();
-            let mut comma_separated_shift_goto_map_term = quote! {};
+            let mut comma_separated_shift_goto_map_term = TokenStream::new();
             for (term, goto) in shift_goto_map_term.into_iter() {
                 let (_, term_stream) = self.terminals.get(&term.to_string()).unwrap();
                 comma_separated_shift_goto_map_term.extend(quote! {
@@ -145,7 +145,7 @@ impl Grammar {
             // use BTreeMap to sort keys, for consistent output
             let shift_goto_map_nonterm: BTreeMap<_, _> =
                 state.shift_goto_map_nonterm.iter().collect();
-            let mut comma_separated_shift_goto_map_nonterm = quote! {};
+            let mut comma_separated_shift_goto_map_nonterm = TokenStream::new();
             for (nonterm, goto) in shift_goto_map_nonterm.into_iter() {
                 comma_separated_shift_goto_map_nonterm.extend(quote! {
                     (#nonterm, #goto),
@@ -154,7 +154,7 @@ impl Grammar {
 
             // use BTreeMap to sort keys, for consistent output
             let reduce_map: BTreeMap<_, _> = state.reduce_map.iter().collect();
-            let mut comma_separated_reduce_map = quote! {};
+            let mut comma_separated_reduce_map = TokenStream::new();
             for (term, ruleid) in reduce_map.into_iter() {
                 let (_, term_stream) = self.terminals.get(&term.to_string()).unwrap();
                 comma_separated_reduce_map.extend(quote! {
@@ -370,7 +370,7 @@ impl Grammar {
                         Token::Term(_) => {
                             let mapto = &token.mapto;
                             token_pop_stream.extend(quote! {
-                                let mut #mapto = self.#terms_stack_name.pop().unwrap();
+                                let mut #mapto = self.#terms_stack_name.pop().expect("Something wrong! term_stack is empty");
                             });
                         }
                         Token::NonTerm(nonterm) => {
@@ -379,9 +379,11 @@ impl Grammar {
                             // if <RuleType> is defined for this nonterm,
                             // pop value from the stack to 'mapto'
                             let stack_name = Self::stack_name(nonterm);
+                            let error_message =
+                                format!("Something wrong! {} stack is empty", nonterm);
                             if self.rules.get(&nonterm.to_string()).unwrap().1.is_some() {
                                 token_pop_stream.extend(quote! {
-                                    let mut #mapto = self.#stack_name.pop().unwrap();
+                                    let mut #mapto = self.#stack_name.pop().expect(#error_message);
                                 });
                             }
                         }
@@ -478,7 +480,7 @@ impl Grammar {
                 (
                     start_typename.clone(),
                     quote! {
-                        self.#start_rule_stack_name.pop().unwrap()
+                        self.#start_rule_stack_name.pop().expect("Something wrong! start_rule_stack is empty")
                     },
                 )
             } else {
@@ -583,7 +585,7 @@ impl Grammar {
                 #user_data_parameter_def
             ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, &'static str, C::Error, #error_typename>> {
                 // fetch state from state stack
-                let state = &self.states[*context.state_stack.last().unwrap()];
+                let state = &self.states[*context.state_stack.last().expect("Something wrong! state_stack is empty")];
 
                 // feed token to current state and get action
                 // there must be no reduce/shift conflict ( that is, both shift and reduce are possible with this term ),
@@ -640,7 +642,7 @@ impl Grammar {
                 self.lookahead(context, callback, &term, #user_data_var)?;
 
                 // fetch state from state stack
-                let state = &self.states[*context.state_stack.last().unwrap()];
+                let state = &self.states[*context.state_stack.last().expect("Something wrong! state_stack is empty")];
 
                 // feed token to current state and get action
                 // there must be no reduce/shift conflict ( that is, both shift and reduce are possible with this term ),
@@ -672,7 +674,7 @@ impl Grammar {
                 nonterm: &'a &'static str,
             ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, &'static str, C::Error, #error_typename>> {
                 // fetch state from state stack
-                let state = &self.states[*context.state_stack.last().unwrap()];
+                let state = &self.states[*context.state_stack.last().expect("Something wrong! state_stack is empty")];
 
                 // feed token to current state and get action
                 // for shift/reduce confict, shift has higher priority

@@ -87,7 +87,10 @@ impl GrammarContext {
     ) -> Result<(), ParseError> {
         match rustylr_macro_generated_ruleid__ {
             0usize => {
-                let mut group = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut group = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_Action_stack.push({
                     if let TermType::Group(group) = group {
                         if let Some(action) = group {
@@ -109,118 +112,202 @@ impl GrammarContext {
                 self.rustylr_macro_generated_Action_stack.push({ None });
             }
             2usize => {
-                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut ident = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(ident);
             }
             3usize => {
-                let mut colon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut colon = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(colon);
             }
             4usize => {
-                let mut pipe = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut pipe = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack.push(pipe);
             }
             5usize => {
-                let mut percent = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut percent = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(percent);
             }
             6usize => {
-                let mut left = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut left = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack.push(left);
             }
             7usize => {
-                let mut right = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut right = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(right);
             }
             8usize => {
-                let mut token = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut token = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(token);
             }
             9usize => {
-                let mut start = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut start = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(start);
             }
             10usize => {
-                let mut eofdef = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut eofdef = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(eofdef);
             }
             11usize => {
-                let mut tokentype = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut tokentype = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(tokentype);
             }
             12usize => {
-                let mut userdata = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut userdata = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(userdata);
             }
             13usize => {
-                let mut errortype = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut errortype = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(errortype);
             }
             14usize => {
-                let mut group = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut group = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(group);
             }
             15usize => {
-                let mut literal = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut literal = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(literal);
             }
             16usize => {
-                let mut equal = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut equal = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(equal);
             }
             17usize => {
-                let mut plus = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut plus = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack.push(plus);
             }
             18usize => {
-                let mut star = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut star = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack.push(star);
             }
             19usize => {
-                let mut question = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut question = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(question);
             }
             20usize => {
-                let mut otherpunct = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut otherpunct = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(otherpunct);
             }
             21usize => {
-                let mut moduleprefix = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut moduleprefix = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_AnyTokenNoSemi_stack
                     .push(moduleprefix);
             }
             22usize => {
-                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut RustCode = self.rustylr_macro_generated_RustCode_stack.pop().unwrap();
-                let mut eofdef = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut semicolon = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut RustCode = self
+                    .rustylr_macro_generated_RustCode_stack
+                    .pop()
+                    .expect("Something wrong! RustCode stack is empty");
+                let mut eofdef = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_EofDef_stack
                     .push({ (eofdef.span().expect("EofDef"), RustCode) });
             }
             23usize => {
-                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut RustCode = self.rustylr_macro_generated_RustCode_stack.pop().unwrap();
-                let mut errortype = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut semicolon = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut RustCode = self
+                    .rustylr_macro_generated_RustCode_stack
+                    .pop()
+                    .expect("Something wrong! RustCode stack is empty");
+                let mut errortype = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_ErrorDef_stack
                     .push({ (errortype.span().expect("ErrorDef"), RustCode) });
             }
             24usize => {
-                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
-                let mut Rule = self.rustylr_macro_generated_Rule_stack.pop().unwrap();
+                let mut Grammar = self
+                    .rustylr_macro_generated_Grammar_stack
+                    .pop()
+                    .expect("Something wrong! Grammar stack is empty");
+                let mut Rule = self
+                    .rustylr_macro_generated_Rule_stack
+                    .pop()
+                    .expect("Something wrong! Rule stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar;
                     let r = Rule;
@@ -233,7 +320,10 @@ impl GrammarContext {
                 });
             }
             25usize => {
-                let mut Rule = self.rustylr_macro_generated_Rule_stack.pop().unwrap();
+                let mut Rule = self
+                    .rustylr_macro_generated_Rule_stack
+                    .pop()
+                    .expect("Something wrong! Rule stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
                     let r = Rule;
@@ -242,8 +332,14 @@ impl GrammarContext {
                 });
             }
             26usize => {
-                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
-                let mut TokenDef = self.rustylr_macro_generated_TokenDef_stack.pop().unwrap();
+                let mut Grammar = self
+                    .rustylr_macro_generated_Grammar_stack
+                    .pop()
+                    .expect("Something wrong! Grammar stack is empty");
+                let mut TokenDef = self
+                    .rustylr_macro_generated_TokenDef_stack
+                    .pop()
+                    .expect("Something wrong! TokenDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar;
                     let t = TokenDef;
@@ -261,7 +357,10 @@ impl GrammarContext {
                 });
             }
             27usize => {
-                let mut TokenDef = self.rustylr_macro_generated_TokenDef_stack.pop().unwrap();
+                let mut TokenDef = self
+                    .rustylr_macro_generated_TokenDef_stack
+                    .pop()
+                    .expect("Something wrong! TokenDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
                     let t = TokenDef;
@@ -270,8 +369,14 @@ impl GrammarContext {
                 });
             }
             28usize => {
-                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
-                let mut StartDef = self.rustylr_macro_generated_StartDef_stack.pop().unwrap();
+                let mut Grammar = self
+                    .rustylr_macro_generated_Grammar_stack
+                    .pop()
+                    .expect("Something wrong! Grammar stack is empty");
+                let mut StartDef = self
+                    .rustylr_macro_generated_StartDef_stack
+                    .pop()
+                    .expect("Something wrong! StartDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar;
                     let start = StartDef;
@@ -284,7 +389,10 @@ impl GrammarContext {
                 });
             }
             29usize => {
-                let mut StartDef = self.rustylr_macro_generated_StartDef_stack.pop().unwrap();
+                let mut StartDef = self
+                    .rustylr_macro_generated_StartDef_stack
+                    .pop()
+                    .expect("Something wrong! StartDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
                     let start = StartDef;
@@ -293,8 +401,14 @@ impl GrammarContext {
                 });
             }
             30usize => {
-                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
-                let mut EofDef = self.rustylr_macro_generated_EofDef_stack.pop().unwrap();
+                let mut Grammar = self
+                    .rustylr_macro_generated_Grammar_stack
+                    .pop()
+                    .expect("Something wrong! Grammar stack is empty");
+                let mut EofDef = self
+                    .rustylr_macro_generated_EofDef_stack
+                    .pop()
+                    .expect("Something wrong! EofDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar;
                     let (span, eof) = EofDef;
@@ -306,7 +420,10 @@ impl GrammarContext {
                 });
             }
             31usize => {
-                let mut EofDef = self.rustylr_macro_generated_EofDef_stack.pop().unwrap();
+                let mut EofDef = self
+                    .rustylr_macro_generated_EofDef_stack
+                    .pop()
+                    .expect("Something wrong! EofDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
                     let (span, eof) = EofDef;
@@ -315,11 +432,14 @@ impl GrammarContext {
                 });
             }
             32usize => {
-                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
+                let mut Grammar = self
+                    .rustylr_macro_generated_Grammar_stack
+                    .pop()
+                    .expect("Something wrong! Grammar stack is empty");
                 let mut TokenTypeDef = self
                     .rustylr_macro_generated_TokenTypeDef_stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! TokenTypeDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar;
                     let (span, token_type) = TokenTypeDef;
@@ -336,7 +456,7 @@ impl GrammarContext {
                 let mut TokenTypeDef = self
                     .rustylr_macro_generated_TokenTypeDef_stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! TokenTypeDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
                     let (span, token_type) = TokenTypeDef;
@@ -345,11 +465,14 @@ impl GrammarContext {
                 });
             }
             34usize => {
-                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
+                let mut Grammar = self
+                    .rustylr_macro_generated_Grammar_stack
+                    .pop()
+                    .expect("Something wrong! Grammar stack is empty");
                 let mut UserDataDef = self
                     .rustylr_macro_generated_UserDataDef_stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! UserDataDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar;
                     let (span, user_data) = UserDataDef;
@@ -364,7 +487,7 @@ impl GrammarContext {
                 let mut UserDataDef = self
                     .rustylr_macro_generated_UserDataDef_stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! UserDataDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
                     let (span, user_data) = UserDataDef;
@@ -373,8 +496,14 @@ impl GrammarContext {
                 });
             }
             36usize => {
-                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
-                let mut ReduceDef = self.rustylr_macro_generated_ReduceDef_stack.pop().unwrap();
+                let mut Grammar = self
+                    .rustylr_macro_generated_Grammar_stack
+                    .pop()
+                    .expect("Something wrong! Grammar stack is empty");
+                let mut ReduceDef = self
+                    .rustylr_macro_generated_ReduceDef_stack
+                    .pop()
+                    .expect("Something wrong! ReduceDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar;
                     let reduce = ReduceDef;
@@ -387,7 +516,10 @@ impl GrammarContext {
                 });
             }
             37usize => {
-                let mut ReduceDef = self.rustylr_macro_generated_ReduceDef_stack.pop().unwrap();
+                let mut ReduceDef = self
+                    .rustylr_macro_generated_ReduceDef_stack
+                    .pop()
+                    .expect("Something wrong! ReduceDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
                     let reduce = ReduceDef;
@@ -396,8 +528,14 @@ impl GrammarContext {
                 });
             }
             38usize => {
-                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
-                let mut ErrorDef = self.rustylr_macro_generated_ErrorDef_stack.pop().unwrap();
+                let mut Grammar = self
+                    .rustylr_macro_generated_Grammar_stack
+                    .pop()
+                    .expect("Something wrong! Grammar stack is empty");
+                let mut ErrorDef = self
+                    .rustylr_macro_generated_ErrorDef_stack
+                    .pop()
+                    .expect("Something wrong! ErrorDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar;
                     let (span, error) = ErrorDef;
@@ -409,7 +547,10 @@ impl GrammarContext {
                 });
             }
             39usize => {
-                let mut ErrorDef = self.rustylr_macro_generated_ErrorDef_stack.pop().unwrap();
+                let mut ErrorDef = self
+                    .rustylr_macro_generated_ErrorDef_stack
+                    .pop()
+                    .expect("Something wrong! ErrorDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
                     let (span, error) = ErrorDef;
@@ -418,11 +559,14 @@ impl GrammarContext {
                 });
             }
             40usize => {
-                let mut Grammar = self.rustylr_macro_generated_Grammar_stack.pop().unwrap();
+                let mut Grammar = self
+                    .rustylr_macro_generated_Grammar_stack
+                    .pop()
+                    .expect("Something wrong! Grammar stack is empty");
                 let mut ModulePrefixDef = self
                     .rustylr_macro_generated_ModulePrefixDef_stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! ModulePrefixDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar;
                     let (span, module_prefix) = ModulePrefixDef;
@@ -434,7 +578,7 @@ impl GrammarContext {
                 let mut ModulePrefixDef = self
                     .rustylr_macro_generated_ModulePrefixDef_stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! ModulePrefixDef stack is empty");
                 self.rustylr_macro_generated_Grammar_stack.push({
                     let mut g = Grammar::new();
                     let (span, module_prefix) = ModulePrefixDef;
@@ -443,16 +587,34 @@ impl GrammarContext {
                 });
             }
             42usize => {
-                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut RustCode = self.rustylr_macro_generated_RustCode_stack.pop().unwrap();
-                let mut moduleprefix = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut semicolon = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut RustCode = self
+                    .rustylr_macro_generated_RustCode_stack
+                    .pop()
+                    .expect("Something wrong! RustCode stack is empty");
+                let mut moduleprefix = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_ModulePrefixDef_stack
                     .push({ (moduleprefix.span().expect("ModulePrefixDef"), RustCode) });
             }
             43usize => {
-                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut left = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut semicolon = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut ident = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut left = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_ReduceDef_stack.push({
                     if let TermType::Ident(ident) = ident {
                         (ident.expect("ReduceDef-Left"), ReduceType::Left)
@@ -462,9 +624,18 @@ impl GrammarContext {
                 });
             }
             44usize => {
-                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut right = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut semicolon = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut ident = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut right = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_ReduceDef_stack.push({
                     if let TermType::Ident(ident) = ident {
                         (ident.expect("ReduceDef-Right"), ReduceType::Right)
@@ -474,11 +645,26 @@ impl GrammarContext {
                 });
             }
             45usize => {
-                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut RuleLines = self.rustylr_macro_generated_RuleLines_stack.pop().unwrap();
-                let mut colon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut RuleType = self.rustylr_macro_generated_RuleType_stack.pop().unwrap();
-                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut semicolon = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut RuleLines = self
+                    .rustylr_macro_generated_RuleLines_stack
+                    .pop()
+                    .expect("Something wrong! RuleLines stack is empty");
+                let mut colon = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut RuleType = self
+                    .rustylr_macro_generated_RuleType_stack
+                    .pop()
+                    .expect("Something wrong! RuleType stack is empty");
+                let mut ident = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_Rule_stack.push({
                     let ident = if let TermType::Ident(ident) = ident {
                         ident.expect("Rule-Ident")
@@ -498,12 +684,18 @@ impl GrammarContext {
                 let mut TokenMapped = self
                     .rustylr_macro_generated___TokenMapped__star__stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! __TokenMapped__star_ stack is empty");
                 self.rustylr_macro_generated_RuleDef_stack.push(TokenMapped);
             }
             47usize => {
-                let mut Action = self.rustylr_macro_generated_Action_stack.pop().unwrap();
-                let mut RuleDef = self.rustylr_macro_generated_RuleDef_stack.pop().unwrap();
+                let mut Action = self
+                    .rustylr_macro_generated_Action_stack
+                    .pop()
+                    .expect("Something wrong! Action stack is empty");
+                let mut RuleDef = self
+                    .rustylr_macro_generated_RuleDef_stack
+                    .pop()
+                    .expect("Something wrong! RuleDef stack is empty");
                 self.rustylr_macro_generated_RuleLine_stack.push({
                     RuleLine {
                         tokens: RuleDef,
@@ -512,21 +704,36 @@ impl GrammarContext {
                 });
             }
             48usize => {
-                let mut RuleLine = self.rustylr_macro_generated_RuleLine_stack.pop().unwrap();
-                let mut pipe = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut RuleLines = self.rustylr_macro_generated_RuleLines_stack.pop().unwrap();
+                let mut RuleLine = self
+                    .rustylr_macro_generated_RuleLine_stack
+                    .pop()
+                    .expect("Something wrong! RuleLine stack is empty");
+                let mut pipe = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut RuleLines = self
+                    .rustylr_macro_generated_RuleLines_stack
+                    .pop()
+                    .expect("Something wrong! RuleLines stack is empty");
                 self.rustylr_macro_generated_RuleLines_stack.push({
                     RuleLines.push(RuleLine);
                     RuleLines
                 });
             }
             49usize => {
-                let mut RuleLine = self.rustylr_macro_generated_RuleLine_stack.pop().unwrap();
+                let mut RuleLine = self
+                    .rustylr_macro_generated_RuleLine_stack
+                    .pop()
+                    .expect("Something wrong! RuleLine stack is empty");
                 self.rustylr_macro_generated_RuleLines_stack
                     .push({ vec![RuleLine] });
             }
             50usize => {
-                let mut group = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut group = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_RuleType_stack.push({
                     if let TermType::Group(group) = group {
                         if let Some(group) = group {
@@ -549,7 +756,7 @@ impl GrammarContext {
                 let mut AnyTokenNoSemi = self
                     .rustylr_macro_generated___AnyTokenNoSemi__plus__stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! __AnyTokenNoSemi__plus_ stack is empty");
                 self.rustylr_macro_generated_RustCode_stack.push({
                     let mut tokens = TokenStream::new();
                     for token in AnyTokenNoSemi.into_iter() {
@@ -559,9 +766,18 @@ impl GrammarContext {
                 });
             }
             53usize => {
-                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut start = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut semicolon = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut ident = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut start = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_StartDef_stack.push({
                     if let TermType::Ident(ident) = ident {
                         ident.expect("StartDef")
@@ -571,7 +787,10 @@ impl GrammarContext {
                 });
             }
             54usize => {
-                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut ident = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_SymbolPattern_stack.push({
                     if let TermType::Ident(ident) = ident {
                         Token::NonTerm(ident.expect("SymbolPattern-Ident0"))
@@ -581,8 +800,14 @@ impl GrammarContext {
                 });
             }
             55usize => {
-                let mut star = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut star = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut ident = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_SymbolPattern_stack.push({
                     if let TermType::Ident(ident) = ident {
                         let ident = ident.expect("SymbolPattern-Ident1");
@@ -593,8 +818,14 @@ impl GrammarContext {
                 });
             }
             56usize => {
-                let mut plus = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut plus = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut ident = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_SymbolPattern_stack.push({
                     if let TermType::Ident(ident) = ident {
                         let ident = ident.expect("SymbolPattern-Plus");
@@ -605,8 +836,14 @@ impl GrammarContext {
                 });
             }
             57usize => {
-                let mut question = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut question = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut ident = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_SymbolPattern_stack.push({
                     if let TermType::Ident(ident) = ident {
                         let ident = ident.expect("SymbolPattern-Question");
@@ -617,10 +854,22 @@ impl GrammarContext {
                 });
             }
             58usize => {
-                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut RustCode = self.rustylr_macro_generated_RustCode_stack.pop().unwrap();
-                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut token = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut semicolon = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut RustCode = self
+                    .rustylr_macro_generated_RustCode_stack
+                    .pop()
+                    .expect("Something wrong! RustCode stack is empty");
+                let mut ident = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut token = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_TokenDef_stack.push({
                     if let TermType::Ident(ident) = ident {
                         (ident.expect("TokenDef"), RustCode)
@@ -633,7 +882,7 @@ impl GrammarContext {
                 let mut SymbolPattern = self
                     .rustylr_macro_generated_SymbolPattern_stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! SymbolPattern stack is empty");
                 self.rustylr_macro_generated_TokenMapped_stack.push({
                     let mapto = SymbolPattern.ident();
                     TokenMapped {
@@ -646,9 +895,15 @@ impl GrammarContext {
                 let mut SymbolPattern = self
                     .rustylr_macro_generated_SymbolPattern_stack
                     .pop()
-                    .unwrap();
-                let mut equal = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut ident = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                    .expect("Something wrong! SymbolPattern stack is empty");
+                let mut equal = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut ident = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_TokenMapped_stack.push({
                     if let TermType::Ident(ident) = ident {
                         let ident = ident.expect("TokenMapped-Ident");
@@ -662,16 +917,34 @@ impl GrammarContext {
                 });
             }
             61usize => {
-                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut RustCode = self.rustylr_macro_generated_RustCode_stack.pop().unwrap();
-                let mut tokentype = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut semicolon = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut RustCode = self
+                    .rustylr_macro_generated_RustCode_stack
+                    .pop()
+                    .expect("Something wrong! RustCode stack is empty");
+                let mut tokentype = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_TokenTypeDef_stack
                     .push({ (tokentype.span().expect("TokenTypedef"), RustCode) });
             }
             62usize => {
-                let mut semicolon = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
-                let mut RustCode = self.rustylr_macro_generated_RustCode_stack.pop().unwrap();
-                let mut userdata = self.rustylr_macro_generated_rl_terms_stack.pop().unwrap();
+                let mut semicolon = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
+                let mut RustCode = self
+                    .rustylr_macro_generated_RustCode_stack
+                    .pop()
+                    .expect("Something wrong! RustCode stack is empty");
+                let mut userdata = self
+                    .rustylr_macro_generated_rl_terms_stack
+                    .pop()
+                    .expect("Something wrong! term_stack is empty");
                 self.rustylr_macro_generated_UserDataDef_stack
                     .push({ (userdata.span().expect("UserDataDef"), RustCode) });
             }
@@ -679,7 +952,7 @@ impl GrammarContext {
                 let mut A = self
                     .rustylr_macro_generated_AnyTokenNoSemi_stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! AnyTokenNoSemi stack is empty");
                 self.rustylr_macro_generated___AnyTokenNoSemi__plus__stack
                     .push({ vec![A] });
             }
@@ -687,11 +960,11 @@ impl GrammarContext {
                 let mut A = self
                     .rustylr_macro_generated_AnyTokenNoSemi_stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! AnyTokenNoSemi stack is empty");
                 let mut Ap = self
                     .rustylr_macro_generated___AnyTokenNoSemi__plus__stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! __AnyTokenNoSemi__plus_ stack is empty");
                 self.rustylr_macro_generated___AnyTokenNoSemi__plus__stack
                     .push({
                         Ap.push(A);
@@ -702,7 +975,7 @@ impl GrammarContext {
                 let mut A = self
                     .rustylr_macro_generated_TokenMapped_stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! TokenMapped stack is empty");
                 self.rustylr_macro_generated___TokenMapped__plus__stack
                     .push({ vec![A] });
             }
@@ -710,11 +983,11 @@ impl GrammarContext {
                 let mut A = self
                     .rustylr_macro_generated_TokenMapped_stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! TokenMapped stack is empty");
                 let mut Ap = self
                     .rustylr_macro_generated___TokenMapped__plus__stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! __TokenMapped__plus_ stack is empty");
                 self.rustylr_macro_generated___TokenMapped__plus__stack
                     .push({
                         Ap.push(A);
@@ -729,7 +1002,7 @@ impl GrammarContext {
                 let mut Ap = self
                     .rustylr_macro_generated___TokenMapped__plus__stack
                     .pop()
-                    .unwrap();
+                    .expect("Something wrong! __TokenMapped__plus_ stack is empty");
                 self.rustylr_macro_generated___TokenMapped__star__stack
                     .push({ Ap });
             }
@@ -740,7 +1013,9 @@ impl GrammarContext {
         Ok(())
     }
     pub fn accept(&mut self) -> (Grammar) {
-        self.rustylr_macro_generated_Grammar_stack.pop().unwrap()
+        self.rustylr_macro_generated_Grammar_stack
+            .pop()
+            .expect("Something wrong! start_rule_stack is empty")
     }
     pub fn push(&mut self, term: TermType) {
         self.rustylr_macro_generated_rl_terms_stack.push(term);
@@ -7884,7 +8159,10 @@ impl GrammarParser {
         term: &TermType,
     ) -> Result<(), ::rusty_lr_core::ParseError<'a, TermType, &'static str, C::Error, ParseError>>
     {
-        let state = &self.states[*context.state_stack.last().unwrap()];
+        let state = &self.states[*context
+            .state_stack
+            .last()
+            .expect("Something wrong! state_stack is empty")];
         if let Some(reduce_rule) = state.reduce(term) {
             let rule = &self.rules[reduce_rule];
             if context.state_stack.len() < rule.rule.len() {
@@ -7924,7 +8202,10 @@ impl GrammarParser {
     ) -> Result<(), ::rusty_lr_core::ParseError<'a, TermType, &'static str, C::Error, ParseError>>
     {
         self.lookahead(context, callback, &term)?;
-        let state = &self.states[*context.state_stack.last().unwrap()];
+        let state = &self.states[*context
+            .state_stack
+            .last()
+            .expect("Something wrong! state_stack is empty")];
         if let Some(next_state_id) = state.shift_goto_term(&term) {
             context.state_stack.push(next_state_id);
             callback
@@ -7949,7 +8230,10 @@ impl GrammarParser {
         nonterm: &'a &'static str,
     ) -> Result<(), ::rusty_lr_core::ParseError<'a, TermType, &'static str, C::Error, ParseError>>
     {
-        let state = &self.states[*context.state_stack.last().unwrap()];
+        let state = &self.states[*context
+            .state_stack
+            .last()
+            .expect("Something wrong! state_stack is empty")];
         if let Some(next_state_id) = state.shift_goto_nonterm(nonterm) {
             context.state_stack.push(next_state_id);
             callback
