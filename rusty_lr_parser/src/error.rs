@@ -5,6 +5,8 @@ use quote::quote_spanned;
 
 use std::fmt::Display;
 
+use super::utils;
+
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum ParseError {
@@ -26,6 +28,8 @@ pub enum ParseError {
     TerminalNotDefined(Ident),
     NonTerminalNotDefined(Ident),
     EofDefined(Ident),
+    AugmentedDefined(Ident),
+    ReservedNonTerminal(Ident),
 
     RuleTypeDefinedButActionNotDefined(Ident),
 
@@ -109,7 +113,21 @@ impl Display for ParseError {
                 write!(f, "Non-terminal not defined: {}", ident)
             }
             ParseError::EofDefined(_) => {
-                write!(f, "'eof' is reserved name for terminal symbol")
+                write!(
+                    f,
+                    "\"{}\" is reserved name for terminal symbol",
+                    utils::EOF_NAME
+                )
+            }
+            ParseError::AugmentedDefined(_) => {
+                write!(
+                    f,
+                    "\"{}\" is reserved name for non-terminal symbol",
+                    utils::AUGMENTED_NAME
+                )
+            }
+            ParseError::ReservedNonTerminal(ident) => {
+                write!(f, "\"{}\" is reserved name for non-terminal symbol", ident)
             }
             ParseError::RuleTypeDefinedButActionNotDefined(ident) => {
                 write!(
@@ -145,6 +163,8 @@ impl ParseError {
             ParseError::TerminalNotDefined(ident) => ident.span(),
             ParseError::NonTerminalNotDefined(ident) => ident.span(),
             ParseError::EofDefined(ident) => ident.span(),
+            ParseError::AugmentedDefined(ident) => ident.span(),
+            ParseError::ReservedNonTerminal(ident) => ident.span(),
             ParseError::RuleTypeDefinedButActionNotDefined(ident) => ident.span(),
             ParseError::GrammarBuildError(_) => Span::call_site(),
             ParseError::InternalGrammar(span, _) => span.clone(),

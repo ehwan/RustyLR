@@ -4,7 +4,6 @@ use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
-use quote::format_ident;
 use quote::quote;
 
 use std::collections::BTreeMap;
@@ -20,6 +19,7 @@ use super::parser_expanded::GrammarParser;
 use super::rule::RuleLines;
 use super::term::TermType;
 use super::token::Token;
+use super::utils;
 
 #[derive(Debug)]
 pub struct Grammar {
@@ -60,19 +60,13 @@ impl Grammar {
             rules: BTreeMap::new(),
         }
     }
-    pub fn stack_name(name: &Ident) -> Ident {
-        let span = name.span();
-        let mut ident = format_ident!("rustylr_macro_generated_{}_stack", name);
-        ident.set_span(span);
-        ident
-    }
 
     // make A+ -> A A+ | A
     fn new_plus_rule(
         ident: &Ident,
         ruletype: Option<&TokenStream>, // if A is term, then TokenStream for termtype
     ) -> (Ident, Option<TokenStream>, RuleLines) {
-        let new_ident = Ident::new(&format!("__{}__plus_", ident), ident.span());
+        let new_ident = utils::generate_plus_rule_name(ident);
         if let Some(ruletype) = ruletype {
             // ruletype exists,
             // A+ -> A+ A { Ap.push(A); Ap }
@@ -142,8 +136,8 @@ impl Grammar {
         ident: &Ident,
         ruletype: Option<&TokenStream>, // if A is term, then TokenStream for tokentype
     ) -> (Ident, Option<TokenStream>, RuleLines) {
-        let plus_ident = Ident::new(&format!("__{}__plus_", ident), ident.span());
-        let new_ident = Ident::new(&format!("__{}__star_", ident), ident.span());
+        let plus_ident = utils::generate_plus_rule_name(ident);
+        let new_ident = utils::generate_star_rule_name(ident);
         if let Some(ruletype) = ruletype {
             // ruletype exists,
             // A* -> A+ { Ap }
@@ -196,7 +190,7 @@ impl Grammar {
         ident: &Ident,
         ruletype: Option<&TokenStream>, // if A is term, then TokenStream for tokentype
     ) -> (Ident, Option<TokenStream>, RuleLines) {
-        let new_ident = Ident::new(&format!("__{}__question_", ident), ident.span());
+        let new_ident = utils::generate_question_rule_name(ident);
         if let Some(ruletype) = ruletype {
             // ruletype exists,
             // A? -> A { Some(Ap) }
@@ -282,14 +276,29 @@ impl Grammar {
 
         // check eof is defined
         if let Some(eof) = &grammar.eof {
-            if let Some((ident, _)) = grammar
-                .terminals
-                .insert("eof".to_string(), (format_ident!("eof"), eof.clone()))
-            {
+            // check if 'eof' is used as terminal symbol
+            // else insert
+            if let Some((ident, _)) = grammar.terminals.insert(
+                utils::EOF_NAME.to_string(),
+                (Ident::new(utils::EOF_NAME, Span::call_site()), eof.clone()),
+            ) {
                 return Err(ParseError::EofDefined(ident));
+            }
+
+            // check if 'eof' is used as non-terminal symbol
+            if let Some((ident, _, _)) = grammar.rules.get(utils::EOF_NAME) {
+                return Err(ParseError::EofDefined(ident.clone()));
             }
         } else {
             return Err(ParseError::EofNotDefined);
+        }
+
+        // check name 'Augmented' is being used
+        if let Some((ident, _)) = grammar.terminals.get(utils::AUGMENTED_NAME) {
+            return Err(ParseError::AugmentedDefined(ident.clone()));
+        }
+        if let Some((ident, _, _)) = grammar.rules.get(utils::AUGMENTED_NAME) {
+            return Err(ParseError::AugmentedDefined(ident.clone()));
         }
 
         // check if there are same names for terminals and non-terminals
@@ -413,7 +422,9 @@ impl Grammar {
                 }
             }
             for (name, rule_lines) in new_rules {
-                grammar.rules.insert(name, rule_lines);
+                if let Some((ident, _, _)) = grammar.rules.insert(name, rule_lines) {
+                    return Err(ParseError::ReservedNonTerminal(ident));
+                }
             }
         }
 
@@ -424,22 +435,14 @@ impl Grammar {
                 for token in rule.tokens.iter_mut() {
                     match token.token.clone() {
                         Token::Plus(ident) => {
-                            token.token = Token::NonTerm(Ident::new(
-                                &format!("__{}__plus_", ident),
-                                ident.span(),
-                            ));
+                            token.token = Token::NonTerm(utils::generate_plus_rule_name(&ident));
                         }
                         Token::Star(ident) => {
-                            token.token = Token::NonTerm(Ident::new(
-                                &format!("__{}__star_", ident),
-                                ident.span(),
-                            ));
+                            token.token = Token::NonTerm(utils::generate_star_rule_name(&ident));
                         }
                         Token::Question(ident) => {
-                            token.token = Token::NonTerm(Ident::new(
-                                &format!("__{}__question_", ident),
-                                ident.span(),
-                            ));
+                            token.token =
+                                Token::NonTerm(utils::generate_question_rule_name(&ident));
                         }
                         _ => {}
                     }

@@ -1,4 +1,5 @@
 use proc_macro2::Ident;
+use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
 use quote::format_ident;
@@ -7,6 +8,7 @@ use quote::quote;
 use crate::error::ParseError;
 use crate::grammar::Grammar;
 use crate::token::Token;
+use crate::utils;
 
 use rusty_lr_core as rlr;
 
@@ -14,6 +16,49 @@ use std::collections::BTreeMap;
 
 /// emit Rust code for the parser
 impl Grammar {
+    /// write enum that represents non-terminal symbols, including Augmented
+    fn emit_nonterm_enum(&self) -> Result<TokenStream, ParseError> {
+        // =====================================================================
+        // =====================Writing NonTerminal Enum========================
+        // =====================================================================
+
+        let start_rule_name = self.start_rule_name.as_ref().unwrap();
+        let enum_name = utils::generate_enum_name(start_rule_name);
+
+        let mut comma_separated_variants = TokenStream::new();
+        let mut case_display = TokenStream::new();
+        for (name, (ident, _, _)) in self.rules.iter() {
+            comma_separated_variants.extend(quote! {
+                #ident,
+            });
+
+            case_display.extend(quote! {
+                #enum_name::#ident => write!(f, "{}", #name),
+            });
+        }
+
+        let aug_ident = Ident::new(utils::AUGMENTED_NAME, Span::call_site());
+        let aug_ident_str = utils::AUGMENTED_NAME;
+
+        Ok(quote! {
+            /// An enum that represents non-terminal symbols
+            #[allow(non_camel_case_types)]
+            #[derive(Debug, Clone, Copy, std::hash::Hash, std::cmp::PartialEq, std::cmp::Eq, std::cmp::PartialOrd, std::cmp::Ord)]
+            pub enum #enum_name {
+                #comma_separated_variants
+                #aug_ident,
+            }
+
+            impl std::fmt::Display for #enum_name {
+                fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    match self {
+                        #case_display
+                        #enum_name::#aug_ident => write!(f, "{}", #aug_ident_str),
+                    }
+                }
+            }
+        })
+    }
     // build grammar at compile time
     fn emit_grammar_compiletime(&self, lalr: bool) -> Result<TokenStream, ParseError> {
         let mut grammar: rlr::Grammar<String, String> = rlr::Grammar::new();
@@ -58,7 +103,7 @@ impl Grammar {
 
         // augmented rule
         grammar.add_rule(
-            "<Augmented>".to_string(),
+            utils::AUGMENTED_NAME.to_string(),
             vec![
                 rlr::Token::NonTerm(self.start_rule_name.as_ref().unwrap().to_string()),
                 rlr::Token::Term("eof".to_string()),
@@ -67,20 +112,23 @@ impl Grammar {
 
         // build
         let parser = if lalr {
-            match grammar.build_lalr("<Augmented>".to_string()) {
+            match grammar.build_lalr(utils::AUGMENTED_NAME.to_string()) {
                 Ok(parser) => parser,
                 Err(err) => {
                     return Err(ParseError::GrammarBuildError(format!("{}", err)));
                 }
             }
         } else {
-            match grammar.build("<Augmented>".to_string()) {
+            match grammar.build(utils::AUGMENTED_NAME.to_string()) {
                 Ok(parser) => parser,
                 Err(err) => {
                     return Err(ParseError::GrammarBuildError(format!("{}", err)));
                 }
             }
         };
+
+        let nonterminals_enum_name =
+            utils::generate_enum_name(self.start_rule_name.as_ref().unwrap());
 
         // generate code that copy rules and states to parser
         // =====================================================================
@@ -97,16 +145,17 @@ impl Grammar {
                             .extend(quote! {#module_prefix::Token::Term(#term_stream),});
                     }
                     rlr::Token::NonTerm(nonterm) => {
+                        let ident = Ident::new(nonterm, Span::call_site());
                         comma_separated_tokens
-                            .extend(quote! {#module_prefix::Token::NonTerm(#nonterm),});
+                            .extend(quote! {#module_prefix::Token::NonTerm(#nonterminals_enum_name::#ident),});
                     }
                 }
             }
 
-            let nonterm = &rule.name;
+            let nonterm = Ident::new(&rule.name, Span::call_site());
             comma_separated_rules.extend(quote! {
                 #module_prefix::ProductionRule {
-                    name: #nonterm,
+                    name: #nonterminals_enum_name::#nonterm,
                     rule: vec![#comma_separated_tokens],
                 },
             });
@@ -147,8 +196,9 @@ impl Grammar {
                 state.shift_goto_map_nonterm.iter().collect();
             let mut comma_separated_shift_goto_map_nonterm = TokenStream::new();
             for (nonterm, goto) in shift_goto_map_nonterm.into_iter() {
+                let nonterm = Ident::new(nonterm, Span::call_site());
                 comma_separated_shift_goto_map_nonterm.extend(quote! {
-                    (#nonterm, #goto),
+                    (#nonterminals_enum_name::#nonterm, #goto),
                 });
             }
 
@@ -242,6 +292,8 @@ impl Grammar {
             .as_ref()
             .cloned()
             .unwrap_or_else(|| quote! {::rusty_lr});
+        let nonterminals_enum_name =
+            utils::generate_enum_name(self.start_rule_name.as_ref().unwrap());
 
         let mut build_grammar_stream = quote! {
             let mut grammar = #module_prefix::Grammar::new();
@@ -275,7 +327,7 @@ impl Grammar {
         }
 
         // rules
-        for (name, (_name_ident, _typename, rules)) in self.rules.iter() {
+        for (_name, (name_ident, _typename, rules)) in self.rules.iter() {
             for rule in rules.rule_lines.iter() {
                 let mut comma_separated_tokens = quote! {};
                 for token in rule.tokens.iter() {
@@ -286,7 +338,9 @@ impl Grammar {
                                 .extend(quote! {#module_prefix::Token::Term(#term_stream),});
                         }
                         Token::NonTerm(nonterm) => {
-                            let nonterm_stream = nonterm.to_string();
+                            let nonterm_stream = quote! {
+                                #nonterminals_enum_name::#nonterm
+                            };
                             comma_separated_tokens
                                 .extend(quote! {#module_prefix::Token::NonTerm(#nonterm_stream),});
                         }
@@ -298,20 +352,21 @@ impl Grammar {
                 }
 
                 build_grammar_stream.extend(quote! {
-                    grammar.add_rule(#name, vec![#comma_separated_tokens]);
+                    grammar.add_rule(#nonterminals_enum_name::#name_ident, vec![#comma_separated_tokens]);
                 });
             }
         }
 
         // augmented rule
+        let aug_ident = Ident::new(utils::AUGMENTED_NAME, Span::call_site());
         {
-            let start_name = self.start_rule_name.as_ref().unwrap().to_string();
+            let start_name = self.start_rule_name.as_ref().unwrap();
             let eof_stream = self.eof.as_ref().unwrap();
             build_grammar_stream.extend(quote! {
                 grammar.add_rule(
-                    "<Augmented>",
+                    #nonterminals_enum_name::#aug_ident,
                     vec![
-                        #module_prefix::Token::NonTerm(#start_name),
+                        #module_prefix::Token::NonTerm(#nonterminals_enum_name::#start_name),
                         #module_prefix::Token::Term(#eof_stream),
                     ],
                 );
@@ -321,7 +376,8 @@ impl Grammar {
         // build grammar
         if lalr {
             build_grammar_stream.extend(quote! {
-                let parser = match grammar.build_lalr("<Augmented>") {
+                let parser = match grammar.build_lalr(#nonterminals_enum_name::#aug_ident) {
+
                     Ok(parser) => parser,
                     Err(err) => {
                         panic!( "Error building LALR parser:\n{:?}", err );
@@ -330,7 +386,7 @@ impl Grammar {
             });
         } else {
             build_grammar_stream.extend(quote! {
-                let parser = match grammar.build_lalr("<Augmented>") {
+                let parser = match grammar.build_lalr(#nonterminals_enum_name::#aug_ident) {
                     Ok(parser) => parser,
                     Err(err) => {
                         panic!( "Error building LR parser:\n{:?}", err );
@@ -352,6 +408,10 @@ impl Grammar {
             .as_ref()
             .cloned()
             .unwrap_or_else(|| quote! {::rusty_lr});
+
+        let nonterminals_enum_name =
+            utils::generate_enum_name(self.start_rule_name.as_ref().unwrap());
+
         // =====================================================================
         // =========================Writing Parser==============================
         // =====================================================================
@@ -379,7 +439,7 @@ impl Grammar {
         let mut ruleid: usize = 0;
         let mut case_streams = quote! {};
         // stack for end index of each rule in term stack
-        let terms_stack_name = Self::stack_name(&format_ident! {"rl_terms"});
+        let terms_stack_name = utils::generate_stack_name(&format_ident! {"rl_terms"});
         let term_typename = self.token_typename.as_ref().unwrap();
 
         // TokenStream to define reduce function for each production rule
@@ -401,7 +461,7 @@ impl Grammar {
 
                             // if <RuleType> is defined for this nonterm,
                             // pop value from the stack to 'mapto'
-                            let stack_name = Self::stack_name(nonterm);
+                            let stack_name = utils::generate_stack_name(nonterm);
                             let error_message =
                                 format!("Something wrong! {} stack is empty", nonterm);
                             if self.rules.get(&nonterm.to_string()).unwrap().1.is_some() {
@@ -428,7 +488,7 @@ impl Grammar {
                 // else, just execute action
                 if typename.is_some() {
                     // push result to this stack
-                    let stack_name = Self::stack_name(name_ident);
+                    let stack_name = utils::generate_stack_name(name_ident);
 
                     // typename is defined, reduce action must be defined
                     if let Some(action) = &rule.reduce_action {
@@ -515,7 +575,7 @@ impl Grammar {
         let start_rule_name = self.start_rule_name.as_ref().unwrap();
         let (start_rule_typename, pop_from_start_rule_stack) = {
             if let Some(start_typename) = &self.rules.get(&start_rule_name.to_string()).unwrap().1 {
-                let start_rule_stack_name = Self::stack_name(start_rule_name);
+                let start_rule_stack_name = utils::generate_stack_name(start_rule_name);
                 (
                     start_typename.clone(),
                     quote! {
@@ -532,7 +592,7 @@ impl Grammar {
         let mut stack_init_streams = quote! {};
         for (_name, (name, typename, _rules)) in self.rules.iter() {
             // push result to this stack
-            let stack_name = Self::stack_name(name);
+            let stack_name = utils::generate_stack_name(name);
 
             if let Some(typename) = typename {
                 stack_def_streams.extend(quote! {
@@ -599,9 +659,9 @@ impl Grammar {
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         pub struct #struct_name {
             /// production rules
-            pub rules: Vec<#module_prefix::ProductionRule<#term_typename, &'static str>>,
+            pub rules: Vec<#module_prefix::ProductionRule<#term_typename, #nonterminals_enum_name>>,
             /// states
-            pub states: Vec<#module_prefix::State<#term_typename, &'static str>>,
+            pub states: Vec<#module_prefix::State<#term_typename, #nonterminals_enum_name>>,
         }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         impl #struct_name {
@@ -614,13 +674,13 @@ impl Grammar {
             }
 
             /// give lookahead token to parser, and check if there is any reduce action
-            fn lookahead<'a, C: #module_prefix::Callback<#term_typename, &'static str>>(
+            fn lookahead<'a, C: #module_prefix::Callback<#term_typename, #nonterminals_enum_name>>(
                 &'a self,
                 context: &mut #stack_struct_name,
                 callback: &mut C,
                 term: &#term_typename,
                 #user_data_parameter_def
-            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, &'static str, C::Error, #error_typename>> {
+            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, #nonterminals_enum_name, C::Error, #error_typename>> {
                 // fetch state from state stack
                 let state = &self.states[*context.state_stack.last().expect("Something wrong! state_stack is empty")];
 
@@ -664,17 +724,17 @@ impl Grammar {
                 context: &mut #stack_struct_name,
                 term: #term_typename,
                 #user_data_parameter_def
-            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, &'static str, u8, #error_typename>> {
+            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, #nonterminals_enum_name, u8, #error_typename>> {
                 self.feed_callback( context, &mut #module_prefix::DefaultCallback {}, term, #user_data_var )
             }
             /// feed one terminal to parser, and update state stack
-            pub fn feed_callback<'a, C: #module_prefix::Callback<#term_typename, &'static str>>(
+            pub fn feed_callback<'a, C: #module_prefix::Callback<#term_typename, #nonterminals_enum_name>>(
                 &'a self,
                 context: &mut #stack_struct_name,
                 callback: &mut C,
                 term: #term_typename,
                 #user_data_parameter_def
-            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, &'static str, C::Error, #error_typename>> {
+            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, #nonterminals_enum_name, C::Error, #error_typename>> {
                 // reduce if possible
                 self.lookahead(context, callback, &term, #user_data_var)?;
 
@@ -704,12 +764,12 @@ impl Grammar {
             }
 
             /// feed one non-terminal to parser, and update state stack
-            fn feed_nonterm<'a, C: #module_prefix::Callback<#term_typename, &'static str>>(
+            fn feed_nonterm<'a, C: #module_prefix::Callback<#term_typename, #nonterminals_enum_name>>(
                 &'a self,
                 context: &mut #stack_struct_name,
                 callback: &mut C,
-                nonterm: &'a &'static str,
-            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, &'static str, C::Error, #error_typename>> {
+                nonterm: &'a #nonterminals_enum_name,
+            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, #nonterminals_enum_name, C::Error, #error_typename>> {
                 // fetch state from state stack
                 let state = &self.states[*context.state_stack.last().expect("Something wrong! state_stack is empty")];
 
@@ -723,7 +783,7 @@ impl Grammar {
                     Ok(())
                 }else {
                     Err(#module_prefix::ParseError::InvalidNonTerminal(
-                        &nonterm,
+                        nonterm,
                         &self.rules,
                         &self.states,
                         context.state_stack.clone(),
@@ -739,13 +799,23 @@ impl Grammar {
     }
 
     pub fn emit_compiletime(&self, lalr: bool) -> Result<TokenStream, ParseError> {
+        let enum_emit = self.emit_nonterm_enum()?;
         let grammar_emit = self.emit_grammar_compiletime(lalr)?;
         let parser_emit = self.emit_parser(grammar_emit)?;
-        Ok(parser_emit)
+
+        Ok(quote! {
+            #enum_emit
+            #parser_emit
+        })
     }
     pub fn emit_runtime(&self, lalr: bool) -> Result<TokenStream, ParseError> {
+        let enum_emit = self.emit_nonterm_enum()?;
         let grammar_emit = self.emit_grammar_runtime(lalr)?;
         let parser_emit = self.emit_parser(grammar_emit)?;
-        Ok(parser_emit)
+
+        Ok(quote! {
+            #enum_emit
+            #parser_emit
+        })
     }
 }

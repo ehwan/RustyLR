@@ -7,3 +7,4 @@ pub mod rule;
 pub mod term;
 pub mod token;
 pub mod tokenizer;
+pub mod utils;

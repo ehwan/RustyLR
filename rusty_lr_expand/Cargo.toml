@@ -8,4 +8,4 @@ proc-macro2 = "1.0.86"
 quote = "1.0"
 clap = { version = "4.5.7", features = ["derive"] }
 # rusty_lr_parser = { path = "../rusty_lr_parser" }
-rusty_lr_parser = "1.1.0"
+rusty_lr_parser = "1.2"
