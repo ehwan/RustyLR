@@ -3,7 +3,7 @@ yacc-like LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from C
 
 ```
 [dependencies]
-rusty_lr = "1.0.0"
+rusty_lr = "1.0.1"
 ```
 
 ## Features
@@ -19,7 +19,7 @@ rusty_lr = "1.0.0"
  - Can generate *pretty* error messages, by just passing `Span` data.
  - With modern IDE, auto-completion and error highlighting can be done in real-time.
 
-## Sample
+## Usage
 
  - [Calculator](example/calculator): calculator with enum `Token`
  - [Calculator u8](example/calculator_u8): calculator with `u8`
@@ -113,8 +113,8 @@ fn main() {
 }
 ```
 
-The result will be:
 ```
+$ cargo run
 3.0 '+' 4.0
 1.0 '+' 140.0
 result: 141
@@ -125,17 +125,18 @@ userdata: 2
 
 
 
-## proc-macro `lr1!`, `lalr1!`, `lr1_runtime!`, and `lalr1_runtime!`
-`lr1!`, `lalr1!`, `lr1_runtime!`, and `lalr1_runtime!` are procedural macros that will build `Parser` struct from CFGs.
-Please refer to the [Sample](#sample) section for actual usage.
+## proc-macro syntax
 
-### Compile-time vs Runtime
-Former two macros (those without '_runtime' suffix) will generate `Parser` struct at compile-time, which `build()` is called at compile-time and the generated code will be *TONS* of `insert` of tokens one by one.
-Latter two (those with '_runtime' suffix) will generate `Parser` struct at runtime, the `build()` is called on `Parser::new()`.
+Four procedural macros are provided that will build `Parser` struct from CFGs:
+ - `lr1!`, `lalr1!`
+ - `lr1_runtime!`, `lalr1_runtime!`
 
+Former two macros (those without '_runtime' suffix) will generate `Parser` struct at compile-time.
+The calculation of building DFA will be done at compile-time, and the generated code will be *TONS* of `insert` of tokens one by one.
+Latter two (those with '_runtime' suffix) will generate `Parser` struct at runtime. 
+The calculation of building DFA will be done at runtime, and the generated code will be much more readable, and smaller.
 
-### Syntax
-Every line in the macro must follow the syntax below. The syntax can be also found in the [bootstrap](rusty_lr_parser/src/parser.rs) file.
+Every line in the macro must follow the syntax below.
 
 ### Token type <sub><sup>(must defined)</sup></sub>
 ```
@@ -144,6 +145,28 @@ Every line in the macro must follow the syntax below. The syntax can be also fou
 Define the type of terminal symbols.
 `<RustType>` must be accessible at the point where the macro is called.
 
+<details>
+<summary>
+Example
+</summary>
+
+```rust
+enum MyTokenType<Generic> {
+    Digit,
+    Ident,
+    ...
+    VariantWithGeneric<Generic>
+}
+
+lr! {
+...
+%tokentype MyTokenType<i32>;
+}
+```
+
+</details>
+
+
 ### Token definition <sub><sup>(must defined)</sup></sub>
 ```
 '%token' <Ident> <RustExpr> ';'
@@ -151,11 +174,50 @@ Define the type of terminal symbols.
 Map terminal symbol's name `<Ident>` to the actual value `<RustExpr>`.
 `<RustExpr>` must be accessible at the point where the macro is called.
 
+<details>
+
+<summary>
+Example
+</summary>
+
+
+```rust
+lr1! {
+%tokentype u8;
+
+%token zero b'0';
+%token one b'1';
+
+...
+
+// 'zero' and 'one' will be replaced by b'0' and b'1' respectively
+E: zero one;
+}
+```
+
+</details>
+
 ### Start symbol <sub><sup>(must defined)</sup></sub>
 ```
 '%start' <Ident> ';'
 ```
 Define the start symbol of the grammar.
+
+<details>
+<summary>
+Example
+</summary>
+
+```rust
+lr1! {
+%start E;
+// this internally generate augmented rule <Augmented> -> E eof
+
+E: ... ;
+}
+```
+
+</details>
 
 ### Eof symbol <sub><sup>(must defined)</sup></sub>
 ```
@@ -165,11 +227,51 @@ Define the `eof` terminal symbol.
 `<RustExpr>` must be accessible at the point where the macro is called.
 'eof' terminal symbol will be automatically added to the grammar.
 
+<details>
+<summary>
+Example
+</summary>
+
+```rust
+lr1! {
+%eof b'\0';
+// you can access eof terminal symbol by 'eof' in the grammar
+// without %token eof ...;
+}
+```
+
+</details>
+
 ### Userdata type <sub><sup>(optional)</sup></sub>
 ```
 '%userdata' <RustType> ';'
 ```
 Define the type of userdata passed to `feed()` function.
+
+<details>
+<summary>
+Example
+</summary>
+
+```rust
+struct MyUserData { ... }
+
+lr1! {
+...
+%userdata MyUserData;
+}
+
+...
+
+fn main() {
+    ...
+    let mut userdata = MyUserData { ... };
+    parser.feed( ..., token, &mut userdata); // <-- userdata feed here
+}
+```
+
+</details>
+
 
 ### Reduce type <sub><sup>(optional)</sup></sub>
 ```
@@ -184,6 +286,28 @@ Define the type of userdata passed to `feed()` function.
 '%shift' <Ident> ';'
 ```
 Set the shift/reduce precedence for terminal symbols. `<Ident>` must be defined in `%token`.
+
+<details>
+<summary>
+Example
+</summary>
+
+```rust
+lr1! {
+// define tokens
+%token plus '+';
+%token hat '^';
+
+
+// reduce first for token 'plus'
+%left plus;
+
+// shift first for token 'hat'
+%right hat;
+}
+```
+
+</details>
 
 ### Production rules
 ```
@@ -208,13 +332,20 @@ Define the production rules.
                ;
 ```
 
-Example:
-```
-E: A plus* d=D ;
-```
-This production rule defines non-terminal `E` to be `A`, then zero or more `plus`, then `D` mapped to variable `d`.
-For more information, please refer to the [Accessing token data in ReduceAction](#accessing-token-data-in-reduceaction) section.
+<details>
+<summary>
+Example
+</summary>
 
+This production rule defines non-terminal `E` to be `A`, then zero or more `plus`, then `D` mapped to variable `d`.
+For more information, please refer to the [Accessing token data in ReduceAction](#accessing-token-data-in-reduceaction) section below.
+```rust
+lr1! {
+E: A plus* d=D;
+}
+```
+
+</details>
 
 ### RuleType <sub><sup>(optional)</sup></sub>
 ```
@@ -224,6 +355,19 @@ For more information, please refer to the [Accessing token data in ReduceAction]
 ```
 Define the type of value that this production rule holds.
 
+<details>
+<summary>
+Example
+</summary>
+
+```rust
+lr1! {
+E(MyType<...>): ... Tokens ... ;
+}
+```
+
+</details>
+
 ### ReduceAction <sub><sup>(optional)</sup></sub>
 ```
 <ReduceAction> : '{' <RustExpr> '}'
@@ -232,11 +376,55 @@ Define the type of value that this production rule holds.
 ```
 
 Define the action to be executed when the rule is matched and reduced.
-If `<RuleType>` is defined, `<ReduceAction>` itself must be the value of `<RuleType>` (i.e. no semicolon at the end of the statement).
 
-`<ReduceAction>` can be omitted if:
+- If `<RuleType>` is defined, `<ReduceAction>` itself must be the value of `<RuleType>` (i.e. no semicolon at the end of the statement).
+
+- `<ReduceAction>` can be omitted if:
   - `<RuleType>` is not defined
   - Only one token is holding value in the production rule
+
+- `Result<(),Error>` can be returned from `<ReduceAction>`.
+  - Returned `Error` will be delivered to the caller of `feed()` function.
+  - `ErrorType` can be defined by `%err` or `%error` directive. See [Error type](#error-type-optional) section.
+
+<details>
+<summary>
+Example
+</summary>
+
+Omitting `ReduceAction`:
+```rust
+lr1! {
+NoRuleType: ... ;
+
+RuleTypeI32(i32): ... { 0 } ;
+
+// RuleTypeI32 will be automatically chosen
+E(i32): NoRuleType NoRuleType RuleTypeI32 NoRuleType;
+}
+```
+
+Returning `Result<(),String>` from ReduceAction:
+```rust
+lr1! {
+// set Err variant type to String
+%err String;
+
+%token div '/';
+
+E(i32): A div a2=A {
+    if a2 == 0 {
+        return Err("Division by zero".to_string());
+    }
+
+    A / a2
+};
+
+A(i32): ... ;
+}
+```
+
+</details>
 
 ### Accessing token data in ReduceAction
 
@@ -256,30 +444,88 @@ For regex-like pattern, type of variable will be modified by following:
  | '+'     | `Vec<T>`       | (not defined)              | `Vec<TermType>` |
  | '?'     | `Option<T>`    | (not defined)              | `Option<TermType>` |
 
-For example, following code will print the value of each `A`, and the slice of each `A` and `plus` token in the production rule `E -> A plus A`.
+<details>
+<summary>
+Example
+</summary>
+
 ```rust
+lr1! {
 %token plus ...;
 
-E : A plus? a2=A*
+// one or more 'A', then optional 'plus', then zero or more 'B'
+E(f32) : A+ plus? b=B*
   {
-    println!("Value of 1st A: {}", A); // i32
+    println!("Value of A: {:?}", A);         // Vec<i32>
     println!("Value of plus: {:?}", plus); // Option<TermType>
-    println!("Value of 2nd As: {:?}", a2); // Vec<i32>
+    println!("Value of b: {:?}", b);       // Vec<f32>
+
+    let first_A = A[0];
+    let first_B = b.first(); // Option<&f32>
+
+
+    // this will be the new value of E
+    if let Some(first_B) = first_B {
+        let value = first_A as f32 + *first_B;
+        value
+    } else {
+        first_a as f32
+    }
   }
   ;
 
 A(i32): ... ;
+B(f32): ... ;
+}
 ```
 
-`Result<(), String>` can be returned from `<ReduceAction>`.
-Returned `Err` will be delivered to the caller of `feed()` function.
+</details>
 
-#### Error type <sub><sup>(optional)</sup></sub>
+
+
+### <a name="errortype"></a> Error type <sub><sup>(optional)</sup></sub>
 ```
 '%err' <RustType> ';'
 '%error' <RustType> ';'
 ```
 Define the type of `Err` variant in `Result<(), Err>` returned from `<ReduceAction>`. If not defined, `String` will be used.
+
+<details>
+<summary>
+Example
+</summary>
+
+```rust
+enum MyErrorType<T> {
+    ErrVar1,
+    ErrVar2,
+    ErrVar3(T),
+    ...
+}
+
+lr1! {
+
+%err MyErrorType<GenericType> ;
+
+}
+
+...
+
+match parser.feed( ... ) {
+    Ok(_) => {}
+    Err(err) => {
+        match err {
+            ParseError::ReduceAction( err ) => {
+                // do something with err
+            }
+            _ => {}
+        }
+    }
+}
+```
+
+</details>
+
 
 ## Start Parsing
 `lr1!` and `lalr1!` will generate struct `<StartSymbol>Parser`.
@@ -432,10 +678,12 @@ Options:
 The input file must be consisted of two parts: Rust codes and CFGs, separated by `%%`.
 ```
 // <Rust Codes...>
+// use statements, type definitions, etc.
 
 %%
 
 // <CFGs...>
+// without macro callings `lr1!` or `lalr1!`, just internal lines
 ```
 
 The output file will be generated `<StartSymbol>Parser` struct with the given CFGs.
@@ -446,6 +694,10 @@ The output file will be generated `<StartSymbol>Parser` struct with the given CF
 
 ## Build Deterministic Finite Automata (DFA) from Context Free Grammar (CFG)
 This section will describe how to build DFA from CFGs, on runtime.
+<details>
+<summary>
+Click to expand
+</summary>
 
 ### 1. Define terminal and non-terminal symbols
 
@@ -579,3 +831,5 @@ for term in terms {
 ```
 
 `EOF` token is feeded at the end of sequence, and the augmented rule `Augmented -> StartSymbol $` will not be reduced since there are no lookahead symbols.
+
+</details>

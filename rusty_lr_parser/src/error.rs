@@ -5,6 +5,7 @@ use quote::quote_spanned;
 
 use std::fmt::Display;
 
+#[non_exhaustive]
 #[derive(Debug)]
 pub enum ParseError {
     MultipleTokenDefinition(Span, Ident, TokenStream, TokenStream),
