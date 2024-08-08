@@ -356,14 +356,37 @@ impl Grammar {
         // =========================Writing Parser==============================
         // =====================================================================
 
+        // error typename from '%error'
+        let error_typename = if let Some(error_typename) = &self.error_typename {
+            error_typename.clone()
+        } else {
+            // default is String
+            quote! { String }
+        };
+
+        // TokenStream for userdata parameter definition, if defined
+        let user_data_parameter_name = format_ident!("data");
+        let (user_data_parameter_def, user_data_var) =
+            if let Some(user_data) = &self.userdata_typename {
+                (
+                    quote! { #user_data_parameter_name: &mut #user_data, },
+                    quote! { #user_data_parameter_name, },
+                )
+            } else {
+                (quote! {}, quote! {})
+            };
+
         let mut ruleid: usize = 0;
         let mut case_streams = quote! {};
         // stack for end index of each rule in term stack
         let terms_stack_name = Self::stack_name(&format_ident! {"rl_terms"});
         let term_typename = self.token_typename.as_ref().unwrap();
 
+        // TokenStream to define reduce function for each production rule
+        let mut fn_reduce_for_each_rule_stream = TokenStream::new();
+
         for (_name, (name_ident, typename, rules)) in self.rules.iter() {
-            for rule in rules.rule_lines.iter() {
+            for (rule_local_id, rule) in rules.rule_lines.iter().enumerate() {
                 let mut token_pop_stream = TokenStream::new();
                 for token in rule.tokens.iter().rev() {
                     match &token.token {
@@ -393,6 +416,14 @@ impl Grammar {
                     }
                 }
 
+                let reduce_fn_ident = format_ident!("reduce_{}_{}", name_ident, rule_local_id);
+
+                case_streams.extend(quote! {
+                    #ruleid => {
+                        self.#reduce_fn_ident( #user_data_var )?;
+                    }
+                });
+
                 // if typename is defined for this rule, push result of action to stack
                 // else, just execute action
                 if typename.is_some() {
@@ -401,10 +432,11 @@ impl Grammar {
 
                     // typename is defined, reduce action must be defined
                     if let Some(action) = &rule.reduce_action {
-                        case_streams.extend(quote! {
-                            #ruleid => {
+                        fn_reduce_for_each_rule_stream.extend(quote! {
+                            fn #reduce_fn_ident(&mut self, #user_data_parameter_def) -> Result<(), #error_typename> {
                                 #token_pop_stream
                                 self.#stack_name.push(#action);
+                                Ok(())
                             }
                         });
                     } else {
@@ -440,10 +472,11 @@ impl Grammar {
                             }
                         }
                         if let Some(unique_mapto) = unique_mapto {
-                            case_streams.extend(quote! {
-                                #ruleid => {
+                            fn_reduce_for_each_rule_stream.extend(quote! {
+                                fn #reduce_fn_ident(&mut self, #user_data_parameter_def) -> Result<(), #error_typename> {
                                     #token_pop_stream
                                     self.#stack_name.push(#unique_mapto);
+                                    Ok(())
                                 }
                             });
                         } else {
@@ -453,17 +486,21 @@ impl Grammar {
                         }
                     }
                 } else {
+                    // <RuleType> is not defined,
+                    // just execute action
                     if let Some(action) = &rule.reduce_action {
-                        case_streams.extend(quote! {
-                            #ruleid => {
+                        fn_reduce_for_each_rule_stream.extend(quote! {
+                            fn #reduce_fn_ident(&mut self, #user_data_parameter_def) -> Result<(), #error_typename> {
                                 #token_pop_stream
                                 #action
+                                Ok(())
                             }
                         });
                     } else {
-                        case_streams.extend(quote! {
-                            #ruleid => {
+                        fn_reduce_for_each_rule_stream.extend(quote! {
+                            fn #reduce_fn_ident(&mut self, #user_data_parameter_def) -> Result<(), #error_typename> {
                                 #token_pop_stream
+                                Ok(())
                             }
                         });
                     }
@@ -473,6 +510,8 @@ impl Grammar {
             }
         }
 
+        // TokenStream for <RuleType> of start rule
+        // and pop from start rule stack
         let start_rule_name = self.start_rule_name.as_ref().unwrap();
         let (start_rule_typename, pop_from_start_rule_stack) = {
             if let Some(start_typename) = &self.rules.get(&start_rule_name.to_string()).unwrap().1 {
@@ -488,6 +527,7 @@ impl Grammar {
             }
         };
 
+        // TokenStream for member variables declaration
         let mut stack_def_streams = quote! {};
         let mut stack_init_streams = quote! {};
         for (_name, (name, typename, _rules)) in self.rules.iter() {
@@ -509,23 +549,11 @@ impl Grammar {
         let mut stack_struct_name = format_ident!("{}Context", start_rule_name);
         stack_struct_name.set_span(start_rule_name.span());
 
-        // error typename from '%error'
-        let error_typename = if let Some(error_typename) = &self.error_typename {
-            error_typename.clone()
-        } else {
-            quote! { String }
-        };
-
-        let (user_data_parameter_def, user_data_var) =
-            if let Some(user_data) = &self.userdata_typename {
-                (quote! { data: &mut #user_data, }, quote! { data, })
-            } else {
-                (quote! {}, quote! {})
-            };
-
         Ok(quote! {
+        /// struct that holds internal parser data, for reduce action and state transition
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         pub struct #stack_struct_name {
+            /// state stack, user must not modify this
             pub state_stack: Vec<usize>,
             #terms_stack_name: Vec<#term_typename>,
             #stack_def_streams
@@ -540,6 +568,9 @@ impl Grammar {
                 }
             }
 
+            #fn_reduce_for_each_rule_stream
+
+            /// reduce items in stack, this function is called automatically by parser
             pub fn reduce(&mut self,
                 rulelen: usize,
                 rustylr_macro_generated_ruleid__: usize,
@@ -553,17 +584,23 @@ impl Grammar {
                 }
                 Ok(())
             }
+
+            /// pop value from start rule
             pub fn accept(&mut self) -> #start_rule_typename {
                 #pop_from_start_rule_stack
             }
 
+            /// push terminal symbol to stack, this function is called automatically by parser
             pub fn push( &mut self, term: #term_typename ) {
                 self.#terms_stack_name.push(term);
             }
         }
+        /// struct that holds parser data, DFA tables
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         pub struct #struct_name {
+            /// production rules
             pub rules: Vec<#module_prefix::ProductionRule<#term_typename, &'static str>>,
+            /// states
             pub states: Vec<#module_prefix::State<#term_typename, &'static str>>,
         }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
