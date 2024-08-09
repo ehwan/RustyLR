@@ -1,5 +1,6 @@
 # rustylr
-Converts a context-free grammar into a deterministic finite automaton (DFA) tables, and generates a Rust code that can be used as a parser for that grammar.
+Converts a context-free grammar into a deterministic finite automaton (DFA) tables,
+and generates a Rust code that can be used as a parser for that grammar.
 
 ```
 cargo install rustylr
