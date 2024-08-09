@@ -145,9 +145,11 @@ fn main() {
             let mut shift_first = BTreeSet::new();
 
             for (shifted_rule_ref, lookaheads) in state.ruleset.rules.iter() {
-                for token in lookaheads.iter() {
-                    if state.shift_goto_map_term.contains_key(token) {
-                        shift_first.insert(token);
+                if shifted_rule_ref.shifted == parser.rules[shifted_rule_ref.rule].rule.len() {
+                    for token in lookaheads.iter() {
+                        if state.shift_goto_map_term.contains_key(token) {
+                            shift_first.insert(token);
+                        }
                     }
                 }
 
