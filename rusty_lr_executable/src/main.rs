@@ -161,7 +161,7 @@ fn main() {
                 }
             }
 
-            if !reduce_first.is_empty() && !shift_first.is_empty() {
+            if !reduce_first.is_empty() || !shift_first.is_empty() {
                 debug_comments.push_str(format!("{:=^80}\n", "Shift/Reduce Conflict").as_str());
                 debug_comments.push_str(format!("State{}:\n", state_id).as_str());
                 for (shifted_rule_ref, lookaheads) in state.ruleset.rules.iter() {
@@ -175,22 +175,26 @@ fn main() {
                     };
                     debug_comments.push_str(format!("{}\n", lookahead_rule).as_str());
                 }
-                debug_comments.push_str("Tokens for reduce: ");
-                for (id, token) in reduce_first.iter().enumerate() {
-                    debug_comments.push_str(format!("{}", token).as_str());
-                    if id < reduce_first.len() - 1 {
-                        debug_comments.push_str(", ");
+                if !reduce_first.is_empty() {
+                    debug_comments.push_str("Tokens for reduce: ");
+                    for (id, token) in reduce_first.iter().enumerate() {
+                        debug_comments.push_str(format!("{}", token).as_str());
+                        if id < reduce_first.len() - 1 {
+                            debug_comments.push_str(", ");
+                        }
                     }
+                    debug_comments.push_str("\n");
                 }
-                debug_comments.push_str("\n");
-                debug_comments.push_str("Tokens for shift: ");
-                for (id, token) in shift_first.iter().enumerate() {
-                    debug_comments.push_str(format!("{}", token).as_str());
-                    if id < shift_first.len() - 1 {
-                        debug_comments.push_str(", ");
+                if !shift_first.is_empty() {
+                    debug_comments.push_str("Tokens for shift: ");
+                    for (id, token) in shift_first.iter().enumerate() {
+                        debug_comments.push_str(format!("{}", token).as_str());
+                        if id < shift_first.len() - 1 {
+                            debug_comments.push_str(", ");
+                        }
                     }
+                    debug_comments.push_str("\n");
                 }
-                debug_comments.push_str("\n");
             }
         }
     }

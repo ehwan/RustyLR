@@ -1,6 +1,6 @@
 [package]
 name = "rustylr"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 license = "MIT"
 description = "An executable for LR(1), LALR(1) parser and code generator"
