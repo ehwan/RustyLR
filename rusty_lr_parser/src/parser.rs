@@ -38,7 +38,10 @@ use rusty_lr_core::ReduceType;
 %token tokentype TermType::TokenType(None);
 %token userdata TermType::UserData(None);
 %token errortype TermType::ErrorType(None);
-%token group TermType::Group(None);
+%token parengroup TermType::ParenGroup(None);
+%token bracegroup TermType::BraceGroup(None);
+%token bracketgroup TermType::BracketGroup(None);
+%token othergroup TermType::OtherGroup(None);
 %token literal TermType::Literal(None);
 %token equal TermType::Equal(None);
 %token plus TermType::Plus(None);
@@ -60,8 +63,8 @@ Rule((Ident, Option<TokenStream>, RuleLines)) : ident RuleType colon RuleLines s
 }
 ;
 
-RuleType(Option<Group>): group {
-    if let TermType::Group(group) = group {
+RuleType(Option<Group>): parengroup {
+    if let TermType::ParenGroup(group) = parengroup {
         if let Some(group) = group {
             if group.delimiter() != proc_macro2::Delimiter::Parenthesis {
                 return Err( ParseError::InvalidRuletypeDelimiter(group.span()) );
@@ -152,8 +155,8 @@ TokenMapped(TokenMapped): SymbolPattern {
 }
 ;
 
-Action(Option<Group>): group {
-    if let TermType::Group(group) = group {
+Action(Option<Group>): bracegroup {
+    if let TermType::BraceGroup(group) = bracegroup {
         if let Some(action) = group {
             if action.delimiter() != proc_macro2::Delimiter::Brace {
                 return Err( ParseError::InvalidReduceActionDelimiter(action.span()) );
@@ -192,7 +195,10 @@ AnyTokenNoSemi(TermType):
     | tokentype
     | userdata
     | errortype
-    | group
+    | parengroup
+    | bracegroup
+    | bracketgroup
+    | othergroup
     | literal
     | equal
     | plus
