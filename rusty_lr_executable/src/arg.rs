@@ -33,4 +33,7 @@ pub struct Args {
     /// and the shift/reduce resolving process.
     #[arg(short, long, default_value = "false")]
     pub verbose: bool,
+
+    #[arg(long)]
+    pub visualize: Option<String>,
 }

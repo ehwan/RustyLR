@@ -4,6 +4,7 @@ use proc_macro2::TokenStream;
 use proc_macro2::TokenTree;
 use quote::TokenStreamExt;
 
+use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::fs::read;
 use std::fs::write;
@@ -111,6 +112,9 @@ fn main() {
 
     // this comments will be printed to the output file
     let mut debug_comments = String::new();
+    let mut plantuml = String::new();
+    plantuml.push_str("@startuml\n");
+    plantuml.push_str("[*] --> State0\n");
     {
         let parser = match grammar.create_grammar() {
             Ok(mut grammar) => {
@@ -197,7 +201,57 @@ fn main() {
                 }
             }
         }
+
+        // plantuml visualize
+        for (state_id, state) in parser.states.iter().enumerate() {
+            // current ruleset
+            for (shifted_rule_ref, lookaheads) in state.ruleset.rules.iter() {
+                let shifted_rule = rusty_lr_core::ShiftedRule {
+                    rule: parser.rules[shifted_rule_ref.rule].clone(),
+                    shifted: shifted_rule_ref.shifted,
+                };
+                let lookahead_rule = rusty_lr_core::LookaheadRule {
+                    rule: shifted_rule,
+                    lookaheads: lookaheads.clone(),
+                };
+                plantuml.push_str(format!("State{}: {}\n", state_id, lookahead_rule).as_str());
+            }
+
+            // goto_new_state, terms map
+            let mut goto_terms = BTreeMap::new();
+            for (term, goto_state) in state.shift_goto_map_term.iter() {
+                goto_terms
+                    .entry(*goto_state)
+                    .or_insert_with(Vec::new)
+                    .push(term.clone());
+            }
+            for (goto, terms) in goto_terms.into_iter() {
+                let mut terms_string = String::new();
+                let terms_len = terms.len();
+                for (term_id, term) in terms.into_iter().enumerate() {
+                    terms_string.push_str(format!("{}", term).as_str());
+                    if term_id < terms_len - 1 {
+                        terms_string.push_str(", ");
+                    }
+                }
+
+                plantuml.push_str(
+                    format!("State{} --> State{}: {}\n", state_id, goto, terms_string).as_str(),
+                );
+            }
+        }
     }
+    plantuml.push_str("@enduml\n");
+    if let Some(visualize) = args.visualize {
+        match write(visualize, plantuml) {
+            Ok(_) => {}
+            Err(e) => {
+                eprintln!("Error writing plantuml file: {}", e);
+                return;
+            }
+        }
+    }
+
     if args.verbose {
         println!("{}", debug_comments);
     }
