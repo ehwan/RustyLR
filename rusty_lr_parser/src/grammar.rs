@@ -367,7 +367,7 @@ impl Grammar {
                                 };
 
                                 // add plus rule
-                                let new_rule = Self::new_plus_rule(&ident, ruletype);
+                                let new_rule = Self::new_plus_rule(ident, ruletype);
                                 new_rules.insert(new_rule.0.to_string(), new_rule);
                             }
                             Token::Star(ident) => {
@@ -388,11 +388,11 @@ impl Grammar {
                                 };
 
                                 // add plus rule
-                                let new_rule = Self::new_plus_rule(&ident, ruletype);
+                                let new_rule = Self::new_plus_rule(ident, ruletype);
                                 new_rules.insert(new_rule.0.to_string(), new_rule);
 
                                 // add star rule
-                                let new_rule = Self::new_star_rule(&ident, ruletype);
+                                let new_rule = Self::new_star_rule(ident, ruletype);
                                 new_rules.insert(new_rule.0.to_string(), new_rule);
                             }
                             Token::Question(ident) => {
@@ -413,7 +413,7 @@ impl Grammar {
                                 };
 
                                 // add question rule
-                                let new_rule = Self::new_question_rule(&ident, ruletype);
+                                let new_rule = Self::new_question_rule(ident, ruletype);
                                 new_rules.insert(new_rule.0.to_string(), new_rule);
                             }
                             _ => {}
@@ -476,6 +476,55 @@ impl Grammar {
                 }
             }
         }
+
+        Ok(grammar)
+    }
+
+    /// create the rusty_lr_core::Grammar from the parsed CFGs
+    pub fn create_grammar(&self) -> Result<rlr::Grammar<String, String>, ParseError> {
+        let mut grammar: rlr::Grammar<String, String> = rlr::Grammar::new();
+
+        // reduce types
+        for (term, (_, reduce_type)) in self.reduce_types.iter() {
+            match grammar.set_reduce_type(term.clone(), *reduce_type) {
+                Ok(_) => {}
+                Err(err) => {
+                    return Err(ParseError::GrammarBuildError(format!("{}", err)));
+                }
+            }
+        }
+
+        // rules
+        for (name, (_name_ident, _typename, rules)) in self.rules.iter() {
+            for rule in rules.rule_lines.iter() {
+                let mut tokens = Vec::with_capacity(rule.tokens.len());
+                for token in rule.tokens.iter() {
+                    match &token.token {
+                        Token::Term(term) => {
+                            tokens.push(rlr::Token::Term(term.to_string()));
+                        }
+                        Token::NonTerm(nonterm) => {
+                            tokens.push(rlr::Token::NonTerm(nonterm.to_string()));
+                        }
+
+                        Token::Plus(_) | Token::Star(_) | Token::Question(_) => {
+                            unreachable!("Only Term and NonTerm should be in rule");
+                        }
+                    }
+                }
+
+                grammar.add_rule(name.clone(), tokens);
+            }
+        }
+
+        // augmented rule
+        grammar.add_rule(
+            utils::AUGMENTED_NAME.to_string(),
+            vec![
+                rlr::Token::NonTerm(self.start_rule_name.as_ref().unwrap().to_string()),
+                rlr::Token::Term("eof".to_string()),
+            ],
+        );
 
         Ok(grammar)
     }

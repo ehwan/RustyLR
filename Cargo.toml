@@ -4,7 +4,7 @@ members = [
   "rusty_lr_core",
   "rusty_lr_derive",
   "rusty_lr_parser",
-  "rusty_lr_expand",
+  "rusty_lr_executable",
   "example/calculator",
   "example/calculator_u8",
   "example/lrtest",

@@ -3,7 +3,7 @@ yacc-like LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from C
 
 ```
 [dependencies]
-rusty_lr = "1.1.0"
+rusty_lr = "1.1.1"
 ```
 
 ## Features
@@ -13,11 +13,7 @@ rusty_lr = "1.1.0"
  - customizable reduce action
  - resolving conflicts of ambiguous grammar
  - tracing parser action with callback
-
-#### Why proc-macro, not external executable?
- - Decent built-in lexer, with consideration of unicode and comments.
- - Can generate *pretty* error messages, by just passing `Span` data.
- - With modern IDE, auto-completion and error highlighting can be done in real-time.
+ - [executable](#macro-expand-executable-rustylr) for generating parser tables from CFGs
 
 ## Usage
 
@@ -667,38 +663,9 @@ Reduce by E -> A
 
 
 
-
-## Macro expand executable [`rusty_lr_expand`](rusty_lr_expand)
-This executable is on development, and not `cargo publish`ed yet.
-```
-Usage: rusty_lr_expand <INPUT_FILE> [OUTPUT_FILE]
-
-Options:
-      --no-format
-          do not rustfmt the output
-
-  -r, --runtime
-          call `grammar.build()` at runtime
-
-  -l, --lalr
-          build LALR(1) parser
-```
-
-The input file must be consisted of two parts: Rust codes and CFGs, separated by `%%`.
-```
-// <Rust Codes...>
-// use statements, type definitions, etc.
-
-%%
-
-// <CFGs...>
-// without macro callings `lr1!` or `lalr1!`, just internal lines
-```
-
-The output file will be filled with the generated `Parser`, `Context`, and `NonTerminals` structs, with given CFGs.
-
-
-
+## Macro expand executable `rustylr`
+An executable version of `lr1!` and `lalr1!` macro.
+[Here](rusty_lr_executable) for more information.
 
 
 ## Build Deterministic Finite Automata (DFA) from Context Free Grammar (CFG)

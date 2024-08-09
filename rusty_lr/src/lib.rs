@@ -10,11 +10,7 @@
 //! - customizable reduce action
 //! - resolving conflicts of ambiguous grammar
 //! - tracing parser action with callback
-//!
-//! #### Why proc-macro, not external executable?
-//! - Decent built-in lexer, with consideration of unicode and comments.
-//! - Can generate *pretty* error messages, by just passing `Span` data.
-//! - With modern IDE, auto-completion and error highlighting can be done in real-time.
+//! - executable for generating parser tables from CFGs
 
 // re-exports
 

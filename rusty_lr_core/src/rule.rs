@@ -124,6 +124,7 @@ pub struct LookaheadRuleRef<Term> {
     pub lookaheads: BTreeSet<Term>,
 }
 
+/// shifted rule with lookahead tokens
 #[derive(Clone)]
 pub struct LookaheadRule<Term, NonTerm> {
     pub rule: ShiftedRule<Term, NonTerm>,
@@ -131,7 +132,7 @@ pub struct LookaheadRule<Term, NonTerm> {
 }
 impl<Term: Display, NonTerm: Display> Display for LookaheadRule<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} /Lookaheads: ", self.rule)?;
+        write!(f, "{} / ", self.rule)?;
         for (id, lookahead) in self.lookaheads.iter().enumerate() {
             write!(f, "{}", lookahead)?;
             if id < self.lookaheads.len() - 1 {
@@ -143,7 +144,7 @@ impl<Term: Display, NonTerm: Display> Display for LookaheadRule<Term, NonTerm> {
 }
 impl<Term: Debug, NonTerm: Debug> Debug for LookaheadRule<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?} /Lookaheads: ", self.rule)?;
+        write!(f, "{:?} / ", self.rule)?;
         for (id, lookahead) in self.lookaheads.iter().enumerate() {
             write!(f, "{:?}", lookahead)?;
             if id < self.lookaheads.len() - 1 {

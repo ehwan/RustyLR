@@ -33,7 +33,7 @@ impl Grammar {
             });
 
             case_display.extend(quote! {
-                #enum_name::#ident => write!(f, "{}", #name),
+                #enum_name::#ident => write!(f, #name),
             });
         }
 
@@ -53,7 +53,7 @@ impl Grammar {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                     match self {
                         #case_display
-                        #enum_name::#aug_ident => write!(f, "{}", #aug_ident_str),
+                        #enum_name::#aug_ident => write!(f, #aug_ident_str),
                     }
                 }
             }
@@ -61,54 +61,13 @@ impl Grammar {
     }
     // build grammar at compile time
     fn emit_grammar_compiletime(&self, lalr: bool) -> Result<TokenStream, ParseError> {
-        let mut grammar: rlr::Grammar<String, String> = rlr::Grammar::new();
         let module_prefix = self
             .module_prefix
             .as_ref()
             .cloned()
             .unwrap_or_else(|| quote! {::rusty_lr});
 
-        // reduce types
-        for (term, (_, reduce_type)) in self.reduce_types.iter() {
-            match grammar.set_reduce_type(term.clone(), *reduce_type) {
-                Ok(_) => {}
-                Err(err) => {
-                    return Err(ParseError::GrammarBuildError(format!("{}", err)));
-                }
-            }
-        }
-
-        // rules
-        for (name, (_name_ident, _typename, rules)) in self.rules.iter() {
-            for rule in rules.rule_lines.iter() {
-                let mut tokens = Vec::with_capacity(rule.tokens.len());
-                for token in rule.tokens.iter() {
-                    match &token.token {
-                        Token::Term(term) => {
-                            tokens.push(rlr::Token::Term(term.to_string()));
-                        }
-                        Token::NonTerm(nonterm) => {
-                            tokens.push(rlr::Token::NonTerm(nonterm.to_string()));
-                        }
-
-                        Token::Plus(_) | Token::Star(_) | Token::Question(_) => {
-                            unreachable!("Only Term and NonTerm should be in rule");
-                        }
-                    }
-                }
-
-                grammar.add_rule(name.clone(), tokens);
-            }
-        }
-
-        // augmented rule
-        grammar.add_rule(
-            utils::AUGMENTED_NAME.to_string(),
-            vec![
-                rlr::Token::NonTerm(self.start_rule_name.as_ref().unwrap().to_string()),
-                rlr::Token::Term("eof".to_string()),
-            ],
-        );
+        let mut grammar = self.create_grammar()?;
 
         // build
         let parser = if lalr {

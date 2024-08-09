@@ -8,7 +8,9 @@ pub(crate) mod token;
 
 pub use rule::ProductionRule;
 
+pub use rule::LookaheadRule;
 pub use rule::LookaheadRuleRefSet;
+pub use rule::ShiftedRule;
 pub use rule::ShiftedRuleRef;
 
 pub use rule::ReduceType;
