@@ -1,3 +1,4 @@
+use proc_macro2::Delimiter;
 use proc_macro2::TokenStream;
 use proc_macro2::TokenTree;
 
@@ -69,7 +70,12 @@ impl Tokenizer {
 
                     _ => Some(TermType::OtherPunct(Some(punct))),
                 },
-                TokenTree::Group(group) => Some(TermType::Group(Some(group))),
+                TokenTree::Group(group) => match group.delimiter() {
+                    Delimiter::Parenthesis => Some(TermType::ParenGroup(Some(group))),
+                    Delimiter::Brace => Some(TermType::BraceGroup(Some(group))),
+                    Delimiter::Bracket => Some(TermType::BracketGroup(Some(group))),
+                    _ => Some(TermType::OtherGroup(Some(group))),
+                },
                 TokenTree::Literal(literal) => Some(TermType::Literal(Some(literal))),
             }
         } else {
