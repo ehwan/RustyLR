@@ -342,6 +342,7 @@ lr1! {
 
 // shift first for tokens in range 'zero' to 'nine'
 %shift [zero-nine];
+}
 ```
 
 </details>
@@ -553,7 +554,7 @@ B(f32): ... ;
 
 
 
-### <a name="errortype"></a> Error type <sub><sup>(optional)</sup></sub>
+### Error type <sub><sup>(optional)</sup></sub>
 ```
 '%err' <RustType> ';'
 '%error' <RustType> ';'
@@ -607,7 +608,7 @@ The parser struct has the following functions:
  - `feed_callback(&self, &mut Context, &mut C: Callback, TermType, &mut UserData) -> Result<(), ParseError>` : feed token with callback
 
 Note that the parameter `&mut UserData` is omitted if `%userdata` is not defined.
-Once the input sequence (including `eof` token) is feeded, without errors, you can get the value of start symbol by calling `context.accept()`.
+Once the input sequence is feeded (including `eof` token), without errors, you can get the value of start symbol by calling `context.accept()`.
 
 ```rust
 let parser = parser::EParser::new();
