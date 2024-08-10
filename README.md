@@ -3,18 +3,18 @@ yacc-like LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from C
 
 ```
 [dependencies]
-rusty_lr = "1.2.0"
+rusty_lr = "1.3.0"
 ```
 
 ## Features
  - pure Rust implementation
- - readable error messages, both for grammar building and parsing
- - compile-time DFA construction from CFGs ( with proc-macro )
- - customizable reduce action
- - resolving conflicts of ambiguous grammar
- - tracing parser action with callback
- - regex patterns partially supported
- - [executable](#macro-expand-executable-rustylr) for generating parser tables from CFGs
+ - [readable error messages, both for grammar building and parsing](#readable-error-messages)
+ - [compile-time DFA construction from CFGs ( with proc-macro )](#proc-macro-syntax)
+ - [customizable reduce action](#reduceaction-optional)
+ - [resolving conflicts of ambiguous grammar](#reduce-type-optional)
+ - [tracing parser action with callback](#parse-with-callback)
+ - [regex patterns partially supported](#regex-pattern)
+ - [executable for generating parser tables from CFGs](#macro-expand-executable-rustylr)
 
 ## Usage
 
@@ -33,38 +33,38 @@ use rusty_lr::lalr1;
 // where 'E' is the start symbol
 lr1! {
     %userdata i32;
-    %tokentype u8;
+    %tokentype char;
     %start E;
-    %eof b'\0';
+    %eof '\0';
 
-    %token zero b'0';
-    %token one b'1';
-    %token two b'2';
-    %token three b'3';
-    %token four b'4';
-    %token five b'5';
-    %token six b'6';
-    %token seven b'7';
-    %token eight b'8';
-    %token nine b'9';
-    %token plus b'+';
-    %token star b'*';
-    %token lparen b'(';
-    %token rparen b')';
-    %token space b' ';
+    %token zero '0';
+    %token one '1';
+    %token two '2';
+    %token three '3';
+    %token four '4';
+    %token five '5';
+    %token six '6';
+    %token seven '7';
+    %token eight '8';
+    %token nine '9';
+    %token plus '+';
+    %token star '*';
+    %token lparen '(';
+    %token rparen ')';
+    %token space ' ';
 
     %left plus;
     %left star;
 
     WS0: space*;
 
-    Digit(u8): [zero-nine];
+    Digit(char): [zero-nine];
 
-    Number(i32): WS0 Digit+ WS0 { std::str::from_utf8(&Digit).unwrap().parse().unwrap() };
+    Number(i32): WS0 Digit+ WS0 { Digit.into_iter().collect::<String>().parse().unwrap() };
 
     A(f32): A plus a2=A {
         *data += 1; // access userdata by `data`
-        println!( "{:?} {:?} {:?}", A, plus as char, a2 );
+        println!( "{:?} {:?} {:?}", A, plus, a2 );
         A + a2
     }
     | M
@@ -92,8 +92,8 @@ fn main() {
     let parser = parser::EParser::new();
     let mut context = parser.begin();
     let mut userdata: i32 = 0;
-    for b in input.as_bytes().iter() {
-        match parser.feed(&mut context, *b, &mut userdata) {
+    for b in input.chars() {
+        match parser.feed(&mut context, b, &mut userdata) {
             // feed userdata here
             Ok(_) => {}
             Err(e) => {
@@ -102,7 +102,7 @@ fn main() {
             }
         }
     }
-    parser.feed(&mut context, 0, &mut userdata).unwrap(); // feed EOF
+    parser.feed(&mut context, 0 as char, &mut userdata).unwrap(); // feed EOF
 
     let result = context.accept(); // get value of start 'E'
     println!("result: {}", result);
@@ -116,6 +116,28 @@ $ cargo run
 1.0 '+' 140.0
 result: 141
 userdata: 2
+```
+
+### Readable error messages
+In you put invalid input like `1 + 2 ** ( 3 + 4 )`, it will make error message below.
+```
+error: Invalid Terminal: '*'
+Expected one of: ' ', '(', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+-------------------------------Backtracing state--------------------------------
+M -> M '*' • M
+-----------------------------------Prev state-----------------------------------
+M -> M • '*' M
+-----------------------------------Prev state-----------------------------------
+A -> • A '+' A
+A -> A '+' • A
+A -> • M
+M -> • M '*' M
+-----------------------------------Prev state-----------------------------------
+A -> A • '+' A
+-----------------------------------Prev state-----------------------------------
+A -> • A '+' A
+E -> • A
+Augmented -> • E '\0'
 ```
 
 

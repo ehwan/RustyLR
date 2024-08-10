@@ -64,7 +64,7 @@ impl<Term: Debug, NonTerm: Debug> Debug for ProductionRule<Term, NonTerm> {
 ///
 /// This struct has index of the Rule in Grammar::rules
 /// and it will be used for Eq, Ord, Hash
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy)]
 pub struct ShiftedRuleRef {
     pub rule: usize,
     pub shifted: usize,

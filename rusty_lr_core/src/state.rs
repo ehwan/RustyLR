@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fmt::Display;
 use std::hash::Hash;
 
@@ -42,6 +43,29 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         Term: Hash + Eq,
     {
         self.reduce_map.get(term).copied()
+    }
+
+    /// check if this state is accept state.
+    /// Augmented -> Start EOF . is accept state.
+    pub fn is_accept(&self) -> bool {
+        self.reduce_map.is_empty()
+            && self.shift_goto_map_term.is_empty()
+            && self.shift_goto_map_nonterm.is_empty()
+    }
+
+    /// get expected terms set
+    pub fn expected(&self) -> HashSet<Term>
+    where
+        Term: Clone + Hash + Eq,
+    {
+        let mut set = HashSet::new();
+        for (term, _) in self.shift_goto_map_term.iter() {
+            set.insert(term.clone());
+        }
+        for (term, _) in self.reduce_map.iter() {
+            set.insert(term.clone());
+        }
+        set
     }
 }
 impl<Term: Display, NonTerm: Display> Display for State<Term, NonTerm> {

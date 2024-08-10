@@ -1,6 +1,6 @@
 [package]
 name = "rustylr"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 license = "MIT"
 description = "LR(1), LALR(1) parser code generation with rusty_lr"
@@ -14,6 +14,6 @@ proc-macro2 = "1.0.86"
 quote = "1.0"
 clap = { version = "4.5.7", features = ["derive"] }
 # rusty_lr_parser = { path = "../rusty_lr_parser" }
-rusty_lr_parser = "2.0"
+rusty_lr_parser = "2.1"
 # rusty_lr_core = { path = "../rusty_lr_core" }
-rusty_lr_core = "1.0"
+rusty_lr_core = "1.1"

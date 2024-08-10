@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_parser"
-version = "2.0.0"
+version = "2.1.0"
 edition = "2021"
 license = "MIT"
 description = "macro line parser for rusty_lr"
@@ -12,5 +12,5 @@ categories = ["parsing"]
 [dependencies]
 proc-macro2 = "1.0.86"
 quote = "1.0"
-rusty_lr_core = "1.0"
+rusty_lr_core = "1.1"
 # rusty_lr_core = { path = "../rusty_lr_core" }

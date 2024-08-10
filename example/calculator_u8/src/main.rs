@@ -6,8 +6,8 @@ fn main() {
     let parser = parser::EParser::new();
     let mut context = parser.begin();
     let mut userdata: i32 = 0;
-    for b in input.as_bytes().iter() {
-        match parser.feed(&mut context, *b, &mut userdata) {
+    for b in input.chars() {
+        match parser.feed(&mut context, b, &mut userdata) {
             // feed userdata here
             Ok(_) => {}
             Err(e) => {
@@ -16,9 +16,26 @@ fn main() {
             }
         }
     }
-    parser.feed(&mut context, 0, &mut userdata).unwrap(); // feed EOF
+    parser.feed(&mut context, 0 as char, &mut userdata).unwrap(); // feed EOF
 
     let result = context.accept(); // get value of start 'E'
     println!("result: {}", result);
     println!("userdata: {}", userdata);
+
+    // invalid input, expect error
+    let error_input = "1+2**(3+4)";
+    let mut context = parser.begin();
+    let mut userdata: i32 = 0;
+    for b in error_input.chars() {
+        match parser.feed(&mut context, b, &mut userdata) {
+            // feed userdata here
+            Ok(_) => {}
+            Err(e) => {
+                // this will print error messages
+                eprintln!("error: {:?}", e);
+                return;
+            }
+        }
+    }
+    parser.feed(&mut context, 0 as char, &mut userdata).unwrap(); // feed EOF
 }

@@ -2,38 +2,38 @@ use rusty_lr::lr1;
 
 lr1! {
     %userdata i32;
-    %tokentype u8;
+    %tokentype char;
     %start E;
-    %eof b'\0';
+    %eof '\0';
 
-    %token zero b'0';
-    %token one b'1';
-    %token two b'2';
-    %token three b'3';
-    %token four b'4';
-    %token five b'5';
-    %token six b'6';
-    %token seven b'7';
-    %token eight b'8';
-    %token nine b'9';
-    %token plus b'+';
-    %token star b'*';
-    %token lparen b'(';
-    %token rparen b')';
-    %token space b' ';
+    %token zero '0';
+    %token one '1';
+    %token two '2';
+    %token three '3';
+    %token four '4';
+    %token five '5';
+    %token six '6';
+    %token seven '7';
+    %token eight '8';
+    %token nine '9';
+    %token plus '+';
+    %token star '*';
+    %token lparen '(';
+    %token rparen ')';
+    %token space ' ';
 
     %left plus;
     %left star;
 
     WS0: space*;
 
-    Digit(u8): [zero-nine];
+    Digit(char): [zero-nine];
 
-    Number(i32): WS0 Digit+ WS0 { std::str::from_utf8(&Digit).unwrap().parse().unwrap() };
+    Number(i32): WS0 Digit+ WS0 { Digit.into_iter().collect::<String>().parse().unwrap() };
 
     A(f32): A plus a2=A {
         *data += 1; // access userdata by `data`
-        println!( "{:?} {:?} {:?}", A, plus as char, a2 );
+        println!( "{:?} {:?} {:?}", A, plus, a2 );
         A + a2
     }
     | M
