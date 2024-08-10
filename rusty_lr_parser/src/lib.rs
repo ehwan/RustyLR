@@ -1,10 +1,9 @@
 pub mod emit;
 pub mod error;
 pub mod grammar;
-// pub mod parser;
-pub mod parser_expanded;
-pub mod rule;
-pub mod term;
-pub mod token;
-pub mod tokenizer;
+pub(crate) mod parser;
+pub(crate) mod pattern;
+pub(crate) mod rule;
+pub(crate) mod terminalset;
+pub(crate) mod token;
 pub mod utils;

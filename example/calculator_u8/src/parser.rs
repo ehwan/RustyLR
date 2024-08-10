@@ -27,7 +27,7 @@ lr1! {
 
     WS0: space*;
 
-    Digit(u8): zero | one | two | three | four | five | six | seven | eight | nine;
+    Digit(u8): [zero-nine];
 
     Number(i32): WS0 Digit+ WS0 { std::str::from_utf8(&Digit).unwrap().parse().unwrap() };
 

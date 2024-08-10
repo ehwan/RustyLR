@@ -10,6 +10,7 @@
 //! - customizable reduce action
 //! - resolving conflicts of ambiguous grammar
 //! - tracing parser action with callback
+//! - regex patterns partially supported
 //! - executable for generating parser tables from CFGs
 
 // re-exports

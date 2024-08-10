@@ -10,20 +10,20 @@ use super::utils;
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum ParseError {
-    MultipleTokenDefinition(Span, Ident, TokenStream, TokenStream),
+    MultipleTokenDefinition(Ident),
     MultipleStartDefinition(Span, Ident, Ident),
     MultipleTokenTypeDefinition(Span, TokenStream, TokenStream),
     MultipleEofDefinition(Span, TokenStream, TokenStream),
     MultipleUserDataDefinition(Span, TokenStream, TokenStream),
-    MultipleRuleDefinition(Span, String),
+    MultipleRuleDefinition(Ident),
     MultipleErrorDefinition(Span, TokenStream, TokenStream),
-    MultipleReduceDefinition(Span, String),
-
-    InvalidRuletypeDelimiter(Span),
-    InvalidReduceActionDelimiter(Span),
+    /// different reduce type applied to the same terminal symbol
+    MultipleReduceDefinition(Ident),
 
     // same name for terminal and non-terminal exists
-    TermNonTermConflict(Span, String),
+    TermNonTermConflict(Ident),
+
+    InvalidTerminalRange(Ident, Ident),
 
     TerminalNotDefined(Ident),
     NonTerminalNotDefined(Ident),
@@ -41,17 +41,16 @@ pub enum ParseError {
 
     // building the grammar for parsing production rules failed
     InternalGrammar(Span, String),
+
+    /// error parsing TerminalSet
+    TerminalSetParse(Span, String),
 }
 
 impl Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ParseError::MultipleTokenDefinition(_, ident, tokens0, tokens1) => {
-                write!(
-                    f,
-                    "Multiple token definition: {} ->\n{}\nAND\n{}",
-                    ident, tokens0, tokens1
-                )
+            ParseError::MultipleTokenDefinition(ident) => {
+                write!(f, "Multiple token definition: {}", ident)
             }
             ParseError::MultipleStartDefinition(_, start1, start2) => {
                 write!(f, "Multiple start definition: {} AND {}", start1, start2)
@@ -69,22 +68,19 @@ impl Display for ParseError {
             ParseError::MultipleUserDataDefinition(_, ident, tokens) => {
                 write!(f, "Multiple user data definition: {} AND {}", ident, tokens)
             }
-            ParseError::MultipleRuleDefinition(_, name) => {
+            ParseError::MultipleRuleDefinition(name) => {
                 write!(f, "Multiple rule definition: {}", name)
             }
             ParseError::MultipleErrorDefinition(_, err1, err2) => {
                 write!(f, "Multiple error type definition: {} AND {}", err1, err2)
             }
-            ParseError::MultipleReduceDefinition(_, name) => {
+            ParseError::MultipleReduceDefinition(name) => {
                 write!(f, "Multiple reduce type definition: {}", name)
             }
-            ParseError::InvalidRuletypeDelimiter(_) => {
-                write!(f, "rule type must be enclosed with '(' and ')'")
+            ParseError::InvalidTerminalRange(ident1, ident2) => {
+                write!(f, "Invalid terminal range: {} - {}", ident1, ident2)
             }
-            ParseError::InvalidReduceActionDelimiter(_) => {
-                write!(f, "reduce action must be enclosed with '{{' and '}}'")
-            }
-            ParseError::TermNonTermConflict(_, name) => {
+            ParseError::TermNonTermConflict(name) => {
                 write!(
                     f,
                     "Same token name for Terminal and Non-Terminal symbol exists: {}",
@@ -140,23 +136,26 @@ impl Display for ParseError {
                 write!(f, "{}", message)
             }
             ParseError::InternalGrammar(_, message) => write!(f, "{}", message),
+
+            ParseError::TerminalSetParse(_, message) => {
+                write!(f, "Error parsing TerminalSet:\n{}", message)
+            }
         }
     }
 }
 impl ParseError {
     pub fn span(&self) -> Span {
         match self {
-            ParseError::MultipleTokenDefinition(span, _, _, _) => span.clone(),
-            ParseError::MultipleStartDefinition(span, _, _) => span.clone(),
-            ParseError::MultipleTokenTypeDefinition(span, _, _) => span.clone(),
-            ParseError::MultipleEofDefinition(span, _, _) => span.clone(),
-            ParseError::MultipleUserDataDefinition(span, _, _) => span.clone(),
-            ParseError::MultipleRuleDefinition(span, _) => span.clone(),
-            ParseError::MultipleErrorDefinition(span, _, _) => span.clone(),
-            ParseError::MultipleReduceDefinition(span, _) => span.clone(),
-            ParseError::InvalidRuletypeDelimiter(span) => span.clone(),
-            ParseError::InvalidReduceActionDelimiter(span) => span.clone(),
-            ParseError::TermNonTermConflict(span, _) => span.clone(),
+            ParseError::MultipleTokenDefinition(ident) => ident.span(),
+            ParseError::MultipleStartDefinition(span, _, _) => *span,
+            ParseError::MultipleTokenTypeDefinition(span, _, _) => *span,
+            ParseError::MultipleEofDefinition(span, _, _) => *span,
+            ParseError::MultipleUserDataDefinition(span, _, _) => *span,
+            ParseError::MultipleRuleDefinition(ident) => ident.span(),
+            ParseError::MultipleErrorDefinition(span, _, _) => *span,
+            ParseError::MultipleReduceDefinition(ident) => ident.span(),
+            ParseError::InvalidTerminalRange(ident1, _ident2) => ident1.span(),
+            ParseError::TermNonTermConflict(ident) => ident.span(),
             ParseError::StartNotDefined => Span::call_site(),
             ParseError::TokenTypeNotDefined => Span::call_site(),
             ParseError::EofNotDefined => Span::call_site(),
@@ -167,7 +166,8 @@ impl ParseError {
             ParseError::ReservedNonTerminal(ident) => ident.span(),
             ParseError::RuleTypeDefinedButActionNotDefined(ident) => ident.span(),
             ParseError::GrammarBuildError(_) => Span::call_site(),
-            ParseError::InternalGrammar(span, _) => span.clone(),
+            ParseError::InternalGrammar(span, _) => *span,
+            ParseError::TerminalSetParse(span, _) => *span,
         }
     }
     pub fn compile_error(&self) -> TokenStream {

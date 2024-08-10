@@ -3,7 +3,7 @@ yacc-like LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from C
 
 ```
 [dependencies]
-rusty_lr = "1.1.1"
+rusty_lr = "1.2.0"
 ```
 
 ## Features
@@ -13,13 +13,14 @@ rusty_lr = "1.1.1"
  - customizable reduce action
  - resolving conflicts of ambiguous grammar
  - tracing parser action with callback
+ - regex patterns partially supported
  - [executable](#macro-expand-executable-rustylr) for generating parser tables from CFGs
 
 ## Usage
 
  - [Calculator](example/calculator): calculator with enum `Token`
  - [Calculator u8](example/calculator_u8): calculator with `u8`
- - [Bootstrap](rusty_lr_parser/src/parser.rs), [Expanded Bootstrap](rusty_lr_parser/src/parser_expanded.rs): bootstrapped line parser of `lr1!` and `lalr1!` macro, written in RustyLR itself.
+ - [Bootstrap](rusty_lr_parser/src/parser/parser.rs), [Expanded Bootstrap](rusty_lr_parser/src/parser/parser_expanded.rs): bootstrapped line parser of `lr1!` and `lalr1!` macro, written in RustyLR itself.
 
 ### Sample calculator example
 
@@ -57,7 +58,7 @@ lr1! {
 
     WS0: space*;
 
-    Digit(u8): zero | one | two | three | four | five | six | seven | eight | nine;
+    Digit(u8): [zero-nine];
 
     Number(i32): WS0 Digit+ WS0 { std::str::from_utf8(&Digit).unwrap().parse().unwrap() };
 
@@ -136,7 +137,7 @@ The calculation of building DFA will be done at compile-time, and the generated 
 Latter two (those with '_runtime' suffix) will generate `Parser` struct at runtime. 
 The calculation of building DFA will be done at runtime, and the generated code will be much more readable, and smaller.
 
-[Bootstrap](rusty_lr_parser/src/parser.rs), [Expanded Bootstrap](rusty_lr_parser/src/parser_expanded.rs) would be a good example to understand the syntax and generated code. It is RustyLR syntax parser written in RustyLR itself.
+[Bootstrap](rusty_lr_parser/src/parser/parser.rs), [Expanded Bootstrap](rusty_lr_parser/src/parser/parser_expanded.rs) would be a good example to understand the syntax and generated code. It is RustyLR syntax parser written in RustyLR itself.
 
 Every line in the macro must follow the syntax below.
 
@@ -279,15 +280,15 @@ fn main() {
 ```
 // reduce first
 '%left' <Ident> ';'
-'%l' <Ident> ';'
-'%reduce' <Ident> ';'
+'%left' <TerminalSet> ';'
 
 // shift first
 '%right' <Ident> ';'
-'%r' <Ident> ';'
-'%shift' <Ident> ';'
+'%right' <TerminalSet> ';'
 ```
 Set the shift/reduce precedence for terminal symbols. `<Ident>` must be defined in `%token`.
+With `<TerminalSet>`, you can define reduce type to multiple terminals at once. Please refer to the [Regex Pattern](#regex-pattern) section below.
+`%left` can be abbreviated as `%reduce` or `%l`, and `%right` can be abbreviated as `%shift` or `%r`.
 
 <details>
 <summary>
@@ -309,6 +310,18 @@ lr1! {
 }
 ```
 
+```rust
+lr1! {
+// define tokens
+%token zero b'0';
+%token one b'1';
+...
+%token nine b'9';
+
+// shift first for tokens in range 'zero' to 'nine'
+%shift [zero-nine];
+```
+
 </details>
 
 ### Production rules
@@ -328,9 +341,10 @@ Define the production rules.
 ```
 ```
 <TokenPattern> : <Ident as terminal or non-terminal>
-               | <Ident as terminal or non-terminal> '*'  (zero or more)
-               | <Ident as terminal or non-terminal> '+'  (one or more)
-               | <Ident as terminal or non-terminal> '?'  (zero or one)
+               | <TerminalSet>
+               | <TokenPattern> '*'    (zero or more)
+               | <TokenPattern> '+'    (one or more)
+               | <TokenPattern> '?'    (zero or one)
                ;
 ```
 
@@ -348,6 +362,37 @@ E: A plus* d=D;
 ```
 
 </details>
+
+### Regex pattern
+Regex patterns are partially supported. You can use `*`, `+`, `?` to define the number of repetitions, and `[]` to define the set of terminal symbols.
+
+```
+%token lparen '(';
+%token rparen ')';
+%token zero '0';
+...
+%token nine '9';
+
+A: [zero-nine]+; // zero to nine
+
+B: [^lparen rparen]; // any token except lparen and rparen
+
+C: [lparen rparen one-nine]*; // lparen and rparen, and one to nine
+```
+
+Note that in range pattern `[first-last]`,
+the range is constructed by the order of the `%token` directives,
+not by the actual value of the token.
+If you define tokens in the following order:
+```
+%token one '1';
+%token two '2';
+...
+%token zero '0';
+%token nine '9';
+```
+The range `[zero-nine]` will be `['0', '9']`, not `['0'-'9']`.
+
 
 ### RuleType <sub><sup>(optional)</sup></sub>
 ```
@@ -383,7 +428,7 @@ Define the action to be executed when the rule is matched and reduced.
 
 - `<ReduceAction>` can be omitted if:
   - `<RuleType>` is not defined
-  - Only one token is holding value in the production rule
+  - Only one token is holding value in the production rule ( Non-terminal symbol with `<RuleType>` defined, or terminal symbols are considered as holding value )
 
 - `Result<(),Error>` can be returned from `<ReduceAction>`.
   - Returned `Error` will be delivered to the caller of `feed()` function.
@@ -401,7 +446,7 @@ NoRuleType: ... ;
 
 RuleTypeI32(i32): ... { 0 } ;
 
-// RuleTypeI32 will be automatically chosen
+// RuleTypeI32 will be chosen
 E(i32): NoRuleType NoRuleType RuleTypeI32 NoRuleType;
 }
 ```
@@ -439,8 +484,8 @@ For terminal symbols, the type of variable is `%tokentype`.
 
 If multiple variables are defined with the same name, the variable on the front-most will be used.
 
-For regex-like pattern, type of variable will be modified by following:
- | Pattern | Non-Terminal<br/>`<RuleType>=T` | Non-Terminal<br/>`<RuleType>=(not defined)` | Terminal |
+For regex pattern, type of variable will be modified by following:
+ | Pattern | Non-Terminal<br/>`<RuleType>=T` | Non-Terminal<br/>`<RuleType>=(not defined)` | Terminal<br/>TerminalSet |
  |:-------:|:--------------:|:--------------------------:|:--------:|
  | '*'     | `Vec<T>`       | (not defined)              | `Vec<TermType>` |
  | '+'     | `Vec<T>`       | (not defined)              | `Vec<TermType>` |
@@ -456,11 +501,12 @@ lr1! {
 %token plus ...;
 
 // one or more 'A', then optional 'plus', then zero or more 'B'
-E(f32) : A+ plus? b=B*
+E(f32) : A+ plus? b=B* minus_or_star=[minus star]
   {
     println!("Value of A: {:?}", A);         // Vec<i32>
     println!("Value of plus: {:?}", plus); // Option<TermType>
     println!("Value of b: {:?}", b);       // Vec<f32>
+    println!("Value of minus_or_star: {:?}", minus_or_star); // must explicitly define the variable name
 
     let first_A = A[0];
     let first_B = b.first(); // Option<&f32>

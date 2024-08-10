@@ -7,7 +7,6 @@ use quote::quote;
 
 use crate::error::ParseError;
 use crate::grammar::Grammar;
-use crate::token::Token;
 use crate::utils;
 
 use rusty_lr_core as rlr;
@@ -22,18 +21,19 @@ impl Grammar {
         // =====================Writing NonTerminal Enum========================
         // =====================================================================
 
-        let start_rule_name = self.start_rule_name.as_ref().unwrap();
+        let start_rule_name = &self.start_rule_name;
         let enum_name = utils::generate_enum_name(start_rule_name);
 
         let mut comma_separated_variants = TokenStream::new();
         let mut case_display = TokenStream::new();
-        for (name, (ident, _, _)) in self.rules.iter() {
+        for (name, _) in self.rules.iter() {
             comma_separated_variants.extend(quote! {
-                #ident,
+                #name,
             });
 
+            let name_str = name.to_string();
             case_display.extend(quote! {
-                #enum_name::#ident => write!(f, #name),
+                #enum_name::#name=> write!(f, #name_str),
             });
         }
 
@@ -61,11 +61,7 @@ impl Grammar {
     }
     // build grammar at compile time
     fn emit_grammar_compiletime(&self, lalr: bool) -> Result<TokenStream, ParseError> {
-        let module_prefix = self
-            .module_prefix
-            .as_ref()
-            .cloned()
-            .unwrap_or_else(|| quote! {::rusty_lr});
+        let module_prefix = &self.module_prefix;
 
         let mut grammar = self.create_grammar()?;
 
@@ -86,8 +82,7 @@ impl Grammar {
             }
         };
 
-        let nonterminals_enum_name =
-            utils::generate_enum_name(self.start_rule_name.as_ref().unwrap());
+        let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
 
         // generate code that copy rules and states to parser
         // =====================================================================
@@ -99,7 +94,10 @@ impl Grammar {
             for token in rule.rule.iter() {
                 match token {
                     rlr::Token::Term(term) => {
-                        let (_, term_stream) = self.terminals.get(term).unwrap();
+                        let (_, term_stream) = self
+                            .terminals
+                            .get(&Ident::new(term, Span::call_site()))
+                            .unwrap();
                         comma_separated_tokens
                             .extend(quote! {#module_prefix::Token::Term(#term_stream),});
                     }
@@ -144,7 +142,10 @@ impl Grammar {
             let shift_goto_map_term: BTreeMap<_, _> = state.shift_goto_map_term.iter().collect();
             let mut comma_separated_shift_goto_map_term = TokenStream::new();
             for (term, goto) in shift_goto_map_term.into_iter() {
-                let (_, term_stream) = self.terminals.get(&term.to_string()).unwrap();
+                let (_, term_stream) = self
+                    .terminals
+                    .get(&Ident::new(term, Span::call_site()))
+                    .unwrap();
                 comma_separated_shift_goto_map_term.extend(quote! {
                     (#term_stream, #goto),
                 });
@@ -165,7 +166,10 @@ impl Grammar {
             let reduce_map: BTreeMap<_, _> = state.reduce_map.iter().collect();
             let mut comma_separated_reduce_map = TokenStream::new();
             for (term, ruleid) in reduce_map.into_iter() {
-                let (_, term_stream) = self.terminals.get(&term.to_string()).unwrap();
+                let (_, term_stream) = self
+                    .terminals
+                    .get(&Ident::new(term, Span::call_site()))
+                    .unwrap();
                 comma_separated_reduce_map.extend(quote! {
                     (#term_stream, #ruleid),
                 });
@@ -184,7 +188,10 @@ impl Grammar {
 
                     let mut comma_separated_lookaheads = TokenStream::new();
                     for lookahead_name in lookaheads.iter() {
-                        let (_, term_stream) = self.terminals.get(lookahead_name).unwrap();
+                        let (_, term_stream) = self
+                            .terminals
+                            .get(&Ident::new(lookahead_name, Span::call_site()))
+                            .unwrap();
                         comma_separated_lookaheads.extend(quote! {#term_stream,});
                     }
 
@@ -246,20 +253,15 @@ impl Grammar {
 
     /// emit code that build grammar at runtime
     fn emit_grammar_runtime(&self, lalr: bool) -> Result<TokenStream, ParseError> {
-        let module_prefix = self
-            .module_prefix
-            .as_ref()
-            .cloned()
-            .unwrap_or_else(|| quote! {::rusty_lr});
-        let nonterminals_enum_name =
-            utils::generate_enum_name(self.start_rule_name.as_ref().unwrap());
+        let module_prefix = &self.module_prefix;
+        let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
 
         let mut build_grammar_stream = quote! {
             let mut grammar = #module_prefix::Grammar::new();
         };
 
         // reduce types
-        for (term, (_, reduce_type)) in self.reduce_types.iter() {
+        for (term, reduce_type) in self.reduce_types.iter() {
             let stream = &self.terminals.get(term).unwrap().1;
             match reduce_type {
                 rlr::ReduceType::Left => {
@@ -286,32 +288,24 @@ impl Grammar {
         }
 
         // rules
-        for (_name, (name_ident, _typename, rules)) in self.rules.iter() {
+        for (name, rules) in self.rules.iter() {
             for rule in rules.rule_lines.iter() {
                 let mut comma_separated_tokens = quote! {};
                 for token in rule.tokens.iter() {
-                    match &token.token {
-                        Token::Term(term) => {
-                            let term_stream = &self.terminals.get(&term.to_string()).unwrap().1;
-                            comma_separated_tokens
-                                .extend(quote! {#module_prefix::Token::Term(#term_stream),});
-                        }
-                        Token::NonTerm(nonterm) => {
-                            let nonterm_stream = quote! {
-                                #nonterminals_enum_name::#nonterm
-                            };
-                            comma_separated_tokens
-                                .extend(quote! {#module_prefix::Token::NonTerm(#nonterm_stream),});
-                        }
-
-                        _ => {
-                            unreachable!("Only Term and NonTerm should be in rule");
-                        }
+                    if let Some((_term_idx, term_stream)) = self.terminals.get(&token.token) {
+                        comma_separated_tokens
+                            .extend(quote! {#module_prefix::Token::Term(#term_stream),});
+                    } else if self.rules.contains_key(&token.token) {
+                        let nonterm = &token.token;
+                        comma_separated_tokens
+                            .extend(quote! {#module_prefix::Token::NonTerm(#nonterminals_enum_name::#nonterm),});
+                    } else {
+                        unreachable!("Token should be either terminal or non-terminal");
                     }
                 }
 
                 build_grammar_stream.extend(quote! {
-                    grammar.add_rule(#nonterminals_enum_name::#name_ident, vec![#comma_separated_tokens]);
+                    grammar.add_rule(#nonterminals_enum_name::#name, vec![#comma_separated_tokens]);
                 });
             }
         }
@@ -319,8 +313,8 @@ impl Grammar {
         // augmented rule
         let aug_ident = Ident::new(utils::AUGMENTED_NAME, Span::call_site());
         {
-            let start_name = self.start_rule_name.as_ref().unwrap();
-            let eof_stream = self.eof.as_ref().unwrap();
+            let start_name = &self.start_rule_name;
+            let eof_stream = &self.eof;
             build_grammar_stream.extend(quote! {
                 grammar.add_rule(
                     #nonterminals_enum_name::#aug_ident,
@@ -362,29 +356,20 @@ impl Grammar {
     }
 
     fn emit_parser(&self, grammar_emit: TokenStream) -> Result<TokenStream, ParseError> {
-        let module_prefix = self
-            .module_prefix
-            .as_ref()
-            .cloned()
-            .unwrap_or_else(|| quote! {::rusty_lr});
+        let module_prefix = &self.module_prefix;
 
-        let nonterminals_enum_name =
-            utils::generate_enum_name(self.start_rule_name.as_ref().unwrap());
+        let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
 
         // =====================================================================
         // =========================Writing Parser==============================
         // =====================================================================
 
         // error typename from '%error'
-        let error_typename = if let Some(error_typename) = &self.error_typename {
-            error_typename.clone()
-        } else {
-            // default is String
-            quote! { String }
-        };
+        let error_typename = &self.error_typename;
 
         // TokenStream for userdata parameter definition, if defined
-        let user_data_parameter_name = format_ident!("data");
+        let user_data_parameter_name =
+            Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
         let (user_data_parameter_def, user_data_var) =
             if let Some(user_data) = &self.userdata_typename {
                 (
@@ -398,40 +383,36 @@ impl Grammar {
         let mut ruleid: usize = 0;
         let mut case_streams = quote! {};
         // stack for end index of each rule in term stack
-        let terms_stack_name = utils::generate_stack_name(&format_ident! {"rl_terms"});
-        let term_typename = self.token_typename.as_ref().unwrap();
+        let terms_stack_name = Ident::new(utils::TERMINAL_STACK_NAME, Span::call_site());
+        let term_typename = &self.token_typename;
 
         // TokenStream to define reduce function for each production rule
         let mut fn_reduce_for_each_rule_stream = TokenStream::new();
 
-        for (_name, (name_ident, typename, rules)) in self.rules.iter() {
+        for (name_ident, rules) in self.rules.iter() {
             for (rule_local_id, rule) in rules.rule_lines.iter().enumerate() {
                 let mut token_pop_stream = TokenStream::new();
                 for token in rule.tokens.iter().rev() {
-                    match &token.token {
-                        Token::Term(_) => {
-                            let mapto = &token.mapto;
-                            token_pop_stream.extend(quote! {
-                                let mut #mapto = self.#terms_stack_name.pop().expect("Something wrong! term_stack is empty");
-                            });
-                        }
-                        Token::NonTerm(nonterm) => {
-                            let mapto = &token.mapto;
-
+                    if self.terminals.contains_key(&token.token) {
+                        let mapto = &token.mapto;
+                        token_pop_stream.extend(quote! {
+                            let mut #mapto = self.#terms_stack_name.pop().expect("Something wrong! term_stack is empty");
+                        });
+                    } else if let Some(typename) = self.nonterm_typenames.get(&token.token) {
+                        if typename.is_some() {
                             // if <RuleType> is defined for this nonterm,
                             // pop value from the stack to 'mapto'
-                            let stack_name = utils::generate_stack_name(nonterm);
+                            let stack_name = utils::generate_stack_name(&token.token);
                             let error_message =
-                                format!("Something wrong! {} stack is empty", nonterm);
-                            if self.rules.get(&nonterm.to_string()).unwrap().1.is_some() {
-                                token_pop_stream.extend(quote! {
-                                    let mut #mapto = self.#stack_name.pop().expect(#error_message);
-                                });
-                            }
+                                format!("Something wrong! {} stack is empty", &token.token);
+
+                            let mapto = &token.mapto;
+                            token_pop_stream.extend(quote! {
+                                let mut #mapto = self.#stack_name.pop().expect(#error_message);
+                            });
                         }
-                        Token::Plus(_) | Token::Star(_) | Token::Question(_) => {
-                            unreachable!("Only Term and NonTerm should be in rule");
-                        }
+                    } else {
+                        unreachable!("Token should be either terminal or non-terminal");
                     }
                 }
 
@@ -445,6 +426,7 @@ impl Grammar {
 
                 // if typename is defined for this rule, push result of action to stack
                 // else, just execute action
+                let typename = self.nonterm_typenames.get(&name_ident).unwrap();
                 if typename.is_some() {
                     // push result to this stack
                     let stack_name = utils::generate_stack_name(name_ident);
@@ -466,27 +448,13 @@ impl Grammar {
                         // the unique value will be pushed to stack
                         let mut unique_mapto = None;
                         for token in rule.tokens.iter() {
-                            match &token.token {
-                                Token::Term(_) => {
-                                    if unique_mapto.is_none() {
-                                        unique_mapto = Some(&token.mapto);
-                                    } else {
-                                        unique_mapto = None;
-                                        break;
-                                    }
-                                }
-                                Token::NonTerm(nonterm) => {
-                                    if self.rules.get(&nonterm.to_string()).unwrap().1.is_some() {
-                                        if unique_mapto.is_none() {
-                                            unique_mapto = Some(&token.mapto);
-                                        } else {
-                                            unique_mapto = None;
-                                            break;
-                                        }
-                                    }
-                                }
-                                Token::Plus(_) | Token::Star(_) | Token::Question(_) => {
-                                    unreachable!("Only Term and NonTerm should be in rule");
+                            let typename = self.get_typename(&token.token);
+                            if typename.is_some() {
+                                if unique_mapto.is_some() {
+                                    unique_mapto = None;
+                                    break;
+                                } else {
+                                    unique_mapto = Some(&token.mapto);
                                 }
                             }
                         }
@@ -531,9 +499,9 @@ impl Grammar {
 
         // TokenStream for <RuleType> of start rule
         // and pop from start rule stack
-        let start_rule_name = self.start_rule_name.as_ref().unwrap();
+        let start_rule_name = &self.start_rule_name;
         let (start_rule_typename, pop_from_start_rule_stack) = {
-            if let Some(start_typename) = &self.rules.get(&start_rule_name.to_string()).unwrap().1 {
+            if let Some(start_typename) = &self.nonterm_typenames.get(&start_rule_name).unwrap() {
                 let start_rule_stack_name = utils::generate_stack_name(start_rule_name);
                 (
                     start_typename.clone(),
@@ -549,7 +517,7 @@ impl Grammar {
         // TokenStream for member variables declaration
         let mut stack_def_streams = quote! {};
         let mut stack_init_streams = quote! {};
-        for (_name, (name, typename, _rules)) in self.rules.iter() {
+        for (name, typename) in self.nonterm_typenames.iter() {
             // push result to this stack
             let stack_name = utils::generate_stack_name(name);
 
