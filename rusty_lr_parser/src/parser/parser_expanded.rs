@@ -1952,6 +1952,75 @@ impl GrammarParser {
                 ],
             },
         ];
+        let _rustylr_generated_terminals_0 = vec![
+            Lexed::BraceGroup(None),
+            Lexed::BracketGroup(None),
+            Lexed::Caret(None),
+            Lexed::Colon(None),
+            Lexed::Equal(None),
+            Lexed::Ident(None),
+            Lexed::Literal(None),
+            Lexed::Minus(None),
+            Lexed::NoneGroup(None),
+            Lexed::OtherPunct(None),
+            Lexed::ParenGroup(None),
+            Lexed::Percent(None),
+            Lexed::Pipe(None),
+            Lexed::Plus(None),
+            Lexed::Question(None),
+            Lexed::Semicolon(None),
+            Lexed::Star(None),
+        ];
+        let _rustylr_generated_terminals_1 = vec![
+            Lexed::Eof,
+            Lexed::EofDef(None),
+            Lexed::ErrorType(None),
+            Lexed::Ident(None),
+            Lexed::Left(None),
+            Lexed::ModulePrefix(None),
+            Lexed::Right(None),
+            Lexed::Start(None),
+            Lexed::Token(None),
+            Lexed::TokenType(None),
+            Lexed::UserData(None),
+        ];
+        let _rustylr_generated_terminals_2 = vec![Lexed::Semicolon(None)];
+        let _rustylr_generated_terminals_3 = vec![Lexed::Colon(None)];
+        let _rustylr_generated_terminals_4 = vec![
+            Lexed::BraceGroup(None),
+            Lexed::Pipe(None),
+            Lexed::Semicolon(None),
+        ];
+        let _rustylr_generated_terminals_5 = vec![
+            Lexed::BraceGroup(None),
+            Lexed::Ident(None),
+            Lexed::LBracket(None),
+            Lexed::Pipe(None),
+            Lexed::Plus(None),
+            Lexed::Question(None),
+            Lexed::Semicolon(None),
+            Lexed::Star(None),
+        ];
+        let _rustylr_generated_terminals_6 = vec![Lexed::Ident(None)];
+        let _rustylr_generated_terminals_7 = vec![Lexed::Ident(None), Lexed::RBracket(None)];
+        let _rustylr_generated_terminals_8 = vec![
+            Lexed::BraceGroup(None),
+            Lexed::Ident(None),
+            Lexed::LBracket(None),
+            Lexed::Pipe(None),
+            Lexed::Semicolon(None),
+        ];
+        let _rustylr_generated_terminals_9 = vec![Lexed::Pipe(None), Lexed::Semicolon(None)];
+        let _rustylr_generated_terminals_10 = vec![Lexed::Ident(None), Lexed::LBracket(None)];
+        let pair_to_rule = |(rule, shifted): (usize, usize)| -> (
+            ::rusty_lr_core::ShiftedRuleRef,
+            std::collections::BTreeSet<Lexed>,
+        ) {
+            (
+                ::rusty_lr_core::ShiftedRuleRef { rule, shifted },
+                Default::default(),
+            )
+        };
         let mut states = Vec::with_capacity(107usize);
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -1979,228 +2048,44 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TokenDef, 104usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TokenTypeDef, 105usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::UserDataDef, 106usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![
+                (2usize, 0usize),
+                (3usize, 0usize),
+                (4usize, 0usize),
+                (5usize, 0usize),
+                (6usize, 0usize),
+                (7usize, 0usize),
+                (8usize, 0usize),
+                (9usize, 0usize),
+                (10usize, 0usize),
+                (11usize, 0usize),
+                (12usize, 0usize),
+                (13usize, 0usize),
+                (14usize, 0usize),
+                (15usize, 0usize),
+                (16usize, 0usize),
+                (17usize, 0usize),
+                (18usize, 0usize),
+                (19usize, 0usize),
+                (20usize, 0usize),
+                (21usize, 0usize),
+                (22usize, 0usize),
+                (28usize, 0usize),
+                (29usize, 0usize),
+                (30usize, 0usize),
+                (31usize, 0usize),
+                (32usize, 0usize),
+                (39usize, 0usize),
+                (43usize, 0usize),
+                (46usize, 0usize),
+                (47usize, 0usize),
+                (74usize, 0usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 2usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 3usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 4usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 5usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 6usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 7usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 8usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 9usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 10usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 11usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 12usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 13usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 14usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 15usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 16usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 17usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 18usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 19usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 20usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 21usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 22usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 28usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 29usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 30usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 31usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 32usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 39usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 43usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 46usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 47usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 74usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2234,151 +2119,33 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 18usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated4, 20usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 22usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![
+                (2usize, 1usize),
+                (38usize, 0usize),
+                (56usize, 0usize),
+                (57usize, 0usize),
+                (58usize, 0usize),
+                (59usize, 0usize),
+                (60usize, 0usize),
+                (61usize, 0usize),
+                (62usize, 0usize),
+                (63usize, 0usize),
+                (64usize, 0usize),
+                (65usize, 0usize),
+                (66usize, 0usize),
+                (67usize, 0usize),
+                (68usize, 0usize),
+                (69usize, 0usize),
+                (70usize, 0usize),
+                (71usize, 0usize),
+                (72usize, 0usize),
+                (73usize, 0usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 2usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 38usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 56usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 57usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 58usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 59usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 60usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 61usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 62usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 63usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 64usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 65usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 66usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 67usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 68usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 69usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 70usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 71usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 72usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 73usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2389,37 +2156,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 58usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 58usize);
-            reduce_map.insert(Lexed::Caret(None), 58usize);
-            reduce_map.insert(Lexed::Colon(None), 58usize);
-            reduce_map.insert(Lexed::Equal(None), 58usize);
-            reduce_map.insert(Lexed::Ident(None), 58usize);
-            reduce_map.insert(Lexed::Literal(None), 58usize);
-            reduce_map.insert(Lexed::Minus(None), 58usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 58usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 58usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 58usize);
-            reduce_map.insert(Lexed::Percent(None), 58usize);
-            reduce_map.insert(Lexed::Pipe(None), 58usize);
-            reduce_map.insert(Lexed::Plus(None), 58usize);
-            reduce_map.insert(Lexed::Question(None), 58usize);
-            reduce_map.insert(Lexed::Semicolon(None), 58usize);
-            reduce_map.insert(Lexed::Star(None), 58usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 58usize);
+            }
+            let rule_shifted_pairs = vec![(58usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 58usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2430,37 +2178,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 59usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 59usize);
-            reduce_map.insert(Lexed::Caret(None), 59usize);
-            reduce_map.insert(Lexed::Colon(None), 59usize);
-            reduce_map.insert(Lexed::Equal(None), 59usize);
-            reduce_map.insert(Lexed::Ident(None), 59usize);
-            reduce_map.insert(Lexed::Literal(None), 59usize);
-            reduce_map.insert(Lexed::Minus(None), 59usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 59usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 59usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 59usize);
-            reduce_map.insert(Lexed::Percent(None), 59usize);
-            reduce_map.insert(Lexed::Pipe(None), 59usize);
-            reduce_map.insert(Lexed::Plus(None), 59usize);
-            reduce_map.insert(Lexed::Question(None), 59usize);
-            reduce_map.insert(Lexed::Semicolon(None), 59usize);
-            reduce_map.insert(Lexed::Star(None), 59usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 59usize);
+            }
+            let rule_shifted_pairs = vec![(59usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 59usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2471,37 +2200,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 60usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 60usize);
-            reduce_map.insert(Lexed::Caret(None), 60usize);
-            reduce_map.insert(Lexed::Colon(None), 60usize);
-            reduce_map.insert(Lexed::Equal(None), 60usize);
-            reduce_map.insert(Lexed::Ident(None), 60usize);
-            reduce_map.insert(Lexed::Literal(None), 60usize);
-            reduce_map.insert(Lexed::Minus(None), 60usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 60usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 60usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 60usize);
-            reduce_map.insert(Lexed::Percent(None), 60usize);
-            reduce_map.insert(Lexed::Pipe(None), 60usize);
-            reduce_map.insert(Lexed::Plus(None), 60usize);
-            reduce_map.insert(Lexed::Question(None), 60usize);
-            reduce_map.insert(Lexed::Semicolon(None), 60usize);
-            reduce_map.insert(Lexed::Star(None), 60usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 60usize);
+            }
+            let rule_shifted_pairs = vec![(60usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 60usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2512,37 +2222,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 61usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 61usize);
-            reduce_map.insert(Lexed::Caret(None), 61usize);
-            reduce_map.insert(Lexed::Colon(None), 61usize);
-            reduce_map.insert(Lexed::Equal(None), 61usize);
-            reduce_map.insert(Lexed::Ident(None), 61usize);
-            reduce_map.insert(Lexed::Literal(None), 61usize);
-            reduce_map.insert(Lexed::Minus(None), 61usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 61usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 61usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 61usize);
-            reduce_map.insert(Lexed::Percent(None), 61usize);
-            reduce_map.insert(Lexed::Pipe(None), 61usize);
-            reduce_map.insert(Lexed::Plus(None), 61usize);
-            reduce_map.insert(Lexed::Question(None), 61usize);
-            reduce_map.insert(Lexed::Semicolon(None), 61usize);
-            reduce_map.insert(Lexed::Star(None), 61usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 61usize);
+            }
+            let rule_shifted_pairs = vec![(61usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 61usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2553,37 +2244,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 62usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 62usize);
-            reduce_map.insert(Lexed::Caret(None), 62usize);
-            reduce_map.insert(Lexed::Colon(None), 62usize);
-            reduce_map.insert(Lexed::Equal(None), 62usize);
-            reduce_map.insert(Lexed::Ident(None), 62usize);
-            reduce_map.insert(Lexed::Literal(None), 62usize);
-            reduce_map.insert(Lexed::Minus(None), 62usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 62usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 62usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 62usize);
-            reduce_map.insert(Lexed::Percent(None), 62usize);
-            reduce_map.insert(Lexed::Pipe(None), 62usize);
-            reduce_map.insert(Lexed::Plus(None), 62usize);
-            reduce_map.insert(Lexed::Question(None), 62usize);
-            reduce_map.insert(Lexed::Semicolon(None), 62usize);
-            reduce_map.insert(Lexed::Star(None), 62usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 62usize);
+            }
+            let rule_shifted_pairs = vec![(62usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 62usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2594,37 +2266,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 63usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 63usize);
-            reduce_map.insert(Lexed::Caret(None), 63usize);
-            reduce_map.insert(Lexed::Colon(None), 63usize);
-            reduce_map.insert(Lexed::Equal(None), 63usize);
-            reduce_map.insert(Lexed::Ident(None), 63usize);
-            reduce_map.insert(Lexed::Literal(None), 63usize);
-            reduce_map.insert(Lexed::Minus(None), 63usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 63usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 63usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 63usize);
-            reduce_map.insert(Lexed::Percent(None), 63usize);
-            reduce_map.insert(Lexed::Pipe(None), 63usize);
-            reduce_map.insert(Lexed::Plus(None), 63usize);
-            reduce_map.insert(Lexed::Question(None), 63usize);
-            reduce_map.insert(Lexed::Semicolon(None), 63usize);
-            reduce_map.insert(Lexed::Star(None), 63usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 63usize);
+            }
+            let rule_shifted_pairs = vec![(63usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 63usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2635,37 +2288,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 64usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 64usize);
-            reduce_map.insert(Lexed::Caret(None), 64usize);
-            reduce_map.insert(Lexed::Colon(None), 64usize);
-            reduce_map.insert(Lexed::Equal(None), 64usize);
-            reduce_map.insert(Lexed::Ident(None), 64usize);
-            reduce_map.insert(Lexed::Literal(None), 64usize);
-            reduce_map.insert(Lexed::Minus(None), 64usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 64usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 64usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 64usize);
-            reduce_map.insert(Lexed::Percent(None), 64usize);
-            reduce_map.insert(Lexed::Pipe(None), 64usize);
-            reduce_map.insert(Lexed::Plus(None), 64usize);
-            reduce_map.insert(Lexed::Question(None), 64usize);
-            reduce_map.insert(Lexed::Semicolon(None), 64usize);
-            reduce_map.insert(Lexed::Star(None), 64usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 64usize);
+            }
+            let rule_shifted_pairs = vec![(64usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 64usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2676,37 +2310,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 65usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 65usize);
-            reduce_map.insert(Lexed::Caret(None), 65usize);
-            reduce_map.insert(Lexed::Colon(None), 65usize);
-            reduce_map.insert(Lexed::Equal(None), 65usize);
-            reduce_map.insert(Lexed::Ident(None), 65usize);
-            reduce_map.insert(Lexed::Literal(None), 65usize);
-            reduce_map.insert(Lexed::Minus(None), 65usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 65usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 65usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 65usize);
-            reduce_map.insert(Lexed::Percent(None), 65usize);
-            reduce_map.insert(Lexed::Pipe(None), 65usize);
-            reduce_map.insert(Lexed::Plus(None), 65usize);
-            reduce_map.insert(Lexed::Question(None), 65usize);
-            reduce_map.insert(Lexed::Semicolon(None), 65usize);
-            reduce_map.insert(Lexed::Star(None), 65usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 65usize);
+            }
+            let rule_shifted_pairs = vec![(65usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 65usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2717,37 +2332,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 66usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 66usize);
-            reduce_map.insert(Lexed::Caret(None), 66usize);
-            reduce_map.insert(Lexed::Colon(None), 66usize);
-            reduce_map.insert(Lexed::Equal(None), 66usize);
-            reduce_map.insert(Lexed::Ident(None), 66usize);
-            reduce_map.insert(Lexed::Literal(None), 66usize);
-            reduce_map.insert(Lexed::Minus(None), 66usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 66usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 66usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 66usize);
-            reduce_map.insert(Lexed::Percent(None), 66usize);
-            reduce_map.insert(Lexed::Pipe(None), 66usize);
-            reduce_map.insert(Lexed::Plus(None), 66usize);
-            reduce_map.insert(Lexed::Question(None), 66usize);
-            reduce_map.insert(Lexed::Semicolon(None), 66usize);
-            reduce_map.insert(Lexed::Star(None), 66usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 66usize);
+            }
+            let rule_shifted_pairs = vec![(66usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 66usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2758,37 +2354,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 67usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 67usize);
-            reduce_map.insert(Lexed::Caret(None), 67usize);
-            reduce_map.insert(Lexed::Colon(None), 67usize);
-            reduce_map.insert(Lexed::Equal(None), 67usize);
-            reduce_map.insert(Lexed::Ident(None), 67usize);
-            reduce_map.insert(Lexed::Literal(None), 67usize);
-            reduce_map.insert(Lexed::Minus(None), 67usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 67usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 67usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 67usize);
-            reduce_map.insert(Lexed::Percent(None), 67usize);
-            reduce_map.insert(Lexed::Pipe(None), 67usize);
-            reduce_map.insert(Lexed::Plus(None), 67usize);
-            reduce_map.insert(Lexed::Question(None), 67usize);
-            reduce_map.insert(Lexed::Semicolon(None), 67usize);
-            reduce_map.insert(Lexed::Star(None), 67usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 67usize);
+            }
+            let rule_shifted_pairs = vec![(67usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 67usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2799,37 +2376,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 68usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 68usize);
-            reduce_map.insert(Lexed::Caret(None), 68usize);
-            reduce_map.insert(Lexed::Colon(None), 68usize);
-            reduce_map.insert(Lexed::Equal(None), 68usize);
-            reduce_map.insert(Lexed::Ident(None), 68usize);
-            reduce_map.insert(Lexed::Literal(None), 68usize);
-            reduce_map.insert(Lexed::Minus(None), 68usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 68usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 68usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 68usize);
-            reduce_map.insert(Lexed::Percent(None), 68usize);
-            reduce_map.insert(Lexed::Pipe(None), 68usize);
-            reduce_map.insert(Lexed::Plus(None), 68usize);
-            reduce_map.insert(Lexed::Question(None), 68usize);
-            reduce_map.insert(Lexed::Semicolon(None), 68usize);
-            reduce_map.insert(Lexed::Star(None), 68usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 68usize);
+            }
+            let rule_shifted_pairs = vec![(68usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 68usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2840,37 +2398,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 69usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 69usize);
-            reduce_map.insert(Lexed::Caret(None), 69usize);
-            reduce_map.insert(Lexed::Colon(None), 69usize);
-            reduce_map.insert(Lexed::Equal(None), 69usize);
-            reduce_map.insert(Lexed::Ident(None), 69usize);
-            reduce_map.insert(Lexed::Literal(None), 69usize);
-            reduce_map.insert(Lexed::Minus(None), 69usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 69usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 69usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 69usize);
-            reduce_map.insert(Lexed::Percent(None), 69usize);
-            reduce_map.insert(Lexed::Pipe(None), 69usize);
-            reduce_map.insert(Lexed::Plus(None), 69usize);
-            reduce_map.insert(Lexed::Question(None), 69usize);
-            reduce_map.insert(Lexed::Semicolon(None), 69usize);
-            reduce_map.insert(Lexed::Star(None), 69usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 69usize);
+            }
+            let rule_shifted_pairs = vec![(69usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 69usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2881,37 +2420,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 70usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 70usize);
-            reduce_map.insert(Lexed::Caret(None), 70usize);
-            reduce_map.insert(Lexed::Colon(None), 70usize);
-            reduce_map.insert(Lexed::Equal(None), 70usize);
-            reduce_map.insert(Lexed::Ident(None), 70usize);
-            reduce_map.insert(Lexed::Literal(None), 70usize);
-            reduce_map.insert(Lexed::Minus(None), 70usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 70usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 70usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 70usize);
-            reduce_map.insert(Lexed::Percent(None), 70usize);
-            reduce_map.insert(Lexed::Pipe(None), 70usize);
-            reduce_map.insert(Lexed::Plus(None), 70usize);
-            reduce_map.insert(Lexed::Question(None), 70usize);
-            reduce_map.insert(Lexed::Semicolon(None), 70usize);
-            reduce_map.insert(Lexed::Star(None), 70usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 70usize);
+            }
+            let rule_shifted_pairs = vec![(70usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 70usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2922,37 +2442,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 71usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 71usize);
-            reduce_map.insert(Lexed::Caret(None), 71usize);
-            reduce_map.insert(Lexed::Colon(None), 71usize);
-            reduce_map.insert(Lexed::Equal(None), 71usize);
-            reduce_map.insert(Lexed::Ident(None), 71usize);
-            reduce_map.insert(Lexed::Literal(None), 71usize);
-            reduce_map.insert(Lexed::Minus(None), 71usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 71usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 71usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 71usize);
-            reduce_map.insert(Lexed::Percent(None), 71usize);
-            reduce_map.insert(Lexed::Pipe(None), 71usize);
-            reduce_map.insert(Lexed::Plus(None), 71usize);
-            reduce_map.insert(Lexed::Question(None), 71usize);
-            reduce_map.insert(Lexed::Semicolon(None), 71usize);
-            reduce_map.insert(Lexed::Star(None), 71usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 71usize);
+            }
+            let rule_shifted_pairs = vec![(71usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 71usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -2963,37 +2464,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 72usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 72usize);
-            reduce_map.insert(Lexed::Caret(None), 72usize);
-            reduce_map.insert(Lexed::Colon(None), 72usize);
-            reduce_map.insert(Lexed::Equal(None), 72usize);
-            reduce_map.insert(Lexed::Ident(None), 72usize);
-            reduce_map.insert(Lexed::Literal(None), 72usize);
-            reduce_map.insert(Lexed::Minus(None), 72usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 72usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 72usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 72usize);
-            reduce_map.insert(Lexed::Percent(None), 72usize);
-            reduce_map.insert(Lexed::Pipe(None), 72usize);
-            reduce_map.insert(Lexed::Plus(None), 72usize);
-            reduce_map.insert(Lexed::Question(None), 72usize);
-            reduce_map.insert(Lexed::Semicolon(None), 72usize);
-            reduce_map.insert(Lexed::Star(None), 72usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 72usize);
+            }
+            let rule_shifted_pairs = vec![(72usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 72usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3004,37 +2486,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 73usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 73usize);
-            reduce_map.insert(Lexed::Caret(None), 73usize);
-            reduce_map.insert(Lexed::Colon(None), 73usize);
-            reduce_map.insert(Lexed::Equal(None), 73usize);
-            reduce_map.insert(Lexed::Ident(None), 73usize);
-            reduce_map.insert(Lexed::Literal(None), 73usize);
-            reduce_map.insert(Lexed::Minus(None), 73usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 73usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 73usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 73usize);
-            reduce_map.insert(Lexed::Percent(None), 73usize);
-            reduce_map.insert(Lexed::Pipe(None), 73usize);
-            reduce_map.insert(Lexed::Plus(None), 73usize);
-            reduce_map.insert(Lexed::Question(None), 73usize);
-            reduce_map.insert(Lexed::Semicolon(None), 73usize);
-            reduce_map.insert(Lexed::Star(None), 73usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 73usize);
+            }
+            let rule_shifted_pairs = vec![(73usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 73usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3048,18 +2511,13 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
             shift_goto_map_term.insert(Lexed::Semicolon(None), 19usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(2usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 2usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3070,31 +2528,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 2usize);
-            reduce_map.insert(Lexed::EofDef(None), 2usize);
-            reduce_map.insert(Lexed::ErrorType(None), 2usize);
-            reduce_map.insert(Lexed::Ident(None), 2usize);
-            reduce_map.insert(Lexed::Left(None), 2usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 2usize);
-            reduce_map.insert(Lexed::Right(None), 2usize);
-            reduce_map.insert(Lexed::Start(None), 2usize);
-            reduce_map.insert(Lexed::Token(None), 2usize);
-            reduce_map.insert(Lexed::TokenType(None), 2usize);
-            reduce_map.insert(Lexed::UserData(None), 2usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 2usize);
+            }
+            let rule_shifted_pairs = vec![(2usize, 3usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 2usize,
-                        shifted: 3usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3128,136 +2573,33 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 21usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(1usize);
-            reduce_map.insert(Lexed::Semicolon(None), 38usize);
+            for term in _rustylr_generated_terminals_2.iter() {
+                reduce_map.insert(term.clone(), 38usize);
+            }
+            let rule_shifted_pairs = vec![
+                (38usize, 1usize),
+                (57usize, 1usize),
+                (58usize, 0usize),
+                (59usize, 0usize),
+                (60usize, 0usize),
+                (61usize, 0usize),
+                (62usize, 0usize),
+                (63usize, 0usize),
+                (64usize, 0usize),
+                (65usize, 0usize),
+                (66usize, 0usize),
+                (67usize, 0usize),
+                (68usize, 0usize),
+                (69usize, 0usize),
+                (70usize, 0usize),
+                (71usize, 0usize),
+                (72usize, 0usize),
+                (73usize, 0usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 38usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 57usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 58usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 59usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 60usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 61usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 62usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 63usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 64usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 65usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 66usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 67usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 68usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 69usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 70usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 71usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 72usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 73usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3268,37 +2610,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 57usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 57usize);
-            reduce_map.insert(Lexed::Caret(None), 57usize);
-            reduce_map.insert(Lexed::Colon(None), 57usize);
-            reduce_map.insert(Lexed::Equal(None), 57usize);
-            reduce_map.insert(Lexed::Ident(None), 57usize);
-            reduce_map.insert(Lexed::Literal(None), 57usize);
-            reduce_map.insert(Lexed::Minus(None), 57usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 57usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 57usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 57usize);
-            reduce_map.insert(Lexed::Percent(None), 57usize);
-            reduce_map.insert(Lexed::Pipe(None), 57usize);
-            reduce_map.insert(Lexed::Plus(None), 57usize);
-            reduce_map.insert(Lexed::Question(None), 57usize);
-            reduce_map.insert(Lexed::Semicolon(None), 57usize);
-            reduce_map.insert(Lexed::Star(None), 57usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 57usize);
+            }
+            let rule_shifted_pairs = vec![(57usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 57usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3309,37 +2632,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(17usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 56usize);
-            reduce_map.insert(Lexed::BracketGroup(None), 56usize);
-            reduce_map.insert(Lexed::Caret(None), 56usize);
-            reduce_map.insert(Lexed::Colon(None), 56usize);
-            reduce_map.insert(Lexed::Equal(None), 56usize);
-            reduce_map.insert(Lexed::Ident(None), 56usize);
-            reduce_map.insert(Lexed::Literal(None), 56usize);
-            reduce_map.insert(Lexed::Minus(None), 56usize);
-            reduce_map.insert(Lexed::NoneGroup(None), 56usize);
-            reduce_map.insert(Lexed::OtherPunct(None), 56usize);
-            reduce_map.insert(Lexed::ParenGroup(None), 56usize);
-            reduce_map.insert(Lexed::Percent(None), 56usize);
-            reduce_map.insert(Lexed::Pipe(None), 56usize);
-            reduce_map.insert(Lexed::Plus(None), 56usize);
-            reduce_map.insert(Lexed::Question(None), 56usize);
-            reduce_map.insert(Lexed::Semicolon(None), 56usize);
-            reduce_map.insert(Lexed::Star(None), 56usize);
+            for term in _rustylr_generated_terminals_0.iter() {
+                reduce_map.insert(term.clone(), 56usize);
+            }
+            let rule_shifted_pairs = vec![(56usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 56usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3373,151 +2677,33 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 24usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated4, 20usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 22usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![
+                (3usize, 1usize),
+                (38usize, 0usize),
+                (56usize, 0usize),
+                (57usize, 0usize),
+                (58usize, 0usize),
+                (59usize, 0usize),
+                (60usize, 0usize),
+                (61usize, 0usize),
+                (62usize, 0usize),
+                (63usize, 0usize),
+                (64usize, 0usize),
+                (65usize, 0usize),
+                (66usize, 0usize),
+                (67usize, 0usize),
+                (68usize, 0usize),
+                (69usize, 0usize),
+                (70usize, 0usize),
+                (71usize, 0usize),
+                (72usize, 0usize),
+                (73usize, 0usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 3usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 38usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 56usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 57usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 58usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 59usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 60usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 61usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 62usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 63usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 64usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 65usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 66usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 67usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 68usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 69usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 70usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 71usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 72usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 73usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3531,18 +2717,13 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
             shift_goto_map_term.insert(Lexed::Semicolon(None), 25usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(3usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 3usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3553,31 +2734,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 3usize);
-            reduce_map.insert(Lexed::EofDef(None), 3usize);
-            reduce_map.insert(Lexed::ErrorType(None), 3usize);
-            reduce_map.insert(Lexed::Ident(None), 3usize);
-            reduce_map.insert(Lexed::Left(None), 3usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 3usize);
-            reduce_map.insert(Lexed::Right(None), 3usize);
-            reduce_map.insert(Lexed::Start(None), 3usize);
-            reduce_map.insert(Lexed::Token(None), 3usize);
-            reduce_map.insert(Lexed::TokenType(None), 3usize);
-            reduce_map.insert(Lexed::UserData(None), 3usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 3usize);
+            }
+            let rule_shifted_pairs = vec![(3usize, 3usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 3usize,
-                        shifted: 3usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3596,31 +2764,14 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::RuleType, 28usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(1usize);
-            reduce_map.insert(Lexed::Colon(None), 37usize);
+            for term in _rustylr_generated_terminals_3.iter() {
+                reduce_map.insert(term.clone(), 37usize);
+            }
+            let rule_shifted_pairs = vec![(32usize, 1usize), (36usize, 0usize), (37usize, 0usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 32usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 36usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 37usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3631,21 +2782,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(1usize);
-            reduce_map.insert(Lexed::Colon(None), 36usize);
+            for term in _rustylr_generated_terminals_3.iter() {
+                reduce_map.insert(term.clone(), 36usize);
+            }
+            let rule_shifted_pairs = vec![(36usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3659,18 +2807,13 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
             shift_goto_map_term.insert(Lexed::Colon(None), 29usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(32usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3696,124 +2839,31 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated1, 57usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(3usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 49usize);
-            reduce_map.insert(Lexed::Pipe(None), 49usize);
-            reduce_map.insert(Lexed::Semicolon(None), 49usize);
+            for term in _rustylr_generated_terminals_4.iter() {
+                reduce_map.insert(term.clone(), 49usize);
+            }
+            let rule_shifted_pairs = vec![
+                (23usize, 0usize),
+                (24usize, 0usize),
+                (25usize, 0usize),
+                (26usize, 0usize),
+                (27usize, 0usize),
+                (32usize, 3usize),
+                (33usize, 0usize),
+                (34usize, 0usize),
+                (35usize, 0usize),
+                (40usize, 0usize),
+                (44usize, 0usize),
+                (45usize, 0usize),
+                (48usize, 0usize),
+                (49usize, 0usize),
+                (50usize, 0usize),
+                (51usize, 0usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 23usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 24usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 25usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 26usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 27usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 32usize,
-                            shifted: 3usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 33usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 34usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 35usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 40usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 44usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 45usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 48usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 49usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 50usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 51usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3827,35 +2877,17 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
             shift_goto_map_term.insert(Lexed::Equal(None), 31usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(8usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 23usize);
-            reduce_map.insert(Lexed::Ident(None), 23usize);
-            reduce_map.insert(Lexed::LBracket(None), 23usize);
-            reduce_map.insert(Lexed::Pipe(None), 23usize);
-            reduce_map.insert(Lexed::Plus(None), 23usize);
-            reduce_map.insert(Lexed::Question(None), 23usize);
-            reduce_map.insert(Lexed::Semicolon(None), 23usize);
-            reduce_map.insert(Lexed::Star(None), 23usize);
+            for term in _rustylr_generated_terminals_5.iter() {
+                reduce_map.insert(term.clone(), 23usize);
+            }
+            let rule_shifted_pairs = vec![(23usize, 1usize), (45usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 23usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 45usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3874,60 +2906,20 @@ impl GrammarParser {
             shift_goto_map_nonterm.reserve(2usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::Pattern, 43usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSet, 47usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![
+                (23usize, 0usize),
+                (24usize, 0usize),
+                (25usize, 0usize),
+                (26usize, 0usize),
+                (27usize, 0usize),
+                (40usize, 0usize),
+                (45usize, 2usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 23usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 24usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 25usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 26usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 27usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 40usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 45usize,
-                            shifted: 2usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3938,28 +2930,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(8usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 23usize);
-            reduce_map.insert(Lexed::Ident(None), 23usize);
-            reduce_map.insert(Lexed::LBracket(None), 23usize);
-            reduce_map.insert(Lexed::Pipe(None), 23usize);
-            reduce_map.insert(Lexed::Plus(None), 23usize);
-            reduce_map.insert(Lexed::Question(None), 23usize);
-            reduce_map.insert(Lexed::Semicolon(None), 23usize);
-            reduce_map.insert(Lexed::Star(None), 23usize);
+            for term in _rustylr_generated_terminals_5.iter() {
+                reduce_map.insert(term.clone(), 23usize);
+            }
+            let rule_shifted_pairs = vec![(23usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -3978,31 +2960,14 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated2, 35usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(1usize);
-            reduce_map.insert(Lexed::Ident(None), 53usize);
+            for term in _rustylr_generated_terminals_6.iter() {
+                reduce_map.insert(term.clone(), 53usize);
+            }
+            let rule_shifted_pairs = vec![(40usize, 1usize), (52usize, 0usize), (53usize, 0usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 40usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 52usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 53usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4013,21 +2978,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(1usize);
-            reduce_map.insert(Lexed::Ident(None), 52usize);
+            for term in _rustylr_generated_terminals_6.iter() {
+                reduce_map.insert(term.clone(), 52usize);
+            }
+            let rule_shifted_pairs = vec![(52usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 52usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4045,46 +3007,18 @@ impl GrammarParser {
             shift_goto_map_nonterm.reserve(2usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSetItem, 39usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated3, 40usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![
+                (40usize, 2usize),
+                (41usize, 0usize),
+                (42usize, 0usize),
+                (54usize, 0usize),
+                (55usize, 0usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 40usize,
-                            shifted: 2usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 41usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 42usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 54usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 55usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4098,29 +3032,17 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
             shift_goto_map_term.insert(Lexed::Minus(None), 37usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            reduce_map.insert(Lexed::Ident(None), 41usize);
-            reduce_map.insert(Lexed::RBracket(None), 41usize);
+            for term in _rustylr_generated_terminals_7.iter() {
+                reduce_map.insert(term.clone(), 41usize);
+            }
+            let rule_shifted_pairs = vec![(41usize, 1usize), (42usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 41usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 42usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4134,18 +3056,13 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
             shift_goto_map_term.insert(Lexed::Ident(None), 38usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(42usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 42usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4156,22 +3073,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            reduce_map.insert(Lexed::Ident(None), 42usize);
-            reduce_map.insert(Lexed::RBracket(None), 42usize);
+            for term in _rustylr_generated_terminals_7.iter() {
+                reduce_map.insert(term.clone(), 42usize);
+            }
+            let rule_shifted_pairs = vec![(42usize, 3usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 42usize,
-                        shifted: 3usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4182,22 +3095,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            reduce_map.insert(Lexed::Ident(None), 54usize);
-            reduce_map.insert(Lexed::RBracket(None), 54usize);
+            for term in _rustylr_generated_terminals_7.iter() {
+                reduce_map.insert(term.clone(), 54usize);
+            }
+            let rule_shifted_pairs = vec![(54usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 54usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4215,39 +3124,17 @@ impl GrammarParser {
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(1usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSetItem, 42usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![
+                (40usize, 3usize),
+                (41usize, 0usize),
+                (42usize, 0usize),
+                (55usize, 1usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 40usize,
-                            shifted: 3usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 41usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 42usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 55usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4258,28 +3145,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(8usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 40usize);
-            reduce_map.insert(Lexed::Ident(None), 40usize);
-            reduce_map.insert(Lexed::LBracket(None), 40usize);
-            reduce_map.insert(Lexed::Pipe(None), 40usize);
-            reduce_map.insert(Lexed::Plus(None), 40usize);
-            reduce_map.insert(Lexed::Question(None), 40usize);
-            reduce_map.insert(Lexed::Semicolon(None), 40usize);
-            reduce_map.insert(Lexed::Star(None), 40usize);
+            for term in _rustylr_generated_terminals_5.iter() {
+                reduce_map.insert(term.clone(), 40usize);
+            }
+            let rule_shifted_pairs = vec![(40usize, 4usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 40usize,
-                        shifted: 4usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4290,22 +3167,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            reduce_map.insert(Lexed::Ident(None), 55usize);
-            reduce_map.insert(Lexed::RBracket(None), 55usize);
+            for term in _rustylr_generated_terminals_7.iter() {
+                reduce_map.insert(term.clone(), 55usize);
+            }
+            let rule_shifted_pairs = vec![(55usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 55usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4321,46 +3194,22 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Plus(None), 44usize);
             shift_goto_map_term.insert(Lexed::Question(None), 45usize);
             shift_goto_map_term.insert(Lexed::Star(None), 46usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(5usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 45usize);
-            reduce_map.insert(Lexed::Ident(None), 45usize);
-            reduce_map.insert(Lexed::LBracket(None), 45usize);
-            reduce_map.insert(Lexed::Pipe(None), 45usize);
-            reduce_map.insert(Lexed::Semicolon(None), 45usize);
+            for term in _rustylr_generated_terminals_8.iter() {
+                reduce_map.insert(term.clone(), 45usize);
+            }
+            let rule_shifted_pairs = vec![
+                (24usize, 1usize),
+                (25usize, 1usize),
+                (26usize, 1usize),
+                (45usize, 3usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 24usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 25usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 26usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 45usize,
-                            shifted: 3usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4371,28 +3220,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(8usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 24usize);
-            reduce_map.insert(Lexed::Ident(None), 24usize);
-            reduce_map.insert(Lexed::LBracket(None), 24usize);
-            reduce_map.insert(Lexed::Pipe(None), 24usize);
-            reduce_map.insert(Lexed::Plus(None), 24usize);
-            reduce_map.insert(Lexed::Question(None), 24usize);
-            reduce_map.insert(Lexed::Semicolon(None), 24usize);
-            reduce_map.insert(Lexed::Star(None), 24usize);
+            for term in _rustylr_generated_terminals_5.iter() {
+                reduce_map.insert(term.clone(), 24usize);
+            }
+            let rule_shifted_pairs = vec![(24usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4403,28 +3242,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(8usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 26usize);
-            reduce_map.insert(Lexed::Ident(None), 26usize);
-            reduce_map.insert(Lexed::LBracket(None), 26usize);
-            reduce_map.insert(Lexed::Pipe(None), 26usize);
-            reduce_map.insert(Lexed::Plus(None), 26usize);
-            reduce_map.insert(Lexed::Question(None), 26usize);
-            reduce_map.insert(Lexed::Semicolon(None), 26usize);
-            reduce_map.insert(Lexed::Star(None), 26usize);
+            for term in _rustylr_generated_terminals_5.iter() {
+                reduce_map.insert(term.clone(), 26usize);
+            }
+            let rule_shifted_pairs = vec![(26usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 26usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4435,28 +3264,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(8usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 25usize);
-            reduce_map.insert(Lexed::Ident(None), 25usize);
-            reduce_map.insert(Lexed::LBracket(None), 25usize);
-            reduce_map.insert(Lexed::Pipe(None), 25usize);
-            reduce_map.insert(Lexed::Plus(None), 25usize);
-            reduce_map.insert(Lexed::Question(None), 25usize);
-            reduce_map.insert(Lexed::Semicolon(None), 25usize);
-            reduce_map.insert(Lexed::Star(None), 25usize);
+            for term in _rustylr_generated_terminals_5.iter() {
+                reduce_map.insert(term.clone(), 25usize);
+            }
+            let rule_shifted_pairs = vec![(25usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4467,28 +3286,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(8usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 27usize);
-            reduce_map.insert(Lexed::Ident(None), 27usize);
-            reduce_map.insert(Lexed::LBracket(None), 27usize);
-            reduce_map.insert(Lexed::Pipe(None), 27usize);
-            reduce_map.insert(Lexed::Plus(None), 27usize);
-            reduce_map.insert(Lexed::Question(None), 27usize);
-            reduce_map.insert(Lexed::Semicolon(None), 27usize);
-            reduce_map.insert(Lexed::Star(None), 27usize);
+            for term in _rustylr_generated_terminals_5.iter() {
+                reduce_map.insert(term.clone(), 27usize);
+            }
+            let rule_shifted_pairs = vec![(27usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4504,46 +3313,22 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Plus(None), 44usize);
             shift_goto_map_term.insert(Lexed::Question(None), 45usize);
             shift_goto_map_term.insert(Lexed::Star(None), 46usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(5usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 44usize);
-            reduce_map.insert(Lexed::Ident(None), 44usize);
-            reduce_map.insert(Lexed::LBracket(None), 44usize);
-            reduce_map.insert(Lexed::Pipe(None), 44usize);
-            reduce_map.insert(Lexed::Semicolon(None), 44usize);
+            for term in _rustylr_generated_terminals_8.iter() {
+                reduce_map.insert(term.clone(), 44usize);
+            }
+            let rule_shifted_pairs = vec![
+                (24usize, 1usize),
+                (25usize, 1usize),
+                (26usize, 1usize),
+                (44usize, 1usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 24usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 25usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 26usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 44usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4554,22 +3339,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            reduce_map.insert(Lexed::Pipe(None), 35usize);
-            reduce_map.insert(Lexed::Semicolon(None), 35usize);
+            for term in _rustylr_generated_terminals_9.iter() {
+                reduce_map.insert(term.clone(), 35usize);
+            }
+            let rule_shifted_pairs = vec![(35usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4584,27 +3365,13 @@ impl GrammarParser {
             shift_goto_map_term.reserve(2usize);
             shift_goto_map_term.insert(Lexed::Pipe(None), 51usize);
             shift_goto_map_term.insert(Lexed::Semicolon(None), 59usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(32usize, 4usize), (34usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 32usize,
-                            shifted: 4usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 34usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4629,110 +3396,29 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated1, 57usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(3usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 49usize);
-            reduce_map.insert(Lexed::Pipe(None), 49usize);
-            reduce_map.insert(Lexed::Semicolon(None), 49usize);
+            for term in _rustylr_generated_terminals_4.iter() {
+                reduce_map.insert(term.clone(), 49usize);
+            }
+            let rule_shifted_pairs = vec![
+                (23usize, 0usize),
+                (24usize, 0usize),
+                (25usize, 0usize),
+                (26usize, 0usize),
+                (27usize, 0usize),
+                (33usize, 0usize),
+                (34usize, 2usize),
+                (40usize, 0usize),
+                (44usize, 0usize),
+                (45usize, 0usize),
+                (48usize, 0usize),
+                (49usize, 0usize),
+                (50usize, 0usize),
+                (51usize, 0usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 23usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 24usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 25usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 26usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 27usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 33usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 34usize,
-                            shifted: 2usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 40usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 44usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 45usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 48usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 49usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 50usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 51usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4743,22 +3429,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            reduce_map.insert(Lexed::Pipe(None), 34usize);
-            reduce_map.insert(Lexed::Semicolon(None), 34usize);
+            for term in _rustylr_generated_terminals_9.iter() {
+                reduce_map.insert(term.clone(), 34usize);
+            }
+            let rule_shifted_pairs = vec![(34usize, 3usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 3usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4769,25 +3451,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(5usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 50usize);
-            reduce_map.insert(Lexed::Ident(None), 50usize);
-            reduce_map.insert(Lexed::LBracket(None), 50usize);
-            reduce_map.insert(Lexed::Pipe(None), 50usize);
-            reduce_map.insert(Lexed::Semicolon(None), 50usize);
+            for term in _rustylr_generated_terminals_8.iter() {
+                reduce_map.insert(term.clone(), 50usize);
+            }
+            let rule_shifted_pairs = vec![(50usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 50usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4806,32 +3481,14 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::Action, 56usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            reduce_map.insert(Lexed::Pipe(None), 1usize);
-            reduce_map.insert(Lexed::Semicolon(None), 1usize);
+            for term in _rustylr_generated_terminals_9.iter() {
+                reduce_map.insert(term.clone(), 1usize);
+            }
+            let rule_shifted_pairs = vec![(0usize, 0usize), (1usize, 0usize), (33usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 0usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 1usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 33usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4842,22 +3499,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            reduce_map.insert(Lexed::Pipe(None), 0usize);
-            reduce_map.insert(Lexed::Semicolon(None), 0usize);
+            for term in _rustylr_generated_terminals_9.iter() {
+                reduce_map.insert(term.clone(), 0usize);
+            }
+            let rule_shifted_pairs = vec![(0usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 0usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4868,22 +3521,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            reduce_map.insert(Lexed::Pipe(None), 33usize);
-            reduce_map.insert(Lexed::Semicolon(None), 33usize);
+            for term in _rustylr_generated_terminals_9.iter() {
+                reduce_map.insert(term.clone(), 33usize);
+            }
+            let rule_shifted_pairs = vec![(33usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4905,82 +3554,25 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TokenMapped, 58usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(3usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 48usize);
-            reduce_map.insert(Lexed::Pipe(None), 48usize);
-            reduce_map.insert(Lexed::Semicolon(None), 48usize);
+            for term in _rustylr_generated_terminals_4.iter() {
+                reduce_map.insert(term.clone(), 48usize);
+            }
+            let rule_shifted_pairs = vec![
+                (23usize, 0usize),
+                (24usize, 0usize),
+                (25usize, 0usize),
+                (26usize, 0usize),
+                (27usize, 0usize),
+                (40usize, 0usize),
+                (44usize, 0usize),
+                (45usize, 0usize),
+                (48usize, 1usize),
+                (51usize, 1usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 23usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 24usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 25usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 26usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 27usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 40usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 44usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 45usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 48usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 51usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -4991,25 +3583,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(5usize);
-            reduce_map.insert(Lexed::BraceGroup(None), 51usize);
-            reduce_map.insert(Lexed::Ident(None), 51usize);
-            reduce_map.insert(Lexed::LBracket(None), 51usize);
-            reduce_map.insert(Lexed::Pipe(None), 51usize);
-            reduce_map.insert(Lexed::Semicolon(None), 51usize);
+            for term in _rustylr_generated_terminals_8.iter() {
+                reduce_map.insert(term.clone(), 51usize);
+            }
+            let rule_shifted_pairs = vec![(51usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 51usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5020,31 +3605,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 32usize);
-            reduce_map.insert(Lexed::EofDef(None), 32usize);
-            reduce_map.insert(Lexed::ErrorType(None), 32usize);
-            reduce_map.insert(Lexed::Ident(None), 32usize);
-            reduce_map.insert(Lexed::Left(None), 32usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 32usize);
-            reduce_map.insert(Lexed::Right(None), 32usize);
-            reduce_map.insert(Lexed::Start(None), 32usize);
-            reduce_map.insert(Lexed::Token(None), 32usize);
-            reduce_map.insert(Lexed::TokenType(None), 32usize);
-            reduce_map.insert(Lexed::UserData(None), 32usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 32usize);
+            }
+            let rule_shifted_pairs = vec![(32usize, 5usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 5usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5055,22 +3627,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            reduce_map.insert(Lexed::Ident(None), 30usize);
-            reduce_map.insert(Lexed::LBracket(None), 30usize);
+            for term in _rustylr_generated_terminals_10.iter() {
+                reduce_map.insert(term.clone(), 30usize);
+            }
+            let rule_shifted_pairs = vec![(30usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 30usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5104,151 +3672,33 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 62usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated4, 20usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 22usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![
+                (22usize, 1usize),
+                (38usize, 0usize),
+                (56usize, 0usize),
+                (57usize, 0usize),
+                (58usize, 0usize),
+                (59usize, 0usize),
+                (60usize, 0usize),
+                (61usize, 0usize),
+                (62usize, 0usize),
+                (63usize, 0usize),
+                (64usize, 0usize),
+                (65usize, 0usize),
+                (66usize, 0usize),
+                (67usize, 0usize),
+                (68usize, 0usize),
+                (69usize, 0usize),
+                (70usize, 0usize),
+                (71usize, 0usize),
+                (72usize, 0usize),
+                (73usize, 0usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 22usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 38usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 56usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 57usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 58usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 59usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 60usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 61usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 62usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 63usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 64usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 65usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 66usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 67usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 68usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 69usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 70usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 71usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 72usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 73usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5262,18 +3712,13 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
             shift_goto_map_term.insert(Lexed::Semicolon(None), 63usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(22usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5284,31 +3729,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 22usize);
-            reduce_map.insert(Lexed::EofDef(None), 22usize);
-            reduce_map.insert(Lexed::ErrorType(None), 22usize);
-            reduce_map.insert(Lexed::Ident(None), 22usize);
-            reduce_map.insert(Lexed::Left(None), 22usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 22usize);
-            reduce_map.insert(Lexed::Right(None), 22usize);
-            reduce_map.insert(Lexed::Start(None), 22usize);
-            reduce_map.insert(Lexed::Token(None), 22usize);
-            reduce_map.insert(Lexed::TokenType(None), 22usize);
-            reduce_map.insert(Lexed::UserData(None), 22usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 22usize);
+            }
+            let rule_shifted_pairs = vec![(22usize, 3usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 3usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5319,22 +3751,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            reduce_map.insert(Lexed::Ident(None), 31usize);
-            reduce_map.insert(Lexed::LBracket(None), 31usize);
+            for term in _rustylr_generated_terminals_10.iter() {
+                reduce_map.insert(term.clone(), 31usize);
+            }
+            let rule_shifted_pairs = vec![(31usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5348,18 +3776,13 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
             shift_goto_map_term.insert(Lexed::Ident(None), 66usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(39usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 39usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5373,18 +3796,13 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
             shift_goto_map_term.insert(Lexed::Semicolon(None), 67usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(39usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 39usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5395,31 +3813,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 39usize);
-            reduce_map.insert(Lexed::EofDef(None), 39usize);
-            reduce_map.insert(Lexed::ErrorType(None), 39usize);
-            reduce_map.insert(Lexed::Ident(None), 39usize);
-            reduce_map.insert(Lexed::Left(None), 39usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 39usize);
-            reduce_map.insert(Lexed::Right(None), 39usize);
-            reduce_map.insert(Lexed::Start(None), 39usize);
-            reduce_map.insert(Lexed::Token(None), 39usize);
-            reduce_map.insert(Lexed::TokenType(None), 39usize);
-            reduce_map.insert(Lexed::UserData(None), 39usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 39usize);
+            }
+            let rule_shifted_pairs = vec![(39usize, 3usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 39usize,
-                        shifted: 3usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5433,18 +3838,13 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
             shift_goto_map_term.insert(Lexed::Ident(None), 69usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(43usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 43usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5478,151 +3878,33 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 70usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated4, 20usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 22usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![
+                (38usize, 0usize),
+                (43usize, 2usize),
+                (56usize, 0usize),
+                (57usize, 0usize),
+                (58usize, 0usize),
+                (59usize, 0usize),
+                (60usize, 0usize),
+                (61usize, 0usize),
+                (62usize, 0usize),
+                (63usize, 0usize),
+                (64usize, 0usize),
+                (65usize, 0usize),
+                (66usize, 0usize),
+                (67usize, 0usize),
+                (68usize, 0usize),
+                (69usize, 0usize),
+                (70usize, 0usize),
+                (71usize, 0usize),
+                (72usize, 0usize),
+                (73usize, 0usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 38usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 43usize,
-                            shifted: 2usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 56usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 57usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 58usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 59usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 60usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 61usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 62usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 63usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 64usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 65usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 66usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 67usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 68usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 69usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 70usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 71usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 72usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 73usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5636,18 +3918,13 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
             shift_goto_map_term.insert(Lexed::Semicolon(None), 71usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(43usize, 3usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 43usize,
-                        shifted: 3usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5658,31 +3935,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 43usize);
-            reduce_map.insert(Lexed::EofDef(None), 43usize);
-            reduce_map.insert(Lexed::ErrorType(None), 43usize);
-            reduce_map.insert(Lexed::Ident(None), 43usize);
-            reduce_map.insert(Lexed::Left(None), 43usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 43usize);
-            reduce_map.insert(Lexed::Right(None), 43usize);
-            reduce_map.insert(Lexed::Start(None), 43usize);
-            reduce_map.insert(Lexed::Token(None), 43usize);
-            reduce_map.insert(Lexed::TokenType(None), 43usize);
-            reduce_map.insert(Lexed::UserData(None), 43usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 43usize);
+            }
+            let rule_shifted_pairs = vec![(43usize, 4usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 43usize,
-                        shifted: 4usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5716,151 +3980,33 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 73usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated4, 20usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 22usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![
+                (38usize, 0usize),
+                (46usize, 1usize),
+                (56usize, 0usize),
+                (57usize, 0usize),
+                (58usize, 0usize),
+                (59usize, 0usize),
+                (60usize, 0usize),
+                (61usize, 0usize),
+                (62usize, 0usize),
+                (63usize, 0usize),
+                (64usize, 0usize),
+                (65usize, 0usize),
+                (66usize, 0usize),
+                (67usize, 0usize),
+                (68usize, 0usize),
+                (69usize, 0usize),
+                (70usize, 0usize),
+                (71usize, 0usize),
+                (72usize, 0usize),
+                (73usize, 0usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 38usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 46usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 56usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 57usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 58usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 59usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 60usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 61usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 62usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 63usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 64usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 65usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 66usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 67usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 68usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 69usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 70usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 71usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 72usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 73usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5874,18 +4020,13 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
             shift_goto_map_term.insert(Lexed::Semicolon(None), 74usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(46usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 46usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5896,31 +4037,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 46usize);
-            reduce_map.insert(Lexed::EofDef(None), 46usize);
-            reduce_map.insert(Lexed::ErrorType(None), 46usize);
-            reduce_map.insert(Lexed::Ident(None), 46usize);
-            reduce_map.insert(Lexed::Left(None), 46usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 46usize);
-            reduce_map.insert(Lexed::Right(None), 46usize);
-            reduce_map.insert(Lexed::Start(None), 46usize);
-            reduce_map.insert(Lexed::Token(None), 46usize);
-            reduce_map.insert(Lexed::TokenType(None), 46usize);
-            reduce_map.insert(Lexed::UserData(None), 46usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 46usize);
+            }
+            let rule_shifted_pairs = vec![(46usize, 3usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 46usize,
-                        shifted: 3usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -5954,151 +4082,33 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 76usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated4, 20usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 22usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![
+                (38usize, 0usize),
+                (47usize, 1usize),
+                (56usize, 0usize),
+                (57usize, 0usize),
+                (58usize, 0usize),
+                (59usize, 0usize),
+                (60usize, 0usize),
+                (61usize, 0usize),
+                (62usize, 0usize),
+                (63usize, 0usize),
+                (64usize, 0usize),
+                (65usize, 0usize),
+                (66usize, 0usize),
+                (67usize, 0usize),
+                (68usize, 0usize),
+                (69usize, 0usize),
+                (70usize, 0usize),
+                (71usize, 0usize),
+                (72usize, 0usize),
+                (73usize, 0usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 38usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 47usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 56usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 57usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 58usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 59usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 60usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 61usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 62usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 63usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 64usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 65usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 66usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 67usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 68usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 69usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 70usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 71usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 72usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 73usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6112,18 +4122,13 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
             shift_goto_map_term.insert(Lexed::Semicolon(None), 77usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(47usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 47usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6134,31 +4139,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 47usize);
-            reduce_map.insert(Lexed::EofDef(None), 47usize);
-            reduce_map.insert(Lexed::ErrorType(None), 47usize);
-            reduce_map.insert(Lexed::Ident(None), 47usize);
-            reduce_map.insert(Lexed::Left(None), 47usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 47usize);
-            reduce_map.insert(Lexed::Right(None), 47usize);
-            reduce_map.insert(Lexed::Start(None), 47usize);
-            reduce_map.insert(Lexed::Token(None), 47usize);
-            reduce_map.insert(Lexed::TokenType(None), 47usize);
-            reduce_map.insert(Lexed::UserData(None), 47usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 47usize);
+            }
+            let rule_shifted_pairs = vec![(47usize, 3usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 47usize,
-                        shifted: 3usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6169,31 +4161,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 11usize);
-            reduce_map.insert(Lexed::EofDef(None), 11usize);
-            reduce_map.insert(Lexed::ErrorType(None), 11usize);
-            reduce_map.insert(Lexed::Ident(None), 11usize);
-            reduce_map.insert(Lexed::Left(None), 11usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 11usize);
-            reduce_map.insert(Lexed::Right(None), 11usize);
-            reduce_map.insert(Lexed::Start(None), 11usize);
-            reduce_map.insert(Lexed::Token(None), 11usize);
-            reduce_map.insert(Lexed::TokenType(None), 11usize);
-            reduce_map.insert(Lexed::UserData(None), 11usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 11usize);
+            }
+            let rule_shifted_pairs = vec![(11usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 11usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6204,31 +4183,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 19usize);
-            reduce_map.insert(Lexed::EofDef(None), 19usize);
-            reduce_map.insert(Lexed::ErrorType(None), 19usize);
-            reduce_map.insert(Lexed::Ident(None), 19usize);
-            reduce_map.insert(Lexed::Left(None), 19usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 19usize);
-            reduce_map.insert(Lexed::Right(None), 19usize);
-            reduce_map.insert(Lexed::Start(None), 19usize);
-            reduce_map.insert(Lexed::Token(None), 19usize);
-            reduce_map.insert(Lexed::TokenType(None), 19usize);
-            reduce_map.insert(Lexed::UserData(None), 19usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 19usize);
+            }
+            let rule_shifted_pairs = vec![(19usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6264,165 +4230,35 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TokenDef, 97usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TokenTypeDef, 98usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::UserDataDef, 99usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![
+                (2usize, 0usize),
+                (3usize, 0usize),
+                (4usize, 1usize),
+                (6usize, 1usize),
+                (8usize, 1usize),
+                (10usize, 1usize),
+                (12usize, 1usize),
+                (14usize, 1usize),
+                (16usize, 1usize),
+                (18usize, 1usize),
+                (20usize, 1usize),
+                (22usize, 0usize),
+                (28usize, 0usize),
+                (29usize, 0usize),
+                (30usize, 0usize),
+                (31usize, 0usize),
+                (32usize, 0usize),
+                (39usize, 0usize),
+                (43usize, 0usize),
+                (46usize, 0usize),
+                (47usize, 0usize),
+                (74usize, 1usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 2usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 3usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 4usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 6usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 8usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 10usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 12usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 14usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 16usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 18usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 20usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 22usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 28usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 29usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 30usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 31usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 32usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 39usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 43usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 46usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 47usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 74usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6433,20 +4269,14 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(74usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 74usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6457,31 +4287,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 10usize);
-            reduce_map.insert(Lexed::EofDef(None), 10usize);
-            reduce_map.insert(Lexed::ErrorType(None), 10usize);
-            reduce_map.insert(Lexed::Ident(None), 10usize);
-            reduce_map.insert(Lexed::Left(None), 10usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 10usize);
-            reduce_map.insert(Lexed::Right(None), 10usize);
-            reduce_map.insert(Lexed::Start(None), 10usize);
-            reduce_map.insert(Lexed::Token(None), 10usize);
-            reduce_map.insert(Lexed::TokenType(None), 10usize);
-            reduce_map.insert(Lexed::UserData(None), 10usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 10usize);
+            }
+            let rule_shifted_pairs = vec![(10usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 10usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6492,31 +4309,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 18usize);
-            reduce_map.insert(Lexed::EofDef(None), 18usize);
-            reduce_map.insert(Lexed::ErrorType(None), 18usize);
-            reduce_map.insert(Lexed::Ident(None), 18usize);
-            reduce_map.insert(Lexed::Left(None), 18usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 18usize);
-            reduce_map.insert(Lexed::Right(None), 18usize);
-            reduce_map.insert(Lexed::Start(None), 18usize);
-            reduce_map.insert(Lexed::Token(None), 18usize);
-            reduce_map.insert(Lexed::TokenType(None), 18usize);
-            reduce_map.insert(Lexed::UserData(None), 18usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 18usize);
+            }
+            let rule_shifted_pairs = vec![(18usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 18usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6527,31 +4331,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 20usize);
-            reduce_map.insert(Lexed::EofDef(None), 20usize);
-            reduce_map.insert(Lexed::ErrorType(None), 20usize);
-            reduce_map.insert(Lexed::Ident(None), 20usize);
-            reduce_map.insert(Lexed::Left(None), 20usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 20usize);
-            reduce_map.insert(Lexed::Right(None), 20usize);
-            reduce_map.insert(Lexed::Start(None), 20usize);
-            reduce_map.insert(Lexed::Token(None), 20usize);
-            reduce_map.insert(Lexed::TokenType(None), 20usize);
-            reduce_map.insert(Lexed::UserData(None), 20usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 20usize);
+            }
+            let rule_shifted_pairs = vec![(20usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 20usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6562,31 +4353,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 16usize);
-            reduce_map.insert(Lexed::EofDef(None), 16usize);
-            reduce_map.insert(Lexed::ErrorType(None), 16usize);
-            reduce_map.insert(Lexed::Ident(None), 16usize);
-            reduce_map.insert(Lexed::Left(None), 16usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 16usize);
-            reduce_map.insert(Lexed::Right(None), 16usize);
-            reduce_map.insert(Lexed::Start(None), 16usize);
-            reduce_map.insert(Lexed::Token(None), 16usize);
-            reduce_map.insert(Lexed::TokenType(None), 16usize);
-            reduce_map.insert(Lexed::UserData(None), 16usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 16usize);
+            }
+            let rule_shifted_pairs = vec![(16usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 16usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6604,32 +4382,12 @@ impl GrammarParser {
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(1usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSet, 93usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(28usize, 1usize), (29usize, 1usize), (40usize, 0usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 28usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 29usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 40usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6643,18 +4401,13 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
             shift_goto_map_term.insert(Lexed::Semicolon(None), 88usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(28usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6665,31 +4418,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 28usize);
-            reduce_map.insert(Lexed::EofDef(None), 28usize);
-            reduce_map.insert(Lexed::ErrorType(None), 28usize);
-            reduce_map.insert(Lexed::Ident(None), 28usize);
-            reduce_map.insert(Lexed::Left(None), 28usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 28usize);
-            reduce_map.insert(Lexed::Right(None), 28usize);
-            reduce_map.insert(Lexed::Start(None), 28usize);
-            reduce_map.insert(Lexed::Token(None), 28usize);
-            reduce_map.insert(Lexed::TokenType(None), 28usize);
-            reduce_map.insert(Lexed::UserData(None), 28usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 28usize);
+            }
+            let rule_shifted_pairs = vec![(28usize, 3usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 3usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6708,31 +4448,14 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated2, 90usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(1usize);
-            reduce_map.insert(Lexed::Ident(None), 53usize);
+            for term in _rustylr_generated_terminals_6.iter() {
+                reduce_map.insert(term.clone(), 53usize);
+            }
+            let rule_shifted_pairs = vec![(40usize, 1usize), (52usize, 0usize), (53usize, 0usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 40usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 52usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 53usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6750,46 +4473,18 @@ impl GrammarParser {
             shift_goto_map_nonterm.reserve(2usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSetItem, 39usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated3, 91usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![
+                (40usize, 2usize),
+                (41usize, 0usize),
+                (42usize, 0usize),
+                (54usize, 0usize),
+                (55usize, 0usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 40usize,
-                            shifted: 2usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 41usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 42usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 54usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 55usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6807,39 +4502,17 @@ impl GrammarParser {
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(1usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSetItem, 42usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![
+                (40usize, 3usize),
+                (41usize, 0usize),
+                (42usize, 0usize),
+                (55usize, 1usize),
+            ];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 40usize,
-                            shifted: 3usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 41usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 42usize,
-                            shifted: 0usize,
-                        },
-                        Default::default(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 55usize,
-                            shifted: 1usize,
-                        },
-                        Default::default(),
-                    ),
-                ]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6850,21 +4523,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(1usize);
-            reduce_map.insert(Lexed::Semicolon(None), 40usize);
+            for term in _rustylr_generated_terminals_2.iter() {
+                reduce_map.insert(term.clone(), 40usize);
+            }
+            let rule_shifted_pairs = vec![(40usize, 4usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 40usize,
-                        shifted: 4usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6878,18 +4548,13 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
             shift_goto_map_term.insert(Lexed::Semicolon(None), 94usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
-            let mut reduce_map = ::rusty_lr_core::HashMap::default();
-            reduce_map.reserve(0usize);
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            let reduce_map = ::rusty_lr_core::HashMap::default();
+            let rule_shifted_pairs = vec![(29usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6900,31 +4565,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 29usize);
-            reduce_map.insert(Lexed::EofDef(None), 29usize);
-            reduce_map.insert(Lexed::ErrorType(None), 29usize);
-            reduce_map.insert(Lexed::Ident(None), 29usize);
-            reduce_map.insert(Lexed::Left(None), 29usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 29usize);
-            reduce_map.insert(Lexed::Right(None), 29usize);
-            reduce_map.insert(Lexed::Start(None), 29usize);
-            reduce_map.insert(Lexed::Token(None), 29usize);
-            reduce_map.insert(Lexed::TokenType(None), 29usize);
-            reduce_map.insert(Lexed::UserData(None), 29usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 29usize);
+            }
+            let rule_shifted_pairs = vec![(29usize, 3usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 3usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6935,31 +4587,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 4usize);
-            reduce_map.insert(Lexed::EofDef(None), 4usize);
-            reduce_map.insert(Lexed::ErrorType(None), 4usize);
-            reduce_map.insert(Lexed::Ident(None), 4usize);
-            reduce_map.insert(Lexed::Left(None), 4usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 4usize);
-            reduce_map.insert(Lexed::Right(None), 4usize);
-            reduce_map.insert(Lexed::Start(None), 4usize);
-            reduce_map.insert(Lexed::Token(None), 4usize);
-            reduce_map.insert(Lexed::TokenType(None), 4usize);
-            reduce_map.insert(Lexed::UserData(None), 4usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 4usize);
+            }
+            let rule_shifted_pairs = vec![(4usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 4usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -6970,31 +4609,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 8usize);
-            reduce_map.insert(Lexed::EofDef(None), 8usize);
-            reduce_map.insert(Lexed::ErrorType(None), 8usize);
-            reduce_map.insert(Lexed::Ident(None), 8usize);
-            reduce_map.insert(Lexed::Left(None), 8usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 8usize);
-            reduce_map.insert(Lexed::Right(None), 8usize);
-            reduce_map.insert(Lexed::Start(None), 8usize);
-            reduce_map.insert(Lexed::Token(None), 8usize);
-            reduce_map.insert(Lexed::TokenType(None), 8usize);
-            reduce_map.insert(Lexed::UserData(None), 8usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 8usize);
+            }
+            let rule_shifted_pairs = vec![(8usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 8usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -7005,31 +4631,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 6usize);
-            reduce_map.insert(Lexed::EofDef(None), 6usize);
-            reduce_map.insert(Lexed::ErrorType(None), 6usize);
-            reduce_map.insert(Lexed::Ident(None), 6usize);
-            reduce_map.insert(Lexed::Left(None), 6usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 6usize);
-            reduce_map.insert(Lexed::Right(None), 6usize);
-            reduce_map.insert(Lexed::Start(None), 6usize);
-            reduce_map.insert(Lexed::Token(None), 6usize);
-            reduce_map.insert(Lexed::TokenType(None), 6usize);
-            reduce_map.insert(Lexed::UserData(None), 6usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 6usize);
+            }
+            let rule_shifted_pairs = vec![(6usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 6usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -7040,31 +4653,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 12usize);
-            reduce_map.insert(Lexed::EofDef(None), 12usize);
-            reduce_map.insert(Lexed::ErrorType(None), 12usize);
-            reduce_map.insert(Lexed::Ident(None), 12usize);
-            reduce_map.insert(Lexed::Left(None), 12usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 12usize);
-            reduce_map.insert(Lexed::Right(None), 12usize);
-            reduce_map.insert(Lexed::Start(None), 12usize);
-            reduce_map.insert(Lexed::Token(None), 12usize);
-            reduce_map.insert(Lexed::TokenType(None), 12usize);
-            reduce_map.insert(Lexed::UserData(None), 12usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 12usize);
+            }
+            let rule_shifted_pairs = vec![(12usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 12usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -7075,31 +4675,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 14usize);
-            reduce_map.insert(Lexed::EofDef(None), 14usize);
-            reduce_map.insert(Lexed::ErrorType(None), 14usize);
-            reduce_map.insert(Lexed::Ident(None), 14usize);
-            reduce_map.insert(Lexed::Left(None), 14usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 14usize);
-            reduce_map.insert(Lexed::Right(None), 14usize);
-            reduce_map.insert(Lexed::Start(None), 14usize);
-            reduce_map.insert(Lexed::Token(None), 14usize);
-            reduce_map.insert(Lexed::TokenType(None), 14usize);
-            reduce_map.insert(Lexed::UserData(None), 14usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 14usize);
+            }
+            let rule_shifted_pairs = vec![(14usize, 2usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 14usize,
-                        shifted: 2usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -7110,31 +4697,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 21usize);
-            reduce_map.insert(Lexed::EofDef(None), 21usize);
-            reduce_map.insert(Lexed::ErrorType(None), 21usize);
-            reduce_map.insert(Lexed::Ident(None), 21usize);
-            reduce_map.insert(Lexed::Left(None), 21usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 21usize);
-            reduce_map.insert(Lexed::Right(None), 21usize);
-            reduce_map.insert(Lexed::Start(None), 21usize);
-            reduce_map.insert(Lexed::Token(None), 21usize);
-            reduce_map.insert(Lexed::TokenType(None), 21usize);
-            reduce_map.insert(Lexed::UserData(None), 21usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 21usize);
+            }
+            let rule_shifted_pairs = vec![(21usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 21usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -7145,31 +4719,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 17usize);
-            reduce_map.insert(Lexed::EofDef(None), 17usize);
-            reduce_map.insert(Lexed::ErrorType(None), 17usize);
-            reduce_map.insert(Lexed::Ident(None), 17usize);
-            reduce_map.insert(Lexed::Left(None), 17usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 17usize);
-            reduce_map.insert(Lexed::Right(None), 17usize);
-            reduce_map.insert(Lexed::Start(None), 17usize);
-            reduce_map.insert(Lexed::Token(None), 17usize);
-            reduce_map.insert(Lexed::TokenType(None), 17usize);
-            reduce_map.insert(Lexed::UserData(None), 17usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 17usize);
+            }
+            let rule_shifted_pairs = vec![(17usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 17usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -7180,31 +4741,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 5usize);
-            reduce_map.insert(Lexed::EofDef(None), 5usize);
-            reduce_map.insert(Lexed::ErrorType(None), 5usize);
-            reduce_map.insert(Lexed::Ident(None), 5usize);
-            reduce_map.insert(Lexed::Left(None), 5usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 5usize);
-            reduce_map.insert(Lexed::Right(None), 5usize);
-            reduce_map.insert(Lexed::Start(None), 5usize);
-            reduce_map.insert(Lexed::Token(None), 5usize);
-            reduce_map.insert(Lexed::TokenType(None), 5usize);
-            reduce_map.insert(Lexed::UserData(None), 5usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 5usize);
+            }
+            let rule_shifted_pairs = vec![(5usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 5usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -7215,31 +4763,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 9usize);
-            reduce_map.insert(Lexed::EofDef(None), 9usize);
-            reduce_map.insert(Lexed::ErrorType(None), 9usize);
-            reduce_map.insert(Lexed::Ident(None), 9usize);
-            reduce_map.insert(Lexed::Left(None), 9usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 9usize);
-            reduce_map.insert(Lexed::Right(None), 9usize);
-            reduce_map.insert(Lexed::Start(None), 9usize);
-            reduce_map.insert(Lexed::Token(None), 9usize);
-            reduce_map.insert(Lexed::TokenType(None), 9usize);
-            reduce_map.insert(Lexed::UserData(None), 9usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 9usize);
+            }
+            let rule_shifted_pairs = vec![(9usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 9usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -7250,31 +4785,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 7usize);
-            reduce_map.insert(Lexed::EofDef(None), 7usize);
-            reduce_map.insert(Lexed::ErrorType(None), 7usize);
-            reduce_map.insert(Lexed::Ident(None), 7usize);
-            reduce_map.insert(Lexed::Left(None), 7usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 7usize);
-            reduce_map.insert(Lexed::Right(None), 7usize);
-            reduce_map.insert(Lexed::Start(None), 7usize);
-            reduce_map.insert(Lexed::Token(None), 7usize);
-            reduce_map.insert(Lexed::TokenType(None), 7usize);
-            reduce_map.insert(Lexed::UserData(None), 7usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 7usize);
+            }
+            let rule_shifted_pairs = vec![(7usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 7usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -7285,31 +4807,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 13usize);
-            reduce_map.insert(Lexed::EofDef(None), 13usize);
-            reduce_map.insert(Lexed::ErrorType(None), 13usize);
-            reduce_map.insert(Lexed::Ident(None), 13usize);
-            reduce_map.insert(Lexed::Left(None), 13usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 13usize);
-            reduce_map.insert(Lexed::Right(None), 13usize);
-            reduce_map.insert(Lexed::Start(None), 13usize);
-            reduce_map.insert(Lexed::Token(None), 13usize);
-            reduce_map.insert(Lexed::TokenType(None), 13usize);
-            reduce_map.insert(Lexed::UserData(None), 13usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 13usize);
+            }
+            let rule_shifted_pairs = vec![(13usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 13usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,
@@ -7320,31 +4829,18 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_term.reserve(0usize);
-            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
-            shift_goto_map_nonterm.reserve(0usize);
+            let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            reduce_map.insert(Lexed::Eof, 15usize);
-            reduce_map.insert(Lexed::EofDef(None), 15usize);
-            reduce_map.insert(Lexed::ErrorType(None), 15usize);
-            reduce_map.insert(Lexed::Ident(None), 15usize);
-            reduce_map.insert(Lexed::Left(None), 15usize);
-            reduce_map.insert(Lexed::ModulePrefix(None), 15usize);
-            reduce_map.insert(Lexed::Right(None), 15usize);
-            reduce_map.insert(Lexed::Start(None), 15usize);
-            reduce_map.insert(Lexed::Token(None), 15usize);
-            reduce_map.insert(Lexed::TokenType(None), 15usize);
-            reduce_map.insert(Lexed::UserData(None), 15usize);
+            for term in _rustylr_generated_terminals_1.iter() {
+                reduce_map.insert(term.clone(), 15usize);
+            }
+            let rule_shifted_pairs = vec![(15usize, 1usize)];
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 15usize,
-                        shifted: 1usize,
-                    },
-                    Default::default(),
-                )]),
+                rules: std::collections::BTreeMap::from_iter(
+                    rule_shifted_pairs.into_iter().map(pair_to_rule),
+                ),
             };
             let state = ::rusty_lr_core::State {
                 shift_goto_map_term,

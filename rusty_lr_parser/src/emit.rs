@@ -12,6 +12,7 @@ use crate::utils;
 use rusty_lr_core as rlr;
 
 use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 
 /// emit Rust code for the parser
 impl Grammar {
@@ -134,12 +135,37 @@ impl Grammar {
         // and it takes too much space
 
         {
+            // this write closure that convert (rule_id, shifted) pair to ShiftedRuleRef
+            // to shorten the emitted code
+            let term_typename = &self.token_typename;
+            write_states.extend(
+            quote!{
+                let pair_to_rule = |(rule, shifted):(usize,usize)| -> (#module_prefix::ShiftedRuleRef, std::collections::BTreeSet<#term_typename>) {
+                    (
+                        #module_prefix::ShiftedRuleRef {
+                            rule,
+                            shifted,
+                        },
+                        Default::default()
+                    )
+                };
+                }
+            );
+        }
+        {
             let state_len = parser.states.len();
             write_states.extend(quote! {
                 let mut states = Vec::with_capacity(#state_len);
             });
         }
-        for state in parser.states.iter() {
+
+        // when generating code for 'inserting tokens to reduce_map',
+        // there could be multiple lookahead tokens for one rule
+        // inserting all of them one by one is inefficient
+        let mut reduce_terminals_map = BTreeMap::new();
+        let mut init_reduce_terminals_stream = TokenStream::new();
+
+        for state in parser.states.into_iter() {
             let mut init_shift_term_stream = TokenStream::new();
             let mut init_shift_nonterm_stream = TokenStream::new();
             let mut init_reduce_stream = TokenStream::new();
@@ -148,26 +174,45 @@ impl Grammar {
                 let shift_nonterm_len = state.shift_goto_map_nonterm.len();
                 let reduce_len = state.reduce_map.len();
 
-                init_shift_term_stream.extend(quote! {
-                    let mut shift_goto_map_term = #module_prefix::HashMap::default();
-                    shift_goto_map_term.reserve(#shift_term_len);
-                });
-                init_shift_nonterm_stream.extend(quote! {
-                    let mut shift_goto_map_nonterm = #module_prefix::HashMap::default();
-                    shift_goto_map_nonterm.reserve(#shift_nonterm_len);
-                });
-                init_reduce_stream.extend(quote! {
-                    let mut reduce_map = #module_prefix::HashMap::default();
-                    reduce_map.reserve(#reduce_len);
-                });
+                if shift_term_len > 0 {
+                    init_shift_term_stream.extend(quote! {
+                        let mut shift_goto_map_term = #module_prefix::HashMap::default();
+                        shift_goto_map_term.reserve(#shift_term_len);
+                    });
+                } else {
+                    init_shift_term_stream.extend(quote! {
+                        let shift_goto_map_term = #module_prefix::HashMap::default();
+                    });
+                }
+                if shift_nonterm_len > 0 {
+                    init_shift_nonterm_stream.extend(quote! {
+                        let mut shift_goto_map_nonterm = #module_prefix::HashMap::default();
+                        shift_goto_map_nonterm.reserve(#shift_nonterm_len);
+                    });
+                } else {
+                    init_shift_nonterm_stream.extend(quote! {
+                        let shift_goto_map_nonterm = #module_prefix::HashMap::default();
+                    });
+                }
+                if reduce_len > 0 {
+                    init_reduce_stream.extend(quote! {
+                        let mut reduce_map = #module_prefix::HashMap::default();
+                        reduce_map.reserve(#reduce_len);
+                    });
+                } else {
+                    init_reduce_stream.extend(quote! {
+                        let reduce_map = #module_prefix::HashMap::default();
+                    });
+                }
             }
 
             // use BTreeMap to sort keys, for consistent output
-            let shift_goto_map_term: BTreeMap<_, _> = state.shift_goto_map_term.iter().collect();
+            let shift_goto_map_term: BTreeMap<_, _> =
+                state.shift_goto_map_term.into_iter().collect();
             for (term, goto) in shift_goto_map_term.into_iter() {
                 let (_, term_stream) = self
                     .terminals
-                    .get(&Ident::new(term, Span::call_site()))
+                    .get(&Ident::new(&term, Span::call_site()))
                     .unwrap();
                 init_shift_term_stream.extend(quote! {
                     shift_goto_map_term.insert( #term_stream, #goto );
@@ -176,38 +221,63 @@ impl Grammar {
 
             // use BTreeMap to sort keys, for consistent output
             let shift_goto_map_nonterm: BTreeMap<_, _> =
-                state.shift_goto_map_nonterm.iter().collect();
+                state.shift_goto_map_nonterm.into_iter().collect();
             for (nonterm, goto) in shift_goto_map_nonterm.into_iter() {
-                let nonterm = Ident::new(nonterm, Span::call_site());
+                let nonterm = Ident::new(&nonterm, Span::call_site());
                 init_shift_nonterm_stream.extend(quote! {
                     shift_goto_map_nonterm.insert(#nonterminals_enum_name::#nonterm, #goto);
                 });
             }
 
             // use BTreeMap to sort keys, for consistent output
-            let reduce_map: BTreeMap<_, _> = state.reduce_map.iter().collect();
-            for (term, ruleid) in reduce_map.into_iter() {
-                let (_, term_stream) = self
-                    .terminals
-                    .get(&Ident::new(term, Span::call_site()))
-                    .unwrap();
+            let mut reduce_map_by_rule_id = BTreeMap::new();
+            for (term, ruleid) in state.reduce_map.into_iter() {
+                reduce_map_by_rule_id
+                    .entry(ruleid)
+                    .or_insert_with(BTreeSet::new)
+                    .insert(term);
+            }
+            for (ruleid, tokens) in reduce_map_by_rule_id.into_iter() {
+                let terminal_set_ident_num = if let Some(id) = reduce_terminals_map.get(&tokens) {
+                    *id
+                } else {
+                    let len = reduce_terminals_map.len();
+                    reduce_terminals_map.insert(tokens.clone(), len);
+
+                    let mut init_terminals_comma_separated = TokenStream::new();
+                    for term_name in tokens.into_iter() {
+                        let term_ident = Ident::new(&term_name, Span::call_site());
+                        let (_, term_stream) = self.terminals.get(&term_ident).unwrap();
+                        init_terminals_comma_separated.extend(quote! {
+                            #term_stream,
+                        });
+                    }
+
+                    let terminals_ident = format_ident!("_rustylr_generated_terminals_{}", len);
+                    init_reduce_terminals_stream.extend(quote! {
+                        let #terminals_ident = vec![
+                            #init_terminals_comma_separated
+                        ];
+                    });
+
+                    len
+                };
+                let terminals_ident =
+                    format_ident!("_rustylr_generated_terminals_{}", terminal_set_ident_num);
+
                 init_reduce_stream.extend(quote! {
-                    reduce_map.insert( #term_stream, #ruleid );
+                    for term in #terminals_ident.iter() {
+                        reduce_map.insert( term.clone(), #ruleid );
+                    }
                 });
             }
 
-            let mut comma_separated_ruleset = quote! {};
-            for (rule, _lookaheads) in state.ruleset.rules.iter() {
+            let mut comma_separated_rule_shifted = TokenStream::new();
+            for (rule, _lookaheads) in state.ruleset.rules.into_iter() {
                 let rule_id = rule.rule;
                 let shifted = rule.shifted;
-                comma_separated_ruleset.extend(quote! {
-                    (
-                        #module_prefix::ShiftedRuleRef {
-                            rule: #rule_id,
-                            shifted: #shifted,
-                        },
-                        Default::default(),
-                    ),
+                comma_separated_rule_shifted.extend(quote! {
+                    ( #rule_id, #shifted ),
                 });
             }
 
@@ -216,10 +286,13 @@ impl Grammar {
                     #init_shift_term_stream
                     #init_shift_nonterm_stream
                     #init_reduce_stream
+                    let rule_shifted_pairs = vec![ #comma_separated_rule_shifted ];
                     let ruleset = #module_prefix::LookaheadRuleRefSet {
-                        rules: std::collections::BTreeMap::from(
-                            [ #comma_separated_ruleset ]
-                        )
+                        rules: std::collections::BTreeMap::from_iter(
+                            rule_shifted_pairs.into_iter().map(
+                                pair_to_rule
+                            )
+                        ),
                     };
                     let state = #module_prefix::State {
                         shift_goto_map_term,
@@ -234,6 +307,7 @@ impl Grammar {
 
         Ok(quote! {
             #write_rules
+            #init_reduce_terminals_stream
             #write_states
         })
     }
