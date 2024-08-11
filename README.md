@@ -3,7 +3,7 @@ yacc-like LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from C
 
 ```
 [dependencies]
-rusty_lr = "1.3.0"
+rusty_lr = "1.4.0"
 ```
 
 ## Features
@@ -15,6 +15,7 @@ rusty_lr = "1.3.0"
  - [tracing parser action with callback](#parse-with-callback)
  - [regex patterns partially supported](#regex-pattern)
  - [executable for generating parser tables from CFGs](#macro-expand-executable-rustylr)
+ - [features=["fxhash"] to replace `std::collections::HashMap` with `FxHashMap`](https://github.com/rust-lang/rustc-hash)
 
 ## Usage
 

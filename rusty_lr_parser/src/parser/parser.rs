@@ -64,6 +64,7 @@ use rusty_lr_core::ReduceType;
 %token userdata Lexed::UserData(None);
 %token errortype Lexed::ErrorType(None);
 %token moduleprefix Lexed::ModulePrefix(None);
+
 %eof Lexed::Eof;
 
 %start Grammar;
@@ -198,7 +199,7 @@ TokenDef((Ident, TokenStream)): token ident RustCode semicolon
 }
 ;
 
-RustCode(TokenStream): t=[^semicolon lparen rparen lbrace rbrace lbracket rbracket]+ {
+RustCode(TokenStream): t=[^semicolon lparen-moduleprefix ]+ {
     let mut tokens = TokenStream::new();
     for token in t.into_iter() {
         tokens.extend( token.stream() );

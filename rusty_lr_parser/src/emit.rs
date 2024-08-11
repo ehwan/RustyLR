@@ -138,40 +138,59 @@ impl Grammar {
             });
         }
         for state in parser.states.iter() {
+            let mut init_shift_term_stream = TokenStream::new();
+            let mut init_shift_nonterm_stream = TokenStream::new();
+            let mut init_reduce_stream = TokenStream::new();
+            {
+                let shift_term_len = state.shift_goto_map_term.len();
+                let shift_nonterm_len = state.shift_goto_map_nonterm.len();
+                let reduce_len = state.reduce_map.len();
+
+                init_shift_term_stream.extend(quote! {
+                    let mut shift_goto_map_term = #module_prefix::HashMap::default();
+                    shift_goto_map_term.reserve(#shift_term_len);
+                });
+                init_shift_nonterm_stream.extend(quote! {
+                    let mut shift_goto_map_nonterm = #module_prefix::HashMap::default();
+                    shift_goto_map_nonterm.reserve(#shift_nonterm_len);
+                });
+                init_reduce_stream.extend(quote! {
+                    let mut reduce_map = #module_prefix::HashMap::default();
+                    reduce_map.reserve(#reduce_len);
+                });
+            }
+
             // use BTreeMap to sort keys, for consistent output
             let shift_goto_map_term: BTreeMap<_, _> = state.shift_goto_map_term.iter().collect();
-            let mut comma_separated_shift_goto_map_term = TokenStream::new();
             for (term, goto) in shift_goto_map_term.into_iter() {
                 let (_, term_stream) = self
                     .terminals
                     .get(&Ident::new(term, Span::call_site()))
                     .unwrap();
-                comma_separated_shift_goto_map_term.extend(quote! {
-                    (#term_stream, #goto),
+                init_shift_term_stream.extend(quote! {
+                    shift_goto_map_term.insert( #term_stream, #goto );
                 });
             }
 
             // use BTreeMap to sort keys, for consistent output
             let shift_goto_map_nonterm: BTreeMap<_, _> =
                 state.shift_goto_map_nonterm.iter().collect();
-            let mut comma_separated_shift_goto_map_nonterm = TokenStream::new();
             for (nonterm, goto) in shift_goto_map_nonterm.into_iter() {
                 let nonterm = Ident::new(nonterm, Span::call_site());
-                comma_separated_shift_goto_map_nonterm.extend(quote! {
-                    (#nonterminals_enum_name::#nonterm, #goto),
+                init_shift_nonterm_stream.extend(quote! {
+                    shift_goto_map_nonterm.insert(#nonterminals_enum_name::#nonterm, #goto);
                 });
             }
 
             // use BTreeMap to sort keys, for consistent output
             let reduce_map: BTreeMap<_, _> = state.reduce_map.iter().collect();
-            let mut comma_separated_reduce_map = TokenStream::new();
             for (term, ruleid) in reduce_map.into_iter() {
                 let (_, term_stream) = self
                     .terminals
                     .get(&Ident::new(term, Span::call_site()))
                     .unwrap();
-                comma_separated_reduce_map.extend(quote! {
-                    (#term_stream, #ruleid),
+                init_reduce_stream.extend(quote! {
+                    reduce_map.insert( #term_stream, #ruleid );
                 });
             }
 
@@ -219,15 +238,9 @@ impl Grammar {
 
             write_states.extend(quote! {
                 {
-                    let shift_goto_map_term = std::collections::HashMap::from(
-                        [ #comma_separated_shift_goto_map_term ]
-                    );
-                    let shift_goto_map_nonterm = std::collections::HashMap::from(
-                        [ #comma_separated_shift_goto_map_nonterm ]
-                    );
-                    let reduce_map = std::collections::HashMap::from(
-                        [ #comma_separated_reduce_map ]
-                    );
+                    #init_shift_term_stream
+                    #init_shift_nonterm_stream
+                    #init_reduce_stream
                     let ruleset = #module_prefix::LookaheadRuleRefSet {
                         rules: std::collections::BTreeMap::from(
                             [ #comma_separated_ruleset ]

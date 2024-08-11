@@ -1,8 +1,7 @@
-use std::collections::HashMap;
-use std::collections::HashSet;
 use std::fmt::Display;
 use std::hash::Hash;
 
+use super::hashmap::{HashMap, HashSet};
 use super::rule::LookaheadRuleRefSet;
 
 /// state in DFA
@@ -16,9 +15,9 @@ pub struct State<Term, NonTerm> {
 impl<Term, NonTerm> State<Term, NonTerm> {
     pub fn new() -> Self {
         State {
-            shift_goto_map_term: HashMap::new(),
-            shift_goto_map_nonterm: HashMap::new(),
-            reduce_map: HashMap::new(),
+            shift_goto_map_term: Default::default(),
+            shift_goto_map_nonterm: Default::default(),
+            reduce_map: Default::default(),
             ruleset: LookaheadRuleRefSet::new(),
         }
     }
@@ -58,14 +57,12 @@ impl<Term, NonTerm> State<Term, NonTerm> {
     where
         Term: Clone + Hash + Eq,
     {
-        let mut set = HashSet::new();
-        for (term, _) in self.shift_goto_map_term.iter() {
-            set.insert(term.clone());
-        }
-        for (term, _) in self.reduce_map.iter() {
-            set.insert(term.clone());
-        }
-        set
+        HashSet::from_iter(
+            self.shift_goto_map_term
+                .keys()
+                .chain(self.reduce_map.keys())
+                .cloned(),
+        )
     }
 }
 impl<Term: Display, NonTerm: Display> Display for State<Term, NonTerm> {

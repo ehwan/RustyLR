@@ -1,10 +1,14 @@
 pub(crate) mod grammar;
+pub(crate) mod hashmap;
 pub(crate) mod parser;
 pub(crate) mod rule;
 pub(crate) mod state;
 pub(crate) mod token;
 
 // reexport
+
+pub use hashmap::HashMap;
+pub use hashmap::HashSet;
 
 pub use rule::ProductionRule;
 

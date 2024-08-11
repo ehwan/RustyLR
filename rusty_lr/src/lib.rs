@@ -12,6 +12,7 @@
 //! - tracing parser action with callback
 //! - regex patterns partially supported
 //! - executable for generating parser tables from CFGs
+//! - features=["fxhash"] to replace `std::collections::HashMap` with `FxHashMap`
 
 // re-exports
 

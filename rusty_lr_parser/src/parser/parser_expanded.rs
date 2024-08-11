@@ -84,28 +84,19 @@ use std::boxed::Box;
 59: _RustyLRGenerated5 -> bracketgroup
 60: _RustyLRGenerated5 -> caret
 61: _RustyLRGenerated5 -> colon
-62: _RustyLRGenerated5 -> eofdef
-63: _RustyLRGenerated5 -> equal
-64: _RustyLRGenerated5 -> errortype
-65: _RustyLRGenerated5 -> ident
-66: _RustyLRGenerated5 -> left
-67: _RustyLRGenerated5 -> literal
-68: _RustyLRGenerated5 -> minus
-69: _RustyLRGenerated5 -> moduleprefix
-70: _RustyLRGenerated5 -> nonegroup
-71: _RustyLRGenerated5 -> otherpunct
-72: _RustyLRGenerated5 -> parengroup
-73: _RustyLRGenerated5 -> percent
-74: _RustyLRGenerated5 -> pipe
-75: _RustyLRGenerated5 -> plus
-76: _RustyLRGenerated5 -> question
-77: _RustyLRGenerated5 -> right
-78: _RustyLRGenerated5 -> star
-79: _RustyLRGenerated5 -> start
-80: _RustyLRGenerated5 -> token
-81: _RustyLRGenerated5 -> tokentype
-82: _RustyLRGenerated5 -> userdata
-83: Augmented -> Grammar eof
+62: _RustyLRGenerated5 -> equal
+63: _RustyLRGenerated5 -> ident
+64: _RustyLRGenerated5 -> literal
+65: _RustyLRGenerated5 -> minus
+66: _RustyLRGenerated5 -> nonegroup
+67: _RustyLRGenerated5 -> otherpunct
+68: _RustyLRGenerated5 -> parengroup
+69: _RustyLRGenerated5 -> percent
+70: _RustyLRGenerated5 -> pipe
+71: _RustyLRGenerated5 -> plus
+72: _RustyLRGenerated5 -> question
+73: _RustyLRGenerated5 -> star
+74: Augmented -> Grammar eof
 
 
 */
@@ -1249,78 +1240,6 @@ impl GrammarContext {
         self._rustylr_generated__RustyLRGenerated5_stack.push(term);
         Ok(())
     }
-    fn reduce__RustyLRGenerated5_16(&mut self) -> Result<(), ParseError> {
-        let mut term = self
-            .__rustylr_generated_terminal_stack
-            .pop()
-            .expect("Something wrong! term_stack is empty");
-        self._rustylr_generated__RustyLRGenerated5_stack.push(term);
-        Ok(())
-    }
-    fn reduce__RustyLRGenerated5_17(&mut self) -> Result<(), ParseError> {
-        let mut term = self
-            .__rustylr_generated_terminal_stack
-            .pop()
-            .expect("Something wrong! term_stack is empty");
-        self._rustylr_generated__RustyLRGenerated5_stack.push(term);
-        Ok(())
-    }
-    fn reduce__RustyLRGenerated5_18(&mut self) -> Result<(), ParseError> {
-        let mut term = self
-            .__rustylr_generated_terminal_stack
-            .pop()
-            .expect("Something wrong! term_stack is empty");
-        self._rustylr_generated__RustyLRGenerated5_stack.push(term);
-        Ok(())
-    }
-    fn reduce__RustyLRGenerated5_19(&mut self) -> Result<(), ParseError> {
-        let mut term = self
-            .__rustylr_generated_terminal_stack
-            .pop()
-            .expect("Something wrong! term_stack is empty");
-        self._rustylr_generated__RustyLRGenerated5_stack.push(term);
-        Ok(())
-    }
-    fn reduce__RustyLRGenerated5_20(&mut self) -> Result<(), ParseError> {
-        let mut term = self
-            .__rustylr_generated_terminal_stack
-            .pop()
-            .expect("Something wrong! term_stack is empty");
-        self._rustylr_generated__RustyLRGenerated5_stack.push(term);
-        Ok(())
-    }
-    fn reduce__RustyLRGenerated5_21(&mut self) -> Result<(), ParseError> {
-        let mut term = self
-            .__rustylr_generated_terminal_stack
-            .pop()
-            .expect("Something wrong! term_stack is empty");
-        self._rustylr_generated__RustyLRGenerated5_stack.push(term);
-        Ok(())
-    }
-    fn reduce__RustyLRGenerated5_22(&mut self) -> Result<(), ParseError> {
-        let mut term = self
-            .__rustylr_generated_terminal_stack
-            .pop()
-            .expect("Something wrong! term_stack is empty");
-        self._rustylr_generated__RustyLRGenerated5_stack.push(term);
-        Ok(())
-    }
-    fn reduce__RustyLRGenerated5_23(&mut self) -> Result<(), ParseError> {
-        let mut term = self
-            .__rustylr_generated_terminal_stack
-            .pop()
-            .expect("Something wrong! term_stack is empty");
-        self._rustylr_generated__RustyLRGenerated5_stack.push(term);
-        Ok(())
-    }
-    fn reduce__RustyLRGenerated5_24(&mut self) -> Result<(), ParseError> {
-        let mut term = self
-            .__rustylr_generated_terminal_stack
-            .pop()
-            .expect("Something wrong! term_stack is empty");
-        self._rustylr_generated__RustyLRGenerated5_stack.push(term);
-        Ok(())
-    }
     #[doc = r" reduce items in stack, this function is called automatically by parser"]
     pub fn reduce(
         &mut self,
@@ -1549,33 +1468,6 @@ impl GrammarContext {
             }
             73usize => {
                 self.reduce__RustyLRGenerated5_15()?;
-            }
-            74usize => {
-                self.reduce__RustyLRGenerated5_16()?;
-            }
-            75usize => {
-                self.reduce__RustyLRGenerated5_17()?;
-            }
-            76usize => {
-                self.reduce__RustyLRGenerated5_18()?;
-            }
-            77usize => {
-                self.reduce__RustyLRGenerated5_19()?;
-            }
-            78usize => {
-                self.reduce__RustyLRGenerated5_20()?;
-            }
-            79usize => {
-                self.reduce__RustyLRGenerated5_21()?;
-            }
-            80usize => {
-                self.reduce__RustyLRGenerated5_22()?;
-            }
-            81usize => {
-                self.reduce__RustyLRGenerated5_23()?;
-            }
-            82usize => {
-                self.reduce__RustyLRGenerated5_24()?;
             }
             _ => {
                 unreachable!("Invalid Rule: {}", rustylr_macro_generated_ruleid__);
@@ -2006,23 +1898,11 @@ impl GrammarParser {
             },
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::_RustyLRGenerated5,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::EofDef(None))],
-            },
-            ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_RustyLRGenerated5,
                 rule: vec![::rusty_lr_core::Token::Term(Lexed::Equal(None))],
             },
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::_RustyLRGenerated5,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::ErrorType(None))],
-            },
-            ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_RustyLRGenerated5,
                 rule: vec![::rusty_lr_core::Token::Term(Lexed::Ident(None))],
-            },
-            ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_RustyLRGenerated5,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Left(None))],
             },
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::_RustyLRGenerated5,
@@ -2031,10 +1911,6 @@ impl GrammarParser {
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::_RustyLRGenerated5,
                 rule: vec![::rusty_lr_core::Token::Term(Lexed::Minus(None))],
-            },
-            ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_RustyLRGenerated5,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::ModulePrefix(None))],
             },
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::_RustyLRGenerated5,
@@ -2066,27 +1942,7 @@ impl GrammarParser {
             },
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::_RustyLRGenerated5,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Right(None))],
-            },
-            ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_RustyLRGenerated5,
                 rule: vec![::rusty_lr_core::Token::Term(Lexed::Star(None))],
-            },
-            ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_RustyLRGenerated5,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Start(None))],
-            },
-            ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_RustyLRGenerated5,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Token(None))],
-            },
-            ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_RustyLRGenerated5,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::TokenType(None))],
-            },
-            ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_RustyLRGenerated5,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::UserData(None))],
             },
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::Augmented,
@@ -2119,14 +1975,10 @@ impl GrammarParser {
             Lexed::BracketGroup(None),
             Lexed::Caret(None),
             Lexed::Colon(None),
-            Lexed::EofDef(None),
             Lexed::Equal(None),
-            Lexed::ErrorType(None),
             Lexed::Ident(None),
-            Lexed::Left(None),
             Lexed::Literal(None),
             Lexed::Minus(None),
-            Lexed::ModulePrefix(None),
             Lexed::NoneGroup(None),
             Lexed::OtherPunct(None),
             Lexed::ParenGroup(None),
@@ -2134,13 +1986,8 @@ impl GrammarParser {
             Lexed::Pipe(None),
             Lexed::Plus(None),
             Lexed::Question(None),
-            Lexed::Right(None),
             Lexed::Semicolon(None),
             Lexed::Star(None),
-            Lexed::Start(None),
-            Lexed::Token(None),
-            Lexed::TokenType(None),
-            Lexed::UserData(None),
         ]);
         let rustylr_macrogenerated_lookaheads_5 =
             std::collections::BTreeSet::from([Lexed::Colon(None)]);
@@ -2172,34 +2019,35 @@ impl GrammarParser {
             std::collections::BTreeSet::from([Lexed::Ident(None)]);
         let rustylr_macrogenerated_lookaheads_11 =
             std::collections::BTreeSet::from([Lexed::Ident(None), Lexed::RBracket(None)]);
-        let mut states = Vec::with_capacity(116usize);
+        let mut states = Vec::with_capacity(107usize);
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::EofDef(None), 1usize),
-                (Lexed::ErrorType(None), 32usize),
-                (Lexed::Ident(None), 35usize),
-                (Lexed::Left(None), 69usize),
-                (Lexed::ModulePrefix(None), 70usize),
-                (Lexed::Right(None), 73usize),
-                (Lexed::Start(None), 74usize),
-                (Lexed::Token(None), 77usize),
-                (Lexed::TokenType(None), 81usize),
-                (Lexed::UserData(None), 84usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([
-                (GrammarNonTerminals::EofDef, 87usize),
-                (GrammarNonTerminals::ErrorDef, 88usize),
-                (GrammarNonTerminals::Grammar, 89usize),
-                (GrammarNonTerminals::ModulePrefixDef, 109usize),
-                (GrammarNonTerminals::ReduceDef, 110usize),
-                (GrammarNonTerminals::ReduceType, 95usize),
-                (GrammarNonTerminals::Rule, 111usize),
-                (GrammarNonTerminals::StartDef, 112usize),
-                (GrammarNonTerminals::TokenDef, 113usize),
-                (GrammarNonTerminals::TokenTypeDef, 114usize),
-                (GrammarNonTerminals::UserDataDef, 115usize),
-            ]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(10usize);
+            shift_goto_map_term.insert(Lexed::EofDef(None), 1usize);
+            shift_goto_map_term.insert(Lexed::ErrorType(None), 23usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 26usize);
+            shift_goto_map_term.insert(Lexed::Left(None), 60usize);
+            shift_goto_map_term.insert(Lexed::ModulePrefix(None), 61usize);
+            shift_goto_map_term.insert(Lexed::Right(None), 64usize);
+            shift_goto_map_term.insert(Lexed::Start(None), 65usize);
+            shift_goto_map_term.insert(Lexed::Token(None), 68usize);
+            shift_goto_map_term.insert(Lexed::TokenType(None), 72usize);
+            shift_goto_map_term.insert(Lexed::UserData(None), 75usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(11usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::EofDef, 78usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::ErrorDef, 79usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::Grammar, 80usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::ModulePrefixDef, 100usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::ReduceDef, 101usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::ReduceType, 86usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::Rule, 102usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::StartDef, 103usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TokenDef, 104usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TokenTypeDef, 105usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::UserDataDef, 106usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -2414,7 +2262,7 @@ impl GrammarParser {
                     ),
                     (
                         ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 83usize,
+                            rule: 74usize,
                             shifted: 0usize,
                         },
                         rustylr_macrogenerated_lookaheads_2.clone(),
@@ -2430,39 +2278,31 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 2usize),
-                (Lexed::BracketGroup(None), 3usize),
-                (Lexed::Caret(None), 4usize),
-                (Lexed::Colon(None), 5usize),
-                (Lexed::EofDef(None), 6usize),
-                (Lexed::Equal(None), 7usize),
-                (Lexed::ErrorType(None), 8usize),
-                (Lexed::Ident(None), 9usize),
-                (Lexed::Left(None), 10usize),
-                (Lexed::Literal(None), 11usize),
-                (Lexed::Minus(None), 12usize),
-                (Lexed::ModulePrefix(None), 13usize),
-                (Lexed::NoneGroup(None), 14usize),
-                (Lexed::OtherPunct(None), 15usize),
-                (Lexed::ParenGroup(None), 16usize),
-                (Lexed::Percent(None), 17usize),
-                (Lexed::Pipe(None), 18usize),
-                (Lexed::Plus(None), 19usize),
-                (Lexed::Question(None), 20usize),
-                (Lexed::Right(None), 21usize),
-                (Lexed::Star(None), 22usize),
-                (Lexed::Start(None), 23usize),
-                (Lexed::Token(None), 24usize),
-                (Lexed::TokenType(None), 25usize),
-                (Lexed::UserData(None), 26usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([
-                (GrammarNonTerminals::RustCode, 27usize),
-                (GrammarNonTerminals::_RustyLRGenerated4, 29usize),
-                (GrammarNonTerminals::_RustyLRGenerated5, 31usize),
-            ]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(16usize);
+            shift_goto_map_term.insert(Lexed::BraceGroup(None), 2usize);
+            shift_goto_map_term.insert(Lexed::BracketGroup(None), 3usize);
+            shift_goto_map_term.insert(Lexed::Caret(None), 4usize);
+            shift_goto_map_term.insert(Lexed::Colon(None), 5usize);
+            shift_goto_map_term.insert(Lexed::Equal(None), 6usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 7usize);
+            shift_goto_map_term.insert(Lexed::Literal(None), 8usize);
+            shift_goto_map_term.insert(Lexed::Minus(None), 9usize);
+            shift_goto_map_term.insert(Lexed::NoneGroup(None), 10usize);
+            shift_goto_map_term.insert(Lexed::OtherPunct(None), 11usize);
+            shift_goto_map_term.insert(Lexed::ParenGroup(None), 12usize);
+            shift_goto_map_term.insert(Lexed::Percent(None), 13usize);
+            shift_goto_map_term.insert(Lexed::Pipe(None), 14usize);
+            shift_goto_map_term.insert(Lexed::Plus(None), 15usize);
+            shift_goto_map_term.insert(Lexed::Question(None), 16usize);
+            shift_goto_map_term.insert(Lexed::Star(None), 17usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(3usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 18usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated4, 20usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 22usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -2605,69 +2445,6 @@ impl GrammarParser {
                         },
                         rustylr_macrogenerated_lookaheads_4.clone(),
                     ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 74usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 75usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 76usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 77usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 78usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 79usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 80usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 81usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 82usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
                 ]),
             };
             let state = ::rusty_lr_core::State {
@@ -2679,36 +2456,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 58usize),
-                (Lexed::BracketGroup(None), 58usize),
-                (Lexed::Caret(None), 58usize),
-                (Lexed::Colon(None), 58usize),
-                (Lexed::EofDef(None), 58usize),
-                (Lexed::Equal(None), 58usize),
-                (Lexed::ErrorType(None), 58usize),
-                (Lexed::Ident(None), 58usize),
-                (Lexed::Left(None), 58usize),
-                (Lexed::Literal(None), 58usize),
-                (Lexed::Minus(None), 58usize),
-                (Lexed::ModulePrefix(None), 58usize),
-                (Lexed::NoneGroup(None), 58usize),
-                (Lexed::OtherPunct(None), 58usize),
-                (Lexed::ParenGroup(None), 58usize),
-                (Lexed::Percent(None), 58usize),
-                (Lexed::Pipe(None), 58usize),
-                (Lexed::Plus(None), 58usize),
-                (Lexed::Question(None), 58usize),
-                (Lexed::Right(None), 58usize),
-                (Lexed::Semicolon(None), 58usize),
-                (Lexed::Star(None), 58usize),
-                (Lexed::Start(None), 58usize),
-                (Lexed::Token(None), 58usize),
-                (Lexed::TokenType(None), 58usize),
-                (Lexed::UserData(None), 58usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 58usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 58usize);
+            reduce_map.insert(Lexed::Caret(None), 58usize);
+            reduce_map.insert(Lexed::Colon(None), 58usize);
+            reduce_map.insert(Lexed::Equal(None), 58usize);
+            reduce_map.insert(Lexed::Ident(None), 58usize);
+            reduce_map.insert(Lexed::Literal(None), 58usize);
+            reduce_map.insert(Lexed::Minus(None), 58usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 58usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 58usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 58usize);
+            reduce_map.insert(Lexed::Percent(None), 58usize);
+            reduce_map.insert(Lexed::Pipe(None), 58usize);
+            reduce_map.insert(Lexed::Plus(None), 58usize);
+            reduce_map.insert(Lexed::Question(None), 58usize);
+            reduce_map.insert(Lexed::Semicolon(None), 58usize);
+            reduce_map.insert(Lexed::Star(None), 58usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -2727,36 +2497,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 59usize),
-                (Lexed::BracketGroup(None), 59usize),
-                (Lexed::Caret(None), 59usize),
-                (Lexed::Colon(None), 59usize),
-                (Lexed::EofDef(None), 59usize),
-                (Lexed::Equal(None), 59usize),
-                (Lexed::ErrorType(None), 59usize),
-                (Lexed::Ident(None), 59usize),
-                (Lexed::Left(None), 59usize),
-                (Lexed::Literal(None), 59usize),
-                (Lexed::Minus(None), 59usize),
-                (Lexed::ModulePrefix(None), 59usize),
-                (Lexed::NoneGroup(None), 59usize),
-                (Lexed::OtherPunct(None), 59usize),
-                (Lexed::ParenGroup(None), 59usize),
-                (Lexed::Percent(None), 59usize),
-                (Lexed::Pipe(None), 59usize),
-                (Lexed::Plus(None), 59usize),
-                (Lexed::Question(None), 59usize),
-                (Lexed::Right(None), 59usize),
-                (Lexed::Semicolon(None), 59usize),
-                (Lexed::Star(None), 59usize),
-                (Lexed::Start(None), 59usize),
-                (Lexed::Token(None), 59usize),
-                (Lexed::TokenType(None), 59usize),
-                (Lexed::UserData(None), 59usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 59usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 59usize);
+            reduce_map.insert(Lexed::Caret(None), 59usize);
+            reduce_map.insert(Lexed::Colon(None), 59usize);
+            reduce_map.insert(Lexed::Equal(None), 59usize);
+            reduce_map.insert(Lexed::Ident(None), 59usize);
+            reduce_map.insert(Lexed::Literal(None), 59usize);
+            reduce_map.insert(Lexed::Minus(None), 59usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 59usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 59usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 59usize);
+            reduce_map.insert(Lexed::Percent(None), 59usize);
+            reduce_map.insert(Lexed::Pipe(None), 59usize);
+            reduce_map.insert(Lexed::Plus(None), 59usize);
+            reduce_map.insert(Lexed::Question(None), 59usize);
+            reduce_map.insert(Lexed::Semicolon(None), 59usize);
+            reduce_map.insert(Lexed::Star(None), 59usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -2775,36 +2538,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 60usize),
-                (Lexed::BracketGroup(None), 60usize),
-                (Lexed::Caret(None), 60usize),
-                (Lexed::Colon(None), 60usize),
-                (Lexed::EofDef(None), 60usize),
-                (Lexed::Equal(None), 60usize),
-                (Lexed::ErrorType(None), 60usize),
-                (Lexed::Ident(None), 60usize),
-                (Lexed::Left(None), 60usize),
-                (Lexed::Literal(None), 60usize),
-                (Lexed::Minus(None), 60usize),
-                (Lexed::ModulePrefix(None), 60usize),
-                (Lexed::NoneGroup(None), 60usize),
-                (Lexed::OtherPunct(None), 60usize),
-                (Lexed::ParenGroup(None), 60usize),
-                (Lexed::Percent(None), 60usize),
-                (Lexed::Pipe(None), 60usize),
-                (Lexed::Plus(None), 60usize),
-                (Lexed::Question(None), 60usize),
-                (Lexed::Right(None), 60usize),
-                (Lexed::Semicolon(None), 60usize),
-                (Lexed::Star(None), 60usize),
-                (Lexed::Start(None), 60usize),
-                (Lexed::Token(None), 60usize),
-                (Lexed::TokenType(None), 60usize),
-                (Lexed::UserData(None), 60usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 60usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 60usize);
+            reduce_map.insert(Lexed::Caret(None), 60usize);
+            reduce_map.insert(Lexed::Colon(None), 60usize);
+            reduce_map.insert(Lexed::Equal(None), 60usize);
+            reduce_map.insert(Lexed::Ident(None), 60usize);
+            reduce_map.insert(Lexed::Literal(None), 60usize);
+            reduce_map.insert(Lexed::Minus(None), 60usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 60usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 60usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 60usize);
+            reduce_map.insert(Lexed::Percent(None), 60usize);
+            reduce_map.insert(Lexed::Pipe(None), 60usize);
+            reduce_map.insert(Lexed::Plus(None), 60usize);
+            reduce_map.insert(Lexed::Question(None), 60usize);
+            reduce_map.insert(Lexed::Semicolon(None), 60usize);
+            reduce_map.insert(Lexed::Star(None), 60usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -2823,36 +2579,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 61usize),
-                (Lexed::BracketGroup(None), 61usize),
-                (Lexed::Caret(None), 61usize),
-                (Lexed::Colon(None), 61usize),
-                (Lexed::EofDef(None), 61usize),
-                (Lexed::Equal(None), 61usize),
-                (Lexed::ErrorType(None), 61usize),
-                (Lexed::Ident(None), 61usize),
-                (Lexed::Left(None), 61usize),
-                (Lexed::Literal(None), 61usize),
-                (Lexed::Minus(None), 61usize),
-                (Lexed::ModulePrefix(None), 61usize),
-                (Lexed::NoneGroup(None), 61usize),
-                (Lexed::OtherPunct(None), 61usize),
-                (Lexed::ParenGroup(None), 61usize),
-                (Lexed::Percent(None), 61usize),
-                (Lexed::Pipe(None), 61usize),
-                (Lexed::Plus(None), 61usize),
-                (Lexed::Question(None), 61usize),
-                (Lexed::Right(None), 61usize),
-                (Lexed::Semicolon(None), 61usize),
-                (Lexed::Star(None), 61usize),
-                (Lexed::Start(None), 61usize),
-                (Lexed::Token(None), 61usize),
-                (Lexed::TokenType(None), 61usize),
-                (Lexed::UserData(None), 61usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 61usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 61usize);
+            reduce_map.insert(Lexed::Caret(None), 61usize);
+            reduce_map.insert(Lexed::Colon(None), 61usize);
+            reduce_map.insert(Lexed::Equal(None), 61usize);
+            reduce_map.insert(Lexed::Ident(None), 61usize);
+            reduce_map.insert(Lexed::Literal(None), 61usize);
+            reduce_map.insert(Lexed::Minus(None), 61usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 61usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 61usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 61usize);
+            reduce_map.insert(Lexed::Percent(None), 61usize);
+            reduce_map.insert(Lexed::Pipe(None), 61usize);
+            reduce_map.insert(Lexed::Plus(None), 61usize);
+            reduce_map.insert(Lexed::Question(None), 61usize);
+            reduce_map.insert(Lexed::Semicolon(None), 61usize);
+            reduce_map.insert(Lexed::Star(None), 61usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -2871,36 +2620,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 62usize),
-                (Lexed::BracketGroup(None), 62usize),
-                (Lexed::Caret(None), 62usize),
-                (Lexed::Colon(None), 62usize),
-                (Lexed::EofDef(None), 62usize),
-                (Lexed::Equal(None), 62usize),
-                (Lexed::ErrorType(None), 62usize),
-                (Lexed::Ident(None), 62usize),
-                (Lexed::Left(None), 62usize),
-                (Lexed::Literal(None), 62usize),
-                (Lexed::Minus(None), 62usize),
-                (Lexed::ModulePrefix(None), 62usize),
-                (Lexed::NoneGroup(None), 62usize),
-                (Lexed::OtherPunct(None), 62usize),
-                (Lexed::ParenGroup(None), 62usize),
-                (Lexed::Percent(None), 62usize),
-                (Lexed::Pipe(None), 62usize),
-                (Lexed::Plus(None), 62usize),
-                (Lexed::Question(None), 62usize),
-                (Lexed::Right(None), 62usize),
-                (Lexed::Semicolon(None), 62usize),
-                (Lexed::Star(None), 62usize),
-                (Lexed::Start(None), 62usize),
-                (Lexed::Token(None), 62usize),
-                (Lexed::TokenType(None), 62usize),
-                (Lexed::UserData(None), 62usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 62usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 62usize);
+            reduce_map.insert(Lexed::Caret(None), 62usize);
+            reduce_map.insert(Lexed::Colon(None), 62usize);
+            reduce_map.insert(Lexed::Equal(None), 62usize);
+            reduce_map.insert(Lexed::Ident(None), 62usize);
+            reduce_map.insert(Lexed::Literal(None), 62usize);
+            reduce_map.insert(Lexed::Minus(None), 62usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 62usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 62usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 62usize);
+            reduce_map.insert(Lexed::Percent(None), 62usize);
+            reduce_map.insert(Lexed::Pipe(None), 62usize);
+            reduce_map.insert(Lexed::Plus(None), 62usize);
+            reduce_map.insert(Lexed::Question(None), 62usize);
+            reduce_map.insert(Lexed::Semicolon(None), 62usize);
+            reduce_map.insert(Lexed::Star(None), 62usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -2919,36 +2661,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 63usize),
-                (Lexed::BracketGroup(None), 63usize),
-                (Lexed::Caret(None), 63usize),
-                (Lexed::Colon(None), 63usize),
-                (Lexed::EofDef(None), 63usize),
-                (Lexed::Equal(None), 63usize),
-                (Lexed::ErrorType(None), 63usize),
-                (Lexed::Ident(None), 63usize),
-                (Lexed::Left(None), 63usize),
-                (Lexed::Literal(None), 63usize),
-                (Lexed::Minus(None), 63usize),
-                (Lexed::ModulePrefix(None), 63usize),
-                (Lexed::NoneGroup(None), 63usize),
-                (Lexed::OtherPunct(None), 63usize),
-                (Lexed::ParenGroup(None), 63usize),
-                (Lexed::Percent(None), 63usize),
-                (Lexed::Pipe(None), 63usize),
-                (Lexed::Plus(None), 63usize),
-                (Lexed::Question(None), 63usize),
-                (Lexed::Right(None), 63usize),
-                (Lexed::Semicolon(None), 63usize),
-                (Lexed::Star(None), 63usize),
-                (Lexed::Start(None), 63usize),
-                (Lexed::Token(None), 63usize),
-                (Lexed::TokenType(None), 63usize),
-                (Lexed::UserData(None), 63usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 63usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 63usize);
+            reduce_map.insert(Lexed::Caret(None), 63usize);
+            reduce_map.insert(Lexed::Colon(None), 63usize);
+            reduce_map.insert(Lexed::Equal(None), 63usize);
+            reduce_map.insert(Lexed::Ident(None), 63usize);
+            reduce_map.insert(Lexed::Literal(None), 63usize);
+            reduce_map.insert(Lexed::Minus(None), 63usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 63usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 63usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 63usize);
+            reduce_map.insert(Lexed::Percent(None), 63usize);
+            reduce_map.insert(Lexed::Pipe(None), 63usize);
+            reduce_map.insert(Lexed::Plus(None), 63usize);
+            reduce_map.insert(Lexed::Question(None), 63usize);
+            reduce_map.insert(Lexed::Semicolon(None), 63usize);
+            reduce_map.insert(Lexed::Star(None), 63usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -2967,36 +2702,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 64usize),
-                (Lexed::BracketGroup(None), 64usize),
-                (Lexed::Caret(None), 64usize),
-                (Lexed::Colon(None), 64usize),
-                (Lexed::EofDef(None), 64usize),
-                (Lexed::Equal(None), 64usize),
-                (Lexed::ErrorType(None), 64usize),
-                (Lexed::Ident(None), 64usize),
-                (Lexed::Left(None), 64usize),
-                (Lexed::Literal(None), 64usize),
-                (Lexed::Minus(None), 64usize),
-                (Lexed::ModulePrefix(None), 64usize),
-                (Lexed::NoneGroup(None), 64usize),
-                (Lexed::OtherPunct(None), 64usize),
-                (Lexed::ParenGroup(None), 64usize),
-                (Lexed::Percent(None), 64usize),
-                (Lexed::Pipe(None), 64usize),
-                (Lexed::Plus(None), 64usize),
-                (Lexed::Question(None), 64usize),
-                (Lexed::Right(None), 64usize),
-                (Lexed::Semicolon(None), 64usize),
-                (Lexed::Star(None), 64usize),
-                (Lexed::Start(None), 64usize),
-                (Lexed::Token(None), 64usize),
-                (Lexed::TokenType(None), 64usize),
-                (Lexed::UserData(None), 64usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 64usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 64usize);
+            reduce_map.insert(Lexed::Caret(None), 64usize);
+            reduce_map.insert(Lexed::Colon(None), 64usize);
+            reduce_map.insert(Lexed::Equal(None), 64usize);
+            reduce_map.insert(Lexed::Ident(None), 64usize);
+            reduce_map.insert(Lexed::Literal(None), 64usize);
+            reduce_map.insert(Lexed::Minus(None), 64usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 64usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 64usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 64usize);
+            reduce_map.insert(Lexed::Percent(None), 64usize);
+            reduce_map.insert(Lexed::Pipe(None), 64usize);
+            reduce_map.insert(Lexed::Plus(None), 64usize);
+            reduce_map.insert(Lexed::Question(None), 64usize);
+            reduce_map.insert(Lexed::Semicolon(None), 64usize);
+            reduce_map.insert(Lexed::Star(None), 64usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3015,36 +2743,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 65usize),
-                (Lexed::BracketGroup(None), 65usize),
-                (Lexed::Caret(None), 65usize),
-                (Lexed::Colon(None), 65usize),
-                (Lexed::EofDef(None), 65usize),
-                (Lexed::Equal(None), 65usize),
-                (Lexed::ErrorType(None), 65usize),
-                (Lexed::Ident(None), 65usize),
-                (Lexed::Left(None), 65usize),
-                (Lexed::Literal(None), 65usize),
-                (Lexed::Minus(None), 65usize),
-                (Lexed::ModulePrefix(None), 65usize),
-                (Lexed::NoneGroup(None), 65usize),
-                (Lexed::OtherPunct(None), 65usize),
-                (Lexed::ParenGroup(None), 65usize),
-                (Lexed::Percent(None), 65usize),
-                (Lexed::Pipe(None), 65usize),
-                (Lexed::Plus(None), 65usize),
-                (Lexed::Question(None), 65usize),
-                (Lexed::Right(None), 65usize),
-                (Lexed::Semicolon(None), 65usize),
-                (Lexed::Star(None), 65usize),
-                (Lexed::Start(None), 65usize),
-                (Lexed::Token(None), 65usize),
-                (Lexed::TokenType(None), 65usize),
-                (Lexed::UserData(None), 65usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 65usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 65usize);
+            reduce_map.insert(Lexed::Caret(None), 65usize);
+            reduce_map.insert(Lexed::Colon(None), 65usize);
+            reduce_map.insert(Lexed::Equal(None), 65usize);
+            reduce_map.insert(Lexed::Ident(None), 65usize);
+            reduce_map.insert(Lexed::Literal(None), 65usize);
+            reduce_map.insert(Lexed::Minus(None), 65usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 65usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 65usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 65usize);
+            reduce_map.insert(Lexed::Percent(None), 65usize);
+            reduce_map.insert(Lexed::Pipe(None), 65usize);
+            reduce_map.insert(Lexed::Plus(None), 65usize);
+            reduce_map.insert(Lexed::Question(None), 65usize);
+            reduce_map.insert(Lexed::Semicolon(None), 65usize);
+            reduce_map.insert(Lexed::Star(None), 65usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3063,36 +2784,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 66usize),
-                (Lexed::BracketGroup(None), 66usize),
-                (Lexed::Caret(None), 66usize),
-                (Lexed::Colon(None), 66usize),
-                (Lexed::EofDef(None), 66usize),
-                (Lexed::Equal(None), 66usize),
-                (Lexed::ErrorType(None), 66usize),
-                (Lexed::Ident(None), 66usize),
-                (Lexed::Left(None), 66usize),
-                (Lexed::Literal(None), 66usize),
-                (Lexed::Minus(None), 66usize),
-                (Lexed::ModulePrefix(None), 66usize),
-                (Lexed::NoneGroup(None), 66usize),
-                (Lexed::OtherPunct(None), 66usize),
-                (Lexed::ParenGroup(None), 66usize),
-                (Lexed::Percent(None), 66usize),
-                (Lexed::Pipe(None), 66usize),
-                (Lexed::Plus(None), 66usize),
-                (Lexed::Question(None), 66usize),
-                (Lexed::Right(None), 66usize),
-                (Lexed::Semicolon(None), 66usize),
-                (Lexed::Star(None), 66usize),
-                (Lexed::Start(None), 66usize),
-                (Lexed::Token(None), 66usize),
-                (Lexed::TokenType(None), 66usize),
-                (Lexed::UserData(None), 66usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 66usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 66usize);
+            reduce_map.insert(Lexed::Caret(None), 66usize);
+            reduce_map.insert(Lexed::Colon(None), 66usize);
+            reduce_map.insert(Lexed::Equal(None), 66usize);
+            reduce_map.insert(Lexed::Ident(None), 66usize);
+            reduce_map.insert(Lexed::Literal(None), 66usize);
+            reduce_map.insert(Lexed::Minus(None), 66usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 66usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 66usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 66usize);
+            reduce_map.insert(Lexed::Percent(None), 66usize);
+            reduce_map.insert(Lexed::Pipe(None), 66usize);
+            reduce_map.insert(Lexed::Plus(None), 66usize);
+            reduce_map.insert(Lexed::Question(None), 66usize);
+            reduce_map.insert(Lexed::Semicolon(None), 66usize);
+            reduce_map.insert(Lexed::Star(None), 66usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3111,36 +2825,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 67usize),
-                (Lexed::BracketGroup(None), 67usize),
-                (Lexed::Caret(None), 67usize),
-                (Lexed::Colon(None), 67usize),
-                (Lexed::EofDef(None), 67usize),
-                (Lexed::Equal(None), 67usize),
-                (Lexed::ErrorType(None), 67usize),
-                (Lexed::Ident(None), 67usize),
-                (Lexed::Left(None), 67usize),
-                (Lexed::Literal(None), 67usize),
-                (Lexed::Minus(None), 67usize),
-                (Lexed::ModulePrefix(None), 67usize),
-                (Lexed::NoneGroup(None), 67usize),
-                (Lexed::OtherPunct(None), 67usize),
-                (Lexed::ParenGroup(None), 67usize),
-                (Lexed::Percent(None), 67usize),
-                (Lexed::Pipe(None), 67usize),
-                (Lexed::Plus(None), 67usize),
-                (Lexed::Question(None), 67usize),
-                (Lexed::Right(None), 67usize),
-                (Lexed::Semicolon(None), 67usize),
-                (Lexed::Star(None), 67usize),
-                (Lexed::Start(None), 67usize),
-                (Lexed::Token(None), 67usize),
-                (Lexed::TokenType(None), 67usize),
-                (Lexed::UserData(None), 67usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 67usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 67usize);
+            reduce_map.insert(Lexed::Caret(None), 67usize);
+            reduce_map.insert(Lexed::Colon(None), 67usize);
+            reduce_map.insert(Lexed::Equal(None), 67usize);
+            reduce_map.insert(Lexed::Ident(None), 67usize);
+            reduce_map.insert(Lexed::Literal(None), 67usize);
+            reduce_map.insert(Lexed::Minus(None), 67usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 67usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 67usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 67usize);
+            reduce_map.insert(Lexed::Percent(None), 67usize);
+            reduce_map.insert(Lexed::Pipe(None), 67usize);
+            reduce_map.insert(Lexed::Plus(None), 67usize);
+            reduce_map.insert(Lexed::Question(None), 67usize);
+            reduce_map.insert(Lexed::Semicolon(None), 67usize);
+            reduce_map.insert(Lexed::Star(None), 67usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3159,36 +2866,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 68usize),
-                (Lexed::BracketGroup(None), 68usize),
-                (Lexed::Caret(None), 68usize),
-                (Lexed::Colon(None), 68usize),
-                (Lexed::EofDef(None), 68usize),
-                (Lexed::Equal(None), 68usize),
-                (Lexed::ErrorType(None), 68usize),
-                (Lexed::Ident(None), 68usize),
-                (Lexed::Left(None), 68usize),
-                (Lexed::Literal(None), 68usize),
-                (Lexed::Minus(None), 68usize),
-                (Lexed::ModulePrefix(None), 68usize),
-                (Lexed::NoneGroup(None), 68usize),
-                (Lexed::OtherPunct(None), 68usize),
-                (Lexed::ParenGroup(None), 68usize),
-                (Lexed::Percent(None), 68usize),
-                (Lexed::Pipe(None), 68usize),
-                (Lexed::Plus(None), 68usize),
-                (Lexed::Question(None), 68usize),
-                (Lexed::Right(None), 68usize),
-                (Lexed::Semicolon(None), 68usize),
-                (Lexed::Star(None), 68usize),
-                (Lexed::Start(None), 68usize),
-                (Lexed::Token(None), 68usize),
-                (Lexed::TokenType(None), 68usize),
-                (Lexed::UserData(None), 68usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 68usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 68usize);
+            reduce_map.insert(Lexed::Caret(None), 68usize);
+            reduce_map.insert(Lexed::Colon(None), 68usize);
+            reduce_map.insert(Lexed::Equal(None), 68usize);
+            reduce_map.insert(Lexed::Ident(None), 68usize);
+            reduce_map.insert(Lexed::Literal(None), 68usize);
+            reduce_map.insert(Lexed::Minus(None), 68usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 68usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 68usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 68usize);
+            reduce_map.insert(Lexed::Percent(None), 68usize);
+            reduce_map.insert(Lexed::Pipe(None), 68usize);
+            reduce_map.insert(Lexed::Plus(None), 68usize);
+            reduce_map.insert(Lexed::Question(None), 68usize);
+            reduce_map.insert(Lexed::Semicolon(None), 68usize);
+            reduce_map.insert(Lexed::Star(None), 68usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3207,36 +2907,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 69usize),
-                (Lexed::BracketGroup(None), 69usize),
-                (Lexed::Caret(None), 69usize),
-                (Lexed::Colon(None), 69usize),
-                (Lexed::EofDef(None), 69usize),
-                (Lexed::Equal(None), 69usize),
-                (Lexed::ErrorType(None), 69usize),
-                (Lexed::Ident(None), 69usize),
-                (Lexed::Left(None), 69usize),
-                (Lexed::Literal(None), 69usize),
-                (Lexed::Minus(None), 69usize),
-                (Lexed::ModulePrefix(None), 69usize),
-                (Lexed::NoneGroup(None), 69usize),
-                (Lexed::OtherPunct(None), 69usize),
-                (Lexed::ParenGroup(None), 69usize),
-                (Lexed::Percent(None), 69usize),
-                (Lexed::Pipe(None), 69usize),
-                (Lexed::Plus(None), 69usize),
-                (Lexed::Question(None), 69usize),
-                (Lexed::Right(None), 69usize),
-                (Lexed::Semicolon(None), 69usize),
-                (Lexed::Star(None), 69usize),
-                (Lexed::Start(None), 69usize),
-                (Lexed::Token(None), 69usize),
-                (Lexed::TokenType(None), 69usize),
-                (Lexed::UserData(None), 69usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 69usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 69usize);
+            reduce_map.insert(Lexed::Caret(None), 69usize);
+            reduce_map.insert(Lexed::Colon(None), 69usize);
+            reduce_map.insert(Lexed::Equal(None), 69usize);
+            reduce_map.insert(Lexed::Ident(None), 69usize);
+            reduce_map.insert(Lexed::Literal(None), 69usize);
+            reduce_map.insert(Lexed::Minus(None), 69usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 69usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 69usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 69usize);
+            reduce_map.insert(Lexed::Percent(None), 69usize);
+            reduce_map.insert(Lexed::Pipe(None), 69usize);
+            reduce_map.insert(Lexed::Plus(None), 69usize);
+            reduce_map.insert(Lexed::Question(None), 69usize);
+            reduce_map.insert(Lexed::Semicolon(None), 69usize);
+            reduce_map.insert(Lexed::Star(None), 69usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3255,36 +2948,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 70usize),
-                (Lexed::BracketGroup(None), 70usize),
-                (Lexed::Caret(None), 70usize),
-                (Lexed::Colon(None), 70usize),
-                (Lexed::EofDef(None), 70usize),
-                (Lexed::Equal(None), 70usize),
-                (Lexed::ErrorType(None), 70usize),
-                (Lexed::Ident(None), 70usize),
-                (Lexed::Left(None), 70usize),
-                (Lexed::Literal(None), 70usize),
-                (Lexed::Minus(None), 70usize),
-                (Lexed::ModulePrefix(None), 70usize),
-                (Lexed::NoneGroup(None), 70usize),
-                (Lexed::OtherPunct(None), 70usize),
-                (Lexed::ParenGroup(None), 70usize),
-                (Lexed::Percent(None), 70usize),
-                (Lexed::Pipe(None), 70usize),
-                (Lexed::Plus(None), 70usize),
-                (Lexed::Question(None), 70usize),
-                (Lexed::Right(None), 70usize),
-                (Lexed::Semicolon(None), 70usize),
-                (Lexed::Star(None), 70usize),
-                (Lexed::Start(None), 70usize),
-                (Lexed::Token(None), 70usize),
-                (Lexed::TokenType(None), 70usize),
-                (Lexed::UserData(None), 70usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 70usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 70usize);
+            reduce_map.insert(Lexed::Caret(None), 70usize);
+            reduce_map.insert(Lexed::Colon(None), 70usize);
+            reduce_map.insert(Lexed::Equal(None), 70usize);
+            reduce_map.insert(Lexed::Ident(None), 70usize);
+            reduce_map.insert(Lexed::Literal(None), 70usize);
+            reduce_map.insert(Lexed::Minus(None), 70usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 70usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 70usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 70usize);
+            reduce_map.insert(Lexed::Percent(None), 70usize);
+            reduce_map.insert(Lexed::Pipe(None), 70usize);
+            reduce_map.insert(Lexed::Plus(None), 70usize);
+            reduce_map.insert(Lexed::Question(None), 70usize);
+            reduce_map.insert(Lexed::Semicolon(None), 70usize);
+            reduce_map.insert(Lexed::Star(None), 70usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3303,36 +2989,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 71usize),
-                (Lexed::BracketGroup(None), 71usize),
-                (Lexed::Caret(None), 71usize),
-                (Lexed::Colon(None), 71usize),
-                (Lexed::EofDef(None), 71usize),
-                (Lexed::Equal(None), 71usize),
-                (Lexed::ErrorType(None), 71usize),
-                (Lexed::Ident(None), 71usize),
-                (Lexed::Left(None), 71usize),
-                (Lexed::Literal(None), 71usize),
-                (Lexed::Minus(None), 71usize),
-                (Lexed::ModulePrefix(None), 71usize),
-                (Lexed::NoneGroup(None), 71usize),
-                (Lexed::OtherPunct(None), 71usize),
-                (Lexed::ParenGroup(None), 71usize),
-                (Lexed::Percent(None), 71usize),
-                (Lexed::Pipe(None), 71usize),
-                (Lexed::Plus(None), 71usize),
-                (Lexed::Question(None), 71usize),
-                (Lexed::Right(None), 71usize),
-                (Lexed::Semicolon(None), 71usize),
-                (Lexed::Star(None), 71usize),
-                (Lexed::Start(None), 71usize),
-                (Lexed::Token(None), 71usize),
-                (Lexed::TokenType(None), 71usize),
-                (Lexed::UserData(None), 71usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 71usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 71usize);
+            reduce_map.insert(Lexed::Caret(None), 71usize);
+            reduce_map.insert(Lexed::Colon(None), 71usize);
+            reduce_map.insert(Lexed::Equal(None), 71usize);
+            reduce_map.insert(Lexed::Ident(None), 71usize);
+            reduce_map.insert(Lexed::Literal(None), 71usize);
+            reduce_map.insert(Lexed::Minus(None), 71usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 71usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 71usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 71usize);
+            reduce_map.insert(Lexed::Percent(None), 71usize);
+            reduce_map.insert(Lexed::Pipe(None), 71usize);
+            reduce_map.insert(Lexed::Plus(None), 71usize);
+            reduce_map.insert(Lexed::Question(None), 71usize);
+            reduce_map.insert(Lexed::Semicolon(None), 71usize);
+            reduce_map.insert(Lexed::Star(None), 71usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3351,36 +3030,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 72usize),
-                (Lexed::BracketGroup(None), 72usize),
-                (Lexed::Caret(None), 72usize),
-                (Lexed::Colon(None), 72usize),
-                (Lexed::EofDef(None), 72usize),
-                (Lexed::Equal(None), 72usize),
-                (Lexed::ErrorType(None), 72usize),
-                (Lexed::Ident(None), 72usize),
-                (Lexed::Left(None), 72usize),
-                (Lexed::Literal(None), 72usize),
-                (Lexed::Minus(None), 72usize),
-                (Lexed::ModulePrefix(None), 72usize),
-                (Lexed::NoneGroup(None), 72usize),
-                (Lexed::OtherPunct(None), 72usize),
-                (Lexed::ParenGroup(None), 72usize),
-                (Lexed::Percent(None), 72usize),
-                (Lexed::Pipe(None), 72usize),
-                (Lexed::Plus(None), 72usize),
-                (Lexed::Question(None), 72usize),
-                (Lexed::Right(None), 72usize),
-                (Lexed::Semicolon(None), 72usize),
-                (Lexed::Star(None), 72usize),
-                (Lexed::Start(None), 72usize),
-                (Lexed::Token(None), 72usize),
-                (Lexed::TokenType(None), 72usize),
-                (Lexed::UserData(None), 72usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 72usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 72usize);
+            reduce_map.insert(Lexed::Caret(None), 72usize);
+            reduce_map.insert(Lexed::Colon(None), 72usize);
+            reduce_map.insert(Lexed::Equal(None), 72usize);
+            reduce_map.insert(Lexed::Ident(None), 72usize);
+            reduce_map.insert(Lexed::Literal(None), 72usize);
+            reduce_map.insert(Lexed::Minus(None), 72usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 72usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 72usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 72usize);
+            reduce_map.insert(Lexed::Percent(None), 72usize);
+            reduce_map.insert(Lexed::Pipe(None), 72usize);
+            reduce_map.insert(Lexed::Plus(None), 72usize);
+            reduce_map.insert(Lexed::Question(None), 72usize);
+            reduce_map.insert(Lexed::Semicolon(None), 72usize);
+            reduce_map.insert(Lexed::Star(None), 72usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3399,36 +3071,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 73usize),
-                (Lexed::BracketGroup(None), 73usize),
-                (Lexed::Caret(None), 73usize),
-                (Lexed::Colon(None), 73usize),
-                (Lexed::EofDef(None), 73usize),
-                (Lexed::Equal(None), 73usize),
-                (Lexed::ErrorType(None), 73usize),
-                (Lexed::Ident(None), 73usize),
-                (Lexed::Left(None), 73usize),
-                (Lexed::Literal(None), 73usize),
-                (Lexed::Minus(None), 73usize),
-                (Lexed::ModulePrefix(None), 73usize),
-                (Lexed::NoneGroup(None), 73usize),
-                (Lexed::OtherPunct(None), 73usize),
-                (Lexed::ParenGroup(None), 73usize),
-                (Lexed::Percent(None), 73usize),
-                (Lexed::Pipe(None), 73usize),
-                (Lexed::Plus(None), 73usize),
-                (Lexed::Question(None), 73usize),
-                (Lexed::Right(None), 73usize),
-                (Lexed::Semicolon(None), 73usize),
-                (Lexed::Star(None), 73usize),
-                (Lexed::Start(None), 73usize),
-                (Lexed::Token(None), 73usize),
-                (Lexed::TokenType(None), 73usize),
-                (Lexed::UserData(None), 73usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 73usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 73usize);
+            reduce_map.insert(Lexed::Caret(None), 73usize);
+            reduce_map.insert(Lexed::Colon(None), 73usize);
+            reduce_map.insert(Lexed::Equal(None), 73usize);
+            reduce_map.insert(Lexed::Ident(None), 73usize);
+            reduce_map.insert(Lexed::Literal(None), 73usize);
+            reduce_map.insert(Lexed::Minus(None), 73usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 73usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 73usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 73usize);
+            reduce_map.insert(Lexed::Percent(None), 73usize);
+            reduce_map.insert(Lexed::Pipe(None), 73usize);
+            reduce_map.insert(Lexed::Plus(None), 73usize);
+            reduce_map.insert(Lexed::Question(None), 73usize);
+            reduce_map.insert(Lexed::Semicolon(None), 73usize);
+            reduce_map.insert(Lexed::Star(None), 73usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3447,442 +3112,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 74usize),
-                (Lexed::BracketGroup(None), 74usize),
-                (Lexed::Caret(None), 74usize),
-                (Lexed::Colon(None), 74usize),
-                (Lexed::EofDef(None), 74usize),
-                (Lexed::Equal(None), 74usize),
-                (Lexed::ErrorType(None), 74usize),
-                (Lexed::Ident(None), 74usize),
-                (Lexed::Left(None), 74usize),
-                (Lexed::Literal(None), 74usize),
-                (Lexed::Minus(None), 74usize),
-                (Lexed::ModulePrefix(None), 74usize),
-                (Lexed::NoneGroup(None), 74usize),
-                (Lexed::OtherPunct(None), 74usize),
-                (Lexed::ParenGroup(None), 74usize),
-                (Lexed::Percent(None), 74usize),
-                (Lexed::Pipe(None), 74usize),
-                (Lexed::Plus(None), 74usize),
-                (Lexed::Question(None), 74usize),
-                (Lexed::Right(None), 74usize),
-                (Lexed::Semicolon(None), 74usize),
-                (Lexed::Star(None), 74usize),
-                (Lexed::Start(None), 74usize),
-                (Lexed::Token(None), 74usize),
-                (Lexed::TokenType(None), 74usize),
-                (Lexed::UserData(None), 74usize),
-            ]);
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 74usize,
-                        shifted: 1usize,
-                    },
-                    rustylr_macrogenerated_lookaheads_4.clone(),
-                )]),
-            };
-            let state = ::rusty_lr_core::State {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
-        }
-        {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 75usize),
-                (Lexed::BracketGroup(None), 75usize),
-                (Lexed::Caret(None), 75usize),
-                (Lexed::Colon(None), 75usize),
-                (Lexed::EofDef(None), 75usize),
-                (Lexed::Equal(None), 75usize),
-                (Lexed::ErrorType(None), 75usize),
-                (Lexed::Ident(None), 75usize),
-                (Lexed::Left(None), 75usize),
-                (Lexed::Literal(None), 75usize),
-                (Lexed::Minus(None), 75usize),
-                (Lexed::ModulePrefix(None), 75usize),
-                (Lexed::NoneGroup(None), 75usize),
-                (Lexed::OtherPunct(None), 75usize),
-                (Lexed::ParenGroup(None), 75usize),
-                (Lexed::Percent(None), 75usize),
-                (Lexed::Pipe(None), 75usize),
-                (Lexed::Plus(None), 75usize),
-                (Lexed::Question(None), 75usize),
-                (Lexed::Right(None), 75usize),
-                (Lexed::Semicolon(None), 75usize),
-                (Lexed::Star(None), 75usize),
-                (Lexed::Start(None), 75usize),
-                (Lexed::Token(None), 75usize),
-                (Lexed::TokenType(None), 75usize),
-                (Lexed::UserData(None), 75usize),
-            ]);
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 75usize,
-                        shifted: 1usize,
-                    },
-                    rustylr_macrogenerated_lookaheads_4.clone(),
-                )]),
-            };
-            let state = ::rusty_lr_core::State {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
-        }
-        {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 76usize),
-                (Lexed::BracketGroup(None), 76usize),
-                (Lexed::Caret(None), 76usize),
-                (Lexed::Colon(None), 76usize),
-                (Lexed::EofDef(None), 76usize),
-                (Lexed::Equal(None), 76usize),
-                (Lexed::ErrorType(None), 76usize),
-                (Lexed::Ident(None), 76usize),
-                (Lexed::Left(None), 76usize),
-                (Lexed::Literal(None), 76usize),
-                (Lexed::Minus(None), 76usize),
-                (Lexed::ModulePrefix(None), 76usize),
-                (Lexed::NoneGroup(None), 76usize),
-                (Lexed::OtherPunct(None), 76usize),
-                (Lexed::ParenGroup(None), 76usize),
-                (Lexed::Percent(None), 76usize),
-                (Lexed::Pipe(None), 76usize),
-                (Lexed::Plus(None), 76usize),
-                (Lexed::Question(None), 76usize),
-                (Lexed::Right(None), 76usize),
-                (Lexed::Semicolon(None), 76usize),
-                (Lexed::Star(None), 76usize),
-                (Lexed::Start(None), 76usize),
-                (Lexed::Token(None), 76usize),
-                (Lexed::TokenType(None), 76usize),
-                (Lexed::UserData(None), 76usize),
-            ]);
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 76usize,
-                        shifted: 1usize,
-                    },
-                    rustylr_macrogenerated_lookaheads_4.clone(),
-                )]),
-            };
-            let state = ::rusty_lr_core::State {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
-        }
-        {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 77usize),
-                (Lexed::BracketGroup(None), 77usize),
-                (Lexed::Caret(None), 77usize),
-                (Lexed::Colon(None), 77usize),
-                (Lexed::EofDef(None), 77usize),
-                (Lexed::Equal(None), 77usize),
-                (Lexed::ErrorType(None), 77usize),
-                (Lexed::Ident(None), 77usize),
-                (Lexed::Left(None), 77usize),
-                (Lexed::Literal(None), 77usize),
-                (Lexed::Minus(None), 77usize),
-                (Lexed::ModulePrefix(None), 77usize),
-                (Lexed::NoneGroup(None), 77usize),
-                (Lexed::OtherPunct(None), 77usize),
-                (Lexed::ParenGroup(None), 77usize),
-                (Lexed::Percent(None), 77usize),
-                (Lexed::Pipe(None), 77usize),
-                (Lexed::Plus(None), 77usize),
-                (Lexed::Question(None), 77usize),
-                (Lexed::Right(None), 77usize),
-                (Lexed::Semicolon(None), 77usize),
-                (Lexed::Star(None), 77usize),
-                (Lexed::Start(None), 77usize),
-                (Lexed::Token(None), 77usize),
-                (Lexed::TokenType(None), 77usize),
-                (Lexed::UserData(None), 77usize),
-            ]);
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 77usize,
-                        shifted: 1usize,
-                    },
-                    rustylr_macrogenerated_lookaheads_4.clone(),
-                )]),
-            };
-            let state = ::rusty_lr_core::State {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
-        }
-        {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 78usize),
-                (Lexed::BracketGroup(None), 78usize),
-                (Lexed::Caret(None), 78usize),
-                (Lexed::Colon(None), 78usize),
-                (Lexed::EofDef(None), 78usize),
-                (Lexed::Equal(None), 78usize),
-                (Lexed::ErrorType(None), 78usize),
-                (Lexed::Ident(None), 78usize),
-                (Lexed::Left(None), 78usize),
-                (Lexed::Literal(None), 78usize),
-                (Lexed::Minus(None), 78usize),
-                (Lexed::ModulePrefix(None), 78usize),
-                (Lexed::NoneGroup(None), 78usize),
-                (Lexed::OtherPunct(None), 78usize),
-                (Lexed::ParenGroup(None), 78usize),
-                (Lexed::Percent(None), 78usize),
-                (Lexed::Pipe(None), 78usize),
-                (Lexed::Plus(None), 78usize),
-                (Lexed::Question(None), 78usize),
-                (Lexed::Right(None), 78usize),
-                (Lexed::Semicolon(None), 78usize),
-                (Lexed::Star(None), 78usize),
-                (Lexed::Start(None), 78usize),
-                (Lexed::Token(None), 78usize),
-                (Lexed::TokenType(None), 78usize),
-                (Lexed::UserData(None), 78usize),
-            ]);
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 78usize,
-                        shifted: 1usize,
-                    },
-                    rustylr_macrogenerated_lookaheads_4.clone(),
-                )]),
-            };
-            let state = ::rusty_lr_core::State {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
-        }
-        {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 79usize),
-                (Lexed::BracketGroup(None), 79usize),
-                (Lexed::Caret(None), 79usize),
-                (Lexed::Colon(None), 79usize),
-                (Lexed::EofDef(None), 79usize),
-                (Lexed::Equal(None), 79usize),
-                (Lexed::ErrorType(None), 79usize),
-                (Lexed::Ident(None), 79usize),
-                (Lexed::Left(None), 79usize),
-                (Lexed::Literal(None), 79usize),
-                (Lexed::Minus(None), 79usize),
-                (Lexed::ModulePrefix(None), 79usize),
-                (Lexed::NoneGroup(None), 79usize),
-                (Lexed::OtherPunct(None), 79usize),
-                (Lexed::ParenGroup(None), 79usize),
-                (Lexed::Percent(None), 79usize),
-                (Lexed::Pipe(None), 79usize),
-                (Lexed::Plus(None), 79usize),
-                (Lexed::Question(None), 79usize),
-                (Lexed::Right(None), 79usize),
-                (Lexed::Semicolon(None), 79usize),
-                (Lexed::Star(None), 79usize),
-                (Lexed::Start(None), 79usize),
-                (Lexed::Token(None), 79usize),
-                (Lexed::TokenType(None), 79usize),
-                (Lexed::UserData(None), 79usize),
-            ]);
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 79usize,
-                        shifted: 1usize,
-                    },
-                    rustylr_macrogenerated_lookaheads_4.clone(),
-                )]),
-            };
-            let state = ::rusty_lr_core::State {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
-        }
-        {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 80usize),
-                (Lexed::BracketGroup(None), 80usize),
-                (Lexed::Caret(None), 80usize),
-                (Lexed::Colon(None), 80usize),
-                (Lexed::EofDef(None), 80usize),
-                (Lexed::Equal(None), 80usize),
-                (Lexed::ErrorType(None), 80usize),
-                (Lexed::Ident(None), 80usize),
-                (Lexed::Left(None), 80usize),
-                (Lexed::Literal(None), 80usize),
-                (Lexed::Minus(None), 80usize),
-                (Lexed::ModulePrefix(None), 80usize),
-                (Lexed::NoneGroup(None), 80usize),
-                (Lexed::OtherPunct(None), 80usize),
-                (Lexed::ParenGroup(None), 80usize),
-                (Lexed::Percent(None), 80usize),
-                (Lexed::Pipe(None), 80usize),
-                (Lexed::Plus(None), 80usize),
-                (Lexed::Question(None), 80usize),
-                (Lexed::Right(None), 80usize),
-                (Lexed::Semicolon(None), 80usize),
-                (Lexed::Star(None), 80usize),
-                (Lexed::Start(None), 80usize),
-                (Lexed::Token(None), 80usize),
-                (Lexed::TokenType(None), 80usize),
-                (Lexed::UserData(None), 80usize),
-            ]);
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 80usize,
-                        shifted: 1usize,
-                    },
-                    rustylr_macrogenerated_lookaheads_4.clone(),
-                )]),
-            };
-            let state = ::rusty_lr_core::State {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
-        }
-        {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 81usize),
-                (Lexed::BracketGroup(None), 81usize),
-                (Lexed::Caret(None), 81usize),
-                (Lexed::Colon(None), 81usize),
-                (Lexed::EofDef(None), 81usize),
-                (Lexed::Equal(None), 81usize),
-                (Lexed::ErrorType(None), 81usize),
-                (Lexed::Ident(None), 81usize),
-                (Lexed::Left(None), 81usize),
-                (Lexed::Literal(None), 81usize),
-                (Lexed::Minus(None), 81usize),
-                (Lexed::ModulePrefix(None), 81usize),
-                (Lexed::NoneGroup(None), 81usize),
-                (Lexed::OtherPunct(None), 81usize),
-                (Lexed::ParenGroup(None), 81usize),
-                (Lexed::Percent(None), 81usize),
-                (Lexed::Pipe(None), 81usize),
-                (Lexed::Plus(None), 81usize),
-                (Lexed::Question(None), 81usize),
-                (Lexed::Right(None), 81usize),
-                (Lexed::Semicolon(None), 81usize),
-                (Lexed::Star(None), 81usize),
-                (Lexed::Start(None), 81usize),
-                (Lexed::Token(None), 81usize),
-                (Lexed::TokenType(None), 81usize),
-                (Lexed::UserData(None), 81usize),
-            ]);
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 81usize,
-                        shifted: 1usize,
-                    },
-                    rustylr_macrogenerated_lookaheads_4.clone(),
-                )]),
-            };
-            let state = ::rusty_lr_core::State {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
-        }
-        {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 82usize),
-                (Lexed::BracketGroup(None), 82usize),
-                (Lexed::Caret(None), 82usize),
-                (Lexed::Colon(None), 82usize),
-                (Lexed::EofDef(None), 82usize),
-                (Lexed::Equal(None), 82usize),
-                (Lexed::ErrorType(None), 82usize),
-                (Lexed::Ident(None), 82usize),
-                (Lexed::Left(None), 82usize),
-                (Lexed::Literal(None), 82usize),
-                (Lexed::Minus(None), 82usize),
-                (Lexed::ModulePrefix(None), 82usize),
-                (Lexed::NoneGroup(None), 82usize),
-                (Lexed::OtherPunct(None), 82usize),
-                (Lexed::ParenGroup(None), 82usize),
-                (Lexed::Percent(None), 82usize),
-                (Lexed::Pipe(None), 82usize),
-                (Lexed::Plus(None), 82usize),
-                (Lexed::Question(None), 82usize),
-                (Lexed::Right(None), 82usize),
-                (Lexed::Semicolon(None), 82usize),
-                (Lexed::Star(None), 82usize),
-                (Lexed::Start(None), 82usize),
-                (Lexed::Token(None), 82usize),
-                (Lexed::TokenType(None), 82usize),
-                (Lexed::UserData(None), 82usize),
-            ]);
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from([(
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 82usize,
-                        shifted: 1usize,
-                    },
-                    rustylr_macrogenerated_lookaheads_4.clone(),
-                )]),
-            };
-            let state = ::rusty_lr_core::State {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
-        }
-        {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Semicolon(None), 28usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(None), 19usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3901,21 +3137,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 2usize),
-                (Lexed::EofDef(None), 2usize),
-                (Lexed::ErrorType(None), 2usize),
-                (Lexed::Ident(None), 2usize),
-                (Lexed::Left(None), 2usize),
-                (Lexed::ModulePrefix(None), 2usize),
-                (Lexed::Right(None), 2usize),
-                (Lexed::Start(None), 2usize),
-                (Lexed::Token(None), 2usize),
-                (Lexed::TokenType(None), 2usize),
-                (Lexed::UserData(None), 2usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 2usize);
+            reduce_map.insert(Lexed::EofDef(None), 2usize);
+            reduce_map.insert(Lexed::ErrorType(None), 2usize);
+            reduce_map.insert(Lexed::Ident(None), 2usize);
+            reduce_map.insert(Lexed::Left(None), 2usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 2usize);
+            reduce_map.insert(Lexed::Right(None), 2usize);
+            reduce_map.insert(Lexed::Start(None), 2usize);
+            reduce_map.insert(Lexed::Token(None), 2usize);
+            reduce_map.insert(Lexed::TokenType(None), 2usize);
+            reduce_map.insert(Lexed::UserData(None), 2usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3934,38 +3172,30 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 2usize),
-                (Lexed::BracketGroup(None), 3usize),
-                (Lexed::Caret(None), 4usize),
-                (Lexed::Colon(None), 5usize),
-                (Lexed::EofDef(None), 6usize),
-                (Lexed::Equal(None), 7usize),
-                (Lexed::ErrorType(None), 8usize),
-                (Lexed::Ident(None), 9usize),
-                (Lexed::Left(None), 10usize),
-                (Lexed::Literal(None), 11usize),
-                (Lexed::Minus(None), 12usize),
-                (Lexed::ModulePrefix(None), 13usize),
-                (Lexed::NoneGroup(None), 14usize),
-                (Lexed::OtherPunct(None), 15usize),
-                (Lexed::ParenGroup(None), 16usize),
-                (Lexed::Percent(None), 17usize),
-                (Lexed::Pipe(None), 18usize),
-                (Lexed::Plus(None), 19usize),
-                (Lexed::Question(None), 20usize),
-                (Lexed::Right(None), 21usize),
-                (Lexed::Star(None), 22usize),
-                (Lexed::Start(None), 23usize),
-                (Lexed::Token(None), 24usize),
-                (Lexed::TokenType(None), 25usize),
-                (Lexed::UserData(None), 26usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([(
-                GrammarNonTerminals::_RustyLRGenerated5,
-                30usize,
-            )]);
-            let reduce_map = std::collections::HashMap::from([(Lexed::Semicolon(None), 38usize)]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(16usize);
+            shift_goto_map_term.insert(Lexed::BraceGroup(None), 2usize);
+            shift_goto_map_term.insert(Lexed::BracketGroup(None), 3usize);
+            shift_goto_map_term.insert(Lexed::Caret(None), 4usize);
+            shift_goto_map_term.insert(Lexed::Colon(None), 5usize);
+            shift_goto_map_term.insert(Lexed::Equal(None), 6usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 7usize);
+            shift_goto_map_term.insert(Lexed::Literal(None), 8usize);
+            shift_goto_map_term.insert(Lexed::Minus(None), 9usize);
+            shift_goto_map_term.insert(Lexed::NoneGroup(None), 10usize);
+            shift_goto_map_term.insert(Lexed::OtherPunct(None), 11usize);
+            shift_goto_map_term.insert(Lexed::ParenGroup(None), 12usize);
+            shift_goto_map_term.insert(Lexed::Percent(None), 13usize);
+            shift_goto_map_term.insert(Lexed::Pipe(None), 14usize);
+            shift_goto_map_term.insert(Lexed::Plus(None), 15usize);
+            shift_goto_map_term.insert(Lexed::Question(None), 16usize);
+            shift_goto_map_term.insert(Lexed::Star(None), 17usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(1usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 21usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(1usize);
+            reduce_map.insert(Lexed::Semicolon(None), 38usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -4094,69 +3324,6 @@ impl GrammarParser {
                         },
                         rustylr_macrogenerated_lookaheads_4.clone(),
                     ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 74usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 75usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 76usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 77usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 78usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 79usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 80usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 81usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 82usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
                 ]),
             };
             let state = ::rusty_lr_core::State {
@@ -4168,36 +3335,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 57usize),
-                (Lexed::BracketGroup(None), 57usize),
-                (Lexed::Caret(None), 57usize),
-                (Lexed::Colon(None), 57usize),
-                (Lexed::EofDef(None), 57usize),
-                (Lexed::Equal(None), 57usize),
-                (Lexed::ErrorType(None), 57usize),
-                (Lexed::Ident(None), 57usize),
-                (Lexed::Left(None), 57usize),
-                (Lexed::Literal(None), 57usize),
-                (Lexed::Minus(None), 57usize),
-                (Lexed::ModulePrefix(None), 57usize),
-                (Lexed::NoneGroup(None), 57usize),
-                (Lexed::OtherPunct(None), 57usize),
-                (Lexed::ParenGroup(None), 57usize),
-                (Lexed::Percent(None), 57usize),
-                (Lexed::Pipe(None), 57usize),
-                (Lexed::Plus(None), 57usize),
-                (Lexed::Question(None), 57usize),
-                (Lexed::Right(None), 57usize),
-                (Lexed::Semicolon(None), 57usize),
-                (Lexed::Star(None), 57usize),
-                (Lexed::Start(None), 57usize),
-                (Lexed::Token(None), 57usize),
-                (Lexed::TokenType(None), 57usize),
-                (Lexed::UserData(None), 57usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 57usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 57usize);
+            reduce_map.insert(Lexed::Caret(None), 57usize);
+            reduce_map.insert(Lexed::Colon(None), 57usize);
+            reduce_map.insert(Lexed::Equal(None), 57usize);
+            reduce_map.insert(Lexed::Ident(None), 57usize);
+            reduce_map.insert(Lexed::Literal(None), 57usize);
+            reduce_map.insert(Lexed::Minus(None), 57usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 57usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 57usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 57usize);
+            reduce_map.insert(Lexed::Percent(None), 57usize);
+            reduce_map.insert(Lexed::Pipe(None), 57usize);
+            reduce_map.insert(Lexed::Plus(None), 57usize);
+            reduce_map.insert(Lexed::Question(None), 57usize);
+            reduce_map.insert(Lexed::Semicolon(None), 57usize);
+            reduce_map.insert(Lexed::Star(None), 57usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4216,36 +3376,29 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 56usize),
-                (Lexed::BracketGroup(None), 56usize),
-                (Lexed::Caret(None), 56usize),
-                (Lexed::Colon(None), 56usize),
-                (Lexed::EofDef(None), 56usize),
-                (Lexed::Equal(None), 56usize),
-                (Lexed::ErrorType(None), 56usize),
-                (Lexed::Ident(None), 56usize),
-                (Lexed::Left(None), 56usize),
-                (Lexed::Literal(None), 56usize),
-                (Lexed::Minus(None), 56usize),
-                (Lexed::ModulePrefix(None), 56usize),
-                (Lexed::NoneGroup(None), 56usize),
-                (Lexed::OtherPunct(None), 56usize),
-                (Lexed::ParenGroup(None), 56usize),
-                (Lexed::Percent(None), 56usize),
-                (Lexed::Pipe(None), 56usize),
-                (Lexed::Plus(None), 56usize),
-                (Lexed::Question(None), 56usize),
-                (Lexed::Right(None), 56usize),
-                (Lexed::Semicolon(None), 56usize),
-                (Lexed::Star(None), 56usize),
-                (Lexed::Start(None), 56usize),
-                (Lexed::Token(None), 56usize),
-                (Lexed::TokenType(None), 56usize),
-                (Lexed::UserData(None), 56usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(17usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 56usize);
+            reduce_map.insert(Lexed::BracketGroup(None), 56usize);
+            reduce_map.insert(Lexed::Caret(None), 56usize);
+            reduce_map.insert(Lexed::Colon(None), 56usize);
+            reduce_map.insert(Lexed::Equal(None), 56usize);
+            reduce_map.insert(Lexed::Ident(None), 56usize);
+            reduce_map.insert(Lexed::Literal(None), 56usize);
+            reduce_map.insert(Lexed::Minus(None), 56usize);
+            reduce_map.insert(Lexed::NoneGroup(None), 56usize);
+            reduce_map.insert(Lexed::OtherPunct(None), 56usize);
+            reduce_map.insert(Lexed::ParenGroup(None), 56usize);
+            reduce_map.insert(Lexed::Percent(None), 56usize);
+            reduce_map.insert(Lexed::Pipe(None), 56usize);
+            reduce_map.insert(Lexed::Plus(None), 56usize);
+            reduce_map.insert(Lexed::Question(None), 56usize);
+            reduce_map.insert(Lexed::Semicolon(None), 56usize);
+            reduce_map.insert(Lexed::Star(None), 56usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4264,39 +3417,31 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 2usize),
-                (Lexed::BracketGroup(None), 3usize),
-                (Lexed::Caret(None), 4usize),
-                (Lexed::Colon(None), 5usize),
-                (Lexed::EofDef(None), 6usize),
-                (Lexed::Equal(None), 7usize),
-                (Lexed::ErrorType(None), 8usize),
-                (Lexed::Ident(None), 9usize),
-                (Lexed::Left(None), 10usize),
-                (Lexed::Literal(None), 11usize),
-                (Lexed::Minus(None), 12usize),
-                (Lexed::ModulePrefix(None), 13usize),
-                (Lexed::NoneGroup(None), 14usize),
-                (Lexed::OtherPunct(None), 15usize),
-                (Lexed::ParenGroup(None), 16usize),
-                (Lexed::Percent(None), 17usize),
-                (Lexed::Pipe(None), 18usize),
-                (Lexed::Plus(None), 19usize),
-                (Lexed::Question(None), 20usize),
-                (Lexed::Right(None), 21usize),
-                (Lexed::Star(None), 22usize),
-                (Lexed::Start(None), 23usize),
-                (Lexed::Token(None), 24usize),
-                (Lexed::TokenType(None), 25usize),
-                (Lexed::UserData(None), 26usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([
-                (GrammarNonTerminals::RustCode, 33usize),
-                (GrammarNonTerminals::_RustyLRGenerated4, 29usize),
-                (GrammarNonTerminals::_RustyLRGenerated5, 31usize),
-            ]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(16usize);
+            shift_goto_map_term.insert(Lexed::BraceGroup(None), 2usize);
+            shift_goto_map_term.insert(Lexed::BracketGroup(None), 3usize);
+            shift_goto_map_term.insert(Lexed::Caret(None), 4usize);
+            shift_goto_map_term.insert(Lexed::Colon(None), 5usize);
+            shift_goto_map_term.insert(Lexed::Equal(None), 6usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 7usize);
+            shift_goto_map_term.insert(Lexed::Literal(None), 8usize);
+            shift_goto_map_term.insert(Lexed::Minus(None), 9usize);
+            shift_goto_map_term.insert(Lexed::NoneGroup(None), 10usize);
+            shift_goto_map_term.insert(Lexed::OtherPunct(None), 11usize);
+            shift_goto_map_term.insert(Lexed::ParenGroup(None), 12usize);
+            shift_goto_map_term.insert(Lexed::Percent(None), 13usize);
+            shift_goto_map_term.insert(Lexed::Pipe(None), 14usize);
+            shift_goto_map_term.insert(Lexed::Plus(None), 15usize);
+            shift_goto_map_term.insert(Lexed::Question(None), 16usize);
+            shift_goto_map_term.insert(Lexed::Star(None), 17usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(3usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 24usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated4, 20usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 22usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -4439,69 +3584,6 @@ impl GrammarParser {
                         },
                         rustylr_macrogenerated_lookaheads_4.clone(),
                     ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 74usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 75usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 76usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 77usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 78usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 79usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 80usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 81usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 82usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
                 ]),
             };
             let state = ::rusty_lr_core::State {
@@ -4513,10 +3595,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Semicolon(None), 34usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(None), 25usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4535,21 +3620,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 3usize),
-                (Lexed::EofDef(None), 3usize),
-                (Lexed::ErrorType(None), 3usize),
-                (Lexed::Ident(None), 3usize),
-                (Lexed::Left(None), 3usize),
-                (Lexed::ModulePrefix(None), 3usize),
-                (Lexed::Right(None), 3usize),
-                (Lexed::Start(None), 3usize),
-                (Lexed::Token(None), 3usize),
-                (Lexed::TokenType(None), 3usize),
-                (Lexed::UserData(None), 3usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 3usize);
+            reduce_map.insert(Lexed::EofDef(None), 3usize);
+            reduce_map.insert(Lexed::ErrorType(None), 3usize);
+            reduce_map.insert(Lexed::Ident(None), 3usize);
+            reduce_map.insert(Lexed::Left(None), 3usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 3usize);
+            reduce_map.insert(Lexed::Right(None), 3usize);
+            reduce_map.insert(Lexed::Start(None), 3usize);
+            reduce_map.insert(Lexed::Token(None), 3usize);
+            reduce_map.insert(Lexed::TokenType(None), 3usize);
+            reduce_map.insert(Lexed::UserData(None), 3usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4568,11 +3655,15 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::ParenGroup(None), 36usize)]);
-            let shift_goto_map_nonterm =
-                std::collections::HashMap::from([(GrammarNonTerminals::RuleType, 37usize)]);
-            let reduce_map = std::collections::HashMap::from([(Lexed::Colon(None), 37usize)]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::ParenGroup(None), 27usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(1usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::RuleType, 28usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(1usize);
+            reduce_map.insert(Lexed::Colon(None), 37usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -4607,9 +3698,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([(Lexed::Colon(None), 36usize)]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(1usize);
+            reduce_map.insert(Lexed::Colon(None), 36usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4628,10 +3723,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Colon(None), 38usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Colon(None), 29usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4650,24 +3748,24 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::Ident(None), 39usize),
-                (Lexed::LBracket(None), 42usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([
-                (GrammarNonTerminals::Pattern, 57usize),
-                (GrammarNonTerminals::RuleLine, 58usize),
-                (GrammarNonTerminals::RuleLines, 59usize),
-                (GrammarNonTerminals::TerminalSet, 56usize),
-                (GrammarNonTerminals::TokenMapped, 62usize),
-                (GrammarNonTerminals::_RustyLRGenerated0, 63usize),
-                (GrammarNonTerminals::_RustyLRGenerated1, 66usize),
-            ]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 49usize),
-                (Lexed::Pipe(None), 49usize),
-                (Lexed::Semicolon(None), 49usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(2usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 30usize);
+            shift_goto_map_term.insert(Lexed::LBracket(None), 33usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(7usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::Pattern, 48usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::RuleLine, 49usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::RuleLines, 50usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSet, 47usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TokenMapped, 53usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated0, 54usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated1, 57usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(3usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 49usize);
+            reduce_map.insert(Lexed::Pipe(None), 49usize);
+            reduce_map.insert(Lexed::Semicolon(None), 49usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -4793,19 +3891,21 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Equal(None), 40usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 23usize),
-                (Lexed::Ident(None), 23usize),
-                (Lexed::LBracket(None), 23usize),
-                (Lexed::Pipe(None), 23usize),
-                (Lexed::Plus(None), 23usize),
-                (Lexed::Question(None), 23usize),
-                (Lexed::Semicolon(None), 23usize),
-                (Lexed::Star(None), 23usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Equal(None), 31usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(8usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 23usize);
+            reduce_map.insert(Lexed::Ident(None), 23usize);
+            reduce_map.insert(Lexed::LBracket(None), 23usize);
+            reduce_map.insert(Lexed::Pipe(None), 23usize);
+            reduce_map.insert(Lexed::Plus(None), 23usize);
+            reduce_map.insert(Lexed::Question(None), 23usize);
+            reduce_map.insert(Lexed::Semicolon(None), 23usize);
+            reduce_map.insert(Lexed::Star(None), 23usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -4833,15 +3933,16 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::Ident(None), 41usize),
-                (Lexed::LBracket(None), 42usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([
-                (GrammarNonTerminals::Pattern, 52usize),
-                (GrammarNonTerminals::TerminalSet, 56usize),
-            ]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(2usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 32usize);
+            shift_goto_map_term.insert(Lexed::LBracket(None), 33usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(2usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::Pattern, 43usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSet, 47usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -4904,18 +4005,20 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 23usize),
-                (Lexed::Ident(None), 23usize),
-                (Lexed::LBracket(None), 23usize),
-                (Lexed::Pipe(None), 23usize),
-                (Lexed::Plus(None), 23usize),
-                (Lexed::Question(None), 23usize),
-                (Lexed::Semicolon(None), 23usize),
-                (Lexed::Star(None), 23usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(8usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 23usize);
+            reduce_map.insert(Lexed::Ident(None), 23usize);
+            reduce_map.insert(Lexed::LBracket(None), 23usize);
+            reduce_map.insert(Lexed::Pipe(None), 23usize);
+            reduce_map.insert(Lexed::Plus(None), 23usize);
+            reduce_map.insert(Lexed::Question(None), 23usize);
+            reduce_map.insert(Lexed::Semicolon(None), 23usize);
+            reduce_map.insert(Lexed::Star(None), 23usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4934,13 +4037,15 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Caret(None), 43usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([(
-                GrammarNonTerminals::_RustyLRGenerated2,
-                44usize,
-            )]);
-            let reduce_map = std::collections::HashMap::from([(Lexed::Ident(None), 53usize)]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Caret(None), 34usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(1usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated2, 35usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(1usize);
+            reduce_map.insert(Lexed::Ident(None), 53usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -4975,9 +4080,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([(Lexed::Ident(None), 52usize)]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(1usize);
+            reduce_map.insert(Lexed::Ident(None), 52usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4996,13 +4105,15 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Ident(None), 45usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([
-                (GrammarNonTerminals::TerminalSetItem, 48usize),
-                (GrammarNonTerminals::_RustyLRGenerated3, 49usize),
-            ]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 36usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(2usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSetItem, 39usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated3, 40usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -5051,13 +4162,15 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Minus(None), 46usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Ident(None), 41usize),
-                (Lexed::RBracket(None), 41usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Minus(None), 37usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(2usize);
+            reduce_map.insert(Lexed::Ident(None), 41usize);
+            reduce_map.insert(Lexed::RBracket(None), 41usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -5085,10 +4198,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Ident(None), 47usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 38usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5107,12 +4223,14 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Ident(None), 42usize),
-                (Lexed::RBracket(None), 42usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(2usize);
+            reduce_map.insert(Lexed::Ident(None), 42usize);
+            reduce_map.insert(Lexed::RBracket(None), 42usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5131,12 +4249,14 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Ident(None), 54usize),
-                (Lexed::RBracket(None), 54usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(2usize);
+            reduce_map.insert(Lexed::Ident(None), 54usize);
+            reduce_map.insert(Lexed::RBracket(None), 54usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5155,13 +4275,15 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::Ident(None), 45usize),
-                (Lexed::RBracket(None), 50usize),
-            ]);
-            let shift_goto_map_nonterm =
-                std::collections::HashMap::from([(GrammarNonTerminals::TerminalSetItem, 51usize)]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(2usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 36usize);
+            shift_goto_map_term.insert(Lexed::RBracket(None), 41usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(1usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSetItem, 42usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -5203,18 +4325,20 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 40usize),
-                (Lexed::Ident(None), 40usize),
-                (Lexed::LBracket(None), 40usize),
-                (Lexed::Pipe(None), 40usize),
-                (Lexed::Plus(None), 40usize),
-                (Lexed::Question(None), 40usize),
-                (Lexed::Semicolon(None), 40usize),
-                (Lexed::Star(None), 40usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(8usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 40usize);
+            reduce_map.insert(Lexed::Ident(None), 40usize);
+            reduce_map.insert(Lexed::LBracket(None), 40usize);
+            reduce_map.insert(Lexed::Pipe(None), 40usize);
+            reduce_map.insert(Lexed::Plus(None), 40usize);
+            reduce_map.insert(Lexed::Question(None), 40usize);
+            reduce_map.insert(Lexed::Semicolon(None), 40usize);
+            reduce_map.insert(Lexed::Star(None), 40usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5233,12 +4357,14 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Ident(None), 55usize),
-                (Lexed::RBracket(None), 55usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(2usize);
+            reduce_map.insert(Lexed::Ident(None), 55usize);
+            reduce_map.insert(Lexed::RBracket(None), 55usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5257,19 +4383,20 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::Plus(None), 53usize),
-                (Lexed::Question(None), 54usize),
-                (Lexed::Star(None), 55usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 45usize),
-                (Lexed::Ident(None), 45usize),
-                (Lexed::LBracket(None), 45usize),
-                (Lexed::Pipe(None), 45usize),
-                (Lexed::Semicolon(None), 45usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(3usize);
+            shift_goto_map_term.insert(Lexed::Plus(None), 44usize);
+            shift_goto_map_term.insert(Lexed::Question(None), 45usize);
+            shift_goto_map_term.insert(Lexed::Star(None), 46usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(5usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 45usize);
+            reduce_map.insert(Lexed::Ident(None), 45usize);
+            reduce_map.insert(Lexed::LBracket(None), 45usize);
+            reduce_map.insert(Lexed::Pipe(None), 45usize);
+            reduce_map.insert(Lexed::Semicolon(None), 45usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -5311,18 +4438,20 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 24usize),
-                (Lexed::Ident(None), 24usize),
-                (Lexed::LBracket(None), 24usize),
-                (Lexed::Pipe(None), 24usize),
-                (Lexed::Plus(None), 24usize),
-                (Lexed::Question(None), 24usize),
-                (Lexed::Semicolon(None), 24usize),
-                (Lexed::Star(None), 24usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(8usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 24usize);
+            reduce_map.insert(Lexed::Ident(None), 24usize);
+            reduce_map.insert(Lexed::LBracket(None), 24usize);
+            reduce_map.insert(Lexed::Pipe(None), 24usize);
+            reduce_map.insert(Lexed::Plus(None), 24usize);
+            reduce_map.insert(Lexed::Question(None), 24usize);
+            reduce_map.insert(Lexed::Semicolon(None), 24usize);
+            reduce_map.insert(Lexed::Star(None), 24usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5341,18 +4470,20 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 26usize),
-                (Lexed::Ident(None), 26usize),
-                (Lexed::LBracket(None), 26usize),
-                (Lexed::Pipe(None), 26usize),
-                (Lexed::Plus(None), 26usize),
-                (Lexed::Question(None), 26usize),
-                (Lexed::Semicolon(None), 26usize),
-                (Lexed::Star(None), 26usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(8usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 26usize);
+            reduce_map.insert(Lexed::Ident(None), 26usize);
+            reduce_map.insert(Lexed::LBracket(None), 26usize);
+            reduce_map.insert(Lexed::Pipe(None), 26usize);
+            reduce_map.insert(Lexed::Plus(None), 26usize);
+            reduce_map.insert(Lexed::Question(None), 26usize);
+            reduce_map.insert(Lexed::Semicolon(None), 26usize);
+            reduce_map.insert(Lexed::Star(None), 26usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5371,18 +4502,20 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 25usize),
-                (Lexed::Ident(None), 25usize),
-                (Lexed::LBracket(None), 25usize),
-                (Lexed::Pipe(None), 25usize),
-                (Lexed::Plus(None), 25usize),
-                (Lexed::Question(None), 25usize),
-                (Lexed::Semicolon(None), 25usize),
-                (Lexed::Star(None), 25usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(8usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 25usize);
+            reduce_map.insert(Lexed::Ident(None), 25usize);
+            reduce_map.insert(Lexed::LBracket(None), 25usize);
+            reduce_map.insert(Lexed::Pipe(None), 25usize);
+            reduce_map.insert(Lexed::Plus(None), 25usize);
+            reduce_map.insert(Lexed::Question(None), 25usize);
+            reduce_map.insert(Lexed::Semicolon(None), 25usize);
+            reduce_map.insert(Lexed::Star(None), 25usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5401,18 +4534,20 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 27usize),
-                (Lexed::Ident(None), 27usize),
-                (Lexed::LBracket(None), 27usize),
-                (Lexed::Pipe(None), 27usize),
-                (Lexed::Plus(None), 27usize),
-                (Lexed::Question(None), 27usize),
-                (Lexed::Semicolon(None), 27usize),
-                (Lexed::Star(None), 27usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(8usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 27usize);
+            reduce_map.insert(Lexed::Ident(None), 27usize);
+            reduce_map.insert(Lexed::LBracket(None), 27usize);
+            reduce_map.insert(Lexed::Pipe(None), 27usize);
+            reduce_map.insert(Lexed::Plus(None), 27usize);
+            reduce_map.insert(Lexed::Question(None), 27usize);
+            reduce_map.insert(Lexed::Semicolon(None), 27usize);
+            reduce_map.insert(Lexed::Star(None), 27usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5431,19 +4566,20 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::Plus(None), 53usize),
-                (Lexed::Question(None), 54usize),
-                (Lexed::Star(None), 55usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 44usize),
-                (Lexed::Ident(None), 44usize),
-                (Lexed::LBracket(None), 44usize),
-                (Lexed::Pipe(None), 44usize),
-                (Lexed::Semicolon(None), 44usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(3usize);
+            shift_goto_map_term.insert(Lexed::Plus(None), 44usize);
+            shift_goto_map_term.insert(Lexed::Question(None), 45usize);
+            shift_goto_map_term.insert(Lexed::Star(None), 46usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(5usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 44usize);
+            reduce_map.insert(Lexed::Ident(None), 44usize);
+            reduce_map.insert(Lexed::LBracket(None), 44usize);
+            reduce_map.insert(Lexed::Pipe(None), 44usize);
+            reduce_map.insert(Lexed::Semicolon(None), 44usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -5485,12 +4621,14 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Pipe(None), 35usize),
-                (Lexed::Semicolon(None), 35usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(2usize);
+            reduce_map.insert(Lexed::Pipe(None), 35usize);
+            reduce_map.insert(Lexed::Semicolon(None), 35usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5509,12 +4647,14 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::Pipe(None), 60usize),
-                (Lexed::Semicolon(None), 68usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(2usize);
+            shift_goto_map_term.insert(Lexed::Pipe(None), 51usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(None), 59usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -5542,23 +4682,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::Ident(None), 39usize),
-                (Lexed::LBracket(None), 42usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([
-                (GrammarNonTerminals::Pattern, 57usize),
-                (GrammarNonTerminals::RuleLine, 61usize),
-                (GrammarNonTerminals::TerminalSet, 56usize),
-                (GrammarNonTerminals::TokenMapped, 62usize),
-                (GrammarNonTerminals::_RustyLRGenerated0, 63usize),
-                (GrammarNonTerminals::_RustyLRGenerated1, 66usize),
-            ]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 49usize),
-                (Lexed::Pipe(None), 49usize),
-                (Lexed::Semicolon(None), 49usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(2usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 30usize);
+            shift_goto_map_term.insert(Lexed::LBracket(None), 33usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(6usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::Pattern, 48usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::RuleLine, 52usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSet, 47usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TokenMapped, 53usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated0, 54usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated1, 57usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(3usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 49usize);
+            reduce_map.insert(Lexed::Pipe(None), 49usize);
+            reduce_map.insert(Lexed::Semicolon(None), 49usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -5670,12 +4810,14 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Pipe(None), 34usize),
-                (Lexed::Semicolon(None), 34usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(2usize);
+            reduce_map.insert(Lexed::Pipe(None), 34usize);
+            reduce_map.insert(Lexed::Semicolon(None), 34usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5694,15 +4836,17 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 50usize),
-                (Lexed::Ident(None), 50usize),
-                (Lexed::LBracket(None), 50usize),
-                (Lexed::Pipe(None), 50usize),
-                (Lexed::Semicolon(None), 50usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(5usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 50usize);
+            reduce_map.insert(Lexed::Ident(None), 50usize);
+            reduce_map.insert(Lexed::LBracket(None), 50usize);
+            reduce_map.insert(Lexed::Pipe(None), 50usize);
+            reduce_map.insert(Lexed::Semicolon(None), 50usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5721,14 +4865,16 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::BraceGroup(None), 64usize)]);
-            let shift_goto_map_nonterm =
-                std::collections::HashMap::from([(GrammarNonTerminals::Action, 65usize)]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Pipe(None), 1usize),
-                (Lexed::Semicolon(None), 1usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::BraceGroup(None), 55usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(1usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::Action, 56usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(2usize);
+            reduce_map.insert(Lexed::Pipe(None), 1usize);
+            reduce_map.insert(Lexed::Semicolon(None), 1usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -5763,12 +4909,14 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Pipe(None), 0usize),
-                (Lexed::Semicolon(None), 0usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(2usize);
+            reduce_map.insert(Lexed::Pipe(None), 0usize);
+            reduce_map.insert(Lexed::Semicolon(None), 0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5787,12 +4935,14 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Pipe(None), 33usize),
-                (Lexed::Semicolon(None), 33usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(2usize);
+            reduce_map.insert(Lexed::Pipe(None), 33usize);
+            reduce_map.insert(Lexed::Semicolon(None), 33usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5811,20 +4961,20 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::Ident(None), 39usize),
-                (Lexed::LBracket(None), 42usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([
-                (GrammarNonTerminals::Pattern, 57usize),
-                (GrammarNonTerminals::TerminalSet, 56usize),
-                (GrammarNonTerminals::TokenMapped, 67usize),
-            ]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 48usize),
-                (Lexed::Pipe(None), 48usize),
-                (Lexed::Semicolon(None), 48usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(2usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 30usize);
+            shift_goto_map_term.insert(Lexed::LBracket(None), 33usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(3usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::Pattern, 48usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSet, 47usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TokenMapped, 58usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(3usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 48usize);
+            reduce_map.insert(Lexed::Pipe(None), 48usize);
+            reduce_map.insert(Lexed::Semicolon(None), 48usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -5908,15 +5058,17 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 51usize),
-                (Lexed::Ident(None), 51usize),
-                (Lexed::LBracket(None), 51usize),
-                (Lexed::Pipe(None), 51usize),
-                (Lexed::Semicolon(None), 51usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(5usize);
+            reduce_map.insert(Lexed::BraceGroup(None), 51usize);
+            reduce_map.insert(Lexed::Ident(None), 51usize);
+            reduce_map.insert(Lexed::LBracket(None), 51usize);
+            reduce_map.insert(Lexed::Pipe(None), 51usize);
+            reduce_map.insert(Lexed::Semicolon(None), 51usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5935,21 +5087,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 32usize),
-                (Lexed::EofDef(None), 32usize),
-                (Lexed::ErrorType(None), 32usize),
-                (Lexed::Ident(None), 32usize),
-                (Lexed::Left(None), 32usize),
-                (Lexed::ModulePrefix(None), 32usize),
-                (Lexed::Right(None), 32usize),
-                (Lexed::Start(None), 32usize),
-                (Lexed::Token(None), 32usize),
-                (Lexed::TokenType(None), 32usize),
-                (Lexed::UserData(None), 32usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 32usize);
+            reduce_map.insert(Lexed::EofDef(None), 32usize);
+            reduce_map.insert(Lexed::ErrorType(None), 32usize);
+            reduce_map.insert(Lexed::Ident(None), 32usize);
+            reduce_map.insert(Lexed::Left(None), 32usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 32usize);
+            reduce_map.insert(Lexed::Right(None), 32usize);
+            reduce_map.insert(Lexed::Start(None), 32usize);
+            reduce_map.insert(Lexed::Token(None), 32usize);
+            reduce_map.insert(Lexed::TokenType(None), 32usize);
+            reduce_map.insert(Lexed::UserData(None), 32usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5968,12 +5122,14 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Ident(None), 30usize),
-                (Lexed::LBracket(None), 30usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(2usize);
+            reduce_map.insert(Lexed::Ident(None), 30usize);
+            reduce_map.insert(Lexed::LBracket(None), 30usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5992,39 +5148,31 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 2usize),
-                (Lexed::BracketGroup(None), 3usize),
-                (Lexed::Caret(None), 4usize),
-                (Lexed::Colon(None), 5usize),
-                (Lexed::EofDef(None), 6usize),
-                (Lexed::Equal(None), 7usize),
-                (Lexed::ErrorType(None), 8usize),
-                (Lexed::Ident(None), 9usize),
-                (Lexed::Left(None), 10usize),
-                (Lexed::Literal(None), 11usize),
-                (Lexed::Minus(None), 12usize),
-                (Lexed::ModulePrefix(None), 13usize),
-                (Lexed::NoneGroup(None), 14usize),
-                (Lexed::OtherPunct(None), 15usize),
-                (Lexed::ParenGroup(None), 16usize),
-                (Lexed::Percent(None), 17usize),
-                (Lexed::Pipe(None), 18usize),
-                (Lexed::Plus(None), 19usize),
-                (Lexed::Question(None), 20usize),
-                (Lexed::Right(None), 21usize),
-                (Lexed::Star(None), 22usize),
-                (Lexed::Start(None), 23usize),
-                (Lexed::Token(None), 24usize),
-                (Lexed::TokenType(None), 25usize),
-                (Lexed::UserData(None), 26usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([
-                (GrammarNonTerminals::RustCode, 71usize),
-                (GrammarNonTerminals::_RustyLRGenerated4, 29usize),
-                (GrammarNonTerminals::_RustyLRGenerated5, 31usize),
-            ]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(16usize);
+            shift_goto_map_term.insert(Lexed::BraceGroup(None), 2usize);
+            shift_goto_map_term.insert(Lexed::BracketGroup(None), 3usize);
+            shift_goto_map_term.insert(Lexed::Caret(None), 4usize);
+            shift_goto_map_term.insert(Lexed::Colon(None), 5usize);
+            shift_goto_map_term.insert(Lexed::Equal(None), 6usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 7usize);
+            shift_goto_map_term.insert(Lexed::Literal(None), 8usize);
+            shift_goto_map_term.insert(Lexed::Minus(None), 9usize);
+            shift_goto_map_term.insert(Lexed::NoneGroup(None), 10usize);
+            shift_goto_map_term.insert(Lexed::OtherPunct(None), 11usize);
+            shift_goto_map_term.insert(Lexed::ParenGroup(None), 12usize);
+            shift_goto_map_term.insert(Lexed::Percent(None), 13usize);
+            shift_goto_map_term.insert(Lexed::Pipe(None), 14usize);
+            shift_goto_map_term.insert(Lexed::Plus(None), 15usize);
+            shift_goto_map_term.insert(Lexed::Question(None), 16usize);
+            shift_goto_map_term.insert(Lexed::Star(None), 17usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(3usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 62usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated4, 20usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 22usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -6167,69 +5315,6 @@ impl GrammarParser {
                         },
                         rustylr_macrogenerated_lookaheads_4.clone(),
                     ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 74usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 75usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 76usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 77usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 78usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 79usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 80usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 81usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 82usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
                 ]),
             };
             let state = ::rusty_lr_core::State {
@@ -6241,10 +5326,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Semicolon(None), 72usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(None), 63usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -6263,21 +5351,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 22usize),
-                (Lexed::EofDef(None), 22usize),
-                (Lexed::ErrorType(None), 22usize),
-                (Lexed::Ident(None), 22usize),
-                (Lexed::Left(None), 22usize),
-                (Lexed::ModulePrefix(None), 22usize),
-                (Lexed::Right(None), 22usize),
-                (Lexed::Start(None), 22usize),
-                (Lexed::Token(None), 22usize),
-                (Lexed::TokenType(None), 22usize),
-                (Lexed::UserData(None), 22usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 22usize);
+            reduce_map.insert(Lexed::EofDef(None), 22usize);
+            reduce_map.insert(Lexed::ErrorType(None), 22usize);
+            reduce_map.insert(Lexed::Ident(None), 22usize);
+            reduce_map.insert(Lexed::Left(None), 22usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 22usize);
+            reduce_map.insert(Lexed::Right(None), 22usize);
+            reduce_map.insert(Lexed::Start(None), 22usize);
+            reduce_map.insert(Lexed::Token(None), 22usize);
+            reduce_map.insert(Lexed::TokenType(None), 22usize);
+            reduce_map.insert(Lexed::UserData(None), 22usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -6296,12 +5386,14 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Ident(None), 31usize),
-                (Lexed::LBracket(None), 31usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(2usize);
+            reduce_map.insert(Lexed::Ident(None), 31usize);
+            reduce_map.insert(Lexed::LBracket(None), 31usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -6320,10 +5412,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Ident(None), 75usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 66usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -6342,10 +5437,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Semicolon(None), 76usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(None), 67usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -6364,21 +5462,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 39usize),
-                (Lexed::EofDef(None), 39usize),
-                (Lexed::ErrorType(None), 39usize),
-                (Lexed::Ident(None), 39usize),
-                (Lexed::Left(None), 39usize),
-                (Lexed::ModulePrefix(None), 39usize),
-                (Lexed::Right(None), 39usize),
-                (Lexed::Start(None), 39usize),
-                (Lexed::Token(None), 39usize),
-                (Lexed::TokenType(None), 39usize),
-                (Lexed::UserData(None), 39usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 39usize);
+            reduce_map.insert(Lexed::EofDef(None), 39usize);
+            reduce_map.insert(Lexed::ErrorType(None), 39usize);
+            reduce_map.insert(Lexed::Ident(None), 39usize);
+            reduce_map.insert(Lexed::Left(None), 39usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 39usize);
+            reduce_map.insert(Lexed::Right(None), 39usize);
+            reduce_map.insert(Lexed::Start(None), 39usize);
+            reduce_map.insert(Lexed::Token(None), 39usize);
+            reduce_map.insert(Lexed::TokenType(None), 39usize);
+            reduce_map.insert(Lexed::UserData(None), 39usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -6397,10 +5497,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Ident(None), 78usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 69usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -6419,39 +5522,31 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 2usize),
-                (Lexed::BracketGroup(None), 3usize),
-                (Lexed::Caret(None), 4usize),
-                (Lexed::Colon(None), 5usize),
-                (Lexed::EofDef(None), 6usize),
-                (Lexed::Equal(None), 7usize),
-                (Lexed::ErrorType(None), 8usize),
-                (Lexed::Ident(None), 9usize),
-                (Lexed::Left(None), 10usize),
-                (Lexed::Literal(None), 11usize),
-                (Lexed::Minus(None), 12usize),
-                (Lexed::ModulePrefix(None), 13usize),
-                (Lexed::NoneGroup(None), 14usize),
-                (Lexed::OtherPunct(None), 15usize),
-                (Lexed::ParenGroup(None), 16usize),
-                (Lexed::Percent(None), 17usize),
-                (Lexed::Pipe(None), 18usize),
-                (Lexed::Plus(None), 19usize),
-                (Lexed::Question(None), 20usize),
-                (Lexed::Right(None), 21usize),
-                (Lexed::Star(None), 22usize),
-                (Lexed::Start(None), 23usize),
-                (Lexed::Token(None), 24usize),
-                (Lexed::TokenType(None), 25usize),
-                (Lexed::UserData(None), 26usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([
-                (GrammarNonTerminals::RustCode, 79usize),
-                (GrammarNonTerminals::_RustyLRGenerated4, 29usize),
-                (GrammarNonTerminals::_RustyLRGenerated5, 31usize),
-            ]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(16usize);
+            shift_goto_map_term.insert(Lexed::BraceGroup(None), 2usize);
+            shift_goto_map_term.insert(Lexed::BracketGroup(None), 3usize);
+            shift_goto_map_term.insert(Lexed::Caret(None), 4usize);
+            shift_goto_map_term.insert(Lexed::Colon(None), 5usize);
+            shift_goto_map_term.insert(Lexed::Equal(None), 6usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 7usize);
+            shift_goto_map_term.insert(Lexed::Literal(None), 8usize);
+            shift_goto_map_term.insert(Lexed::Minus(None), 9usize);
+            shift_goto_map_term.insert(Lexed::NoneGroup(None), 10usize);
+            shift_goto_map_term.insert(Lexed::OtherPunct(None), 11usize);
+            shift_goto_map_term.insert(Lexed::ParenGroup(None), 12usize);
+            shift_goto_map_term.insert(Lexed::Percent(None), 13usize);
+            shift_goto_map_term.insert(Lexed::Pipe(None), 14usize);
+            shift_goto_map_term.insert(Lexed::Plus(None), 15usize);
+            shift_goto_map_term.insert(Lexed::Question(None), 16usize);
+            shift_goto_map_term.insert(Lexed::Star(None), 17usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(3usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 70usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated4, 20usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 22usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -6594,69 +5689,6 @@ impl GrammarParser {
                         },
                         rustylr_macrogenerated_lookaheads_4.clone(),
                     ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 74usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 75usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 76usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 77usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 78usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 79usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 80usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 81usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 82usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
                 ]),
             };
             let state = ::rusty_lr_core::State {
@@ -6668,10 +5700,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Semicolon(None), 80usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(None), 71usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -6690,21 +5725,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 43usize),
-                (Lexed::EofDef(None), 43usize),
-                (Lexed::ErrorType(None), 43usize),
-                (Lexed::Ident(None), 43usize),
-                (Lexed::Left(None), 43usize),
-                (Lexed::ModulePrefix(None), 43usize),
-                (Lexed::Right(None), 43usize),
-                (Lexed::Start(None), 43usize),
-                (Lexed::Token(None), 43usize),
-                (Lexed::TokenType(None), 43usize),
-                (Lexed::UserData(None), 43usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 43usize);
+            reduce_map.insert(Lexed::EofDef(None), 43usize);
+            reduce_map.insert(Lexed::ErrorType(None), 43usize);
+            reduce_map.insert(Lexed::Ident(None), 43usize);
+            reduce_map.insert(Lexed::Left(None), 43usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 43usize);
+            reduce_map.insert(Lexed::Right(None), 43usize);
+            reduce_map.insert(Lexed::Start(None), 43usize);
+            reduce_map.insert(Lexed::Token(None), 43usize);
+            reduce_map.insert(Lexed::TokenType(None), 43usize);
+            reduce_map.insert(Lexed::UserData(None), 43usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -6723,39 +5760,31 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 2usize),
-                (Lexed::BracketGroup(None), 3usize),
-                (Lexed::Caret(None), 4usize),
-                (Lexed::Colon(None), 5usize),
-                (Lexed::EofDef(None), 6usize),
-                (Lexed::Equal(None), 7usize),
-                (Lexed::ErrorType(None), 8usize),
-                (Lexed::Ident(None), 9usize),
-                (Lexed::Left(None), 10usize),
-                (Lexed::Literal(None), 11usize),
-                (Lexed::Minus(None), 12usize),
-                (Lexed::ModulePrefix(None), 13usize),
-                (Lexed::NoneGroup(None), 14usize),
-                (Lexed::OtherPunct(None), 15usize),
-                (Lexed::ParenGroup(None), 16usize),
-                (Lexed::Percent(None), 17usize),
-                (Lexed::Pipe(None), 18usize),
-                (Lexed::Plus(None), 19usize),
-                (Lexed::Question(None), 20usize),
-                (Lexed::Right(None), 21usize),
-                (Lexed::Star(None), 22usize),
-                (Lexed::Start(None), 23usize),
-                (Lexed::Token(None), 24usize),
-                (Lexed::TokenType(None), 25usize),
-                (Lexed::UserData(None), 26usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([
-                (GrammarNonTerminals::RustCode, 82usize),
-                (GrammarNonTerminals::_RustyLRGenerated4, 29usize),
-                (GrammarNonTerminals::_RustyLRGenerated5, 31usize),
-            ]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(16usize);
+            shift_goto_map_term.insert(Lexed::BraceGroup(None), 2usize);
+            shift_goto_map_term.insert(Lexed::BracketGroup(None), 3usize);
+            shift_goto_map_term.insert(Lexed::Caret(None), 4usize);
+            shift_goto_map_term.insert(Lexed::Colon(None), 5usize);
+            shift_goto_map_term.insert(Lexed::Equal(None), 6usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 7usize);
+            shift_goto_map_term.insert(Lexed::Literal(None), 8usize);
+            shift_goto_map_term.insert(Lexed::Minus(None), 9usize);
+            shift_goto_map_term.insert(Lexed::NoneGroup(None), 10usize);
+            shift_goto_map_term.insert(Lexed::OtherPunct(None), 11usize);
+            shift_goto_map_term.insert(Lexed::ParenGroup(None), 12usize);
+            shift_goto_map_term.insert(Lexed::Percent(None), 13usize);
+            shift_goto_map_term.insert(Lexed::Pipe(None), 14usize);
+            shift_goto_map_term.insert(Lexed::Plus(None), 15usize);
+            shift_goto_map_term.insert(Lexed::Question(None), 16usize);
+            shift_goto_map_term.insert(Lexed::Star(None), 17usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(3usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 73usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated4, 20usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 22usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -6898,69 +5927,6 @@ impl GrammarParser {
                         },
                         rustylr_macrogenerated_lookaheads_4.clone(),
                     ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 74usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 75usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 76usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 77usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 78usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 79usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 80usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 81usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 82usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
                 ]),
             };
             let state = ::rusty_lr_core::State {
@@ -6972,10 +5938,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Semicolon(None), 83usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(None), 74usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -6994,21 +5963,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 46usize),
-                (Lexed::EofDef(None), 46usize),
-                (Lexed::ErrorType(None), 46usize),
-                (Lexed::Ident(None), 46usize),
-                (Lexed::Left(None), 46usize),
-                (Lexed::ModulePrefix(None), 46usize),
-                (Lexed::Right(None), 46usize),
-                (Lexed::Start(None), 46usize),
-                (Lexed::Token(None), 46usize),
-                (Lexed::TokenType(None), 46usize),
-                (Lexed::UserData(None), 46usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 46usize);
+            reduce_map.insert(Lexed::EofDef(None), 46usize);
+            reduce_map.insert(Lexed::ErrorType(None), 46usize);
+            reduce_map.insert(Lexed::Ident(None), 46usize);
+            reduce_map.insert(Lexed::Left(None), 46usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 46usize);
+            reduce_map.insert(Lexed::Right(None), 46usize);
+            reduce_map.insert(Lexed::Start(None), 46usize);
+            reduce_map.insert(Lexed::Token(None), 46usize);
+            reduce_map.insert(Lexed::TokenType(None), 46usize);
+            reduce_map.insert(Lexed::UserData(None), 46usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -7027,39 +5998,31 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::BraceGroup(None), 2usize),
-                (Lexed::BracketGroup(None), 3usize),
-                (Lexed::Caret(None), 4usize),
-                (Lexed::Colon(None), 5usize),
-                (Lexed::EofDef(None), 6usize),
-                (Lexed::Equal(None), 7usize),
-                (Lexed::ErrorType(None), 8usize),
-                (Lexed::Ident(None), 9usize),
-                (Lexed::Left(None), 10usize),
-                (Lexed::Literal(None), 11usize),
-                (Lexed::Minus(None), 12usize),
-                (Lexed::ModulePrefix(None), 13usize),
-                (Lexed::NoneGroup(None), 14usize),
-                (Lexed::OtherPunct(None), 15usize),
-                (Lexed::ParenGroup(None), 16usize),
-                (Lexed::Percent(None), 17usize),
-                (Lexed::Pipe(None), 18usize),
-                (Lexed::Plus(None), 19usize),
-                (Lexed::Question(None), 20usize),
-                (Lexed::Right(None), 21usize),
-                (Lexed::Star(None), 22usize),
-                (Lexed::Start(None), 23usize),
-                (Lexed::Token(None), 24usize),
-                (Lexed::TokenType(None), 25usize),
-                (Lexed::UserData(None), 26usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([
-                (GrammarNonTerminals::RustCode, 85usize),
-                (GrammarNonTerminals::_RustyLRGenerated4, 29usize),
-                (GrammarNonTerminals::_RustyLRGenerated5, 31usize),
-            ]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(16usize);
+            shift_goto_map_term.insert(Lexed::BraceGroup(None), 2usize);
+            shift_goto_map_term.insert(Lexed::BracketGroup(None), 3usize);
+            shift_goto_map_term.insert(Lexed::Caret(None), 4usize);
+            shift_goto_map_term.insert(Lexed::Colon(None), 5usize);
+            shift_goto_map_term.insert(Lexed::Equal(None), 6usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 7usize);
+            shift_goto_map_term.insert(Lexed::Literal(None), 8usize);
+            shift_goto_map_term.insert(Lexed::Minus(None), 9usize);
+            shift_goto_map_term.insert(Lexed::NoneGroup(None), 10usize);
+            shift_goto_map_term.insert(Lexed::OtherPunct(None), 11usize);
+            shift_goto_map_term.insert(Lexed::ParenGroup(None), 12usize);
+            shift_goto_map_term.insert(Lexed::Percent(None), 13usize);
+            shift_goto_map_term.insert(Lexed::Pipe(None), 14usize);
+            shift_goto_map_term.insert(Lexed::Plus(None), 15usize);
+            shift_goto_map_term.insert(Lexed::Question(None), 16usize);
+            shift_goto_map_term.insert(Lexed::Star(None), 17usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(3usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 76usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated4, 20usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 22usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -7202,69 +6165,6 @@ impl GrammarParser {
                         },
                         rustylr_macrogenerated_lookaheads_4.clone(),
                     ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 74usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 75usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 76usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 77usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 78usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 79usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 80usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 81usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
-                    (
-                        ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 82usize,
-                            shifted: 0usize,
-                        },
-                        rustylr_macrogenerated_lookaheads_4.clone(),
-                    ),
                 ]),
             };
             let state = ::rusty_lr_core::State {
@@ -7276,10 +6176,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Semicolon(None), 86usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(None), 77usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -7298,21 +6201,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 47usize),
-                (Lexed::EofDef(None), 47usize),
-                (Lexed::ErrorType(None), 47usize),
-                (Lexed::Ident(None), 47usize),
-                (Lexed::Left(None), 47usize),
-                (Lexed::ModulePrefix(None), 47usize),
-                (Lexed::Right(None), 47usize),
-                (Lexed::Start(None), 47usize),
-                (Lexed::Token(None), 47usize),
-                (Lexed::TokenType(None), 47usize),
-                (Lexed::UserData(None), 47usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 47usize);
+            reduce_map.insert(Lexed::EofDef(None), 47usize);
+            reduce_map.insert(Lexed::ErrorType(None), 47usize);
+            reduce_map.insert(Lexed::Ident(None), 47usize);
+            reduce_map.insert(Lexed::Left(None), 47usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 47usize);
+            reduce_map.insert(Lexed::Right(None), 47usize);
+            reduce_map.insert(Lexed::Start(None), 47usize);
+            reduce_map.insert(Lexed::Token(None), 47usize);
+            reduce_map.insert(Lexed::TokenType(None), 47usize);
+            reduce_map.insert(Lexed::UserData(None), 47usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -7331,21 +6236,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 11usize),
-                (Lexed::EofDef(None), 11usize),
-                (Lexed::ErrorType(None), 11usize),
-                (Lexed::Ident(None), 11usize),
-                (Lexed::Left(None), 11usize),
-                (Lexed::ModulePrefix(None), 11usize),
-                (Lexed::Right(None), 11usize),
-                (Lexed::Start(None), 11usize),
-                (Lexed::Token(None), 11usize),
-                (Lexed::TokenType(None), 11usize),
-                (Lexed::UserData(None), 11usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 11usize);
+            reduce_map.insert(Lexed::EofDef(None), 11usize);
+            reduce_map.insert(Lexed::ErrorType(None), 11usize);
+            reduce_map.insert(Lexed::Ident(None), 11usize);
+            reduce_map.insert(Lexed::Left(None), 11usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 11usize);
+            reduce_map.insert(Lexed::Right(None), 11usize);
+            reduce_map.insert(Lexed::Start(None), 11usize);
+            reduce_map.insert(Lexed::Token(None), 11usize);
+            reduce_map.insert(Lexed::TokenType(None), 11usize);
+            reduce_map.insert(Lexed::UserData(None), 11usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -7364,21 +6271,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 19usize),
-                (Lexed::EofDef(None), 19usize),
-                (Lexed::ErrorType(None), 19usize),
-                (Lexed::Ident(None), 19usize),
-                (Lexed::Left(None), 19usize),
-                (Lexed::ModulePrefix(None), 19usize),
-                (Lexed::Right(None), 19usize),
-                (Lexed::Start(None), 19usize),
-                (Lexed::Token(None), 19usize),
-                (Lexed::TokenType(None), 19usize),
-                (Lexed::UserData(None), 19usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 19usize);
+            reduce_map.insert(Lexed::EofDef(None), 19usize);
+            reduce_map.insert(Lexed::ErrorType(None), 19usize);
+            reduce_map.insert(Lexed::Ident(None), 19usize);
+            reduce_map.insert(Lexed::Left(None), 19usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 19usize);
+            reduce_map.insert(Lexed::Right(None), 19usize);
+            reduce_map.insert(Lexed::Start(None), 19usize);
+            reduce_map.insert(Lexed::Token(None), 19usize);
+            reduce_map.insert(Lexed::TokenType(None), 19usize);
+            reduce_map.insert(Lexed::UserData(None), 19usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -7397,32 +6306,33 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::Eof, 90usize),
-                (Lexed::EofDef(None), 1usize),
-                (Lexed::ErrorType(None), 32usize),
-                (Lexed::Ident(None), 35usize),
-                (Lexed::Left(None), 69usize),
-                (Lexed::ModulePrefix(None), 70usize),
-                (Lexed::Right(None), 73usize),
-                (Lexed::Start(None), 74usize),
-                (Lexed::Token(None), 77usize),
-                (Lexed::TokenType(None), 81usize),
-                (Lexed::UserData(None), 84usize),
-            ]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([
-                (GrammarNonTerminals::EofDef, 91usize),
-                (GrammarNonTerminals::ErrorDef, 92usize),
-                (GrammarNonTerminals::ModulePrefixDef, 93usize),
-                (GrammarNonTerminals::ReduceDef, 94usize),
-                (GrammarNonTerminals::ReduceType, 95usize),
-                (GrammarNonTerminals::Rule, 104usize),
-                (GrammarNonTerminals::StartDef, 105usize),
-                (GrammarNonTerminals::TokenDef, 106usize),
-                (GrammarNonTerminals::TokenTypeDef, 107usize),
-                (GrammarNonTerminals::UserDataDef, 108usize),
-            ]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(11usize);
+            shift_goto_map_term.insert(Lexed::Eof, 81usize);
+            shift_goto_map_term.insert(Lexed::EofDef(None), 1usize);
+            shift_goto_map_term.insert(Lexed::ErrorType(None), 23usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 26usize);
+            shift_goto_map_term.insert(Lexed::Left(None), 60usize);
+            shift_goto_map_term.insert(Lexed::ModulePrefix(None), 61usize);
+            shift_goto_map_term.insert(Lexed::Right(None), 64usize);
+            shift_goto_map_term.insert(Lexed::Start(None), 65usize);
+            shift_goto_map_term.insert(Lexed::Token(None), 68usize);
+            shift_goto_map_term.insert(Lexed::TokenType(None), 72usize);
+            shift_goto_map_term.insert(Lexed::UserData(None), 75usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(10usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::EofDef, 82usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::ErrorDef, 83usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::ModulePrefixDef, 84usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::ReduceDef, 85usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::ReduceType, 86usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::Rule, 95usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::StartDef, 96usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TokenDef, 97usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TokenTypeDef, 98usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::UserDataDef, 99usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -7574,7 +6484,7 @@ impl GrammarParser {
                     ),
                     (
                         ::rusty_lr_core::ShiftedRuleRef {
-                            rule: 83usize,
+                            rule: 74usize,
                             shifted: 1usize,
                         },
                         rustylr_macrogenerated_lookaheads_2.clone(),
@@ -7590,13 +6500,16 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 83usize,
+                        rule: 74usize,
                         shifted: 2usize,
                     },
                     rustylr_macrogenerated_lookaheads_2.clone(),
@@ -7611,21 +6524,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 10usize),
-                (Lexed::EofDef(None), 10usize),
-                (Lexed::ErrorType(None), 10usize),
-                (Lexed::Ident(None), 10usize),
-                (Lexed::Left(None), 10usize),
-                (Lexed::ModulePrefix(None), 10usize),
-                (Lexed::Right(None), 10usize),
-                (Lexed::Start(None), 10usize),
-                (Lexed::Token(None), 10usize),
-                (Lexed::TokenType(None), 10usize),
-                (Lexed::UserData(None), 10usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 10usize);
+            reduce_map.insert(Lexed::EofDef(None), 10usize);
+            reduce_map.insert(Lexed::ErrorType(None), 10usize);
+            reduce_map.insert(Lexed::Ident(None), 10usize);
+            reduce_map.insert(Lexed::Left(None), 10usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 10usize);
+            reduce_map.insert(Lexed::Right(None), 10usize);
+            reduce_map.insert(Lexed::Start(None), 10usize);
+            reduce_map.insert(Lexed::Token(None), 10usize);
+            reduce_map.insert(Lexed::TokenType(None), 10usize);
+            reduce_map.insert(Lexed::UserData(None), 10usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -7644,21 +6559,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 18usize),
-                (Lexed::EofDef(None), 18usize),
-                (Lexed::ErrorType(None), 18usize),
-                (Lexed::Ident(None), 18usize),
-                (Lexed::Left(None), 18usize),
-                (Lexed::ModulePrefix(None), 18usize),
-                (Lexed::Right(None), 18usize),
-                (Lexed::Start(None), 18usize),
-                (Lexed::Token(None), 18usize),
-                (Lexed::TokenType(None), 18usize),
-                (Lexed::UserData(None), 18usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 18usize);
+            reduce_map.insert(Lexed::EofDef(None), 18usize);
+            reduce_map.insert(Lexed::ErrorType(None), 18usize);
+            reduce_map.insert(Lexed::Ident(None), 18usize);
+            reduce_map.insert(Lexed::Left(None), 18usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 18usize);
+            reduce_map.insert(Lexed::Right(None), 18usize);
+            reduce_map.insert(Lexed::Start(None), 18usize);
+            reduce_map.insert(Lexed::Token(None), 18usize);
+            reduce_map.insert(Lexed::TokenType(None), 18usize);
+            reduce_map.insert(Lexed::UserData(None), 18usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -7677,21 +6594,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 20usize),
-                (Lexed::EofDef(None), 20usize),
-                (Lexed::ErrorType(None), 20usize),
-                (Lexed::Ident(None), 20usize),
-                (Lexed::Left(None), 20usize),
-                (Lexed::ModulePrefix(None), 20usize),
-                (Lexed::Right(None), 20usize),
-                (Lexed::Start(None), 20usize),
-                (Lexed::Token(None), 20usize),
-                (Lexed::TokenType(None), 20usize),
-                (Lexed::UserData(None), 20usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 20usize);
+            reduce_map.insert(Lexed::EofDef(None), 20usize);
+            reduce_map.insert(Lexed::ErrorType(None), 20usize);
+            reduce_map.insert(Lexed::Ident(None), 20usize);
+            reduce_map.insert(Lexed::Left(None), 20usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 20usize);
+            reduce_map.insert(Lexed::Right(None), 20usize);
+            reduce_map.insert(Lexed::Start(None), 20usize);
+            reduce_map.insert(Lexed::Token(None), 20usize);
+            reduce_map.insert(Lexed::TokenType(None), 20usize);
+            reduce_map.insert(Lexed::UserData(None), 20usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -7710,21 +6629,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 16usize),
-                (Lexed::EofDef(None), 16usize),
-                (Lexed::ErrorType(None), 16usize),
-                (Lexed::Ident(None), 16usize),
-                (Lexed::Left(None), 16usize),
-                (Lexed::ModulePrefix(None), 16usize),
-                (Lexed::Right(None), 16usize),
-                (Lexed::Start(None), 16usize),
-                (Lexed::Token(None), 16usize),
-                (Lexed::TokenType(None), 16usize),
-                (Lexed::UserData(None), 16usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 16usize);
+            reduce_map.insert(Lexed::EofDef(None), 16usize);
+            reduce_map.insert(Lexed::ErrorType(None), 16usize);
+            reduce_map.insert(Lexed::Ident(None), 16usize);
+            reduce_map.insert(Lexed::Left(None), 16usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 16usize);
+            reduce_map.insert(Lexed::Right(None), 16usize);
+            reduce_map.insert(Lexed::Start(None), 16usize);
+            reduce_map.insert(Lexed::Token(None), 16usize);
+            reduce_map.insert(Lexed::TokenType(None), 16usize);
+            reduce_map.insert(Lexed::UserData(None), 16usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -7743,13 +6664,15 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::Ident(None), 96usize),
-                (Lexed::LBracket(None), 98usize),
-            ]);
-            let shift_goto_map_nonterm =
-                std::collections::HashMap::from([(GrammarNonTerminals::TerminalSet, 102usize)]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(2usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 87usize);
+            shift_goto_map_term.insert(Lexed::LBracket(None), 89usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(1usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSet, 93usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -7784,10 +6707,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Semicolon(None), 97usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(None), 88usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -7806,21 +6732,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 28usize),
-                (Lexed::EofDef(None), 28usize),
-                (Lexed::ErrorType(None), 28usize),
-                (Lexed::Ident(None), 28usize),
-                (Lexed::Left(None), 28usize),
-                (Lexed::ModulePrefix(None), 28usize),
-                (Lexed::Right(None), 28usize),
-                (Lexed::Start(None), 28usize),
-                (Lexed::Token(None), 28usize),
-                (Lexed::TokenType(None), 28usize),
-                (Lexed::UserData(None), 28usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 28usize);
+            reduce_map.insert(Lexed::EofDef(None), 28usize);
+            reduce_map.insert(Lexed::ErrorType(None), 28usize);
+            reduce_map.insert(Lexed::Ident(None), 28usize);
+            reduce_map.insert(Lexed::Left(None), 28usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 28usize);
+            reduce_map.insert(Lexed::Right(None), 28usize);
+            reduce_map.insert(Lexed::Start(None), 28usize);
+            reduce_map.insert(Lexed::Token(None), 28usize);
+            reduce_map.insert(Lexed::TokenType(None), 28usize);
+            reduce_map.insert(Lexed::UserData(None), 28usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -7839,13 +6767,15 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Caret(None), 43usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([(
-                GrammarNonTerminals::_RustyLRGenerated2,
-                99usize,
-            )]);
-            let reduce_map = std::collections::HashMap::from([(Lexed::Ident(None), 53usize)]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Caret(None), 34usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(1usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated2, 90usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(1usize);
+            reduce_map.insert(Lexed::Ident(None), 53usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -7880,13 +6810,15 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Ident(None), 45usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([
-                (GrammarNonTerminals::TerminalSetItem, 48usize),
-                (GrammarNonTerminals::_RustyLRGenerated3, 100usize),
-            ]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 36usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(2usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSetItem, 39usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated3, 91usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -7935,13 +6867,15 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([
-                (Lexed::Ident(None), 45usize),
-                (Lexed::RBracket(None), 101usize),
-            ]);
-            let shift_goto_map_nonterm =
-                std::collections::HashMap::from([(GrammarNonTerminals::TerminalSetItem, 51usize)]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(2usize);
+            shift_goto_map_term.insert(Lexed::Ident(None), 36usize);
+            shift_goto_map_term.insert(Lexed::RBracket(None), 92usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(1usize);
+            shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSetItem, 42usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([
                     (
@@ -7983,9 +6917,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([(Lexed::Semicolon(None), 40usize)]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(1usize);
+            reduce_map.insert(Lexed::Semicolon(None), 40usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8004,10 +6942,13 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term =
-                std::collections::HashMap::from([(Lexed::Semicolon(None), 103usize)]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(1usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(None), 94usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(0usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8026,21 +6967,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 29usize),
-                (Lexed::EofDef(None), 29usize),
-                (Lexed::ErrorType(None), 29usize),
-                (Lexed::Ident(None), 29usize),
-                (Lexed::Left(None), 29usize),
-                (Lexed::ModulePrefix(None), 29usize),
-                (Lexed::Right(None), 29usize),
-                (Lexed::Start(None), 29usize),
-                (Lexed::Token(None), 29usize),
-                (Lexed::TokenType(None), 29usize),
-                (Lexed::UserData(None), 29usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 29usize);
+            reduce_map.insert(Lexed::EofDef(None), 29usize);
+            reduce_map.insert(Lexed::ErrorType(None), 29usize);
+            reduce_map.insert(Lexed::Ident(None), 29usize);
+            reduce_map.insert(Lexed::Left(None), 29usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 29usize);
+            reduce_map.insert(Lexed::Right(None), 29usize);
+            reduce_map.insert(Lexed::Start(None), 29usize);
+            reduce_map.insert(Lexed::Token(None), 29usize);
+            reduce_map.insert(Lexed::TokenType(None), 29usize);
+            reduce_map.insert(Lexed::UserData(None), 29usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8059,21 +7002,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 4usize),
-                (Lexed::EofDef(None), 4usize),
-                (Lexed::ErrorType(None), 4usize),
-                (Lexed::Ident(None), 4usize),
-                (Lexed::Left(None), 4usize),
-                (Lexed::ModulePrefix(None), 4usize),
-                (Lexed::Right(None), 4usize),
-                (Lexed::Start(None), 4usize),
-                (Lexed::Token(None), 4usize),
-                (Lexed::TokenType(None), 4usize),
-                (Lexed::UserData(None), 4usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 4usize);
+            reduce_map.insert(Lexed::EofDef(None), 4usize);
+            reduce_map.insert(Lexed::ErrorType(None), 4usize);
+            reduce_map.insert(Lexed::Ident(None), 4usize);
+            reduce_map.insert(Lexed::Left(None), 4usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 4usize);
+            reduce_map.insert(Lexed::Right(None), 4usize);
+            reduce_map.insert(Lexed::Start(None), 4usize);
+            reduce_map.insert(Lexed::Token(None), 4usize);
+            reduce_map.insert(Lexed::TokenType(None), 4usize);
+            reduce_map.insert(Lexed::UserData(None), 4usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8092,21 +7037,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 8usize),
-                (Lexed::EofDef(None), 8usize),
-                (Lexed::ErrorType(None), 8usize),
-                (Lexed::Ident(None), 8usize),
-                (Lexed::Left(None), 8usize),
-                (Lexed::ModulePrefix(None), 8usize),
-                (Lexed::Right(None), 8usize),
-                (Lexed::Start(None), 8usize),
-                (Lexed::Token(None), 8usize),
-                (Lexed::TokenType(None), 8usize),
-                (Lexed::UserData(None), 8usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 8usize);
+            reduce_map.insert(Lexed::EofDef(None), 8usize);
+            reduce_map.insert(Lexed::ErrorType(None), 8usize);
+            reduce_map.insert(Lexed::Ident(None), 8usize);
+            reduce_map.insert(Lexed::Left(None), 8usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 8usize);
+            reduce_map.insert(Lexed::Right(None), 8usize);
+            reduce_map.insert(Lexed::Start(None), 8usize);
+            reduce_map.insert(Lexed::Token(None), 8usize);
+            reduce_map.insert(Lexed::TokenType(None), 8usize);
+            reduce_map.insert(Lexed::UserData(None), 8usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8125,21 +7072,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 6usize),
-                (Lexed::EofDef(None), 6usize),
-                (Lexed::ErrorType(None), 6usize),
-                (Lexed::Ident(None), 6usize),
-                (Lexed::Left(None), 6usize),
-                (Lexed::ModulePrefix(None), 6usize),
-                (Lexed::Right(None), 6usize),
-                (Lexed::Start(None), 6usize),
-                (Lexed::Token(None), 6usize),
-                (Lexed::TokenType(None), 6usize),
-                (Lexed::UserData(None), 6usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 6usize);
+            reduce_map.insert(Lexed::EofDef(None), 6usize);
+            reduce_map.insert(Lexed::ErrorType(None), 6usize);
+            reduce_map.insert(Lexed::Ident(None), 6usize);
+            reduce_map.insert(Lexed::Left(None), 6usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 6usize);
+            reduce_map.insert(Lexed::Right(None), 6usize);
+            reduce_map.insert(Lexed::Start(None), 6usize);
+            reduce_map.insert(Lexed::Token(None), 6usize);
+            reduce_map.insert(Lexed::TokenType(None), 6usize);
+            reduce_map.insert(Lexed::UserData(None), 6usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8158,21 +7107,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 12usize),
-                (Lexed::EofDef(None), 12usize),
-                (Lexed::ErrorType(None), 12usize),
-                (Lexed::Ident(None), 12usize),
-                (Lexed::Left(None), 12usize),
-                (Lexed::ModulePrefix(None), 12usize),
-                (Lexed::Right(None), 12usize),
-                (Lexed::Start(None), 12usize),
-                (Lexed::Token(None), 12usize),
-                (Lexed::TokenType(None), 12usize),
-                (Lexed::UserData(None), 12usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 12usize);
+            reduce_map.insert(Lexed::EofDef(None), 12usize);
+            reduce_map.insert(Lexed::ErrorType(None), 12usize);
+            reduce_map.insert(Lexed::Ident(None), 12usize);
+            reduce_map.insert(Lexed::Left(None), 12usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 12usize);
+            reduce_map.insert(Lexed::Right(None), 12usize);
+            reduce_map.insert(Lexed::Start(None), 12usize);
+            reduce_map.insert(Lexed::Token(None), 12usize);
+            reduce_map.insert(Lexed::TokenType(None), 12usize);
+            reduce_map.insert(Lexed::UserData(None), 12usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8191,21 +7142,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 14usize),
-                (Lexed::EofDef(None), 14usize),
-                (Lexed::ErrorType(None), 14usize),
-                (Lexed::Ident(None), 14usize),
-                (Lexed::Left(None), 14usize),
-                (Lexed::ModulePrefix(None), 14usize),
-                (Lexed::Right(None), 14usize),
-                (Lexed::Start(None), 14usize),
-                (Lexed::Token(None), 14usize),
-                (Lexed::TokenType(None), 14usize),
-                (Lexed::UserData(None), 14usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 14usize);
+            reduce_map.insert(Lexed::EofDef(None), 14usize);
+            reduce_map.insert(Lexed::ErrorType(None), 14usize);
+            reduce_map.insert(Lexed::Ident(None), 14usize);
+            reduce_map.insert(Lexed::Left(None), 14usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 14usize);
+            reduce_map.insert(Lexed::Right(None), 14usize);
+            reduce_map.insert(Lexed::Start(None), 14usize);
+            reduce_map.insert(Lexed::Token(None), 14usize);
+            reduce_map.insert(Lexed::TokenType(None), 14usize);
+            reduce_map.insert(Lexed::UserData(None), 14usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8224,21 +7177,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 21usize),
-                (Lexed::EofDef(None), 21usize),
-                (Lexed::ErrorType(None), 21usize),
-                (Lexed::Ident(None), 21usize),
-                (Lexed::Left(None), 21usize),
-                (Lexed::ModulePrefix(None), 21usize),
-                (Lexed::Right(None), 21usize),
-                (Lexed::Start(None), 21usize),
-                (Lexed::Token(None), 21usize),
-                (Lexed::TokenType(None), 21usize),
-                (Lexed::UserData(None), 21usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 21usize);
+            reduce_map.insert(Lexed::EofDef(None), 21usize);
+            reduce_map.insert(Lexed::ErrorType(None), 21usize);
+            reduce_map.insert(Lexed::Ident(None), 21usize);
+            reduce_map.insert(Lexed::Left(None), 21usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 21usize);
+            reduce_map.insert(Lexed::Right(None), 21usize);
+            reduce_map.insert(Lexed::Start(None), 21usize);
+            reduce_map.insert(Lexed::Token(None), 21usize);
+            reduce_map.insert(Lexed::TokenType(None), 21usize);
+            reduce_map.insert(Lexed::UserData(None), 21usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8257,21 +7212,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 17usize),
-                (Lexed::EofDef(None), 17usize),
-                (Lexed::ErrorType(None), 17usize),
-                (Lexed::Ident(None), 17usize),
-                (Lexed::Left(None), 17usize),
-                (Lexed::ModulePrefix(None), 17usize),
-                (Lexed::Right(None), 17usize),
-                (Lexed::Start(None), 17usize),
-                (Lexed::Token(None), 17usize),
-                (Lexed::TokenType(None), 17usize),
-                (Lexed::UserData(None), 17usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 17usize);
+            reduce_map.insert(Lexed::EofDef(None), 17usize);
+            reduce_map.insert(Lexed::ErrorType(None), 17usize);
+            reduce_map.insert(Lexed::Ident(None), 17usize);
+            reduce_map.insert(Lexed::Left(None), 17usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 17usize);
+            reduce_map.insert(Lexed::Right(None), 17usize);
+            reduce_map.insert(Lexed::Start(None), 17usize);
+            reduce_map.insert(Lexed::Token(None), 17usize);
+            reduce_map.insert(Lexed::TokenType(None), 17usize);
+            reduce_map.insert(Lexed::UserData(None), 17usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8290,21 +7247,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 5usize),
-                (Lexed::EofDef(None), 5usize),
-                (Lexed::ErrorType(None), 5usize),
-                (Lexed::Ident(None), 5usize),
-                (Lexed::Left(None), 5usize),
-                (Lexed::ModulePrefix(None), 5usize),
-                (Lexed::Right(None), 5usize),
-                (Lexed::Start(None), 5usize),
-                (Lexed::Token(None), 5usize),
-                (Lexed::TokenType(None), 5usize),
-                (Lexed::UserData(None), 5usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 5usize);
+            reduce_map.insert(Lexed::EofDef(None), 5usize);
+            reduce_map.insert(Lexed::ErrorType(None), 5usize);
+            reduce_map.insert(Lexed::Ident(None), 5usize);
+            reduce_map.insert(Lexed::Left(None), 5usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 5usize);
+            reduce_map.insert(Lexed::Right(None), 5usize);
+            reduce_map.insert(Lexed::Start(None), 5usize);
+            reduce_map.insert(Lexed::Token(None), 5usize);
+            reduce_map.insert(Lexed::TokenType(None), 5usize);
+            reduce_map.insert(Lexed::UserData(None), 5usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8323,21 +7282,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 9usize),
-                (Lexed::EofDef(None), 9usize),
-                (Lexed::ErrorType(None), 9usize),
-                (Lexed::Ident(None), 9usize),
-                (Lexed::Left(None), 9usize),
-                (Lexed::ModulePrefix(None), 9usize),
-                (Lexed::Right(None), 9usize),
-                (Lexed::Start(None), 9usize),
-                (Lexed::Token(None), 9usize),
-                (Lexed::TokenType(None), 9usize),
-                (Lexed::UserData(None), 9usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 9usize);
+            reduce_map.insert(Lexed::EofDef(None), 9usize);
+            reduce_map.insert(Lexed::ErrorType(None), 9usize);
+            reduce_map.insert(Lexed::Ident(None), 9usize);
+            reduce_map.insert(Lexed::Left(None), 9usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 9usize);
+            reduce_map.insert(Lexed::Right(None), 9usize);
+            reduce_map.insert(Lexed::Start(None), 9usize);
+            reduce_map.insert(Lexed::Token(None), 9usize);
+            reduce_map.insert(Lexed::TokenType(None), 9usize);
+            reduce_map.insert(Lexed::UserData(None), 9usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8356,21 +7317,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 7usize),
-                (Lexed::EofDef(None), 7usize),
-                (Lexed::ErrorType(None), 7usize),
-                (Lexed::Ident(None), 7usize),
-                (Lexed::Left(None), 7usize),
-                (Lexed::ModulePrefix(None), 7usize),
-                (Lexed::Right(None), 7usize),
-                (Lexed::Start(None), 7usize),
-                (Lexed::Token(None), 7usize),
-                (Lexed::TokenType(None), 7usize),
-                (Lexed::UserData(None), 7usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 7usize);
+            reduce_map.insert(Lexed::EofDef(None), 7usize);
+            reduce_map.insert(Lexed::ErrorType(None), 7usize);
+            reduce_map.insert(Lexed::Ident(None), 7usize);
+            reduce_map.insert(Lexed::Left(None), 7usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 7usize);
+            reduce_map.insert(Lexed::Right(None), 7usize);
+            reduce_map.insert(Lexed::Start(None), 7usize);
+            reduce_map.insert(Lexed::Token(None), 7usize);
+            reduce_map.insert(Lexed::TokenType(None), 7usize);
+            reduce_map.insert(Lexed::UserData(None), 7usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8389,21 +7352,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 13usize),
-                (Lexed::EofDef(None), 13usize),
-                (Lexed::ErrorType(None), 13usize),
-                (Lexed::Ident(None), 13usize),
-                (Lexed::Left(None), 13usize),
-                (Lexed::ModulePrefix(None), 13usize),
-                (Lexed::Right(None), 13usize),
-                (Lexed::Start(None), 13usize),
-                (Lexed::Token(None), 13usize),
-                (Lexed::TokenType(None), 13usize),
-                (Lexed::UserData(None), 13usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 13usize);
+            reduce_map.insert(Lexed::EofDef(None), 13usize);
+            reduce_map.insert(Lexed::ErrorType(None), 13usize);
+            reduce_map.insert(Lexed::Ident(None), 13usize);
+            reduce_map.insert(Lexed::Left(None), 13usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 13usize);
+            reduce_map.insert(Lexed::Right(None), 13usize);
+            reduce_map.insert(Lexed::Start(None), 13usize);
+            reduce_map.insert(Lexed::Token(None), 13usize);
+            reduce_map.insert(Lexed::TokenType(None), 13usize);
+            reduce_map.insert(Lexed::UserData(None), 13usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8422,21 +7387,23 @@ impl GrammarParser {
             states.push(state);
         }
         {
-            let shift_goto_map_term = std::collections::HashMap::from([]);
-            let shift_goto_map_nonterm = std::collections::HashMap::from([]);
-            let reduce_map = std::collections::HashMap::from([
-                (Lexed::Eof, 15usize),
-                (Lexed::EofDef(None), 15usize),
-                (Lexed::ErrorType(None), 15usize),
-                (Lexed::Ident(None), 15usize),
-                (Lexed::Left(None), 15usize),
-                (Lexed::ModulePrefix(None), 15usize),
-                (Lexed::Right(None), 15usize),
-                (Lexed::Start(None), 15usize),
-                (Lexed::Token(None), 15usize),
-                (Lexed::TokenType(None), 15usize),
-                (Lexed::UserData(None), 15usize),
-            ]);
+            let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_term.reserve(0usize);
+            let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
+            shift_goto_map_nonterm.reserve(0usize);
+            let mut reduce_map = ::rusty_lr_core::HashMap::default();
+            reduce_map.reserve(11usize);
+            reduce_map.insert(Lexed::Eof, 15usize);
+            reduce_map.insert(Lexed::EofDef(None), 15usize);
+            reduce_map.insert(Lexed::ErrorType(None), 15usize);
+            reduce_map.insert(Lexed::Ident(None), 15usize);
+            reduce_map.insert(Lexed::Left(None), 15usize);
+            reduce_map.insert(Lexed::ModulePrefix(None), 15usize);
+            reduce_map.insert(Lexed::Right(None), 15usize);
+            reduce_map.insert(Lexed::Start(None), 15usize);
+            reduce_map.insert(Lexed::Token(None), 15usize);
+            reduce_map.insert(Lexed::TokenType(None), 15usize);
+            reduce_map.insert(Lexed::UserData(None), 15usize);
             let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
                 rules: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::ShiftedRuleRef {

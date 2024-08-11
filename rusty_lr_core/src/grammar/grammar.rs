@@ -1,12 +1,12 @@
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
-use std::collections::HashMap;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::hash::Hash;
 use std::vec::Vec;
 
 use super::error::BuildError;
+use crate::hashmap::HashMap;
 use crate::parser::parser::Parser;
 use crate::rule::*;
 use crate::state::State;
@@ -24,20 +24,31 @@ pub struct Grammar<Term, NonTerm> {
 
     /// reduce type for each terminal symbols for resolving shift/reduce conflict
     reduce_types: HashMap<Term, ReduceType>,
+
+    /// rules for each nonterminals
+    rules_map: HashMap<NonTerm, Vec<usize>>,
 }
 
 impl<Term, NonTerm> Grammar<Term, NonTerm> {
     pub fn new() -> Self {
         Grammar {
             rules: Vec::new(),
-            firsts: HashMap::new(),
-            reduce_types: HashMap::new(),
+            firsts: Default::default(),
+            reduce_types: Default::default(),
+            rules_map: Default::default(),
         }
     }
 
     /// add new production rule for given nonterminal 'name'
-    pub fn add_rule(&mut self, name: NonTerm, rule: Vec<Token<Term, NonTerm>>) -> usize {
+    pub fn add_rule(&mut self, name: NonTerm, rule: Vec<Token<Term, NonTerm>>) -> usize
+    where
+        NonTerm: Clone + Hash + Eq,
+    {
         let id = self.rules.len();
+        self.rules_map
+            .entry(name.clone())
+            .or_insert_with(Vec::new)
+            .push(id);
         let rule = ProductionRule { name, rule };
         self.rules.push(rule);
         id
@@ -148,15 +159,9 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     /// search for every production rules with name 'name'
     fn search_rules(&self, name: &NonTerm) -> Vec<usize>
     where
-        NonTerm: PartialEq,
+        NonTerm: Hash + Eq,
     {
-        let mut ret = Vec::new();
-        for (id, rule) in self.rules.iter().enumerate() {
-            if &rule.name == name {
-                ret.push(id);
-            }
-        }
-        ret
+        self.rules_map.get(name).cloned().unwrap_or_default()
     }
     /// calculate first terminals for each nonterminals
     fn calculate_first(&mut self)
