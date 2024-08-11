@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use std::fmt::Display;
 use std::hash::Hash;
 
-use crate::rule::ShiftedRule;
+use crate::rule::ShiftedRuleRef2;
 use crate::state::State;
 use crate::ProductionRule;
 use crate::ShiftedRuleRef;
@@ -48,75 +48,64 @@ impl<'a, Term, NonTerm, CallbackError, ReduceActionError>
         state_stack: &[usize],
     ) -> Vec<BTreeSet<ShiftedRuleRef>>
     where
-        NonTerm: Eq,
+        NonTerm: PartialEq,
     {
         let mut backtrace = Vec::with_capacity(state_stack.len());
 
-        // if it is on first state, print all rules
-        if state_stack.len() == 1 {
-            backtrace.push(states[0].ruleset.rules.keys().copied().collect());
-            return backtrace;
-        } else {
-            let state = &states[*state_stack.last().unwrap()];
-            let mut cur_rules = BTreeSet::new();
-            for (rule, _) in state.ruleset.rules.iter() {
-                if rule.shifted > 0 {
-                    cur_rules.insert(*rule);
-                }
-            }
-            for prev_state in state_stack.iter().rev().skip(1) {
-                backtrace.push(cur_rules.clone());
+        let state = &states[*state_stack.last().unwrap()];
+        let mut cur_rules: BTreeSet<ShiftedRuleRef> = state.ruleset.rules.keys().copied().collect();
+        for prev_state in state_stack.iter().rev().skip(1) {
+            backtrace.push(cur_rules.clone());
 
-                // prepare for next iteration
-                let mut prev_rules = BTreeSet::new();
-                for mut r in cur_rules.into_iter() {
-                    match r.shifted {
-                        0 => {}
+            // prepare for next iteration
+            let mut prev_rules = BTreeSet::new();
+            for mut r in cur_rules.into_iter() {
+                match r.shifted {
+                    0 => {}
 
-                        _ => {
-                            r.shifted -= 1;
-                            prev_rules.insert(r);
-                        }
+                    _ => {
+                        r.shifted -= 1;
+                        prev_rules.insert(r);
                     }
                 }
+            }
 
-                loop {
-                    let mut add_rules = BTreeSet::new();
-                    for r in prev_rules.iter() {
-                        // this rule's shift == 0,
-                        // it must be added by other rule start with this rule's non-terminal
-                        if r.shifted == 0 {
-                            let rule_name = &rules[r.rule].name;
-                            for (rule, _) in states[*prev_state].ruleset.rules.iter() {
-                                if let Some(Token::NonTerm(next_token)) =
-                                    rules[rule.rule].rule.get(rule.shifted)
-                                {
-                                    if next_token == rule_name {
-                                        add_rules.insert(*rule);
-                                    }
+            loop {
+                let mut add_rules = BTreeSet::new();
+                for r in prev_rules.iter() {
+                    // this rule's shift == 0,
+                    // it must be added by other rule start with this rule's non-terminal
+                    if r.shifted == 0 {
+                        let rule_name = &rules[r.rule].name;
+                        for (rule, _) in states[*prev_state].ruleset.rules.iter() {
+                            if let Some(Token::NonTerm(next_token)) =
+                                rules[rule.rule].rule.get(rule.shifted)
+                            {
+                                if next_token == rule_name {
+                                    add_rules.insert(*rule);
                                 }
                             }
                         }
                     }
-                    let len0 = prev_rules.len();
-                    prev_rules.append(&mut add_rules);
-                    if prev_rules.len() == len0 {
-                        break;
-                    }
                 }
-
-                cur_rules = prev_rules;
+                let len0 = prev_rules.len();
+                prev_rules.append(&mut add_rules);
+                if prev_rules.len() == len0 {
+                    break;
+                }
             }
-            backtrace.push(cur_rules);
-            backtrace
+
+            cur_rules = prev_rules;
         }
+        backtrace.push(cur_rules);
+        backtrace
     }
 }
 
 impl<
         'a,
-        Term: Display + Clone + Ord + Hash + Eq,
-        NonTerm: Display + Clone + Eq,
+        Term: Display + Hash + Eq,
+        NonTerm: Display + PartialEq,
         CallbackError: Display,
         ReduceActionError: Display,
     > Display for ParseError<'a, Term, NonTerm, CallbackError, ReduceActionError>
@@ -129,7 +118,7 @@ impl<
                 writeln!(f, "Invalid NonTerminal: {}", nonterm)?;
                 let state = &states[*state_stack.last().unwrap()];
 
-                let expected: BTreeSet<Term> = state.expected().into_iter().collect();
+                let expected = state.expected();
                 if expected.is_empty() {
                     writeln!(f, "No expected token")?;
                 } else {
@@ -153,8 +142,8 @@ impl<
                         writeln!(f, "{:-^80}", "Prev state")?;
                     }
                     for rule in ruleset.iter() {
-                        let shifted = ShiftedRule {
-                            rule: rules[rule.rule].clone(),
+                        let shifted = ShiftedRuleRef2 {
+                            rule: &rules[rule.rule],
                             shifted: rule.shifted,
                         };
                         writeln!(f, "{}", shifted)?;
@@ -165,7 +154,7 @@ impl<
                 writeln!(f, "Invalid Terminal: {}", term,)?;
                 let state = &states[*state_stack.last().unwrap()];
 
-                let expected: BTreeSet<Term> = state.expected().into_iter().collect();
+                let expected = state.expected();
                 if expected.is_empty() {
                     writeln!(f, "No expected token")?;
                 } else {
@@ -189,8 +178,8 @@ impl<
                         writeln!(f, "{:-^80}", "Prev state")?;
                     }
                     for rule in ruleset.iter() {
-                        let shifted = ShiftedRule {
-                            rule: rules[rule.rule].clone(),
+                        let shifted = ShiftedRuleRef2 {
+                            rule: &rules[rule.rule],
                             shifted: rule.shifted,
                         };
                         writeln!(f, "{}", shifted)?;
@@ -209,8 +198,8 @@ impl<
 }
 impl<
         'a,
-        Term: Debug + Clone + Ord + Hash + Eq,
-        NonTerm: Debug + Clone + Eq,
+        Term: Debug + Hash + Eq,
+        NonTerm: Debug + PartialEq,
         CallbackError: Debug,
         ReduceActionError: Debug,
     > Debug for ParseError<'a, Term, NonTerm, CallbackError, ReduceActionError>
@@ -223,7 +212,7 @@ impl<
                 writeln!(f, "Invalid NonTerminal: {:?}", nonterm)?;
                 let state = &states[*state_stack.last().unwrap()];
 
-                let expected: BTreeSet<Term> = state.expected().into_iter().collect();
+                let expected = state.expected();
                 if expected.is_empty() {
                     writeln!(f, "No expected token")?;
                 } else {
@@ -247,8 +236,8 @@ impl<
                         writeln!(f, "{:-^80}", "Prev state")?;
                     }
                     for rule in ruleset.iter() {
-                        let shifted = ShiftedRule {
-                            rule: rules[rule.rule].clone(),
+                        let shifted = ShiftedRuleRef2 {
+                            rule: &rules[rule.rule],
                             shifted: rule.shifted,
                         };
                         writeln!(f, "{:?}", shifted)?;
@@ -259,7 +248,7 @@ impl<
                 writeln!(f, "Invalid Terminal: {:?}", term,)?;
                 let state = &states[*state_stack.last().unwrap()];
 
-                let expected: BTreeSet<Term> = state.expected().into_iter().collect();
+                let expected = state.expected();
                 if expected.is_empty() {
                     writeln!(f, "No expected token")?;
                 } else {
@@ -283,8 +272,8 @@ impl<
                         writeln!(f, "{:-^80}", "Prev state")?;
                     }
                     for rule in ruleset.iter() {
-                        let shifted = ShiftedRule {
-                            rule: rules[rule.rule].clone(),
+                        let shifted = ShiftedRuleRef2 {
+                            rule: &rules[rule.rule],
                             shifted: rule.shifted,
                         };
                         writeln!(f, "{:?}", shifted)?;

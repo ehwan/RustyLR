@@ -47,7 +47,7 @@ impl Grammar {
         } else {
             self.nonterm_typenames
                 .get(ident)
-                .expect(&format!("get_typename: {}", ident))
+                .unwrap_or_else(|| panic!("get_typename: {}", ident))
                 .as_ref()
         }
     }

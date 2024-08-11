@@ -110,6 +110,8 @@ fn main() {
     };
 
     // this comments will be printed to the output file
+    // build again here whether it was built before
+    // since many informations are removed in the rusty_lr_parser output
     let mut debug_comments = String::new();
     {
         let parser = match grammar.create_grammar() {
@@ -180,22 +182,22 @@ fn main() {
                 if !reduce_first.is_empty() {
                     debug_comments.push_str("Tokens for reduce: ");
                     for (id, token) in reduce_first.iter().enumerate() {
-                        debug_comments.push_str(format!("{}", token).as_str());
+                        debug_comments.push_str(&token.to_string());
                         if id < reduce_first.len() - 1 {
                             debug_comments.push_str(", ");
                         }
                     }
-                    debug_comments.push_str("\n");
+                    debug_comments.push('\n');
                 }
                 if !shift_first.is_empty() {
                     debug_comments.push_str("Tokens for shift: ");
                     for (id, token) in shift_first.iter().enumerate() {
-                        debug_comments.push_str(format!("{}", token).as_str());
+                        debug_comments.push_str(&token.to_string());
                         if id < shift_first.len() - 1 {
                             debug_comments.push_str(", ");
                         }
                     }
-                    debug_comments.push_str("\n");
+                    debug_comments.push('\n');
                 }
             }
         }

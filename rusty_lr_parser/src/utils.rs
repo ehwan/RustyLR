@@ -23,10 +23,10 @@ pub(crate) fn generate_enum_name(rule_name: &Ident) -> Ident {
 
 /// check if the given identifier is reserved name
 pub(crate) fn check_reserved_name(ident: &Ident) -> Result<(), ParseError> {
-    if ident.to_string() == AUGMENTED_NAME {
+    if ident == AUGMENTED_NAME {
         return Err(ParseError::AugmentedDefined(ident.clone()));
     }
-    if ident.to_string() == EOF_NAME {
+    if ident == EOF_NAME {
         return Err(ParseError::EofDefined(ident.clone()));
     }
     Ok(())

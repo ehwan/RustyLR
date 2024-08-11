@@ -54,45 +54,6 @@ pub enum Lexed {
     Eof,
 }
 impl Lexed {
-    pub fn enum_index(&self) -> usize {
-        match self {
-            Lexed::Ident(_) => 0,
-            Lexed::Colon(_) => 1,
-            Lexed::Semicolon(_) => 2,
-            Lexed::Pipe(_) => 3,
-            Lexed::Percent(_) => 4,
-            Lexed::Literal(_) => 5,
-            Lexed::Equal(_) => 6,
-            Lexed::Plus(_) => 7,
-            Lexed::Star(_) => 8,
-            Lexed::Question(_) => 9,
-            Lexed::Caret(_) => 10,
-            Lexed::Minus(_) => 11,
-            Lexed::OtherPunct(_) => 12,
-
-            Lexed::ParenGroup(_) => 13,
-            Lexed::BraceGroup(_) => 14,
-            Lexed::BracketGroup(_) => 15,
-            Lexed::NoneGroup(_) => 16,
-            Lexed::LParen(_) => 17,
-            Lexed::RParen(_) => 18,
-            Lexed::LBrace(_) => 19,
-            Lexed::RBrace(_) => 20,
-            Lexed::LBracket(_) => 21,
-            Lexed::RBracket(_) => 22,
-
-            Lexed::Left(_) => 23,
-            Lexed::Right(_) => 24,
-            Lexed::Token(_) => 25,
-            Lexed::Start(_) => 26,
-            Lexed::EofDef(_) => 27,
-            Lexed::TokenType(_) => 28,
-            Lexed::UserData(_) => 29,
-            Lexed::ErrorType(_) => 30,
-            Lexed::ModulePrefix(_) => 31,
-            Lexed::Eof => 32,
-        }
-    }
     pub fn stream(self) -> TokenStream {
         match self {
             Lexed::Ident(ident) => ident.unwrap().to_token_stream(),
@@ -247,25 +208,15 @@ impl std::fmt::Display for Lexed {
 }
 impl std::hash::Hash for Lexed {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.enum_index().hash(state);
+        std::mem::discriminant(self).hash(state);
     }
 }
 impl PartialEq for Lexed {
     fn eq(&self, other: &Self) -> bool {
-        self.enum_index() == other.enum_index()
+        std::mem::discriminant(self).eq(&std::mem::discriminant(other))
     }
 }
 impl Eq for Lexed {}
-impl std::cmp::PartialOrd for Lexed {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-impl std::cmp::Ord for Lexed {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.enum_index().cmp(&other.enum_index())
-    }
-}
 
 /// lex & feed stream to parser
 /// For '%' directives and 'Group' variants,

@@ -53,15 +53,14 @@ impl<Term, NonTerm> State<Term, NonTerm> {
     }
 
     /// get expected terms set
-    pub fn expected(&self) -> HashSet<Term>
+    pub fn expected<'a>(&'a self) -> HashSet<&Term>
     where
-        Term: Clone + Hash + Eq,
+        Term: Hash + Eq,
     {
         HashSet::from_iter(
             self.shift_goto_map_term
                 .keys()
-                .chain(self.reduce_map.keys())
-                .cloned(),
+                .chain(self.reduce_map.keys()),
         )
     }
 }
@@ -80,5 +79,11 @@ impl<Term: Display, NonTerm: Display> Display for State<Term, NonTerm> {
             writeln!(f, "{}: {}", token, action)?;
         }
         Ok(())
+    }
+}
+
+impl<Term, NonTerm> Default for State<Term, NonTerm> {
+    fn default() -> Self {
+        Self::new()
     }
 }

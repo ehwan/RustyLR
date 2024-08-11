@@ -45,10 +45,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         NonTerm: Clone + Hash + Eq,
     {
         let id = self.rules.len();
-        self.rules_map
-            .entry(name.clone())
-            .or_insert_with(Vec::new)
-            .push(id);
+        self.rules_map.entry(name.clone()).or_default().push(id);
         let rule = ProductionRule { name, rule };
         self.rules.push(rule);
         id
@@ -502,7 +499,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 states[new_state_id]
                     .ruleset
                     .rules
-                    .insert(shifted_rule.clone(), BTreeSet::new());
+                    .insert(*shifted_rule, BTreeSet::new());
             }
             new_state_id
         });
@@ -674,5 +671,11 @@ impl<Term: Display, NonTerm: Display> Display for Grammar<Term, NonTerm> {
         }
 
         Ok(())
+    }
+}
+
+impl<Term, NonTerm> Default for Grammar<Term, NonTerm> {
+    fn default() -> Self {
+        Self::new()
     }
 }

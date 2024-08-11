@@ -127,9 +127,11 @@ impl Grammar {
         // =========================Writing States==============================
         // =====================================================================
 
-        let mut lookaheads_definition_stream = TokenStream::new();
-        let mut lookaheads_map: BTreeMap<_, Ident> = BTreeMap::new();
         let mut write_states = TokenStream::new();
+
+        // writing lookaheads are removed
+        // since it is not used in runtime
+        // and it takes too much space
 
         {
             let state_len = parser.states.len();
@@ -195,34 +197,7 @@ impl Grammar {
             }
 
             let mut comma_separated_ruleset = quote! {};
-            for (rule, lookaheads) in state.ruleset.rules.iter() {
-                let lookaheads_ident = if let Some(lookaheads_ident) =
-                    lookaheads_map.get(lookaheads)
-                {
-                    lookaheads_ident.clone()
-                } else {
-                    let new_ident =
-                        format_ident!("rustylr_macrogenerated_lookaheads_{}", lookaheads_map.len());
-                    lookaheads_map.insert(lookaheads.clone(), new_ident.clone());
-
-                    let mut comma_separated_lookaheads = TokenStream::new();
-                    for lookahead_name in lookaheads.iter() {
-                        let (_, term_stream) = self
-                            .terminals
-                            .get(&Ident::new(lookahead_name, Span::call_site()))
-                            .unwrap();
-                        comma_separated_lookaheads.extend(quote! {#term_stream,});
-                    }
-
-                    lookaheads_definition_stream.extend(quote! {
-                        let #new_ident = std::collections::BTreeSet::from(
-                            [ #comma_separated_lookaheads ]
-                        );
-                    });
-
-                    new_ident
-                };
-
+            for (rule, _lookaheads) in state.ruleset.rules.iter() {
                 let rule_id = rule.rule;
                 let shifted = rule.shifted;
                 comma_separated_ruleset.extend(quote! {
@@ -231,7 +206,7 @@ impl Grammar {
                             rule: #rule_id,
                             shifted: #shifted,
                         },
-                        #lookaheads_ident.clone(),
+                        Default::default(),
                     ),
                 });
             }
@@ -259,7 +234,6 @@ impl Grammar {
 
         Ok(quote! {
             #write_rules
-            #lookaheads_definition_stream
             #write_states
         })
     }
@@ -402,7 +376,7 @@ impl Grammar {
         // TokenStream to define reduce function for each production rule
         let mut fn_reduce_for_each_rule_stream = TokenStream::new();
 
-        for (name_ident, rules) in self.rules.iter() {
+        for (name, rules) in self.rules.iter() {
             for (rule_local_id, rule) in rules.rule_lines.iter().enumerate() {
                 let mut token_pop_stream = TokenStream::new();
                 for token in rule.tokens.iter().rev() {
@@ -429,7 +403,7 @@ impl Grammar {
                     }
                 }
 
-                let reduce_fn_ident = format_ident!("reduce_{}_{}", name_ident, rule_local_id);
+                let reduce_fn_ident = format_ident!("reduce_{}_{}", name, rule_local_id);
 
                 case_streams.extend(quote! {
                     #ruleid => {
@@ -439,10 +413,10 @@ impl Grammar {
 
                 // if typename is defined for this rule, push result of action to stack
                 // else, just execute action
-                let typename = self.nonterm_typenames.get(&name_ident).unwrap();
+                let typename = self.nonterm_typenames.get(name).unwrap();
                 if typename.is_some() {
                     // push result to this stack
-                    let stack_name = utils::generate_stack_name(name_ident);
+                    let stack_name = utils::generate_stack_name(name);
 
                     // typename is defined, reduce action must be defined
                     if let Some(action) = &rule.reduce_action {
@@ -481,7 +455,7 @@ impl Grammar {
                             });
                         } else {
                             return Err(ParseError::RuleTypeDefinedButActionNotDefined(
-                                name_ident.clone(),
+                                name.clone(),
                             ));
                         }
                     }
@@ -514,7 +488,7 @@ impl Grammar {
         // and pop from start rule stack
         let start_rule_name = &self.start_rule_name;
         let (start_rule_typename, pop_from_start_rule_stack) = {
-            if let Some(start_typename) = &self.nonterm_typenames.get(&start_rule_name).unwrap() {
+            if let Some(start_typename) = &self.nonterm_typenames.get(start_rule_name).unwrap() {
                 let start_rule_stack_name = utils::generate_stack_name(start_rule_name);
                 (
                     start_typename.clone(),
@@ -644,10 +618,10 @@ impl Grammar {
                         self.rules[reduce_rule].rule.len(),
                         reduce_rule,
                         #user_data_var
-                    ).map_err(|e| #module_prefix::ParseError::ReduceAction(e))?;
+                    ).map_err(#module_prefix::ParseError::ReduceAction)?;
                     callback
                         .reduce(&self.rules, &self.states, &context.state_stack, reduce_rule)
-                        .map_err(|e| #module_prefix::ParseError::Callback(e))?;
+                        .map_err(#module_prefix::ParseError::Callback)?;
 
 
                     // feed reduced token
@@ -688,7 +662,7 @@ impl Grammar {
                     context.state_stack.push(next_state_id);
                     callback
                         .shift_and_goto(&self.rules, &self.states, &context.state_stack, &term)
-                        .map_err(|e| #module_prefix::ParseError::Callback(e))?;
+                        .map_err(#module_prefix::ParseError::Callback)?;
 
                     context.push( term );
 
@@ -719,7 +693,7 @@ impl Grammar {
                     context.state_stack.push(next_state_id);
                     callback
                         .shift_and_goto_nonterm(&self.rules, &self.states, &context.state_stack, nonterm)
-                        .map_err(|e| #module_prefix::ParseError::Callback(e))?;
+                        .map_err(#module_prefix::ParseError::Callback)?;
                     Ok(())
                 }else {
                     Err(#module_prefix::ParseError::InvalidNonTerminal(

@@ -75,6 +75,49 @@ pub struct ShiftedRuleRef {
 /// name -> Token1 Token2 . Token3
 ///
 ///         ^^^^^^^^^^^^^ shifted = 2
+/// This struct is only for Display purpose.
+#[derive(Clone)]
+pub(crate) struct ShiftedRuleRef2<'a, Term, NonTerm> {
+    pub rule: &'a ProductionRule<Term, NonTerm>,
+    pub shifted: usize,
+}
+impl<'a, Term: Display, NonTerm: Display> Display for ShiftedRuleRef2<'a, Term, NonTerm> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} -> ", self.rule.name)?;
+        for (id, token) in self.rule.rule.iter().enumerate() {
+            if id == self.shifted {
+                write!(f, "• ")?;
+            }
+            write!(f, "{}", token)?;
+            if id < self.rule.rule.len() - 1 {
+                write!(f, " ")?;
+            }
+        }
+        if self.shifted == self.rule.rule.len() {
+            write!(f, " •")?;
+        }
+        Ok(())
+    }
+}
+impl<'a, Term: Debug, NonTerm: Debug> Debug for ShiftedRuleRef2<'a, Term, NonTerm> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?} -> ", self.rule.name)?;
+        for (id, token) in self.rule.rule.iter().enumerate() {
+            if id == self.shifted {
+                write!(f, "• ")?;
+            }
+            write!(f, "{:?}", token)?;
+            if id < self.rule.rule.len() - 1 {
+                write!(f, " ")?;
+            }
+        }
+        if self.shifted == self.rule.rule.len() {
+            write!(f, " •")?;
+        }
+        Ok(())
+    }
+}
+
 #[derive(Clone)]
 pub struct ShiftedRule<Term, NonTerm> {
     pub rule: ProductionRule<Term, NonTerm>,

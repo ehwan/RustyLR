@@ -3,7 +3,7 @@ yacc-like LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from C
 
 ```
 [dependencies]
-rusty_lr = "1.4.0"
+rusty_lr = "1.5.0"
 ```
 
 ## Features
