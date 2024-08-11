@@ -5,6 +5,8 @@ use crate::parser::args::RuleDefArgs;
 use crate::parser::args::RuleLineArgs;
 use crate::parser::lexer::Lexed;
 use crate::parser::args::ReduceTypeArgs;
+use crate::terminalset::TerminalSet;
+use crate::terminalset::TerminalSetItem;
 
 use proc_macro2::Group;
 use proc_macro2::Ident;
@@ -32,18 +34,6 @@ use rusty_lr_core::ReduceType;
 %token semicolon Lexed::Semicolon(None);
 %token pipe Lexed::Pipe(None);
 %token percent Lexed::Percent(None);
-%token left Lexed::Left(None);
-%token right Lexed::Right(None);
-%token token Lexed::Token(None);
-%token start Lexed::Start(None);
-%token eofdef Lexed::EofDef(None);
-%token tokentype Lexed::TokenType(None);
-%token userdata Lexed::UserData(None);
-%token errortype Lexed::ErrorType(None);
-%token parengroup Lexed::ParenGroup(None);
-%token bracegroup Lexed::BraceGroup(None);
-%token bracketgroup Lexed::BracketGroup(None);
-%token othergroup Lexed::OtherGroup(None);
 %token literal Lexed::Literal(None);
 %token equal Lexed::Equal(None);
 %token plus Lexed::Plus(None);
@@ -52,6 +42,27 @@ use rusty_lr_core::ReduceType;
 %token caret Lexed::Caret(None);
 %token minus Lexed::Minus(None);
 %token otherpunct Lexed::OtherPunct(None);
+
+%token parengroup Lexed::ParenGroup(None);
+%token bracegroup Lexed::BraceGroup(None);
+%token bracketgroup Lexed::BracketGroup(None);
+%token nonegroup Lexed::NoneGroup(None);
+
+%token lparen Lexed::LParen(None);
+%token rparen Lexed::RParen(None);
+%token lbrace Lexed::LBrace(None);
+%token rbrace Lexed::RBrace(None);
+%token lbracket Lexed::LBracket(None);
+%token rbracket Lexed::RBracket(None);
+
+%token left Lexed::Left(None);
+%token right Lexed::Right(None);
+%token token Lexed::Token(None);
+%token start Lexed::Start(None);
+%token eofdef Lexed::EofDef(None);
+%token tokentype Lexed::TokenType(None);
+%token userdata Lexed::UserData(None);
+%token errortype Lexed::ErrorType(None);
 %token moduleprefix Lexed::ModulePrefix(None);
 %eof Lexed::Eof;
 
@@ -113,6 +124,38 @@ TokenMapped((Option<Ident>, PatternArgs)): Pattern {
 }
 ;
 
+TerminalSetItem(TerminalSetItem): ident {
+    let ident = if let Lexed::Ident(ident) = ident {
+        ident.expect("TerminalSetItem-Range0")
+    }else {
+        unreachable!( "TerminalSetItem-Range1" );
+    };
+    TerminalSetItem::Terminal( ident )
+}
+| first=ident minus last=ident {
+    let first = if let Lexed::Ident(first) = first {
+        first.expect("TerminalSetItem-Range0")
+    }else {
+        unreachable!( "TerminalSetItem-Range1" );
+    };
+    let last = if let Lexed::Ident(last) = last {
+        last.expect("TerminalSetItem-Range2")
+    }else {
+        unreachable!( "TerminalSetItem-Range3" );
+    };
+
+    TerminalSetItem::Range( first, last )
+}
+;
+
+TerminalSet(TerminalSet): lbracket caret? TerminalSetItem+ rbracket {
+    TerminalSet {
+      negate: caret.is_some(),
+      items: TerminalSetItem,
+    }
+}
+;
+
 Pattern(PatternArgs): ident {
     if let Lexed::Ident(ident) = ident {
         PatternArgs::Ident( ident.expect("Pattern-Ident") )
@@ -129,12 +172,8 @@ Pattern(PatternArgs): ident {
 | Pattern question {
     PatternArgs::Question( Box::new(Pattern) )
 }
-| bracketgroup {
-    if let Lexed::BracketGroup(group) = bracketgroup {
-        PatternArgs::TerminalSet( group.expect("Pattern-BracketGroup0") )
-    }else {
-        unreachable!( "Pattern-BracketGroup1" );
-    }
+| TerminalSet {
+    PatternArgs::TerminalSet( TerminalSet )
 }
 ;
 
@@ -159,7 +198,7 @@ TokenDef((Ident, TokenStream)): token ident RustCode semicolon
 }
 ;
 
-RustCode(TokenStream): t=[^semicolon]+ {
+RustCode(TokenStream): t=[^semicolon lparen rparen lbrace rbrace lbracket rbracket]+ {
     let mut tokens = TokenStream::new();
     for token in t.into_iter() {
         tokens.extend( token.stream() );
@@ -193,12 +232,8 @@ ReduceDef((ReduceTypeArgs, ReduceType)): reducetype=ReduceType ident semicolon {
         unreachable!( "ReduceDef-Ident (Left)" );
     }
 }
-| reducetype=ReduceType bracketgroup semicolon {
-    if let Lexed::BracketGroup(group) = bracketgroup {
-        ( ReduceTypeArgs::TerminalSet(group.expect("ReduceDef-BracketGroup")), reducetype )
-    }else {
-        unreachable!( "Pattern-BracketGroup1" );
-    }
+| reducetype=ReduceType TerminalSet semicolon {
+    ( ReduceTypeArgs::TerminalSet( TerminalSet ), reducetype )
 }
 ;
 

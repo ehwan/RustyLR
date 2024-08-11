@@ -1,4 +1,8 @@
 use proc_macro2::Delimiter;
+use proc_macro2::Group;
+use proc_macro2::Ident;
+use proc_macro2::Literal;
+use proc_macro2::Punct;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use proc_macro2::TokenTree;
@@ -6,34 +10,47 @@ use proc_macro2::TokenTree;
 use quote::quote;
 use quote::ToTokens;
 
+use super::parser_expanded::GrammarContext;
+use super::parser_expanded::GrammarNonTerminals;
+use super::parser_expanded::GrammarParser;
+use crate::error::ParseError;
+
 #[derive(Clone, Debug)]
 pub enum Lexed {
-    Ident(Option<proc_macro2::Ident>),
-    Colon(Option<proc_macro2::Punct>),
-    Semicolon(Option<proc_macro2::Punct>),
-    Pipe(Option<proc_macro2::Punct>),
-    Percent(Option<proc_macro2::Punct>),
-    Left(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %left, %l, %reduce
-    Right(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %right, %r, %shift
-    Token(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %token
-    Start(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %start
-    EofDef(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %eof
-    TokenType(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %tokentype
-    UserData(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %userdata
-    ErrorType(Option<(proc_macro2::Punct, proc_macro2::Ident)>), // %err %error
-    ModulePrefix(Option<(proc_macro2::Punct, proc_macro2::Ident)>),
-    ParenGroup(Option<proc_macro2::Group>),
-    BraceGroup(Option<proc_macro2::Group>),
-    BracketGroup(Option<proc_macro2::Group>),
-    OtherGroup(Option<proc_macro2::Group>),
-    Literal(Option<proc_macro2::Literal>),
-    Equal(Option<proc_macro2::Punct>),
-    Plus(Option<proc_macro2::Punct>),
-    Star(Option<proc_macro2::Punct>),
-    Question(Option<proc_macro2::Punct>),
-    Caret(Option<proc_macro2::Punct>),
-    Minus(Option<proc_macro2::Punct>),
-    OtherPunct(Option<proc_macro2::Punct>),
+    Ident(Option<Ident>),
+    Colon(Option<Punct>),
+    Semicolon(Option<Punct>),
+    Pipe(Option<Punct>),
+    Percent(Option<Punct>),
+    Literal(Option<Literal>),
+    Equal(Option<Punct>),
+    Plus(Option<Punct>),
+    Star(Option<Punct>),
+    Question(Option<Punct>),
+    Caret(Option<Punct>),
+    Minus(Option<Punct>),
+    OtherPunct(Option<Punct>),
+
+    ParenGroup(Option<Group>),
+    BraceGroup(Option<Group>),
+    BracketGroup(Option<Group>),
+    NoneGroup(Option<Group>),
+    LParen(Option<Span>),
+    RParen(Option<Span>),
+    LBrace(Option<Span>),
+    RBrace(Option<Span>),
+    LBracket(Option<Span>),
+    RBracket(Option<Span>),
+
+    Left(Option<(Punct, Ident)>),         // %left, %l, %reduce
+    Right(Option<(Punct, Ident)>),        // %right, %r, %shift
+    Token(Option<(Punct, Ident)>),        // %token
+    Start(Option<(Punct, Ident)>),        // %start
+    EofDef(Option<(Punct, Ident)>),       // %eof
+    TokenType(Option<(Punct, Ident)>),    // %tokentype
+    UserData(Option<(Punct, Ident)>),     // %userdata
+    ErrorType(Option<(Punct, Ident)>),    // %err %error
+    ModulePrefix(Option<(Punct, Ident)>), // %moduleprefix
     Eof,
 }
 impl Lexed {
@@ -44,28 +61,36 @@ impl Lexed {
             Lexed::Semicolon(_) => 2,
             Lexed::Pipe(_) => 3,
             Lexed::Percent(_) => 4,
-            Lexed::Left(_) => 5,
-            Lexed::Right(_) => 6,
-            Lexed::Token(_) => 8,
-            Lexed::Start(_) => 9,
-            Lexed::EofDef(_) => 10,
-            Lexed::TokenType(_) => 11,
-            Lexed::UserData(_) => 12,
-            Lexed::ErrorType(_) => 13,
-            Lexed::ModulePrefix(_) => 14,
-            Lexed::ParenGroup(_) => 15,
-            Lexed::BraceGroup(_) => 16,
-            Lexed::BracketGroup(_) => 17,
-            Lexed::OtherGroup(_) => 18,
-            Lexed::Literal(_) => 19,
-            Lexed::Equal(_) => 20,
-            Lexed::Plus(_) => 21,
-            Lexed::Star(_) => 22,
-            Lexed::Question(_) => 23,
-            Lexed::Caret(_) => 24,
-            Lexed::Minus(_) => 25,
-            Lexed::OtherPunct(_) => 26,
-            Lexed::Eof => 27,
+            Lexed::Literal(_) => 5,
+            Lexed::Equal(_) => 6,
+            Lexed::Plus(_) => 7,
+            Lexed::Star(_) => 8,
+            Lexed::Question(_) => 9,
+            Lexed::Caret(_) => 10,
+            Lexed::Minus(_) => 11,
+            Lexed::OtherPunct(_) => 12,
+
+            Lexed::ParenGroup(_) => 13,
+            Lexed::BraceGroup(_) => 14,
+            Lexed::BracketGroup(_) => 15,
+            Lexed::NoneGroup(_) => 16,
+            Lexed::LParen(_) => 17,
+            Lexed::RParen(_) => 18,
+            Lexed::LBrace(_) => 19,
+            Lexed::RBrace(_) => 20,
+            Lexed::LBracket(_) => 21,
+            Lexed::RBracket(_) => 22,
+
+            Lexed::Left(_) => 23,
+            Lexed::Right(_) => 24,
+            Lexed::Token(_) => 25,
+            Lexed::Start(_) => 26,
+            Lexed::EofDef(_) => 27,
+            Lexed::TokenType(_) => 28,
+            Lexed::UserData(_) => 29,
+            Lexed::ErrorType(_) => 30,
+            Lexed::ModulePrefix(_) => 31,
+            Lexed::Eof => 32,
         }
     }
     pub fn stream(self) -> TokenStream {
@@ -75,6 +100,27 @@ impl Lexed {
             Lexed::Semicolon(punct) => punct.unwrap().to_token_stream(),
             Lexed::Pipe(punct) => punct.unwrap().to_token_stream(),
             Lexed::Percent(punct) => punct.unwrap().to_token_stream(),
+            Lexed::Literal(lit) => lit.unwrap().to_token_stream(),
+            Lexed::Equal(punct) => punct.unwrap().to_token_stream(),
+            Lexed::Plus(punct) => punct.unwrap().to_token_stream(),
+            Lexed::Star(punct) => punct.unwrap().to_token_stream(),
+            Lexed::Question(punct) => punct.unwrap().to_token_stream(),
+            Lexed::Caret(punct) => punct.unwrap().to_token_stream(),
+            Lexed::Minus(punct) => punct.unwrap().to_token_stream(),
+            Lexed::OtherPunct(punct) => punct.unwrap().to_token_stream(),
+
+            Lexed::ParenGroup(group) => group.unwrap().to_token_stream(),
+            Lexed::BraceGroup(group) => group.unwrap().to_token_stream(),
+            Lexed::BracketGroup(group) => group.unwrap().to_token_stream(),
+            Lexed::NoneGroup(group) => group.unwrap().to_token_stream(),
+
+            Lexed::LParen(_) => unreachable!("LParen::stream()"),
+            Lexed::RParen(_) => unreachable!("RParen::stream()"),
+            Lexed::LBrace(_) => unreachable!("LBrace::stream()"),
+            Lexed::RBrace(_) => unreachable!("RBrace::stream()"),
+            Lexed::LBracket(_) => unreachable!("LBracket::stream()"),
+            Lexed::RBracket(_) => unreachable!("RBracket::stream()"),
+
             Lexed::Left(punct_ident) => {
                 let (punct, ident) = punct_ident.unwrap();
                 quote! { #punct #ident }
@@ -111,18 +157,7 @@ impl Lexed {
                 let (punct, ident) = punct_ident.unwrap();
                 quote! { #punct #ident }
             }
-            Lexed::ParenGroup(group) => group.unwrap().to_token_stream(),
-            Lexed::BraceGroup(group) => group.unwrap().to_token_stream(),
-            Lexed::BracketGroup(group) => group.unwrap().to_token_stream(),
-            Lexed::OtherGroup(group) => group.unwrap().to_token_stream(),
-            Lexed::Literal(lit) => lit.unwrap().to_token_stream(),
-            Lexed::Equal(punct) => punct.unwrap().to_token_stream(),
-            Lexed::Plus(punct) => punct.unwrap().to_token_stream(),
-            Lexed::Star(punct) => punct.unwrap().to_token_stream(),
-            Lexed::Question(punct) => punct.unwrap().to_token_stream(),
-            Lexed::Caret(punct) => punct.unwrap().to_token_stream(),
-            Lexed::Minus(punct) => punct.unwrap().to_token_stream(),
-            Lexed::OtherPunct(punct) => punct.unwrap().to_token_stream(),
+
             Lexed::Eof => unreachable!("Eof should not be converted to TokenStream"),
         }
     }
@@ -134,6 +169,26 @@ impl Lexed {
             Lexed::Semicolon(punct) => punct.as_ref().map(|p| p.span()),
             Lexed::Pipe(punct) => punct.as_ref().map(|p| p.span()),
             Lexed::Percent(punct) => punct.as_ref().map(|p| p.span()),
+            Lexed::Literal(lit) => lit.as_ref().map(|l| l.span()),
+            Lexed::Equal(punct) => punct.as_ref().map(|p| p.span()),
+            Lexed::Plus(punct) => punct.as_ref().map(|p| p.span()),
+            Lexed::Star(punct) => punct.as_ref().map(|p| p.span()),
+            Lexed::Question(punct) => punct.as_ref().map(|p| p.span()),
+            Lexed::Caret(punct) => punct.as_ref().map(|p| p.span()),
+            Lexed::Minus(punct) => punct.as_ref().map(|p| p.span()),
+            Lexed::OtherPunct(punct) => punct.as_ref().map(|p| p.span()),
+
+            Lexed::ParenGroup(group) => group.as_ref().map(|g| g.span()),
+            Lexed::BraceGroup(group) => group.as_ref().map(|g| g.span()),
+            Lexed::BracketGroup(group) => group.as_ref().map(|g| g.span()),
+            Lexed::NoneGroup(group) => group.as_ref().map(|g| g.span()),
+            Lexed::LParen(span) => span.as_ref().map(|s| *s),
+            Lexed::RParen(span) => span.as_ref().map(|s| *s),
+            Lexed::LBrace(span) => span.as_ref().map(|s| *s),
+            Lexed::RBrace(span) => span.as_ref().map(|s| *s),
+            Lexed::LBracket(span) => span.as_ref().map(|s| *s),
+            Lexed::RBracket(span) => span.as_ref().map(|s| *s),
+
             Lexed::Left(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
             Lexed::Right(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
             Lexed::Token(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
@@ -143,18 +198,7 @@ impl Lexed {
             Lexed::UserData(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
             Lexed::ErrorType(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
             Lexed::ModulePrefix(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
-            Lexed::ParenGroup(group) => group.as_ref().map(|g| g.span()),
-            Lexed::BraceGroup(group) => group.as_ref().map(|g| g.span()),
-            Lexed::BracketGroup(group) => group.as_ref().map(|g| g.span()),
-            Lexed::OtherGroup(group) => group.as_ref().map(|g| g.span()),
-            Lexed::Literal(lit) => lit.as_ref().map(|l| l.span()),
-            Lexed::Equal(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::Plus(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::Star(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::Question(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::Caret(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::Minus(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::OtherPunct(punct) => punct.as_ref().map(|p| p.span()),
+
             Lexed::Eof => None,
         }
     }
@@ -167,6 +211,26 @@ impl std::fmt::Display for Lexed {
             Lexed::Semicolon(_) => write!(f, "';'"),
             Lexed::Pipe(_) => write!(f, "'|'"),
             Lexed::Percent(_) => write!(f, "'%'"),
+            Lexed::Literal(_) => write!(f, "<Literal>"),
+            Lexed::Equal(_) => write!(f, "'='"),
+            Lexed::Plus(_) => write!(f, "'+'"),
+            Lexed::Star(_) => write!(f, "'*'"),
+            Lexed::Question(_) => write!(f, "'?'"),
+            Lexed::Caret(_) => write!(f, "'^'"),
+            Lexed::Minus(_) => write!(f, "'-'"),
+            Lexed::OtherPunct(_) => write!(f, "<Punct>"),
+
+            Lexed::ParenGroup(_) => write!(f, "<ParenGroup>"),
+            Lexed::BraceGroup(_) => write!(f, "<BraceGroup>"),
+            Lexed::BracketGroup(_) => write!(f, "<BracketGroup>"),
+            Lexed::NoneGroup(_) => write!(f, "<NoneGroup>"),
+            Lexed::LParen(_) => write!(f, "'('"),
+            Lexed::RParen(_) => write!(f, "')'"),
+            Lexed::LBrace(_) => write!(f, "'{{'"),
+            Lexed::RBrace(_) => write!(f, "'}}'"),
+            Lexed::LBracket(_) => write!(f, "'['"),
+            Lexed::RBracket(_) => write!(f, "'['"),
+
             Lexed::Left(_) => write!(f, "%left"),
             Lexed::Right(_) => write!(f, "%right"),
             Lexed::Token(_) => write!(f, "%token"),
@@ -176,18 +240,7 @@ impl std::fmt::Display for Lexed {
             Lexed::UserData(_) => write!(f, "%userdata"),
             Lexed::ErrorType(_) => write!(f, "%error"),
             Lexed::ModulePrefix(_) => write!(f, "%moduleprefix"),
-            Lexed::ParenGroup(_) => write!(f, "<ParenGroup>"),
-            Lexed::BraceGroup(_) => write!(f, "<BraceGroup>"),
-            Lexed::BracketGroup(_) => write!(f, "<BracketGroup>"),
-            Lexed::OtherGroup(_) => write!(f, "<OtherGroup>"),
-            Lexed::Literal(_) => write!(f, "<Literal>"),
-            Lexed::Equal(_) => write!(f, "'='"),
-            Lexed::Plus(_) => write!(f, "'+'"),
-            Lexed::Star(_) => write!(f, "'*'"),
-            Lexed::Question(_) => write!(f, "'?'"),
-            Lexed::Caret(_) => write!(f, "'^'"),
-            Lexed::Minus(_) => write!(f, "'-'"),
-            Lexed::OtherPunct(_) => write!(f, "<Punct>"),
+
             Lexed::Eof => write!(f, "<eof>"),
         }
     }
@@ -214,76 +267,218 @@ impl std::cmp::Ord for Lexed {
     }
 }
 
-pub struct Lexer {
-    iter: std::iter::Peekable<proc_macro2::token_stream::IntoIter>,
-}
-impl Lexer {
-    pub fn new(input: TokenStream) -> Self {
-        Lexer {
-            iter: input.into_iter().peekable(),
-        }
-    }
-    pub fn next_token(&mut self) -> Option<Lexed> {
-        if let Some(next) = self.iter.next() {
-            match next {
-                TokenTree::Ident(ident) => Some(Lexed::Ident(Some(ident))),
-                TokenTree::Punct(punct) => match punct.as_char() {
-                    ':' => Some(Lexed::Colon(Some(punct))),
-                    ';' => Some(Lexed::Semicolon(Some(punct))),
-                    '|' => Some(Lexed::Pipe(Some(punct))),
-                    '+' => Some(Lexed::Plus(Some(punct))),
-                    '*' => Some(Lexed::Star(Some(punct))),
-                    '?' => Some(Lexed::Question(Some(punct))),
-                    '^' => Some(Lexed::Caret(Some(punct))),
-                    '-' => Some(Lexed::Minus(Some(punct))),
-                    '%' => {
-                        let (ret, shift) = match self.iter.peek() {
-                            Some(TokenTree::Ident(ident)) => match ident.to_string().as_str() {
-                                "left" | "l" | "reduce" => {
-                                    (Some(Lexed::Left(Some((punct, ident.clone())))), true)
-                                }
-                                "right" | "r" | "shift" => {
-                                    (Some(Lexed::Right(Some((punct, ident.clone())))), true)
-                                }
-                                "token" => (Some(Lexed::Token(Some((punct, ident.clone())))), true),
-                                "start" => (Some(Lexed::Start(Some((punct, ident.clone())))), true),
-                                "eof" => (Some(Lexed::EofDef(Some((punct, ident.clone())))), true),
-                                "tokentype" => {
-                                    (Some(Lexed::TokenType(Some((punct, ident.clone())))), true)
-                                }
-                                "userdata" => {
-                                    (Some(Lexed::UserData(Some((punct, ident.clone())))), true)
-                                }
-                                "err" | "error" => {
-                                    (Some(Lexed::ErrorType(Some((punct, ident.clone())))), true)
-                                }
-                                "moduleprefix" => (
-                                    Some(Lexed::ModulePrefix(Some((punct, ident.clone())))),
-                                    true,
-                                ),
-                                _ => (Some(Lexed::Percent(Some(punct))), false),
-                            },
-                            _ => (Some(Lexed::Percent(Some(punct))), false),
-                        };
-                        if shift {
-                            self.iter.next();
-                        }
-                        ret
-                    }
-                    '=' => Some(Lexed::Equal(Some(punct))),
+/// lex & feed stream to parser
+/// For '%' directives and 'Group' variants,
+/// First tries to feed the Compound token
+/// if it failed, then feed the internal splitted tokens recursively
+pub fn feed_recursive<'a>(
+    input: TokenStream,
+    parser: &'a GrammarParser,
+    context: &mut GrammarContext,
+) -> Result<
+    (),
+    (
+        Span, // span of the error point
+        rusty_lr_core::ParseError<'a, Lexed, GrammarNonTerminals, u8, ParseError>,
+    ),
+> {
+    let mut input = input.into_iter().peekable();
 
-                    _ => Some(Lexed::OtherPunct(Some(punct))),
+    while let Some(next) = input.next() {
+        let lexed = match next {
+            TokenTree::Ident(ident) => Lexed::Ident(Some(ident)),
+            TokenTree::Punct(punct) => match punct.as_char() {
+                ':' => Lexed::Colon(Some(punct)),
+                ';' => Lexed::Semicolon(Some(punct)),
+                '|' => Lexed::Pipe(Some(punct)),
+                '+' => Lexed::Plus(Some(punct)),
+                '*' => Lexed::Star(Some(punct)),
+                '?' => Lexed::Question(Some(punct)),
+                '^' => Lexed::Caret(Some(punct)),
+                '-' => Lexed::Minus(Some(punct)),
+                '=' => Lexed::Equal(Some(punct)),
+                '%' => match input.peek().cloned() {
+                    Some(TokenTree::Ident(ident)) => match ident.to_string().as_str() {
+                        "left" | "l" | "reduce" => {
+                            input.next();
+                            Lexed::Left(Some((punct, ident)))
+                        }
+                        "right" | "r" | "shift" => {
+                            input.next();
+                            Lexed::Right(Some((punct, ident)))
+                        }
+                        "token" => {
+                            input.next();
+                            Lexed::Token(Some((punct, ident)))
+                        }
+                        "start" => {
+                            input.next();
+                            Lexed::Start(Some((punct, ident)))
+                        }
+                        "eof" => {
+                            input.next();
+                            Lexed::EofDef(Some((punct, ident)))
+                        }
+                        "tokentype" => {
+                            input.next();
+                            Lexed::TokenType(Some((punct, ident)))
+                        }
+                        "userdata" => {
+                            input.next();
+                            Lexed::UserData(Some((punct, ident)))
+                        }
+                        "err" | "error" => {
+                            input.next();
+                            Lexed::ErrorType(Some((punct, ident)))
+                        }
+                        "moduleprefix" => {
+                            input.next();
+                            Lexed::ModulePrefix(Some((punct, ident)))
+                        }
+                        _ => Lexed::Percent(Some(punct)),
+                    },
+                    _ => Lexed::Percent(Some(punct)),
                 },
-                TokenTree::Group(group) => match group.delimiter() {
-                    Delimiter::Parenthesis => Some(Lexed::ParenGroup(Some(group))),
-                    Delimiter::Brace => Some(Lexed::BraceGroup(Some(group))),
-                    Delimiter::Bracket => Some(Lexed::BracketGroup(Some(group))),
-                    _ => Some(Lexed::OtherGroup(Some(group))),
-                },
-                TokenTree::Literal(literal) => Some(Lexed::Literal(Some(literal))),
-            }
-        } else {
-            None
+
+                _ => Lexed::OtherPunct(Some(punct)),
+            },
+            TokenTree::Group(group) => match group.delimiter() {
+                Delimiter::Parenthesis => Lexed::ParenGroup(Some(group)),
+                Delimiter::Brace => Lexed::BraceGroup(Some(group)),
+                Delimiter::Bracket => Lexed::BracketGroup(Some(group)),
+                _ => Lexed::NoneGroup(Some(group)),
+            },
+            TokenTree::Literal(literal) => Lexed::Literal(Some(literal)),
+        };
+
+        let l0 = lexed.clone();
+
+        match parser.feed(context, lexed) {
+            Ok(_) => {}
+            Err(e) => match l0 {
+                Lexed::ParenGroup(Some(group)) => {
+                    parser
+                        .feed(context, Lexed::LParen(Some(group.span_open())))
+                        .map_err(|e| (group.span_open(), e))?;
+                    feed_recursive(group.stream(), parser, context)?;
+                    parser
+                        .feed(context, Lexed::RParen(Some(group.span_close())))
+                        .map_err(|e| (group.span_close(), e))?;
+                }
+                Lexed::BraceGroup(Some(group)) => {
+                    parser
+                        .feed(context, Lexed::LBrace(Some(group.span_open())))
+                        .map_err(|e| (group.span_open(), e))?;
+                    feed_recursive(group.stream(), parser, context)?;
+                    parser
+                        .feed(context, Lexed::RBrace(Some(group.span_close())))
+                        .map_err(|e| (group.span_close(), e))?;
+                }
+                Lexed::BracketGroup(Some(group)) => {
+                    parser
+                        .feed(context, Lexed::LBracket(Some(group.span_open())))
+                        .map_err(|e| (group.span_open(), e))?;
+                    feed_recursive(group.stream(), parser, context)?;
+                    parser
+                        .feed(context, Lexed::RBracket(Some(group.span_close())))
+                        .map_err(|e| (group.span_close(), e))?;
+                }
+                Lexed::NoneGroup(Some(group)) => {
+                    feed_recursive(group.stream(), parser, context)?;
+                }
+                Lexed::Left(Some((punct, ident))) => {
+                    let ps = punct.span();
+                    parser
+                        .feed(context, Lexed::Percent(Some(punct)))
+                        .map_err(|e| (ps, e))?;
+                    let is = ident.span();
+                    parser
+                        .feed(context, Lexed::Ident(Some(ident)))
+                        .map_err(|e| (is, e))?;
+                }
+                Lexed::Right(Some((punct, ident))) => {
+                    let ps = punct.span();
+                    parser
+                        .feed(context, Lexed::Percent(Some(punct)))
+                        .map_err(|e| (ps, e))?;
+                    let is = ident.span();
+                    parser
+                        .feed(context, Lexed::Ident(Some(ident)))
+                        .map_err(|e| (is, e))?;
+                }
+                Lexed::Token(Some((punct, ident))) => {
+                    let ps = punct.span();
+                    parser
+                        .feed(context, Lexed::Percent(Some(punct)))
+                        .map_err(|e| (ps, e))?;
+                    let is = ident.span();
+                    parser
+                        .feed(context, Lexed::Ident(Some(ident)))
+                        .map_err(|e| (is, e))?;
+                }
+                Lexed::Start(Some((punct, ident))) => {
+                    let ps = punct.span();
+                    parser
+                        .feed(context, Lexed::Percent(Some(punct)))
+                        .map_err(|e| (ps, e))?;
+                    let is = ident.span();
+                    parser
+                        .feed(context, Lexed::Ident(Some(ident)))
+                        .map_err(|e| (is, e))?;
+                }
+                Lexed::EofDef(Some((punct, ident))) => {
+                    let ps = punct.span();
+                    parser
+                        .feed(context, Lexed::Percent(Some(punct)))
+                        .map_err(|e| (ps, e))?;
+                    let is = ident.span();
+                    parser
+                        .feed(context, Lexed::Ident(Some(ident)))
+                        .map_err(|e| (is, e))?;
+                }
+                Lexed::TokenType(Some((punct, ident))) => {
+                    let ps = punct.span();
+                    parser
+                        .feed(context, Lexed::Percent(Some(punct)))
+                        .map_err(|e| (ps, e))?;
+                    let is = ident.span();
+                    parser
+                        .feed(context, Lexed::Ident(Some(ident)))
+                        .map_err(|e| (is, e))?;
+                }
+                Lexed::UserData(Some((punct, ident))) => {
+                    let ps = punct.span();
+                    parser
+                        .feed(context, Lexed::Percent(Some(punct)))
+                        .map_err(|e| (ps, e))?;
+                    let is = ident.span();
+                    parser
+                        .feed(context, Lexed::Ident(Some(ident)))
+                        .map_err(|e| (is, e))?;
+                }
+                Lexed::ErrorType(Some((punct, ident))) => {
+                    let ps = punct.span();
+                    parser
+                        .feed(context, Lexed::Percent(Some(punct)))
+                        .map_err(|e| (ps, e))?;
+                    let is = ident.span();
+                    parser
+                        .feed(context, Lexed::Ident(Some(ident)))
+                        .map_err(|e| (is, e))?;
+                }
+                Lexed::ModulePrefix(Some((punct, ident))) => {
+                    let ps = punct.span();
+                    parser
+                        .feed(context, Lexed::Percent(Some(punct)))
+                        .map_err(|e| (ps, e))?;
+                    let is = ident.span();
+                    parser
+                        .feed(context, Lexed::Ident(Some(ident)))
+                        .map_err(|e| (is, e))?;
+                }
+                _ => return Err((l0.span().unwrap(), e)),
+            },
         }
     }
+    Ok(())
 }

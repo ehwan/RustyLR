@@ -8,13 +8,10 @@ use std::collections::BTreeMap;
 use crate::error::ParseError;
 use crate::parser::args::ReduceTypeArgs;
 use crate::parser::lexer::Lexed;
-use crate::parser::lexer::Lexer;
 use crate::parser::parser_expanded::GrammarParser;
-use crate::parser::terminalset_expanded::TerminalSetParser;
 use crate::pattern::Pattern;
 use crate::rule::RuleLine;
 use crate::rule::RuleLines;
-use crate::terminalset::TerminalSet;
 use crate::token::TokenMapped;
 use crate::utils;
 
@@ -57,24 +54,19 @@ impl Grammar {
 
     /// parse the input TokenStream and return a parsed Grammar
     pub fn parse(input: TokenStream) -> Result<Self, ParseError> {
-        let mut lexer = Lexer::new(input);
-
         let parser = GrammarParser::new();
         let mut context = parser.begin();
 
-        while let Some(lexed) = lexer.next_token() {
-            let span = lexed.span().unwrap();
-            match parser.feed(&mut context, lexed) {
-                Ok(_) => {}
-                Err(err) => match err {
-                    rusty_lr_core::ParseError::ReduceAction(err) => {
-                        return Err(err);
-                    }
-                    _ => {
-                        return Err(ParseError::InternalGrammar(span, format!("{}", err)));
-                    }
-                },
-            }
+        match crate::parser::lexer::feed_recursive(input, &parser, &mut context) {
+            Ok(_) => {}
+            Err((span, err)) => match err {
+                rusty_lr_core::ParseError::ReduceAction(err) => {
+                    return Err(err);
+                }
+                _ => {
+                    return Err(ParseError::InternalGrammar(span, format!("{}", err)));
+                }
+            },
         }
         match parser.feed(&mut context, Lexed::Eof) {
             Ok(_) => {}
@@ -145,8 +137,6 @@ impl Grammar {
             .terminals_index
             .push(Ident::new(utils::EOF_NAME, Span::call_site()));
 
-        let terminal_set_parser = TerminalSetParser::new();
-
         // reduce types
         for (terminals, reduce_type) in grammar_args.reduce_types.into_iter() {
             match terminals {
@@ -160,8 +150,7 @@ impl Grammar {
                         }
                     }
                 }
-                ReduceTypeArgs::TerminalSet(group) => {
-                    let terminal_set = TerminalSet::parse(group.stream(), &terminal_set_parser)?;
+                ReduceTypeArgs::TerminalSet(terminal_set) => {
                     for terminal in terminal_set.to_terminal_set(&grammar)?.into_iter() {
                         if let Some(old) =
                             grammar.reduce_types.insert(terminal.clone(), reduce_type)
@@ -191,7 +180,7 @@ impl Grammar {
             for rule in rules.rule_lines.into_iter() {
                 let mut tokens = Vec::new();
                 for (mapto, pattern) in rule.tokens.into_iter() {
-                    let pattern = pattern.to_pattern(&terminal_set_parser, &grammar)?;
+                    let pattern = pattern.to_pattern(&grammar)?;
                     let token_rule = pattern.get_rule(&mut grammar)?;
                     let mapto = mapto.unwrap_or_else(|| pattern.base_ident());
 

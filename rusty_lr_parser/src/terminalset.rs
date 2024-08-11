@@ -1,14 +1,10 @@
 use proc_macro2::Ident;
 use proc_macro2::Span;
-use proc_macro2::TokenStream;
 
 use std::collections::BTreeSet;
 
 use crate::error::ParseError;
 use crate::grammar::Grammar;
-use crate::parser::lexer::Lexed;
-use crate::parser::lexer::Lexer;
-use crate::parser::terminalset_expanded::TerminalSetParser;
 use crate::utils;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -70,33 +66,6 @@ impl TerminalSet {
 
         // exclude eof on any case
         terminal_set.remove(&Ident::new(utils::EOF_NAME, Span::call_site()));
-        Ok(terminal_set)
-    }
-
-    /// input: internal TokenStream between '[' and ']'
-    pub fn parse(input: TokenStream, parser: &TerminalSetParser) -> Result<Self, ParseError> {
-        let mut context = parser.begin();
-        let mut lexer = Lexer::new(input);
-        while let Some(lexed) = lexer.next_token() {
-            let span = lexed.span().unwrap();
-            match parser.feed(&mut context, lexed) {
-                Ok(_) => {}
-                Err(err) => {
-                    let message = format!("{}", err);
-                    return Err(ParseError::TerminalSetParse(span, message));
-                }
-            }
-        }
-        match parser.feed(&mut context, Lexed::Eof) {
-            Ok(_) => {}
-            Err(err) => {
-                let message = format!("{}", err);
-                let span = Span::call_site();
-                return Err(ParseError::TerminalSetParse(span, message));
-            }
-        }
-
-        let terminal_set = context.accept();
         Ok(terminal_set)
     }
 }

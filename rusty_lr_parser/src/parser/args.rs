@@ -1,18 +1,16 @@
-use proc_macro2::Group;
 use proc_macro2::Ident;
 use proc_macro2::TokenStream;
 use rusty_lr_core::ReduceType;
 
 use crate::error::ParseError;
 use crate::grammar::Grammar;
-use crate::parser::terminalset_expanded::TerminalSetParser;
 use crate::pattern::Pattern;
 use crate::terminalset::TerminalSet;
 
 /// parsed arguments for reduce type def
 pub(crate) enum ReduceTypeArgs {
     Ident(Ident),
-    TerminalSet(Group),
+    TerminalSet(TerminalSet),
 }
 
 /// parsed arguments for pattern
@@ -22,28 +20,19 @@ pub(crate) enum PatternArgs {
     Star(Box<PatternArgs>),
     Question(Box<PatternArgs>),
     /// a group delimited by '[' and ']' containing terminal set
-    TerminalSet(Group),
+    TerminalSet(TerminalSet),
 }
 
 impl PatternArgs {
-    pub fn to_pattern(
-        &self,
-        parser: &TerminalSetParser,
-        grammar: &Grammar,
-    ) -> Result<Pattern, ParseError> {
+    pub fn to_pattern(&self, grammar: &Grammar) -> Result<Pattern, ParseError> {
         match self {
             PatternArgs::Ident(ident) => Ok(Pattern::Ident(ident.clone())),
-            PatternArgs::Plus(pattern) => Ok(Pattern::Plus(Box::new(
-                pattern.to_pattern(parser, grammar)?,
-            ))),
-            PatternArgs::Star(pattern) => Ok(Pattern::Star(Box::new(
-                pattern.to_pattern(parser, grammar)?,
-            ))),
-            PatternArgs::Question(pattern) => Ok(Pattern::Question(Box::new(
-                pattern.to_pattern(parser, grammar)?,
-            ))),
-            PatternArgs::TerminalSet(group) => {
-                let terminal_set = TerminalSet::parse(group.stream(), parser)?;
+            PatternArgs::Plus(pattern) => Ok(Pattern::Plus(Box::new(pattern.to_pattern(grammar)?))),
+            PatternArgs::Star(pattern) => Ok(Pattern::Star(Box::new(pattern.to_pattern(grammar)?))),
+            PatternArgs::Question(pattern) => {
+                Ok(Pattern::Question(Box::new(pattern.to_pattern(grammar)?)))
+            }
+            PatternArgs::TerminalSet(terminal_set) => {
                 Ok(Pattern::TerminalSet(terminal_set.to_terminal_set(grammar)?))
             }
         }
