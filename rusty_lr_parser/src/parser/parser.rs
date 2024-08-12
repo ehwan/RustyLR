@@ -149,7 +149,7 @@ TerminalSetItem(TerminalSetItem): ident {
 }
 ;
 
-TerminalSet(TerminalSet): lbracket caret? TerminalSetItem+ rbracket {
+TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
     TerminalSet {
       negate: caret.is_some(),
       items: TerminalSetItem,
