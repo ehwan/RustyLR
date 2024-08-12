@@ -1,47 +1,50 @@
 use clap::Parser;
-use proc_macro2::Spacing;
+use codespan_reporting::term;
+use codespan_reporting::term::termcolor::ColorChoice;
+use codespan_reporting::term::termcolor::StandardStream;
+use proc_macro2::Span;
 use proc_macro2::TokenStream;
-use proc_macro2::TokenTree;
-use quote::TokenStreamExt;
 
 use std::collections::BTreeSet;
 use std::fs::read;
 use std::fs::write;
 use std::process::Command;
 
+use codespan_reporting::diagnostic::Diagnostic;
+use codespan_reporting::diagnostic::Label;
+use codespan_reporting::files::SimpleFiles;
+
 mod arg;
+mod split;
 
-// split stream by '%%'
-fn split_stream(token_stream: TokenStream) -> Result<(TokenStream, TokenStream), &'static str> {
-    // input stream
-    let mut token_stream = token_stream.into_iter().peekable();
-
-    // before '%%'
-    let mut output_stream = TokenStream::new();
-
-    while let Some(token) = token_stream.next() {
-        if let TokenTree::Punct(token) = token {
-            if token.as_char() == '%' && token.spacing() == Spacing::Joint {
-                if let Some(TokenTree::Punct(next)) = token_stream.peek() {
-                    if next.as_char() == '%' && next.spacing() == Spacing::Alone {
-                        token_stream.next();
-                        let macro_stream: TokenStream = token_stream.collect();
-                        return Ok((output_stream, macro_stream));
-                    } else {
-                        output_stream.append(token);
-                    }
-                } else {
-                    output_stream.append(token);
-                }
-            } else {
-                output_stream.append(token);
-            }
-        } else {
-            output_stream.append(token);
+struct Error {
+    files: SimpleFiles<String, String>,
+    fileid: usize,
+    writer: StandardStream,
+}
+impl Error {
+    pub fn new(name: String, source: String) -> Self {
+        let mut files = SimpleFiles::new();
+        let id = files.add(name, source);
+        Self {
+            files,
+            fileid: id,
+            writer: StandardStream::stderr(ColorChoice::Auto),
         }
     }
 
-    Err("No '%%' found")
+    pub fn error(&self, span: Span, message: String) {
+        let range = span.byte_range();
+        let diagnostic = Diagnostic::error()
+            .with_message(message.clone())
+            .with_labels(vec![Label::primary(self.fileid, range)]);
+        let config = term::Config::default();
+
+        match term::emit(&mut self.writer.lock(), &config, &self.files, &diagnostic) {
+            Ok(_) => {}
+            Err(_e) => eprintln!("{}", message),
+        }
+    }
 }
 
 fn main() {
@@ -61,6 +64,7 @@ fn main() {
             return;
         }
     };
+
     let str = match String::from_utf8(input_bytes) {
         Ok(str) => str,
         Err(e) => {
@@ -68,17 +72,19 @@ fn main() {
             return;
         }
     };
+    let error = Error::new(args.input_file.clone(), str.clone());
+
     // lex with proc-macro2
     let token_stream: TokenStream = match str.parse() {
         Ok(token_stream) => token_stream,
         Err(e) => {
-            eprintln!("Error lexing token stream: {}", e);
+            error.error(e.span(), e.to_string());
             return;
         }
     };
 
     // split stream by '%%'
-    let (output_stream, macro_stream) = match split_stream(token_stream) {
+    let (output_stream, macro_stream) = match split::split_stream(token_stream) {
         Ok((output_stream, macro_stream)) => (output_stream, macro_stream),
         Err(e) => {
             eprintln!("{}", e);
@@ -90,7 +96,7 @@ fn main() {
     let grammar = match rusty_lr_parser::grammar::Grammar::parse(macro_stream) {
         Ok(grammar) => grammar,
         Err(e) => {
-            println!("{}", e);
+            error.error(e.span(), format!("{}", e));
             return;
         }
     };
@@ -104,7 +110,7 @@ fn main() {
     let expanded_stream = match expanded_stream {
         Ok(expanded_stream) => expanded_stream,
         Err(e) => {
-            eprintln!("{}", e);
+            error.error(e.span(), format!("{}", e));
             return;
         }
     };
@@ -137,7 +143,7 @@ fn main() {
                 }
             }
             Err(e) => {
-                eprintln!("{}", e);
+                error.error(e.span(), format!("{}", e));
                 return;
             }
         };
