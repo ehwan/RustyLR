@@ -7,6 +7,7 @@ pub static AUGMENTED_NAME: &str = "Augmented";
 pub static EOF_NAME: &str = "eof";
 pub static USER_DATA_PARAMETER_NAME: &str = "data";
 pub static TERMINAL_STACK_NAME: &str = "__rustylr_generated_terminal_stack";
+pub static AUTO_GENERATED_RULE_PREFIX: &str = "_RustyLRGenerated";
 
 /// for non-terminal symbol 'rule_name', generate the name of the stack
 pub(crate) fn generate_stack_name(rule_name: &Ident) -> Ident {

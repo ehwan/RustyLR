@@ -1,43 +1,27 @@
 # RustyLR
 yacc-like LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from Context Free Grammar (CFGs).
 
+RustyLR provides both [executable](#executable-rustylr) and [procedural macros](#proc-macro-syntax) to generate LR(1) and LALR(1) parser.
+
 ```
 [dependencies]
-rusty_lr = "1.5.0"
+rusty_lr = "1.6.0"
 ```
+`features=["fxhash"]` to replace `std::collections::HashMap` with [`FxHashMap`](https://github.com/rust-lang/rustc-hash)
 
-## Features
- - pure Rust implementation
- - [readable error messages, both for grammar building and parsing](#readable-error-messages)
- - [compile-time DFA construction from CFGs ( with proc-macro )](#proc-macro-syntax)
- - [customizable reduce action](#reduceaction-optional)
- - [resolving conflicts of ambiguous grammar](#reduce-type-optional)
- - [tracing parser action with callback](#parse-with-callback)
- - [regex patterns partially supported](#regex-pattern)
- - [executable for generating parser tables from CFGs](#macro-expand-executable-rustylr)
- - [features=["fxhash"] to replace `std::collections::HashMap` with `FxHashMap`](https://github.com/rust-lang/rustc-hash)
-
-## Usage
-
- - [Calculator](example/calculator): calculator with enum `Token`
- - [Calculator u8](example/calculator_u8): calculator with `u8`
- - [Bootstrap](rusty_lr_parser/src/parser/parser.rs), [Expanded Bootstrap](rusty_lr_parser/src/parser/parser_expanded.rs): bootstrapped line parser of `lr1!` and `lalr1!` macro, written in RustyLR itself.
-
-### Sample calculator example
-
-In [`example/calculator_u8/parser.rs`](example/calculator_u8/src/parser.rs),
+### Simple definition of CFG
 ```rust
-use rusty_lr::lr1;
-use rusty_lr::lalr1;
-
-// this define struct `EParser`
-// where 'E' is the start symbol
 lr1! {
+    // userdata type
     %userdata i32;
+    // token type
     %tokentype char;
+    // start symbol
     %start E;
+    // eof symbol
     %eof '\0';
 
+    // token definition
     %token zero '0';
     %token one '1';
     %token two '2';
@@ -54,9 +38,11 @@ lr1! {
     %token rparen ')';
     %token space ' ';
 
+    // conflict resolving
     %left plus;
     %left star;
 
+    // context-free grammars
     WS0: space*;
 
     Digit(char): [zero-nine];
@@ -66,99 +52,62 @@ lr1! {
     A(f32): A plus a2=A {
         *data += 1; // access userdata by `data`
         println!( "{:?} {:?} {:?}", A, plus, a2 );
-        A + a2
+        A + a2 // this will be the new value of A
     }
-    | M
-    ;
+        | M
+        ;
 
     M(f32): M star m2=M { M * m2 }
-    | P
-    ;
+        | P
+        ;
 
     P(f32): Number { Number as f32 }
-    | WS0 lparen E rparen WS0 { E }
-    ;
+        | WS0 lparen E rparen WS0 { E }
+        ;
 
     E(f32) : A ;
 }
 ```
 
-In [`example/calculator_u8/src/main.rs`](example/calculator_u8/src/main.rs),
-```rust
-pub mod parser;
+### Readable error messages (with [codespan](https://github.com/brendanzab/codespan))
+![images/error1.png](images/error1.png)
+![images/error3.png](images/error3.png)
 
-fn main() {
-    let input = "  1 +  20 *   (3 + 4 )   ";
+## Contents
+ - [syntax](#proc-macro-syntax)
+ - [start parsing](#start-parsing)
+ - [parse with callback](#parse-with-callback)
+ - [using executable `rustylr`](#executable-rustylr)
+ - [build DFA from CFG](#build-deterministic-finite-automata-dfa-from-context-free-grammar-cfg)
 
-    let parser = parser::EParser::new();
-    let mut context = parser.begin();
-    let mut userdata: i32 = 0;
-    for b in input.chars() {
-        match parser.feed(&mut context, b, &mut userdata) {
-            // feed userdata here
-            Ok(_) => {}
-            Err(e) => {
-                eprintln!("error: {:?}", e);
-                return;
-            }
-        }
-    }
-    parser.feed(&mut context, 0 as char, &mut userdata).unwrap(); // feed EOF
+## Features
+ - pure Rust implementation
+ - readable error messages, both for grammar building and parsing
+ - compile-time DFA construction from CFGs
+ - customizable reduce action
+ - resolving conflicts of ambiguous grammar
+ - tracing parser action with callback
+ - regex patterns partially supported
+ - executable for generating parser tables from CFGs
 
-    let result = context.accept(); // get value of start 'E'
-    println!("result: {}", result);
-    println!("userdata: {}", userdata);
-}
-```
+## Usage
 
-```
-$ cargo run
-3.0 '+' 4.0
-1.0 '+' 140.0
-result: 141
-userdata: 2
-```
-
-### Readable error messages
-In you put invalid input like `1 + 2 ** ( 3 + 4 )`, it will make error message below.
-```
-error: Invalid Terminal: '*'
-Expected one of: ' ', '(', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
--------------------------------Backtracing state--------------------------------
-M -> M '*' • M
------------------------------------Prev state-----------------------------------
-M -> M • '*' M
------------------------------------Prev state-----------------------------------
-A -> • A '+' A
-A -> A '+' • A
-A -> • M
-M -> • M '*' M
------------------------------------Prev state-----------------------------------
-A -> A • '+' A
------------------------------------Prev state-----------------------------------
-A -> • A '+' A
-E -> • A
-Augmented -> • E '\0'
-```
-
-
-
+ - [Calculator](example/calculator): calculator with enum `Token`
+ - [Calculator u8](example/calculator_u8): calculator with `u8`
+ - [Bootstrap](rusty_lr_parser/src/parser/parser.rs), [Expanded Bootstrap](rusty_lr_parser/src/parser/parser_expanded.rs): bootstrapped line parser of `lr1!` and `lalr1!` macro, written in RustyLR itself.
 
 
 ## proc-macro syntax
 
-Four procedural macros are provided:
+Below procedural macros are provided:
  - `lr1!`, `lalr1!`
- - `lr1_runtime!`, `lalr1_runtime!`
 
-These macros will define three structs: `Parser`, `Context`, and `enum NonTerminals`, prefixed by the `<StartSymbol>`.
+These macros will define three structs: `Parser`, `Context`, and `enum NonTerminals`, prefixed by `<StartSymbol>`.
 In most cases, what you want is the `Parser` struct, which contains the DFA states and `feed()` functions.
 Please refer to the [Start Parsing](#start-parsing) section below for actual usage of the `Parser` struct.
 
-Former two macros (those without '_runtime' suffix) will generate `Parser` struct at compile-time.
+Those macros (those without '_runtime' suffix) will generate `Parser` struct at compile-time.
 The calculation of building DFA will be done at compile-time, and the generated code will be *TONS* of `insert` of tokens one by one.
-Latter two (those with '_runtime' suffix) will generate `Parser` struct at runtime. 
-The calculation of building DFA will be done at runtime, and the generated code will be much more readable, and smaller.
 
 [Bootstrap](rusty_lr_parser/src/parser/parser.rs), [Expanded Bootstrap](rusty_lr_parser/src/parser/parser_expanded.rs) would be a good example to understand the syntax and generated code. It is RustyLR syntax parser written in RustyLR itself.
 
@@ -404,7 +353,7 @@ B: [^lparen rparen]; // any token except lparen and rparen
 C: [lparen rparen one-nine]*; // lparen and rparen, and one to nine
 ```
 
-Note that in range pattern `[first-last]`,
+Note that when using range pattern `[first-last]`,
 the range is constructed by the order of the `%token` directives,
 not by the actual value of the token.
 If you define tokens in the following order:
@@ -625,7 +574,8 @@ for token in input_sequence {
         //                           |- feed token
         Ok(_) => {}
         Err(e) => {
-            println!("{:?}", e);
+            println!("{}", e);
+            // println!( "{}", e.long_message() ); // for more detailed error message
             return;
         }
     }
@@ -733,13 +683,59 @@ Reduce by E -> A
 
 
 
-## Macro expand executable `rustylr`
+## executable `rustylr`
 An executable version of `lr1!` and `lalr1!` macro.
+Converts a context-free grammar into a deterministic finite automaton (DFA) tables,
+and generates a Rust code that can be used as a parser for that grammar.
+
+This executable will provide much more detailed, pretty-printed error messages than the procedural macros.
+If you are writing a huge, complex grammar, it is recommended to use this executable than the procedural macros.
+Although it is convenient to use the proc-macros for small grammars, since modern IDEs feature (rust-analyzer's auto completion, inline error messages) will be enabled.
+
+This program searches for `%%` in the input file.
+
+The contents before `%%` will be copied into the output file as it is.
+Context-free grammar must be followed by `%%`.
+Each line must follow the syntax of [rusty_lr#syntax](#proc-macro-syntax).
+
 [Here](rusty_lr_executable) for more information.
+
+```rust
+// my_grammar.rs
+use some_crate::some_module::SomeStruct;
+
+enum SomeTypeDef {
+    A,
+    B,
+    C,
+}
+
+%% // <-- input file splitted here
+
+%tokentype u8;
+%start E;
+%eof b'\0';
+
+%token a b'a';
+%token lparen b'(';
+%token rparen b')';
+
+E: lparen E rparen
+ | P
+ ;
+
+P: a;
+```
+
+Calling the command will generate a Rust code `my_parser.rs`.
+```
+$ rustylr my_grammar.rs my_parser.rs
+```
+
 
 
 ## Build Deterministic Finite Automata (DFA) from Context Free Grammar (CFG)
-This section will describe how to build DFA from CFGs, on runtime.
+This section will describe about the core library, how to build DFA from CFGs, on runtime.
 <details>
 <summary>
 Click to expand

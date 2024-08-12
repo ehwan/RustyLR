@@ -19,10 +19,6 @@ pub struct Args {
     #[arg(long, default_value = "false")]
     pub no_format: bool,
 
-    /// the generated code will `build()` at runtime
-    #[arg(short, long, default_value = "false")]
-    pub runtime: bool,
-
     /// build LALR(1) parser
     #[arg(short, long, default_value = "false")]
     pub lalr: bool,

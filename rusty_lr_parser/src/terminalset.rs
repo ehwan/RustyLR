@@ -7,7 +7,7 @@ use crate::error::ParseError;
 use crate::grammar::Grammar;
 use crate::utils;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone)]
 pub enum TerminalSetItem {
     Terminal(Ident),
     Range(Ident, Ident),
@@ -24,21 +24,21 @@ impl TerminalSetItem {
                 }
             }
             TerminalSetItem::Range(first, last) => {
-                let first_index = match grammar.terminals.get(first) {
-                    Some((index, _)) => *index,
+                let (first_index, first_stream) = match grammar.terminals.get(first) {
+                    Some(f) => f,
                     None => return Err(ParseError::TerminalNotDefined(first.clone())),
                 };
-                let last_index = match grammar.terminals.get(last) {
-                    Some((index, _)) => *index,
+                let (last_index, last_stream) = match grammar.terminals.get(last) {
+                    Some(l) => l,
                     None => return Err(ParseError::TerminalNotDefined(last.clone())),
                 };
                 if last_index < first_index {
                     return Err(ParseError::InvalidTerminalRange(
-                        first.clone(),
-                        last.clone(),
+                        (first.clone(), *first_index, first_stream.clone()),
+                        (last.clone(), *last_index, last_stream.clone()),
                     ));
                 }
-                Ok(grammar.terminals_index[first_index..=last_index]
+                Ok(grammar.terminals_index[*first_index..=*last_index]
                     .iter()
                     .cloned()
                     .collect())
@@ -47,10 +47,14 @@ impl TerminalSetItem {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone)]
 pub struct TerminalSet {
     pub negate: bool,
     pub items: Vec<TerminalSetItem>,
+    // '['
+    pub open_span: Span,
+    // ']'
+    pub close_span: Span,
 }
 impl TerminalSet {
     pub fn to_terminal_set(&self, grammar: &Grammar) -> Result<BTreeSet<Ident>, ParseError> {

@@ -1,3 +1,5 @@
+use crate::utils;
+
 use super::error::ParseError;
 use super::grammar::Grammar;
 use super::rule::{RuleLine, RuleLines};
@@ -23,7 +25,11 @@ pub enum Pattern {
 impl Pattern {
     /// get rule for the pattern
     /// make new rule if not exists
-    pub(crate) fn get_rule(&self, grammar: &mut Grammar) -> Result<Ident, ParseError> {
+    pub(crate) fn get_rule(
+        &self,
+        grammar: &mut Grammar,
+        root_span_pair: (Span, Span),
+    ) -> Result<Ident, ParseError> {
         if let Some(existing) = grammar.pattern_map.get(self) {
             return Ok(existing.clone());
         }
@@ -31,12 +37,19 @@ impl Pattern {
             Pattern::Ident(ident) => Ok(ident.clone()),
             Pattern::Plus(pattern) => {
                 let new_ident = Ident::new(
-                    &format!("_RustyLRGenerated{}", grammar.pattern_map.len()),
+                    &format!(
+                        "{}{}",
+                        utils::AUTO_GENERATED_RULE_PREFIX,
+                        grammar.pattern_map.len()
+                    ),
                     Span::call_site(),
                 );
                 grammar.pattern_map.insert(self.clone(), new_ident.clone());
+                grammar
+                    .generated_root_span
+                    .insert(new_ident.clone(), root_span_pair);
 
-                let base_rule = pattern.get_rule(grammar)?;
+                let base_rule = pattern.get_rule(grammar, root_span_pair)?;
                 let base_typename = grammar.get_typename(&base_rule).cloned();
 
                 if let Some(base_typename) = base_typename {
@@ -47,25 +60,33 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.clone(),
                             mapto: Ident::new("A", Span::call_site()),
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
                         }],
                         reduce_action: Some(quote! {
                             { vec![A] }
                         }),
+                        separator_span: Span::call_site(),
                     };
                     let line2 = RuleLine {
                         tokens: vec![
                             TokenMapped {
                                 token: new_ident.clone(),
                                 mapto: Ident::new("Ap", Span::call_site()),
+                                begin_span: Span::call_site(),
+                                end_span: Span::call_site(),
                             },
                             TokenMapped {
                                 token: base_rule.clone(),
                                 mapto: Ident::new("A", Span::call_site()),
+                                begin_span: Span::call_site(),
+                                end_span: Span::call_site(),
                             },
                         ],
                         reduce_action: Some(quote! {
                             { Ap.push(A); Ap }
                         }),
+                        separator_span: Span::call_site(),
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -82,21 +103,29 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.clone(),
                             mapto: Ident::new("A", Span::call_site()),
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
                         }],
                         reduce_action: None,
+                        separator_span: Span::call_site(),
                     };
                     let line2 = RuleLine {
                         tokens: vec![
                             TokenMapped {
                                 token: base_rule.clone(),
                                 mapto: Ident::new("A", Span::call_site()),
+                                begin_span: Span::call_site(),
+                                end_span: Span::call_site(),
                             },
                             TokenMapped {
                                 token: new_ident.clone(),
                                 mapto: Ident::new("A", Span::call_site()),
+                                begin_span: Span::call_site(),
+                                end_span: Span::call_site(),
                             },
                         ],
                         reduce_action: None,
+                        separator_span: Span::call_site(),
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -109,14 +138,21 @@ impl Pattern {
             }
             Pattern::Star(pattern) => {
                 let new_ident = Ident::new(
-                    &format!("_RustyLRGenerated{}", grammar.pattern_map.len()),
+                    &format!(
+                        "{}{}",
+                        utils::AUTO_GENERATED_RULE_PREFIX,
+                        grammar.pattern_map.len()
+                    ),
                     Span::call_site(),
                 );
                 grammar.pattern_map.insert(self.clone(), new_ident.clone());
+                grammar
+                    .generated_root_span
+                    .insert(new_ident.clone(), root_span_pair);
 
-                let plus_rule = Pattern::Plus(pattern.clone()).get_rule(grammar)?;
+                let plus_rule = Pattern::Plus(pattern.clone()).get_rule(grammar, root_span_pair)?;
 
-                let base_rule = pattern.get_rule(grammar)?;
+                let base_rule = pattern.get_rule(grammar, root_span_pair)?;
                 let base_typename = grammar.get_typename(&base_rule).cloned();
 
                 if let Some(base_typename) = base_typename {
@@ -127,16 +163,20 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: plus_rule.clone(),
                             mapto: Ident::new("Ap", Span::call_site()),
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
                         }],
                         reduce_action: Some(quote! {
                             { Ap }
                         }),
+                        separator_span: Span::call_site(),
                     };
                     let line2 = RuleLine {
                         tokens: vec![],
                         reduce_action: Some(quote! {
                             { vec![] }
                         }),
+                        separator_span: Span::call_site(),
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -153,12 +193,16 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: plus_rule.clone(),
                             mapto: Ident::new("A", Span::call_site()),
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
                         }],
                         reduce_action: None,
+                        separator_span: Span::call_site(),
                     };
                     let line2 = RuleLine {
                         tokens: vec![],
                         reduce_action: None,
+                        separator_span: Span::call_site(),
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -171,12 +215,19 @@ impl Pattern {
             }
             Pattern::Question(pattern) => {
                 let new_ident = Ident::new(
-                    &format!("_RustyLRGenerated{}", grammar.pattern_map.len()),
+                    &format!(
+                        "{}{}",
+                        utils::AUTO_GENERATED_RULE_PREFIX,
+                        grammar.pattern_map.len()
+                    ),
                     Span::call_site(),
                 );
                 grammar.pattern_map.insert(self.clone(), new_ident.clone());
+                grammar
+                    .generated_root_span
+                    .insert(new_ident.clone(), root_span_pair);
 
-                let base_rule = pattern.get_rule(grammar)?;
+                let base_rule = pattern.get_rule(grammar, root_span_pair)?;
                 let base_typename = grammar.get_typename(&base_rule).cloned();
 
                 if let Some(base_typename) = base_typename {
@@ -187,16 +238,20 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.clone(),
                             mapto: Ident::new("A", Span::call_site()),
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
                         }],
                         reduce_action: Some(quote! {
                             { Some(A) }
                         }),
+                        separator_span: Span::call_site(),
                     };
                     let line2 = RuleLine {
                         tokens: vec![],
                         reduce_action: Some(quote! {
                             { None }
                         }),
+                        separator_span: Span::call_site(),
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -213,12 +268,16 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.clone(),
                             mapto: Ident::new("A", Span::call_site()),
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
                         }],
                         reduce_action: None,
+                        separator_span: Span::call_site(),
                     };
                     let line2 = RuleLine {
                         tokens: vec![],
                         reduce_action: None,
+                        separator_span: Span::call_site(),
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -231,10 +290,17 @@ impl Pattern {
             }
             Pattern::TerminalSet(terminal_set) => {
                 let new_ident = Ident::new(
-                    &format!("_RustyLRGenerated{}", grammar.pattern_map.len()),
+                    &format!(
+                        "{}{}",
+                        utils::AUTO_GENERATED_RULE_PREFIX,
+                        grammar.pattern_map.len()
+                    ),
                     Span::call_site(),
                 );
                 grammar.pattern_map.insert(self.clone(), new_ident.clone());
+                grammar
+                    .generated_root_span
+                    .insert(new_ident.clone(), root_span_pair);
 
                 let mut rule_lines = Vec::new();
                 for terminal in terminal_set.iter() {
@@ -242,10 +308,13 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: terminal.clone(),
                             mapto: Ident::new("term", Span::call_site()),
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
                         }],
                         reduce_action: Some(quote! {
                             term
                         }),
+                        separator_span: Span::call_site(),
                     };
                     rule_lines.push(rule);
                 }

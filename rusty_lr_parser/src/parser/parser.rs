@@ -1,4 +1,3 @@
-use crate::error::ParseError;
 use crate::parser::args::PatternArgs;
 use crate::parser::args::GrammarArgs;
 use crate::parser::args::RuleDefArgs;
@@ -26,7 +25,6 @@ use rusty_lr_core::ReduceType;
 %%
 
 %moduleprefix ::rusty_lr_core;
-%error ParseError;
 
 %tokentype Lexed;
 %token ident Lexed::Ident(None);
@@ -75,6 +73,14 @@ Rule(RuleDefArgs) : ident RuleType colon RuleLines semicolon {
     } else {
         unreachable!( "Rule-Ident" );
     };
+    if let Lexed::Colon(colon) = colon {
+        let span = colon.expect( "Rule-Colon" ).span();
+        if let Some(fisrt) = RuleLines.first_mut() {
+            fisrt.separator_span = span;
+        }
+    }else {
+        unreachable!( "Rule-Colon2" );
+    }
     RuleDefArgs {
         name: ident,
         typename: RuleType.map(|t| t.to_token_stream()),
@@ -96,7 +102,10 @@ RuleType(Option<Group>): parengroup {
 ;
 
 RuleLines(Vec<RuleLineArgs>): RuleLines pipe RuleLine {
-    RuleLines.push( RuleLine );
+    if let Lexed::Pipe(punct) = pipe {
+        RuleLine.separator_span = punct.expect( "RuleLines-Pipe" ).span();
+        RuleLines.push( RuleLine );
+    }
     RuleLines
 }
 | RuleLine {
@@ -108,7 +117,8 @@ RuleLine(RuleLineArgs): TokenMapped* Action
 {
     RuleLineArgs {
         tokens: TokenMapped,
-        reduce_action: Action.map(|action| action.to_token_stream())
+        reduce_action: Action.map(|action| action.to_token_stream()),
+        separator_span: Span::call_site(),
     }
 }
 ;
@@ -150,28 +160,54 @@ TerminalSetItem(TerminalSetItem): ident {
 ;
 
 TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
+    let open_span = if let Lexed::LBracket(lbracket) = lbracket {
+        lbracket.expect("TerminalSet-Open")
+    } else {
+        unreachable!( "TerminalSet-Open" );
+    };
+    let close_span = if let Lexed::RBracket(rbracket) = rbracket {
+        rbracket.expect("TerminalSet-Close")
+    } else {
+        unreachable!( "TerminalSet-Close" );
+    };
     TerminalSet {
       negate: caret.is_some(),
       items: TerminalSetItem,
+      open_span,
+      close_span,
     }
 }
 ;
 
 Pattern(PatternArgs): ident {
     if let Lexed::Ident(ident) = ident {
-        PatternArgs::Ident( ident.expect("Pattern-Ident") )
+        let ident = ident.expect("Pattern-Ident");
+        let span = ident.span();
+        PatternArgs::Ident( ident, span )
     }else {
         unreachable!( "Pattern-Ident" );
     }
 }
 | Pattern plus {
-    PatternArgs::Plus( Box::new(Pattern) )
+    if let Lexed::Plus(plus) = plus {
+        PatternArgs::Plus( Box::new(Pattern), plus.expect("Pattern-Plus0").span() )
+    }else {
+        unreachable!( "Pattern-Plus" );
+    }
 }
 | Pattern star {
-    PatternArgs::Star( Box::new(Pattern) )
+    if let Lexed::Star(star) = star {
+        PatternArgs::Star( Box::new(Pattern), star.expect("Pattern-Star0").span() )
+    }else {
+        unreachable!( "Pattern-Star" );
+    }
 }
 | Pattern question {
-    PatternArgs::Question( Box::new(Pattern) )
+    if let Lexed::Question(question) = question {
+        PatternArgs::Question( Box::new(Pattern), question.expect("Pattern-Question0").span() )
+    }else {
+        unreachable!( "Pattern-Question" );
+    }
 }
 | TerminalSet {
     PatternArgs::TerminalSet( TerminalSet )
@@ -262,57 +298,39 @@ Grammar(GrammarArgs): Grammar Rule {
     g
 }
 | Grammar StartDef {
-    if let Some(old) = Grammar.start_rule_name {
-        return Err( ParseError::MultipleStartDefinition(StartDef.span(), old, StartDef) );
-    }
-    Grammar.start_rule_name = Some(StartDef);
+    Grammar.start_rule_name.push(StartDef);
     Grammar
 }
 | StartDef {
     let mut g:GrammarArgs = Default::default();
-    g.start_rule_name = Some(StartDef);
+    g.start_rule_name.push(StartDef);
     g
 }
 | Grammar EofDef {
-    let (span,eof) = EofDef;
-    if let Some(old) = Grammar.eof {
-        return Err( ParseError::MultipleEofDefinition(span,old, eof) );
-    }
-    Grammar.eof = Some(eof);
+    Grammar.eof.push(EofDef);
     Grammar
 }
 | EofDef {
     let mut g:GrammarArgs = Default::default();
-    let (span,eof) = EofDef;
-    g.eof = Some(eof);
+    g.eof.push(EofDef);
     g
 }
 | Grammar TokenTypeDef {
-    let (span,token_type) = TokenTypeDef;
-    if let Some(old) = Grammar.token_typename {
-        return Err( ParseError::MultipleTokenTypeDefinition(span,old, token_type) );
-    }
-    Grammar.token_typename = Some(token_type);
+    Grammar.token_typename.push(TokenTypeDef);
     Grammar
 }
 | TokenTypeDef {
     let mut g:GrammarArgs = Default::default();
-    let (span,token_type) = TokenTypeDef;
-    g.token_typename = Some(token_type);
+    g.token_typename.push(TokenTypeDef);
     g
 }
 | Grammar UserDataDef {
-    let (span,user_data) = UserDataDef;
-    if let Some(old) = Grammar.userdata_typename {
-        return Err( ParseError::MultipleUserDataDefinition(span,old, user_data) );
-    }
-    Grammar.userdata_typename = Some(user_data);
+    Grammar.userdata_typename.push(UserDataDef);
     Grammar
 }
 | UserDataDef {
     let mut g:GrammarArgs = Default::default();
-    let (span,user_data) = UserDataDef;
-    g.userdata_typename = Some(user_data);
+    g.userdata_typename.push(UserDataDef);
     g
 }
 | Grammar ReduceDef {
@@ -325,29 +343,21 @@ Grammar(GrammarArgs): Grammar Rule {
     g
 }
 | Grammar ErrorDef {
-    let (span,error) = ErrorDef;
-    if let Some(old) = Grammar.error_typename {
-        return Err( ParseError::MultipleErrorDefinition(span, old, error) );
-    }
-    Grammar.error_typename = Some(error);
+    Grammar.error_typename.push(ErrorDef);
     Grammar
 }
 | ErrorDef {
     let mut g:GrammarArgs = Default::default();
-    let (span,error) = ErrorDef;
-    g.error_typename = Some(error);
+    g.error_typename.push(ErrorDef);
     g
 }
 | Grammar ModulePrefixDef {
-    let (span,module_prefix) = ModulePrefixDef;
-    // no multiple definition check for module prefix
-    Grammar.module_prefix = Some(module_prefix);
+    Grammar.module_prefix.push(ModulePrefixDef);
     Grammar
 }
 | ModulePrefixDef {
     let mut g:GrammarArgs = Default::default();
-    let (span,module_prefix) = ModulePrefixDef;
-    g.module_prefix = Some(module_prefix);
+    g.module_prefix.push(ModulePrefixDef);
     g
 }
 ;

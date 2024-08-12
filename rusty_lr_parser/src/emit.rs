@@ -4,6 +4,8 @@ use proc_macro2::TokenStream;
 
 use quote::format_ident;
 use quote::quote;
+use rusty_lr_core::BuildError;
+use rusty_lr_core::ShiftedRule;
 
 use crate::error::ParseError;
 use crate::grammar::Grammar;
@@ -68,19 +70,50 @@ impl Grammar {
 
         // build
         let parser = if lalr {
-            match grammar.build_lalr(utils::AUGMENTED_NAME.to_string()) {
-                Ok(parser) => parser,
-                Err(err) => {
-                    return Err(ParseError::GrammarBuildError(format!("{}", err)));
-                }
-            }
+            grammar.build_lalr(Ident::new(utils::AUGMENTED_NAME, Span::call_site()))
         } else {
-            match grammar.build(utils::AUGMENTED_NAME.to_string()) {
-                Ok(parser) => parser,
-                Err(err) => {
-                    return Err(ParseError::GrammarBuildError(format!("{}", err)));
+            grammar.build(Ident::new(utils::AUGMENTED_NAME, Span::call_site()))
+        };
+        let parser = match parser {
+            Ok(parser) => parser,
+            Err(e) => match e {
+                BuildError::NoAugmented
+                | BuildError::MultipleReduceType(_)
+                | BuildError::RuleNotFound(_) => unreachable!("Unreachable grammar build error"),
+                BuildError::ReduceReduceConflict {
+                    lookahead,
+                    rule1,
+                    rule2,
+                    rules,
+                } => {
+                    return Err(ParseError::ReduceReduceConflict {
+                        lookahead,
+                        rule1: (rule1, rules[rule1].clone()),
+                        rule2: (rule2, rules[rule2].clone()),
+                    })
                 }
-            }
+                BuildError::ShiftReduceConflict {
+                    reduce,
+                    shift,
+                    term,
+                    rules,
+                } => {
+                    let mut shift_rules = Vec::new();
+                    for (r, _) in shift.rules.into_iter() {
+                        let shifted_rule = ShiftedRule {
+                            rule: rules[r.rule].clone(),
+                            shifted: r.shifted,
+                        };
+                        shift_rules.push((r.rule, shifted_rule));
+                    }
+
+                    return Err(ParseError::ShiftReduceConflict {
+                        term,
+                        reduce_rule: (reduce, rules[reduce].clone()),
+                        shift_rules,
+                    });
+                }
+            },
         };
 
         let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
@@ -95,22 +128,18 @@ impl Grammar {
             for token in rule.rule.iter() {
                 match token {
                     rlr::Token::Term(term) => {
-                        let (_, term_stream) = self
-                            .terminals
-                            .get(&Ident::new(term, Span::call_site()))
-                            .unwrap();
+                        let (_, term_stream) = self.terminals.get(term).unwrap();
                         comma_separated_tokens
                             .extend(quote! {#module_prefix::Token::Term(#term_stream),});
                     }
                     rlr::Token::NonTerm(nonterm) => {
-                        let ident = Ident::new(nonterm, Span::call_site());
                         comma_separated_tokens
-                            .extend(quote! {#module_prefix::Token::NonTerm(#nonterminals_enum_name::#ident),});
+                            .extend(quote! {#module_prefix::Token::NonTerm(#nonterminals_enum_name::#nonterm),});
                     }
                 }
             }
 
-            let nonterm = Ident::new(&rule.name, Span::call_site());
+            let nonterm = &rule.name;
             comma_separated_rules.extend(quote! {
                 #module_prefix::ProductionRule {
                     name: #nonterminals_enum_name::#nonterm,
@@ -210,10 +239,7 @@ impl Grammar {
             let shift_goto_map_term: BTreeMap<_, _> =
                 state.shift_goto_map_term.into_iter().collect();
             for (term, goto) in shift_goto_map_term.into_iter() {
-                let (_, term_stream) = self
-                    .terminals
-                    .get(&Ident::new(&term, Span::call_site()))
-                    .unwrap();
+                let (_, term_stream) = self.terminals.get(&term).unwrap();
                 init_shift_term_stream.extend(quote! {
                     shift_goto_map_term.insert( #term_stream, #goto );
                 });
@@ -223,7 +249,6 @@ impl Grammar {
             let shift_goto_map_nonterm: BTreeMap<_, _> =
                 state.shift_goto_map_nonterm.into_iter().collect();
             for (nonterm, goto) in shift_goto_map_nonterm.into_iter() {
-                let nonterm = Ident::new(&nonterm, Span::call_site());
                 init_shift_nonterm_stream.extend(quote! {
                     shift_goto_map_nonterm.insert(#nonterminals_enum_name::#nonterm, #goto);
                 });
@@ -246,8 +271,7 @@ impl Grammar {
 
                     let mut init_terminals_comma_separated = TokenStream::new();
                     for term_name in tokens.into_iter() {
-                        let term_ident = Ident::new(&term_name, Span::call_site());
-                        let (_, term_stream) = self.terminals.get(&term_ident).unwrap();
+                        let (_, term_stream) = self.terminals.get(&term_name).unwrap();
                         init_terminals_comma_separated.extend(quote! {
                             #term_stream,
                         });
@@ -528,9 +552,10 @@ impl Grammar {
                                 }
                             });
                         } else {
-                            return Err(ParseError::RuleTypeDefinedButActionNotDefined(
-                                name.clone(),
-                            ));
+                            return Err(ParseError::RuleTypeDefinedButActionNotDefined {
+                                name: name.clone(),
+                                rule_local_id,
+                            });
                         }
                     }
                 } else {

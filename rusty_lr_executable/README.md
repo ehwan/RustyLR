@@ -24,9 +24,6 @@ Options:
       --no-format
           do not rustfmt the output
 
-  -r, --runtime
-          the generated code will `build()` at runtime
-
   -l, --lalr
           build LALR(1) parser
 
@@ -45,7 +42,7 @@ Each line must follow the syntax of [rusty_lr#syntax](https://github.com/ehwan/R
 // my_grammar.rs
 use some_crate::some_module::SomeStruct;
 
-enum SomeEnum {
+enum SomeTypeDef {
     A,
     B,
     C,

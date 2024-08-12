@@ -14,7 +14,7 @@ pub enum BuildError<'a, Term, NonTerm> {
         lookahead: Term,
         rule1: usize,
         rule2: usize,
-        rules: &'a Vec<ProductionRule<Term, NonTerm>>,
+        rules: &'a [ProductionRule<Term, NonTerm>],
     },
 
     /// shift/reduce conflict
@@ -22,7 +22,7 @@ pub enum BuildError<'a, Term, NonTerm> {
         reduce: usize,
         shift: LookaheadRuleRefSet<Term>,
         term: Term,
-        rules: &'a Vec<ProductionRule<Term, NonTerm>>,
+        rules: &'a [ProductionRule<Term, NonTerm>],
     },
 
     NoAugmented,

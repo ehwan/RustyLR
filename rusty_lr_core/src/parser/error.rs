@@ -32,7 +32,7 @@ pub enum ParseError<'a, Term, NonTerm, CallbackError, ReduceActionError> {
     /// Error from callback trait
     Callback(CallbackError),
 
-    /// Error from macro reduce action
+    /// Error from reduce action
     ReduceAction(ReduceActionError),
 }
 
@@ -100,6 +100,121 @@ impl<'a, Term, NonTerm, CallbackError, ReduceActionError>
         backtrace.push(cur_rules);
         backtrace
     }
+
+    pub fn short_message(&self) -> String
+    where
+        Term: Display + Hash + Eq,
+        NonTerm: Display,
+        CallbackError: Display,
+        ReduceActionError: Display,
+    {
+        let mut message = String::new();
+        match self {
+            ParseError::InvalidNonTerminal(nonterm, _, states, state_stack) => {
+                // this variant should be removed in the future.
+                // it will not occur if the grammar is builded correctly
+                message.push_str(&format!("Invalid NonTerminal: {}\n", nonterm));
+
+                let state = &states[*state_stack.last().unwrap()];
+                let expected: BTreeSet<String> = state
+                    .expected()
+                    .into_iter()
+                    .map(|t| format!("{}", t))
+                    .collect();
+                if expected.is_empty() {
+                    message.push_str("No expected token");
+                } else {
+                    message.push_str("Expected one of: ");
+                    let len = expected.len();
+                    for (id, term) in expected.into_iter().enumerate() {
+                        message.push_str(&format!("{}", term));
+                        if id < len - 1 {
+                            message.push_str(", ");
+                        }
+                    }
+                }
+            }
+            ParseError::InvalidTerminal(term, _, states, state_stack) => {
+                message.push_str(&format!("Invalid Terminal: {}\n", term));
+
+                let state = &states[*state_stack.last().unwrap()];
+                let expected: BTreeSet<String> = state
+                    .expected()
+                    .into_iter()
+                    .map(|t| format!("{}", t))
+                    .collect();
+                if expected.is_empty() {
+                    message.push_str("No expected token");
+                } else {
+                    message.push_str("Expected one of: ");
+                    let len = expected.len();
+                    for (id, term) in expected.into_iter().enumerate() {
+                        message.push_str(&format!("{}", term));
+                        if id < len - 1 {
+                            message.push_str(", ");
+                        }
+                    }
+                }
+            }
+            ParseError::Callback(err) => {
+                message.push_str(&format!("{}", err));
+            }
+            ParseError::ReduceAction(err) => {
+                message.push_str(&format!("{}", err));
+            }
+        }
+        message
+    }
+    pub fn long_message(&self) -> String
+    where
+        Term: Display + Hash + Eq,
+        NonTerm: Display + PartialEq,
+        CallbackError: Display,
+        ReduceActionError: Display,
+    {
+        let mut message = String::new();
+        match self {
+            ParseError::InvalidNonTerminal(_, rules, states, state_stack) => {
+                // this variant should be removed in the future.
+                // it will not occur if the grammar is builded correctly
+                let backtrace = Self::backtrace(rules, states, state_stack);
+                for (id, ruleset) in backtrace.iter().enumerate() {
+                    if id == 0 {
+                        message.push_str(&format!("{:-^80}\n", "Backtracing state"));
+                    } else {
+                        message.push_str(&format!("{:-^80}\n", "Prev state"));
+                    }
+                    for rule in ruleset.iter() {
+                        let shifted = ShiftedRuleRef2 {
+                            rule: &rules[rule.rule],
+                            shifted: rule.shifted,
+                        };
+                        message.push_str(&format!("{}\n", shifted));
+                    }
+                }
+            }
+            ParseError::InvalidTerminal(_, rules, states, state_stack) => {
+                let backtrace = Self::backtrace(rules, states, state_stack);
+                for (id, ruleset) in backtrace.iter().enumerate() {
+                    if id == 0 {
+                        message.push_str(&format!("{:-^80}\n", "Backtracing state"));
+                    } else {
+                        message.push_str(&format!("{:-^80}\n", "Prev state"));
+                    }
+                    for rule in ruleset.iter() {
+                        let shifted = ShiftedRuleRef2 {
+                            rule: &rules[rule.rule],
+                            shifted: rule.shifted,
+                        };
+                        message.push_str(&format!("{}\n", shifted));
+                    }
+                }
+            }
+            ParseError::Callback(_) => {}
+            ParseError::ReduceAction(_) => {}
+        }
+        format!("{}\n{}", &self.short_message(), message)
+    }
 }
 
 impl<
@@ -111,89 +226,7 @@ impl<
     > Display for ParseError<'a, Term, NonTerm, CallbackError, ReduceActionError>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ParseError::InvalidNonTerminal(nonterm, rules, states, state_stack) => {
-                // this variant should be removed in the future.
-                // it will not occur if the grammar is builded correctly
-                writeln!(f, "Invalid NonTerminal: {}", nonterm)?;
-                let state = &states[*state_stack.last().unwrap()];
-
-                let expected = state.expected();
-                if expected.is_empty() {
-                    writeln!(f, "No expected token")?;
-                } else {
-                    write!(f, "Expected one of: ")?;
-                    let len = expected.len();
-                    for (id, term) in expected.into_iter().enumerate() {
-                        write!(f, "{}", term)?;
-                        if id < len - 1 {
-                            write!(f, ", ")?;
-                        } else {
-                            writeln!(f)?;
-                        }
-                    }
-                }
-
-                let backtrace = Self::backtrace(rules, states, state_stack);
-                for (id, ruleset) in backtrace.iter().enumerate() {
-                    if id == 0 {
-                        writeln!(f, "{:-^80}", "Backtracing state")?;
-                    } else {
-                        writeln!(f, "{:-^80}", "Prev state")?;
-                    }
-                    for rule in ruleset.iter() {
-                        let shifted = ShiftedRuleRef2 {
-                            rule: &rules[rule.rule],
-                            shifted: rule.shifted,
-                        };
-                        writeln!(f, "{}", shifted)?;
-                    }
-                }
-            }
-            ParseError::InvalidTerminal(term, rules, states, state_stack) => {
-                writeln!(f, "Invalid Terminal: {}", term,)?;
-                let state = &states[*state_stack.last().unwrap()];
-
-                let expected = state.expected();
-                if expected.is_empty() {
-                    writeln!(f, "No expected token")?;
-                } else {
-                    write!(f, "Expected one of: ")?;
-                    let len = expected.len();
-                    for (id, term) in expected.into_iter().enumerate() {
-                        write!(f, "{}", term)?;
-                        if id < len - 1 {
-                            write!(f, ", ")?;
-                        } else {
-                            writeln!(f)?;
-                        }
-                    }
-                }
-
-                let backtrace = Self::backtrace(rules, states, state_stack);
-                for (id, ruleset) in backtrace.iter().enumerate() {
-                    if id == 0 {
-                        writeln!(f, "{:-^80}", "Backtracing state")?;
-                    } else {
-                        writeln!(f, "{:-^80}", "Prev state")?;
-                    }
-                    for rule in ruleset.iter() {
-                        let shifted = ShiftedRuleRef2 {
-                            rule: &rules[rule.rule],
-                            shifted: rule.shifted,
-                        };
-                        writeln!(f, "{}", shifted)?;
-                    }
-                }
-            }
-            ParseError::Callback(message) => {
-                write!(f, "Callback Error: {}", message)?;
-            }
-            ParseError::ReduceAction(message) => {
-                write!(f, "{}", message)?;
-            }
-        }
-        Ok(())
+        writeln!(f, "{}", self.short_message())
     }
 }
 impl<
@@ -212,14 +245,18 @@ impl<
                 writeln!(f, "Invalid NonTerminal: {:?}", nonterm)?;
                 let state = &states[*state_stack.last().unwrap()];
 
-                let expected = state.expected();
+                let expected: BTreeSet<String> = state
+                    .expected()
+                    .into_iter()
+                    .map(|t| format!("{:?}", t))
+                    .collect();
                 if expected.is_empty() {
                     writeln!(f, "No expected token")?;
                 } else {
                     write!(f, "Expected one of: ")?;
                     let len = expected.len();
                     for (id, term) in expected.into_iter().enumerate() {
-                        write!(f, "{:?}", term)?;
+                        write!(f, "{}", term)?;
                         if id < len - 1 {
                             write!(f, ", ")?;
                         } else {
@@ -248,14 +285,18 @@ impl<
                 writeln!(f, "Invalid Terminal: {:?}", term,)?;
                 let state = &states[*state_stack.last().unwrap()];
 
-                let expected = state.expected();
+                let expected: BTreeSet<String> = state
+                    .expected()
+                    .into_iter()
+                    .map(|t| format!("{:?}", t))
+                    .collect();
                 if expected.is_empty() {
                     writeln!(f, "No expected token")?;
                 } else {
                     write!(f, "Expected one of: ")?;
                     let len = expected.len();
                     for (id, term) in expected.into_iter().enumerate() {
-                        write!(f, "{:?}", term)?;
+                        write!(f, "{}", term)?;
                         if id < len - 1 {
                             write!(f, ", ")?;
                         } else {

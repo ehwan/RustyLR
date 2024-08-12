@@ -32,7 +32,7 @@ fn main() {
             Ok(_) => {}
             Err(e) => {
                 // this will print error messages
-                eprintln!("error: {:?}", e);
+                eprintln!("error: {}", e);
                 return;
             }
         }

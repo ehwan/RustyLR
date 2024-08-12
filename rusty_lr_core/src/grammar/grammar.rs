@@ -400,9 +400,24 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                         }
                         None => {
                             // shift/reduce error
+
+                            // next_rules_term has set of rules that is already shifted.
+                            // so shift -= 1 again to get the rule that is not shifted yet
+                            let shifted_rules: BTreeMap<_, _> = next_rules_term[&lookahead]
+                                .rules
+                                .iter()
+                                .map(|(rule_ref, lookaheads)| {
+                                    let mut rule_ref = rule_ref.clone();
+                                    rule_ref.shifted -= 1;
+                                    (rule_ref, lookaheads.clone())
+                                })
+                                .collect();
+
                             return Err(BuildError::ShiftReduceConflict {
                                 reduce: empty_rule,
-                                shift: next_rules_term[&lookahead].clone(),
+                                shift: LookaheadRuleRefSet {
+                                    rules: shifted_rules,
+                                },
                                 term: lookahead.clone(),
                                 rules: &self.rules,
                             });

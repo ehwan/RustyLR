@@ -13,7 +13,6 @@ use quote::ToTokens;
 use super::parser_expanded::GrammarContext;
 use super::parser_expanded::GrammarNonTerminals;
 use super::parser_expanded::GrammarParser;
-use crate::error::ParseError;
 
 #[derive(Clone, Debug)]
 pub enum Lexed {
@@ -230,7 +229,7 @@ pub fn feed_recursive<'a>(
     (),
     (
         Span, // span of the error point
-        rusty_lr_core::ParseError<'a, Lexed, GrammarNonTerminals, u8, ParseError>,
+        rusty_lr_core::ParseError<'a, Lexed, GrammarNonTerminals, u8, String>,
     ),
 > {
     let mut input = input.into_iter().peekable();

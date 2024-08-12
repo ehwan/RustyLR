@@ -1,179 +1,311 @@
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
+
+use quote::quote;
 use quote::quote_spanned;
 
-use std::fmt::Display;
+use rusty_lr_core::ProductionRule;
+use rusty_lr_core::ShiftedRule;
 
-use super::utils;
+use crate::utils;
 
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum ParseError {
-    MultipleTokenDefinition(Ident),
-    MultipleStartDefinition(Span, Ident, Ident),
-    MultipleTokenTypeDefinition(Span, TokenStream, TokenStream),
-    MultipleEofDefinition(Span, TokenStream, TokenStream),
-    MultipleUserDataDefinition(Span, TokenStream, TokenStream),
-    MultipleRuleDefinition(Ident),
-    MultipleErrorDefinition(Span, TokenStream, TokenStream),
+    MultipleModulePrefixDefinition((Span, TokenStream), (Span, TokenStream)),
+    MultipleUserDataDefinition((Span, TokenStream), (Span, TokenStream)),
+    MultipleErrorDefinition((Span, TokenStream), (Span, TokenStream)),
+    MultipleTokenTypeDefinition((Span, TokenStream), (Span, TokenStream)),
+    MultipleEofDefinition((Span, TokenStream), (Span, TokenStream)),
+    MultipleStartDefinition(Ident, Ident),
+    MultipleRuleDefinition(Ident, Ident),
+
     /// different reduce type applied to the same terminal symbol
     MultipleReduceDefinition(Ident),
 
-    // same name for terminal and non-terminal exists
-    TermNonTermConflict(Ident),
+    /// same name for terminal and non-terminal exists
+    TermNonTermConflict {
+        name: Ident,
+        terminal: Ident,
+        non_terminal: Ident,
+    },
 
-    InvalidTerminalRange(Ident, Ident),
+    InvalidTerminalRange((Ident, usize, TokenStream), (Ident, usize, TokenStream)),
 
+    /// name given to %start not defined
+    StartNonTerminalNotDefined(Ident),
+
+    /// unknown terminal symbol name
     TerminalNotDefined(Ident),
-    NonTerminalNotDefined(Ident),
-    EofDefined(Ident),
-    AugmentedDefined(Ident),
-    ReservedNonTerminal(Ident),
 
-    RuleTypeDefinedButActionNotDefined(Ident),
+    /// multiple %token definition
+    MultipleTokenDefinition(Ident, Ident),
+
+    /// 'eof' is reserved name
+    EofDefined(Ident),
+    /// 'Augmented' is reserved name
+    AugmentedDefined(Ident),
 
     StartNotDefined,
     EofNotDefined,
     TokenTypeNotDefined,
 
-    GrammarBuildError(String),
+    /// feed() failed
+    MacroLineParse {
+        span: Span,
+        message: String,
+    },
+    // feed(eof) failed
+    MacroLineParseEnd {
+        message: String,
+    },
 
-    // building the grammar for parsing production rules failed
-    InternalGrammar(Span, String),
+    ////////////////////////////////////
+    //// Below errors are for emit()
+    ////////////////////////////////////
+    /// ReduceAction must be defined but not defined
+    RuleTypeDefinedButActionNotDefined {
+        name: Ident,
+        rule_local_id: usize,
+    },
 
-    /// error parsing TerminalSet
-    TerminalSetParse(Span, String),
+    /// error building given CFG
+    ShiftReduceConflict {
+        term: Ident,
+        reduce_rule: (usize, ProductionRule<Ident, Ident>),
+        shift_rules: Vec<(usize, ShiftedRule<Ident, Ident>)>,
+    },
+    /// error building given CFG
+    ReduceReduceConflict {
+        lookahead: Ident,
+        rule1: (usize, ProductionRule<Ident, Ident>),
+        rule2: (usize, ProductionRule<Ident, Ident>),
+    },
 }
-
-impl Display for ParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+#[allow(unused)]
+impl ParseError {
+    pub fn to_compile_error(&self) -> TokenStream {
         match self {
-            ParseError::MultipleTokenDefinition(ident) => {
-                write!(f, "Multiple token definition: {}", ident)
+            ParseError::MultipleModulePrefixDefinition(
+                (span1, tokenstream1),
+                (span2, tokenstream2),
+            ) => {
+                let span = *span2;
+                let message = "Multiple %moduleprefix definition";
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
             }
-            ParseError::MultipleStartDefinition(_, start1, start2) => {
-                write!(f, "Multiple start definition: {} AND {}", start1, start2)
+            ParseError::MultipleUserDataDefinition(
+                (span1, tokenstream1),
+                (span2, tokenstream2),
+            ) => {
+                let span = *span2;
+                let message = "Multiple %userdata definition";
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
             }
-            ParseError::MultipleTokenTypeDefinition(_, stream1, stream2) => {
-                write!(
-                    f,
-                    "Multiple token type definition: {} AND {}",
-                    stream1, stream2
-                )
+            ParseError::MultipleErrorDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
+                let span = *span2;
+                let message = "Multiple %error definition";
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
             }
-            ParseError::MultipleEofDefinition(_, stream1, stream2) => {
-                write!(f, "Multiple eof definition: {} AND {}", stream1, stream2)
+            ParseError::MultipleTokenTypeDefinition(
+                (span1, tokenstream1),
+                (span2, tokenstream2),
+            ) => {
+                let span = *span2;
+                let message = "Multiple %tokentype definition";
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
             }
-            ParseError::MultipleUserDataDefinition(_, ident, tokens) => {
-                write!(f, "Multiple user data definition: {} AND {}", ident, tokens)
+            ParseError::MultipleEofDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
+                let span = *span2;
+                let message = "Multiple %eof definition";
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
             }
-            ParseError::MultipleRuleDefinition(name) => {
-                write!(f, "Multiple rule definition: {}", name)
+            ParseError::MultipleStartDefinition(old, new) => {
+                let span = new.span();
+                let message = format!("Multiple %start definition: {} and {}", old, new);
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
             }
-            ParseError::MultipleErrorDefinition(_, err1, err2) => {
-                write!(f, "Multiple error type definition: {} AND {}", err1, err2)
+            ParseError::MultipleRuleDefinition(old, new) => {
+                let span = new.span();
+                let message = format!("Multiple rule definition with same name: {}", old);
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
             }
-            ParseError::MultipleReduceDefinition(name) => {
-                write!(f, "Multiple reduce type definition: {}", name)
+
+            ParseError::MultipleReduceDefinition(term) => {
+                let span = term.span();
+                let message = format!("Differnt reduce type (%left and %right) applied to the same terminal symbol: {}", term);
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
             }
-            ParseError::InvalidTerminalRange(ident1, ident2) => {
-                write!(f, "Invalid terminal range: {} - {}", ident1, ident2)
+
+            ParseError::TermNonTermConflict {
+                name,
+                terminal,
+                non_terminal,
+            } => {
+                let span = name.span();
+                let message = format!("Same name for terminal and non-terminal exists: {}", name);
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
             }
-            ParseError::TermNonTermConflict(name) => {
-                write!(
-                    f,
-                    "Same token name for Terminal and Non-Terminal symbol exists: {}",
-                    name
-                )
+
+            ParseError::InvalidTerminalRange((first, first_index, _), (last, last_index, _)) => {
+                let span = first.span();
+                let message = format!(
+                    "Invalid terminal range: [{}({}) - {}({})]",
+                    first, first_index, last, last_index
+                );
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
             }
+
+            ParseError::StartNonTerminalNotDefined(ident) => {
+                let span = ident.span();
+                let message = format!("Name given to %start not defined: {}", ident);
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
+            }
+
+            ParseError::TerminalNotDefined(ident) => {
+                let span = ident.span();
+                let message = format!("Unknown terminal symbol name: {}", ident);
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
+            }
+
+            ParseError::MultipleTokenDefinition(old, new) => {
+                let span = new.span();
+                let message = format!("Multiple %token definition with same name: {}", old);
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
+            }
+
+            ParseError::EofDefined(ident) => {
+                let span = ident.span();
+                let message = format!("'{}' is reserved name", utils::EOF_NAME);
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
+            }
+            ParseError::AugmentedDefined(ident) => {
+                let span = ident.span();
+                let message = format!("'{}' is reserved name", utils::AUGMENTED_NAME);
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
+            }
+
             ParseError::StartNotDefined => {
-                write!(
-                    f,
-                    "Start production rule not defined;\n>> %start <RuleName>;"
-                )
-            }
-            ParseError::TokenTypeNotDefined => {
-                write!(
-                    f,
-                    "Token type not defined for Terminal;\n>> %tokentype <RustType>;"
-                )
+                quote! {
+                    compile_error!("Start rule not defined\n>>> %start <rule_name>;");
+                }
             }
             ParseError::EofNotDefined => {
-                write!(f, "Eof not defined;\n>> %eof <RustCode>;")
+                quote! {
+                    compile_error!("Eof not defined\n>>> %eof <eof_token_value>;");
+                }
             }
-            ParseError::TerminalNotDefined(ident) => {
-                write!(f, "Terminal not defined: {}", ident)
+            ParseError::TokenTypeNotDefined => {
+                quote! {
+                    compile_error!("Token type not defined\n>>> %tokentype <token_type_name>;");
+                }
             }
-            ParseError::NonTerminalNotDefined(ident) => {
-                write!(f, "Non-terminal not defined: {}", ident)
-            }
-            ParseError::EofDefined(_) => {
-                write!(
-                    f,
-                    "\"{}\" is reserved name for terminal symbol",
-                    utils::EOF_NAME
-                )
-            }
-            ParseError::AugmentedDefined(_) => {
-                write!(
-                    f,
-                    "\"{}\" is reserved name for non-terminal symbol",
-                    utils::AUGMENTED_NAME
-                )
-            }
-            ParseError::ReservedNonTerminal(ident) => {
-                write!(f, "\"{}\" is reserved name for non-terminal symbol", ident)
-            }
-            ParseError::RuleTypeDefinedButActionNotDefined(ident) => {
-                write!(
-                    f,
-                    "<RuleType> is defined but <ReduceAction> is not defined: {}",
-                    ident
-                )
-            }
-            ParseError::GrammarBuildError(message) => {
-                write!(f, "{}", message)
-            }
-            ParseError::InternalGrammar(_, message) => write!(f, "{}", message),
 
-            ParseError::TerminalSetParse(_, message) => {
-                write!(f, "Error parsing TerminalSet:\n{}", message)
+            ParseError::MacroLineParse { span, message } => {
+                quote_spanned! {
+                    *span=>
+                    compile_error!(#message);
+                }
             }
-        }
-    }
-}
-impl ParseError {
-    pub fn span(&self) -> Span {
-        match self {
-            ParseError::MultipleTokenDefinition(ident) => ident.span(),
-            ParseError::MultipleStartDefinition(span, _, _) => *span,
-            ParseError::MultipleTokenTypeDefinition(span, _, _) => *span,
-            ParseError::MultipleEofDefinition(span, _, _) => *span,
-            ParseError::MultipleUserDataDefinition(span, _, _) => *span,
-            ParseError::MultipleRuleDefinition(ident) => ident.span(),
-            ParseError::MultipleErrorDefinition(span, _, _) => *span,
-            ParseError::MultipleReduceDefinition(ident) => ident.span(),
-            ParseError::InvalidTerminalRange(ident1, _ident2) => ident1.span(),
-            ParseError::TermNonTermConflict(ident) => ident.span(),
-            ParseError::StartNotDefined => Span::call_site(),
-            ParseError::TokenTypeNotDefined => Span::call_site(),
-            ParseError::EofNotDefined => Span::call_site(),
-            ParseError::TerminalNotDefined(ident) => ident.span(),
-            ParseError::NonTerminalNotDefined(ident) => ident.span(),
-            ParseError::EofDefined(ident) => ident.span(),
-            ParseError::AugmentedDefined(ident) => ident.span(),
-            ParseError::ReservedNonTerminal(ident) => ident.span(),
-            ParseError::RuleTypeDefinedButActionNotDefined(ident) => ident.span(),
-            ParseError::GrammarBuildError(_) => Span::call_site(),
-            ParseError::InternalGrammar(span, _) => *span,
-            ParseError::TerminalSetParse(span, _) => *span,
-        }
-    }
-    pub fn compile_error(&self) -> TokenStream {
-        let message = format!("{}", self);
-        quote_spanned! {
-            self.span() => compile_error!(#message);
+            ParseError::MacroLineParseEnd { message } => {
+                quote! {
+                    compile_error!(#message);
+                }
+            }
+
+            ParseError::RuleTypeDefinedButActionNotDefined {
+                name,
+                rule_local_id,
+            } => {
+                let span = name.span();
+                quote_spanned! {
+                    span=>
+                    compile_error!("ReduceAction must be defined for this rule");
+                }
+            }
+
+            ParseError::ShiftReduceConflict {
+                term,
+                reduce_rule: (ruleid, rule),
+                shift_rules,
+            } => {
+                let span = term.span();
+                let message = format!(
+                    "Shift-Reduce conflict with terminal symbol: {}\n>>> Reduce: {}\n>>> Shifts: {}",
+                    term,
+                    rule,
+                    shift_rules
+                        .iter()
+                        .map(|(ruleid, rule)| format!("{}", rule))
+                        .collect::<Vec<_>>()
+                        .join("\n>>>")
+                );
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
+            }
+            ParseError::ReduceReduceConflict {
+                lookahead,
+                rule1: (ruleid1, rule1),
+                rule2: (ruleid2, rule2),
+            } => {
+                let span = lookahead.span();
+                let message = format!(
+                    "Reduce-Reduce conflict with lookahead symbol: {}\n>>> Rule1: {}\n>>> Rule2: {}",
+                    lookahead, rule1, rule2
+                );
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
+            }
         }
     }
 }
