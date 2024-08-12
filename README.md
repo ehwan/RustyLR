@@ -688,6 +688,10 @@ An executable version of `lr1!` and `lalr1!` macro.
 Converts a context-free grammar into a deterministic finite automaton (DFA) tables,
 and generates a Rust code that can be used as a parser for that grammar.
 
+```
+cargo install rustylr
+```
+
 This executable will provide much more detailed, pretty-printed error messages than the procedural macros.
 If you are writing a huge, complex grammar, it is recommended to use this executable than the procedural macros.
 Although it is convenient to use the proc-macros for small grammars, since modern IDEs feature (rust-analyzer's auto completion, inline error messages) will be enabled.
@@ -697,8 +701,6 @@ This program searches for `%%` in the input file.
 The contents before `%%` will be copied into the output file as it is.
 Context-free grammar must be followed by `%%`.
 Each line must follow the syntax of [rusty_lr#syntax](#proc-macro-syntax).
-
-[Here](rusty_lr_executable) for more information.
 
 ```rust
 // my_grammar.rs
@@ -730,6 +732,32 @@ P: a;
 Calling the command will generate a Rust code `my_parser.rs`.
 ```
 $ rustylr my_grammar.rs my_parser.rs
+```
+
+```
+$ rustylr --help
+Usage: rustylr [OPTIONS] <INPUT_FILE> [OUTPUT_FILE]
+
+Arguments:
+  <INPUT_FILE>
+          input_file to read
+
+  [OUTPUT_FILE]
+          output_file to write
+
+          [default: out.tab.rs]
+
+Options:
+      --no-format
+          do not rustfmt the output
+
+  -l, --lalr
+          build LALR(1) parser
+
+  -v, --verbose
+          print debug information.
+
+          Print the whole rule set (include auto-generated rules), and the shift/reduce resolving process.
 ```
 
 
