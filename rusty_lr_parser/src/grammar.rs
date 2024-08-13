@@ -31,14 +31,19 @@ pub struct Grammar {
     /// terminals sorted by index, insertion order
     pub(crate) terminals_index: Vec<Ident>,
 
+    /// %left or %right for terminals
     pub reduce_types: HashMap<Ident, rusty_lr_core::ReduceType>,
 
     /// setted reduce types originated from
     pub reduce_types_origin: HashMap<Ident, (Span, Span)>,
+    /// %err
     pub(crate) error_typename: TokenStream,
 
+    /// rule definitions
     pub rules: HashMap<Ident, RuleLines>,
+    /// rule typenames
     pub(crate) nonterm_typenames: HashMap<Ident, TokenStream>,
+    /// rules sorted by index, insertion order
     pub(crate) rules_index: Vec<Ident>,
 
     /// pattern map for auto-generated rules
