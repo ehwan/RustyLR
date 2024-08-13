@@ -13,7 +13,7 @@ use proc_macro2::Span;
 use quote::quote;
 
 /// Some regex pattern
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum Pattern {
     Ident(Ident),
     Plus(Box<Pattern>),
@@ -92,9 +92,10 @@ impl Pattern {
                         rule_lines: vec![line1, line2],
                     };
                     grammar.rules.insert(new_ident.clone(), rule_lines);
+                    grammar.rules_index.push(new_ident.clone());
                     grammar
                         .nonterm_typenames
-                        .insert(new_ident.clone(), Some(quote! { Vec<#base_typename> }));
+                        .insert(new_ident.clone(), quote! { Vec<#base_typename> });
                 } else {
                     // typename not exist, make new rule with typename ()
                     // A+ -> A Ap
@@ -131,7 +132,7 @@ impl Pattern {
                         rule_lines: vec![line1, line2],
                     };
                     grammar.rules.insert(new_ident.clone(), rule_lines);
-                    grammar.nonterm_typenames.insert(new_ident.clone(), None);
+                    grammar.rules_index.push(new_ident.clone());
                 }
 
                 Ok(new_ident)
@@ -182,9 +183,10 @@ impl Pattern {
                         rule_lines: vec![line1, line2],
                     };
                     grammar.rules.insert(new_ident.clone(), rule_lines);
+                    grammar.rules_index.push(new_ident.clone());
                     grammar
                         .nonterm_typenames
-                        .insert(new_ident.clone(), Some(quote! { Vec<#base_typename> }));
+                        .insert(new_ident.clone(), quote! { Vec<#base_typename> });
                 } else {
                     // typename not exist, make new rule with typename ()
                     // A* -> A+ { Ap }
@@ -208,7 +210,7 @@ impl Pattern {
                         rule_lines: vec![line1, line2],
                     };
                     grammar.rules.insert(new_ident.clone(), rule_lines);
-                    grammar.nonterm_typenames.insert(new_ident.clone(), None);
+                    grammar.rules_index.push(new_ident.clone());
                 }
 
                 Ok(new_ident)
@@ -257,9 +259,10 @@ impl Pattern {
                         rule_lines: vec![line1, line2],
                     };
                     grammar.rules.insert(new_ident.clone(), rule_lines);
+                    grammar.rules_index.push(new_ident.clone());
                     grammar
                         .nonterm_typenames
-                        .insert(new_ident.clone(), Some(quote! { Option<#base_typename> }));
+                        .insert(new_ident.clone(), quote! { Option<#base_typename> });
                 } else {
                     // typename not exist, make new rule with typename ()
                     // A? -> A { Some(A) }
@@ -283,7 +286,7 @@ impl Pattern {
                         rule_lines: vec![line1, line2],
                     };
                     grammar.rules.insert(new_ident.clone(), rule_lines);
-                    grammar.nonterm_typenames.insert(new_ident.clone(), None);
+                    grammar.rules_index.push(new_ident.clone());
                 }
 
                 Ok(new_ident)
@@ -321,9 +324,10 @@ impl Pattern {
                 grammar
                     .rules
                     .insert(new_ident.clone(), RuleLines { rule_lines });
+                grammar.rules_index.push(new_ident.clone());
                 grammar
                     .nonterm_typenames
-                    .insert(new_ident.clone(), Some(grammar.token_typename.clone()));
+                    .insert(new_ident.clone(), grammar.token_typename.clone());
                 Ok(new_ident)
             }
         }

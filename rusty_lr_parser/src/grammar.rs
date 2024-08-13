@@ -3,8 +3,6 @@ use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
 
-use std::collections::BTreeMap;
-
 use crate::error::ArgError;
 use crate::error::ParseArgError;
 use crate::error::ParseError;
@@ -18,6 +16,8 @@ use crate::rule::RuleLines;
 use crate::token::TokenMapped;
 use crate::utils;
 
+use rusty_lr_core::HashMap;
+
 #[derive(Debug)]
 pub struct Grammar {
     /// for bootstrapping the generated code; the prefix for the '::rusty_lr' module
@@ -27,24 +27,24 @@ pub struct Grammar {
     pub(crate) start_rule_name: Ident,
     pub(crate) eof: TokenStream,
     // index, typename
-    pub(crate) terminals: BTreeMap<Ident, (usize, TokenStream)>,
+    pub(crate) terminals: HashMap<Ident, (usize, TokenStream)>,
     /// terminals sorted by index, insertion order
     pub(crate) terminals_index: Vec<Ident>,
 
-    pub reduce_types: BTreeMap<Ident, rusty_lr_core::ReduceType>,
+    pub reduce_types: HashMap<Ident, rusty_lr_core::ReduceType>,
 
     /// setted reduce types originated from
-    pub reduce_types_origin: BTreeMap<Ident, (Span, Span)>,
+    pub reduce_types_origin: HashMap<Ident, (Span, Span)>,
     pub(crate) error_typename: TokenStream,
 
-    //                  name       typename           rules
-    pub rules: BTreeMap<Ident, RuleLines>,
-    pub(crate) nonterm_typenames: BTreeMap<Ident, Option<TokenStream>>,
+    pub rules: HashMap<Ident, RuleLines>,
+    pub(crate) nonterm_typenames: HashMap<Ident, TokenStream>,
+    pub(crate) rules_index: Vec<Ident>,
 
     /// pattern map for auto-generated rules
-    pub(crate) pattern_map: BTreeMap<Pattern, Ident>,
+    pub(crate) pattern_map: HashMap<Pattern, Ident>,
     /// span range that generated rule was originated from
-    pub generated_root_span: BTreeMap<Ident, (Span, Span)>,
+    pub generated_root_span: HashMap<Ident, (Span, Span)>,
 }
 
 impl Grammar {
@@ -53,18 +53,17 @@ impl Grammar {
         if self.terminals.contains_key(ident) {
             Some(&self.token_typename)
         } else {
-            self.nonterm_typenames
-                .get(ident)
-                .unwrap_or_else(|| panic!("get_typename: {}", ident))
-                .as_ref()
+            self.nonterm_typenames.get(ident)
         }
     }
 
     /// get rule by ruleid
     pub fn get_rule_by_id(&self, mut ruleid: usize) -> Option<(&Ident, &RuleLines, usize)> {
-        for (name, rules) in self.rules.iter() {
+        for name in self.rules_index.iter() {
+            // rule_name is same as name, but can have different Span
+            let (rule_name, rules) = self.rules.get_key_value(name).unwrap();
             if ruleid < rules.rule_lines.len() {
-                return Some((name, rules, ruleid));
+                return Some((rule_name, rules, ruleid));
             }
             ruleid -= rules.rule_lines.len();
         }
@@ -169,14 +168,15 @@ impl Grammar {
             } else {
                 quote! { String }
             },
-            terminals: BTreeMap::new(),
-            terminals_index: Vec::new(),
-            reduce_types: BTreeMap::new(),
-            reduce_types_origin: BTreeMap::new(),
-            rules: BTreeMap::new(),
-            nonterm_typenames: BTreeMap::new(),
-            pattern_map: BTreeMap::new(),
-            generated_root_span: BTreeMap::new(),
+            terminals: Default::default(),
+            terminals_index: Default::default(),
+            reduce_types: Default::default(),
+            reduce_types_origin: Default::default(),
+            rules: Default::default(),
+            nonterm_typenames: Default::default(),
+            rules_index: Default::default(),
+            pattern_map: Default::default(),
+            generated_root_span: Default::default(),
         };
 
         for (index, (ident, typename)) in grammar_args.terminals.into_iter().enumerate() {
@@ -251,22 +251,25 @@ impl Grammar {
 
         // insert rule typenames
         for rules in grammar_args.rules.iter() {
-            grammar
-                .nonterm_typenames
-                .insert(rules.name.clone(), rules.typename.clone());
+            // check reserved name
+            utils::check_reserved_name(&rules.name)?;
+
+            if let Some(typename) = rules.typename.as_ref() {
+                grammar
+                    .nonterm_typenames
+                    .insert(rules.name.clone(), typename.clone());
+            }
         }
 
         // insert rules
         for rules in grammar_args.rules.into_iter() {
-            // check reserved name
-            utils::check_reserved_name(&rules.name)?;
-
             if let Some((old, _)) = grammar.rules.get_key_value(&rules.name) {
                 return Err(ParseError::MultipleRuleDefinition(
                     old.clone(),
                     rules.name.clone(),
                 ));
             }
+            grammar.rules_index.push(rules.name.clone());
 
             let mut rule_lines = Vec::new();
             for rule in rules.rule_lines.into_iter() {
@@ -296,6 +299,33 @@ impl Grammar {
                 .rules
                 .insert(rules.name.clone(), RuleLines { rule_lines });
         }
+        // insert augmented rule
+        grammar
+            .rules_index
+            .push(Ident::new(utils::AUGMENTED_NAME, Span::call_site()));
+        grammar.rules.insert(
+            Ident::new(utils::AUGMENTED_NAME, Span::call_site()),
+            RuleLines {
+                rule_lines: vec![RuleLine {
+                    tokens: vec![
+                        TokenMapped {
+                            token: grammar.start_rule_name.clone(),
+                            mapto: grammar.start_rule_name.clone(),
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
+                        },
+                        TokenMapped {
+                            token: Ident::new(utils::EOF_NAME, Span::call_site()),
+                            mapto: Ident::new(utils::EOF_NAME, Span::call_site()),
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
+                        },
+                    ],
+                    reduce_action: None,
+                    separator_span: Span::call_site(),
+                }],
+            },
+        );
 
         // check all token is defined as one of terminal or non-terminal
         for (_name, rule_lines) in grammar.rules.iter() {
@@ -360,9 +390,11 @@ impl Grammar {
             }
         }
 
-        // rules
-        for (name, rules) in self.rules.iter() {
-            for rule in rules.rule_lines.iter() {
+        // add rules
+        for name in self.rules_index.iter() {
+            let rule_lines = self.rules.get(name).expect("rules.get");
+
+            for rule in rule_lines.rule_lines.iter() {
                 let mut tokens = Vec::with_capacity(rule.tokens.len());
                 for token in rule.tokens.iter() {
                     if self.terminals.contains_key(&token.token) {
@@ -377,15 +409,6 @@ impl Grammar {
                 grammar.add_rule(name.clone(), tokens);
             }
         }
-
-        // augmented rule
-        grammar.add_rule(
-            Ident::new(utils::AUGMENTED_NAME, Span::call_site()),
-            vec![
-                rusty_lr_core::Token::NonTerm(self.start_rule_name.clone()),
-                rusty_lr_core::Token::Term(Ident::new(utils::EOF_NAME, Span::call_site())),
-            ],
-        );
 
         grammar
     }

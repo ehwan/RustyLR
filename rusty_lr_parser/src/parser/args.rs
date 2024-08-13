@@ -8,6 +8,7 @@ use crate::error::ParseError;
 use crate::grammar::Grammar;
 use crate::pattern::Pattern;
 use crate::terminalset::TerminalSet;
+use crate::utils;
 
 /// parsed arguments for reduce type def
 pub enum ReduceTypeArgs {
@@ -31,7 +32,10 @@ pub enum PatternArgs {
 impl PatternArgs {
     pub fn to_pattern(&self, grammar: &Grammar) -> Result<Pattern, ParseError> {
         match self {
-            PatternArgs::Ident(ident, _) => Ok(Pattern::Ident(ident.clone())),
+            PatternArgs::Ident(ident, _) => {
+                utils::check_reserved_name(ident)?;
+                Ok(Pattern::Ident(ident.clone()))
+            }
             PatternArgs::Plus(pattern, _) => {
                 Ok(Pattern::Plus(Box::new(pattern.to_pattern(grammar)?)))
             }

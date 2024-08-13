@@ -29,7 +29,7 @@ impl Grammar {
 
         let mut comma_separated_variants = TokenStream::new();
         let mut case_display = TokenStream::new();
-        for (name, _) in self.rules.iter() {
+        for name in self.rules_index.iter() {
             comma_separated_variants.extend(quote! {
                 #name,
             });
@@ -40,23 +40,18 @@ impl Grammar {
             });
         }
 
-        let aug_ident = Ident::new(utils::AUGMENTED_NAME, Span::call_site());
-        let aug_ident_str = utils::AUGMENTED_NAME;
-
         quote! {
             /// An enum that represents non-terminal symbols
             #[allow(non_camel_case_types)]
             #[derive(Debug, Clone, Copy, std::hash::Hash, std::cmp::PartialEq, std::cmp::Eq, std::cmp::PartialOrd, std::cmp::Ord)]
             pub enum #enum_name {
                 #comma_separated_variants
-                #aug_ident,
             }
 
             impl std::fmt::Display for #enum_name {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                     match self {
                         #case_display
-                        #enum_name::#aug_ident => write!(f, #aug_ident_str),
                     }
                 }
             }
@@ -346,11 +341,12 @@ impl Grammar {
         };
 
         // reduce types
-        for (term, reduce_type) in self.reduce_types.iter() {
-            let stream = &self.terminals.get(term).unwrap().1;
-            match reduce_type {
-                rlr::ReduceType::Left => {
-                    build_grammar_stream.extend(quote! {
+        for term in self.terminals_index.iter() {
+            if let Some(reduce_type) = self.reduce_types.get(term) {
+                let stream = &self.terminals.get(term).unwrap().1;
+                match reduce_type {
+                    rlr::ReduceType::Left => {
+                        build_grammar_stream.extend(quote! {
                         match grammar.set_reduce_type(#stream, #module_prefix::ReduceType::Left) {
                             Ok(_) => {},
                             Err(err) => {
@@ -358,9 +354,9 @@ impl Grammar {
                             }
                         }
                     });
-                }
-                rlr::ReduceType::Right => {
-                    build_grammar_stream.extend(quote! {
+                    }
+                    rlr::ReduceType::Right => {
+                        build_grammar_stream.extend(quote! {
                         match grammar.set_reduce_type(#stream, #module_prefix::ReduceType::Right) {
                             Ok(_) => {},
                             Err(err) => {
@@ -368,12 +364,14 @@ impl Grammar {
                             }
                         }
                     });
+                    }
                 }
             }
         }
 
         // rules
-        for (name, rules) in self.rules.iter() {
+        for name in self.rules_index.iter() {
+            let rules = self.rules.get(name).unwrap();
             for rule in rules.rule_lines.iter() {
                 let mut comma_separated_tokens = quote! {};
                 for token in rule.tokens.iter() {
@@ -395,21 +393,7 @@ impl Grammar {
             }
         }
 
-        // augmented rule
         let aug_ident = Ident::new(utils::AUGMENTED_NAME, Span::call_site());
-        {
-            let start_name = &self.start_rule_name;
-            let eof_stream = &self.eof;
-            build_grammar_stream.extend(quote! {
-                grammar.add_rule(
-                    #nonterminals_enum_name::#aug_ident,
-                    vec![
-                        #module_prefix::Token::NonTerm(#nonterminals_enum_name::#start_name),
-                        #module_prefix::Token::Term(#eof_stream),
-                    ],
-                );
-            });
-        }
 
         // build grammar
         if lalr {
@@ -474,7 +458,8 @@ impl Grammar {
         // TokenStream to define reduce function for each production rule
         let mut fn_reduce_for_each_rule_stream = TokenStream::new();
 
-        for (name, rules) in self.rules.iter() {
+        for name in self.rules_index.iter() {
+            let rules = self.rules.get(name).unwrap();
             for (rule_local_id, rule) in rules.rule_lines.iter().enumerate() {
                 let mut token_pop_stream = TokenStream::new();
                 for token in rule.tokens.iter().rev() {
@@ -483,21 +468,17 @@ impl Grammar {
                         token_pop_stream.extend(quote! {
                             let mut #mapto = self.#terms_stack_name.pop().expect("Something wrong! term_stack is empty");
                         });
-                    } else if let Some(typename) = self.nonterm_typenames.get(&token.token) {
-                        if typename.is_some() {
-                            // if <RuleType> is defined for this nonterm,
-                            // pop value from the stack to 'mapto'
-                            let stack_name = utils::generate_stack_name(&token.token);
-                            let error_message =
-                                format!("Something wrong! {} stack is empty", &token.token);
+                    } else if self.nonterm_typenames.get(&token.token).is_some() {
+                        // if <RuleType> is defined for this nonterm,
+                        // pop value from the stack to 'mapto'
+                        let stack_name = utils::generate_stack_name(&token.token);
+                        let error_message =
+                            format!("Something wrong! {} stack is empty", &token.token);
 
-                            let mapto = &token.mapto;
-                            token_pop_stream.extend(quote! {
-                                let mut #mapto = self.#stack_name.pop().expect(#error_message);
-                            });
-                        }
-                    } else {
-                        unreachable!("Token should be either terminal or non-terminal");
+                        let mapto = &token.mapto;
+                        token_pop_stream.extend(quote! {
+                            let mut #mapto = self.#stack_name.pop().expect(#error_message);
+                        });
                     }
                 }
 
@@ -511,7 +492,7 @@ impl Grammar {
 
                 // if typename is defined for this rule, push result of action to stack
                 // else, just execute action
-                let typename = self.nonterm_typenames.get(name).unwrap();
+                let typename = self.nonterm_typenames.get(name);
                 if typename.is_some() {
                     // push result to this stack
                     let stack_name = utils::generate_stack_name(name);
@@ -587,7 +568,7 @@ impl Grammar {
         // and pop from start rule stack
         let start_rule_name = &self.start_rule_name;
         let (start_rule_typename, pop_from_start_rule_stack) = {
-            if let Some(start_typename) = &self.nonterm_typenames.get(start_rule_name).unwrap() {
+            if let Some(start_typename) = self.nonterm_typenames.get(start_rule_name) {
                 let start_rule_stack_name = utils::generate_stack_name(start_rule_name);
                 (
                     start_typename.clone(),
@@ -603,11 +584,11 @@ impl Grammar {
         // TokenStream for member variables declaration
         let mut stack_def_streams = quote! {};
         let mut stack_init_streams = quote! {};
-        for (name, typename) in self.nonterm_typenames.iter() {
-            // push result to this stack
-            let stack_name = utils::generate_stack_name(name);
+        for name in self.rules_index.iter() {
+            if let Some(typename) = self.nonterm_typenames.get(name) {
+                // push result to this stack
+                let stack_name = utils::generate_stack_name(name);
 
-            if let Some(typename) = typename {
                 stack_def_streams.extend(quote! {
                     #stack_name : Vec<#typename>,
                 });
