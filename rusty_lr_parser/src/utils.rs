@@ -30,5 +30,8 @@ pub(crate) fn check_reserved_name(ident: &Ident) -> Result<(), ParseError> {
     if ident == EOF_NAME {
         return Err(ParseError::EofDefined(ident.clone()));
     }
+    if ident.to_string().starts_with(AUTO_GENERATED_RULE_PREFIX) {
+        return Err(ParseError::ReservedName(ident.clone()));
+    }
     Ok(())
 }

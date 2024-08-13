@@ -694,7 +694,10 @@ cargo install rustylr
 
 This executable will provide much more detailed, pretty-printed error messages than the procedural macros.
 If you are writing a huge, complex grammar, it is recommended to use this executable than the procedural macros.
-Although it is convenient to use the proc-macros for small grammars, since modern IDEs feature (rust-analyzer's auto completion, inline error messages) will be enabled.
+`--verbose` option is useful for debugging the grammar. It will print the auto-generated rules and the resolving process of shift/reduce conflicts. [like](images/example1.png) [this](images/example2.png)
+
+Although it is convenient to use the proc-macros for small grammars,
+since modern IDEs feature (rust-analyzer's auto completion, inline error messages) could be enabled.
 
 This program searches for `%%` in the input file.
 
@@ -734,6 +737,7 @@ Calling the command will generate a Rust code `my_parser.rs`.
 $ rustylr my_grammar.rs my_parser.rs
 ```
 
+
 ```
 $ rustylr --help
 Usage: rustylr [OPTIONS] <INPUT_FILE> [OUTPUT_FILE]
@@ -756,8 +760,9 @@ Options:
 
   -v, --verbose
           print debug information.
-
-          Print the whole rule set (include auto-generated rules), and the shift/reduce resolving process.
+    
+          print the auto-generated rules, and where they are originated from.
+          print the shift/reduce conflicts, and the resolving process.
 ```
 
 

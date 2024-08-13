@@ -25,8 +25,8 @@ pub struct Args {
 
     /// print debug information.
     ///
-    /// Print the whole rule set (include auto-generated rules),
-    /// and the shift/reduce resolving process.
+    /// print the auto-generated rules, and where they are originated from.
+    /// print the shift/reduce conflicts, and the resolving process.
     #[arg(short, long, default_value = "false")]
     pub verbose: bool,
 }

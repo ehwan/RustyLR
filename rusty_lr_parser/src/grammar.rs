@@ -5,7 +5,11 @@ use quote::quote;
 
 use std::collections::BTreeMap;
 
+use crate::error::ArgError;
+use crate::error::EmitError;
+use crate::error::ParseArgError;
 use crate::error::ParseError;
+use crate::parser::args::GrammarArgs;
 use crate::parser::args::ReduceTypeArgs;
 use crate::parser::lexer::Lexed;
 use crate::parser::parser_expanded::GrammarParser;
@@ -25,10 +29,13 @@ pub struct Grammar {
     pub(crate) eof: TokenStream,
     // index, typename
     pub(crate) terminals: BTreeMap<Ident, (usize, TokenStream)>,
-    // terminals sorted by index, insertion order
+    /// terminals sorted by index, insertion order
     pub(crate) terminals_index: Vec<Ident>,
 
-    pub(crate) reduce_types: BTreeMap<Ident, rusty_lr_core::ReduceType>,
+    pub reduce_types: BTreeMap<Ident, rusty_lr_core::ReduceType>,
+
+    /// setted reduce types originated from
+    pub reduce_types_origin: BTreeMap<Ident, (Span, Span)>,
     pub(crate) error_typename: TokenStream,
 
     //                  name       typename           rules
@@ -65,8 +72,7 @@ impl Grammar {
         None
     }
 
-    /// parse the input TokenStream and return a parsed Grammar
-    pub fn parse(input: TokenStream) -> Result<Self, ParseError> {
+    pub fn parse_args(input: TokenStream) -> Result<GrammarArgs, ParseArgError> {
         let parser = GrammarParser::new();
         let mut context = parser.begin();
 
@@ -75,7 +81,7 @@ impl Grammar {
             Err((span, err)) => match err {
                 _ => {
                     let message = err.short_message();
-                    return Err(ParseError::MacroLineParse { span, message });
+                    return Err(ParseArgError::MacroLineParse { span, message });
                 }
             },
         }
@@ -84,95 +90,94 @@ impl Grammar {
             Err(err) => match err {
                 _ => {
                     let message = err.short_message();
-                    return Err(ParseError::MacroLineParseEnd { message });
+                    return Err(ParseArgError::MacroLineParseEnd { message });
                 }
             },
         }
 
-        let grammar_args = context.accept();
-
+        Ok(context.accept())
+    }
+    pub fn arg_check_error(grammar_args: &GrammarArgs) -> Result<(), ArgError> {
         // %error
-        let error_typename = if grammar_args.error_typename.len() > 1 {
-            return Err(ParseError::MultipleErrorDefinition(
+        if grammar_args.error_typename.len() > 1 {
+            return Err(ArgError::MultipleErrorDefinition(
                 grammar_args.error_typename[0].clone(),
                 grammar_args.error_typename[1].clone(),
             ));
-        } else if grammar_args.error_typename.is_empty() {
-            quote! { String }
-        } else {
-            grammar_args.error_typename[0].1.clone()
-        };
+        }
 
         // %moduleprefix
-        let module_prefix = if grammar_args.module_prefix.len() > 1 {
-            return Err(ParseError::MultipleUserDataDefinition(
+        if grammar_args.module_prefix.len() > 1 {
+            return Err(ArgError::MultipleUserDataDefinition(
                 grammar_args.module_prefix[0].clone(),
                 grammar_args.module_prefix[1].clone(),
             ));
-        } else if grammar_args.module_prefix.is_empty() {
-            quote! { ::rusty_lr }
-        } else {
-            grammar_args.module_prefix[0].1.clone()
-        };
+        }
 
         // %userdata
-        let userdata = if grammar_args.userdata_typename.len() > 1 {
-            return Err(ParseError::MultipleUserDataDefinition(
+        if grammar_args.userdata_typename.len() > 1 {
+            return Err(ArgError::MultipleUserDataDefinition(
                 grammar_args.userdata_typename[0].clone(),
                 grammar_args.userdata_typename[1].clone(),
             ));
-        } else if grammar_args.userdata_typename.is_empty() {
-            None
-        } else {
-            Some(grammar_args.userdata_typename[0].1.clone())
-        };
+        }
 
         // %tokentype
-        let tokentype = if grammar_args.token_typename.is_empty() {
-            return Err(ParseError::TokenTypeNotDefined);
+        if grammar_args.token_typename.is_empty() {
+            return Err(ArgError::TokenTypeNotDefined);
         } else if grammar_args.token_typename.len() > 1 {
-            return Err(ParseError::MultipleTokenTypeDefinition(
+            return Err(ArgError::MultipleTokenTypeDefinition(
                 grammar_args.token_typename[0].clone(),
                 grammar_args.token_typename[1].clone(),
             ));
-        } else {
-            grammar_args.token_typename[0].1.clone()
-        };
+        }
 
         // %eof
-        let eof = if grammar_args.eof.is_empty() {
-            return Err(ParseError::EofNotDefined);
+        if grammar_args.eof.is_empty() {
+            return Err(ArgError::EofNotDefined);
         } else if grammar_args.eof.len() > 1 {
-            return Err(ParseError::MultipleEofDefinition(
+            return Err(ArgError::MultipleEofDefinition(
                 grammar_args.eof[0].clone(),
                 grammar_args.eof[1].clone(),
             ));
-        } else {
-            grammar_args.eof[0].1.clone()
-        };
+        }
 
         // %start
-        let start = if grammar_args.start_rule_name.is_empty() {
-            return Err(ParseError::StartNotDefined);
+        if grammar_args.start_rule_name.is_empty() {
+            return Err(ArgError::StartNotDefined);
         } else if grammar_args.start_rule_name.len() > 1 {
-            return Err(ParseError::MultipleStartDefinition(
+            return Err(ArgError::MultipleStartDefinition(
                 grammar_args.start_rule_name[0].clone(),
                 grammar_args.start_rule_name[1].clone(),
             ));
-        } else {
-            grammar_args.start_rule_name[0].clone()
-        };
+        }
+        Ok(())
+    }
 
+    /// parse the input TokenStream and return a parsed Grammar
+    pub fn from_grammar_args(grammar_args: GrammarArgs) -> Result<Self, ParseError> {
         let mut grammar = Grammar {
-            module_prefix: module_prefix,
-            token_typename: tokentype,
-            userdata_typename: userdata,
-            start_rule_name: start,
-            eof,
-            error_typename,
+            module_prefix: if let Some(module_prefix) = grammar_args.module_prefix.get(0) {
+                module_prefix.1.clone()
+            } else {
+                quote! { ::rusty_lr }
+            },
+            token_typename: grammar_args.token_typename[0].1.clone(),
+            userdata_typename: grammar_args
+                .userdata_typename
+                .get(0)
+                .map(|(_, stream)| stream.clone()),
+            start_rule_name: grammar_args.start_rule_name[0].clone(),
+            eof: grammar_args.eof[0].1.clone(),
+            error_typename: if let Some(error_typename) = grammar_args.error_typename.get(0) {
+                error_typename.1.clone()
+            } else {
+                quote! { String }
+            },
             terminals: BTreeMap::new(),
             terminals_index: Vec::new(),
             reduce_types: BTreeMap::new(),
+            reduce_types_origin: BTreeMap::new(),
             rules: BTreeMap::new(),
             nonterm_typenames: BTreeMap::new(),
             pattern_map: BTreeMap::new(),
@@ -205,24 +210,45 @@ impl Grammar {
         for (terminals, reduce_type) in grammar_args.reduce_types.into_iter() {
             match terminals {
                 ReduceTypeArgs::Ident(terminal) => {
+                    let new_span = terminal.span();
+
                     if !grammar.terminals.contains_key(&terminal) {
                         return Err(ParseError::TerminalNotDefined(terminal));
                     }
                     if let Some(old) = grammar.reduce_types.insert(terminal.clone(), reduce_type) {
                         if old != reduce_type {
-                            return Err(ParseError::MultipleReduceDefinition(terminal));
+                            let old_span = grammar
+                                .reduce_types_origin
+                                .get(&terminal)
+                                .expect("reduce_types_origin::get");
+                            return Err(ParseError::MultipleReduceDefinition {
+                                terminal,
+                                old: (old_span.0, old_span.1, old),
+                                new: (new_span, new_span, reduce_type),
+                            });
                         }
                     }
+                    grammar
+                        .reduce_types_origin
+                        .insert(terminal, (new_span, new_span));
                 }
                 ReduceTypeArgs::TerminalSet(terminal_set) => {
+                    let new_span = (terminal_set.open_span, terminal_set.close_span);
                     for terminal in terminal_set.to_terminal_set(&grammar)?.into_iter() {
                         if let Some(old) =
                             grammar.reduce_types.insert(terminal.clone(), reduce_type)
                         {
-                            if old != reduce_type {
-                                return Err(ParseError::MultipleReduceDefinition(terminal));
-                            }
+                            let old_span = grammar
+                                .reduce_types_origin
+                                .get(&terminal)
+                                .expect("reduce_types_origin::get");
+                            return Err(ParseError::MultipleReduceDefinition {
+                                terminal,
+                                old: (old_span.0, old_span.1, old),
+                                new: (new_span.0, new_span.1, reduce_type),
+                            });
                         }
+                        grammar.reduce_types_origin.insert(terminal, new_span);
                     }
                 }
             }
@@ -306,8 +332,24 @@ impl Grammar {
         Ok(grammar)
     }
 
+    /// for backward compatibility
+    pub fn parse(input: TokenStream) -> Result<Self, TokenStream> {
+        let grammar_args = match Grammar::parse_args(input) {
+            Ok(grammar_args) => grammar_args,
+            Err(e) => return Err(e.to_compile_error()),
+        };
+        match Grammar::arg_check_error(&grammar_args) {
+            Ok(_) => {}
+            Err(e) => return Err(e.to_compile_error()),
+        }
+        match Grammar::from_grammar_args(grammar_args) {
+            Ok(grammar) => Ok(grammar),
+            Err(e) => Err(e.to_compile_error()),
+        }
+    }
+
     /// create the rusty_lr_core::Grammar from the parsed CFGs
-    pub fn create_grammar(&self) -> Result<rusty_lr_core::Grammar<Ident, Ident>, ParseError> {
+    pub fn create_grammar(&self) -> Result<rusty_lr_core::Grammar<Ident, Ident>, EmitError> {
         let mut grammar: rusty_lr_core::Grammar<Ident, Ident> = rusty_lr_core::Grammar::new();
 
         // reduce types

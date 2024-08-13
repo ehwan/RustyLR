@@ -4,7 +4,7 @@ use proc_macro2::TokenTree;
 use quote::TokenStreamExt;
 
 // split stream by '%%'
-pub fn split_stream(token_stream: TokenStream) -> Result<(TokenStream, TokenStream), &'static str> {
+pub fn split_stream(token_stream: TokenStream) -> Result<(TokenStream, TokenStream), ()> {
     // input stream
     let mut token_stream = token_stream.into_iter().peekable();
 
@@ -33,5 +33,5 @@ pub fn split_stream(token_stream: TokenStream) -> Result<(TokenStream, TokenStre
         }
     }
 
-    Err("No '%%' found")
+    Err(())
 }

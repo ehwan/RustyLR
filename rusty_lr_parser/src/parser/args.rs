@@ -10,13 +10,13 @@ use crate::pattern::Pattern;
 use crate::terminalset::TerminalSet;
 
 /// parsed arguments for reduce type def
-pub(crate) enum ReduceTypeArgs {
+pub enum ReduceTypeArgs {
     Ident(Ident),
     TerminalSet(TerminalSet),
 }
 
 /// parsed arguments for pattern
-pub(crate) enum PatternArgs {
+pub enum PatternArgs {
     /// span of the ident
     Ident(Ident, Span),
     /// span of '+' or '*' or '?' after the pattern
@@ -61,7 +61,7 @@ impl PatternArgs {
 }
 
 /// parsed arguments for single line of a rule separated by '|'
-pub(crate) struct RuleLineArgs {
+pub struct RuleLineArgs {
     /// mapto '=' pattern
     pub tokens: Vec<(Option<Ident>, PatternArgs)>,
     pub reduce_action: Option<TokenStream>,
@@ -70,7 +70,7 @@ pub(crate) struct RuleLineArgs {
 }
 
 /// parsed arguments for multiple lines of a rule
-pub(crate) struct RuleDefArgs {
+pub struct RuleDefArgs {
     pub name: Ident,
     pub typename: Option<TokenStream>,
     pub rule_lines: Vec<RuleLineArgs>,
@@ -78,7 +78,7 @@ pub(crate) struct RuleDefArgs {
 
 /// parsed arguments for the grammar
 #[derive(Default)]
-pub(crate) struct GrammarArgs {
+pub struct GrammarArgs {
     pub module_prefix: Vec<(Span, TokenStream)>,
     pub token_typename: Vec<(Span, TokenStream)>,
     pub userdata_typename: Vec<(Span, TokenStream)>,
