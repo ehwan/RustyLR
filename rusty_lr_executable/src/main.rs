@@ -681,44 +681,52 @@ fn main() {
 
         // print note about generated rules
         if args.verbose {
-            for (rule_name, rule_lines) in grammar.rules.iter() {
-                if !rule_name
-                    .to_string()
-                    .starts_with(rusty_lr_parser::utils::AUTO_GENERATED_RULE_PREFIX)
-                {
-                    continue;
-                }
+            let mut rules_on_same_root = BTreeMap::new();
 
-                let mut message = "Auto-generated rule:\n".to_string();
-                for (idx, rule_line) in rule_lines.rule_lines.iter().enumerate() {
-                    let mut line_string = String::new();
-                    for (idx, token) in rule_line.tokens.iter().enumerate() {
-                        line_string.push_str(token.token.to_string().as_str());
-                        if idx < rule_line.tokens.len() - 1 {
-                            line_string.push(' ');
+            // `generated_root_span` contains only auto-generated rules
+            for (rule_name, root_span) in grammar.generated_root_span.iter() {
+                let start = root_span.0.byte_range().start;
+                let end = root_span.1.byte_range().end;
+                rules_on_same_root
+                    .entry((start, end))
+                    .or_insert_with(Vec::new)
+                    .push(rule_name);
+            }
+
+            for (root_range, rules) in rules_on_same_root.into_iter() {
+                let mut rules_string = String::new();
+                for rule_name in rules.into_iter() {
+                    let name_str = rule_name.to_string();
+                    let name_len = name_str.len();
+                    let front_padding = " ".repeat(name_len);
+                    let rule_lines = grammar.rules.get(rule_name).expect("Rule not found");
+
+                    for (idx, rule_line) in rule_lines.rule_lines.iter().enumerate() {
+                        let mut line_string = String::new();
+                        for (idx, token) in rule_line.tokens.iter().enumerate() {
+                            line_string.push_str(token.token.to_string().as_str());
+                            if idx < rule_line.tokens.len() - 1 {
+                                line_string.push(' ');
+                            }
+                        }
+
+                        if idx == 0 {
+                            rules_string
+                                .push_str(format!("\n{} -> {}", name_str, line_string).as_str());
+                        } else {
+                            rules_string.push_str(
+                                format!("\n{}  | {}", front_padding, line_string).as_str(),
+                            );
                         }
                     }
-
-                    if idx == 0 {
-                        message.push_str(format!("{} -> {}", rule_name, line_string).as_str());
-                    } else {
-                        message.push_str(format!("\n  | {}", line_string).as_str());
-                    }
+                    rules_string.push_str(format!("\n{}  ;", front_padding).as_str());
                 }
-                message.push_str("\n  ;");
 
-                let span = grammar
-                    .generated_root_span
-                    .get(rule_name)
-                    .expect("generated_root_span::rule not found");
-                let range = span.0.byte_range().start..span.1.byte_range().end;
-
-                let diag =
-                    Diagnostic::note()
-                        .with_message(message)
-                        .with_labels(vec![
-                            Label::primary(file_id, range).with_message("was generated here")
-                        ]);
+                let message = format!("Auto-generated rules:{}", rules_string);
+                let diag = Diagnostic::note()
+                    .with_message(message)
+                    .with_labels(vec![Label::primary(file_id, root_range.0..root_range.1)
+                        .with_message("was generated here")]);
 
                 let writer = StandardStream::stdout(ColorChoice::Auto);
                 let config = codespan_reporting::term::Config::default();
