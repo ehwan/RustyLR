@@ -53,7 +53,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
     }
 
     /// get expected terms set
-    pub fn expected<'a>(&'a self) -> HashSet<&Term>
+    pub fn expected(&self) -> HashSet<&Term>
     where
         Term: Hash + Eq,
     {

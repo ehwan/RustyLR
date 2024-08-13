@@ -2032,13 +2032,11 @@ impl GrammarParser {
             Lexed::TokenType(None),
             Lexed::UserData(None),
         ];
-        let _rustylr_generated_terminals_2 = vec![Lexed::Semicolon(None)];
-        let _rustylr_generated_terminals_3 = vec![Lexed::Colon(None)];
-        let _rustylr_generated_terminals_4 = vec![
-            Lexed::BraceGroup(None),
+        let _rustylr_generated_terminals_2 = [Lexed::Semicolon(None)];
+        let _rustylr_generated_terminals_3 = [Lexed::Colon(None)];
+        let _rustylr_generated_terminals_4 = [Lexed::BraceGroup(None),
             Lexed::Pipe(None),
-            Lexed::Semicolon(None),
-        ];
+            Lexed::Semicolon(None)];
         let _rustylr_generated_terminals_5 = vec![
             Lexed::BraceGroup(None),
             Lexed::Ident(None),
@@ -2049,8 +2047,8 @@ impl GrammarParser {
             Lexed::Semicolon(None),
             Lexed::Star(None),
         ];
-        let _rustylr_generated_terminals_6 = vec![Lexed::Ident(None), Lexed::RBracket(None)];
-        let _rustylr_generated_terminals_7 = vec![Lexed::RBracket(None)];
+        let _rustylr_generated_terminals_6 = [Lexed::Ident(None), Lexed::RBracket(None)];
+        let _rustylr_generated_terminals_7 = [Lexed::RBracket(None)];
         let _rustylr_generated_terminals_8 = vec![
             Lexed::BraceGroup(None),
             Lexed::Ident(None),
@@ -2058,8 +2056,8 @@ impl GrammarParser {
             Lexed::Pipe(None),
             Lexed::Semicolon(None),
         ];
-        let _rustylr_generated_terminals_9 = vec![Lexed::Pipe(None), Lexed::Semicolon(None)];
-        let _rustylr_generated_terminals_10 = vec![Lexed::Ident(None), Lexed::LBracket(None)];
+        let _rustylr_generated_terminals_9 = [Lexed::Pipe(None), Lexed::Semicolon(None)];
+        let _rustylr_generated_terminals_10 = [Lexed::Ident(None), Lexed::LBracket(None)];
         let pair_to_rule = |(rule, shifted): (usize, usize)| -> (
             ::rusty_lr_core::ShiftedRuleRef,
             std::collections::BTreeSet<Lexed>,

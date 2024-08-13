@@ -275,12 +275,6 @@ fn main() {
                 }
 
                 ParseError::MultipleReduceDefinition { terminal, old, new } => {
-                    let mut labels = Vec::new();
-                    labels.push(
-                        Label::primary(file_id, terminal.span().byte_range()).with_message(
-                            "This terminal symbol is defined as both of %left and %right",
-                        ),
-                    );
                     let old_range = old.0.byte_range().start..old.1.byte_range().end;
                     let old_string = match old.2 {
                         rusty_lr_core::ReduceType::Left => "%left",
@@ -435,7 +429,7 @@ fn main() {
     let expanded_stream = match grammar.emit_compiletime(args.lalr) {
         Ok(expanded_stream) => expanded_stream,
         Err(e) => {
-            let diag = match e {
+            let diag = match e.as_ref() {
                 EmitError::RuleTypeDefinedButActionNotDefined {
                     name,
                     rule_local_id,
@@ -443,7 +437,7 @@ fn main() {
                     // `name` must not be generated rule,
                     // since it is programmically generated, it must have a proper reduce action
 
-                    let rule_line = &grammar.rules.get(&name).unwrap().rule_lines[rule_local_id];
+                    let rule_line = &grammar.rules.get(name).unwrap().rule_lines[*rule_local_id];
                     let rule_line_range = if rule_line.tokens.is_empty() {
                         rule_line.separator_span.byte_range()
                     } else {
@@ -476,7 +470,7 @@ fn main() {
                     }
 
                     let (name, rules, rule) =
-                        grammar.get_rule_by_id(reduceid).expect("Rule not found");
+                        grammar.get_rule_by_id(*reduceid).expect("Rule not found");
                     let mut labels = Vec::new();
 
                     if !name
@@ -492,12 +486,12 @@ fn main() {
                         );
                         labels.push(
                             Label::secondary(file_id, rule_range)
-                                .with_message(format!("in this line")),
+                                .with_message("in this line".to_string()),
                         );
                     } else {
                         let origin_span = grammar
                             .generated_root_span
-                            .get(&name)
+                            .get(name)
                             .expect("generated_root_span::rule not found");
                         let origin_range =
                             origin_span.0.byte_range().start..origin_span.1.byte_range().end;
@@ -507,9 +501,9 @@ fn main() {
                         );
                     }
 
-                    for (shiftid, shift_rule) in shift_rules.into_iter() {
+                    for (shiftid, shift_rule) in shift_rules.iter() {
                         let (name, rules, rule) =
-                            grammar.get_rule_by_id(shiftid).expect("Rule not found");
+                            grammar.get_rule_by_id(*shiftid).expect("Rule not found");
                         if !name
                             .to_string()
                             .starts_with(rusty_lr_parser::utils::AUTO_GENERATED_RULE_PREFIX)
@@ -527,12 +521,12 @@ fn main() {
                             );
                             labels.push(
                                 Label::secondary(file_id, rule_range)
-                                    .with_message(format!("in this line")),
+                                    .with_message("in this line".to_string()),
                             );
                         } else {
                             let origin_span = grammar
                                 .generated_root_span
-                                .get(&name)
+                                .get(name)
                                 .expect("generated_root_span::rule not found");
                             let origin_range =
                                 origin_span.0.byte_range().start..origin_span.1.byte_range().end;
@@ -562,11 +556,11 @@ fn main() {
                     rule2: (ruleid2, production_rule2),
                 } => {
                     let (name1, rules1, rule1) =
-                        grammar.get_rule_by_id(ruleid1).expect("Rule not found 1");
+                        grammar.get_rule_by_id(*ruleid1).expect("Rule not found 1");
                     let (rule1_begin, rule1_end) = rules1.rule_lines[rule1].span_pair();
                     let rule_range1 = rule1_begin.byte_range().start..rule1_end.byte_range().end;
                     let (name2, rules2, rule2) =
-                        grammar.get_rule_by_id(ruleid2).expect("Rule not found 2");
+                        grammar.get_rule_by_id(*ruleid2).expect("Rule not found 2");
                     let (rule2_begin, rule2_end) = rules2.rule_lines[rule2].span_pair();
                     let rule_range2 = rule2_begin.byte_range().start..rule2_end.byte_range().end;
 
@@ -583,12 +577,12 @@ fn main() {
                         );
                         labels.push(
                             Label::secondary(file_id, rule_range1)
-                                .with_message(format!("in this line")),
+                                .with_message("in this line".to_string()),
                         );
                     } else {
                         let origin_span = grammar
                             .generated_root_span
-                            .get(&name1)
+                            .get(name1)
                             .expect("generated_root_span::rule not found");
                         let origin_range =
                             origin_span.0.byte_range().start..origin_span.1.byte_range().end;
@@ -608,12 +602,12 @@ fn main() {
                         );
                         labels.push(
                             Label::secondary(file_id, rule_range2)
-                                .with_message(format!("in this line")),
+                                .with_message("in this line".to_string()),
                         );
                     } else {
                         let origin_span = grammar
                             .generated_root_span
-                            .get(&name2)
+                            .get(name2)
                             .expect("generated_root_span::rule not found");
                         let origin_range =
                             origin_span.0.byte_range().start..origin_span.1.byte_range().end;
@@ -656,36 +650,32 @@ fn main() {
     // since many informations are removed in the rusty_lr_parser output
     let mut debug_comments = String::new();
     {
-        let parser = match grammar.create_grammar() {
-            Ok(mut grammar) => {
-                debug_comments.push_str(format!("{:=^80}\n", "Grammar").as_str());
-                debug_comments.push_str(format!("{}\n", grammar).as_str());
-                if args.lalr {
-                    match grammar.build_lalr(Ident::new(
-                        rusty_lr_parser::utils::AUGMENTED_NAME,
-                        Span::call_site(),
-                    )) {
-                        Ok(parser) => parser,
-                        Err(e) => {
-                            eprintln!("{}", e);
-                            return;
-                        }
-                    }
-                } else {
-                    match grammar.build(Ident::new(
-                        rusty_lr_parser::utils::AUGMENTED_NAME,
-                        Span::call_site(),
-                    )) {
-                        Ok(parser) => parser,
-                        Err(e) => {
-                            eprintln!("{}", e);
-                            return;
-                        }
+        let parser = {
+            let mut grammar = grammar.create_grammar();
+            debug_comments.push_str(format!("{:=^80}\n", "Grammar").as_str());
+            debug_comments.push_str(format!("{}\n", grammar).as_str());
+            if args.lalr {
+                match grammar.build_lalr(Ident::new(
+                    rusty_lr_parser::utils::AUGMENTED_NAME,
+                    Span::call_site(),
+                )) {
+                    Ok(parser) => parser,
+                    Err(e) => {
+                        eprintln!("{}", e);
+                        return;
                     }
                 }
-            }
-            Err(e) => {
-                unreachable!("Unknown error: {:?}", e);
+            } else {
+                match grammar.build(Ident::new(
+                    rusty_lr_parser::utils::AUGMENTED_NAME,
+                    Span::call_site(),
+                )) {
+                    Ok(parser) => parser,
+                    Err(e) => {
+                        eprintln!("{}", e);
+                        return;
+                    }
+                }
             }
         };
 
@@ -719,7 +709,7 @@ fn main() {
 
                 let span = grammar
                     .generated_root_span
-                    .get(&rule_name)
+                    .get(rule_name)
                     .expect("generated_root_span::rule not found");
                 let range = span.0.byte_range().start..span.1.byte_range().end;
 
@@ -797,12 +787,12 @@ fn main() {
                         );
                         labels.push(
                             Label::secondary(file_id, rule_range)
-                                .with_message(format!("in this line")),
+                                .with_message("in this line".to_string()),
                         );
                     } else {
                         let origin_span = grammar
                             .generated_root_span
-                            .get(&name)
+                            .get(name)
                             .expect("generated_root_span::rule not found");
                         let origin_range =
                             origin_span.0.byte_range().start..origin_span.1.byte_range().end;
@@ -833,12 +823,12 @@ fn main() {
                             );
                             labels.push(
                                 Label::secondary(file_id, rule_range)
-                                    .with_message(format!("in this line")),
+                                    .with_message("in this line".to_string()),
                             );
                         } else {
                             let origin_span = grammar
                                 .generated_root_span
-                                .get(&name)
+                                .get(name)
                                 .expect("generated_root_span::rule not found");
                             let origin_range =
                                 origin_span.0.byte_range().start..origin_span.1.byte_range().end;

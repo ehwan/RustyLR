@@ -48,14 +48,13 @@ impl PatternArgs {
     }
     pub fn span_pair(&self) -> (Span, Span) {
         match self {
-            PatternArgs::Ident(_, span) => (span.clone(), *span),
+            PatternArgs::Ident(_, span) => (*span, *span),
             PatternArgs::Plus(base, span) => (base.span_pair().0, *span),
             PatternArgs::Star(base, span) => (base.span_pair().0, *span),
             PatternArgs::Question(base, span) => (base.span_pair().0, *span),
-            PatternArgs::TerminalSet(terminal_set) => (
-                terminal_set.open_span.clone(),
-                terminal_set.close_span.clone(),
-            ),
+            PatternArgs::TerminalSet(terminal_set) => {
+                (terminal_set.open_span, terminal_set.close_span)
+            }
         }
     }
 }

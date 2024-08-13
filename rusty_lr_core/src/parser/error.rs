@@ -127,7 +127,7 @@ impl<'a, Term, NonTerm, CallbackError, ReduceActionError>
                     message.push_str("Expected one of: ");
                     let len = expected.len();
                     for (id, term) in expected.into_iter().enumerate() {
-                        message.push_str(&format!("{}", term));
+                        message.push_str(&term);
                         if id < len - 1 {
                             message.push_str(", ");
                         }
@@ -149,7 +149,7 @@ impl<'a, Term, NonTerm, CallbackError, ReduceActionError>
                     message.push_str("Expected one of: ");
                     let len = expected.len();
                     for (id, term) in expected.into_iter().enumerate() {
-                        message.push_str(&format!("{}", term));
+                        message.push_str(&term);
                         if id < len - 1 {
                             message.push_str(", ");
                         }

@@ -407,7 +407,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                                 .rules
                                 .iter()
                                 .map(|(rule_ref, lookaheads)| {
-                                    let mut rule_ref = rule_ref.clone();
+                                    let mut rule_ref = *rule_ref;
                                     rule_ref.shifted -= 1;
                                     (rule_ref, lookaheads.clone())
                                 })

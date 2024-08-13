@@ -19,7 +19,7 @@ use std::collections::BTreeSet;
 /// emit Rust code for the parser
 impl Grammar {
     /// write enum that represents non-terminal symbols, including Augmented
-    fn emit_nonterm_enum(&self) -> Result<TokenStream, EmitError> {
+    fn emit_nonterm_enum(&self) -> TokenStream {
         // =====================================================================
         // =====================Writing NonTerminal Enum========================
         // =====================================================================
@@ -43,7 +43,7 @@ impl Grammar {
         let aug_ident = Ident::new(utils::AUGMENTED_NAME, Span::call_site());
         let aug_ident_str = utils::AUGMENTED_NAME;
 
-        Ok(quote! {
+        quote! {
             /// An enum that represents non-terminal symbols
             #[allow(non_camel_case_types)]
             #[derive(Debug, Clone, Copy, std::hash::Hash, std::cmp::PartialEq, std::cmp::Eq, std::cmp::PartialOrd, std::cmp::Ord)]
@@ -60,13 +60,13 @@ impl Grammar {
                     }
                 }
             }
-        })
+        }
     }
     // build grammar at compile time
-    fn emit_grammar_compiletime(&self, lalr: bool) -> Result<TokenStream, EmitError> {
+    fn emit_grammar_compiletime(&self, lalr: bool) -> Result<TokenStream, Box<EmitError>> {
         let module_prefix = &self.module_prefix;
 
-        let mut grammar = self.create_grammar()?;
+        let mut grammar = self.create_grammar();
 
         // build
         let parser = if lalr {
@@ -86,11 +86,11 @@ impl Grammar {
                     rule2,
                     rules,
                 } => {
-                    return Err(EmitError::ReduceReduceConflict {
+                    return Err(Box::new(EmitError::ReduceReduceConflict {
                         lookahead,
                         rule1: (rule1, rules[rule1].clone()),
                         rule2: (rule2, rules[rule2].clone()),
-                    })
+                    }))
                 }
                 BuildError::ShiftReduceConflict {
                     reduce,
@@ -107,11 +107,11 @@ impl Grammar {
                         shift_rules.push((r.rule, shifted_rule));
                     }
 
-                    return Err(EmitError::ShiftReduceConflict {
+                    return Err(Box::new(EmitError::ShiftReduceConflict {
                         term,
                         reduce_rule: (reduce, rules[reduce].clone()),
                         shift_rules,
-                    });
+                    }));
                 }
             },
         };
@@ -337,7 +337,7 @@ impl Grammar {
     }
 
     /// emit code that build grammar at runtime
-    fn emit_grammar_runtime(&self, lalr: bool) -> Result<TokenStream, EmitError> {
+    fn emit_grammar_runtime(&self, lalr: bool) -> TokenStream {
         let module_prefix = &self.module_prefix;
         let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
 
@@ -437,10 +437,10 @@ impl Grammar {
             let rules = parser.rules;
             let states = parser.states;
         });
-        Ok(build_grammar_stream)
+        build_grammar_stream
     }
 
-    fn emit_parser(&self, grammar_emit: TokenStream) -> Result<TokenStream, EmitError> {
+    fn emit_parser(&self, grammar_emit: TokenStream) -> Result<TokenStream, Box<EmitError>> {
         let module_prefix = &self.module_prefix;
 
         let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
@@ -552,10 +552,10 @@ impl Grammar {
                                 }
                             });
                         } else {
-                            return Err(EmitError::RuleTypeDefinedButActionNotDefined {
+                            return Err(Box::new(EmitError::RuleTypeDefinedButActionNotDefined {
                                 name: name.clone(),
                                 rule_local_id,
-                            });
+                            }));
                         }
                     }
                 } else {
@@ -811,8 +811,8 @@ impl Grammar {
         })
     }
 
-    pub fn emit_compiletime(&self, lalr: bool) -> Result<TokenStream, EmitError> {
-        let enum_emit = self.emit_nonterm_enum()?;
+    pub fn emit_compiletime(&self, lalr: bool) -> Result<TokenStream, Box<EmitError>> {
+        let enum_emit = self.emit_nonterm_enum();
         let grammar_emit = self.emit_grammar_compiletime(lalr)?;
         let parser_emit = self.emit_parser(grammar_emit)?;
 
@@ -821,9 +821,9 @@ impl Grammar {
             #parser_emit
         })
     }
-    pub fn emit_runtime(&self, lalr: bool) -> Result<TokenStream, EmitError> {
-        let enum_emit = self.emit_nonterm_enum()?;
-        let grammar_emit = self.emit_grammar_runtime(lalr)?;
+    pub fn emit_runtime(&self, lalr: bool) -> Result<TokenStream, Box<EmitError>> {
+        let enum_emit = self.emit_nonterm_enum();
+        let grammar_emit = self.emit_grammar_runtime(lalr);
         let parser_emit = self.emit_parser(grammar_emit)?;
 
         Ok(quote! {

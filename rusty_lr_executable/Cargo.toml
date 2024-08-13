@@ -1,6 +1,6 @@
 [package]
 name = "rustylr"
-version = "0.6.0"
+version = "0.6.1"
 edition = "2021"
 license = "MIT"
 description = "LR(1), LALR(1) parser code generation with rusty_lr"

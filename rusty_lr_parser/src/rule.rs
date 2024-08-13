@@ -13,7 +13,7 @@ impl RuleLine {
     pub fn span_pair(&self) -> (Span, Span) {
         let begin = self.separator_span;
         let end = if let Some(token) = self.tokens.last() {
-            token.end_span.clone()
+            token.end_span
         } else {
             begin
         };

@@ -26,7 +26,7 @@ impl Display for ReduceType {
 /// Production rule.
 ///
 /// name -> Token0 Token1 Token2 ...
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct ProductionRule<Term, NonTerm> {
     pub name: NonTerm,
     pub rule: Vec<Token<Term, NonTerm>>,
@@ -64,7 +64,7 @@ impl<Term: Debug, NonTerm: Debug> Debug for ProductionRule<Term, NonTerm> {
 ///
 /// This struct has index of the Rule in Grammar::rules
 /// and it will be used for Eq, Ord, Hash
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy, Default)]
 pub struct ShiftedRuleRef {
     pub rule: usize,
     pub shifted: usize,
@@ -118,7 +118,7 @@ impl<'a, Term: Debug, NonTerm: Debug> Debug for ShiftedRuleRef2<'a, Term, NonTer
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct ShiftedRule<Term, NonTerm> {
     pub rule: ProductionRule<Term, NonTerm>,
     pub shifted: usize,
@@ -161,7 +161,7 @@ impl<Term: Debug, NonTerm: Debug> Debug for ShiftedRule<Term, NonTerm> {
 }
 
 /// shifted rule with lookahead tokens
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct LookaheadRuleRef<Term> {
     pub rule: ShiftedRuleRef,
     pub lookaheads: BTreeSet<Term>,
@@ -199,7 +199,7 @@ impl<Term: Debug, NonTerm: Debug> Debug for LookaheadRule<Term, NonTerm> {
 }
 
 /// set of lookahead rules
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct LookaheadRuleRefSet<Term> {
     pub rules: BTreeMap<ShiftedRuleRef, BTreeSet<Term>>,
 }

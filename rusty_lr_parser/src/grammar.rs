@@ -6,7 +6,6 @@ use quote::quote;
 use std::collections::BTreeMap;
 
 use crate::error::ArgError;
-use crate::error::EmitError;
 use crate::error::ParseArgError;
 use crate::error::ParseError;
 use crate::parser::args::GrammarArgs;
@@ -78,21 +77,17 @@ impl Grammar {
 
         match crate::parser::lexer::feed_recursive(input, &parser, &mut context) {
             Ok(_) => {}
-            Err((span, err)) => match err {
-                _ => {
-                    let message = err.short_message();
-                    return Err(ParseArgError::MacroLineParse { span, message });
-                }
-            },
+            Err((span, err)) => {
+                let message = err.short_message();
+                return Err(ParseArgError::MacroLineParse { span, message });
+            }
         }
         match parser.feed(&mut context, Lexed::Eof) {
             Ok(_) => {}
-            Err(err) => match err {
-                _ => {
-                    let message = err.short_message();
-                    return Err(ParseArgError::MacroLineParseEnd { message });
-                }
-            },
+            Err(err) => {
+                let message = err.short_message();
+                return Err(ParseArgError::MacroLineParseEnd { message });
+            }
         }
 
         Ok(context.accept())
@@ -157,7 +152,7 @@ impl Grammar {
     /// parse the input TokenStream and return a parsed Grammar
     pub fn from_grammar_args(grammar_args: GrammarArgs) -> Result<Self, ParseError> {
         let mut grammar = Grammar {
-            module_prefix: if let Some(module_prefix) = grammar_args.module_prefix.get(0) {
+            module_prefix: if let Some(module_prefix) = grammar_args.module_prefix.first() {
                 module_prefix.1.clone()
             } else {
                 quote! { ::rusty_lr }
@@ -165,11 +160,11 @@ impl Grammar {
             token_typename: grammar_args.token_typename[0].1.clone(),
             userdata_typename: grammar_args
                 .userdata_typename
-                .get(0)
+                .first()
                 .map(|(_, stream)| stream.clone()),
             start_rule_name: grammar_args.start_rule_name[0].clone(),
             eof: grammar_args.eof[0].1.clone(),
-            error_typename: if let Some(error_typename) = grammar_args.error_typename.get(0) {
+            error_typename: if let Some(error_typename) = grammar_args.error_typename.first() {
                 error_typename.1.clone()
             } else {
                 quote! { String }
@@ -308,15 +303,18 @@ impl Grammar {
                 for token in rule.tokens.iter() {
                     let is_terminal = grammar.terminals.get_key_value(&token.token);
                     let is_non_terminal = grammar.rules.get_key_value(&token.token);
-                    if is_terminal.is_some() && is_non_terminal.is_some() {
-                        return Err(ParseError::TermNonTermConflict {
-                            name: token.token.clone(),
-                            terminal: is_terminal.unwrap().0.clone(),
-                            non_terminal: is_non_terminal.unwrap().0.clone(),
-                        });
-                    }
-                    if is_terminal.is_none() && is_non_terminal.is_none() {
-                        return Err(ParseError::TerminalNotDefined(token.token.clone()));
+                    match (is_terminal, is_non_terminal) {
+                        (Some(term), Some(nonterm)) => {
+                            return Err(ParseError::TermNonTermConflict {
+                                name: token.token.clone(),
+                                terminal: term.0.clone(),
+                                non_terminal: nonterm.0.clone(),
+                            });
+                        }
+                        (None, None) => {
+                            return Err(ParseError::TerminalNotDefined(token.token.clone()));
+                        }
+                        _ => {}
                     }
                 }
             }
@@ -349,7 +347,7 @@ impl Grammar {
     }
 
     /// create the rusty_lr_core::Grammar from the parsed CFGs
-    pub fn create_grammar(&self) -> Result<rusty_lr_core::Grammar<Ident, Ident>, EmitError> {
+    pub fn create_grammar(&self) -> rusty_lr_core::Grammar<Ident, Ident> {
         let mut grammar: rusty_lr_core::Grammar<Ident, Ident> = rusty_lr_core::Grammar::new();
 
         // reduce types
@@ -389,6 +387,6 @@ impl Grammar {
             ],
         );
 
-        Ok(grammar)
+        grammar
     }
 }
