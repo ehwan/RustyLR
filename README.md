@@ -5,7 +5,7 @@ RustyLR provides both [executable](#executable-rustylr) and [procedural macros](
 
 ```
 [dependencies]
-rusty_lr = "1.6.0"
+rusty_lr = "1.6.1"
 ```
 `features=["fxhash"]` to replace `std::collections::HashMap` with [`FxHashMap`](https://github.com/rust-lang/rustc-hash)
 
