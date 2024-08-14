@@ -109,7 +109,7 @@ for token in input_sequence.chars() {
                 }
             }
             println!("{}", e);
-            // println!( "{}", e.long_message( &parser.rules, &parser.states, &context.state_stack ) );
+            // println!( "{}", e.long_message( &parser, &context ) );
             return;
         }
     }
@@ -194,10 +194,10 @@ There are two error variants returned from `feed()` function:
 For `ReduceActionError`, the error type can be defined by [`%err`](#error-type-optional) directive. If not defined, `String` will be used.
 
 When printing the error message, there are two ways to get the error message:
- - `e.long_message( &parser.rules, &parser.states, &context.state_stack )` : get the error message as `String`, in a detailed format
+ - `e.long_message( &parser, &context )` : get the error message as `String`, in a detailed format
  - `e as Display` : briefly print the short message through `Display` trait.
 
-The `long_message` function requires the reference to the parser's rules and states, and the context's state stack.
+The `long_message` function requires the reference to the parser and the context.
 It will make a detailed error message of what current state was trying to parse, and what the expected terminal symbols were.
 ### Example of long_message
 ```
