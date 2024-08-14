@@ -222,10 +222,7 @@ impl Grammar {
                     }
                     if let Some(old) = grammar.reduce_types.insert(terminal.clone(), reduce_type) {
                         if old != reduce_type {
-                            let old_span = grammar
-                                .reduce_types_origin
-                                .get(&terminal)
-                                .expect("reduce_types_origin::get");
+                            let old_span = grammar.reduce_types_origin.get(&terminal).unwrap();
                             return Err(ParseError::MultipleReduceDefinition {
                                 terminal,
                                 old: (old_span.0, old_span.1, old),
@@ -243,10 +240,7 @@ impl Grammar {
                         if let Some(old) =
                             grammar.reduce_types.insert(terminal.clone(), reduce_type)
                         {
-                            let old_span = grammar
-                                .reduce_types_origin
-                                .get(&terminal)
-                                .expect("reduce_types_origin::get");
+                            let old_span = grammar.reduce_types_origin.get(&terminal).unwrap();
                             return Err(ParseError::MultipleReduceDefinition {
                                 terminal,
                                 old: (old_span.0, old_span.1, old),
@@ -400,7 +394,7 @@ impl Grammar {
 
         // add rules
         for name in self.rules_index.iter() {
-            let rule_lines = self.rules.get(name).expect("rules.get");
+            let rule_lines = self.rules.get(name).unwrap();
 
             for rule in rule_lines.rule_lines.iter() {
                 let mut tokens = Vec::with_capacity(rule.tokens.len());
