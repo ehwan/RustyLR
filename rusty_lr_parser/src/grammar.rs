@@ -9,6 +9,7 @@ use crate::error::ParseError;
 use crate::parser::args::GrammarArgs;
 use crate::parser::args::ReduceTypeArgs;
 use crate::parser::lexer::Lexed;
+use crate::parser::parser_expanded::GrammarParseError;
 use crate::parser::parser_expanded::GrammarParser;
 use crate::pattern::Pattern;
 use crate::rule::RuleLine;
@@ -81,15 +82,19 @@ impl Grammar {
 
         match crate::parser::lexer::feed_recursive(input, &parser, &mut context) {
             Ok(_) => {}
-            Err((span, err)) => {
-                let message = err.short_message();
+            Err(err) => {
+                let message = err.to_string();
+                let span = match err {
+                    GrammarParseError::InvalidTerminal(term) => term.term.span().unwrap(),
+                    _ => unreachable!("feed error"),
+                };
                 return Err(ParseArgError::MacroLineParse { span, message });
             }
         }
         match parser.feed(&mut context, Lexed::Eof) {
             Ok(_) => {}
             Err(err) => {
-                let message = err.short_message();
+                let message = err.to_string();
                 return Err(ParseArgError::MacroLineParseEnd { message });
             }
         }
@@ -382,16 +387,14 @@ impl Grammar {
     }
 
     /// create the rusty_lr_core::Grammar from the parsed CFGs
-    pub fn create_grammar(&self) -> rusty_lr_core::Grammar<Ident, Ident> {
-        let mut grammar: rusty_lr_core::Grammar<Ident, Ident> = rusty_lr_core::Grammar::new();
+    pub fn create_grammar(&self) -> rusty_lr_core::builder::Grammar<Ident, Ident> {
+        let mut grammar: rusty_lr_core::builder::Grammar<Ident, Ident> =
+            rusty_lr_core::builder::Grammar::new();
 
         // reduce types
         for (term, reduce_type) in self.reduce_types.iter() {
-            match grammar.set_reduce_type(term.clone(), *reduce_type) {
-                Ok(_) => {}
-                Err(_) => {
-                    unreachable!("set_reduce_type error");
-                }
+            if !grammar.set_reduce_type(term.clone(), *reduce_type) {
+                unreachable!("set_reduce_type error");
             }
         }
 

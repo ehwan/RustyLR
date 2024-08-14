@@ -1,6 +1,6 @@
 [package]
 name = "rustylr"
-version = "0.6.2"
+version = "0.7.0"
 edition = "2021"
 license = "MIT"
 description = "LR(1), LALR(1) parser code generation with rusty_lr"
@@ -14,7 +14,7 @@ proc-macro2 = { version = "1.0.86", features = ["span-locations"] }
 quote = "1.0"
 clap = { version = "4.5.7", features = ["derive"] }
 # rusty_lr_parser = { path = "../rusty_lr_parser" }
-rusty_lr_parser = "3.1"
+rusty_lr_parser = "3.2"
 # rusty_lr_core = { path = "../rusty_lr_core", features = ["fxhash"] }
-rusty_lr_core = { version = "1.4", features = ["fxhash"] }
+rusty_lr_core = { version = "2.0", features = ["fxhash", "builder"] }
 codespan-reporting = "0.11"

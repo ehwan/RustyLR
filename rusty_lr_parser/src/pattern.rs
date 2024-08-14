@@ -19,6 +19,7 @@ pub enum Pattern {
     Plus(Box<Pattern>),
     Star(Box<Pattern>),
     Question(Box<Pattern>),
+    Exclamation(Box<Pattern>),
     TerminalSet(BTreeSet<Ident>),
 }
 
@@ -291,6 +292,47 @@ impl Pattern {
 
                 Ok(new_ident)
             }
+
+            Pattern::Exclamation(pattern) => {
+                // if base rule does not have typename, just use base rule
+                let base_rule = pattern.get_rule(grammar, root_span_pair)?;
+                if grammar.get_typename(&base_rule).is_none() {
+                    grammar.pattern_map.insert(self.clone(), base_rule.clone());
+                    return Ok(base_rule);
+                }
+
+                // else, make new rule with typename ()
+                let new_ident = Ident::new(
+                    &format!(
+                        "{}{}",
+                        utils::AUTO_GENERATED_RULE_PREFIX,
+                        grammar.pattern_map.len()
+                    ),
+                    Span::call_site(),
+                );
+                grammar.pattern_map.insert(self.clone(), new_ident.clone());
+                grammar
+                    .generated_root_span
+                    .insert(new_ident.clone(), root_span_pair);
+
+                let line1 = RuleLine {
+                    tokens: vec![TokenMapped {
+                        token: base_rule.clone(),
+                        mapto: Ident::new("A", Span::call_site()),
+                        begin_span: Span::call_site(),
+                        end_span: Span::call_site(),
+                    }],
+                    reduce_action: None,
+                    separator_span: Span::call_site(),
+                };
+                let rule_lines = RuleLines {
+                    rule_lines: vec![line1],
+                };
+                grammar.rules.insert(new_ident.clone(), rule_lines);
+                grammar.rules_index.push(new_ident.clone());
+
+                Ok(new_ident)
+            }
             Pattern::TerminalSet(terminal_set) => {
                 let new_ident = Ident::new(
                     &format!(
@@ -333,13 +375,18 @@ impl Pattern {
         }
     }
 
-    /// get ident for default mapto
+    /// Get ident for default mapto
+    ///
+    /// This is used for mapped variable name
+    /// ex) A: plus* <ReduceAction> ;
+    /// zero-or-more plus can be accessible by variable name `plus`, so this function returns `plus`
     pub(crate) fn base_ident(&self) -> Ident {
         match self {
             Pattern::Ident(ident) => ident.clone(),
             Pattern::Plus(pattern) => pattern.base_ident(),
             Pattern::Star(pattern) => pattern.base_ident(),
             Pattern::Question(pattern) => pattern.base_ident(),
+            Pattern::Exclamation(pattern) => pattern.base_ident(),
             Pattern::TerminalSet(_) => Ident::new("_rustylr_deafult_ident", Span::call_site()),
         }
     }

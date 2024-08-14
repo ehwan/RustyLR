@@ -4,7 +4,8 @@ use proc_macro2::TokenStream;
 
 use quote::format_ident;
 use quote::quote;
-use rusty_lr_core::BuildError;
+
+use rusty_lr_core::builder::error::BuildError;
 use rusty_lr_core::ShiftedRule;
 
 use crate::error::EmitError;
@@ -18,6 +19,34 @@ use std::collections::BTreeSet;
 
 /// emit Rust code for the parser
 impl Grammar {
+    /// write type alias
+    fn emit_type_alises(&self) -> TokenStream {
+        let module_prefix = &self.module_prefix;
+        let start_rule_name = &self.start_rule_name;
+        let production_rule = format_ident!("{}Rule", start_rule_name);
+        let state = format_ident!("{}State", start_rule_name);
+        let token_name = &self.token_typename;
+        let enum_name = utils::generate_enum_name(start_rule_name);
+        let error_typename = &self.error_typename;
+        let error_name = format_ident!("{}ParseError", start_rule_name);
+        let invalid_terminal_error = format_ident!("{}InvalidTerminalError", start_rule_name);
+
+        quote! {
+            /// type alias for CFG production rule
+            #[allow(non_camel_case_types,dead_code)]
+            pub type #production_rule = #module_prefix::ProductionRule<#token_name, #enum_name>;
+            /// type alias for DFA state
+            #[allow(non_camel_case_types,dead_code)]
+            pub type #state = #module_prefix::State<#token_name, #enum_name>;
+            /// type alias for `ParseError`
+            #[allow(non_camel_case_types,dead_code)]
+            pub type #error_name = #module_prefix::ParseError<#token_name, #error_typename>;
+            /// type alias for `InvalidTerminalError`
+            #[allow(non_camel_case_types,dead_code)]
+            pub type #invalid_terminal_error = #module_prefix::InvalidTerminalError<#token_name>;
+        }
+    }
+
     /// write enum that represents non-terminal symbols, including Augmented
     fn emit_nonterm_enum(&self) -> TokenStream {
         // =====================================================================
@@ -64,39 +93,37 @@ impl Grammar {
         let mut grammar = self.create_grammar();
 
         // build
-        let parser = if lalr {
+        let dfa = if lalr {
             grammar.build_lalr(Ident::new(utils::AUGMENTED_NAME, Span::call_site()))
         } else {
             grammar.build(Ident::new(utils::AUGMENTED_NAME, Span::call_site()))
         };
-        let parser = match parser {
-            Ok(parser) => parser,
+        let dfa = match dfa {
+            Ok(dfa) => dfa,
             Err(e) => match e {
-                BuildError::NoAugmented
-                | BuildError::MultipleReduceType(_)
-                | BuildError::RuleNotFound(_) => unreachable!("Unreachable grammar build error"),
+                BuildError::NoAugmented | BuildError::RuleNotFound(_) => {
+                    unreachable!("Unreachable grammar build error")
+                }
                 BuildError::ReduceReduceConflict {
                     lookahead,
                     rule1,
                     rule2,
-                    rules,
                 } => {
                     return Err(Box::new(EmitError::ReduceReduceConflict {
                         lookahead,
-                        rule1: (rule1, rules[rule1].clone()),
-                        rule2: (rule2, rules[rule2].clone()),
+                        rule1: (rule1, grammar.rules[rule1].clone()),
+                        rule2: (rule2, grammar.rules[rule2].clone()),
                     }))
                 }
                 BuildError::ShiftReduceConflict {
                     reduce,
                     shift,
                     term,
-                    rules,
                 } => {
                     let mut shift_rules = Vec::new();
                     for (r, _) in shift.rules.into_iter() {
                         let shifted_rule = ShiftedRule {
-                            rule: rules[r.rule].clone(),
+                            rule: grammar.rules[r.rule].clone(),
                             shifted: r.shifted,
                         };
                         shift_rules.push((r.rule, shifted_rule));
@@ -104,7 +131,7 @@ impl Grammar {
 
                     return Err(Box::new(EmitError::ShiftReduceConflict {
                         term,
-                        reduce_rule: (reduce, rules[reduce].clone()),
+                        reduce_rule: (reduce, grammar.rules[reduce].clone()),
                         shift_rules,
                     }));
                 }
@@ -112,13 +139,15 @@ impl Grammar {
         };
 
         let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
+        let production_rule_name = format_ident!("{}Rule", &self.start_rule_name);
+        let state_name = format_ident!("{}State", &self.start_rule_name);
 
         // generate code that copy rules and states to parser
         // =====================================================================
         // ==================Writing Production Rules===========================
         // =====================================================================
         let mut comma_separated_rules = TokenStream::new();
-        for rule in parser.rules.iter() {
+        for rule in grammar.rules.iter() {
             let mut comma_separated_tokens = quote! {};
             for token in rule.rule.iter() {
                 match token {
@@ -136,7 +165,7 @@ impl Grammar {
 
             let nonterm = &rule.name;
             comma_separated_rules.extend(quote! {
-                #module_prefix::ProductionRule {
+                #production_rule_name {
                     name: #nonterminals_enum_name::#nonterm,
                     rule: vec![#comma_separated_tokens],
                 },
@@ -177,7 +206,7 @@ impl Grammar {
             );
         }
         {
-            let state_len = parser.states.len();
+            let state_len = dfa.states.len();
             write_states.extend(quote! {
                 let mut states = Vec::with_capacity(#state_len);
             });
@@ -189,7 +218,7 @@ impl Grammar {
         let mut reduce_terminals_map = BTreeMap::new();
         let mut init_reduce_terminals_stream = TokenStream::new();
 
-        for state in parser.states.into_iter() {
+        for state in dfa.states.into_iter() {
             let mut init_shift_term_stream = TokenStream::new();
             let mut init_shift_nonterm_stream = TokenStream::new();
             let mut init_reduce_stream = TokenStream::new();
@@ -313,7 +342,7 @@ impl Grammar {
                             )
                         ),
                     };
-                    let state = #module_prefix::State {
+                    let state = #state_name {
                         shift_goto_map_term,
                         shift_goto_map_nonterm,
                         reduce_map,
@@ -329,99 +358,6 @@ impl Grammar {
             #init_reduce_terminals_stream
             #write_states
         })
-    }
-
-    /// emit code that build grammar at runtime
-    fn emit_grammar_runtime(&self, lalr: bool) -> TokenStream {
-        let module_prefix = &self.module_prefix;
-        let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
-
-        let mut build_grammar_stream = quote! {
-            let mut grammar = #module_prefix::Grammar::new();
-        };
-
-        // reduce types
-        for term in self.terminals_index.iter() {
-            if let Some(reduce_type) = self.reduce_types.get(term) {
-                let stream = &self.terminals.get(term).unwrap().1;
-                match reduce_type {
-                    rlr::ReduceType::Left => {
-                        build_grammar_stream.extend(quote! {
-                        match grammar.set_reduce_type(#stream, #module_prefix::ReduceType::Left) {
-                            Ok(_) => {},
-                            Err(err) => {
-                                panic!( "Error setting reduce type:\n{:?}", err );
-                            }
-                        }
-                    });
-                    }
-                    rlr::ReduceType::Right => {
-                        build_grammar_stream.extend(quote! {
-                        match grammar.set_reduce_type(#stream, #module_prefix::ReduceType::Right) {
-                            Ok(_) => {},
-                            Err(err) => {
-                                panic!( "Error setting reduce type:\n{:?}", err );
-                            }
-                        }
-                    });
-                    }
-                }
-            }
-        }
-
-        // rules
-        for name in self.rules_index.iter() {
-            let rules = self.rules.get(name).unwrap();
-            for rule in rules.rule_lines.iter() {
-                let mut comma_separated_tokens = quote! {};
-                for token in rule.tokens.iter() {
-                    if let Some((_term_idx, term_stream)) = self.terminals.get(&token.token) {
-                        comma_separated_tokens
-                            .extend(quote! {#module_prefix::Token::Term(#term_stream),});
-                    } else if self.rules.contains_key(&token.token) {
-                        let nonterm = &token.token;
-                        comma_separated_tokens
-                            .extend(quote! {#module_prefix::Token::NonTerm(#nonterminals_enum_name::#nonterm),});
-                    } else {
-                        unreachable!("Token should be either terminal or non-terminal");
-                    }
-                }
-
-                build_grammar_stream.extend(quote! {
-                    grammar.add_rule(#nonterminals_enum_name::#name, vec![#comma_separated_tokens]);
-                });
-            }
-        }
-
-        let aug_ident = Ident::new(utils::AUGMENTED_NAME, Span::call_site());
-
-        // build grammar
-        if lalr {
-            build_grammar_stream.extend(quote! {
-                let parser = match grammar.build_lalr(#nonterminals_enum_name::#aug_ident) {
-
-                    Ok(parser) => parser,
-                    Err(err) => {
-                        panic!( "Error building LALR parser:\n{:?}", err );
-                    }
-                };
-            });
-        } else {
-            build_grammar_stream.extend(quote! {
-                let parser = match grammar.build_lalr(#nonterminals_enum_name::#aug_ident) {
-                    Ok(parser) => parser,
-                    Err(err) => {
-                        panic!( "Error building LR parser:\n{:?}", err );
-                    }
-                };
-            });
-        }
-
-        build_grammar_stream.extend(quote! {
-            let rules = parser.rules;
-            let states = parser.states;
-        });
-        build_grammar_stream
     }
 
     fn emit_parser(&self, grammar_emit: TokenStream) -> Result<TokenStream, Box<EmitError>> {
@@ -466,18 +402,16 @@ impl Grammar {
                     if self.terminals.contains_key(&token.token) {
                         let mapto = &token.mapto;
                         token_pop_stream.extend(quote! {
-                            let mut #mapto = self.#terms_stack_name.pop().expect("Something wrong! term_stack is empty");
+                            let mut #mapto = self.#terms_stack_name.pop().unwrap();
                         });
-                    } else if self.nonterm_typenames.get(&token.token).is_some() {
+                    } else if self.nonterm_typenames.contains_key(&token.token) {
                         // if <RuleType> is defined for this nonterm,
                         // pop value from the stack to 'mapto'
                         let stack_name = utils::generate_stack_name(&token.token);
-                        let error_message =
-                            format!("Something wrong! {} stack is empty", &token.token);
 
                         let mapto = &token.mapto;
                         token_pop_stream.extend(quote! {
-                            let mut #mapto = self.#stack_name.pop().expect(#error_message);
+                            let mut #mapto = self.#stack_name.pop().unwrap();
                         });
                     }
                 }
@@ -573,7 +507,7 @@ impl Grammar {
                 (
                     start_typename.clone(),
                     quote! {
-                        self.#start_rule_stack_name.pop().expect("Something wrong! start_rule_stack is empty")
+                        self.#start_rule_stack_name.pop().unwrap()
                     },
                 )
             } else {
@@ -602,6 +536,10 @@ impl Grammar {
         struct_name.set_span(start_rule_name.span());
         let mut stack_struct_name = format_ident!("{}Context", start_rule_name);
         stack_struct_name.set_span(start_rule_name.span());
+
+        let production_rule_name = format_ident!("{}Rule", start_rule_name);
+        let state_name = format_ident!("{}State", start_rule_name);
+        let error_name = format_ident!("{}ParseError", start_rule_name);
 
         Ok(quote! {
         /// struct that holds internal parser data, for reduce action and state transition
@@ -649,13 +587,19 @@ impl Grammar {
                 self.#terms_stack_name.push(term);
             }
         }
+        impl #module_prefix::GetContext<#term_typename, #nonterminals_enum_name> for #stack_struct_name {
+            fn get_state_stack(&self) -> &[usize] {
+                &self.state_stack
+            }
+        }
+
         /// struct that holds parser data, DFA tables
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         pub struct #struct_name {
             /// production rules
-            pub rules: Vec<#module_prefix::ProductionRule<#term_typename, #nonterminals_enum_name>>,
+            pub rules: Vec<#production_rule_name>,
             /// states
-            pub states: Vec<#module_prefix::State<#term_typename, #nonterminals_enum_name>>,
+            pub states: Vec<#state_name>,
         }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         impl #struct_name {
@@ -668,15 +612,14 @@ impl Grammar {
             }
 
             /// give lookahead token to parser, and check if there is any reduce action
-            fn lookahead<'a, C: #module_prefix::Callback<#term_typename, #nonterminals_enum_name>>(
-                &'a self,
+            fn lookahead(
+                &self,
                 context: &mut #stack_struct_name,
-                callback: &mut C,
                 term: &#term_typename,
                 #user_data_parameter_def
-            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, #nonterminals_enum_name, C::Error, #error_typename>> {
+            ) -> Result<(), #error_name> {
                 // fetch state from state stack
-                let state = &self.states[*context.state_stack.last().expect("Something wrong! state_stack is empty")];
+                let state = &self.states[*context.state_stack.last().unwrap()];
 
                 // feed token to current state and get action
                 // there must be no reduce/shift conflict ( that is, both shift and reduce are possible with this term ),
@@ -684,13 +627,6 @@ impl Grammar {
                 if let Some(reduce_rule) = state.reduce(term) {
                     // reduce items in stack
                     let rule = &self.rules[reduce_rule];
-                    if context.state_stack.len() < rule.rule.len() {
-                        // this should not be happened if DFA is generated correctly
-                        panic!(
-                            "State stack not enough for reduce: {:?}",
-                            context.state_stack
-                        );
-                    }
                     context
                         .state_stack
                         .truncate(context.state_stack.len() - rule.rule.len());
@@ -699,89 +635,62 @@ impl Grammar {
                         reduce_rule,
                         #user_data_var
                     ).map_err(#module_prefix::ParseError::ReduceAction)?;
-                    callback
-                        .reduce(&self.rules, &self.states, &context.state_stack, reduce_rule)
-                        .map_err(#module_prefix::ParseError::Callback)?;
 
 
                     // feed reduced token
-                    self.feed_nonterm(context, callback, &rule.name)?;
+                    self.feed_nonterm(context, &rule.name)?;
 
                     // original lookahead token is not shifted, so feed it again
-                    self.lookahead(context, callback, term, #user_data_var)?;
+                    self.lookahead(context, term, #user_data_var)?;
                 }
                 Ok(())
             }
             /// feed one terminal to parser, and update state stack
-            pub fn feed<'a>(
-                &'a self,
+            pub fn feed(
+                &self,
                 context: &mut #stack_struct_name,
                 term: #term_typename,
                 #user_data_parameter_def
-            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, #nonterminals_enum_name, u8, #error_typename>> {
-                self.feed_callback( context, &mut #module_prefix::DefaultCallback {}, term, #user_data_var )
-            }
-            /// feed one terminal to parser, and update state stack
-            pub fn feed_callback<'a, C: #module_prefix::Callback<#term_typename, #nonterminals_enum_name>>(
-                &'a self,
-                context: &mut #stack_struct_name,
-                callback: &mut C,
-                term: #term_typename,
-                #user_data_parameter_def
-            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, #nonterminals_enum_name, C::Error, #error_typename>> {
+            ) -> Result<(), #error_name> {
                 // reduce if possible
-                self.lookahead(context, callback, &term, #user_data_var)?;
+                self.lookahead(context, &term, #user_data_var)?;
 
                 // fetch state from state stack
-                let state = &self.states[*context.state_stack.last().expect("Something wrong! state_stack is empty")];
+                let state = &self.states[*context.state_stack.last().unwrap()];
 
                 // feed token to current state and get action
                 // there must be no reduce/shift conflict ( that is, both shift and reduce are possible with this term ),
                 // since it is resolved in state generation ( Grammar::build() )
                 if let Some(next_state_id) = state.shift_goto_term(&term) {
                     context.state_stack.push(next_state_id);
-                    callback
-                        .shift_and_goto(&self.rules, &self.states, &context.state_stack, &term)
-                        .map_err(#module_prefix::ParseError::Callback)?;
-
                     context.push( term );
 
                     Ok(())
                 }else {
-                    Err(#module_prefix::ParseError::InvalidTerminal(
+                    let error = #module_prefix::InvalidTerminalError {
                         term,
-                        &self.rules,
-                        &self.states,
-                        context.state_stack.clone(),
-                    ))
+                        expected: state.expected().into_iter().cloned().collect(),
+                    };
+                    Err(#module_prefix::ParseError::InvalidTerminal(error))
                 }
             }
 
             /// feed one non-terminal to parser, and update state stack
-            fn feed_nonterm<'a, C: #module_prefix::Callback<#term_typename, #nonterminals_enum_name>>(
-                &'a self,
+            fn feed_nonterm(
+                &self,
                 context: &mut #stack_struct_name,
-                callback: &mut C,
-                nonterm: &'a #nonterminals_enum_name,
-            ) -> Result<(), #module_prefix::ParseError<'a, #term_typename, #nonterminals_enum_name, C::Error, #error_typename>> {
+                nonterm: &#nonterminals_enum_name,
+            ) -> Result<(), #error_name> {
                 // fetch state from state stack
-                let state = &self.states[*context.state_stack.last().expect("Something wrong! state_stack is empty")];
+                let state = &self.states[*context.state_stack.last().unwrap()];
 
                 // feed token to current state and get action
                 // for shift/reduce confict, shift has higher priority
                 if let Some(next_state_id) = state.shift_goto_nonterm(nonterm) {
                     context.state_stack.push(next_state_id);
-                    callback
-                        .shift_and_goto_nonterm(&self.rules, &self.states, &context.state_stack, nonterm)
-                        .map_err(#module_prefix::ParseError::Callback)?;
                     Ok(())
                 }else {
-                    Err(#module_prefix::ParseError::InvalidNonTerminal(
-                        nonterm,
-                        &self.rules,
-                        &self.states,
-                        context.state_stack.clone(),
-                    ))
+                    unreachable!( "Invalid NonTerminal: {}", nonterm );
                 }
             }
 
@@ -789,25 +698,26 @@ impl Grammar {
                 #stack_struct_name::new()
             }
         }
+
+        impl #module_prefix::GetParser<#term_typename, #nonterminals_enum_name> for #struct_name {
+            fn get_rules(&self) -> &[#production_rule_name] {
+                &self.rules
+            }
+            fn get_states(&self) -> &[#state_name] {
+                &self.states
+            }
+        }
         })
     }
 
     pub fn emit_compiletime(&self, lalr: bool) -> Result<TokenStream, Box<EmitError>> {
+        let type_alias_emit = self.emit_type_alises();
         let enum_emit = self.emit_nonterm_enum();
         let grammar_emit = self.emit_grammar_compiletime(lalr)?;
         let parser_emit = self.emit_parser(grammar_emit)?;
 
         Ok(quote! {
-            #enum_emit
-            #parser_emit
-        })
-    }
-    pub fn emit_runtime(&self, lalr: bool) -> Result<TokenStream, Box<EmitError>> {
-        let enum_emit = self.emit_nonterm_enum();
-        let grammar_emit = self.emit_grammar_runtime(lalr);
-        let parser_emit = self.emit_parser(grammar_emit)?;
-
-        Ok(quote! {
+            #type_alias_emit
             #enum_emit
             #parser_emit
         })

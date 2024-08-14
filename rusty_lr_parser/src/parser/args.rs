@@ -24,6 +24,8 @@ pub enum PatternArgs {
     Plus(Box<PatternArgs>, Span),
     Star(Box<PatternArgs>, Span),
     Question(Box<PatternArgs>, Span),
+    Exclamation(Box<PatternArgs>, Span),
+
     /// span of '[' and ']' containing terminal set
     /// a group delimited by '[' and ']' containing terminal set
     TerminalSet(TerminalSet),
@@ -45,6 +47,9 @@ impl PatternArgs {
             PatternArgs::Question(pattern, _) => {
                 Ok(Pattern::Question(Box::new(pattern.to_pattern(grammar)?)))
             }
+            PatternArgs::Exclamation(pattern, _) => {
+                Ok(Pattern::Exclamation(Box::new(pattern.to_pattern(grammar)?)))
+            }
             PatternArgs::TerminalSet(terminal_set) => {
                 Ok(Pattern::TerminalSet(terminal_set.to_terminal_set(grammar)?))
             }
@@ -56,6 +61,7 @@ impl PatternArgs {
             PatternArgs::Plus(base, span) => (base.span_pair().0, *span),
             PatternArgs::Star(base, span) => (base.span_pair().0, *span),
             PatternArgs::Question(base, span) => (base.span_pair().0, *span),
+            PatternArgs::Exclamation(base, span) => (base.span_pair().0, *span),
             PatternArgs::TerminalSet(terminal_set) => {
                 (terminal_set.open_span, terminal_set.close_span)
             }

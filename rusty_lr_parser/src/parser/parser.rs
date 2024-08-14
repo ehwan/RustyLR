@@ -39,6 +39,7 @@ use rusty_lr_core::ReduceType;
 %token question Lexed::Question(None);
 %token caret Lexed::Caret(None);
 %token minus Lexed::Minus(None);
+%token exclamation Lexed::Exclamation(None);
 %token otherpunct Lexed::OtherPunct(None);
 
 %token parengroup Lexed::ParenGroup(None);
@@ -69,12 +70,12 @@ use rusty_lr_core::ReduceType;
 
 Rule(RuleDefArgs) : ident RuleType colon RuleLines semicolon {
     let ident = if let Lexed::Ident(ident) = ident {
-        ident.expect("Rule-Ident")
+        ident.unwrap()
     } else {
         unreachable!( "Rule-Ident" );
     };
     if let Lexed::Colon(colon) = colon {
-        let span = colon.expect( "Rule-Colon" ).span();
+        let span = colon.unwrap().span();
         if let Some(fisrt) = RuleLines.first_mut() {
             fisrt.separator_span = span;
         }
@@ -103,7 +104,7 @@ RuleType(Option<Group>): parengroup {
 
 RuleLines(Vec<RuleLineArgs>): RuleLines pipe RuleLine {
     if let Lexed::Pipe(punct) = pipe {
-        RuleLine.separator_span = punct.expect( "RuleLines-Pipe" ).span();
+        RuleLine.separator_span = punct.unwrap().span();
         RuleLines.push( RuleLine );
     }
     RuleLines
@@ -137,7 +138,7 @@ TokenMapped((Option<Ident>, PatternArgs)): Pattern {
 
 TerminalSetItem(TerminalSetItem): ident {
     let ident = if let Lexed::Ident(ident) = ident {
-        ident.expect("TerminalSetItem-Range0")
+        ident.unwrap()
     }else {
         unreachable!( "TerminalSetItem-Range1" );
     };
@@ -145,12 +146,12 @@ TerminalSetItem(TerminalSetItem): ident {
 }
 | first=ident minus last=ident {
     let first = if let Lexed::Ident(first) = first {
-        first.expect("TerminalSetItem-Range0")
+        first.unwrap()
     }else {
         unreachable!( "TerminalSetItem-Range1" );
     };
     let last = if let Lexed::Ident(last) = last {
-        last.expect("TerminalSetItem-Range2")
+        last.unwrap()
     }else {
         unreachable!( "TerminalSetItem-Range3" );
     };
@@ -161,12 +162,12 @@ TerminalSetItem(TerminalSetItem): ident {
 
 TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
     let open_span = if let Lexed::LBracket(lbracket) = lbracket {
-        lbracket.expect("TerminalSet-Open")
+        lbracket.unwrap()
     } else {
         unreachable!( "TerminalSet-Open" );
     };
     let close_span = if let Lexed::RBracket(rbracket) = rbracket {
-        rbracket.expect("TerminalSet-Close")
+        rbracket.unwrap()
     } else {
         unreachable!( "TerminalSet-Close" );
     };
@@ -181,7 +182,7 @@ TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
 
 Pattern(PatternArgs): ident {
     if let Lexed::Ident(ident) = ident {
-        let ident = ident.expect("Pattern-Ident");
+        let ident = ident.unwrap();
         let span = ident.span();
         PatternArgs::Ident( ident, span )
     }else {
@@ -190,23 +191,30 @@ Pattern(PatternArgs): ident {
 }
 | Pattern plus {
     if let Lexed::Plus(plus) = plus {
-        PatternArgs::Plus( Box::new(Pattern), plus.expect("Pattern-Plus0").span() )
+        PatternArgs::Plus( Box::new(Pattern), plus.unwrap().span() )
     }else {
         unreachable!( "Pattern-Plus" );
     }
 }
 | Pattern star {
     if let Lexed::Star(star) = star {
-        PatternArgs::Star( Box::new(Pattern), star.expect("Pattern-Star0").span() )
+        PatternArgs::Star( Box::new(Pattern), star.unwrap().span() )
     }else {
         unreachable!( "Pattern-Star" );
     }
 }
 | Pattern question {
     if let Lexed::Question(question) = question {
-        PatternArgs::Question( Box::new(Pattern), question.expect("Pattern-Question0").span() )
+        PatternArgs::Question( Box::new(Pattern), question.unwrap().span() )
     }else {
         unreachable!( "Pattern-Question" );
+    }
+}
+| Pattern exclamation {
+    if let Lexed::Exclamation(exclamation) = exclamation {
+        PatternArgs::Exclamation( Box::new(Pattern), exclamation.unwrap().span() )
+    }else {
+        unreachable!( "Pattern-Exclamation" );
     }
 }
 | TerminalSet {
@@ -228,7 +236,7 @@ Action(Option<Group>): bracegroup {
 TokenDef((Ident, TokenStream)): token ident RustCode semicolon
 {
     if let Lexed::Ident(ident) = ident {
-        ( ident.expect("TokenDef"), RustCode )
+        ( ident.unwrap(), RustCode )
     }else {
         unreachable!( "TokenDef-Ident" );
     }
@@ -245,17 +253,17 @@ RustCode(TokenStream): t=[^semicolon lparen-moduleprefix ]+ {
 
 StartDef(Ident): start ident semicolon {
     if let Lexed::Ident(ident) = ident {
-        ident.expect("StartDef")
+        ident.unwrap()
     }else {
         unreachable!( "StartDef-Ident" );
     }
 }
 ;
-EofDef((Span,TokenStream)): eofdef RustCode semicolon { (eofdef.span().expect("EofDef"), RustCode) }
+EofDef((Span,TokenStream)): eofdef RustCode semicolon { (eofdef.span().unwrap(), RustCode) }
 ;
-TokenTypeDef((Span,TokenStream)): tokentype RustCode semicolon { (tokentype.span().expect("TokenTypedef"), RustCode) }
+TokenTypeDef((Span,TokenStream)): tokentype RustCode semicolon { (tokentype.span().unwrap(), RustCode) }
 ;
-UserDataDef((Span,TokenStream)): userdata RustCode semicolon { (userdata.span().expect("UserDataDef"),RustCode) }
+UserDataDef((Span,TokenStream)): userdata RustCode semicolon { (userdata.span().unwrap(),RustCode) }
 ;
 
 ReduceType(ReduceType): left { ReduceType::Left }
@@ -264,7 +272,7 @@ ReduceType(ReduceType): left { ReduceType::Left }
 
 ReduceDef((ReduceTypeArgs, ReduceType)): reducetype=ReduceType ident semicolon {
     if let Lexed::Ident(ident) = ident {
-        ( ReduceTypeArgs::Ident(ident.expect("ReduceDef-Ident")), reducetype )
+        ( ReduceTypeArgs::Ident(ident.unwrap()), reducetype )
     }else {
         unreachable!( "ReduceDef-Ident (Left)" );
     }
@@ -274,10 +282,10 @@ ReduceDef((ReduceTypeArgs, ReduceType)): reducetype=ReduceType ident semicolon {
 }
 ;
 
-ErrorDef((Span,TokenStream)): errortype RustCode semicolon { (errortype.span().expect("ErrorDef"), RustCode) }
+ErrorDef((Span,TokenStream)): errortype RustCode semicolon { (errortype.span().unwrap(), RustCode) }
 ;
 
-ModulePrefixDef((Span,TokenStream)): moduleprefix RustCode semicolon { (moduleprefix.span().expect("ModulePrefixDef"), RustCode) };
+ModulePrefixDef((Span,TokenStream)): moduleprefix RustCode semicolon { (moduleprefix.span().unwrap(), RustCode) };
 
 Grammar(GrammarArgs): Grammar Rule {
     Grammar.rules.push( Rule );

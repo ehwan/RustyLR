@@ -650,32 +650,26 @@ fn main() {
     // since many informations are removed in the rusty_lr_parser output
     let mut debug_comments = String::new();
     {
-        let parser = {
-            let mut grammar = grammar.create_grammar();
-            debug_comments.push_str(format!("{:=^80}\n", "Grammar").as_str());
-            debug_comments.push_str(format!("{}\n", grammar).as_str());
-            if args.lalr {
-                match grammar.build_lalr(Ident::new(
-                    rusty_lr_parser::utils::AUGMENTED_NAME,
-                    Span::call_site(),
-                )) {
-                    Ok(parser) => parser,
-                    Err(e) => {
-                        eprintln!("{}", e);
-                        return;
-                    }
-                }
-            } else {
-                match grammar.build(Ident::new(
-                    rusty_lr_parser::utils::AUGMENTED_NAME,
-                    Span::call_site(),
-                )) {
-                    Ok(parser) => parser,
-                    Err(e) => {
-                        eprintln!("{}", e);
-                        return;
-                    }
-                }
+        let mut builder = grammar.create_grammar();
+        debug_comments.push_str(format!("{:=^80}\n", "Grammar").as_str());
+        for rule in builder.rules.iter() {
+            debug_comments.push_str(format!("{}\n", rule).as_str());
+        }
+        let parser = if args.lalr {
+            match builder.build_lalr(Ident::new(
+                rusty_lr_parser::utils::AUGMENTED_NAME,
+                Span::call_site(),
+            )) {
+                Ok(parser) => parser,
+                Err(_) => unreachable!("Grammar building failed"),
+            }
+        } else {
+            match builder.build(Ident::new(
+                rusty_lr_parser::utils::AUGMENTED_NAME,
+                Span::call_site(),
+            )) {
+                Ok(parser) => parser,
+                Err(_) => unreachable!("Grammar building failed"),
             }
         };
 
@@ -733,101 +727,67 @@ fn main() {
                 term::emit(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
             }
-        }
 
-        for state in parser.states.iter() {
-            let mut reduce_rules = BTreeMap::new();
-            let mut shift_rules = BTreeMap::new();
+            // about shift/reduce conflict resolving
+            for state in parser.states.iter() {
+                let mut reduce_rules = BTreeMap::new();
+                let mut shift_rules = BTreeMap::new();
 
-            for (shifted_rule_ref, lookaheads) in state.ruleset.rules.iter() {
-                // is end of rule, add to reduce
-                if shifted_rule_ref.shifted == parser.rules[shifted_rule_ref.rule].rule.len() {
-                    for token in lookaheads.iter() {
-                        reduce_rules.insert(token, shifted_rule_ref.rule);
+                for (shifted_rule_ref, lookaheads) in state.ruleset.rules.iter() {
+                    // is end of rule, add to reduce
+                    if shifted_rule_ref.shifted == builder.rules[shifted_rule_ref.rule].rule.len() {
+                        for token in lookaheads.iter() {
+                            reduce_rules.insert(token, shifted_rule_ref.rule);
+                        }
+                    }
+
+                    // if it is not end, and next token is terminal, add to shift
+                    if let Some(rusty_lr_core::Token::Term(token)) = builder.rules
+                        [shifted_rule_ref.rule]
+                        .rule
+                        .get(shifted_rule_ref.shifted)
+                    {
+                        shift_rules
+                            .entry(token)
+                            .or_insert_with(BTreeSet::new)
+                            .insert(*shifted_rule_ref);
                     }
                 }
 
-                // if it is not end, and next token is terminal, add to shift
-                if let Some(rusty_lr_core::Token::Term(token)) = parser.rules[shifted_rule_ref.rule]
-                    .rule
-                    .get(shifted_rule_ref.shifted)
-                {
-                    shift_rules
-                        .entry(token)
-                        .or_insert_with(BTreeSet::new)
-                        .insert(*shifted_rule_ref);
-                }
-            }
+                // check shift/reduce conflict
+                for (term, shift_rules) in shift_rules.into_iter() {
+                    if let Some(reduce_rule) = reduce_rules.get(term) {
+                        // shift/reduce conflict here
+                        // since there were not error reaching here, 'term' must be set reduce_type
 
-            // check shift/reduce conflict
-            for (term, shift_rules) in shift_rules.into_iter() {
-                if let Some(reduce_rule) = reduce_rules.get(term) {
-                    // shift/reduce conflict here
-                    // since there were not error reaching here, 'term' must be set reduce_type
-
-                    let mut message = format!(
+                        let mut message = format!(
                         "Shift/Reduce conflict with token {} was resolved:\nReduce rule:\n>>> {}\nShift rules:",
                         term,
-                        &parser.rules[*reduce_rule]
+                        &builder.rules[*reduce_rule]
                     );
-                    for shifted_rule in shift_rules.iter() {
-                        let shifted_rule = ShiftedRule {
-                            rule: parser.rules[shifted_rule.rule].clone(),
-                            shifted: shifted_rule.shifted,
-                        };
-                        message.push_str(format!("\n>>> {}", shifted_rule).as_str());
-                    }
+                        for shifted_rule in shift_rules.iter() {
+                            let shifted_rule = ShiftedRule {
+                                rule: builder.rules[shifted_rule.rule].clone(),
+                                shifted: shifted_rule.shifted,
+                            };
+                            message.push_str(format!("\n>>> {}", shifted_rule).as_str());
+                        }
 
-                    let (name, rules, rule) = grammar
-                        .get_rule_by_id(*reduce_rule)
-                        .expect("Rule not found");
-                    let mut labels = Vec::new();
-
-                    if !name
-                        .to_string()
-                        .starts_with(rusty_lr_parser::utils::AUTO_GENERATED_RULE_PREFIX)
-                    {
-                        let (rule_begin, rule_end) = rules.rule_lines[rule].span_pair();
-                        let rule_range = rule_begin.byte_range().start..rule_end.byte_range().end;
-                        labels.push(
-                            Label::primary(file_id, name.span().byte_range())
-                                .with_message(format!("Reduce rule {} was defined here", name)),
-                        );
-                        labels.push(
-                            Label::secondary(file_id, rule_range)
-                                .with_message("in this line".to_string()),
-                        );
-                    } else {
-                        let origin_span = grammar
-                            .generated_root_span
-                            .get(name)
-                            .expect("generated_root_span::rule not found");
-                        let origin_range =
-                            origin_span.0.byte_range().start..origin_span.1.byte_range().end;
-                        labels.push(
-                            Label::primary(file_id, origin_range)
-                                .with_message(format!("Reduce rule {} was generated here", name)),
-                        );
-                    }
-
-                    for shift_rule in shift_rules.iter() {
                         let (name, rules, rule) = grammar
-                            .get_rule_by_id(shift_rule.rule)
+                            .get_rule_by_id(*reduce_rule)
                             .expect("Rule not found");
+                        let mut labels = Vec::new();
+
                         if !name
                             .to_string()
                             .starts_with(rusty_lr_parser::utils::AUTO_GENERATED_RULE_PREFIX)
                         {
-                            let first_shift_token_byte = rules.rule_lines[rule].tokens
-                                [shift_rule.shifted]
-                                .begin_span
-                                .byte_range()
-                                .start;
-                            let (_, rule_end) = rules.rule_lines[rule].span_pair();
-                            let rule_range = first_shift_token_byte..rule_end.byte_range().end;
+                            let (rule_begin, rule_end) = rules.rule_lines[rule].span_pair();
+                            let rule_range =
+                                rule_begin.byte_range().start..rule_end.byte_range().end;
                             labels.push(
                                 Label::primary(file_id, name.span().byte_range())
-                                    .with_message(format!("Shift rule {} was defined here", name)),
+                                    .with_message(format!("Reduce rule {} was defined here", name)),
                             );
                             labels.push(
                                 Label::secondary(file_id, rule_range)
@@ -841,39 +801,78 @@ fn main() {
                             let origin_range =
                                 origin_span.0.byte_range().start..origin_span.1.byte_range().end;
                             labels.push(
-                                Label::secondary(file_id, origin_range).with_message(format!(
-                                    "Shift rule {} was generated here",
+                                Label::primary(file_id, origin_range).with_message(format!(
+                                    "Reduce rule {} was generated here",
                                     name
                                 )),
                             );
                         }
+
+                        for shift_rule in shift_rules.iter() {
+                            let (name, rules, rule) = grammar
+                                .get_rule_by_id(shift_rule.rule)
+                                .expect("Rule not found");
+                            if !name
+                                .to_string()
+                                .starts_with(rusty_lr_parser::utils::AUTO_GENERATED_RULE_PREFIX)
+                            {
+                                let first_shift_token_byte = rules.rule_lines[rule].tokens
+                                    [shift_rule.shifted]
+                                    .begin_span
+                                    .byte_range()
+                                    .start;
+                                let (_, rule_end) = rules.rule_lines[rule].span_pair();
+                                let rule_range = first_shift_token_byte..rule_end.byte_range().end;
+                                labels.push(
+                                    Label::primary(file_id, name.span().byte_range()).with_message(
+                                        format!("Shift rule {} was defined here", name),
+                                    ),
+                                );
+                                labels.push(
+                                    Label::secondary(file_id, rule_range)
+                                        .with_message("in this line".to_string()),
+                                );
+                            } else {
+                                let origin_span = grammar
+                                    .generated_root_span
+                                    .get(name)
+                                    .expect("generated_root_span::rule not found");
+                                let origin_range = origin_span.0.byte_range().start
+                                    ..origin_span.1.byte_range().end;
+                                labels.push(Label::secondary(file_id, origin_range).with_message(
+                                    format!("Shift rule {} was generated here", name),
+                                ));
+                            }
+                        }
+
+                        let reduce_type_origin = grammar
+                            .reduce_types_origin
+                            .get(term)
+                            .expect("reduce_types_origin not found");
+                        let range = reduce_type_origin.0.byte_range().start
+                            ..reduce_type_origin.1.byte_range().end;
+                        let reduce_type = *grammar
+                            .reduce_types
+                            .get(term)
+                            .expect("reduce_types not found");
+                        let type_string = match reduce_type {
+                            rusty_lr_core::ReduceType::Left => "%left",
+                            rusty_lr_core::ReduceType::Right => "%right",
+                        };
+                        labels.push(
+                            Label::primary(file_id, range).with_message(format!(
+                                "Reduce type was set as {} here",
+                                type_string
+                            )),
+                        );
+
+                        let diag = Diagnostic::note().with_message(message).with_labels(labels);
+
+                        let writer = StandardStream::stdout(ColorChoice::Auto);
+                        let config = codespan_reporting::term::Config::default();
+                        term::emit(&mut writer.lock(), &config, &files, &diag)
+                            .expect("Failed to write to stderr");
                     }
-
-                    let reduce_type_origin = grammar
-                        .reduce_types_origin
-                        .get(term)
-                        .expect("reduce_types_origin not found");
-                    let range = reduce_type_origin.0.byte_range().start
-                        ..reduce_type_origin.1.byte_range().end;
-                    let reduce_type = *grammar
-                        .reduce_types
-                        .get(term)
-                        .expect("reduce_types not found");
-                    let type_string = match reduce_type {
-                        rusty_lr_core::ReduceType::Left => "%left",
-                        rusty_lr_core::ReduceType::Right => "%right",
-                    };
-                    labels.push(
-                        Label::primary(file_id, range)
-                            .with_message(format!("Reduce type was set as {} here", type_string)),
-                    );
-
-                    let diag = Diagnostic::note().with_message(message).with_labels(labels);
-
-                    let writer = StandardStream::stdout(ColorChoice::Auto);
-                    let config = codespan_reporting::term::Config::default();
-                    term::emit(&mut writer.lock(), &config, &files, &diag)
-                        .expect("Failed to write to stderr");
                 }
             }
         }

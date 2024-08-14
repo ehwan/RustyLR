@@ -1,7 +1,7 @@
 use rusty_lr::*;
 
 fn main() {
-    let mut grammar = Grammar::new();
+    let mut grammar = builder::Grammar::new();
 
     let _ = grammar.set_reduce_type('0', ReduceType::Right);
 
@@ -23,8 +23,8 @@ fn main() {
         Ok(_) => {
             println!("Build successful");
         }
-        Err(e) => {
-            println!("Build failed: {:?}", e);
+        Err(_) => {
+            println!("Build failed");
         }
     }
 }

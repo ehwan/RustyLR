@@ -1,13 +1,12 @@
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::fmt::Debug;
-use std::fmt::Display;
 use std::hash::Hash;
 use std::vec::Vec;
 
+use super::dfa::DFA;
 use super::error::BuildError;
 use crate::hashmap::HashMap;
-use crate::parser::parser::Parser;
 use crate::rule::*;
 use crate::state::State;
 use crate::token::Token;
@@ -51,30 +50,24 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         id
     }
 
-    pub fn set_reduce_type(
-        &mut self,
-        term: Term,
-        reduce_type: ReduceType,
-    ) -> Result<(), BuildError<'static, Term, NonTerm>>
+    /// error if different reduce type is assigned to same terminal symbol
+    pub fn set_reduce_type(&mut self, term: Term, reduce_type: ReduceType) -> bool
     where
-        Term: Hash + Eq + Clone,
+        Term: Hash + Eq,
     {
-        if let Some(old) = self.reduce_types.insert(term.clone(), reduce_type) {
-            if old == reduce_type {
-                Ok(())
-            } else {
-                Err(BuildError::MultipleReduceType(term))
+        if let Some(old) = self.reduce_types.insert(term, reduce_type) {
+            if old != reduce_type {
+                return false;
             }
-        } else {
-            Ok(())
         }
+        true
     }
 
     /// build LR(1) parser table from given grammar
     pub fn build(
         &mut self,
         augmented_name: NonTerm,
-    ) -> Result<Parser<Term, NonTerm>, BuildError<Term, NonTerm>>
+    ) -> Result<DFA<Term, NonTerm>, BuildError<Term, NonTerm>>
     where
         Term: Clone + Ord + Hash,
         NonTerm: Clone + Hash + Ord,
@@ -105,17 +98,14 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             panic!("main state is not 0");
         }
 
-        Ok(Parser {
-            rules: self.rules.clone(),
-            states,
-        })
+        Ok(DFA { states })
     }
 
     /// build LALR(1) parser table from given grammar
     pub fn build_lalr(
         &mut self,
         augmented_name: NonTerm,
-    ) -> Result<Parser<Term, NonTerm>, BuildError<Term, NonTerm>>
+    ) -> Result<DFA<Term, NonTerm>, BuildError<Term, NonTerm>>
     where
         Term: Clone + Ord + Hash,
         NonTerm: Clone + Hash + Ord,
@@ -147,10 +137,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             panic!("main state is not 0");
         }
 
-        Ok(Parser {
-            rules: self.rules.clone(),
-            states,
-        })
+        Ok(DFA { states })
     }
 
     /// search for every production rules with name 'name'
@@ -387,7 +374,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                                     lookahead,
                                     rule1: *old,
                                     rule2: empty_rule,
-                                    rules: &self.rules,
                                 });
                             } else {
                                 state.reduce_map.insert(lookahead, empty_rule);
@@ -419,7 +405,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                                     rules: shifted_rules,
                                 },
                                 term: lookahead.clone(),
-                                rules: &self.rules,
                             });
                         }
                     }
@@ -437,7 +422,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                             lookahead,
                             rule1: *old,
                             rule2: empty_rule,
-                            rules: &self.rules,
                         });
                     } else {
                         state.reduce_map.insert(lookahead, empty_rule);
@@ -465,7 +449,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                             reduce: states[state_id].reduce_map[next_term],
                             shift: next_rule_set.clone(),
                             term: next_term.clone(),
-                            rules: &self.rules,
                         });
                     }
                 }
@@ -590,7 +573,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                                     lookahead,
                                     rule1: *old,
                                     rule2: empty_rule,
-                                    rules: &self.rules,
                                 });
                             } else {
                                 state.reduce_map.insert(lookahead, empty_rule);
@@ -607,7 +589,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                                 reduce: empty_rule,
                                 shift: next_rules_term[&lookahead].clone(),
                                 term: lookahead.clone(),
-                                rules: &self.rules,
                             });
                         }
                     }
@@ -625,7 +606,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                             lookahead,
                             rule1: *old,
                             rule2: empty_rule,
-                            rules: &self.rules,
                         });
                     } else {
                         state.reduce_map.insert(lookahead, empty_rule);
@@ -654,7 +634,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                             reduce: states[state_id].reduce_map[next_term],
                             shift: next_rule_set.clone(),
                             term: next_term.clone(),
-                            rules: &self.rules,
                         });
                     }
                 }
@@ -679,15 +658,15 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     }
 }
 
-impl<Term: Display, NonTerm: Display> Display for Grammar<Term, NonTerm> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for (id, rule) in self.rules.iter().enumerate() {
-            writeln!(f, "{}: {}", id, rule)?;
-        }
+// impl<Term: Display, NonTerm: Display> Display for Grammar<Term, NonTerm> {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         for (id, rule) in self.rules.iter().enumerate() {
+//             writeln!(f, "{}: {}", id, rule)?;
+//         }
 
-        Ok(())
-    }
-}
+//         Ok(())
+//     }
+// }
 
 impl<Term, NonTerm> Default for Grammar<Term, NonTerm> {
     fn default() -> Self {

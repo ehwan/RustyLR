@@ -11,7 +11,7 @@ use quote::quote;
 use quote::ToTokens;
 
 use super::parser_expanded::GrammarContext;
-use super::parser_expanded::GrammarNonTerminals;
+use super::parser_expanded::GrammarParseError;
 use super::parser_expanded::GrammarParser;
 
 #[derive(Clone, Debug)]
@@ -28,6 +28,7 @@ pub enum Lexed {
     Question(Option<Punct>),
     Caret(Option<Punct>),
     Minus(Option<Punct>),
+    Exclamation(Option<Punct>),
     OtherPunct(Option<Punct>),
 
     ParenGroup(Option<Group>),
@@ -67,6 +68,7 @@ impl Lexed {
             Lexed::Question(punct) => punct.unwrap().to_token_stream(),
             Lexed::Caret(punct) => punct.unwrap().to_token_stream(),
             Lexed::Minus(punct) => punct.unwrap().to_token_stream(),
+            Lexed::Exclamation(punct) => punct.unwrap().to_token_stream(),
             Lexed::OtherPunct(punct) => punct.unwrap().to_token_stream(),
 
             Lexed::ParenGroup(group) => group.unwrap().to_token_stream(),
@@ -136,6 +138,7 @@ impl Lexed {
             Lexed::Question(punct) => punct.as_ref().map(|p| p.span()),
             Lexed::Caret(punct) => punct.as_ref().map(|p| p.span()),
             Lexed::Minus(punct) => punct.as_ref().map(|p| p.span()),
+            Lexed::Exclamation(punct) => punct.as_ref().map(|p| p.span()),
             Lexed::OtherPunct(punct) => punct.as_ref().map(|p| p.span()),
 
             Lexed::ParenGroup(group) => group.as_ref().map(|g| g.span()),
@@ -178,6 +181,7 @@ impl std::fmt::Display for Lexed {
             Lexed::Question(_) => write!(f, "'?'"),
             Lexed::Caret(_) => write!(f, "'^'"),
             Lexed::Minus(_) => write!(f, "'-'"),
+            Lexed::Exclamation(_) => write!(f, "'!'"),
             Lexed::OtherPunct(_) => write!(f, "<Punct>"),
 
             Lexed::ParenGroup(_) => write!(f, "<ParenGroup>"),
@@ -221,17 +225,11 @@ impl Eq for Lexed {}
 /// For '%' directives and 'Group' variants,
 /// First tries to feed the Compound token
 /// if it failed, then feed the internal splitted tokens recursively
-pub fn feed_recursive<'a>(
+pub fn feed_recursive(
     input: TokenStream,
-    parser: &'a GrammarParser,
+    parser: &GrammarParser,
     context: &mut GrammarContext,
-) -> Result<
-    (),
-    (
-        Span, // span of the error point
-        rusty_lr_core::ParseError<'a, Lexed, GrammarNonTerminals, u8, String>,
-    ),
-> {
+) -> Result<(), GrammarParseError> {
     let mut input = input.into_iter().peekable();
 
     while let Some(next) = input.next() {
@@ -247,6 +245,7 @@ pub fn feed_recursive<'a>(
                 '^' => Lexed::Caret(Some(punct)),
                 '-' => Lexed::Minus(Some(punct)),
                 '=' => Lexed::Equal(Some(punct)),
+                '!' => Lexed::Exclamation(Some(punct)),
                 '%' => match input.peek().cloned() {
                     Some(TokenTree::Ident(ident)) => match ident.to_string().as_str() {
                         "left" | "l" | "reduce" => {
@@ -307,126 +306,62 @@ pub fn feed_recursive<'a>(
             Ok(_) => {}
             Err(e) => match l0 {
                 Lexed::ParenGroup(Some(group)) => {
-                    parser
-                        .feed(context, Lexed::LParen(Some(group.span_open())))
-                        .map_err(|e| (group.span_open(), e))?;
+                    parser.feed(context, Lexed::LParen(Some(group.span_open())))?;
                     feed_recursive(group.stream(), parser, context)?;
-                    parser
-                        .feed(context, Lexed::RParen(Some(group.span_close())))
-                        .map_err(|e| (group.span_close(), e))?;
+                    parser.feed(context, Lexed::RParen(Some(group.span_close())))?;
                 }
                 Lexed::BraceGroup(Some(group)) => {
-                    parser
-                        .feed(context, Lexed::LBrace(Some(group.span_open())))
-                        .map_err(|e| (group.span_open(), e))?;
+                    parser.feed(context, Lexed::LBrace(Some(group.span_open())))?;
                     feed_recursive(group.stream(), parser, context)?;
-                    parser
-                        .feed(context, Lexed::RBrace(Some(group.span_close())))
-                        .map_err(|e| (group.span_close(), e))?;
+                    parser.feed(context, Lexed::RBrace(Some(group.span_close())))?;
                 }
                 Lexed::BracketGroup(Some(group)) => {
-                    parser
-                        .feed(context, Lexed::LBracket(Some(group.span_open())))
-                        .map_err(|e| (group.span_open(), e))?;
+                    parser.feed(context, Lexed::LBracket(Some(group.span_open())))?;
                     feed_recursive(group.stream(), parser, context)?;
-                    parser
-                        .feed(context, Lexed::RBracket(Some(group.span_close())))
-                        .map_err(|e| (group.span_close(), e))?;
+                    parser.feed(context, Lexed::RBracket(Some(group.span_close())))?;
                 }
                 Lexed::NoneGroup(Some(group)) => {
                     feed_recursive(group.stream(), parser, context)?;
                 }
                 Lexed::Left(Some((punct, ident))) => {
-                    let ps = punct.span();
-                    parser
-                        .feed(context, Lexed::Percent(Some(punct)))
-                        .map_err(|e| (ps, e))?;
-                    let is = ident.span();
-                    parser
-                        .feed(context, Lexed::Ident(Some(ident)))
-                        .map_err(|e| (is, e))?;
+                    parser.feed(context, Lexed::Percent(Some(punct)))?;
+                    parser.feed(context, Lexed::Ident(Some(ident)))?;
                 }
                 Lexed::Right(Some((punct, ident))) => {
-                    let ps = punct.span();
-                    parser
-                        .feed(context, Lexed::Percent(Some(punct)))
-                        .map_err(|e| (ps, e))?;
-                    let is = ident.span();
-                    parser
-                        .feed(context, Lexed::Ident(Some(ident)))
-                        .map_err(|e| (is, e))?;
+                    parser.feed(context, Lexed::Percent(Some(punct)))?;
+                    parser.feed(context, Lexed::Ident(Some(ident)))?;
                 }
                 Lexed::Token(Some((punct, ident))) => {
-                    let ps = punct.span();
-                    parser
-                        .feed(context, Lexed::Percent(Some(punct)))
-                        .map_err(|e| (ps, e))?;
-                    let is = ident.span();
-                    parser
-                        .feed(context, Lexed::Ident(Some(ident)))
-                        .map_err(|e| (is, e))?;
+                    parser.feed(context, Lexed::Percent(Some(punct)))?;
+                    parser.feed(context, Lexed::Ident(Some(ident)))?;
                 }
                 Lexed::Start(Some((punct, ident))) => {
-                    let ps = punct.span();
-                    parser
-                        .feed(context, Lexed::Percent(Some(punct)))
-                        .map_err(|e| (ps, e))?;
-                    let is = ident.span();
-                    parser
-                        .feed(context, Lexed::Ident(Some(ident)))
-                        .map_err(|e| (is, e))?;
+                    parser.feed(context, Lexed::Percent(Some(punct)))?;
+                    parser.feed(context, Lexed::Ident(Some(ident)))?;
                 }
                 Lexed::EofDef(Some((punct, ident))) => {
-                    let ps = punct.span();
-                    parser
-                        .feed(context, Lexed::Percent(Some(punct)))
-                        .map_err(|e| (ps, e))?;
-                    let is = ident.span();
-                    parser
-                        .feed(context, Lexed::Ident(Some(ident)))
-                        .map_err(|e| (is, e))?;
+                    parser.feed(context, Lexed::Percent(Some(punct)))?;
+                    parser.feed(context, Lexed::Ident(Some(ident)))?;
                 }
                 Lexed::TokenType(Some((punct, ident))) => {
-                    let ps = punct.span();
-                    parser
-                        .feed(context, Lexed::Percent(Some(punct)))
-                        .map_err(|e| (ps, e))?;
-                    let is = ident.span();
-                    parser
-                        .feed(context, Lexed::Ident(Some(ident)))
-                        .map_err(|e| (is, e))?;
+                    parser.feed(context, Lexed::Percent(Some(punct)))?;
+                    parser.feed(context, Lexed::Ident(Some(ident)))?;
                 }
                 Lexed::UserData(Some((punct, ident))) => {
-                    let ps = punct.span();
-                    parser
-                        .feed(context, Lexed::Percent(Some(punct)))
-                        .map_err(|e| (ps, e))?;
-                    let is = ident.span();
-                    parser
-                        .feed(context, Lexed::Ident(Some(ident)))
-                        .map_err(|e| (is, e))?;
+                    parser.feed(context, Lexed::Percent(Some(punct)))?;
+                    parser.feed(context, Lexed::Ident(Some(ident)))?;
                 }
                 Lexed::ErrorType(Some((punct, ident))) => {
-                    let ps = punct.span();
-                    parser
-                        .feed(context, Lexed::Percent(Some(punct)))
-                        .map_err(|e| (ps, e))?;
-                    let is = ident.span();
-                    parser
-                        .feed(context, Lexed::Ident(Some(ident)))
-                        .map_err(|e| (is, e))?;
+                    parser.feed(context, Lexed::Percent(Some(punct)))?;
+                    parser.feed(context, Lexed::Ident(Some(ident)))?;
                 }
                 Lexed::ModulePrefix(Some((punct, ident))) => {
-                    let ps = punct.span();
-                    parser
-                        .feed(context, Lexed::Percent(Some(punct)))
-                        .map_err(|e| (ps, e))?;
-                    let is = ident.span();
-                    parser
-                        .feed(context, Lexed::Ident(Some(ident)))
-                        .map_err(|e| (is, e))?;
+                    parser.feed(context, Lexed::Percent(Some(punct)))?;
+                    parser.feed(context, Lexed::Ident(Some(ident)))?;
                 }
-                _ => return Err((l0.span().unwrap(), e)),
+                _ => {
+                    return Err(e);
+                }
             },
         }
     }

@@ -1,16 +1,30 @@
 # RustyLR
+[![crates.io](https://img.shields.io/crates/v/rusty_lr.svg)](https://crates.io/crates/rusty_lr)
+[![docs.rs](https://docs.rs/rusty_lr/badge.svg)](https://docs.rs/rusty_lr)
+for [proc-macro](#proc-macro)
+
+[![crates.io](https://img.shields.io/crates/v/rustylr.svg)](https://crates.io/crates/rustylr)
+for [executable](#executable-rustylr)
+
 yacc-like LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from Context Free Grammar (CFGs).
 
-RustyLR provides both [executable](#executable-rustylr) and [procedural macros](#proc-macro-syntax) to generate LR(1) and LALR(1) parser.
+RustyLR provides both [executable](#executable-rustylr) and [procedural macros](#proc-macro) to generate LR(1) and LALR(1) parser.
+The generated parser will be a pure Rust code, and the calculation of building DFA will be done at compile time.
+Reduce action can be written in Rust code,
+and the error messages are [readable and detailed](#readable-error-messages-with-codespan) with [executable](#executable-rustylr).
+For huge and complex grammars, it is recommended to use the [executable](#executable-rustylr) version.
 
-```
+By default, RustyLR uses `std::collections::HashMap` for the parser tables.
+If you want to use `FxHashMap` from [`rustc-hash`](https://github.com/rust-lang/rustc-hash), add `features=["fxhash"]` to your `Cargo.toml`.
+```toml
 [dependencies]
-rusty_lr = "1.6.1"
+rusty_lr = { version = "...", features = ["fxhash"] }
 ```
-`features=["fxhash"]` to replace `std::collections::HashMap` with [`FxHashMap`](https://github.com/rust-lang/rustc-hash)
 
-### Simple definition of CFG
+### Example
 ```rust
+// this define `EParser` struct
+// where `E` is the start symbol
 lr1! {
     // userdata type
     %userdata i32;
@@ -39,20 +53,21 @@ lr1! {
     %token space ' ';
 
     // conflict resolving
-    %left plus;
-    %left star;
+    %left [plus star]; // reduce first for token 'plus', 'star'
 
     // context-free grammars
-    WS0: space*;
+    Digit(char): [zero-nine]; // character set '0' to '9'
 
-    Digit(char): [zero-nine];
-
-    Number(i32): WS0 Digit+ WS0 { Digit.into_iter().collect::<String>().parse().unwrap() };
+    Number(i32) // type assigned to production rule `Number`
+        : space* Digit+ space* // regex pattern
+    { Digit.into_iter().collect::<String>().parse().unwrap() }; 
+    //    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ this will be the value of `Number`
+    // reduce action written in Rust code
 
     A(f32): A plus a2=A {
         *data += 1; // access userdata by `data`
         println!( "{:?} {:?} {:?}", A, plus, a2 );
-        A + a2 // this will be the new value of A
+        A + a2
     }
         | M
         ;
@@ -68,17 +83,56 @@ lr1! {
     E(f32) : A ;
 }
 ```
+```rust
+// generate `EParser`
+let parser = EParser::new();
+// create context
+let mut context = parser.begin();
+// define userdata
+let mut userdata: i32 = 0;
+
+let input_sequence = "1 + 2 * ( 3 + 4 )";
+
+// start feeding tokens
+for token in input_sequence.chars() {
+    match parser.feed(&mut context, token, &mut userdata) {
+        //                          ^^^^^   ^^^^^^^^^^^^ userdata passed here as `&mut i32`
+        //                           |- feed token
+        Ok(_) => {}
+        Err(e) => {
+            match e {
+                EParseError::InvalidTerminal(invalid_terminal) => {
+                    ...
+                }
+                EParseError::ReduceAction(error_from_reduce_action) => {
+                    ...
+                }
+            }
+            println!("{}", e);
+            // println!( "{}", e.long_message( &parser.rules, &parser.states, &context.state_stack ) );
+            return;
+        }
+    }
+}
+// feed `eof` token
+parser.feed(&mut context, '\0', &mut userdata).unwrap();
+
+// res = value of start symbol
+let res = context.accept();
+println!("{}", res);
+println!("userdata: {}", userdata);
+```
 
 ### Readable error messages (with [codespan](https://github.com/brendanzab/codespan))
 ![images/error1.png](images/error1.png)
-![images/error3.png](images/error3.png)
+![images/error2.png](images/error2.png)
 
 ## Contents
- - [syntax](#proc-macro-syntax)
- - [start parsing](#start-parsing)
- - [parse with callback](#parse-with-callback)
- - [using executable `rustylr`](#executable-rustylr)
- - [build DFA from CFG](#build-deterministic-finite-automata-dfa-from-context-free-grammar-cfg)
+ - [Proc-macro](#proc-macro)
+ - [Start Parsing](#start-parsing)
+ - [Error Handling](#error-handling)
+ - [Syntax](#syntax)
+ - [Executable `rustylr`](#executable-rustylr)
 
 ## Features
  - pure Rust implementation
@@ -86,32 +140,120 @@ lr1! {
  - compile-time DFA construction from CFGs
  - customizable reduce action
  - resolving conflicts of ambiguous grammar
- - tracing parser action with callback
  - regex patterns partially supported
- - executable for generating parser tables from CFGs
+ - executable for generating parser tables
 
-## Usage
-
- - [Calculator](example/calculator): calculator with enum `Token`
- - [Calculator u8](example/calculator_u8): calculator with `u8`
- - [Bootstrap](rusty_lr_parser/src/parser/parser.rs), [Expanded Bootstrap](rusty_lr_parser/src/parser/parser_expanded.rs): bootstrapped line parser of `lr1!` and `lalr1!` macro, written in RustyLR itself.
-
-
-## proc-macro syntax
-
+## proc-macro
 Below procedural macros are provided:
- - `lr1!`, `lalr1!`
+ - `lr1!` : LR(1) parser
+ - `lalr1!` : LALR(1) parser
 
-These macros will define three structs: `Parser`, `Context`, and `enum NonTerminals`, prefixed by `<StartSymbol>`.
-In most cases, what you want is the `Parser` struct, which contains the DFA states and `feed()` functions.
-Please refer to the [Start Parsing](#start-parsing) section below for actual usage of the `Parser` struct.
+These macros will generate structs:
+ - `Parser` : contains DFA tables and production rules
+ - `ParseError` : type alias for `Error` returned from `feed()`
+ - `Context` : contains current state and data stack
+ - `enum NonTerminals` : a list of non-terminal symbols
+ - `Rule` : type alias for production rules
+ - `State` : type alias for DFA states
 
-Those macros (those without '_runtime' suffix) will generate `Parser` struct at compile-time.
-The calculation of building DFA will be done at compile-time, and the generated code will be *TONS* of `insert` of tokens one by one.
+All structs above are prefixed by `<StartSymbol>`.
+In most cases, what you want is the `Parser` and `ParseError` structs, and the others are used internally.
+
+## Start Parsing
+The `Parser` struct has the following functions:
+ - `new()` : create new parser
+ - `begin(&self)` : create new context
+ - `feed(&self, &mut Context, TerminalType, &mut UserData) -> Result<(), ParseError>` : feed token to the parser
+
+Note that the parameter `&mut UserData` is omitted if [`%userdata`](#userdata-type-optional) is not defined.
+All you need to do is to call `new()` to generate the parser, and `begin()` to create a context.
+Then, you can feed the input sequence one by one with `feed()` function.
+Once the input sequence is feeded (including `eof` token), without errors,
+you can get the value of start symbol by calling `context.accept()`.
+
+```rust
+let parser = Parser::new();
+let context = parser.begin();
+for token in input_sequence {
+    match parser.feed(&context, token) {
+        Ok(_) => {}
+        Err(e) => { // e: ParseError
+            println!("{}", e);
+            return;
+        }
+    }
+}
+let start_symbol_value = context.accept();
+```
+
+## Error Handling
+There are two error variants returned from `feed()` function:
+ - `InvalidTerminal(InvalidTerminalError)` : when invalid terminal symbol is fed
+ - `ReduceAction(ReduceActionError)` : when the reduce action returns `Err(Error)`
+
+For `ReduceActionError`, the error type can be defined by [`%err`](#error-type-optional) directive. If not defined, `String` will be used.
+
+When printing the error message, there are two ways to get the error message:
+ - `e.long_message( &parser.rules, &parser.states, &context.state_stack )` : get the error message as `String`, in a detailed format
+ - `e as Display` : briefly print the short message through `Display` trait.
+
+The `long_message` function requires the reference to the parser's rules and states, and the context's state stack.
+It will make a detailed error message of what current state was trying to parse, and what the expected terminal symbols were.
+### Example of long_message
+```
+Invalid Terminal: *
+Expected one of:  , (, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+-------------------------------Backtracing state--------------------------------
+WS0 -> • _RustyLRGenerated0
+_RustyLRGenerated1 -> •  
+_RustyLRGenerated1 -> • _RustyLRGenerated1  
+_RustyLRGenerated0 -> • _RustyLRGenerated1
+_RustyLRGenerated0 ->  •
+Number -> • WS0 _RustyLRGenerated3 WS0
+M -> • M * M
+M -> M * • M
+M -> • P
+P -> • Number
+P -> • WS0 ( E ) WS0
+-----------------------------------Prev state-----------------------------------
+M -> M • * M
+-----------------------------------Prev state-----------------------------------
+A -> • A + A
+A -> A + • A
+A -> • M
+M -> • M * M
+-----------------------------------Prev state-----------------------------------
+A -> A • + A
+-----------------------------------Prev state-----------------------------------
+A -> • A + A
+E -> • A
+Augmented -> • E 
+```
+
+
+## Syntax
+To start writing down a context-free grammar, you need to define necessary directives first.
+This is the syntax of the procedural macros.
+
+```rust
+lr1! {
+// %directives
+// %directives
+// ...
+// %directives
+
+// NonTerminalSymbol(RuleType): ProductionRules
+// NonTerminalSymbol(RuleType): ProductionRules
+// ...
+}
+```
+
+`lr1!` macro will generate a parser struct with LR(1) DFA tables.
+If you want to generate LALR(1) parser, use `lalr1!` macro.
+Every line in the macro must follow the syntax below.
 
 [Bootstrap](rusty_lr_parser/src/parser/parser.rs), [Expanded Bootstrap](rusty_lr_parser/src/parser/parser_expanded.rs) would be a good example to understand the syntax and generated code. It is RustyLR syntax parser written in RustyLR itself.
 
-Every line in the macro must follow the syntax below.
 
 ### Token type <sub><sup>(must defined)</sup></sub>
 ```
@@ -547,139 +689,38 @@ match parser.feed( ... ) {
 
 </details>
 
+### Exclamation mark `!`
+An exclamation mark `!` can be used right after the token to ignore the value of the token.
+The token will be treated as if it is not holding any value.
 
-## Start Parsing
-`<StartSymbol>Parser` will be generated by the procedural macros.
+**Tip**
+When combining with repeatance pattern `*`, `+`, `?`, use `!` first.
+It can prevent `Vec<T>` built from the value of the token internally.
 
-The parser struct has the following functions:
- - `new()` : create new parser
- - `begin(&self)` : create new context
- - `feed(&self, &mut Context, TermType, &mut UserData) -> Result<(), ParseError>` : feed token to the parser
- - `feed_callback(&self, &mut Context, &mut C: Callback, TermType, &mut UserData) -> Result<(), ParseError>` : feed token with callback
-
-Note that the parameter `&mut UserData` is omitted if `%userdata` is not defined.
-Once the input sequence is feeded (including `eof` token), without errors, you can get the value of start symbol by calling `context.accept()`.
-
-```rust
-let parser = parser::EParser::new();
-// create context
-let mut context = parser.begin();
-// define userdata
-let mut userdata: i32 = 0;
-
-// start feeding tokens
-for token in input_sequence {
-    match parser.feed(&mut context, token, &mut userdata) {
-        //                          ^^^^^   ^^^^^^^^^^^^ userdata passed here as `&mut i32`
-        //                           |- feed token
-        Ok(_) => {}
-        Err(e) => {
-            println!("{}", e);
-            // println!( "{}", e.long_message() ); // for more detailed error message
-            return;
-        }
-    }
-}
-// res = value of start symbol
-let res = context.accept();
-println!("{}", res);
-println!("userdata: {}", userdata);
-```
-
-
-
-## Parse with callback
-
-For tracing parser action, you can implement `Callback` trait and pass it to `parser.feed_callback()`.
+<details>
+<summary>
+Example
+</summary>
 
 ```rust
-struct ParserCallback {}
+lr1! {
+%token plus ...;
 
-impl rusty_lr::Callback<Term, NonTerm> for ParserCallback {
-    /// Error type for callback
-    type Error = String;
+A(i32) : ... ;
 
-    fn reduce(
-        &mut self,
-        rules: &[rusty_lr::ProductionRule<Term, NonTerm>],
-        states: &[rusty_lr::State<Term, NonTerm>],
-        state_stack: &[usize],
-        rule: usize,
-    ) -> Result<(), Self::Error> {
-        // `Rule` is Display if Term, NonTerm is Display
-        println!("Reduce by {}", rules[rule]);
-        Ok(())
-    }
-    fn shift_and_goto(
-        &mut self,
-        rules: &[rusty_lr::ProductionRule<Term, NonTerm>],
-        states: &[rusty_lr::State<Term, NonTerm>],
-        state_stack: &[usize],
-        term: &Term,
-    ) -> Result<(), Self::Error> {
-        Ok(())
-    }
-    fn shift_and_goto_nonterm(
-        &mut self,
-        rules: &[rusty_lr::ProductionRule<Term, NonTerm>],
-        states: &[rusty_lr::State<Term, NonTerm>],
-        state_stack: &[usize],
-        nonterm: &NonTerm,
-    ) -> Result<(), Self::Error> {
-        Ok(())
-    }
+// A in the middle will be chosen, since other A's are ignored
+E(i32) : A! A A!;
+
+B: A*!; // Vec<i32> will be built from the value of A, and then ignored
+
+C: A!*; // A will be ignored first, and then repeatance pattern will be applied
 }
 ```
 
-Note that generic type `Term` and `NonTerm` must be replaced with actual types. `Term` must be same as `%tokentype`, and `NonTerm` must be `<StartSymbol>NonTerminals` generated by the procedural macro.
+</details>
 
-```rust
-// Num + Num * ( Num + Num )
-let terms = vec![ Term::Num, Term::Plus, Term::Num, Term::Mul, Term::LeftParen, Term::Num, Term::Plus, Term::Num, Term::RightParen, Term::Eof];
 
-// start parsing
-let mut context = parser.begin();
-let mut callback = ParserCallback {};
 
-// feed input sequence
-for term in terms {
-    match parser.feed_callback(&mut context, &mut callback, term) {
-        Ok(_) => (),
-        Err(err) => {
-            match err {
-                rusty_lr::ParseError::Callback(err) => {
-                    eprintln!("{}", err);
-                }
-                _ => {}
-            }
-            return;
-        }
-    }
-}
-```
-
-The result will be:
-```
-Reduce by P -> Num
-Reduce by M -> P
-Reduce by A -> M
-Reduce by P -> Num
-Reduce by M -> P
-Reduce by P -> Num
-Reduce by M -> P
-Reduce by A -> M
-Reduce by P -> Num
-Reduce by M -> P
-Reduce by A -> M
-Reduce by A -> A + A
-Reduce by E -> A
-Reduce by P -> ( E )
-Reduce by M -> P
-Reduce by M -> M * M
-Reduce by A -> M
-Reduce by A -> A + A
-Reduce by E -> A
-```
 
 
 
@@ -694,16 +735,16 @@ cargo install rustylr
 
 This executable will provide much more detailed, pretty-printed error messages than the procedural macros.
 If you are writing a huge, complex grammar, it is recommended to use this executable than the procedural macros.
-`--verbose` option is useful for debugging the grammar. It will print the auto-generated rules and the resolving process of shift/reduce conflicts. [like](images/example1.png) [this](images/example2.png)
+`--verbose` option is useful for debugging the grammar. It will print where the auto-generated rules are originated from and the resolving process of shift/reduce conflicts. [like](images/example1.png) [this](images/example2.png)
 
 Although it is convenient to use the proc-macros for small grammars,
 since modern IDEs feature (rust-analyzer's auto completion, inline error messages) could be enabled.
 
-This program searches for `%%` in the input file.
+This program searches for `%%` in the input file. ( Not the `lr1!`, `lalr1!` macro )
 
 The contents before `%%` will be copied into the output file as it is.
 Context-free grammar must be followed by `%%`.
-Each line must follow the syntax of [rusty_lr#syntax](#proc-macro-syntax).
+Each line must follow the syntax of [rusty_lr#syntax](#syntax)
 
 ```rust
 // my_grammar.rs
@@ -734,10 +775,11 @@ P: a;
 
 Calling the command will generate a Rust code `my_parser.rs`.
 ```
-$ rustylr my_grammar.rs my_parser.rs
+$ rustylr my_grammar.rs my_parser.rs --verbose
 ```
 
 
+Possible options can be found by `--help`.
 ```
 $ rustylr --help
 Usage: rustylr [OPTIONS] <INPUT_FILE> [OUTPUT_FILE]
@@ -764,147 +806,3 @@ Options:
           print the auto-generated rules, and where they are originated from.
           print the shift/reduce conflicts, and the resolving process.
 ```
-
-
-
-## Build Deterministic Finite Automata (DFA) from Context Free Grammar (CFG)
-This section will describe about the core library, how to build DFA from CFGs, on runtime.
-<details>
-<summary>
-Click to expand
-</summary>
-
-### 1. Define terminal and non-terminal symbols
-
-```rust
-#[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)] // must implement these traits
-pub enum Term {
-    Num,
-    Plus,
-    Mul,
-    LeftParen,
-    RightParen,
-    Eof,
-}
-
-#[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)] // must implement these traits
-pub enum NonTerm {
-    E,
-    A,
-    M,
-    P,
-    Augmented,
-}
-
-/// impl Display for TermType, NonTermType will make related ProductionRule, error message Display-able
-impl Display for TermType { ... }
-impl Display for NonTermType { ... }
-```
-Or simply, you can use `char` or `u8` as terminal, and `&'static str` or `String` as non-terminal.
-***Any type*** that implements traits above can be used as terminal and non-terminal symbols.
-
-### 2. Define production rules
-Consider the following context free grammar.
-```
-A -> A + A  (reduce left)
-A -> M
-```
-This grammar can be written as:
-```rust
-/// type alias
-type Token = rusty_lr::Token<Term, NonTerm>;
-
-/// create grammar
-let mut grammar = rusty_lr::Grammar::<Term,NonTerm>::new();
-
-grammar.add_rule(
-    NonTerm::A,
-    vec![Token::NonTerm(NonTerm::A), Token::Term(Term::Plus), Token::NonTerm(NonTerm::A)],
-);
-grammar.add_rule(
-    NonTerm::A,
-    vec![Token::NonTerm(NonTerm::M)],
-);
-
-/// set reduce type
-grammar.set_reduce_type( Term::Plus, ReduceType::Left );
-```
-
-Note that the production rule `A -> A + A` has a shift/reduce conflict. To resolve this conflict, the precedence of shift/reduce is given to terminal symbol `Plus`. `Left` means that for `Plus` token, the parser will reduce the rule instead of shifting the token.
-
-reduce/reduce conflict (e.g. duplicated rules) will be always an error.
-
-### 3. Build DFA
-Calling `grammar.build()` for LR(1) or `grammar.build_lalr()` for LALR(1) will build the DFA from the CFGs.
-
-```rust
-let parser:rusty_lr::Parser<Term,NonTerm> = match grammar.build(NonTerm::Augmented) {
-    Ok(parser) => parser,
-    Err(err) => {
-        // error is Display if Term, NonTerm is Display
-        eprintln!("{}", err);
-        return;
-    }
-};
-```
-
-You must explicitly specify the Augmented non-terminal symbol, and the Augmented production rule must be defined in the grammar.
-```
-Augmented -> StartSymbol $
-```
-
-The returned `Parser` struct contains the DFA states and the production rules(cloned).
-It is completely independent from the `Grammar`, so you can drop the `Grammar` struct, or export the `Parser` struct to another module.
-
-### 4. Error messages
-The `Error` type returned from `Grammar::build()` will contain the error information.
-You can manually `match` the error type for custom error message,
-but for most cases, using `println!("{}", err)` will be enough to see the detailed errors.
-Error is `Display` if both `Term` and `NonTerm` is `Display`, and It is `Debug` if both `Term` and `NonTerm` is `Debug`.
-
-#### Sample error messages
-For Shift/Reduce conflicts,
-```
-Build failed: Shift/Reduce Conflict
-NextTerm: '0'
-Reduce Rule:
-"Num" -> "Digit"
-Shift Rules:
-"Digit" -> '0' • /Lookaheads: '\0', '0'
-Try rearanging the rules or set ReduceType to Terminal '0' to resolve the conflict.
-```
-For Reduce/Reduce conflicts,
-```
-Build failed: Reduce/Reduce Conflict with lookahead: '\0'
-Production Rule1:
-"Num" -> "Digit"
-Production Rule2:
-"Num" -> "Digit"
-```
-
-## Parse input sequence with generated DFA
-For given input sequence, you can start parsing with `Parser::begin()` method.
-Once you get the `Context` from `begin()`,
-you can feed the input sequence one by one with `Parser::feed()` method.
-
-```rust
-let terms = vec![ Term::Num, Term::Plus, Term::Num, Term::Mul, Term::LeftParen, Term::Num, Term::Plus, Term::Num, Term::RightParen, Term::Eof];
-
-// start parsing
-let mut context = parser.begin();
-
-// feed input sequence
-for term in terms {
-    match parser.feed(&mut context, term) {
-        Ok(_) => (),
-        Err(err) => {
-            eprintln!("{:?}", err);
-            return;
-        }
-    }
-}
-```
-
-`EOF` token is feeded at the end of sequence, and the augmented rule `Augmented -> StartSymbol $` will not be reduced since there are no lookahead symbols.
-
-</details>
