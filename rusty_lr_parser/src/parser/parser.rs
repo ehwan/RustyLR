@@ -47,12 +47,12 @@ use rusty_lr_core::ReduceType;
 %token bracketgroup Lexed::BracketGroup(None);
 %token nonegroup Lexed::NoneGroup(None);
 
-%token lparen Lexed::LParen(None);
-%token rparen Lexed::RParen(None);
-%token lbrace Lexed::LBrace(None);
-%token rbrace Lexed::RBrace(None);
-%token lbracket Lexed::LBracket(None);
-%token rbracket Lexed::RBracket(None);
+%token lparen Lexed::LParen(Span::call_site());
+%token rparen Lexed::RParen(Span::call_site());
+%token lbrace Lexed::LBrace(Span::call_site());
+%token rbrace Lexed::RBrace(Span::call_site());
+%token lbracket Lexed::LBracket(Span::call_site());
+%token rbracket Lexed::RBracket(Span::call_site());
 
 %token left Lexed::Left(None);
 %token right Lexed::Right(None);
@@ -162,12 +162,12 @@ TerminalSetItem(TerminalSetItem): ident {
 
 TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
     let open_span = if let Lexed::LBracket(lbracket) = lbracket {
-        lbracket.unwrap()
+        lbracket
     } else {
         unreachable!( "TerminalSet-Open" );
     };
     let close_span = if let Lexed::RBracket(rbracket) = rbracket {
-        rbracket.unwrap()
+        rbracket
     } else {
         unreachable!( "TerminalSet-Close" );
     };
@@ -259,11 +259,11 @@ StartDef(Ident): start ident semicolon {
     }
 }
 ;
-EofDef((Span,TokenStream)): eofdef RustCode semicolon { (eofdef.span().unwrap(), RustCode) }
+EofDef((Span,TokenStream)): eofdef RustCode semicolon { (eofdef.span(), RustCode) }
 ;
-TokenTypeDef((Span,TokenStream)): tokentype RustCode semicolon { (tokentype.span().unwrap(), RustCode) }
+TokenTypeDef((Span,TokenStream)): tokentype RustCode semicolon { (tokentype.span(), RustCode) }
 ;
-UserDataDef((Span,TokenStream)): userdata RustCode semicolon { (userdata.span().unwrap(),RustCode) }
+UserDataDef((Span,TokenStream)): userdata RustCode semicolon { (userdata.span(),RustCode) }
 ;
 
 ReduceType(ReduceType): left { ReduceType::Left }
@@ -282,10 +282,10 @@ ReduceDef((ReduceTypeArgs, ReduceType)): reducetype=ReduceType ident semicolon {
 }
 ;
 
-ErrorDef((Span,TokenStream)): errortype RustCode semicolon { (errortype.span().unwrap(), RustCode) }
+ErrorDef((Span,TokenStream)): errortype RustCode semicolon { (errortype.span(), RustCode) }
 ;
 
-ModulePrefixDef((Span,TokenStream)): moduleprefix RustCode semicolon { (moduleprefix.span().unwrap(), RustCode) };
+ModulePrefixDef((Span,TokenStream)): moduleprefix RustCode semicolon { (moduleprefix.span(), RustCode) };
 
 Grammar(GrammarArgs): Grammar Rule {
     Grammar.rules.push( Rule );

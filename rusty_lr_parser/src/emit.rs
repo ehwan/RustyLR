@@ -23,27 +23,27 @@ impl Grammar {
     fn emit_type_alises(&self) -> TokenStream {
         let module_prefix = &self.module_prefix;
         let start_rule_name = &self.start_rule_name;
-        let production_rule = format_ident!("{}Rule", start_rule_name);
-        let state = format_ident!("{}State", start_rule_name);
-        let token_name = &self.token_typename;
+        let rule_typename = format_ident!("{}Rule", start_rule_name);
+        let state_typename = format_ident!("{}State", start_rule_name);
+        let token_typename = &self.token_typename;
         let enum_name = utils::generate_enum_name(start_rule_name);
-        let error_typename = &self.error_typename;
-        let error_name = format_ident!("{}ParseError", start_rule_name);
+        let reduce_error_typename = &self.error_typename;
+        let parse_error_typename = format_ident!("{}ParseError", start_rule_name);
         let invalid_terminal_error = format_ident!("{}InvalidTerminalError", start_rule_name);
 
         quote! {
             /// type alias for CFG production rule
             #[allow(non_camel_case_types,dead_code)]
-            pub type #production_rule = #module_prefix::ProductionRule<#token_name, #enum_name>;
+            pub type #rule_typename = #module_prefix::ProductionRule<#token_typename, #enum_name>;
             /// type alias for DFA state
             #[allow(non_camel_case_types,dead_code)]
-            pub type #state = #module_prefix::State<#token_name, #enum_name>;
+            pub type #state_typename = #module_prefix::State<#token_typename, #enum_name>;
             /// type alias for `ParseError`
             #[allow(non_camel_case_types,dead_code)]
-            pub type #error_name = #module_prefix::ParseError<#token_name, #error_typename>;
+            pub type #parse_error_typename = #module_prefix::ParseError<#token_typename, #reduce_error_typename>;
             /// type alias for `InvalidTerminalError`
             #[allow(non_camel_case_types,dead_code)]
-            pub type #invalid_terminal_error = #module_prefix::InvalidTerminalError<#token_name>;
+            pub type #invalid_terminal_error = #module_prefix::InvalidTerminalError<#token_typename>;
         }
     }
 
@@ -54,7 +54,7 @@ impl Grammar {
         // =====================================================================
 
         let start_rule_name = &self.start_rule_name;
-        let enum_name = utils::generate_enum_name(start_rule_name);
+        let enum_typename = utils::generate_enum_name(start_rule_name);
 
         let mut comma_separated_variants = TokenStream::new();
         let mut case_display = TokenStream::new();
@@ -65,7 +65,7 @@ impl Grammar {
 
             let name_str = name.to_string();
             case_display.extend(quote! {
-                #enum_name::#name=> write!(f, #name_str),
+                #enum_typename::#name=> write!(f, #name_str),
             });
         }
 
@@ -73,11 +73,11 @@ impl Grammar {
             /// An enum that represents non-terminal symbols
             #[allow(non_camel_case_types)]
             #[derive(Debug, Clone, Copy, std::hash::Hash, std::cmp::PartialEq, std::cmp::Eq, std::cmp::PartialOrd, std::cmp::Ord)]
-            pub enum #enum_name {
+            pub enum #enum_typename {
                 #comma_separated_variants
             }
 
-            impl std::fmt::Display for #enum_name {
+            impl std::fmt::Display for #enum_typename {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                     match self {
                         #case_display
@@ -139,8 +139,8 @@ impl Grammar {
         };
 
         let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
-        let production_rule_name = format_ident!("{}Rule", &self.start_rule_name);
-        let state_name = format_ident!("{}State", &self.start_rule_name);
+        let rule_typename = format_ident!("{}Rule", &self.start_rule_name);
+        let state_typename = format_ident!("{}State", &self.start_rule_name);
 
         // generate code that copy rules and states to parser
         // =====================================================================
@@ -165,7 +165,7 @@ impl Grammar {
 
             let nonterm = &rule.name;
             comma_separated_rules.extend(quote! {
-                #production_rule_name {
+                #rule_typename {
                     name: #nonterminals_enum_name::#nonterm,
                     rule: vec![#comma_separated_tokens],
                 },
@@ -190,10 +190,10 @@ impl Grammar {
         {
             // this write closure that convert (rule_id, shifted) pair to ShiftedRuleRef
             // to shorten the emitted code
-            let term_typename = &self.token_typename;
+            let token_typename = &self.token_typename;
             write_states.extend(
             quote!{
-                let pair_to_rule = |(rule, shifted):(usize,usize)| -> (#module_prefix::ShiftedRuleRef, std::collections::BTreeSet<#term_typename>) {
+                let pair_to_rule = |(rule, shifted):(usize,usize)| -> (#module_prefix::ShiftedRuleRef, std::collections::BTreeSet<#token_typename>) {
                     (
                         #module_prefix::ShiftedRuleRef {
                             rule,
@@ -342,7 +342,7 @@ impl Grammar {
                             )
                         ),
                     };
-                    let state = #state_name {
+                    let state = #state_typename {
                         shift_goto_map_term,
                         shift_goto_map_nonterm,
                         reduce_map,
@@ -370,7 +370,7 @@ impl Grammar {
         // =====================================================================
 
         // error typename from '%error'
-        let error_typename = &self.error_typename;
+        let reduce_error_typename = &self.error_typename;
 
         // TokenStream for userdata parameter definition, if defined
         let user_data_parameter_name =
@@ -389,7 +389,7 @@ impl Grammar {
         let mut case_streams = quote! {};
         // stack for end index of each rule in term stack
         let terms_stack_name = Ident::new(utils::TERMINAL_STACK_NAME, Span::call_site());
-        let term_typename = &self.token_typename;
+        let token_typename = &self.token_typename;
 
         // TokenStream to define reduce function for each production rule
         let mut fn_reduce_for_each_rule_stream = TokenStream::new();
@@ -434,7 +434,7 @@ impl Grammar {
                     // typename is defined, reduce action must be defined
                     if let Some(action) = &rule.reduce_action {
                         fn_reduce_for_each_rule_stream.extend(quote! {
-                            fn #reduce_fn_ident(&mut self, #user_data_parameter_def) -> Result<(), #error_typename> {
+                            fn #reduce_fn_ident(&mut self, #user_data_parameter_def) -> Result<(), #reduce_error_typename> {
                                 #token_pop_stream
                                 self.#stack_name.push(#action);
                                 Ok(())
@@ -460,7 +460,7 @@ impl Grammar {
                         }
                         if let Some(unique_mapto) = unique_mapto {
                             fn_reduce_for_each_rule_stream.extend(quote! {
-                                fn #reduce_fn_ident(&mut self, #user_data_parameter_def) -> Result<(), #error_typename> {
+                                fn #reduce_fn_ident(&mut self, #user_data_parameter_def) -> Result<(), #reduce_error_typename> {
                                     #token_pop_stream
                                     self.#stack_name.push(#unique_mapto);
                                     Ok(())
@@ -478,7 +478,7 @@ impl Grammar {
                     // just execute action
                     if let Some(action) = &rule.reduce_action {
                         fn_reduce_for_each_rule_stream.extend(quote! {
-                            fn #reduce_fn_ident(&mut self, #user_data_parameter_def) -> Result<(), #error_typename> {
+                            fn #reduce_fn_ident(&mut self, #user_data_parameter_def) -> Result<(), #reduce_error_typename> {
                                 #token_pop_stream
                                 #action
                                 Ok(())
@@ -486,7 +486,7 @@ impl Grammar {
                         });
                     } else {
                         fn_reduce_for_each_rule_stream.extend(quote! {
-                            fn #reduce_fn_ident(&mut self, #user_data_parameter_def) -> Result<(), #error_typename> {
+                            fn #reduce_fn_ident(&mut self, #user_data_parameter_def) -> Result<(), #reduce_error_typename> {
                                 #token_pop_stream
                                 Ok(())
                             }
@@ -537,9 +537,10 @@ impl Grammar {
         let mut stack_struct_name = format_ident!("{}Context", start_rule_name);
         stack_struct_name.set_span(start_rule_name.span());
 
-        let production_rule_name = format_ident!("{}Rule", start_rule_name);
-        let state_name = format_ident!("{}State", start_rule_name);
-        let error_name = format_ident!("{}ParseError", start_rule_name);
+        let rule_typename = format_ident!("{}Rule", start_rule_name);
+        let state_typename = format_ident!("{}State", start_rule_name);
+        let parseerror_typename = format_ident!("{}ParseError", start_rule_name);
+        let invalid_terminal_error = format_ident!("{}InvalidTerminalError", start_rule_name);
 
         Ok(quote! {
         /// struct that holds internal parser data, for reduce action and state transition
@@ -547,7 +548,7 @@ impl Grammar {
         pub struct #stack_struct_name {
             /// state stack, user must not modify this
             pub state_stack: Vec<usize>,
-            #terms_stack_name: Vec<#term_typename>,
+            #terms_stack_name: Vec<#token_typename>,
             #stack_def_streams
         }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
@@ -567,7 +568,7 @@ impl Grammar {
                 rulelen: usize,
                 rustylr_macro_generated_ruleid__: usize,
                 #user_data_parameter_def
-            ) -> Result<(), #error_typename> {
+            ) -> Result<(), #reduce_error_typename> {
                 match rustylr_macro_generated_ruleid__ {
                     #case_streams
                     _ => {
@@ -583,11 +584,11 @@ impl Grammar {
             }
 
             /// push terminal symbol to stack, this function is called automatically by parser
-            pub fn push( &mut self, term: #term_typename ) {
+            pub fn push( &mut self, term: #token_typename ) {
                 self.#terms_stack_name.push(term);
             }
         }
-        impl #module_prefix::GetContext<#term_typename, #nonterminals_enum_name> for #stack_struct_name {
+        impl #module_prefix::GetContext<#token_typename, #nonterminals_enum_name> for #stack_struct_name {
             fn get_state_stack(&self) -> &[usize] {
                 &self.state_stack
             }
@@ -597,9 +598,9 @@ impl Grammar {
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         pub struct #struct_name {
             /// production rules
-            pub rules: Vec<#production_rule_name>,
+            pub rules: Vec<#rule_typename>,
             /// states
-            pub states: Vec<#state_name>,
+            pub states: Vec<#state_typename>,
         }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         impl #struct_name {
@@ -615,9 +616,9 @@ impl Grammar {
             fn lookahead(
                 &self,
                 context: &mut #stack_struct_name,
-                term: &#term_typename,
+                term: &#token_typename,
                 #user_data_parameter_def
-            ) -> Result<(), #error_name> {
+            ) -> Result<(), #parseerror_typename> {
                 // fetch state from state stack
                 let state = &self.states[*context.state_stack.last().unwrap()];
 
@@ -634,7 +635,7 @@ impl Grammar {
                         self.rules[reduce_rule].rule.len(),
                         reduce_rule,
                         #user_data_var
-                    ).map_err(#module_prefix::ParseError::ReduceAction)?;
+                    ).map_err(#parseerror_typename::ReduceAction)?;
 
 
                     // feed reduced token
@@ -649,9 +650,9 @@ impl Grammar {
             pub fn feed(
                 &self,
                 context: &mut #stack_struct_name,
-                term: #term_typename,
+                term: #token_typename,
                 #user_data_parameter_def
-            ) -> Result<(), #error_name> {
+            ) -> Result<(), #parseerror_typename> {
                 // reduce if possible
                 self.lookahead(context, &term, #user_data_var)?;
 
@@ -667,11 +668,11 @@ impl Grammar {
 
                     Ok(())
                 }else {
-                    let error = #module_prefix::InvalidTerminalError {
+                    let error = #invalid_terminal_error {
                         term,
                         expected: state.expected().into_iter().cloned().collect(),
                     };
-                    Err(#module_prefix::ParseError::InvalidTerminal(error))
+                    Err(#parseerror_typename::InvalidTerminal(error))
                 }
             }
 
@@ -680,7 +681,7 @@ impl Grammar {
                 &self,
                 context: &mut #stack_struct_name,
                 nonterm: &#nonterminals_enum_name,
-            ) -> Result<(), #error_name> {
+            ) -> Result<(), #parseerror_typename> {
                 // fetch state from state stack
                 let state = &self.states[*context.state_stack.last().unwrap()];
 
@@ -699,11 +700,11 @@ impl Grammar {
             }
         }
 
-        impl #module_prefix::GetParser<#term_typename, #nonterminals_enum_name> for #struct_name {
-            fn get_rules(&self) -> &[#production_rule_name] {
+        impl #module_prefix::GetParser<#token_typename, #nonterminals_enum_name> for #struct_name {
+            fn get_rules(&self) -> &[#rule_typename] {
                 &self.rules
             }
-            fn get_states(&self) -> &[#state_name] {
+            fn get_states(&self) -> &[#state_typename] {
                 &self.states
             }
         }

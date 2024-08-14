@@ -35,12 +35,12 @@ pub enum Lexed {
     BraceGroup(Option<Group>),
     BracketGroup(Option<Group>),
     NoneGroup(Option<Group>),
-    LParen(Option<Span>),
-    RParen(Option<Span>),
-    LBrace(Option<Span>),
-    RBrace(Option<Span>),
-    LBracket(Option<Span>),
-    RBracket(Option<Span>),
+    LParen(Span),
+    RParen(Span),
+    LBrace(Span),
+    RBrace(Span),
+    LBracket(Span),
+    RBracket(Span),
 
     Left(Option<(Punct, Ident)>),         // %left, %l, %reduce
     Right(Option<(Punct, Ident)>),        // %right, %r, %shift
@@ -124,45 +124,45 @@ impl Lexed {
         }
     }
     #[allow(unused_variables)]
-    pub fn span(&self) -> Option<Span> {
+    pub fn span(&self) -> Span {
         match self {
-            Lexed::Ident(ident) => ident.as_ref().map(|i| i.span()),
-            Lexed::Colon(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::Semicolon(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::Pipe(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::Percent(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::Literal(lit) => lit.as_ref().map(|l| l.span()),
-            Lexed::Equal(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::Plus(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::Star(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::Question(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::Caret(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::Minus(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::Exclamation(punct) => punct.as_ref().map(|p| p.span()),
-            Lexed::OtherPunct(punct) => punct.as_ref().map(|p| p.span()),
+            Lexed::Ident(ident) => ident.as_ref().unwrap().span(),
+            Lexed::Colon(punct) => punct.as_ref().unwrap().span(),
+            Lexed::Semicolon(punct) => punct.as_ref().unwrap().span(),
+            Lexed::Pipe(punct) => punct.as_ref().unwrap().span(),
+            Lexed::Percent(punct) => punct.as_ref().unwrap().span(),
+            Lexed::Literal(lit) => lit.as_ref().unwrap().span(),
+            Lexed::Equal(punct) => punct.as_ref().unwrap().span(),
+            Lexed::Plus(punct) => punct.as_ref().unwrap().span(),
+            Lexed::Star(punct) => punct.as_ref().unwrap().span(),
+            Lexed::Question(punct) => punct.as_ref().unwrap().span(),
+            Lexed::Caret(punct) => punct.as_ref().unwrap().span(),
+            Lexed::Minus(punct) => punct.as_ref().unwrap().span(),
+            Lexed::Exclamation(punct) => punct.as_ref().unwrap().span(),
+            Lexed::OtherPunct(punct) => punct.as_ref().unwrap().span(),
 
-            Lexed::ParenGroup(group) => group.as_ref().map(|g| g.span()),
-            Lexed::BraceGroup(group) => group.as_ref().map(|g| g.span()),
-            Lexed::BracketGroup(group) => group.as_ref().map(|g| g.span()),
-            Lexed::NoneGroup(group) => group.as_ref().map(|g| g.span()),
-            Lexed::LParen(span) => span.as_ref().map(|s| *s),
-            Lexed::RParen(span) => span.as_ref().map(|s| *s),
-            Lexed::LBrace(span) => span.as_ref().map(|s| *s),
-            Lexed::RBrace(span) => span.as_ref().map(|s| *s),
-            Lexed::LBracket(span) => span.as_ref().map(|s| *s),
-            Lexed::RBracket(span) => span.as_ref().map(|s| *s),
+            Lexed::ParenGroup(group) => group.as_ref().unwrap().span(),
+            Lexed::BraceGroup(group) => group.as_ref().unwrap().span(),
+            Lexed::BracketGroup(group) => group.as_ref().unwrap().span(),
+            Lexed::NoneGroup(group) => group.as_ref().unwrap().span(),
+            Lexed::LParen(span) => *span,
+            Lexed::RParen(span) => *span,
+            Lexed::LBrace(span) => *span,
+            Lexed::RBrace(span) => *span,
+            Lexed::LBracket(span) => *span,
+            Lexed::RBracket(span) => *span,
 
-            Lexed::Left(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
-            Lexed::Right(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
-            Lexed::Token(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
-            Lexed::Start(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
-            Lexed::EofDef(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
-            Lexed::TokenType(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
-            Lexed::UserData(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
-            Lexed::ErrorType(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
-            Lexed::ModulePrefix(punct_ident) => punct_ident.as_ref().map(|(p, i)| i.span()),
+            Lexed::Left(punct_ident) => punct_ident.as_ref().unwrap().1.span(),
+            Lexed::Right(punct_ident) => punct_ident.as_ref().unwrap().1.span(),
+            Lexed::Token(punct_ident) => punct_ident.as_ref().unwrap().1.span(),
+            Lexed::Start(punct_ident) => punct_ident.as_ref().unwrap().1.span(),
+            Lexed::EofDef(punct_ident) => punct_ident.as_ref().unwrap().1.span(),
+            Lexed::TokenType(punct_ident) => punct_ident.as_ref().unwrap().1.span(),
+            Lexed::UserData(punct_ident) => punct_ident.as_ref().unwrap().1.span(),
+            Lexed::ErrorType(punct_ident) => punct_ident.as_ref().unwrap().1.span(),
+            Lexed::ModulePrefix(punct_ident) => punct_ident.as_ref().unwrap().1.span(),
 
-            Lexed::Eof => None,
+            Lexed::Eof => Span::call_site(),
         }
     }
 }
@@ -306,19 +306,19 @@ pub fn feed_recursive(
             Ok(_) => {}
             Err(e) => match l0 {
                 Lexed::ParenGroup(Some(group)) => {
-                    parser.feed(context, Lexed::LParen(Some(group.span_open())))?;
+                    parser.feed(context, Lexed::LParen(group.span_open()))?;
                     feed_recursive(group.stream(), parser, context)?;
-                    parser.feed(context, Lexed::RParen(Some(group.span_close())))?;
+                    parser.feed(context, Lexed::RParen(group.span_close()))?;
                 }
                 Lexed::BraceGroup(Some(group)) => {
-                    parser.feed(context, Lexed::LBrace(Some(group.span_open())))?;
+                    parser.feed(context, Lexed::LBrace(group.span_open()))?;
                     feed_recursive(group.stream(), parser, context)?;
-                    parser.feed(context, Lexed::RBrace(Some(group.span_close())))?;
+                    parser.feed(context, Lexed::RBrace(group.span_close()))?;
                 }
                 Lexed::BracketGroup(Some(group)) => {
-                    parser.feed(context, Lexed::LBracket(Some(group.span_open())))?;
+                    parser.feed(context, Lexed::LBracket(group.span_open()))?;
                     feed_recursive(group.stream(), parser, context)?;
-                    parser.feed(context, Lexed::RBracket(Some(group.span_close())))?;
+                    parser.feed(context, Lexed::RBracket(group.span_close()))?;
                 }
                 Lexed::NoneGroup(Some(group)) => {
                     feed_recursive(group.stream(), parser, context)?;
