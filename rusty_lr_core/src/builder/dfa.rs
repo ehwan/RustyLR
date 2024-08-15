@@ -1,6 +1,6 @@
 use std::vec::Vec;
 
-use crate::state::State;
+use super::state::State;
 
 /// struct for Deterministic Finite Automaton (DFA).
 ///

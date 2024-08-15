@@ -141,7 +141,6 @@ impl Grammar {
         let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
         let rule_typename = format_ident!("{}Rule", &self.start_rule_name);
         let state_typename = format_ident!("{}State", &self.start_rule_name);
-        let token_typename = &self.token_typename;
 
         let write_macros = quote! {
             /// macro for generating new state and push to states Vec
@@ -167,21 +166,16 @@ impl Grammar {
                 [$($pairs:expr,)*] => {
                     {
                         let rule_shifted_pairs = vec![ $($pairs),* ];
-                        #module_prefix::LookaheadRuleRefSet {
-                            rules: std::collections::BTreeMap::from_iter(
-                                rule_shifted_pairs.into_iter().map(
-                                    |(rule, shifted):(usize,usize)| -> (#module_prefix::ShiftedRuleRef, std::collections::BTreeSet<#token_typename>) {
-                                        (
-                                            #module_prefix::ShiftedRuleRef {
-                                                rule,
-                                                shifted,
-                                            },
-                                            Default::default()
-                                        )
-                                    }
-                                ),
+                        std::collections::BTreeSet::from_iter(
+                            rule_shifted_pairs.into_iter().map(
+                                |(rule, shifted):(usize,usize)| -> #module_prefix::ShiftedRuleRef {
+                                        #module_prefix::ShiftedRuleRef {
+                                            rule,
+                                            shifted,
+                                        }
+                                }
                             ),
-                        }
+                        )
                     }
                 }
             }

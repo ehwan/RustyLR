@@ -1210,7 +1210,7 @@ impl GrammarParser {
         #[doc = r" macro for extending reduce_map with terminals in `terminals` to `ruleid`"]
         macro_rules ! __rustylr_generated_extend_reduce_map { { $ reduce_map : ident , $ ruleid : literal , $ terminals : ident } => { for term in $ terminals . iter () { $ reduce_map . insert (term . clone () , $ ruleid) ; } } }
         #[doc = r" make new LookaheadRuleRefSet with pairs of (ruleid, shifted)"]
-        macro_rules ! __rustylr_generated_ruleset { [$ ($ pairs : expr ,) *] => { { let rule_shifted_pairs = vec ! [$ ($ pairs) , *] ; :: rusty_lr_core :: LookaheadRuleRefSet { rules : std :: collections :: BTreeMap :: from_iter (rule_shifted_pairs . into_iter () . map (| (rule , shifted) : (usize , usize) | -> (:: rusty_lr_core :: ShiftedRuleRef , std :: collections :: BTreeSet < Lexed >) { (:: rusty_lr_core :: ShiftedRuleRef { rule , shifted , } , Default :: default ()) }) ,) , } } } }
+        macro_rules ! __rustylr_generated_ruleset { [$ ($ pairs : expr ,) *] => { { let rule_shifted_pairs = vec ! [$ ($ pairs) , *] ; std :: collections :: BTreeSet :: from_iter (rule_shifted_pairs . into_iter () . map (| (rule , shifted) : (usize , usize) | -> :: rusty_lr_core :: ShiftedRuleRef { :: rusty_lr_core :: ShiftedRuleRef { rule , shifted , } }) ,) } } }
         let rules = vec![
             GrammarRule {
                 name: GrammarNonTerminals::Rule,

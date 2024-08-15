@@ -49,7 +49,7 @@ impl<Term> InvalidTerminalError<Term> {
         let mut backtrace = Vec::with_capacity(state_stack.len());
 
         let state = &states[*state_stack.last().unwrap()];
-        let mut cur_rules: BTreeSet<ShiftedRuleRef> = state.ruleset.rules.keys().copied().collect();
+        let mut cur_rules = state.ruleset.clone();
         for prev_state in state_stack.iter().rev().skip(1) {
             backtrace.push(cur_rules.clone());
 
@@ -73,7 +73,7 @@ impl<Term> InvalidTerminalError<Term> {
                     // it must be added by other rule start with this rule's non-terminal
                     if r.shifted == 0 {
                         let rule_name = &rules[r.rule].name;
-                        for (rule, _) in states[*prev_state].ruleset.rules.iter() {
+                        for rule in states[*prev_state].ruleset.iter() {
                             if let Some(Token::NonTerm(next_token)) =
                                 rules[rule.rule].rule.get(rule.shifted)
                             {

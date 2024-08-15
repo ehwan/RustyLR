@@ -1,8 +1,9 @@
+use std::collections::BTreeSet;
 use std::fmt::Display;
 use std::hash::Hash;
 
 use super::hashmap::{HashMap, HashSet};
-use super::rule::LookaheadRuleRefSet;
+use super::rule::ShiftedRuleRef;
 
 /// state in DFA
 #[derive(Debug, Clone)]
@@ -10,7 +11,7 @@ pub struct State<Term, NonTerm> {
     pub shift_goto_map_term: HashMap<Term, usize>,
     pub shift_goto_map_nonterm: HashMap<NonTerm, usize>,
     pub reduce_map: HashMap<Term, usize>,
-    pub ruleset: LookaheadRuleRefSet<Term>,
+    pub ruleset: BTreeSet<ShiftedRuleRef>,
 }
 impl<Term, NonTerm> State<Term, NonTerm> {
     pub fn new() -> Self {
@@ -18,7 +19,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
             shift_goto_map_term: Default::default(),
             shift_goto_map_nonterm: Default::default(),
             reduce_map: Default::default(),
-            ruleset: LookaheadRuleRefSet::new(),
+            ruleset: Default::default(),
         }
     }
 

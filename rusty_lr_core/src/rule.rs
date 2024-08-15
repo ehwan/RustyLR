@@ -66,7 +66,9 @@ impl<Term: Debug, NonTerm: Debug> Debug for ProductionRule<Term, NonTerm> {
 /// and it will be used for Eq, Ord, Hash
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy, Default)]
 pub struct ShiftedRuleRef {
+    /// index of the rule in `rules`
     pub rule: usize,
+    /// shifted index
     pub shifted: usize,
 }
 

@@ -6,9 +6,9 @@ use std::vec::Vec;
 
 use super::dfa::DFA;
 use super::error::BuildError;
+use super::state::State;
 use crate::hashmap::HashMap;
 use crate::rule::*;
-use crate::state::State;
 use crate::token::Token;
 
 /// A struct for Context Free Grammar and DFA construction
