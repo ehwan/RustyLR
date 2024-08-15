@@ -379,6 +379,40 @@ impl Grammar {
 
         let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
 
+        // stack_name for each non-terminal
+        let mut stack_names_by_nonterm = rusty_lr_core::HashMap::default();
+        // (stack_name, TokenStream for typename) sorted in rule insertion order
+        // for consistent output
+        let mut stack_names_in_order = Vec::new();
+        {
+            // <RuleType as ToString> - <Stackname> map
+            let mut stack_name_by_typename = rusty_lr_core::HashMap::default();
+
+            // insert terminal token type
+            let term_stack_name = Ident::new(utils::TERMINAL_STACK_NAME, Span::call_site());
+            stack_name_by_typename.insert(self.token_typename.to_string(), term_stack_name.clone());
+            stack_names_in_order.push((term_stack_name, self.token_typename.clone()));
+
+            // for non-terminal have <RuleType> defined
+            for name in self.rules_index.iter() {
+                if let Some(typename) = self.nonterm_typenames.get(name) {
+                    let len = stack_names_in_order.len();
+                    let stack_name = stack_name_by_typename
+                        .entry(typename.to_string())
+                        .or_insert_with(|| {
+                            let new_stack_name = Ident::new(
+                                &format!("__rustylr_generated_stack_{}", len),
+                                Span::call_site(),
+                            );
+                            stack_names_in_order.push((new_stack_name.clone(), typename.clone()));
+
+                            new_stack_name
+                        });
+                    stack_names_by_nonterm.insert(name.clone(), stack_name.clone());
+                }
+            }
+        }
+
         // =====================================================================
         // =========================Writing Parser==============================
         // =====================================================================
@@ -421,7 +455,7 @@ impl Grammar {
                     } else if self.nonterm_typenames.contains_key(&token.token) {
                         // if <RuleType> is defined for this nonterm,
                         // pop value from the stack to 'mapto'
-                        let stack_name = utils::generate_stack_name(&token.token);
+                        let stack_name = stack_names_by_nonterm.get(&token.token).unwrap();
 
                         let mapto = &token.mapto;
                         token_pop_stream.extend(quote! {
@@ -443,7 +477,7 @@ impl Grammar {
                 let typename = self.nonterm_typenames.get(name);
                 if typename.is_some() {
                     // push result to this stack
-                    let stack_name = utils::generate_stack_name(name);
+                    let stack_name = stack_names_by_nonterm.get(name).unwrap();
 
                     // typename is defined, reduce action must be defined
                     if let Some(action) = &rule.reduce_action {
@@ -517,7 +551,7 @@ impl Grammar {
         let start_rule_name = &self.start_rule_name;
         let (start_rule_typename, pop_from_start_rule_stack) = {
             if let Some(start_typename) = self.nonterm_typenames.get(start_rule_name) {
-                let start_rule_stack_name = utils::generate_stack_name(start_rule_name);
+                let start_rule_stack_name = stack_names_by_nonterm.get(start_rule_name).unwrap();
                 (
                     start_typename.clone(),
                     quote! {
@@ -532,18 +566,14 @@ impl Grammar {
         // TokenStream for member variables declaration
         let mut stack_def_streams = quote! {};
         let mut stack_init_streams = quote! {};
-        for name in self.rules_index.iter() {
-            if let Some(typename) = self.nonterm_typenames.get(name) {
-                // push result to this stack
-                let stack_name = utils::generate_stack_name(name);
 
-                stack_def_streams.extend(quote! {
-                    #stack_name : Vec<#typename>,
-                });
-                stack_init_streams.extend(quote! {
-                    #stack_name : Vec::new(),
-                });
-            }
+        for (stack_name, typename) in stack_names_in_order.into_iter() {
+            stack_def_streams.extend(quote! {
+                #stack_name : Vec<#typename>,
+            });
+            stack_init_streams.extend(quote! {
+                #stack_name : Vec::new(),
+            });
         }
 
         let mut struct_name = format_ident!("{}Parser", start_rule_name);
@@ -562,7 +592,6 @@ impl Grammar {
         pub struct #stack_struct_name {
             /// state stack, user must not modify this
             pub state_stack: Vec<usize>,
-            #terms_stack_name: Vec<#token_typename>,
             #stack_def_streams
         }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
@@ -570,7 +599,6 @@ impl Grammar {
             pub fn new() -> Self {
                 Self {
                     state_stack: vec![0],
-                    #terms_stack_name: Vec::new(),
                     #stack_init_streams
                 }
             }

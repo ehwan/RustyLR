@@ -93,7 +93,7 @@ Rule(RuleDefArgs) : ident RuleType colon RuleLines semicolon {
     }
     RuleDefArgs {
         name: ident,
-        typename: RuleType.map(|t| t.to_token_stream()),
+        typename: RuleType.map(|t| t.stream()),
         rule_lines: RuleLines
     }
 }

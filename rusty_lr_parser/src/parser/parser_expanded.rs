@@ -206,33 +206,25 @@ pub struct GrammarContext {
     #[doc = r" state stack, user must not modify this"]
     pub state_stack: Vec<usize>,
     __rustylr_generated_terminal_stack: Vec<Lexed>,
-    _rustylr_generated_Rule_stack: Vec<(RuleDefArgs)>,
-    _rustylr_generated_RuleType_stack: Vec<(Option<Group>)>,
-    _rustylr_generated_RuleLines_stack: Vec<(Vec<RuleLineArgs>)>,
-    _rustylr_generated_RuleLine_stack: Vec<(RuleLineArgs)>,
-    _rustylr_generated__RustyLRGenerated1_stack: Vec<Vec<((Option<Ident>, PatternArgs))>>,
-    _rustylr_generated__RustyLRGenerated0_stack: Vec<Vec<((Option<Ident>, PatternArgs))>>,
-    _rustylr_generated_TokenMapped_stack: Vec<((Option<Ident>, PatternArgs))>,
-    _rustylr_generated_TerminalSetItem_stack: Vec<(TerminalSetItem)>,
-    _rustylr_generated_TerminalSet_stack: Vec<(TerminalSet)>,
-    _rustylr_generated__RustyLRGenerated2_stack: Vec<Option<Lexed>>,
-    _rustylr_generated__RustyLRGenerated4_stack: Vec<Vec<(TerminalSetItem)>>,
-    _rustylr_generated__RustyLRGenerated3_stack: Vec<Vec<(TerminalSetItem)>>,
-    _rustylr_generated_Pattern_stack: Vec<(PatternArgs)>,
-    _rustylr_generated_Action_stack: Vec<(Option<Group>)>,
-    _rustylr_generated_TokenDef_stack: Vec<((Ident, TokenStream))>,
-    _rustylr_generated_RustCode_stack: Vec<(TokenStream)>,
-    _rustylr_generated__RustyLRGenerated6_stack: Vec<Lexed>,
-    _rustylr_generated__RustyLRGenerated5_stack: Vec<Vec<Lexed>>,
-    _rustylr_generated_StartDef_stack: Vec<(Ident)>,
-    _rustylr_generated_EofDef_stack: Vec<((Span, TokenStream))>,
-    _rustylr_generated_TokenTypeDef_stack: Vec<((Span, TokenStream))>,
-    _rustylr_generated_UserDataDef_stack: Vec<((Span, TokenStream))>,
-    _rustylr_generated_ReduceType_stack: Vec<(ReduceType)>,
-    _rustylr_generated_ReduceDef_stack: Vec<((ReduceTypeArgs, ReduceType))>,
-    _rustylr_generated_ErrorDef_stack: Vec<((Span, TokenStream))>,
-    _rustylr_generated_ModulePrefixDef_stack: Vec<((Span, TokenStream))>,
-    _rustylr_generated_Grammar_stack: Vec<(GrammarArgs)>,
+    __rustylr_generated_stack_1: Vec<RuleDefArgs>,
+    __rustylr_generated_stack_2: Vec<Option<Group>>,
+    __rustylr_generated_stack_3: Vec<Vec<RuleLineArgs>>,
+    __rustylr_generated_stack_4: Vec<RuleLineArgs>,
+    __rustylr_generated_stack_5: Vec<Vec<(Option<Ident>, PatternArgs)>>,
+    __rustylr_generated_stack_6: Vec<(Option<Ident>, PatternArgs)>,
+    __rustylr_generated_stack_7: Vec<TerminalSetItem>,
+    __rustylr_generated_stack_8: Vec<TerminalSet>,
+    __rustylr_generated_stack_9: Vec<Option<Lexed>>,
+    __rustylr_generated_stack_10: Vec<Vec<TerminalSetItem>>,
+    __rustylr_generated_stack_11: Vec<PatternArgs>,
+    __rustylr_generated_stack_12: Vec<(Ident, TokenStream)>,
+    __rustylr_generated_stack_13: Vec<TokenStream>,
+    __rustylr_generated_stack_14: Vec<Vec<Lexed>>,
+    __rustylr_generated_stack_15: Vec<Ident>,
+    __rustylr_generated_stack_16: Vec<(Span, TokenStream)>,
+    __rustylr_generated_stack_17: Vec<ReduceType>,
+    __rustylr_generated_stack_18: Vec<(ReduceTypeArgs, ReduceType)>,
+    __rustylr_generated_stack_19: Vec<GrammarArgs>,
 }
 #[allow(
     unused_braces,
@@ -246,42 +238,34 @@ impl GrammarContext {
         Self {
             state_stack: vec![0],
             __rustylr_generated_terminal_stack: Vec::new(),
-            _rustylr_generated_Rule_stack: Vec::new(),
-            _rustylr_generated_RuleType_stack: Vec::new(),
-            _rustylr_generated_RuleLines_stack: Vec::new(),
-            _rustylr_generated_RuleLine_stack: Vec::new(),
-            _rustylr_generated__RustyLRGenerated1_stack: Vec::new(),
-            _rustylr_generated__RustyLRGenerated0_stack: Vec::new(),
-            _rustylr_generated_TokenMapped_stack: Vec::new(),
-            _rustylr_generated_TerminalSetItem_stack: Vec::new(),
-            _rustylr_generated_TerminalSet_stack: Vec::new(),
-            _rustylr_generated__RustyLRGenerated2_stack: Vec::new(),
-            _rustylr_generated__RustyLRGenerated4_stack: Vec::new(),
-            _rustylr_generated__RustyLRGenerated3_stack: Vec::new(),
-            _rustylr_generated_Pattern_stack: Vec::new(),
-            _rustylr_generated_Action_stack: Vec::new(),
-            _rustylr_generated_TokenDef_stack: Vec::new(),
-            _rustylr_generated_RustCode_stack: Vec::new(),
-            _rustylr_generated__RustyLRGenerated6_stack: Vec::new(),
-            _rustylr_generated__RustyLRGenerated5_stack: Vec::new(),
-            _rustylr_generated_StartDef_stack: Vec::new(),
-            _rustylr_generated_EofDef_stack: Vec::new(),
-            _rustylr_generated_TokenTypeDef_stack: Vec::new(),
-            _rustylr_generated_UserDataDef_stack: Vec::new(),
-            _rustylr_generated_ReduceType_stack: Vec::new(),
-            _rustylr_generated_ReduceDef_stack: Vec::new(),
-            _rustylr_generated_ErrorDef_stack: Vec::new(),
-            _rustylr_generated_ModulePrefixDef_stack: Vec::new(),
-            _rustylr_generated_Grammar_stack: Vec::new(),
+            __rustylr_generated_stack_1: Vec::new(),
+            __rustylr_generated_stack_2: Vec::new(),
+            __rustylr_generated_stack_3: Vec::new(),
+            __rustylr_generated_stack_4: Vec::new(),
+            __rustylr_generated_stack_5: Vec::new(),
+            __rustylr_generated_stack_6: Vec::new(),
+            __rustylr_generated_stack_7: Vec::new(),
+            __rustylr_generated_stack_8: Vec::new(),
+            __rustylr_generated_stack_9: Vec::new(),
+            __rustylr_generated_stack_10: Vec::new(),
+            __rustylr_generated_stack_11: Vec::new(),
+            __rustylr_generated_stack_12: Vec::new(),
+            __rustylr_generated_stack_13: Vec::new(),
+            __rustylr_generated_stack_14: Vec::new(),
+            __rustylr_generated_stack_15: Vec::new(),
+            __rustylr_generated_stack_16: Vec::new(),
+            __rustylr_generated_stack_17: Vec::new(),
+            __rustylr_generated_stack_18: Vec::new(),
+            __rustylr_generated_stack_19: Vec::new(),
         }
     }
     fn reduce_Rule_0(&mut self) -> Result<(), String> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RuleLines = self._rustylr_generated_RuleLines_stack.pop().unwrap();
+        let mut RuleLines = self.__rustylr_generated_stack_3.pop().unwrap();
         let mut colon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RuleType = self._rustylr_generated_RuleType_stack.pop().unwrap();
+        let mut RuleType = self.__rustylr_generated_stack_2.pop().unwrap();
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_Rule_stack.push({
+        self.__rustylr_generated_stack_1.push({
             let ident = if let Lexed::Ident(ident) = ident {
                 ident
             } else {
@@ -297,7 +281,7 @@ impl GrammarContext {
             }
             RuleDefArgs {
                 name: ident,
-                typename: RuleType.map(|t| t.to_token_stream()),
+                typename: RuleType.map(|t| t.stream()),
                 rule_lines: RuleLines,
             }
         });
@@ -305,7 +289,7 @@ impl GrammarContext {
     }
     fn reduce_RuleType_0(&mut self) -> Result<(), String> {
         let mut parengroup = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_RuleType_stack.push({
+        self.__rustylr_generated_stack_2.push({
             if let Lexed::ParenGroup(group) = parengroup {
                 group
             } else {
@@ -315,14 +299,14 @@ impl GrammarContext {
         Ok(())
     }
     fn reduce_RuleType_1(&mut self) -> Result<(), String> {
-        self._rustylr_generated_RuleType_stack.push({ None });
+        self.__rustylr_generated_stack_2.push({ None });
         Ok(())
     }
     fn reduce_RuleLines_0(&mut self) -> Result<(), String> {
-        let mut RuleLine = self._rustylr_generated_RuleLine_stack.pop().unwrap();
+        let mut RuleLine = self.__rustylr_generated_stack_4.pop().unwrap();
         let mut pipe = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RuleLines = self._rustylr_generated_RuleLines_stack.pop().unwrap();
-        self._rustylr_generated_RuleLines_stack.push({
+        let mut RuleLines = self.__rustylr_generated_stack_3.pop().unwrap();
+        self.__rustylr_generated_stack_3.push({
             if let Lexed::Pipe(punct) = pipe {
                 RuleLine.separator_span = punct.span();
                 RuleLines.push(RuleLine);
@@ -332,18 +316,14 @@ impl GrammarContext {
         Ok(())
     }
     fn reduce_RuleLines_1(&mut self) -> Result<(), String> {
-        let mut RuleLine = self._rustylr_generated_RuleLine_stack.pop().unwrap();
-        self._rustylr_generated_RuleLines_stack
-            .push({ vec![RuleLine] });
+        let mut RuleLine = self.__rustylr_generated_stack_4.pop().unwrap();
+        self.__rustylr_generated_stack_3.push({ vec![RuleLine] });
         Ok(())
     }
     fn reduce_RuleLine_0(&mut self) -> Result<(), String> {
-        let mut Action = self._rustylr_generated_Action_stack.pop().unwrap();
-        let mut TokenMapped = self
-            ._rustylr_generated__RustyLRGenerated0_stack
-            .pop()
-            .unwrap();
-        self._rustylr_generated_RuleLine_stack.push({
+        let mut Action = self.__rustylr_generated_stack_2.pop().unwrap();
+        let mut TokenMapped = self.__rustylr_generated_stack_5.pop().unwrap();
+        self.__rustylr_generated_stack_4.push({
             RuleLineArgs {
                 tokens: TokenMapped,
                 reduce_action: Action.map(|action| action.to_token_stream()),
@@ -353,48 +333,38 @@ impl GrammarContext {
         Ok(())
     }
     fn reduce__RustyLRGenerated1_0(&mut self) -> Result<(), String> {
-        let mut A = self._rustylr_generated_TokenMapped_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated1_stack
-            .push({ vec![A] });
+        let mut A = self.__rustylr_generated_stack_6.pop().unwrap();
+        self.__rustylr_generated_stack_5.push({ vec![A] });
         Ok(())
     }
     fn reduce__RustyLRGenerated1_1(&mut self) -> Result<(), String> {
-        let mut A = self._rustylr_generated_TokenMapped_stack.pop().unwrap();
-        let mut Ap = self
-            ._rustylr_generated__RustyLRGenerated1_stack
-            .pop()
-            .unwrap();
-        self._rustylr_generated__RustyLRGenerated1_stack.push({
+        let mut A = self.__rustylr_generated_stack_6.pop().unwrap();
+        let mut Ap = self.__rustylr_generated_stack_5.pop().unwrap();
+        self.__rustylr_generated_stack_5.push({
             Ap.push(A);
             Ap
         });
         Ok(())
     }
     fn reduce__RustyLRGenerated0_0(&mut self) -> Result<(), String> {
-        let mut Ap = self
-            ._rustylr_generated__RustyLRGenerated1_stack
-            .pop()
-            .unwrap();
-        self._rustylr_generated__RustyLRGenerated0_stack
-            .push({ Ap });
+        let mut Ap = self.__rustylr_generated_stack_5.pop().unwrap();
+        self.__rustylr_generated_stack_5.push({ Ap });
         Ok(())
     }
     fn reduce__RustyLRGenerated0_1(&mut self) -> Result<(), String> {
-        self._rustylr_generated__RustyLRGenerated0_stack
-            .push({ vec![] });
+        self.__rustylr_generated_stack_5.push({ vec![] });
         Ok(())
     }
     fn reduce_TokenMapped_0(&mut self) -> Result<(), String> {
-        let mut Pattern = self._rustylr_generated_Pattern_stack.pop().unwrap();
-        self._rustylr_generated_TokenMapped_stack
-            .push({ (None, Pattern) });
+        let mut Pattern = self.__rustylr_generated_stack_11.pop().unwrap();
+        self.__rustylr_generated_stack_6.push({ (None, Pattern) });
         Ok(())
     }
     fn reduce_TokenMapped_1(&mut self) -> Result<(), String> {
-        let mut Pattern = self._rustylr_generated_Pattern_stack.pop().unwrap();
+        let mut Pattern = self.__rustylr_generated_stack_11.pop().unwrap();
         let mut equal = self.__rustylr_generated_terminal_stack.pop().unwrap();
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_TokenMapped_stack.push({
+        self.__rustylr_generated_stack_6.push({
             if let Lexed::Ident(ident) = ident {
                 (Some(ident), Pattern)
             } else {
@@ -405,7 +375,7 @@ impl GrammarContext {
     }
     fn reduce_TerminalSetItem_0(&mut self) -> Result<(), String> {
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_TerminalSetItem_stack.push({
+        self.__rustylr_generated_stack_7.push({
             let ident = if let Lexed::Ident(ident) = ident {
                 ident
             } else {
@@ -419,7 +389,7 @@ impl GrammarContext {
         let mut last = self.__rustylr_generated_terminal_stack.pop().unwrap();
         let mut minus = self.__rustylr_generated_terminal_stack.pop().unwrap();
         let mut first = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_TerminalSetItem_stack.push({
+        self.__rustylr_generated_stack_7.push({
             let first = if let Lexed::Ident(first) = first {
                 first
             } else {
@@ -436,16 +406,10 @@ impl GrammarContext {
     }
     fn reduce_TerminalSet_0(&mut self) -> Result<(), String> {
         let mut rbracket = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut TerminalSetItem = self
-            ._rustylr_generated__RustyLRGenerated3_stack
-            .pop()
-            .unwrap();
-        let mut caret = self
-            ._rustylr_generated__RustyLRGenerated2_stack
-            .pop()
-            .unwrap();
+        let mut TerminalSetItem = self.__rustylr_generated_stack_10.pop().unwrap();
+        let mut caret = self.__rustylr_generated_stack_9.pop().unwrap();
         let mut lbracket = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_TerminalSet_stack.push({
+        self.__rustylr_generated_stack_8.push({
             let open_span = if let Lexed::LBracket(lbracket) = lbracket {
                 lbracket
             } else {
@@ -467,50 +431,39 @@ impl GrammarContext {
     }
     fn reduce__RustyLRGenerated2_0(&mut self) -> Result<(), String> {
         let mut A = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated2_stack
-            .push({ Some(A) });
+        self.__rustylr_generated_stack_9.push({ Some(A) });
         Ok(())
     }
     fn reduce__RustyLRGenerated2_1(&mut self) -> Result<(), String> {
-        self._rustylr_generated__RustyLRGenerated2_stack
-            .push({ None });
+        self.__rustylr_generated_stack_9.push({ None });
         Ok(())
     }
     fn reduce__RustyLRGenerated4_0(&mut self) -> Result<(), String> {
-        let mut A = self._rustylr_generated_TerminalSetItem_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated4_stack
-            .push({ vec![A] });
+        let mut A = self.__rustylr_generated_stack_7.pop().unwrap();
+        self.__rustylr_generated_stack_10.push({ vec![A] });
         Ok(())
     }
     fn reduce__RustyLRGenerated4_1(&mut self) -> Result<(), String> {
-        let mut A = self._rustylr_generated_TerminalSetItem_stack.pop().unwrap();
-        let mut Ap = self
-            ._rustylr_generated__RustyLRGenerated4_stack
-            .pop()
-            .unwrap();
-        self._rustylr_generated__RustyLRGenerated4_stack.push({
+        let mut A = self.__rustylr_generated_stack_7.pop().unwrap();
+        let mut Ap = self.__rustylr_generated_stack_10.pop().unwrap();
+        self.__rustylr_generated_stack_10.push({
             Ap.push(A);
             Ap
         });
         Ok(())
     }
     fn reduce__RustyLRGenerated3_0(&mut self) -> Result<(), String> {
-        let mut Ap = self
-            ._rustylr_generated__RustyLRGenerated4_stack
-            .pop()
-            .unwrap();
-        self._rustylr_generated__RustyLRGenerated3_stack
-            .push({ Ap });
+        let mut Ap = self.__rustylr_generated_stack_10.pop().unwrap();
+        self.__rustylr_generated_stack_10.push({ Ap });
         Ok(())
     }
     fn reduce__RustyLRGenerated3_1(&mut self) -> Result<(), String> {
-        self._rustylr_generated__RustyLRGenerated3_stack
-            .push({ vec![] });
+        self.__rustylr_generated_stack_10.push({ vec![] });
         Ok(())
     }
     fn reduce_Pattern_0(&mut self) -> Result<(), String> {
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_Pattern_stack.push({
+        self.__rustylr_generated_stack_11.push({
             if let Lexed::Ident(ident) = ident {
                 let span = ident.span();
                 PatternArgs::Ident(ident, span)
@@ -522,8 +475,8 @@ impl GrammarContext {
     }
     fn reduce_Pattern_1(&mut self) -> Result<(), String> {
         let mut plus = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self._rustylr_generated_Pattern_stack.pop().unwrap();
-        self._rustylr_generated_Pattern_stack.push({
+        let mut Pattern = self.__rustylr_generated_stack_11.pop().unwrap();
+        self.__rustylr_generated_stack_11.push({
             if let Lexed::Plus(plus) = plus {
                 PatternArgs::Plus(Box::new(Pattern), plus.span())
             } else {
@@ -534,8 +487,8 @@ impl GrammarContext {
     }
     fn reduce_Pattern_2(&mut self) -> Result<(), String> {
         let mut star = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self._rustylr_generated_Pattern_stack.pop().unwrap();
-        self._rustylr_generated_Pattern_stack.push({
+        let mut Pattern = self.__rustylr_generated_stack_11.pop().unwrap();
+        self.__rustylr_generated_stack_11.push({
             if let Lexed::Star(star) = star {
                 PatternArgs::Star(Box::new(Pattern), star.span())
             } else {
@@ -546,8 +499,8 @@ impl GrammarContext {
     }
     fn reduce_Pattern_3(&mut self) -> Result<(), String> {
         let mut question = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self._rustylr_generated_Pattern_stack.pop().unwrap();
-        self._rustylr_generated_Pattern_stack.push({
+        let mut Pattern = self.__rustylr_generated_stack_11.pop().unwrap();
+        self.__rustylr_generated_stack_11.push({
             if let Lexed::Question(question) = question {
                 PatternArgs::Question(Box::new(Pattern), question.span())
             } else {
@@ -558,8 +511,8 @@ impl GrammarContext {
     }
     fn reduce_Pattern_4(&mut self) -> Result<(), String> {
         let mut exclamation = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self._rustylr_generated_Pattern_stack.pop().unwrap();
-        self._rustylr_generated_Pattern_stack.push({
+        let mut Pattern = self.__rustylr_generated_stack_11.pop().unwrap();
+        self.__rustylr_generated_stack_11.push({
             if let Lexed::Exclamation(exclamation) = exclamation {
                 PatternArgs::Exclamation(Box::new(Pattern), exclamation.span())
             } else {
@@ -569,14 +522,14 @@ impl GrammarContext {
         Ok(())
     }
     fn reduce_Pattern_5(&mut self) -> Result<(), String> {
-        let mut TerminalSet = self._rustylr_generated_TerminalSet_stack.pop().unwrap();
-        self._rustylr_generated_Pattern_stack
+        let mut TerminalSet = self.__rustylr_generated_stack_8.pop().unwrap();
+        self.__rustylr_generated_stack_11
             .push({ PatternArgs::TerminalSet(TerminalSet) });
         Ok(())
     }
     fn reduce_Action_0(&mut self) -> Result<(), String> {
         let mut bracegroup = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_Action_stack.push({
+        self.__rustylr_generated_stack_2.push({
             if let Lexed::BraceGroup(group) = bracegroup {
                 group
             } else {
@@ -586,15 +539,15 @@ impl GrammarContext {
         Ok(())
     }
     fn reduce_Action_1(&mut self) -> Result<(), String> {
-        self._rustylr_generated_Action_stack.push({ None });
+        self.__rustylr_generated_stack_2.push({ None });
         Ok(())
     }
     fn reduce_TokenDef_0(&mut self) -> Result<(), String> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self._rustylr_generated_RustCode_stack.pop().unwrap();
+        let mut RustCode = self.__rustylr_generated_stack_13.pop().unwrap();
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
         let mut token = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_TokenDef_stack.push({
+        self.__rustylr_generated_stack_12.push({
             if let Lexed::Ident(ident) = ident {
                 (ident, RustCode)
             } else {
@@ -604,11 +557,8 @@ impl GrammarContext {
         Ok(())
     }
     fn reduce_RustCode_0(&mut self) -> Result<(), String> {
-        let mut t = self
-            ._rustylr_generated__RustyLRGenerated5_stack
-            .pop()
-            .unwrap();
-        self._rustylr_generated_RustCode_stack.push({
+        let mut t = self.__rustylr_generated_stack_14.pop().unwrap();
+        self.__rustylr_generated_stack_13.push({
             let mut tokens = TokenStream::new();
             for token in t.into_iter() {
                 token.append_to_stream(&mut tokens);
@@ -619,108 +569,98 @@ impl GrammarContext {
     }
     fn reduce__RustyLRGenerated6_0(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_1(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_2(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_3(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_4(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_5(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_6(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_7(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_8(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_9(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_10(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_11(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_12(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_13(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_14(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_15(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated6_16(&mut self) -> Result<(), String> {
         let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated__RustyLRGenerated6_stack.push(term);
+        self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
     fn reduce__RustyLRGenerated5_0(&mut self) -> Result<(), String> {
-        let mut A = self
-            ._rustylr_generated__RustyLRGenerated6_stack
-            .pop()
-            .unwrap();
-        self._rustylr_generated__RustyLRGenerated5_stack
-            .push({ vec![A] });
+        let mut A = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_stack_14.push({ vec![A] });
         Ok(())
     }
     fn reduce__RustyLRGenerated5_1(&mut self) -> Result<(), String> {
-        let mut A = self
-            ._rustylr_generated__RustyLRGenerated6_stack
-            .pop()
-            .unwrap();
-        let mut Ap = self
-            ._rustylr_generated__RustyLRGenerated5_stack
-            .pop()
-            .unwrap();
-        self._rustylr_generated__RustyLRGenerated5_stack.push({
+        let mut A = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        let mut Ap = self.__rustylr_generated_stack_14.pop().unwrap();
+        self.__rustylr_generated_stack_14.push({
             Ap.push(A);
             Ap
         });
@@ -730,7 +670,7 @@ impl GrammarContext {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
         let mut start = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_StartDef_stack.push({
+        self.__rustylr_generated_stack_15.push({
             if let Lexed::Ident(ident) = ident {
                 ident
             } else {
@@ -741,45 +681,44 @@ impl GrammarContext {
     }
     fn reduce_EofDef_0(&mut self) -> Result<(), String> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self._rustylr_generated_RustCode_stack.pop().unwrap();
+        let mut RustCode = self.__rustylr_generated_stack_13.pop().unwrap();
         let mut eofdef = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_EofDef_stack
+        self.__rustylr_generated_stack_16
             .push({ (eofdef.span(), RustCode) });
         Ok(())
     }
     fn reduce_TokenTypeDef_0(&mut self) -> Result<(), String> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self._rustylr_generated_RustCode_stack.pop().unwrap();
+        let mut RustCode = self.__rustylr_generated_stack_13.pop().unwrap();
         let mut tokentype = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_TokenTypeDef_stack
+        self.__rustylr_generated_stack_16
             .push({ (tokentype.span(), RustCode) });
         Ok(())
     }
     fn reduce_UserDataDef_0(&mut self) -> Result<(), String> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self._rustylr_generated_RustCode_stack.pop().unwrap();
+        let mut RustCode = self.__rustylr_generated_stack_13.pop().unwrap();
         let mut userdata = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_UserDataDef_stack
+        self.__rustylr_generated_stack_16
             .push({ (userdata.span(), RustCode) });
         Ok(())
     }
     fn reduce_ReduceType_0(&mut self) -> Result<(), String> {
         let mut left = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_ReduceType_stack
-            .push({ ReduceType::Left });
+        self.__rustylr_generated_stack_17.push({ ReduceType::Left });
         Ok(())
     }
     fn reduce_ReduceType_1(&mut self) -> Result<(), String> {
         let mut right = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_ReduceType_stack
+        self.__rustylr_generated_stack_17
             .push({ ReduceType::Right });
         Ok(())
     }
     fn reduce_ReduceDef_0(&mut self) -> Result<(), String> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut reducetype = self._rustylr_generated_ReduceType_stack.pop().unwrap();
-        self._rustylr_generated_ReduceDef_stack.push({
+        let mut reducetype = self.__rustylr_generated_stack_17.pop().unwrap();
+        self.__rustylr_generated_stack_18.push({
             if let Lexed::Ident(ident) = ident {
                 (ReduceTypeArgs::Ident(ident), reducetype)
             } else {
@@ -790,40 +729,40 @@ impl GrammarContext {
     }
     fn reduce_ReduceDef_1(&mut self) -> Result<(), String> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut TerminalSet = self._rustylr_generated_TerminalSet_stack.pop().unwrap();
-        let mut reducetype = self._rustylr_generated_ReduceType_stack.pop().unwrap();
-        self._rustylr_generated_ReduceDef_stack
+        let mut TerminalSet = self.__rustylr_generated_stack_8.pop().unwrap();
+        let mut reducetype = self.__rustylr_generated_stack_17.pop().unwrap();
+        self.__rustylr_generated_stack_18
             .push({ (ReduceTypeArgs::TerminalSet(TerminalSet), reducetype) });
         Ok(())
     }
     fn reduce_ErrorDef_0(&mut self) -> Result<(), String> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self._rustylr_generated_RustCode_stack.pop().unwrap();
+        let mut RustCode = self.__rustylr_generated_stack_13.pop().unwrap();
         let mut errortype = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_ErrorDef_stack
+        self.__rustylr_generated_stack_16
             .push({ (errortype.span(), RustCode) });
         Ok(())
     }
     fn reduce_ModulePrefixDef_0(&mut self) -> Result<(), String> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self._rustylr_generated_RustCode_stack.pop().unwrap();
+        let mut RustCode = self.__rustylr_generated_stack_13.pop().unwrap();
         let mut moduleprefix = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self._rustylr_generated_ModulePrefixDef_stack
+        self.__rustylr_generated_stack_16
             .push({ (moduleprefix.span(), RustCode) });
         Ok(())
     }
     fn reduce_Grammar_0(&mut self) -> Result<(), String> {
-        let mut Rule = self._rustylr_generated_Rule_stack.pop().unwrap();
-        let mut Grammar = self._rustylr_generated_Grammar_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut Rule = self.__rustylr_generated_stack_1.pop().unwrap();
+        let mut Grammar = self.__rustylr_generated_stack_19.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             Grammar.rules.push(Rule);
             Grammar
         });
         Ok(())
     }
     fn reduce_Grammar_1(&mut self) -> Result<(), String> {
-        let mut Rule = self._rustylr_generated_Rule_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut Rule = self.__rustylr_generated_stack_1.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             let mut g: GrammarArgs = Default::default();
             g.rules.push(Rule);
             g
@@ -831,17 +770,17 @@ impl GrammarContext {
         Ok(())
     }
     fn reduce_Grammar_2(&mut self) -> Result<(), String> {
-        let mut TokenDef = self._rustylr_generated_TokenDef_stack.pop().unwrap();
-        let mut Grammar = self._rustylr_generated_Grammar_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut TokenDef = self.__rustylr_generated_stack_12.pop().unwrap();
+        let mut Grammar = self.__rustylr_generated_stack_19.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             Grammar.terminals.push(TokenDef);
             Grammar
         });
         Ok(())
     }
     fn reduce_Grammar_3(&mut self) -> Result<(), String> {
-        let mut TokenDef = self._rustylr_generated_TokenDef_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut TokenDef = self.__rustylr_generated_stack_12.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             let mut g: GrammarArgs = Default::default();
             g.terminals.push(TokenDef);
             g
@@ -849,17 +788,17 @@ impl GrammarContext {
         Ok(())
     }
     fn reduce_Grammar_4(&mut self) -> Result<(), String> {
-        let mut StartDef = self._rustylr_generated_StartDef_stack.pop().unwrap();
-        let mut Grammar = self._rustylr_generated_Grammar_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut StartDef = self.__rustylr_generated_stack_15.pop().unwrap();
+        let mut Grammar = self.__rustylr_generated_stack_19.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             Grammar.start_rule_name.push(StartDef);
             Grammar
         });
         Ok(())
     }
     fn reduce_Grammar_5(&mut self) -> Result<(), String> {
-        let mut StartDef = self._rustylr_generated_StartDef_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut StartDef = self.__rustylr_generated_stack_15.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             let mut g: GrammarArgs = Default::default();
             g.start_rule_name.push(StartDef);
             g
@@ -867,17 +806,17 @@ impl GrammarContext {
         Ok(())
     }
     fn reduce_Grammar_6(&mut self) -> Result<(), String> {
-        let mut EofDef = self._rustylr_generated_EofDef_stack.pop().unwrap();
-        let mut Grammar = self._rustylr_generated_Grammar_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut EofDef = self.__rustylr_generated_stack_16.pop().unwrap();
+        let mut Grammar = self.__rustylr_generated_stack_19.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             Grammar.eof.push(EofDef);
             Grammar
         });
         Ok(())
     }
     fn reduce_Grammar_7(&mut self) -> Result<(), String> {
-        let mut EofDef = self._rustylr_generated_EofDef_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut EofDef = self.__rustylr_generated_stack_16.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             let mut g: GrammarArgs = Default::default();
             g.eof.push(EofDef);
             g
@@ -885,17 +824,17 @@ impl GrammarContext {
         Ok(())
     }
     fn reduce_Grammar_8(&mut self) -> Result<(), String> {
-        let mut TokenTypeDef = self._rustylr_generated_TokenTypeDef_stack.pop().unwrap();
-        let mut Grammar = self._rustylr_generated_Grammar_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut TokenTypeDef = self.__rustylr_generated_stack_16.pop().unwrap();
+        let mut Grammar = self.__rustylr_generated_stack_19.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             Grammar.token_typename.push(TokenTypeDef);
             Grammar
         });
         Ok(())
     }
     fn reduce_Grammar_9(&mut self) -> Result<(), String> {
-        let mut TokenTypeDef = self._rustylr_generated_TokenTypeDef_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut TokenTypeDef = self.__rustylr_generated_stack_16.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             let mut g: GrammarArgs = Default::default();
             g.token_typename.push(TokenTypeDef);
             g
@@ -903,17 +842,17 @@ impl GrammarContext {
         Ok(())
     }
     fn reduce_Grammar_10(&mut self) -> Result<(), String> {
-        let mut UserDataDef = self._rustylr_generated_UserDataDef_stack.pop().unwrap();
-        let mut Grammar = self._rustylr_generated_Grammar_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut UserDataDef = self.__rustylr_generated_stack_16.pop().unwrap();
+        let mut Grammar = self.__rustylr_generated_stack_19.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             Grammar.userdata_typename.push(UserDataDef);
             Grammar
         });
         Ok(())
     }
     fn reduce_Grammar_11(&mut self) -> Result<(), String> {
-        let mut UserDataDef = self._rustylr_generated_UserDataDef_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut UserDataDef = self.__rustylr_generated_stack_16.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             let mut g: GrammarArgs = Default::default();
             g.userdata_typename.push(UserDataDef);
             g
@@ -921,17 +860,17 @@ impl GrammarContext {
         Ok(())
     }
     fn reduce_Grammar_12(&mut self) -> Result<(), String> {
-        let mut ReduceDef = self._rustylr_generated_ReduceDef_stack.pop().unwrap();
-        let mut Grammar = self._rustylr_generated_Grammar_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut ReduceDef = self.__rustylr_generated_stack_18.pop().unwrap();
+        let mut Grammar = self.__rustylr_generated_stack_19.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             Grammar.reduce_types.push(ReduceDef);
             Grammar
         });
         Ok(())
     }
     fn reduce_Grammar_13(&mut self) -> Result<(), String> {
-        let mut ReduceDef = self._rustylr_generated_ReduceDef_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut ReduceDef = self.__rustylr_generated_stack_18.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             let mut g: GrammarArgs = Default::default();
             g.reduce_types.push(ReduceDef);
             g
@@ -939,17 +878,17 @@ impl GrammarContext {
         Ok(())
     }
     fn reduce_Grammar_14(&mut self) -> Result<(), String> {
-        let mut ErrorDef = self._rustylr_generated_ErrorDef_stack.pop().unwrap();
-        let mut Grammar = self._rustylr_generated_Grammar_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut ErrorDef = self.__rustylr_generated_stack_16.pop().unwrap();
+        let mut Grammar = self.__rustylr_generated_stack_19.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             Grammar.error_typename.push(ErrorDef);
             Grammar
         });
         Ok(())
     }
     fn reduce_Grammar_15(&mut self) -> Result<(), String> {
-        let mut ErrorDef = self._rustylr_generated_ErrorDef_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut ErrorDef = self.__rustylr_generated_stack_16.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             let mut g: GrammarArgs = Default::default();
             g.error_typename.push(ErrorDef);
             g
@@ -957,17 +896,17 @@ impl GrammarContext {
         Ok(())
     }
     fn reduce_Grammar_16(&mut self) -> Result<(), String> {
-        let mut ModulePrefixDef = self._rustylr_generated_ModulePrefixDef_stack.pop().unwrap();
-        let mut Grammar = self._rustylr_generated_Grammar_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut ModulePrefixDef = self.__rustylr_generated_stack_16.pop().unwrap();
+        let mut Grammar = self.__rustylr_generated_stack_19.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             Grammar.module_prefix.push(ModulePrefixDef);
             Grammar
         });
         Ok(())
     }
     fn reduce_Grammar_17(&mut self) -> Result<(), String> {
-        let mut ModulePrefixDef = self._rustylr_generated_ModulePrefixDef_stack.pop().unwrap();
-        self._rustylr_generated_Grammar_stack.push({
+        let mut ModulePrefixDef = self.__rustylr_generated_stack_16.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({
             let mut g: GrammarArgs = Default::default();
             g.module_prefix.push(ModulePrefixDef);
             g
@@ -976,7 +915,7 @@ impl GrammarContext {
     }
     fn reduce_Augmented_0(&mut self) -> Result<(), String> {
         let mut eof = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Grammar = self._rustylr_generated_Grammar_stack.pop().unwrap();
+        let mut Grammar = self.__rustylr_generated_stack_19.pop().unwrap();
         Ok(())
     }
     #[doc = r" reduce items in stack, this function is called automatically by parser"]
@@ -1230,8 +1169,8 @@ impl GrammarContext {
         Ok(())
     }
     #[doc = r" pop value from start rule"]
-    pub fn accept(&mut self) -> (GrammarArgs) {
-        self._rustylr_generated_Grammar_stack.pop().unwrap()
+    pub fn accept(&mut self) -> GrammarArgs {
+        self.__rustylr_generated_stack_19.pop().unwrap()
     }
     #[doc = r" push terminal symbol to stack, this function is called automatically by parser"]
     pub fn push(&mut self, term: Lexed) {

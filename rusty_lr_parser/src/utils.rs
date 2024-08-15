@@ -9,14 +9,6 @@ pub static USER_DATA_PARAMETER_NAME: &str = "data";
 pub static TERMINAL_STACK_NAME: &str = "__rustylr_generated_terminal_stack";
 pub static AUTO_GENERATED_RULE_PREFIX: &str = "_RustyLRGenerated";
 
-/// for non-terminal symbol 'rule_name', generate the name of the stack
-pub(crate) fn generate_stack_name(rule_name: &Ident) -> Ident {
-    Ident::new(
-        &format!("_rustylr_generated_{}_stack", rule_name),
-        rule_name.span(),
-    )
-}
-
 /// for non-terminal symbol 'rule_name', generate the name of the enum
 pub(crate) fn generate_enum_name(rule_name: &Ident) -> Ident {
     Ident::new(&format!("{}NonTerminals", rule_name), rule_name.span())
