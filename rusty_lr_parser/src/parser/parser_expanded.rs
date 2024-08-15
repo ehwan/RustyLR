@@ -1266,6 +1266,12 @@ pub struct GrammarParser {
 )]
 impl GrammarParser {
     pub fn new() -> Self {
+        #[doc = r" macro for generating new state and push to states Vec"]
+        macro_rules ! __rustylr_generated_init_state_and_push { { $ states : ident , $ a : ident , $ b : ident , $ c : ident , $ d : ident } => { let state = GrammarState { $ a , $ b , $ c , $ d , } ; $ states . push (state) ; } }
+        #[doc = r" macro for extending reduce_map with terminals in `terminals` to `ruleid`"]
+        macro_rules ! __rustylr_generated_extend_reduce_map { { $ reduce_map : ident , $ ruleid : literal , $ terminals : ident } => { for term in $ terminals . iter () { $ reduce_map . insert (term . clone () , $ ruleid) ; } } }
+        #[doc = r" make new LookaheadRuleRefSet with pairs of (ruleid, shifted)"]
+        macro_rules ! __rustylr_generated_ruleset { [$ ($ pairs : expr ,) *] => { { let rule_shifted_pairs = vec ! [$ ($ pairs) , *] ; :: rusty_lr_core :: LookaheadRuleRefSet { rules : std :: collections :: BTreeMap :: from_iter (rule_shifted_pairs . into_iter () . map (| (rule , shifted) : (usize , usize) | -> (:: rusty_lr_core :: ShiftedRuleRef , std :: collections :: BTreeSet < Lexed >) { (:: rusty_lr_core :: ShiftedRuleRef { rule , shifted , } , Default :: default ()) }) ,) , } } } }
         let rules = vec![
             GrammarRule {
                 name: GrammarNonTerminals::Rule,
@@ -1829,15 +1835,6 @@ impl GrammarParser {
             [Lexed::Pipe(punct!('|')), Lexed::Semicolon(punct!(';'))];
         let _rustylr_generated_terminals_10 = [Lexed::Ident(Ident::new("id", Span::call_site())),
             Lexed::LBracket(Span::call_site())];
-        let pair_to_rule = |(rule, shifted): (usize, usize)| -> (
-            ::rusty_lr_core::ShiftedRuleRef,
-            std::collections::BTreeSet<Lexed>,
-        ) {
-            (
-                ::rusty_lr_core::ShiftedRuleRef { rule, shifted },
-                Default::default(),
-            )
-        };
         let mut states = Vec::with_capacity(110usize);
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -1893,7 +1890,7 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TokenTypeDef, 108usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::UserDataDef, 109usize);
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![
+            let ruleset = __rustylr_generated_ruleset![
                 (0usize, 0usize),
                 (29usize, 0usize),
                 (50usize, 0usize),
@@ -1926,18 +1923,7 @@ impl GrammarParser {
                 (77usize, 0usize),
                 (78usize, 0usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -1965,7 +1951,7 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 21usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated6, 23usize);
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![
+            let ruleset = __rustylr_generated_ruleset![
                 (30usize, 0usize),
                 (31usize, 0usize),
                 (32usize, 0usize),
@@ -1988,392 +1974,228 @@ impl GrammarParser {
                 (49usize, 0usize),
                 (51usize, 1usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 31usize);
-            }
-            let rule_shifted_pairs = vec![(31usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                31usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(31usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 32usize);
-            }
-            let rule_shifted_pairs = vec![(32usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                32usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(32usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 33usize);
-            }
-            let rule_shifted_pairs = vec![(33usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                33usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(33usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 34usize);
-            }
-            let rule_shifted_pairs = vec![(34usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                34usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(34usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 35usize);
-            }
-            let rule_shifted_pairs = vec![(35usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                35usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(35usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 36usize);
-            }
-            let rule_shifted_pairs = vec![(36usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                36usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(36usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 37usize);
-            }
-            let rule_shifted_pairs = vec![(37usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                37usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(37usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 38usize);
-            }
-            let rule_shifted_pairs = vec![(38usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                38usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(38usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 39usize);
-            }
-            let rule_shifted_pairs = vec![(39usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                39usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(39usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 40usize);
-            }
-            let rule_shifted_pairs = vec![(40usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                40usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(40usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 41usize);
-            }
-            let rule_shifted_pairs = vec![(41usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                41usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(41usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 42usize);
-            }
-            let rule_shifted_pairs = vec![(42usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                42usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(42usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 43usize);
-            }
-            let rule_shifted_pairs = vec![(43usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                43usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(43usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 44usize);
-            }
-            let rule_shifted_pairs = vec![(44usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                44usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(44usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 45usize);
-            }
-            let rule_shifted_pairs = vec![(45usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                45usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(45usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 46usize);
-            }
-            let rule_shifted_pairs = vec![(46usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                46usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(46usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 47usize);
-            }
-            let rule_shifted_pairs = vec![(47usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                47usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(47usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -2381,41 +2203,21 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 20usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(51usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(51usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 51usize);
-            }
-            let rule_shifted_pairs = vec![(51usize, 3usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                51usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(51usize, 3usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -2442,10 +2244,12 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated6, 22usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(1usize);
-            for term in _rustylr_generated_terminals_2.iter() {
-                reduce_map.insert(term.clone(), 30usize);
-            }
-            let rule_shifted_pairs = vec![
+            __rustylr_generated_extend_reduce_map!(
+                reduce_map,
+                30usize,
+                _rustylr_generated_terminals_2
+            );
+            let ruleset = __rustylr_generated_ruleset![
                 (30usize, 1usize),
                 (31usize, 0usize),
                 (32usize, 0usize),
@@ -2466,62 +2270,33 @@ impl GrammarParser {
                 (47usize, 0usize),
                 (49usize, 1usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 49usize);
-            }
-            let rule_shifted_pairs = vec![(49usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                49usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(49usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(18usize);
-            for term in _rustylr_generated_terminals_0.iter() {
-                reduce_map.insert(term.clone(), 48usize);
-            }
-            let rule_shifted_pairs = vec![(48usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                48usize,
+                _rustylr_generated_terminals_0
+            );
+            let ruleset = __rustylr_generated_ruleset![(48usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -2549,7 +2324,7 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 21usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated6, 23usize);
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![
+            let ruleset = __rustylr_generated_ruleset![
                 (30usize, 0usize),
                 (31usize, 0usize),
                 (32usize, 0usize),
@@ -2572,18 +2347,7 @@ impl GrammarParser {
                 (49usize, 0usize),
                 (58usize, 1usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -2591,41 +2355,21 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 26usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(58usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(58usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 58usize);
-            }
-            let rule_shifted_pairs = vec![(58usize, 3usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                58usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(58usize, 3usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -2636,44 +2380,27 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::RuleType, 29usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(1usize);
-            for term in _rustylr_generated_terminals_3.iter() {
-                reduce_map.insert(term.clone(), 2usize);
-            }
-            let rule_shifted_pairs = vec![(0usize, 1usize), (1usize, 0usize), (2usize, 0usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                2usize,
+                _rustylr_generated_terminals_3
+            );
+            let ruleset =
+                __rustylr_generated_ruleset![(0usize, 1usize), (1usize, 0usize), (2usize, 0usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(1usize);
-            for term in _rustylr_generated_terminals_3.iter() {
-                reduce_map.insert(term.clone(), 1usize);
-            }
-            let rule_shifted_pairs = vec![(1usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                1usize,
+                _rustylr_generated_terminals_3
+            );
+            let ruleset = __rustylr_generated_ruleset![(1usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -2681,19 +2408,8 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Colon(punct!(':')), 30usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(0usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(0usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -2711,10 +2427,12 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated1, 60usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(3usize);
-            for term in _rustylr_generated_terminals_4.iter() {
-                reduce_map.insert(term.clone(), 9usize);
-            }
-            let rule_shifted_pairs = vec![
+            __rustylr_generated_extend_reduce_map!(
+                reduce_map,
+                9usize,
+                _rustylr_generated_terminals_4
+            );
+            let ruleset = __rustylr_generated_ruleset![
                 (0usize, 3usize),
                 (3usize, 0usize),
                 (4usize, 0usize),
@@ -2733,18 +2451,7 @@ impl GrammarParser {
                 (25usize, 0usize),
                 (26usize, 0usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -2753,22 +2460,13 @@ impl GrammarParser {
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(9usize);
-            for term in _rustylr_generated_terminals_5.iter() {
-                reduce_map.insert(term.clone(), 21usize);
-            }
-            let rule_shifted_pairs = vec![(11usize, 1usize), (21usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                21usize,
+                _rustylr_generated_terminals_5
+            );
+            let ruleset = __rustylr_generated_ruleset![(11usize, 1usize), (21usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -2780,7 +2478,7 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::Pattern, 45usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSet, 50usize);
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![
+            let ruleset = __rustylr_generated_ruleset![
                 (11usize, 2usize),
                 (14usize, 0usize),
                 (21usize, 0usize),
@@ -2790,40 +2488,20 @@ impl GrammarParser {
                 (25usize, 0usize),
                 (26usize, 0usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(9usize);
-            for term in _rustylr_generated_terminals_5.iter() {
-                reduce_map.insert(term.clone(), 21usize);
-            }
-            let rule_shifted_pairs = vec![(21usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                21usize,
+                _rustylr_generated_terminals_5
+            );
+            let ruleset = __rustylr_generated_ruleset![(21usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -2834,44 +2512,30 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated2, 36usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            for term in _rustylr_generated_terminals_6.iter() {
-                reduce_map.insert(term.clone(), 16usize);
-            }
-            let rule_shifted_pairs = vec![(14usize, 1usize), (15usize, 0usize), (16usize, 0usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                16usize,
+                _rustylr_generated_terminals_6
+            );
+            let ruleset = __rustylr_generated_ruleset![
+                (14usize, 1usize),
+                (15usize, 0usize),
+                (16usize, 0usize),
+            ];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            for term in _rustylr_generated_terminals_6.iter() {
-                reduce_map.insert(term.clone(), 15usize);
-            }
-            let rule_shifted_pairs = vec![(15usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                15usize,
+                _rustylr_generated_terminals_6
+            );
+            let ruleset = __rustylr_generated_ruleset![(15usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -2884,10 +2548,12 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated4, 43usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(1usize);
-            for term in _rustylr_generated_terminals_7.iter() {
-                reduce_map.insert(term.clone(), 20usize);
-            }
-            let rule_shifted_pairs = vec![
+            __rustylr_generated_extend_reduce_map!(
+                reduce_map,
+                20usize,
+                _rustylr_generated_terminals_7
+            );
+            let ruleset = __rustylr_generated_ruleset![
                 (12usize, 0usize),
                 (13usize, 0usize),
                 (14usize, 2usize),
@@ -2896,18 +2562,7 @@ impl GrammarParser {
                 (19usize, 0usize),
                 (20usize, 0usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -2916,22 +2571,13 @@ impl GrammarParser {
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            for term in _rustylr_generated_terminals_6.iter() {
-                reduce_map.insert(term.clone(), 12usize);
-            }
-            let rule_shifted_pairs = vec![(12usize, 1usize), (13usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                12usize,
+                _rustylr_generated_terminals_6
+            );
+            let ruleset = __rustylr_generated_ruleset![(12usize, 1usize), (13usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -2939,63 +2585,34 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 39usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(13usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(13usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            for term in _rustylr_generated_terminals_6.iter() {
-                reduce_map.insert(term.clone(), 13usize);
-            }
-            let rule_shifted_pairs = vec![(13usize, 3usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                13usize,
+                _rustylr_generated_terminals_6
+            );
+            let ruleset = __rustylr_generated_ruleset![(13usize, 3usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            for term in _rustylr_generated_terminals_6.iter() {
-                reduce_map.insert(term.clone(), 17usize);
-            }
-            let rule_shifted_pairs = vec![(17usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                17usize,
+                _rustylr_generated_terminals_6
+            );
+            let ruleset = __rustylr_generated_ruleset![(17usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3003,41 +2620,21 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::RBracket(Span::call_site()), 42usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(14usize, 3usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(14usize, 3usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(9usize);
-            for term in _rustylr_generated_terminals_5.iter() {
-                reduce_map.insert(term.clone(), 14usize);
-            }
-            let rule_shifted_pairs = vec![(14usize, 4usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                14usize,
+                _rustylr_generated_terminals_5
+            );
+            let ruleset = __rustylr_generated_ruleset![(14usize, 4usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3048,49 +2645,31 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSetItem, 44usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(1usize);
-            for term in _rustylr_generated_terminals_7.iter() {
-                reduce_map.insert(term.clone(), 19usize);
-            }
-            let rule_shifted_pairs = vec![
+            __rustylr_generated_extend_reduce_map!(
+                reduce_map,
+                19usize,
+                _rustylr_generated_terminals_7
+            );
+            let ruleset = __rustylr_generated_ruleset![
                 (12usize, 0usize),
                 (13usize, 0usize),
                 (18usize, 1usize),
                 (19usize, 1usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            for term in _rustylr_generated_terminals_6.iter() {
-                reduce_map.insert(term.clone(), 18usize);
-            }
-            let rule_shifted_pairs = vec![(18usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                18usize,
+                _rustylr_generated_terminals_6
+            );
+            let ruleset = __rustylr_generated_ruleset![(18usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3102,138 +2681,84 @@ impl GrammarParser {
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(5usize);
-            for term in _rustylr_generated_terminals_8.iter() {
-                reduce_map.insert(term.clone(), 11usize);
-            }
-            let rule_shifted_pairs = vec![
+            __rustylr_generated_extend_reduce_map!(
+                reduce_map,
+                11usize,
+                _rustylr_generated_terminals_8
+            );
+            let ruleset = __rustylr_generated_ruleset![
                 (11usize, 3usize),
                 (22usize, 1usize),
                 (23usize, 1usize),
                 (24usize, 1usize),
                 (25usize, 1usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(9usize);
-            for term in _rustylr_generated_terminals_5.iter() {
-                reduce_map.insert(term.clone(), 25usize);
-            }
-            let rule_shifted_pairs = vec![(25usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                25usize,
+                _rustylr_generated_terminals_5
+            );
+            let ruleset = __rustylr_generated_ruleset![(25usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(9usize);
-            for term in _rustylr_generated_terminals_5.iter() {
-                reduce_map.insert(term.clone(), 22usize);
-            }
-            let rule_shifted_pairs = vec![(22usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                22usize,
+                _rustylr_generated_terminals_5
+            );
+            let ruleset = __rustylr_generated_ruleset![(22usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(9usize);
-            for term in _rustylr_generated_terminals_5.iter() {
-                reduce_map.insert(term.clone(), 24usize);
-            }
-            let rule_shifted_pairs = vec![(24usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                24usize,
+                _rustylr_generated_terminals_5
+            );
+            let ruleset = __rustylr_generated_ruleset![(24usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(9usize);
-            for term in _rustylr_generated_terminals_5.iter() {
-                reduce_map.insert(term.clone(), 23usize);
-            }
-            let rule_shifted_pairs = vec![(23usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                23usize,
+                _rustylr_generated_terminals_5
+            );
+            let ruleset = __rustylr_generated_ruleset![(23usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(9usize);
-            for term in _rustylr_generated_terminals_5.iter() {
-                reduce_map.insert(term.clone(), 26usize);
-            }
-            let rule_shifted_pairs = vec![(26usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                26usize,
+                _rustylr_generated_terminals_5
+            );
+            let ruleset = __rustylr_generated_ruleset![(26usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3245,50 +2770,32 @@ impl GrammarParser {
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(5usize);
-            for term in _rustylr_generated_terminals_8.iter() {
-                reduce_map.insert(term.clone(), 10usize);
-            }
-            let rule_shifted_pairs = vec![
+            __rustylr_generated_extend_reduce_map!(
+                reduce_map,
+                10usize,
+                _rustylr_generated_terminals_8
+            );
+            let ruleset = __rustylr_generated_ruleset![
                 (10usize, 1usize),
                 (22usize, 1usize),
                 (23usize, 1usize),
                 (24usize, 1usize),
                 (25usize, 1usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            for term in _rustylr_generated_terminals_9.iter() {
-                reduce_map.insert(term.clone(), 4usize);
-            }
-            let rule_shifted_pairs = vec![(4usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                4usize,
+                _rustylr_generated_terminals_9
+            );
+            let ruleset = __rustylr_generated_ruleset![(4usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3297,19 +2804,8 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 62usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(0usize, 4usize), (3usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(0usize, 4usize), (3usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3326,10 +2822,12 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated1, 60usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(3usize);
-            for term in _rustylr_generated_terminals_4.iter() {
-                reduce_map.insert(term.clone(), 9usize);
-            }
-            let rule_shifted_pairs = vec![
+            __rustylr_generated_extend_reduce_map!(
+                reduce_map,
+                9usize,
+                _rustylr_generated_terminals_4
+            );
+            let ruleset = __rustylr_generated_ruleset![
                 (3usize, 2usize),
                 (5usize, 0usize),
                 (6usize, 0usize),
@@ -3346,62 +2844,33 @@ impl GrammarParser {
                 (25usize, 0usize),
                 (26usize, 0usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            for term in _rustylr_generated_terminals_9.iter() {
-                reduce_map.insert(term.clone(), 3usize);
-            }
-            let rule_shifted_pairs = vec![(3usize, 3usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                3usize,
+                _rustylr_generated_terminals_9
+            );
+            let ruleset = __rustylr_generated_ruleset![(3usize, 3usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(5usize);
-            for term in _rustylr_generated_terminals_8.iter() {
-                reduce_map.insert(term.clone(), 6usize);
-            }
-            let rule_shifted_pairs = vec![(6usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                6usize,
+                _rustylr_generated_terminals_8
+            );
+            let ruleset = __rustylr_generated_ruleset![(6usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3412,66 +2881,43 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::Action, 59usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            for term in _rustylr_generated_terminals_9.iter() {
-                reduce_map.insert(term.clone(), 28usize);
-            }
-            let rule_shifted_pairs = vec![(5usize, 1usize), (27usize, 0usize), (28usize, 0usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                28usize,
+                _rustylr_generated_terminals_9
+            );
+            let ruleset = __rustylr_generated_ruleset![
+                (5usize, 1usize),
+                (27usize, 0usize),
+                (28usize, 0usize),
+            ];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            for term in _rustylr_generated_terminals_9.iter() {
-                reduce_map.insert(term.clone(), 27usize);
-            }
-            let rule_shifted_pairs = vec![(27usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                27usize,
+                _rustylr_generated_terminals_9
+            );
+            let ruleset = __rustylr_generated_ruleset![(27usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            for term in _rustylr_generated_terminals_9.iter() {
-                reduce_map.insert(term.clone(), 5usize);
-            }
-            let rule_shifted_pairs = vec![(5usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                5usize,
+                _rustylr_generated_terminals_9
+            );
+            let ruleset = __rustylr_generated_ruleset![(5usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3485,10 +2931,12 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TokenMapped, 61usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(3usize);
-            for term in _rustylr_generated_terminals_4.iter() {
-                reduce_map.insert(term.clone(), 8usize);
-            }
-            let rule_shifted_pairs = vec![
+            __rustylr_generated_extend_reduce_map!(
+                reduce_map,
+                8usize,
+                _rustylr_generated_terminals_4
+            );
+            let ruleset = __rustylr_generated_ruleset![
                 (7usize, 1usize),
                 (8usize, 1usize),
                 (10usize, 0usize),
@@ -3501,84 +2949,46 @@ impl GrammarParser {
                 (25usize, 0usize),
                 (26usize, 0usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(5usize);
-            for term in _rustylr_generated_terminals_8.iter() {
-                reduce_map.insert(term.clone(), 7usize);
-            }
-            let rule_shifted_pairs = vec![(7usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                7usize,
+                _rustylr_generated_terminals_8
+            );
+            let ruleset = __rustylr_generated_ruleset![(7usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 0usize);
-            }
-            let rule_shifted_pairs = vec![(0usize, 5usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                0usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(0usize, 5usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            for term in _rustylr_generated_terminals_10.iter() {
-                reduce_map.insert(term.clone(), 54usize);
-            }
-            let rule_shifted_pairs = vec![(54usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                54usize,
+                _rustylr_generated_terminals_10
+            );
+            let ruleset = __rustylr_generated_ruleset![(54usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3606,7 +3016,7 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 21usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated6, 23usize);
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![
+            let ruleset = __rustylr_generated_ruleset![
                 (30usize, 0usize),
                 (31usize, 0usize),
                 (32usize, 0usize),
@@ -3629,18 +3039,7 @@ impl GrammarParser {
                 (49usize, 0usize),
                 (59usize, 1usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3648,63 +3047,34 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 66usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(59usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(59usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 59usize);
-            }
-            let rule_shifted_pairs = vec![(59usize, 3usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                59usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(59usize, 3usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            for term in _rustylr_generated_terminals_10.iter() {
-                reduce_map.insert(term.clone(), 55usize);
-            }
-            let rule_shifted_pairs = vec![(55usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                55usize,
+                _rustylr_generated_terminals_10
+            );
+            let ruleset = __rustylr_generated_ruleset![(55usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3712,19 +3082,8 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 69usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(50usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(50usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3732,41 +3091,21 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 70usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(50usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(50usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 50usize);
-            }
-            let rule_shifted_pairs = vec![(50usize, 3usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                50usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(50usize, 3usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3774,19 +3113,8 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 72usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(29usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(29usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3814,7 +3142,7 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 21usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated6, 23usize);
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![
+            let ruleset = __rustylr_generated_ruleset![
                 (29usize, 2usize),
                 (30usize, 0usize),
                 (31usize, 0usize),
@@ -3837,18 +3165,7 @@ impl GrammarParser {
                 (48usize, 0usize),
                 (49usize, 0usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3856,41 +3173,21 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 74usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(29usize, 3usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(29usize, 3usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 29usize);
-            }
-            let rule_shifted_pairs = vec![(29usize, 4usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                29usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(29usize, 4usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3918,7 +3215,7 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 21usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated6, 23usize);
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![
+            let ruleset = __rustylr_generated_ruleset![
                 (30usize, 0usize),
                 (31usize, 0usize),
                 (32usize, 0usize),
@@ -3941,18 +3238,7 @@ impl GrammarParser {
                 (49usize, 0usize),
                 (52usize, 1usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -3960,41 +3246,21 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 77usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(52usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(52usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 52usize);
-            }
-            let rule_shifted_pairs = vec![(52usize, 3usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                52usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(52usize, 3usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -4022,7 +3288,7 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated5, 21usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated6, 23usize);
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![
+            let ruleset = __rustylr_generated_ruleset![
                 (30usize, 0usize),
                 (31usize, 0usize),
                 (32usize, 0usize),
@@ -4045,18 +3311,7 @@ impl GrammarParser {
                 (49usize, 0usize),
                 (53usize, 1usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -4064,85 +3319,47 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 80usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(53usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(53usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 53usize);
-            }
-            let rule_shifted_pairs = vec![(53usize, 3usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                53usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(53usize, 3usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 67usize);
-            }
-            let rule_shifted_pairs = vec![(67usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                67usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(67usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 75usize);
-            }
-            let rule_shifted_pairs = vec![(75usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                75usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(75usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -4198,7 +3415,7 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TokenTypeDef, 101usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::UserDataDef, 102usize);
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![
+            let ruleset = __rustylr_generated_ruleset![
                 (0usize, 0usize),
                 (29usize, 0usize),
                 (50usize, 0usize),
@@ -4222,124 +3439,66 @@ impl GrammarParser {
                 (76usize, 1usize),
                 (78usize, 1usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(78usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(78usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 66usize);
-            }
-            let rule_shifted_pairs = vec![(66usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                66usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(66usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 74usize);
-            }
-            let rule_shifted_pairs = vec![(74usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                74usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(74usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 76usize);
-            }
-            let rule_shifted_pairs = vec![(76usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                76usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(76usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 72usize);
-            }
-            let rule_shifted_pairs = vec![(72usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                72usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(72usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -4350,19 +3509,12 @@ impl GrammarParser {
             shift_goto_map_nonterm.reserve(1usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSet, 96usize);
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(14usize, 0usize), (56usize, 1usize), (57usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![
+                (14usize, 0usize),
+                (56usize, 1usize),
+                (57usize, 1usize),
+            ];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -4370,41 +3522,21 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 91usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(56usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(56usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 56usize);
-            }
-            let rule_shifted_pairs = vec![(56usize, 3usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                56usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(56usize, 3usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -4415,22 +3547,17 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated2, 93usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
-            for term in _rustylr_generated_terminals_6.iter() {
-                reduce_map.insert(term.clone(), 16usize);
-            }
-            let rule_shifted_pairs = vec![(14usize, 1usize), (15usize, 0usize), (16usize, 0usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                16usize,
+                _rustylr_generated_terminals_6
+            );
+            let ruleset = __rustylr_generated_ruleset![
+                (14usize, 1usize),
+                (15usize, 0usize),
+                (16usize, 0usize),
+            ];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -4443,10 +3570,12 @@ impl GrammarParser {
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated4, 43usize);
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(1usize);
-            for term in _rustylr_generated_terminals_7.iter() {
-                reduce_map.insert(term.clone(), 20usize);
-            }
-            let rule_shifted_pairs = vec![
+            __rustylr_generated_extend_reduce_map!(
+                reduce_map,
+                20usize,
+                _rustylr_generated_terminals_7
+            );
+            let ruleset = __rustylr_generated_ruleset![
                 (12usize, 0usize),
                 (13usize, 0usize),
                 (14usize, 2usize),
@@ -4455,18 +3584,7 @@ impl GrammarParser {
                 (19usize, 0usize),
                 (20usize, 0usize),
             ];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -4474,41 +3592,21 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::RBracket(Span::call_site()), 95usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(14usize, 3usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(14usize, 3usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(1usize);
-            for term in _rustylr_generated_terminals_2.iter() {
-                reduce_map.insert(term.clone(), 14usize);
-            }
-            let rule_shifted_pairs = vec![(14usize, 4usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                14usize,
+                _rustylr_generated_terminals_2
+            );
+            let ruleset = __rustylr_generated_ruleset![(14usize, 4usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
@@ -4516,305 +3614,177 @@ impl GrammarParser {
             shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 97usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
-            let rule_shifted_pairs = vec![(57usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            };
-            states.push(state);
+            let ruleset = __rustylr_generated_ruleset![(57usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 57usize);
-            }
-            let rule_shifted_pairs = vec![(57usize, 3usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                57usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(57usize, 3usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 60usize);
-            }
-            let rule_shifted_pairs = vec![(60usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                60usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(60usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 64usize);
-            }
-            let rule_shifted_pairs = vec![(64usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                64usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(64usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 62usize);
-            }
-            let rule_shifted_pairs = vec![(62usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                62usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(62usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 68usize);
-            }
-            let rule_shifted_pairs = vec![(68usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                68usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(68usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 70usize);
-            }
-            let rule_shifted_pairs = vec![(70usize, 2usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                70usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(70usize, 2usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 77usize);
-            }
-            let rule_shifted_pairs = vec![(77usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                77usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(77usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 73usize);
-            }
-            let rule_shifted_pairs = vec![(73usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                73usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(73usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 61usize);
-            }
-            let rule_shifted_pairs = vec![(61usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                61usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(61usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 65usize);
-            }
-            let rule_shifted_pairs = vec![(65usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                65usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(65usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 63usize);
-            }
-            let rule_shifted_pairs = vec![(63usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                63usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(63usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 69usize);
-            }
-            let rule_shifted_pairs = vec![(69usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                69usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(69usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         {
             let shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(11usize);
-            for term in _rustylr_generated_terminals_1.iter() {
-                reduce_map.insert(term.clone(), 71usize);
-            }
-            let rule_shifted_pairs = vec![(71usize, 1usize)];
-            let ruleset = ::rusty_lr_core::LookaheadRuleRefSet {
-                rules: std::collections::BTreeMap::from_iter(
-                    rule_shifted_pairs.into_iter().map(pair_to_rule),
-                ),
-            };
-            let state = GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
+            __rustylr_generated_extend_reduce_map!(
                 reduce_map,
-                ruleset,
-            };
-            states.push(state);
+                71usize,
+                _rustylr_generated_terminals_1
+            );
+            let ruleset = __rustylr_generated_ruleset![(71usize, 1usize),];
+            __rustylr_generated_init_state_and_push! { states , shift_goto_map_term , shift_goto_map_nonterm , reduce_map , ruleset }
         }
         Self { rules, states }
     }

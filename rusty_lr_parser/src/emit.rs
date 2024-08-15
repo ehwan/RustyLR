@@ -141,6 +141,52 @@ impl Grammar {
         let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
         let rule_typename = format_ident!("{}Rule", &self.start_rule_name);
         let state_typename = format_ident!("{}State", &self.start_rule_name);
+        let token_typename = &self.token_typename;
+
+        let write_macros = quote! {
+            /// macro for generating new state and push to states Vec
+            macro_rules! __rustylr_generated_init_state_and_push {
+                {$states:ident, $a:ident, $b:ident, $c:ident, $d:ident} => {
+                    let state = #state_typename {
+                        $a, $b, $c, $d,
+                    };
+                    $states.push(state);
+                }
+            }
+            /// macro for extending reduce_map with terminals in `terminals` to `ruleid`
+            macro_rules! __rustylr_generated_extend_reduce_map {
+                {$reduce_map:ident, $ruleid:literal, $terminals:ident} => {
+                    for term in $terminals.iter() {
+                        $reduce_map.insert(term.clone(), $ruleid);
+                    }
+                }
+            }
+            /// make new LookaheadRuleRefSet with pairs of (ruleid, shifted)
+            macro_rules! __rustylr_generated_ruleset {
+                // must end with comma
+                [$($pairs:expr,)*] => {
+                    {
+                        let rule_shifted_pairs = vec![ $($pairs),* ];
+                        #module_prefix::LookaheadRuleRefSet {
+                            rules: std::collections::BTreeMap::from_iter(
+                                rule_shifted_pairs.into_iter().map(
+                                    |(rule, shifted):(usize,usize)| -> (#module_prefix::ShiftedRuleRef, std::collections::BTreeSet<#token_typename>) {
+                                        (
+                                            #module_prefix::ShiftedRuleRef {
+                                                rule,
+                                                shifted,
+                                            },
+                                            Default::default()
+                                        )
+                                    }
+                                ),
+                            ),
+                        }
+                    }
+                }
+            }
+
+        };
 
         // generate code that copy rules and states to parser
         // =====================================================================
@@ -152,9 +198,9 @@ impl Grammar {
             for token in rule.rule.iter() {
                 match token {
                     rlr::Token::Term(term) => {
-                        let (_, term_stream) = self.terminals.get(term).unwrap();
+                        let stream = &self.terminals.get(term).unwrap().1;
                         comma_separated_tokens
-                            .extend(quote! {#module_prefix::Token::Term(#term_stream),});
+                            .extend(quote! {#module_prefix::Token::Term(#stream),});
                     }
                     rlr::Token::NonTerm(nonterm) => {
                         comma_separated_tokens
@@ -163,10 +209,10 @@ impl Grammar {
                 }
             }
 
-            let nonterm = &rule.name;
+            let nonterm_name = &rule.name;
             comma_separated_rules.extend(quote! {
                 #rule_typename {
-                    name: #nonterminals_enum_name::#nonterm,
+                    name: #nonterminals_enum_name::#nonterm_name,
                     rule: vec![#comma_separated_tokens],
                 },
             });
@@ -187,24 +233,6 @@ impl Grammar {
         // since it is not used in runtime
         // and it takes too much space
 
-        {
-            // this write closure that convert (rule_id, shifted) pair to ShiftedRuleRef
-            // to shorten the emitted code
-            let token_typename = &self.token_typename;
-            write_states.extend(
-            quote!{
-                let pair_to_rule = |(rule, shifted):(usize,usize)| -> (#module_prefix::ShiftedRuleRef, std::collections::BTreeSet<#token_typename>) {
-                    (
-                        #module_prefix::ShiftedRuleRef {
-                            rule,
-                            shifted,
-                        },
-                        Default::default()
-                    )
-                };
-                }
-            );
-        }
         {
             let state_len = dfa.states.len();
             write_states.extend(quote! {
@@ -263,9 +291,9 @@ impl Grammar {
             let shift_goto_map_term: BTreeMap<_, _> =
                 state.shift_goto_map_term.into_iter().collect();
             for (term, goto) in shift_goto_map_term.into_iter() {
-                let (_, term_stream) = self.terminals.get(&term).unwrap();
+                let stream = &self.terminals.get(&term).unwrap().1;
                 init_shift_term_stream.extend(quote! {
-                    shift_goto_map_term.insert( #term_stream, #goto );
+                    shift_goto_map_term.insert( #stream, #goto );
                 });
             }
 
@@ -295,9 +323,9 @@ impl Grammar {
 
                     let mut init_terminals_comma_separated = TokenStream::new();
                     for term_name in tokens.into_iter() {
-                        let (_, term_stream) = self.terminals.get(&term_name).unwrap();
+                        let stream = &self.terminals.get(&term_name).unwrap().1;
                         init_terminals_comma_separated.extend(quote! {
-                            #term_stream,
+                            #stream,
                         });
                     }
 
@@ -314,9 +342,7 @@ impl Grammar {
                     format_ident!("_rustylr_generated_terminals_{}", terminal_set_ident_num);
 
                 init_reduce_stream.extend(quote! {
-                    for term in #terminals_ident.iter() {
-                        reduce_map.insert( term.clone(), #ruleid );
-                    }
+                    __rustylr_generated_extend_reduce_map!( reduce_map, #ruleid, #terminals_ident );
                 });
             }
 
@@ -334,26 +360,14 @@ impl Grammar {
                     #init_shift_term_stream
                     #init_shift_nonterm_stream
                     #init_reduce_stream
-                    let rule_shifted_pairs = vec![ #comma_separated_rule_shifted ];
-                    let ruleset = #module_prefix::LookaheadRuleRefSet {
-                        rules: std::collections::BTreeMap::from_iter(
-                            rule_shifted_pairs.into_iter().map(
-                                pair_to_rule
-                            )
-                        ),
-                    };
-                    let state = #state_typename {
-                        shift_goto_map_term,
-                        shift_goto_map_nonterm,
-                        reduce_map,
-                        ruleset,
-                    };
-                    states.push(state);
+                    let ruleset = __rustylr_generated_ruleset![ #comma_separated_rule_shifted ];
+                    __rustylr_generated_init_state_and_push!{ states, shift_goto_map_term, shift_goto_map_nonterm, reduce_map, ruleset }
                 }
             });
         }
 
         Ok(quote! {
+            #write_macros
             #write_rules
             #init_reduce_terminals_stream
             #write_states
