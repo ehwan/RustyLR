@@ -131,7 +131,7 @@
 //! If you want to generate LALR(1) parser, use `lalr1!` macro.
 //! Every line in the macro must follow the syntax below.
 //!
-//! Syntax can be found in [repository](https://github.com/ehwan/RustyLR/tree/coreclean?tab=readme-ov-file#syntax).
+//! Syntax can be found in [repository](https://github.com/ehwan/RustyLR/tree/main?tab=readme-ov-file#syntax).
 //!
 //!
 //! ## executable `rustylr`

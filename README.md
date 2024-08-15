@@ -254,6 +254,10 @@ Every line in the macro must follow the syntax below.
 
 [Bootstrap](rusty_lr_parser/src/parser/parser.rs), [Expanded Bootstrap](rusty_lr_parser/src/parser/parser_expanded.rs) would be a good example to understand the syntax and generated code. It is RustyLR syntax parser written in RustyLR itself.
 
+<details>
+<summary>
+<big> Click to expand the syntax </big>
+</summary>
 
 ### Token type <sub><sup>(must defined)</sup></sub>
 ```
@@ -716,6 +720,10 @@ B: A*!; // Vec<i32> will be built from the value of A, and then ignored
 C: A!*; // A will be ignored first, and then repeatance pattern will be applied
 }
 ```
+
+</details>
+
+
 
 </details>
 
