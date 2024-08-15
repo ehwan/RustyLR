@@ -13,11 +13,14 @@ use crate::terminalset::TerminalSet;
 use crate::terminalset::TerminalSetItem;
 use proc_macro2::Group;
 use proc_macro2::Ident;
+use proc_macro2::Punct;
+use proc_macro2::Spacing;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 use rusty_lr_core::ReduceType;
 use std::boxed::Box;
+macro_rules ! punct (($ l : literal) => { Punct :: new ($ l , Spacing :: Alone) } ;) ;
 // =================================User Codes End=================================
 /*
 ====================================Grammar=====================================
@@ -280,12 +283,12 @@ impl GrammarContext {
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
         self._rustylr_generated_Rule_stack.push({
             let ident = if let Lexed::Ident(ident) = ident {
-                ident.unwrap()
+                ident
             } else {
                 unreachable!("Rule-Ident");
             };
             if let Lexed::Colon(colon) = colon {
-                let span = colon.unwrap().span();
+                let span = colon.span();
                 if let Some(fisrt) = RuleLines.first_mut() {
                     fisrt.separator_span = span;
                 }
@@ -321,7 +324,7 @@ impl GrammarContext {
         let mut RuleLines = self._rustylr_generated_RuleLines_stack.pop().unwrap();
         self._rustylr_generated_RuleLines_stack.push({
             if let Lexed::Pipe(punct) = pipe {
-                RuleLine.separator_span = punct.unwrap().span();
+                RuleLine.separator_span = punct.span();
                 RuleLines.push(RuleLine);
             }
             RuleLines
@@ -393,7 +396,7 @@ impl GrammarContext {
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
         self._rustylr_generated_TokenMapped_stack.push({
             if let Lexed::Ident(ident) = ident {
-                (ident, Pattern)
+                (Some(ident), Pattern)
             } else {
                 unreachable!("Token-Ident");
             }
@@ -404,7 +407,7 @@ impl GrammarContext {
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
         self._rustylr_generated_TerminalSetItem_stack.push({
             let ident = if let Lexed::Ident(ident) = ident {
-                ident.unwrap()
+                ident
             } else {
                 unreachable!("TerminalSetItem-Range1");
             };
@@ -418,12 +421,12 @@ impl GrammarContext {
         let mut first = self.__rustylr_generated_terminal_stack.pop().unwrap();
         self._rustylr_generated_TerminalSetItem_stack.push({
             let first = if let Lexed::Ident(first) = first {
-                first.unwrap()
+                first
             } else {
                 unreachable!("TerminalSetItem-Range1");
             };
             let last = if let Lexed::Ident(last) = last {
-                last.unwrap()
+                last
             } else {
                 unreachable!("TerminalSetItem-Range3");
             };
@@ -509,7 +512,6 @@ impl GrammarContext {
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
         self._rustylr_generated_Pattern_stack.push({
             if let Lexed::Ident(ident) = ident {
-                let ident = ident.unwrap();
                 let span = ident.span();
                 PatternArgs::Ident(ident, span)
             } else {
@@ -523,7 +525,7 @@ impl GrammarContext {
         let mut Pattern = self._rustylr_generated_Pattern_stack.pop().unwrap();
         self._rustylr_generated_Pattern_stack.push({
             if let Lexed::Plus(plus) = plus {
-                PatternArgs::Plus(Box::new(Pattern), plus.unwrap().span())
+                PatternArgs::Plus(Box::new(Pattern), plus.span())
             } else {
                 unreachable!("Pattern-Plus");
             }
@@ -535,7 +537,7 @@ impl GrammarContext {
         let mut Pattern = self._rustylr_generated_Pattern_stack.pop().unwrap();
         self._rustylr_generated_Pattern_stack.push({
             if let Lexed::Star(star) = star {
-                PatternArgs::Star(Box::new(Pattern), star.unwrap().span())
+                PatternArgs::Star(Box::new(Pattern), star.span())
             } else {
                 unreachable!("Pattern-Star");
             }
@@ -547,7 +549,7 @@ impl GrammarContext {
         let mut Pattern = self._rustylr_generated_Pattern_stack.pop().unwrap();
         self._rustylr_generated_Pattern_stack.push({
             if let Lexed::Question(question) = question {
-                PatternArgs::Question(Box::new(Pattern), question.unwrap().span())
+                PatternArgs::Question(Box::new(Pattern), question.span())
             } else {
                 unreachable!("Pattern-Question");
             }
@@ -559,7 +561,7 @@ impl GrammarContext {
         let mut Pattern = self._rustylr_generated_Pattern_stack.pop().unwrap();
         self._rustylr_generated_Pattern_stack.push({
             if let Lexed::Exclamation(exclamation) = exclamation {
-                PatternArgs::Exclamation(Box::new(Pattern), exclamation.unwrap().span())
+                PatternArgs::Exclamation(Box::new(Pattern), exclamation.span())
             } else {
                 unreachable!("Pattern-Exclamation");
             }
@@ -594,7 +596,7 @@ impl GrammarContext {
         let mut token = self.__rustylr_generated_terminal_stack.pop().unwrap();
         self._rustylr_generated_TokenDef_stack.push({
             if let Lexed::Ident(ident) = ident {
-                (ident.unwrap(), RustCode)
+                (ident, RustCode)
             } else {
                 unreachable!("TokenDef-Ident");
             }
@@ -609,7 +611,7 @@ impl GrammarContext {
         self._rustylr_generated_RustCode_stack.push({
             let mut tokens = TokenStream::new();
             for token in t.into_iter() {
-                tokens.extend(token.stream());
+                token.append_to_stream(&mut tokens);
             }
             tokens
         });
@@ -730,7 +732,7 @@ impl GrammarContext {
         let mut start = self.__rustylr_generated_terminal_stack.pop().unwrap();
         self._rustylr_generated_StartDef_stack.push({
             if let Lexed::Ident(ident) = ident {
-                ident.unwrap()
+                ident
             } else {
                 unreachable!("StartDef-Ident");
             }
@@ -779,7 +781,7 @@ impl GrammarContext {
         let mut reducetype = self._rustylr_generated_ReduceType_stack.pop().unwrap();
         self._rustylr_generated_ReduceDef_stack.push({
             if let Lexed::Ident(ident) = ident {
-                (ReduceTypeArgs::Ident(ident.unwrap()), reducetype)
+                (ReduceTypeArgs::Ident(ident), reducetype)
             } else {
                 unreachable!("ReduceDef-Ident (Left)");
             }
@@ -1268,11 +1270,11 @@ impl GrammarParser {
             GrammarRule {
                 name: GrammarNonTerminals::Rule,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(Lexed::Ident(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Ident(Ident::new("id", Span::call_site()))),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleType),
-                    ::rusty_lr_core::Token::Term(Lexed::Colon(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Colon(punct!(':'))),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLines),
-                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(punct!(';'))),
                 ],
             },
             GrammarRule {
@@ -1287,7 +1289,7 @@ impl GrammarParser {
                 name: GrammarNonTerminals::RuleLines,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLines),
-                    ::rusty_lr_core::Token::Term(Lexed::Pipe(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Pipe(punct!('|'))),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLine),
                 ],
             },
@@ -1336,21 +1338,24 @@ impl GrammarParser {
             GrammarRule {
                 name: GrammarNonTerminals::TokenMapped,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(Lexed::Ident(None)),
-                    ::rusty_lr_core::Token::Term(Lexed::Equal(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Ident(Ident::new("id", Span::call_site()))),
+                    ::rusty_lr_core::Token::Term(Lexed::Equal(punct!('='))),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
                 ],
             },
             GrammarRule {
                 name: GrammarNonTerminals::TerminalSetItem,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Ident(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Ident(Ident::new(
+                    "id",
+                    Span::call_site(),
+                )))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::TerminalSetItem,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(Lexed::Ident(None)),
-                    ::rusty_lr_core::Token::Term(Lexed::Minus(None)),
-                    ::rusty_lr_core::Token::Term(Lexed::Ident(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Ident(Ident::new("id", Span::call_site()))),
+                    ::rusty_lr_core::Token::Term(Lexed::Minus(punct!('-'))),
+                    ::rusty_lr_core::Token::Term(Lexed::Ident(Ident::new("id", Span::call_site()))),
                 ],
             },
             GrammarRule {
@@ -1364,7 +1369,7 @@ impl GrammarParser {
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated2,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Caret(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Caret(punct!('^')))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated2,
@@ -1395,34 +1400,37 @@ impl GrammarParser {
             },
             GrammarRule {
                 name: GrammarNonTerminals::Pattern,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Ident(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Ident(Ident::new(
+                    "id",
+                    Span::call_site(),
+                )))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::Pattern,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(Lexed::Plus(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Plus(punct!('+'))),
                 ],
             },
             GrammarRule {
                 name: GrammarNonTerminals::Pattern,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(Lexed::Star(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Star(punct!('*'))),
                 ],
             },
             GrammarRule {
                 name: GrammarNonTerminals::Pattern,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(Lexed::Question(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Question(punct!('?'))),
                 ],
             },
             GrammarRule {
                 name: GrammarNonTerminals::Pattern,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(Lexed::Exclamation(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Exclamation(punct!('!'))),
                 ],
             },
             GrammarRule {
@@ -1442,10 +1450,13 @@ impl GrammarParser {
             GrammarRule {
                 name: GrammarNonTerminals::TokenDef,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(Lexed::Token(None)),
-                    ::rusty_lr_core::Token::Term(Lexed::Ident(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Token(
+                        punct!('%'),
+                        Ident::new("id", Span::call_site()),
+                    )),
+                    ::rusty_lr_core::Token::Term(Lexed::Ident(Ident::new("id", Span::call_site()))),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(punct!(';'))),
                 ],
             },
             GrammarRule {
@@ -1464,23 +1475,28 @@ impl GrammarParser {
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Caret(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Caret(punct!('^')))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Colon(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Colon(punct!(':')))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Equal(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Equal(punct!('=')))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Exclamation(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Exclamation(punct!(
+                    '!'
+                )))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Ident(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Ident(Ident::new(
+                    "id",
+                    Span::call_site(),
+                )))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated6,
@@ -1488,7 +1504,7 @@ impl GrammarParser {
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Minus(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Minus(punct!('-')))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated6,
@@ -1496,7 +1512,7 @@ impl GrammarParser {
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::OtherPunct(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::OtherPunct(punct!('.')))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated6,
@@ -1504,23 +1520,23 @@ impl GrammarParser {
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Percent(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Percent(punct!('%')))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Pipe(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Pipe(punct!('|')))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Plus(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Plus(punct!('+')))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Question(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Question(punct!('?')))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Star(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Star(punct!('*')))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::_RustyLRGenerated5,
@@ -1538,49 +1554,67 @@ impl GrammarParser {
             GrammarRule {
                 name: GrammarNonTerminals::StartDef,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(Lexed::Start(None)),
-                    ::rusty_lr_core::Token::Term(Lexed::Ident(None)),
-                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Start(
+                        punct!('%'),
+                        Ident::new("id", Span::call_site()),
+                    )),
+                    ::rusty_lr_core::Token::Term(Lexed::Ident(Ident::new("id", Span::call_site()))),
+                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(punct!(';'))),
                 ],
             },
             GrammarRule {
                 name: GrammarNonTerminals::EofDef,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(Lexed::EofDef(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::EofDef(
+                        punct!('%'),
+                        Ident::new("id", Span::call_site()),
+                    )),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(punct!(';'))),
                 ],
             },
             GrammarRule {
                 name: GrammarNonTerminals::TokenTypeDef,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(Lexed::TokenType(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::TokenType(
+                        punct!('%'),
+                        Ident::new("id", Span::call_site()),
+                    )),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(punct!(';'))),
                 ],
             },
             GrammarRule {
                 name: GrammarNonTerminals::UserDataDef,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(Lexed::UserData(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::UserData(
+                        punct!('%'),
+                        Ident::new("id", Span::call_site()),
+                    )),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(punct!(';'))),
                 ],
             },
             GrammarRule {
                 name: GrammarNonTerminals::ReduceType,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Left(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Left(
+                    punct!('%'),
+                    Ident::new("id", Span::call_site()),
+                ))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::ReduceType,
-                rule: vec![::rusty_lr_core::Token::Term(Lexed::Right(None))],
+                rule: vec![::rusty_lr_core::Token::Term(Lexed::Right(
+                    punct!('%'),
+                    Ident::new("id", Span::call_site()),
+                ))],
             },
             GrammarRule {
                 name: GrammarNonTerminals::ReduceDef,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::ReduceType),
-                    ::rusty_lr_core::Token::Term(Lexed::Ident(None)),
-                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Ident(Ident::new("id", Span::call_site()))),
+                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(punct!(';'))),
                 ],
             },
             GrammarRule {
@@ -1588,23 +1622,29 @@ impl GrammarParser {
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::ReduceType),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalSet),
-                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(punct!(';'))),
                 ],
             },
             GrammarRule {
                 name: GrammarNonTerminals::ErrorDef,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(Lexed::ErrorType(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::ErrorType(
+                        punct!('%'),
+                        Ident::new("id", Span::call_site()),
+                    )),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(punct!(';'))),
                 ],
             },
             GrammarRule {
                 name: GrammarNonTerminals::ModulePrefixDef,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(Lexed::ModulePrefix(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::ModulePrefix(
+                        punct!('%'),
+                        Ident::new("id", Span::call_site()),
+                    )),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(None)),
+                    ::rusty_lr_core::Token::Term(Lexed::Semicolon(punct!(';'))),
                 ],
             },
             GrammarRule {
@@ -1731,65 +1771,64 @@ impl GrammarParser {
         let _rustylr_generated_terminals_0 = vec![
             Lexed::BraceGroup(None),
             Lexed::BracketGroup(None),
-            Lexed::Caret(None),
-            Lexed::Colon(None),
-            Lexed::Equal(None),
-            Lexed::Exclamation(None),
-            Lexed::Ident(None),
+            Lexed::Caret(punct!('^')),
+            Lexed::Colon(punct!(':')),
+            Lexed::Equal(punct!('=')),
+            Lexed::Exclamation(punct!('!')),
+            Lexed::Ident(Ident::new("id", Span::call_site())),
             Lexed::Literal(None),
-            Lexed::Minus(None),
+            Lexed::Minus(punct!('-')),
             Lexed::NoneGroup(None),
-            Lexed::OtherPunct(None),
+            Lexed::OtherPunct(punct!('.')),
             Lexed::ParenGroup(None),
-            Lexed::Percent(None),
-            Lexed::Pipe(None),
-            Lexed::Plus(None),
-            Lexed::Question(None),
-            Lexed::Semicolon(None),
-            Lexed::Star(None),
+            Lexed::Percent(punct!('%')),
+            Lexed::Pipe(punct!('|')),
+            Lexed::Plus(punct!('+')),
+            Lexed::Question(punct!('?')),
+            Lexed::Semicolon(punct!(';')),
+            Lexed::Star(punct!('*')),
         ];
         let _rustylr_generated_terminals_1 = vec![
             Lexed::Eof,
-            Lexed::EofDef(None),
-            Lexed::ErrorType(None),
-            Lexed::Ident(None),
-            Lexed::Left(None),
-            Lexed::ModulePrefix(None),
-            Lexed::Right(None),
-            Lexed::Start(None),
-            Lexed::Token(None),
-            Lexed::TokenType(None),
-            Lexed::UserData(None),
+            Lexed::EofDef(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::ErrorType(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::Ident(Ident::new("id", Span::call_site())),
+            Lexed::Left(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::ModulePrefix(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::Right(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::Start(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::Token(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::TokenType(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::UserData(punct!('%'), Ident::new("id", Span::call_site())),
         ];
-        let _rustylr_generated_terminals_2 = [Lexed::Semicolon(None)];
-        let _rustylr_generated_terminals_3 = [Lexed::Colon(None)];
+        let _rustylr_generated_terminals_2 = [Lexed::Semicolon(punct!(';'))];
+        let _rustylr_generated_terminals_3 = [Lexed::Colon(punct!(':'))];
         let _rustylr_generated_terminals_4 = [Lexed::BraceGroup(None),
-            Lexed::Pipe(None),
-            Lexed::Semicolon(None)];
+            Lexed::Pipe(punct!('|')),
+            Lexed::Semicolon(punct!(';'))];
         let _rustylr_generated_terminals_5 = vec![
             Lexed::BraceGroup(None),
-            Lexed::Exclamation(None),
-            Lexed::Ident(None),
+            Lexed::Exclamation(punct!('!')),
+            Lexed::Ident(Ident::new("id", Span::call_site())),
             Lexed::LBracket(Span::call_site()),
-            Lexed::Pipe(None),
-            Lexed::Plus(None),
-            Lexed::Question(None),
-            Lexed::Semicolon(None),
-            Lexed::Star(None),
+            Lexed::Pipe(punct!('|')),
+            Lexed::Plus(punct!('+')),
+            Lexed::Question(punct!('?')),
+            Lexed::Semicolon(punct!(';')),
+            Lexed::Star(punct!('*')),
         ];
-        let _rustylr_generated_terminals_6 =
-            [Lexed::Ident(None), Lexed::RBracket(Span::call_site())];
+        let _rustylr_generated_terminals_6 = [Lexed::Ident(Ident::new("id", Span::call_site())),
+            Lexed::RBracket(Span::call_site())];
         let _rustylr_generated_terminals_7 = [Lexed::RBracket(Span::call_site())];
-        let _rustylr_generated_terminals_8 = vec![
-            Lexed::BraceGroup(None),
-            Lexed::Ident(None),
+        let _rustylr_generated_terminals_8 = [Lexed::BraceGroup(None),
+            Lexed::Ident(Ident::new("id", Span::call_site())),
             Lexed::LBracket(Span::call_site()),
-            Lexed::Pipe(None),
-            Lexed::Semicolon(None),
-        ];
-        let _rustylr_generated_terminals_9 = [Lexed::Pipe(None), Lexed::Semicolon(None)];
-        let _rustylr_generated_terminals_10 =
-            [Lexed::Ident(None), Lexed::LBracket(Span::call_site())];
+            Lexed::Pipe(punct!('|')),
+            Lexed::Semicolon(punct!(';'))];
+        let _rustylr_generated_terminals_9 =
+            [Lexed::Pipe(punct!('|')), Lexed::Semicolon(punct!(';'))];
+        let _rustylr_generated_terminals_10 = [Lexed::Ident(Ident::new("id", Span::call_site())),
+            Lexed::LBracket(Span::call_site())];
         let pair_to_rule = |(rule, shifted): (usize, usize)| -> (
             ::rusty_lr_core::ShiftedRuleRef,
             std::collections::BTreeSet<Lexed>,
@@ -1803,16 +1842,43 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(10usize);
-            shift_goto_map_term.insert(Lexed::EofDef(None), 1usize);
-            shift_goto_map_term.insert(Lexed::ErrorType(None), 24usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 27usize);
-            shift_goto_map_term.insert(Lexed::Left(None), 63usize);
-            shift_goto_map_term.insert(Lexed::ModulePrefix(None), 64usize);
-            shift_goto_map_term.insert(Lexed::Right(None), 67usize);
-            shift_goto_map_term.insert(Lexed::Start(None), 68usize);
-            shift_goto_map_term.insert(Lexed::Token(None), 71usize);
-            shift_goto_map_term.insert(Lexed::TokenType(None), 75usize);
-            shift_goto_map_term.insert(Lexed::UserData(None), 78usize);
+            shift_goto_map_term.insert(
+                Lexed::EofDef(punct!('%'), Ident::new("id", Span::call_site())),
+                1usize,
+            );
+            shift_goto_map_term.insert(
+                Lexed::ErrorType(punct!('%'), Ident::new("id", Span::call_site())),
+                24usize,
+            );
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 27usize);
+            shift_goto_map_term.insert(
+                Lexed::Left(punct!('%'), Ident::new("id", Span::call_site())),
+                63usize,
+            );
+            shift_goto_map_term.insert(
+                Lexed::ModulePrefix(punct!('%'), Ident::new("id", Span::call_site())),
+                64usize,
+            );
+            shift_goto_map_term.insert(
+                Lexed::Right(punct!('%'), Ident::new("id", Span::call_site())),
+                67usize,
+            );
+            shift_goto_map_term.insert(
+                Lexed::Start(punct!('%'), Ident::new("id", Span::call_site())),
+                68usize,
+            );
+            shift_goto_map_term.insert(
+                Lexed::Token(punct!('%'), Ident::new("id", Span::call_site())),
+                71usize,
+            );
+            shift_goto_map_term.insert(
+                Lexed::TokenType(punct!('%'), Ident::new("id", Span::call_site())),
+                75usize,
+            );
+            shift_goto_map_term.insert(
+                Lexed::UserData(punct!('%'), Ident::new("id", Span::call_site())),
+                78usize,
+            );
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(11usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::EofDef, 81usize);
@@ -1878,21 +1944,21 @@ impl GrammarParser {
             shift_goto_map_term.reserve(17usize);
             shift_goto_map_term.insert(Lexed::BraceGroup(None), 2usize);
             shift_goto_map_term.insert(Lexed::BracketGroup(None), 3usize);
-            shift_goto_map_term.insert(Lexed::Caret(None), 4usize);
-            shift_goto_map_term.insert(Lexed::Colon(None), 5usize);
-            shift_goto_map_term.insert(Lexed::Equal(None), 6usize);
-            shift_goto_map_term.insert(Lexed::Exclamation(None), 7usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 8usize);
+            shift_goto_map_term.insert(Lexed::Caret(punct!('^')), 4usize);
+            shift_goto_map_term.insert(Lexed::Colon(punct!(':')), 5usize);
+            shift_goto_map_term.insert(Lexed::Equal(punct!('=')), 6usize);
+            shift_goto_map_term.insert(Lexed::Exclamation(punct!('!')), 7usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 8usize);
             shift_goto_map_term.insert(Lexed::Literal(None), 9usize);
-            shift_goto_map_term.insert(Lexed::Minus(None), 10usize);
+            shift_goto_map_term.insert(Lexed::Minus(punct!('-')), 10usize);
             shift_goto_map_term.insert(Lexed::NoneGroup(None), 11usize);
-            shift_goto_map_term.insert(Lexed::OtherPunct(None), 12usize);
+            shift_goto_map_term.insert(Lexed::OtherPunct(punct!('.')), 12usize);
             shift_goto_map_term.insert(Lexed::ParenGroup(None), 13usize);
-            shift_goto_map_term.insert(Lexed::Percent(None), 14usize);
-            shift_goto_map_term.insert(Lexed::Pipe(None), 15usize);
-            shift_goto_map_term.insert(Lexed::Plus(None), 16usize);
-            shift_goto_map_term.insert(Lexed::Question(None), 17usize);
-            shift_goto_map_term.insert(Lexed::Star(None), 18usize);
+            shift_goto_map_term.insert(Lexed::Percent(punct!('%')), 14usize);
+            shift_goto_map_term.insert(Lexed::Pipe(punct!('|')), 15usize);
+            shift_goto_map_term.insert(Lexed::Plus(punct!('+')), 16usize);
+            shift_goto_map_term.insert(Lexed::Question(punct!('?')), 17usize);
+            shift_goto_map_term.insert(Lexed::Star(punct!('*')), 18usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(3usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 19usize);
@@ -2312,7 +2378,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Semicolon(None), 20usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 20usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
             let rule_shifted_pairs = vec![(51usize, 2usize)];
@@ -2356,21 +2422,21 @@ impl GrammarParser {
             shift_goto_map_term.reserve(17usize);
             shift_goto_map_term.insert(Lexed::BraceGroup(None), 2usize);
             shift_goto_map_term.insert(Lexed::BracketGroup(None), 3usize);
-            shift_goto_map_term.insert(Lexed::Caret(None), 4usize);
-            shift_goto_map_term.insert(Lexed::Colon(None), 5usize);
-            shift_goto_map_term.insert(Lexed::Equal(None), 6usize);
-            shift_goto_map_term.insert(Lexed::Exclamation(None), 7usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 8usize);
+            shift_goto_map_term.insert(Lexed::Caret(punct!('^')), 4usize);
+            shift_goto_map_term.insert(Lexed::Colon(punct!(':')), 5usize);
+            shift_goto_map_term.insert(Lexed::Equal(punct!('=')), 6usize);
+            shift_goto_map_term.insert(Lexed::Exclamation(punct!('!')), 7usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 8usize);
             shift_goto_map_term.insert(Lexed::Literal(None), 9usize);
-            shift_goto_map_term.insert(Lexed::Minus(None), 10usize);
+            shift_goto_map_term.insert(Lexed::Minus(punct!('-')), 10usize);
             shift_goto_map_term.insert(Lexed::NoneGroup(None), 11usize);
-            shift_goto_map_term.insert(Lexed::OtherPunct(None), 12usize);
+            shift_goto_map_term.insert(Lexed::OtherPunct(punct!('.')), 12usize);
             shift_goto_map_term.insert(Lexed::ParenGroup(None), 13usize);
-            shift_goto_map_term.insert(Lexed::Percent(None), 14usize);
-            shift_goto_map_term.insert(Lexed::Pipe(None), 15usize);
-            shift_goto_map_term.insert(Lexed::Plus(None), 16usize);
-            shift_goto_map_term.insert(Lexed::Question(None), 17usize);
-            shift_goto_map_term.insert(Lexed::Star(None), 18usize);
+            shift_goto_map_term.insert(Lexed::Percent(punct!('%')), 14usize);
+            shift_goto_map_term.insert(Lexed::Pipe(punct!('|')), 15usize);
+            shift_goto_map_term.insert(Lexed::Plus(punct!('+')), 16usize);
+            shift_goto_map_term.insert(Lexed::Question(punct!('?')), 17usize);
+            shift_goto_map_term.insert(Lexed::Star(punct!('*')), 18usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(1usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated6, 22usize);
@@ -2462,21 +2528,21 @@ impl GrammarParser {
             shift_goto_map_term.reserve(17usize);
             shift_goto_map_term.insert(Lexed::BraceGroup(None), 2usize);
             shift_goto_map_term.insert(Lexed::BracketGroup(None), 3usize);
-            shift_goto_map_term.insert(Lexed::Caret(None), 4usize);
-            shift_goto_map_term.insert(Lexed::Colon(None), 5usize);
-            shift_goto_map_term.insert(Lexed::Equal(None), 6usize);
-            shift_goto_map_term.insert(Lexed::Exclamation(None), 7usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 8usize);
+            shift_goto_map_term.insert(Lexed::Caret(punct!('^')), 4usize);
+            shift_goto_map_term.insert(Lexed::Colon(punct!(':')), 5usize);
+            shift_goto_map_term.insert(Lexed::Equal(punct!('=')), 6usize);
+            shift_goto_map_term.insert(Lexed::Exclamation(punct!('!')), 7usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 8usize);
             shift_goto_map_term.insert(Lexed::Literal(None), 9usize);
-            shift_goto_map_term.insert(Lexed::Minus(None), 10usize);
+            shift_goto_map_term.insert(Lexed::Minus(punct!('-')), 10usize);
             shift_goto_map_term.insert(Lexed::NoneGroup(None), 11usize);
-            shift_goto_map_term.insert(Lexed::OtherPunct(None), 12usize);
+            shift_goto_map_term.insert(Lexed::OtherPunct(punct!('.')), 12usize);
             shift_goto_map_term.insert(Lexed::ParenGroup(None), 13usize);
-            shift_goto_map_term.insert(Lexed::Percent(None), 14usize);
-            shift_goto_map_term.insert(Lexed::Pipe(None), 15usize);
-            shift_goto_map_term.insert(Lexed::Plus(None), 16usize);
-            shift_goto_map_term.insert(Lexed::Question(None), 17usize);
-            shift_goto_map_term.insert(Lexed::Star(None), 18usize);
+            shift_goto_map_term.insert(Lexed::Percent(punct!('%')), 14usize);
+            shift_goto_map_term.insert(Lexed::Pipe(punct!('|')), 15usize);
+            shift_goto_map_term.insert(Lexed::Plus(punct!('+')), 16usize);
+            shift_goto_map_term.insert(Lexed::Question(punct!('?')), 17usize);
+            shift_goto_map_term.insert(Lexed::Star(punct!('*')), 18usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(3usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 25usize);
@@ -2522,7 +2588,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Semicolon(None), 26usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 26usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
             let rule_shifted_pairs = vec![(58usize, 2usize)];
@@ -2612,7 +2678,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Colon(None), 30usize);
+            shift_goto_map_term.insert(Lexed::Colon(punct!(':')), 30usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
             let rule_shifted_pairs = vec![(0usize, 2usize)];
@@ -2632,7 +2698,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(2usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 31usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 31usize);
             shift_goto_map_term.insert(Lexed::LBracket(Span::call_site()), 34usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(7usize);
@@ -2683,7 +2749,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Equal(None), 32usize);
+            shift_goto_map_term.insert(Lexed::Equal(punct!('=')), 32usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(9usize);
@@ -2707,7 +2773,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(2usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 33usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 33usize);
             shift_goto_map_term.insert(Lexed::LBracket(Span::call_site()), 34usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(2usize);
@@ -2762,7 +2828,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Caret(None), 35usize);
+            shift_goto_map_term.insert(Lexed::Caret(punct!('^')), 35usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(1usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated2, 36usize);
@@ -2810,7 +2876,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 37usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 37usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(3usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSetItem, 40usize);
@@ -2846,7 +2912,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Minus(None), 38usize);
+            shift_goto_map_term.insert(Lexed::Minus(punct!('-')), 38usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(2usize);
@@ -2870,7 +2936,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 39usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 39usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
             let rule_shifted_pairs = vec![(13usize, 2usize)];
@@ -2976,7 +3042,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 37usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 37usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(1usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSetItem, 44usize);
@@ -3029,10 +3095,10 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(4usize);
-            shift_goto_map_term.insert(Lexed::Exclamation(None), 46usize);
-            shift_goto_map_term.insert(Lexed::Plus(None), 47usize);
-            shift_goto_map_term.insert(Lexed::Question(None), 48usize);
-            shift_goto_map_term.insert(Lexed::Star(None), 49usize);
+            shift_goto_map_term.insert(Lexed::Exclamation(punct!('!')), 46usize);
+            shift_goto_map_term.insert(Lexed::Plus(punct!('+')), 47usize);
+            shift_goto_map_term.insert(Lexed::Question(punct!('?')), 48usize);
+            shift_goto_map_term.insert(Lexed::Star(punct!('*')), 49usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(5usize);
@@ -3172,10 +3238,10 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(4usize);
-            shift_goto_map_term.insert(Lexed::Exclamation(None), 46usize);
-            shift_goto_map_term.insert(Lexed::Plus(None), 47usize);
-            shift_goto_map_term.insert(Lexed::Question(None), 48usize);
-            shift_goto_map_term.insert(Lexed::Star(None), 49usize);
+            shift_goto_map_term.insert(Lexed::Exclamation(punct!('!')), 46usize);
+            shift_goto_map_term.insert(Lexed::Plus(punct!('+')), 47usize);
+            shift_goto_map_term.insert(Lexed::Question(punct!('?')), 48usize);
+            shift_goto_map_term.insert(Lexed::Star(punct!('*')), 49usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let mut reduce_map = ::rusty_lr_core::HashMap::default();
             reduce_map.reserve(5usize);
@@ -3227,8 +3293,8 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(2usize);
-            shift_goto_map_term.insert(Lexed::Pipe(None), 54usize);
-            shift_goto_map_term.insert(Lexed::Semicolon(None), 62usize);
+            shift_goto_map_term.insert(Lexed::Pipe(punct!('|')), 54usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 62usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
             let rule_shifted_pairs = vec![(0usize, 4usize), (3usize, 1usize)];
@@ -3248,7 +3314,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(2usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 31usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 31usize);
             shift_goto_map_term.insert(Lexed::LBracket(Span::call_site()), 34usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(6usize);
@@ -3410,7 +3476,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(2usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 31usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 31usize);
             shift_goto_map_term.insert(Lexed::LBracket(Span::call_site()), 34usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(3usize);
@@ -3519,21 +3585,21 @@ impl GrammarParser {
             shift_goto_map_term.reserve(17usize);
             shift_goto_map_term.insert(Lexed::BraceGroup(None), 2usize);
             shift_goto_map_term.insert(Lexed::BracketGroup(None), 3usize);
-            shift_goto_map_term.insert(Lexed::Caret(None), 4usize);
-            shift_goto_map_term.insert(Lexed::Colon(None), 5usize);
-            shift_goto_map_term.insert(Lexed::Equal(None), 6usize);
-            shift_goto_map_term.insert(Lexed::Exclamation(None), 7usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 8usize);
+            shift_goto_map_term.insert(Lexed::Caret(punct!('^')), 4usize);
+            shift_goto_map_term.insert(Lexed::Colon(punct!(':')), 5usize);
+            shift_goto_map_term.insert(Lexed::Equal(punct!('=')), 6usize);
+            shift_goto_map_term.insert(Lexed::Exclamation(punct!('!')), 7usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 8usize);
             shift_goto_map_term.insert(Lexed::Literal(None), 9usize);
-            shift_goto_map_term.insert(Lexed::Minus(None), 10usize);
+            shift_goto_map_term.insert(Lexed::Minus(punct!('-')), 10usize);
             shift_goto_map_term.insert(Lexed::NoneGroup(None), 11usize);
-            shift_goto_map_term.insert(Lexed::OtherPunct(None), 12usize);
+            shift_goto_map_term.insert(Lexed::OtherPunct(punct!('.')), 12usize);
             shift_goto_map_term.insert(Lexed::ParenGroup(None), 13usize);
-            shift_goto_map_term.insert(Lexed::Percent(None), 14usize);
-            shift_goto_map_term.insert(Lexed::Pipe(None), 15usize);
-            shift_goto_map_term.insert(Lexed::Plus(None), 16usize);
-            shift_goto_map_term.insert(Lexed::Question(None), 17usize);
-            shift_goto_map_term.insert(Lexed::Star(None), 18usize);
+            shift_goto_map_term.insert(Lexed::Percent(punct!('%')), 14usize);
+            shift_goto_map_term.insert(Lexed::Pipe(punct!('|')), 15usize);
+            shift_goto_map_term.insert(Lexed::Plus(punct!('+')), 16usize);
+            shift_goto_map_term.insert(Lexed::Question(punct!('?')), 17usize);
+            shift_goto_map_term.insert(Lexed::Star(punct!('*')), 18usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(3usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 65usize);
@@ -3579,7 +3645,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Semicolon(None), 66usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 66usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
             let rule_shifted_pairs = vec![(59usize, 2usize)];
@@ -3643,7 +3709,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 69usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 69usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
             let rule_shifted_pairs = vec![(50usize, 1usize)];
@@ -3663,7 +3729,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Semicolon(None), 70usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 70usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
             let rule_shifted_pairs = vec![(50usize, 2usize)];
@@ -3705,7 +3771,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 72usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 72usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
             let rule_shifted_pairs = vec![(29usize, 1usize)];
@@ -3727,21 +3793,21 @@ impl GrammarParser {
             shift_goto_map_term.reserve(17usize);
             shift_goto_map_term.insert(Lexed::BraceGroup(None), 2usize);
             shift_goto_map_term.insert(Lexed::BracketGroup(None), 3usize);
-            shift_goto_map_term.insert(Lexed::Caret(None), 4usize);
-            shift_goto_map_term.insert(Lexed::Colon(None), 5usize);
-            shift_goto_map_term.insert(Lexed::Equal(None), 6usize);
-            shift_goto_map_term.insert(Lexed::Exclamation(None), 7usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 8usize);
+            shift_goto_map_term.insert(Lexed::Caret(punct!('^')), 4usize);
+            shift_goto_map_term.insert(Lexed::Colon(punct!(':')), 5usize);
+            shift_goto_map_term.insert(Lexed::Equal(punct!('=')), 6usize);
+            shift_goto_map_term.insert(Lexed::Exclamation(punct!('!')), 7usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 8usize);
             shift_goto_map_term.insert(Lexed::Literal(None), 9usize);
-            shift_goto_map_term.insert(Lexed::Minus(None), 10usize);
+            shift_goto_map_term.insert(Lexed::Minus(punct!('-')), 10usize);
             shift_goto_map_term.insert(Lexed::NoneGroup(None), 11usize);
-            shift_goto_map_term.insert(Lexed::OtherPunct(None), 12usize);
+            shift_goto_map_term.insert(Lexed::OtherPunct(punct!('.')), 12usize);
             shift_goto_map_term.insert(Lexed::ParenGroup(None), 13usize);
-            shift_goto_map_term.insert(Lexed::Percent(None), 14usize);
-            shift_goto_map_term.insert(Lexed::Pipe(None), 15usize);
-            shift_goto_map_term.insert(Lexed::Plus(None), 16usize);
-            shift_goto_map_term.insert(Lexed::Question(None), 17usize);
-            shift_goto_map_term.insert(Lexed::Star(None), 18usize);
+            shift_goto_map_term.insert(Lexed::Percent(punct!('%')), 14usize);
+            shift_goto_map_term.insert(Lexed::Pipe(punct!('|')), 15usize);
+            shift_goto_map_term.insert(Lexed::Plus(punct!('+')), 16usize);
+            shift_goto_map_term.insert(Lexed::Question(punct!('?')), 17usize);
+            shift_goto_map_term.insert(Lexed::Star(punct!('*')), 18usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(3usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 73usize);
@@ -3787,7 +3853,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Semicolon(None), 74usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 74usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
             let rule_shifted_pairs = vec![(29usize, 3usize)];
@@ -3831,21 +3897,21 @@ impl GrammarParser {
             shift_goto_map_term.reserve(17usize);
             shift_goto_map_term.insert(Lexed::BraceGroup(None), 2usize);
             shift_goto_map_term.insert(Lexed::BracketGroup(None), 3usize);
-            shift_goto_map_term.insert(Lexed::Caret(None), 4usize);
-            shift_goto_map_term.insert(Lexed::Colon(None), 5usize);
-            shift_goto_map_term.insert(Lexed::Equal(None), 6usize);
-            shift_goto_map_term.insert(Lexed::Exclamation(None), 7usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 8usize);
+            shift_goto_map_term.insert(Lexed::Caret(punct!('^')), 4usize);
+            shift_goto_map_term.insert(Lexed::Colon(punct!(':')), 5usize);
+            shift_goto_map_term.insert(Lexed::Equal(punct!('=')), 6usize);
+            shift_goto_map_term.insert(Lexed::Exclamation(punct!('!')), 7usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 8usize);
             shift_goto_map_term.insert(Lexed::Literal(None), 9usize);
-            shift_goto_map_term.insert(Lexed::Minus(None), 10usize);
+            shift_goto_map_term.insert(Lexed::Minus(punct!('-')), 10usize);
             shift_goto_map_term.insert(Lexed::NoneGroup(None), 11usize);
-            shift_goto_map_term.insert(Lexed::OtherPunct(None), 12usize);
+            shift_goto_map_term.insert(Lexed::OtherPunct(punct!('.')), 12usize);
             shift_goto_map_term.insert(Lexed::ParenGroup(None), 13usize);
-            shift_goto_map_term.insert(Lexed::Percent(None), 14usize);
-            shift_goto_map_term.insert(Lexed::Pipe(None), 15usize);
-            shift_goto_map_term.insert(Lexed::Plus(None), 16usize);
-            shift_goto_map_term.insert(Lexed::Question(None), 17usize);
-            shift_goto_map_term.insert(Lexed::Star(None), 18usize);
+            shift_goto_map_term.insert(Lexed::Percent(punct!('%')), 14usize);
+            shift_goto_map_term.insert(Lexed::Pipe(punct!('|')), 15usize);
+            shift_goto_map_term.insert(Lexed::Plus(punct!('+')), 16usize);
+            shift_goto_map_term.insert(Lexed::Question(punct!('?')), 17usize);
+            shift_goto_map_term.insert(Lexed::Star(punct!('*')), 18usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(3usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 76usize);
@@ -3891,7 +3957,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Semicolon(None), 77usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 77usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
             let rule_shifted_pairs = vec![(52usize, 2usize)];
@@ -3935,21 +4001,21 @@ impl GrammarParser {
             shift_goto_map_term.reserve(17usize);
             shift_goto_map_term.insert(Lexed::BraceGroup(None), 2usize);
             shift_goto_map_term.insert(Lexed::BracketGroup(None), 3usize);
-            shift_goto_map_term.insert(Lexed::Caret(None), 4usize);
-            shift_goto_map_term.insert(Lexed::Colon(None), 5usize);
-            shift_goto_map_term.insert(Lexed::Equal(None), 6usize);
-            shift_goto_map_term.insert(Lexed::Exclamation(None), 7usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 8usize);
+            shift_goto_map_term.insert(Lexed::Caret(punct!('^')), 4usize);
+            shift_goto_map_term.insert(Lexed::Colon(punct!(':')), 5usize);
+            shift_goto_map_term.insert(Lexed::Equal(punct!('=')), 6usize);
+            shift_goto_map_term.insert(Lexed::Exclamation(punct!('!')), 7usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 8usize);
             shift_goto_map_term.insert(Lexed::Literal(None), 9usize);
-            shift_goto_map_term.insert(Lexed::Minus(None), 10usize);
+            shift_goto_map_term.insert(Lexed::Minus(punct!('-')), 10usize);
             shift_goto_map_term.insert(Lexed::NoneGroup(None), 11usize);
-            shift_goto_map_term.insert(Lexed::OtherPunct(None), 12usize);
+            shift_goto_map_term.insert(Lexed::OtherPunct(punct!('.')), 12usize);
             shift_goto_map_term.insert(Lexed::ParenGroup(None), 13usize);
-            shift_goto_map_term.insert(Lexed::Percent(None), 14usize);
-            shift_goto_map_term.insert(Lexed::Pipe(None), 15usize);
-            shift_goto_map_term.insert(Lexed::Plus(None), 16usize);
-            shift_goto_map_term.insert(Lexed::Question(None), 17usize);
-            shift_goto_map_term.insert(Lexed::Star(None), 18usize);
+            shift_goto_map_term.insert(Lexed::Percent(punct!('%')), 14usize);
+            shift_goto_map_term.insert(Lexed::Pipe(punct!('|')), 15usize);
+            shift_goto_map_term.insert(Lexed::Plus(punct!('+')), 16usize);
+            shift_goto_map_term.insert(Lexed::Question(punct!('?')), 17usize);
+            shift_goto_map_term.insert(Lexed::Star(punct!('*')), 18usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(3usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::RustCode, 79usize);
@@ -3995,7 +4061,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Semicolon(None), 80usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 80usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
             let rule_shifted_pairs = vec![(53usize, 2usize)];
@@ -4082,16 +4148,43 @@ impl GrammarParser {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(11usize);
             shift_goto_map_term.insert(Lexed::Eof, 84usize);
-            shift_goto_map_term.insert(Lexed::EofDef(None), 1usize);
-            shift_goto_map_term.insert(Lexed::ErrorType(None), 24usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 27usize);
-            shift_goto_map_term.insert(Lexed::Left(None), 63usize);
-            shift_goto_map_term.insert(Lexed::ModulePrefix(None), 64usize);
-            shift_goto_map_term.insert(Lexed::Right(None), 67usize);
-            shift_goto_map_term.insert(Lexed::Start(None), 68usize);
-            shift_goto_map_term.insert(Lexed::Token(None), 71usize);
-            shift_goto_map_term.insert(Lexed::TokenType(None), 75usize);
-            shift_goto_map_term.insert(Lexed::UserData(None), 78usize);
+            shift_goto_map_term.insert(
+                Lexed::EofDef(punct!('%'), Ident::new("id", Span::call_site())),
+                1usize,
+            );
+            shift_goto_map_term.insert(
+                Lexed::ErrorType(punct!('%'), Ident::new("id", Span::call_site())),
+                24usize,
+            );
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 27usize);
+            shift_goto_map_term.insert(
+                Lexed::Left(punct!('%'), Ident::new("id", Span::call_site())),
+                63usize,
+            );
+            shift_goto_map_term.insert(
+                Lexed::ModulePrefix(punct!('%'), Ident::new("id", Span::call_site())),
+                64usize,
+            );
+            shift_goto_map_term.insert(
+                Lexed::Right(punct!('%'), Ident::new("id", Span::call_site())),
+                67usize,
+            );
+            shift_goto_map_term.insert(
+                Lexed::Start(punct!('%'), Ident::new("id", Span::call_site())),
+                68usize,
+            );
+            shift_goto_map_term.insert(
+                Lexed::Token(punct!('%'), Ident::new("id", Span::call_site())),
+                71usize,
+            );
+            shift_goto_map_term.insert(
+                Lexed::TokenType(punct!('%'), Ident::new("id", Span::call_site())),
+                75usize,
+            );
+            shift_goto_map_term.insert(
+                Lexed::UserData(punct!('%'), Ident::new("id", Span::call_site())),
+                78usize,
+            );
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(10usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::EofDef, 85usize);
@@ -4251,7 +4344,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(2usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 90usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 90usize);
             shift_goto_map_term.insert(Lexed::LBracket(Span::call_site()), 92usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(1usize);
@@ -4274,7 +4367,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Semicolon(None), 91usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 91usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
             let rule_shifted_pairs = vec![(56usize, 2usize)];
@@ -4316,7 +4409,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Caret(None), 35usize);
+            shift_goto_map_term.insert(Lexed::Caret(punct!('^')), 35usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(1usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::_RustyLRGenerated2, 93usize);
@@ -4342,7 +4435,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Ident(None), 37usize);
+            shift_goto_map_term.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 37usize);
             let mut shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             shift_goto_map_nonterm.reserve(3usize);
             shift_goto_map_nonterm.insert(GrammarNonTerminals::TerminalSetItem, 40usize);
@@ -4420,7 +4513,7 @@ impl GrammarParser {
         {
             let mut shift_goto_map_term = ::rusty_lr_core::HashMap::default();
             shift_goto_map_term.reserve(1usize);
-            shift_goto_map_term.insert(Lexed::Semicolon(None), 97usize);
+            shift_goto_map_term.insert(Lexed::Semicolon(punct!(';')), 97usize);
             let shift_goto_map_nonterm = ::rusty_lr_core::HashMap::default();
             let reduce_map = ::rusty_lr_core::HashMap::default();
             let rule_shifted_pairs = vec![(57usize, 2usize)];

@@ -11,6 +11,8 @@ use proc_macro2::Group;
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
+use proc_macro2::Punct;
+use proc_macro2::Spacing;
 use quote::ToTokens;
 
 use std::boxed::Box;
@@ -22,25 +24,32 @@ use rusty_lr_core::ReduceType;
 
 // rusty_lr_expand parser.rs parser_expanded.rs
 
+macro_rules! punct(
+    ($l:literal) => {
+        Punct::new($l, Spacing::Alone)
+    };
+);
+
 %%
 
 %moduleprefix ::rusty_lr_core;
 
 %tokentype Lexed;
-%token ident Lexed::Ident(None);
-%token colon Lexed::Colon(None);
-%token semicolon Lexed::Semicolon(None);
-%token pipe Lexed::Pipe(None);
-%token percent Lexed::Percent(None);
+%token ident Lexed::Ident(Ident::new("id", Span::call_site()));
+%token colon Lexed::Colon(punct!(':'));
+%token semicolon Lexed::Semicolon(punct!(';'));
+%token pipe Lexed::Pipe(punct!('|'));
+%token percent Lexed::Percent(punct!('%'));
+%token equal Lexed::Equal(punct!('='));
+%token plus Lexed::Plus(punct!('+'));
+%token star Lexed::Star(punct!('*'));
+%token question Lexed::Question(punct!('?'));
+%token caret Lexed::Caret(punct!('^'));
+%token minus Lexed::Minus(punct!('-'));
+%token exclamation Lexed::Exclamation(punct!('!'));
+%token otherpunct Lexed::OtherPunct(punct!('.'));
+
 %token literal Lexed::Literal(None);
-%token equal Lexed::Equal(None);
-%token plus Lexed::Plus(None);
-%token star Lexed::Star(None);
-%token question Lexed::Question(None);
-%token caret Lexed::Caret(None);
-%token minus Lexed::Minus(None);
-%token exclamation Lexed::Exclamation(None);
-%token otherpunct Lexed::OtherPunct(None);
 
 %token parengroup Lexed::ParenGroup(None);
 %token bracegroup Lexed::BraceGroup(None);
@@ -54,15 +63,15 @@ use rusty_lr_core::ReduceType;
 %token lbracket Lexed::LBracket(Span::call_site());
 %token rbracket Lexed::RBracket(Span::call_site());
 
-%token left Lexed::Left(None);
-%token right Lexed::Right(None);
-%token token Lexed::Token(None);
-%token start Lexed::Start(None);
-%token eofdef Lexed::EofDef(None);
-%token tokentype Lexed::TokenType(None);
-%token userdata Lexed::UserData(None);
-%token errortype Lexed::ErrorType(None);
-%token moduleprefix Lexed::ModulePrefix(None);
+%token left Lexed::Left(punct!('%'),Ident::new("id", Span::call_site()));
+%token right Lexed::Right(punct!('%'),Ident::new("id", Span::call_site()));
+%token token Lexed::Token(punct!('%'),Ident::new("id", Span::call_site()));
+%token start Lexed::Start(punct!('%'),Ident::new("id", Span::call_site()));
+%token eofdef Lexed::EofDef(punct!('%'),Ident::new("id", Span::call_site()));
+%token tokentype Lexed::TokenType(punct!('%'),Ident::new("id", Span::call_site()));
+%token userdata Lexed::UserData(punct!('%'),Ident::new("id", Span::call_site()));
+%token errortype Lexed::ErrorType(punct!('%'),Ident::new("id", Span::call_site()));
+%token moduleprefix Lexed::ModulePrefix(punct!('%'),Ident::new("id", Span::call_site()));
 
 %eof Lexed::Eof;
 
@@ -70,12 +79,12 @@ use rusty_lr_core::ReduceType;
 
 Rule(RuleDefArgs) : ident RuleType colon RuleLines semicolon {
     let ident = if let Lexed::Ident(ident) = ident {
-        ident.unwrap()
+        ident
     } else {
         unreachable!( "Rule-Ident" );
     };
     if let Lexed::Colon(colon) = colon {
-        let span = colon.unwrap().span();
+        let span = colon.span();
         if let Some(fisrt) = RuleLines.first_mut() {
             fisrt.separator_span = span;
         }
@@ -104,7 +113,7 @@ RuleType(Option<Group>): parengroup {
 
 RuleLines(Vec<RuleLineArgs>): RuleLines pipe RuleLine {
     if let Lexed::Pipe(punct) = pipe {
-        RuleLine.separator_span = punct.unwrap().span();
+        RuleLine.separator_span = punct.span();
         RuleLines.push( RuleLine );
     }
     RuleLines
@@ -129,7 +138,7 @@ TokenMapped((Option<Ident>, PatternArgs)): Pattern {
 }
 | ident equal Pattern {
     if let Lexed::Ident(ident) = ident {
-        ( ident, Pattern )
+        ( Some(ident), Pattern )
     }else {
         unreachable!( "Token-Ident" );
     }
@@ -138,7 +147,7 @@ TokenMapped((Option<Ident>, PatternArgs)): Pattern {
 
 TerminalSetItem(TerminalSetItem): ident {
     let ident = if let Lexed::Ident(ident) = ident {
-        ident.unwrap()
+        ident
     }else {
         unreachable!( "TerminalSetItem-Range1" );
     };
@@ -146,12 +155,12 @@ TerminalSetItem(TerminalSetItem): ident {
 }
 | first=ident minus last=ident {
     let first = if let Lexed::Ident(first) = first {
-        first.unwrap()
+        first
     }else {
         unreachable!( "TerminalSetItem-Range1" );
     };
     let last = if let Lexed::Ident(last) = last {
-        last.unwrap()
+        last
     }else {
         unreachable!( "TerminalSetItem-Range3" );
     };
@@ -182,7 +191,6 @@ TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
 
 Pattern(PatternArgs): ident {
     if let Lexed::Ident(ident) = ident {
-        let ident = ident.unwrap();
         let span = ident.span();
         PatternArgs::Ident( ident, span )
     }else {
@@ -191,28 +199,28 @@ Pattern(PatternArgs): ident {
 }
 | Pattern plus {
     if let Lexed::Plus(plus) = plus {
-        PatternArgs::Plus( Box::new(Pattern), plus.unwrap().span() )
+        PatternArgs::Plus( Box::new(Pattern), plus.span() )
     }else {
         unreachable!( "Pattern-Plus" );
     }
 }
 | Pattern star {
     if let Lexed::Star(star) = star {
-        PatternArgs::Star( Box::new(Pattern), star.unwrap().span() )
+        PatternArgs::Star( Box::new(Pattern), star.span() )
     }else {
         unreachable!( "Pattern-Star" );
     }
 }
 | Pattern question {
     if let Lexed::Question(question) = question {
-        PatternArgs::Question( Box::new(Pattern), question.unwrap().span() )
+        PatternArgs::Question( Box::new(Pattern), question.span() )
     }else {
         unreachable!( "Pattern-Question" );
     }
 }
 | Pattern exclamation {
     if let Lexed::Exclamation(exclamation) = exclamation {
-        PatternArgs::Exclamation( Box::new(Pattern), exclamation.unwrap().span() )
+        PatternArgs::Exclamation( Box::new(Pattern), exclamation.span() )
     }else {
         unreachable!( "Pattern-Exclamation" );
     }
@@ -236,7 +244,7 @@ Action(Option<Group>): bracegroup {
 TokenDef((Ident, TokenStream)): token ident RustCode semicolon
 {
     if let Lexed::Ident(ident) = ident {
-        ( ident.unwrap(), RustCode )
+        ( ident, RustCode )
     }else {
         unreachable!( "TokenDef-Ident" );
     }
@@ -246,14 +254,14 @@ TokenDef((Ident, TokenStream)): token ident RustCode semicolon
 RustCode(TokenStream): t=[^semicolon lparen-moduleprefix ]+ {
     let mut tokens = TokenStream::new();
     for token in t.into_iter() {
-        tokens.extend( token.stream() );
+        token.append_to_stream(&mut tokens);
     }
     tokens
 };
 
 StartDef(Ident): start ident semicolon {
     if let Lexed::Ident(ident) = ident {
-        ident.unwrap()
+        ident
     }else {
         unreachable!( "StartDef-Ident" );
     }
@@ -272,7 +280,7 @@ ReduceType(ReduceType): left { ReduceType::Left }
 
 ReduceDef((ReduceTypeArgs, ReduceType)): reducetype=ReduceType ident semicolon {
     if let Lexed::Ident(ident) = ident {
-        ( ReduceTypeArgs::Ident(ident.unwrap()), reducetype )
+        ( ReduceTypeArgs::Ident(ident), reducetype )
     }else {
         unreachable!( "ReduceDef-Ident (Left)" );
     }
