@@ -388,8 +388,14 @@ impl Grammar {
 
     fn emit_parser(&self, grammar_emit: TokenStream) -> Result<TokenStream, Box<EmitError>> {
         let module_prefix = &self.module_prefix;
-
         let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
+        let reduce_error_typename = &self.error_typename;
+        let parseerror_typename = format_ident!("{}ParseError", self.start_rule_name);
+        let rule_typename = format_ident!("{}Rule", self.start_rule_name);
+        let state_typename = format_ident!("{}State", self.start_rule_name);
+        let invalid_terminal_error = format_ident!("{}InvalidTerminalError", self.start_rule_name);
+        let parser_struct_name = format_ident!("{}Parser", self.start_rule_name);
+        let context_struct_name = format_ident!("{}Context", self.start_rule_name);
 
         // stack_name for each non-terminal
         let mut stack_names_by_nonterm = rusty_lr_core::HashMap::default();
@@ -428,9 +434,6 @@ impl Grammar {
         // =====================================================================
         // =========================Writing Parser==============================
         // =====================================================================
-
-        // error typename from '%error'
-        let reduce_error_typename = &self.error_typename;
 
         // TokenStream for userdata parameter definition, if defined
         let user_data_parameter_name =
@@ -560,10 +563,10 @@ impl Grammar {
 
         // TokenStream for <RuleType> of start rule
         // and pop from start rule stack
-        let start_rule_name = &self.start_rule_name;
         let (start_rule_typename, pop_from_start_rule_stack) = {
-            if let Some(start_typename) = self.nonterm_typenames.get(start_rule_name) {
-                let start_rule_stack_name = stack_names_by_nonterm.get(start_rule_name).unwrap();
+            if let Some(start_typename) = self.nonterm_typenames.get(&self.start_rule_name) {
+                let start_rule_stack_name =
+                    stack_names_by_nonterm.get(&self.start_rule_name).unwrap();
                 (
                     start_typename.clone(),
                     quote! {
@@ -571,7 +574,7 @@ impl Grammar {
                     },
                 )
             } else {
-                (quote! {()}, quote! {})
+                (quote! {()}, TokenStream::new())
             }
         };
 
@@ -588,26 +591,16 @@ impl Grammar {
             });
         }
 
-        let mut struct_name = format_ident!("{}Parser", start_rule_name);
-        struct_name.set_span(start_rule_name.span());
-        let mut stack_struct_name = format_ident!("{}Context", start_rule_name);
-        stack_struct_name.set_span(start_rule_name.span());
-
-        let rule_typename = format_ident!("{}Rule", start_rule_name);
-        let state_typename = format_ident!("{}State", start_rule_name);
-        let parseerror_typename = format_ident!("{}ParseError", start_rule_name);
-        let invalid_terminal_error = format_ident!("{}InvalidTerminalError", start_rule_name);
-
         Ok(quote! {
         /// struct that holds internal parser data, for reduce action and state transition
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-        pub struct #stack_struct_name {
+        pub struct #context_struct_name {
             /// state stack, user must not modify this
             pub state_stack: Vec<usize>,
             #stack_def_streams
         }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-        impl #stack_struct_name {
+        impl #context_struct_name {
             pub fn new() -> Self {
                 Self {
                     state_stack: vec![0],
@@ -642,7 +635,7 @@ impl Grammar {
                 self.#terms_stack_name.push(term);
             }
         }
-        impl #module_prefix::GetContext<#token_typename, #nonterminals_enum_name> for #stack_struct_name {
+        impl #module_prefix::GetContext<#token_typename, #nonterminals_enum_name> for #context_struct_name {
             fn get_state_stack(&self) -> &[usize] {
                 &self.state_stack
             }
@@ -650,26 +643,53 @@ impl Grammar {
 
         /// struct that holds parser data, DFA tables
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-        pub struct #struct_name {
+        pub struct #parser_struct_name {
             /// production rules
             pub rules: Vec<#rule_typename>,
             /// states
             pub states: Vec<#state_typename>,
         }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-        impl #struct_name {
-            pub fn new() -> Self {
-                #grammar_emit
-                Self {
-                    rules,
-                    states,
+        impl #parser_struct_name {
+            /// feed one terminal to parser, and update state stack
+            pub fn feed(
+                &self,
+                context: &mut #context_struct_name,
+                term: #token_typename,
+                #user_data_parameter_def
+            ) -> Result<(), #parseerror_typename> {
+                // reduce if possible
+                self.lookahead(context, &term, #user_data_var)?;
+
+                // fetch state from state stack
+                let state = &self.states[*context.state_stack.last().unwrap()];
+
+                // feed token to current state and get action
+                // there must be no reduce/shift conflict ( that is, both shift and reduce are possible with this term ),
+                // since it is resolved in state generation ( Grammar::build() )
+                if let Some(next_state_id) = state.shift_goto_term(&term) {
+                    context.state_stack.push(next_state_id);
+                    context.push( term );
+
+                    Ok(())
+                }else {
+                    let error = #invalid_terminal_error {
+                        term,
+                        expected: state.expected().into_iter().cloned().collect(),
+                    };
+                    Err(#parseerror_typename::InvalidTerminal(error))
                 }
             }
+            /// Crate new context for parsing
+            pub fn begin(&self) -> #context_struct_name {
+                #context_struct_name::new()
+            }
+
 
             /// give lookahead token to parser, and check if there is any reduce action
             fn lookahead(
                 &self,
-                context: &mut #stack_struct_name,
+                context: &mut #context_struct_name,
                 term: &#token_typename,
                 #user_data_parameter_def
             ) -> Result<(), #parseerror_typename> {
@@ -700,40 +720,11 @@ impl Grammar {
                 }
                 Ok(())
             }
-            /// feed one terminal to parser, and update state stack
-            pub fn feed(
-                &self,
-                context: &mut #stack_struct_name,
-                term: #token_typename,
-                #user_data_parameter_def
-            ) -> Result<(), #parseerror_typename> {
-                // reduce if possible
-                self.lookahead(context, &term, #user_data_var)?;
-
-                // fetch state from state stack
-                let state = &self.states[*context.state_stack.last().unwrap()];
-
-                // feed token to current state and get action
-                // there must be no reduce/shift conflict ( that is, both shift and reduce are possible with this term ),
-                // since it is resolved in state generation ( Grammar::build() )
-                if let Some(next_state_id) = state.shift_goto_term(&term) {
-                    context.state_stack.push(next_state_id);
-                    context.push( term );
-
-                    Ok(())
-                }else {
-                    let error = #invalid_terminal_error {
-                        term,
-                        expected: state.expected().into_iter().cloned().collect(),
-                    };
-                    Err(#parseerror_typename::InvalidTerminal(error))
-                }
-            }
 
             /// feed one non-terminal to parser, and update state stack
             fn feed_nonterm(
                 &self,
-                context: &mut #stack_struct_name,
+                context: &mut #context_struct_name,
                 nonterm: &#nonterminals_enum_name,
             ) -> Result<(), #parseerror_typename> {
                 // fetch state from state stack
@@ -749,12 +740,19 @@ impl Grammar {
                 }
             }
 
-            pub fn begin(&self) -> #stack_struct_name {
-                #stack_struct_name::new()
+
+            /// Create new parser instance.
+            /// Parser can be reused with different context, for multiple parsing.
+            pub fn new() -> Self {
+                #grammar_emit
+                Self {
+                    rules,
+                    states,
+                }
             }
         }
 
-        impl #module_prefix::GetParser<#token_typename, #nonterminals_enum_name> for #struct_name {
+        impl #module_prefix::GetParser<#token_typename, #nonterminals_enum_name> for #parser_struct_name {
             fn get_rules(&self) -> &[#rule_typename] {
                 &self.rules
             }
