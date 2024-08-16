@@ -32,6 +32,18 @@ impl<Term: Display> Display for InvalidTerminalError<Term> {
     }
 }
 
+impl<Term: Display + Debug> std::error::Error for InvalidTerminalError<Term> {
+    fn cause(&self) -> Option<&dyn std::error::Error> {
+        None
+    }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
+    fn description(&self) -> &str {
+        "Invalid terminal feeded"
+    }
+}
+
 impl<Term> InvalidTerminalError<Term> {
     /// Generate backtrace information.
     /// Returned `Vec` holds a list of ruleset, each ruleset is what current state was trying to parse.
@@ -120,6 +132,8 @@ impl<Term> InvalidTerminalError<Term> {
         }
         message
     }
+
+    /// Generate long, detailed error message.
     pub fn long_message<NonTerm>(
         &self,
         parser: &impl GetParser<Term, NonTerm>,
@@ -173,8 +187,22 @@ impl<Term: Display + Hash + Eq, ReduceActionError: Display> Display
         }
     }
 }
+impl<Term: Display + Debug + Hash + Eq, ReduceActionError: std::error::Error> std::error::Error
+    for ParseError<Term, ReduceActionError>
+{
+    fn cause(&self) -> Option<&dyn std::error::Error> {
+        None
+    }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
+    fn description(&self) -> &str {
+        "Parse error"
+    }
+}
 
 impl<Term, ReduceActionError> ParseError<Term, ReduceActionError> {
+    /// Generate long, detailed error message.
     pub fn long_message<NonTerm>(
         &self,
         parser: &impl GetParser<Term, NonTerm>,
