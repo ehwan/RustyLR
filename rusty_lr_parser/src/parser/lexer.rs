@@ -292,54 +292,68 @@ pub fn feed_recursive(
             },
             TokenTree::Group(group) => match group.delimiter() {
                 Delimiter::Parenthesis => {
+                    // for now, splitted for brace is not in syntax, so ignore it
+                    parser.feed(context, Lexed::ParenGroup(Some(group.clone())))?;
+
                     // feed the compound token
-                    if parser
-                        .feed(context, Lexed::ParenGroup(Some(group.clone())))
-                        .is_err()
-                    {
-                        // compound token failed
-                        // feed the splitted tokens
-                        parser.feed(context, Lexed::LParen(group.span_open()))?;
-                        feed_recursive(group.stream(), parser, context)?;
-                        parser.feed(context, Lexed::RParen(group.span_close()))?;
-                    }
+                    // if parser
+                    //     .feed(context, Lexed::ParenGroup(Some(group.clone())))
+                    //     .is_err()
+                    // {
+                    //     // compound token failed
+                    //     // feed the splitted tokens
+                    //     parser.feed(context, Lexed::LParen(group.span_open()))?;
+                    //     feed_recursive(group.stream(), parser, context)?;
+                    //     parser.feed(context, Lexed::RParen(group.span_close()))?;
+                    // }
                 }
                 Delimiter::Brace => {
+                    // for now, splitted for brace is not in syntax, so ignore it
+                    parser.feed(context, Lexed::BraceGroup(Some(group)))?;
+
                     // feed the compound token
-                    if parser
-                        .feed(context, Lexed::BraceGroup(Some(group.clone())))
-                        .is_err()
-                    {
-                        // compound token failed
-                        // feed the splitted tokens
-                        parser.feed(context, Lexed::LBrace(group.span_open()))?;
-                        feed_recursive(group.stream(), parser, context)?;
-                        parser.feed(context, Lexed::RBrace(group.span_close()))?;
-                    }
+                    // if parser
+                    //     .feed(context, Lexed::BraceGroup(Some(group.clone())))
+                    //     .is_err()
+                    // {
+                    //     // compound token failed
+                    //     // feed the splitted tokens
+                    //     parser.feed(context, Lexed::LBrace(group.span_open()))?;
+                    //     feed_recursive(group.stream(), parser, context)?;
+                    //     parser.feed(context, Lexed::RBrace(group.span_close()))?;
+                    // }
                 }
                 Delimiter::Bracket => {
+                    // for now, compound for bracket is not in syntax, so ignore it
+                    parser.feed(context, Lexed::LBracket(group.span_open()))?;
+                    feed_recursive(group.stream(), parser, context)?;
+                    parser.feed(context, Lexed::RBracket(group.span_close()))?;
+
                     // feed the compound token
-                    if parser
-                        .feed(context, Lexed::BracketGroup(Some(group.clone())))
-                        .is_err()
-                    {
-                        // compound token failed
-                        // feed the splitted tokens
-                        parser.feed(context, Lexed::LBracket(group.span_open()))?;
-                        feed_recursive(group.stream(), parser, context)?;
-                        parser.feed(context, Lexed::RBracket(group.span_close()))?;
-                    }
+                    // if parser
+                    //     .feed(context, Lexed::BracketGroup(Some(group.clone())))
+                    //     .is_err()
+                    // {
+                    // compound token failed
+                    // feed the splitted tokens
+                    // parser.feed(context, Lexed::LBracket(group.span_open()))?;
+                    // feed_recursive(group.stream(), parser, context)?;
+                    // parser.feed(context, Lexed::RBracket(group.span_close()))?;
+                    // }
                 }
                 _ => {
+                    // for now, compound for nonegroup is not in syntax, so ignore it
+                    parser.feed(context, Lexed::NoneGroup(Some(group.clone())))?;
+
                     // feed the compound token
-                    if parser
-                        .feed(context, Lexed::NoneGroup(Some(group.clone())))
-                        .is_err()
-                    {
-                        // compound token failed
-                        // feed the splitted tokens
-                        feed_recursive(group.stream(), parser, context)?;
-                    }
+                    // if parser
+                    //     .feed(context, Lexed::NoneGroup(Some(group.clone())))
+                    //     .is_err()
+                    // {
+                    //     // compound token failed
+                    //     // feed the splitted tokens
+                    //     feed_recursive(group.stream(), parser, context)?;
+                    // }
                 }
             },
             TokenTree::Literal(literal) => parser.feed(context, Lexed::Literal(Some(literal)))?,
