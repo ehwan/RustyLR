@@ -56,6 +56,28 @@ impl<Term: Debug, NonTerm: Debug> Debug for ProductionRule<Term, NonTerm> {
     }
 }
 
+impl<Term, NonTerm> ProductionRule<Term, NonTerm> {
+    /// Map terminal and non-terminal symbols to another type.
+    /// This is useful when exporting & importing rules.
+    pub fn map<NewTerm, NewNonTerm>(
+        self,
+        term_map: impl Fn(Term) -> NewTerm,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+    ) -> ProductionRule<NewTerm, NewNonTerm> {
+        ProductionRule {
+            name: nonterm_map(self.name),
+            rule: self
+                .rule
+                .into_iter()
+                .map(move |token| match token {
+                    Token::Term(term) => Token::Term(term_map(term)),
+                    Token::NonTerm(nonterm) => Token::NonTerm(nonterm_map(nonterm)),
+                })
+                .collect(),
+        }
+    }
+}
+
 /// A struct for single shifted named production rule.
 ///
 /// name -> Token1 Token2 . Token3

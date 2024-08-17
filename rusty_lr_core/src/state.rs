@@ -64,6 +64,33 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 .chain(self.reduce_map.keys()),
         )
     }
+
+    /// Map terminal and non-terminal symbols to another type.
+    /// This is useful when exporting & importing rules.
+    pub fn map<NewTerm: Hash + Eq, NewNonTerm: Hash + Eq>(
+        self,
+        term_map: impl Fn(Term) -> NewTerm,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+    ) -> State<NewTerm, NewNonTerm> {
+        State {
+            shift_goto_map_term: self
+                .shift_goto_map_term
+                .into_iter()
+                .map(|(term, state)| (term_map(term), state))
+                .collect(),
+            shift_goto_map_nonterm: self
+                .shift_goto_map_nonterm
+                .into_iter()
+                .map(|(nonterm, state)| (nonterm_map(nonterm), state))
+                .collect(),
+            reduce_map: self
+                .reduce_map
+                .into_iter()
+                .map(|(term, rule)| (term_map(term), rule))
+                .collect(),
+            ruleset: self.ruleset,
+        }
+    }
 }
 impl<Term: Display, NonTerm: Display> Display for State<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
