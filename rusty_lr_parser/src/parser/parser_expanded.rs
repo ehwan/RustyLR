@@ -194,7 +194,9 @@ impl std::fmt::Display for GrammarNonTerminals {
         }
     }
 }
-#[doc = r" struct that holds internal parser data, for reduce action and state transition"]
+#[doc = r" struct that holds internal parser data,"]
+#[doc = r" including data stack for each non-terminal,"]
+#[doc = r" and state stack for DFA"]
 #[allow(
     unused_braces,
     unused_parens,
@@ -1169,10 +1171,12 @@ impl GrammarContext {
         Ok(())
     }
     #[doc = r" pop value from start rule"]
+    #[inline]
     pub fn accept(&mut self) -> GrammarArgs {
         self.__rustylr_generated_stack_19.pop().unwrap()
     }
     #[doc = r" push terminal symbol to stack, this function is called automatically by parser"]
+    #[inline]
     pub fn push(&mut self, term: Lexed) {
         self.__rustylr_generated_terminal_stack.push(term);
     }
@@ -1190,6 +1194,7 @@ impl ::rusty_lr_core::GetContext<Lexed, GrammarNonTerminals> for GrammarContext 
     non_snake_case,
     unused_mut
 )]
+#[derive(Clone)]
 pub struct GrammarParser {
     #[doc = r" production rules"]
     pub rules: Vec<GrammarRule>,
@@ -1204,2375 +1209,26 @@ pub struct GrammarParser {
     unused_mut
 )]
 impl GrammarParser {
-    pub fn new() -> Self {
-        #[doc = r" make new terminal shift_map with pairs of (term, goto)"]
-        macro_rules ! __rustylr_generated_shift_term_extend { { $ shift_map : ident , ($ term : ident , $ stateid : literal) , $ (($ terms : ident , $ stateids : literal) ,) * } => { $ shift_map . insert ($ term ! () , $ stateid) ; __rustylr_generated_shift_term_extend ! { $ shift_map , $ (($ terms , $ stateids) ,) * } } ; { $ shift_map : ident , } => { } }
-        macro_rules ! __rustylr_generated_shift_term { { $ len : literal , $ (($ terms : ident , $ stateids : literal) ,) * } => { { let mut shift_map = :: rusty_lr_core :: HashMap :: default () ; shift_map . reserve ($ len) ; __rustylr_generated_shift_term_extend ! { shift_map , $ (($ terms , $ stateids) ,) * } shift_map } } ; }
-        #[doc = r" make new non-terminal shift_map with pairs of (nonterm, goto)"]
-        macro_rules ! __rustylr_generated_shift_nonterm_extend { { $ shift_map : ident , ($ nonterm : ident , $ stateid : literal) , $ (($ nonterms : ident , $ stateids : literal) ,) * } => { $ shift_map . insert (GrammarNonTerminals :: $ nonterm , $ stateid) ; __rustylr_generated_shift_nonterm_extend ! { $ shift_map , $ (($ nonterms , $ stateids) ,) * } } ; { $ shift_map : ident , } => { } }
-        macro_rules ! __rustylr_generated_shift_nonterm { { $ len : literal , $ (($ nonterms : ident , $ stateids : literal) ,) * } => { { let mut shift_map = :: rusty_lr_core :: HashMap :: default () ; shift_map . reserve ($ len) ; __rustylr_generated_shift_nonterm_extend ! { shift_map , $ (($ nonterms , $ stateids) ,) * } shift_map } } ; }
-        #[doc = r" make new reduce_map with pairs of (terminal_set, rule_id)"]
-        macro_rules ! __rustylr_generated_reduce_map_extend { { $ reduce_map : ident , ($ terminals : ident , $ ruleid : literal) , $ (($ terminals1 : ident , $ ruleid1 : literal) ,) * } => { for term in $ terminals . iter () { $ reduce_map . insert (term . clone () , $ ruleid) ; } __rustylr_generated_reduce_map_extend ! { $ reduce_map , $ (($ terminals1 , $ ruleid1) ,) * } } ; { $ reduce_map : ident , } => { } }
-        macro_rules ! __rustylr_generated_reduce_map { { $ len : literal , $ (($ terminals1 : ident , $ ruleid1 : literal) ,) * } => { { let mut reduce_map = :: rusty_lr_core :: HashMap :: default () ; reduce_map . reserve ($ len) ; __rustylr_generated_reduce_map_extend ! { reduce_map , $ (($ terminals1 , $ ruleid1) ,) * } reduce_map } } ; }
-        #[doc = r" make new LookaheadRuleRefSet with pairs of (ruleid, shifted)"]
-        macro_rules ! __rustylr_generated_ruleset { [$ ($ pairs : expr ,) *] => { { let rule_shifted_pairs = vec ! [$ ($ pairs) , *] ; std :: collections :: BTreeSet :: from_iter (rule_shifted_pairs . into_iter () . map (| (rule , shifted) : (usize , usize) | -> :: rusty_lr_core :: ShiftedRuleRef { :: rusty_lr_core :: ShiftedRuleRef { rule , shifted , } }) ,) } } }
-        macro_rules! __rustylr_ident {
-            () => {
-                Lexed::Ident(Ident::new("id", Span::call_site()))
+    #[doc = r" feed one terminal to parser, and update state stack"]
+    pub fn feed(&self, context: &mut GrammarContext, term: Lexed) -> Result<(), GrammarParseError> {
+        self.lookahead(context, &term)?;
+        let state = &self.states[*context.state_stack.last().unwrap()];
+        if let Some(next_state_id) = state.shift_goto_term(&term) {
+            context.state_stack.push(next_state_id);
+            context.push(term);
+            Ok(())
+        } else {
+            let error = GrammarInvalidTerminalError {
+                term,
+                expected: state.expected().into_iter().cloned().collect(),
             };
-        }
-        macro_rules! __rustylr_colon {
-            () => {
-                Lexed::Colon(punct!(':'))
-            };
-        }
-        macro_rules! __rustylr_semicolon {
-            () => {
-                Lexed::Semicolon(punct!(';'))
-            };
-        }
-        macro_rules! __rustylr_pipe {
-            () => {
-                Lexed::Pipe(punct!('|'))
-            };
-        }
-        macro_rules! __rustylr_percent {
-            () => {
-                Lexed::Percent(punct!('%'))
-            };
-        }
-        macro_rules! __rustylr_equal {
-            () => {
-                Lexed::Equal(punct!('='))
-            };
-        }
-        macro_rules! __rustylr_plus {
-            () => {
-                Lexed::Plus(punct!('+'))
-            };
-        }
-        macro_rules! __rustylr_star {
-            () => {
-                Lexed::Star(punct!('*'))
-            };
-        }
-        macro_rules! __rustylr_question {
-            () => {
-                Lexed::Question(punct!('?'))
-            };
-        }
-        macro_rules! __rustylr_caret {
-            () => {
-                Lexed::Caret(punct!('^'))
-            };
-        }
-        macro_rules! __rustylr_minus {
-            () => {
-                Lexed::Minus(punct!('-'))
-            };
-        }
-        macro_rules! __rustylr_exclamation {
-            () => {
-                Lexed::Exclamation(punct!('!'))
-            };
-        }
-        macro_rules! __rustylr_otherpunct {
-            () => {
-                Lexed::OtherPunct(punct!('.'))
-            };
-        }
-        macro_rules! __rustylr_literal {
-            () => {
-                Lexed::Literal(None)
-            };
-        }
-        macro_rules! __rustylr_parengroup {
-            () => {
-                Lexed::ParenGroup(None)
-            };
-        }
-        macro_rules! __rustylr_bracegroup {
-            () => {
-                Lexed::BraceGroup(None)
-            };
-        }
-        macro_rules! __rustylr_bracketgroup {
-            () => {
-                Lexed::BracketGroup(None)
-            };
-        }
-        macro_rules! __rustylr_nonegroup {
-            () => {
-                Lexed::NoneGroup(None)
-            };
-        }
-        macro_rules! __rustylr_lparen {
-            () => {
-                Lexed::LParen(Span::call_site())
-            };
-        }
-        macro_rules! __rustylr_rparen {
-            () => {
-                Lexed::RParen(Span::call_site())
-            };
-        }
-        macro_rules! __rustylr_lbrace {
-            () => {
-                Lexed::LBrace(Span::call_site())
-            };
-        }
-        macro_rules! __rustylr_rbrace {
-            () => {
-                Lexed::RBrace(Span::call_site())
-            };
-        }
-        macro_rules! __rustylr_lbracket {
-            () => {
-                Lexed::LBracket(Span::call_site())
-            };
-        }
-        macro_rules! __rustylr_rbracket {
-            () => {
-                Lexed::RBracket(Span::call_site())
-            };
-        }
-        macro_rules! __rustylr_left {
-            () => {
-                Lexed::Left(punct!('%'), Ident::new("id", Span::call_site()))
-            };
-        }
-        macro_rules! __rustylr_right {
-            () => {
-                Lexed::Right(punct!('%'), Ident::new("id", Span::call_site()))
-            };
-        }
-        macro_rules! __rustylr_token {
-            () => {
-                Lexed::Token(punct!('%'), Ident::new("id", Span::call_site()))
-            };
-        }
-        macro_rules! __rustylr_start {
-            () => {
-                Lexed::Start(punct!('%'), Ident::new("id", Span::call_site()))
-            };
-        }
-        macro_rules! __rustylr_eofdef {
-            () => {
-                Lexed::EofDef(punct!('%'), Ident::new("id", Span::call_site()))
-            };
-        }
-        macro_rules! __rustylr_tokentype {
-            () => {
-                Lexed::TokenType(punct!('%'), Ident::new("id", Span::call_site()))
-            };
-        }
-        macro_rules! __rustylr_userdata {
-            () => {
-                Lexed::UserData(punct!('%'), Ident::new("id", Span::call_site()))
-            };
-        }
-        macro_rules! __rustylr_errortype {
-            () => {
-                Lexed::ErrorType(punct!('%'), Ident::new("id", Span::call_site()))
-            };
-        }
-        macro_rules! __rustylr_moduleprefix {
-            () => {
-                Lexed::ModulePrefix(punct!('%'), Ident::new("id", Span::call_site()))
-            };
-        }
-        macro_rules! __rustylr_eof {
-            () => {
-                Lexed::Eof
-            };
-        }
-        let rules = vec![
-            GrammarRule {
-                name: GrammarNonTerminals::Rule,
-                rule: vec![
-                    ::rusty_lr_core::Token::Term(__rustylr_ident!()),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleType),
-                    ::rusty_lr_core::Token::Term(__rustylr_colon!()),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLines),
-                    ::rusty_lr_core::Token::Term(__rustylr_semicolon!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::RuleType,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_parengroup!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::RuleType,
-                rule: vec![],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::RuleLines,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLines),
-                    ::rusty_lr_core::Token::Term(__rustylr_pipe!()),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLine),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::RuleLines,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::RuleLine,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::RuleLine,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_RustyLRGenerated0),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Action),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated1,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::TokenMapped,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated1,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_RustyLRGenerated1),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TokenMapped),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated0,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_RustyLRGenerated1,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated0,
-                rule: vec![],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::TokenMapped,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::Pattern,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::TokenMapped,
-                rule: vec![
-                    ::rusty_lr_core::Token::Term(__rustylr_ident!()),
-                    ::rusty_lr_core::Token::Term(__rustylr_equal!()),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::TerminalSetItem,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_ident!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::TerminalSetItem,
-                rule: vec![
-                    ::rusty_lr_core::Token::Term(__rustylr_ident!()),
-                    ::rusty_lr_core::Token::Term(__rustylr_minus!()),
-                    ::rusty_lr_core::Token::Term(__rustylr_ident!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::TerminalSet,
-                rule: vec![
-                    ::rusty_lr_core::Token::Term(__rustylr_lbracket!()),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_RustyLRGenerated2),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_RustyLRGenerated3),
-                    ::rusty_lr_core::Token::Term(__rustylr_rbracket!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated2,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_caret!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated2,
-                rule: vec![],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated4,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::TerminalSetItem,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated4,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_RustyLRGenerated4),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalSetItem),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated3,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_RustyLRGenerated4,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated3,
-                rule: vec![],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Pattern,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_ident!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Pattern,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(__rustylr_plus!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Pattern,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(__rustylr_star!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Pattern,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(__rustylr_question!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Pattern,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(__rustylr_exclamation!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Pattern,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::TerminalSet,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Action,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_bracegroup!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Action,
-                rule: vec![],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::TokenDef,
-                rule: vec![
-                    ::rusty_lr_core::Token::Term(__rustylr_token!()),
-                    ::rusty_lr_core::Token::Term(__rustylr_ident!()),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(__rustylr_semicolon!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::RustCode,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_RustyLRGenerated5,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_bracegroup!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_bracketgroup!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_caret!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_colon!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_equal!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_exclamation!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_ident!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_literal!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_minus!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_nonegroup!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_otherpunct!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_parengroup!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_percent!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_pipe!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_plus!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_question!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated6,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_star!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated5,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_RustyLRGenerated6,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::_RustyLRGenerated5,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_RustyLRGenerated5),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_RustyLRGenerated6),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::StartDef,
-                rule: vec![
-                    ::rusty_lr_core::Token::Term(__rustylr_start!()),
-                    ::rusty_lr_core::Token::Term(__rustylr_ident!()),
-                    ::rusty_lr_core::Token::Term(__rustylr_semicolon!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::EofDef,
-                rule: vec![
-                    ::rusty_lr_core::Token::Term(__rustylr_eofdef!()),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(__rustylr_semicolon!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::TokenTypeDef,
-                rule: vec![
-                    ::rusty_lr_core::Token::Term(__rustylr_tokentype!()),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(__rustylr_semicolon!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::UserDataDef,
-                rule: vec![
-                    ::rusty_lr_core::Token::Term(__rustylr_userdata!()),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(__rustylr_semicolon!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::ReduceType,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_left!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::ReduceType,
-                rule: vec![::rusty_lr_core::Token::Term(__rustylr_right!())],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::ReduceDef,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::ReduceType),
-                    ::rusty_lr_core::Token::Term(__rustylr_ident!()),
-                    ::rusty_lr_core::Token::Term(__rustylr_semicolon!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::ReduceDef,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::ReduceType),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalSet),
-                    ::rusty_lr_core::Token::Term(__rustylr_semicolon!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::ErrorDef,
-                rule: vec![
-                    ::rusty_lr_core::Token::Term(__rustylr_errortype!()),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(__rustylr_semicolon!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::ModulePrefixDef,
-                rule: vec![
-                    ::rusty_lr_core::Token::Term(__rustylr_moduleprefix!()),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(__rustylr_semicolon!()),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Rule),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Rule)],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TokenDef),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::TokenDef,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::StartDef),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::StartDef,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::EofDef),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::EofDef)],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TokenTypeDef),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::TokenTypeDef,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::UserDataDef),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::UserDataDef,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::ReduceDef),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::ReduceDef,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::ErrorDef),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::ErrorDef,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::ModulePrefixDef),
-                ],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Grammar,
-                rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::ModulePrefixDef,
-                )],
-            },
-            GrammarRule {
-                name: GrammarNonTerminals::Augmented,
-                rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
-                    ::rusty_lr_core::Token::Term(__rustylr_eof!()),
-                ],
-            },
-        ];
-        let _rustylr_generated_terminals_0 = vec![
-            __rustylr_bracegroup!(),
-            __rustylr_bracketgroup!(),
-            __rustylr_caret!(),
-            __rustylr_colon!(),
-            __rustylr_equal!(),
-            __rustylr_exclamation!(),
-            __rustylr_ident!(),
-            __rustylr_literal!(),
-            __rustylr_minus!(),
-            __rustylr_nonegroup!(),
-            __rustylr_otherpunct!(),
-            __rustylr_parengroup!(),
-            __rustylr_percent!(),
-            __rustylr_pipe!(),
-            __rustylr_plus!(),
-            __rustylr_question!(),
-            __rustylr_semicolon!(),
-            __rustylr_star!(),
-        ];
-        let _rustylr_generated_terminals_1 = vec![
-            __rustylr_eof!(),
-            __rustylr_eofdef!(),
-            __rustylr_errortype!(),
-            __rustylr_ident!(),
-            __rustylr_left!(),
-            __rustylr_moduleprefix!(),
-            __rustylr_right!(),
-            __rustylr_start!(),
-            __rustylr_token!(),
-            __rustylr_tokentype!(),
-            __rustylr_userdata!(),
-        ];
-        let _rustylr_generated_terminals_2 = [__rustylr_semicolon!()];
-        let _rustylr_generated_terminals_3 = [__rustylr_colon!()];
-        let _rustylr_generated_terminals_4 = [__rustylr_bracegroup!(),
-            __rustylr_pipe!(),
-            __rustylr_semicolon!()];
-        let _rustylr_generated_terminals_5 = vec![
-            __rustylr_bracegroup!(),
-            __rustylr_exclamation!(),
-            __rustylr_ident!(),
-            __rustylr_lbracket!(),
-            __rustylr_pipe!(),
-            __rustylr_plus!(),
-            __rustylr_question!(),
-            __rustylr_semicolon!(),
-            __rustylr_star!(),
-        ];
-        let _rustylr_generated_terminals_6 = [__rustylr_ident!(), __rustylr_rbracket!()];
-        let _rustylr_generated_terminals_7 = [__rustylr_rbracket!()];
-        let _rustylr_generated_terminals_8 = [__rustylr_bracegroup!(),
-            __rustylr_ident!(),
-            __rustylr_lbracket!(),
-            __rustylr_pipe!(),
-            __rustylr_semicolon!()];
-        let _rustylr_generated_terminals_9 = [__rustylr_pipe!(), __rustylr_semicolon!()];
-        let _rustylr_generated_terminals_10 = [__rustylr_ident!(), __rustylr_lbracket!()];
-        let mut states = Vec::with_capacity(110usize);
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 10usize , (__rustylr_eofdef , 1usize) , (__rustylr_errortype , 24usize) , (__rustylr_ident , 27usize) , (__rustylr_left , 63usize) , (__rustylr_moduleprefix , 64usize) , (__rustylr_right , 67usize) , (__rustylr_start , 68usize) , (__rustylr_token , 71usize) , (__rustylr_tokentype , 75usize) , (__rustylr_userdata , 78usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 11usize , (EofDef , 81usize) , (ErrorDef , 82usize) , (Grammar , 83usize) , (ModulePrefixDef , 103usize) , (ReduceDef , 104usize) , (ReduceType , 89usize) , (Rule , 105usize) , (StartDef , 106usize) , (TokenDef , 107usize) , (TokenTypeDef , 108usize) , (UserDataDef , 109usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![
-                (0usize, 0usize),
-                (29usize, 0usize),
-                (50usize, 0usize),
-                (51usize, 0usize),
-                (52usize, 0usize),
-                (53usize, 0usize),
-                (54usize, 0usize),
-                (55usize, 0usize),
-                (56usize, 0usize),
-                (57usize, 0usize),
-                (58usize, 0usize),
-                (59usize, 0usize),
-                (60usize, 0usize),
-                (61usize, 0usize),
-                (62usize, 0usize),
-                (63usize, 0usize),
-                (64usize, 0usize),
-                (65usize, 0usize),
-                (66usize, 0usize),
-                (67usize, 0usize),
-                (68usize, 0usize),
-                (69usize, 0usize),
-                (70usize, 0usize),
-                (71usize, 0usize),
-                (72usize, 0usize),
-                (73usize, 0usize),
-                (74usize, 0usize),
-                (75usize, 0usize),
-                (76usize, 0usize),
-                (77usize, 0usize),
-                (78usize, 0usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 17usize , (__rustylr_bracegroup , 2usize) , (__rustylr_bracketgroup , 3usize) , (__rustylr_caret , 4usize) , (__rustylr_colon , 5usize) , (__rustylr_equal , 6usize) , (__rustylr_exclamation , 7usize) , (__rustylr_ident , 8usize) , (__rustylr_literal , 9usize) , (__rustylr_minus , 10usize) , (__rustylr_nonegroup , 11usize) , (__rustylr_otherpunct , 12usize) , (__rustylr_parengroup , 13usize) , (__rustylr_percent , 14usize) , (__rustylr_pipe , 15usize) , (__rustylr_plus , 16usize) , (__rustylr_question , 17usize) , (__rustylr_star , 18usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 3usize , (RustCode , 19usize) , (_RustyLRGenerated5 , 21usize) , (_RustyLRGenerated6 , 23usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![
-                (30usize, 0usize),
-                (31usize, 0usize),
-                (32usize, 0usize),
-                (33usize, 0usize),
-                (34usize, 0usize),
-                (35usize, 0usize),
-                (36usize, 0usize),
-                (37usize, 0usize),
-                (38usize, 0usize),
-                (39usize, 0usize),
-                (40usize, 0usize),
-                (41usize, 0usize),
-                (42usize, 0usize),
-                (43usize, 0usize),
-                (44usize, 0usize),
-                (45usize, 0usize),
-                (46usize, 0usize),
-                (47usize, 0usize),
-                (48usize, 0usize),
-                (49usize, 0usize),
-                (51usize, 1usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 31usize) , };
-            let ruleset = __rustylr_generated_ruleset![(31usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 32usize) , };
-            let ruleset = __rustylr_generated_ruleset![(32usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 33usize) , };
-            let ruleset = __rustylr_generated_ruleset![(33usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 34usize) , };
-            let ruleset = __rustylr_generated_ruleset![(34usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 35usize) , };
-            let ruleset = __rustylr_generated_ruleset![(35usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 36usize) , };
-            let ruleset = __rustylr_generated_ruleset![(36usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 37usize) , };
-            let ruleset = __rustylr_generated_ruleset![(37usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 38usize) , };
-            let ruleset = __rustylr_generated_ruleset![(38usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 39usize) , };
-            let ruleset = __rustylr_generated_ruleset![(39usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 40usize) , };
-            let ruleset = __rustylr_generated_ruleset![(40usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 41usize) , };
-            let ruleset = __rustylr_generated_ruleset![(41usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 42usize) , };
-            let ruleset = __rustylr_generated_ruleset![(42usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 43usize) , };
-            let ruleset = __rustylr_generated_ruleset![(43usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 44usize) , };
-            let ruleset = __rustylr_generated_ruleset![(44usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 45usize) , };
-            let ruleset = __rustylr_generated_ruleset![(45usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 46usize) , };
-            let ruleset = __rustylr_generated_ruleset![(46usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 47usize) , };
-            let ruleset = __rustylr_generated_ruleset![(47usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_semicolon , 20usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(51usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 51usize) , };
-            let ruleset = __rustylr_generated_ruleset![(51usize, 3usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 17usize , (__rustylr_bracegroup , 2usize) , (__rustylr_bracketgroup , 3usize) , (__rustylr_caret , 4usize) , (__rustylr_colon , 5usize) , (__rustylr_equal , 6usize) , (__rustylr_exclamation , 7usize) , (__rustylr_ident , 8usize) , (__rustylr_literal , 9usize) , (__rustylr_minus , 10usize) , (__rustylr_nonegroup , 11usize) , (__rustylr_otherpunct , 12usize) , (__rustylr_parengroup , 13usize) , (__rustylr_percent , 14usize) , (__rustylr_pipe , 15usize) , (__rustylr_plus , 16usize) , (__rustylr_question , 17usize) , (__rustylr_star , 18usize) , };
-            let shift_goto_map_nonterm =
-                __rustylr_generated_shift_nonterm! { 1usize , (_RustyLRGenerated6 , 22usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 1usize , (_rustylr_generated_terminals_2 , 30usize) , };
-            let ruleset = __rustylr_generated_ruleset![
-                (30usize, 1usize),
-                (31usize, 0usize),
-                (32usize, 0usize),
-                (33usize, 0usize),
-                (34usize, 0usize),
-                (35usize, 0usize),
-                (36usize, 0usize),
-                (37usize, 0usize),
-                (38usize, 0usize),
-                (39usize, 0usize),
-                (40usize, 0usize),
-                (41usize, 0usize),
-                (42usize, 0usize),
-                (43usize, 0usize),
-                (44usize, 0usize),
-                (45usize, 0usize),
-                (46usize, 0usize),
-                (47usize, 0usize),
-                (49usize, 1usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 49usize) , };
-            let ruleset = __rustylr_generated_ruleset![(49usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 18usize , (_rustylr_generated_terminals_0 , 48usize) , };
-            let ruleset = __rustylr_generated_ruleset![(48usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 17usize , (__rustylr_bracegroup , 2usize) , (__rustylr_bracketgroup , 3usize) , (__rustylr_caret , 4usize) , (__rustylr_colon , 5usize) , (__rustylr_equal , 6usize) , (__rustylr_exclamation , 7usize) , (__rustylr_ident , 8usize) , (__rustylr_literal , 9usize) , (__rustylr_minus , 10usize) , (__rustylr_nonegroup , 11usize) , (__rustylr_otherpunct , 12usize) , (__rustylr_parengroup , 13usize) , (__rustylr_percent , 14usize) , (__rustylr_pipe , 15usize) , (__rustylr_plus , 16usize) , (__rustylr_question , 17usize) , (__rustylr_star , 18usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 3usize , (RustCode , 25usize) , (_RustyLRGenerated5 , 21usize) , (_RustyLRGenerated6 , 23usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![
-                (30usize, 0usize),
-                (31usize, 0usize),
-                (32usize, 0usize),
-                (33usize, 0usize),
-                (34usize, 0usize),
-                (35usize, 0usize),
-                (36usize, 0usize),
-                (37usize, 0usize),
-                (38usize, 0usize),
-                (39usize, 0usize),
-                (40usize, 0usize),
-                (41usize, 0usize),
-                (42usize, 0usize),
-                (43usize, 0usize),
-                (44usize, 0usize),
-                (45usize, 0usize),
-                (46usize, 0usize),
-                (47usize, 0usize),
-                (48usize, 0usize),
-                (49usize, 0usize),
-                (58usize, 1usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_semicolon , 26usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(58usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 58usize) , };
-            let ruleset = __rustylr_generated_ruleset![(58usize, 3usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_parengroup , 28usize) , };
-            let shift_goto_map_nonterm =
-                __rustylr_generated_shift_nonterm! { 1usize , (RuleType , 29usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 1usize , (_rustylr_generated_terminals_3 , 2usize) , };
-            let ruleset =
-                __rustylr_generated_ruleset![(0usize, 1usize), (1usize, 0usize), (2usize, 0usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 1usize , (_rustylr_generated_terminals_3 , 1usize) , };
-            let ruleset = __rustylr_generated_ruleset![(1usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_colon , 30usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(0usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 2usize , (__rustylr_ident , 31usize) , (__rustylr_lbracket , 34usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 7usize , (Pattern , 51usize) , (RuleLine , 52usize) , (RuleLines , 53usize) , (TerminalSet , 50usize) , (TokenMapped , 56usize) , (_RustyLRGenerated0 , 57usize) , (_RustyLRGenerated1 , 60usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 3usize , (_rustylr_generated_terminals_4 , 9usize) , };
-            let ruleset = __rustylr_generated_ruleset![
-                (0usize, 3usize),
-                (3usize, 0usize),
-                (4usize, 0usize),
-                (5usize, 0usize),
-                (6usize, 0usize),
-                (7usize, 0usize),
-                (8usize, 0usize),
-                (9usize, 0usize),
-                (10usize, 0usize),
-                (11usize, 0usize),
-                (14usize, 0usize),
-                (21usize, 0usize),
-                (22usize, 0usize),
-                (23usize, 0usize),
-                (24usize, 0usize),
-                (25usize, 0usize),
-                (26usize, 0usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_equal , 32usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 9usize , (_rustylr_generated_terminals_5 , 21usize) , };
-            let ruleset = __rustylr_generated_ruleset![(11usize, 1usize), (21usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 2usize , (__rustylr_ident , 33usize) , (__rustylr_lbracket , 34usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 2usize , (Pattern , 45usize) , (TerminalSet , 50usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![
-                (11usize, 2usize),
-                (14usize, 0usize),
-                (21usize, 0usize),
-                (22usize, 0usize),
-                (23usize, 0usize),
-                (24usize, 0usize),
-                (25usize, 0usize),
-                (26usize, 0usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 9usize , (_rustylr_generated_terminals_5 , 21usize) , };
-            let ruleset = __rustylr_generated_ruleset![(21usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_caret , 35usize) , };
-            let shift_goto_map_nonterm =
-                __rustylr_generated_shift_nonterm! { 1usize , (_RustyLRGenerated2 , 36usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 2usize , (_rustylr_generated_terminals_6 , 16usize) , };
-            let ruleset = __rustylr_generated_ruleset![
-                (14usize, 1usize),
-                (15usize, 0usize),
-                (16usize, 0usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 2usize , (_rustylr_generated_terminals_6 , 15usize) , };
-            let ruleset = __rustylr_generated_ruleset![(15usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_ident , 37usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 3usize , (TerminalSetItem , 40usize) , (_RustyLRGenerated3 , 41usize) , (_RustyLRGenerated4 , 43usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 1usize , (_rustylr_generated_terminals_7 , 20usize) , };
-            let ruleset = __rustylr_generated_ruleset![
-                (12usize, 0usize),
-                (13usize, 0usize),
-                (14usize, 2usize),
-                (17usize, 0usize),
-                (18usize, 0usize),
-                (19usize, 0usize),
-                (20usize, 0usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_minus , 38usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 2usize , (_rustylr_generated_terminals_6 , 12usize) , };
-            let ruleset = __rustylr_generated_ruleset![(12usize, 1usize), (13usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_ident , 39usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(13usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 2usize , (_rustylr_generated_terminals_6 , 13usize) , };
-            let ruleset = __rustylr_generated_ruleset![(13usize, 3usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 2usize , (_rustylr_generated_terminals_6 , 17usize) , };
-            let ruleset = __rustylr_generated_ruleset![(17usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_rbracket , 42usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(14usize, 3usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 9usize , (_rustylr_generated_terminals_5 , 14usize) , };
-            let ruleset = __rustylr_generated_ruleset![(14usize, 4usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_ident , 37usize) , };
-            let shift_goto_map_nonterm =
-                __rustylr_generated_shift_nonterm! { 1usize , (TerminalSetItem , 44usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 1usize , (_rustylr_generated_terminals_7 , 19usize) , };
-            let ruleset = __rustylr_generated_ruleset![
-                (12usize, 0usize),
-                (13usize, 0usize),
-                (18usize, 1usize),
-                (19usize, 1usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 2usize , (_rustylr_generated_terminals_6 , 18usize) , };
-            let ruleset = __rustylr_generated_ruleset![(18usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 4usize , (__rustylr_exclamation , 46usize) , (__rustylr_plus , 47usize) , (__rustylr_question , 48usize) , (__rustylr_star , 49usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 5usize , (_rustylr_generated_terminals_8 , 11usize) , };
-            let ruleset = __rustylr_generated_ruleset![
-                (11usize, 3usize),
-                (22usize, 1usize),
-                (23usize, 1usize),
-                (24usize, 1usize),
-                (25usize, 1usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 9usize , (_rustylr_generated_terminals_5 , 25usize) , };
-            let ruleset = __rustylr_generated_ruleset![(25usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 9usize , (_rustylr_generated_terminals_5 , 22usize) , };
-            let ruleset = __rustylr_generated_ruleset![(22usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 9usize , (_rustylr_generated_terminals_5 , 24usize) , };
-            let ruleset = __rustylr_generated_ruleset![(24usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 9usize , (_rustylr_generated_terminals_5 , 23usize) , };
-            let ruleset = __rustylr_generated_ruleset![(23usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 9usize , (_rustylr_generated_terminals_5 , 26usize) , };
-            let ruleset = __rustylr_generated_ruleset![(26usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 4usize , (__rustylr_exclamation , 46usize) , (__rustylr_plus , 47usize) , (__rustylr_question , 48usize) , (__rustylr_star , 49usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 5usize , (_rustylr_generated_terminals_8 , 10usize) , };
-            let ruleset = __rustylr_generated_ruleset![
-                (10usize, 1usize),
-                (22usize, 1usize),
-                (23usize, 1usize),
-                (24usize, 1usize),
-                (25usize, 1usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 2usize , (_rustylr_generated_terminals_9 , 4usize) , };
-            let ruleset = __rustylr_generated_ruleset![(4usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 2usize , (__rustylr_pipe , 54usize) , (__rustylr_semicolon , 62usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(0usize, 4usize), (3usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 2usize , (__rustylr_ident , 31usize) , (__rustylr_lbracket , 34usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 6usize , (Pattern , 51usize) , (RuleLine , 55usize) , (TerminalSet , 50usize) , (TokenMapped , 56usize) , (_RustyLRGenerated0 , 57usize) , (_RustyLRGenerated1 , 60usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 3usize , (_rustylr_generated_terminals_4 , 9usize) , };
-            let ruleset = __rustylr_generated_ruleset![
-                (3usize, 2usize),
-                (5usize, 0usize),
-                (6usize, 0usize),
-                (7usize, 0usize),
-                (8usize, 0usize),
-                (9usize, 0usize),
-                (10usize, 0usize),
-                (11usize, 0usize),
-                (14usize, 0usize),
-                (21usize, 0usize),
-                (22usize, 0usize),
-                (23usize, 0usize),
-                (24usize, 0usize),
-                (25usize, 0usize),
-                (26usize, 0usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 2usize , (_rustylr_generated_terminals_9 , 3usize) , };
-            let ruleset = __rustylr_generated_ruleset![(3usize, 3usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 5usize , (_rustylr_generated_terminals_8 , 6usize) , };
-            let ruleset = __rustylr_generated_ruleset![(6usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_bracegroup , 58usize) , };
-            let shift_goto_map_nonterm =
-                __rustylr_generated_shift_nonterm! { 1usize , (Action , 59usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 2usize , (_rustylr_generated_terminals_9 , 28usize) , };
-            let ruleset = __rustylr_generated_ruleset![
-                (5usize, 1usize),
-                (27usize, 0usize),
-                (28usize, 0usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 2usize , (_rustylr_generated_terminals_9 , 27usize) , };
-            let ruleset = __rustylr_generated_ruleset![(27usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 2usize , (_rustylr_generated_terminals_9 , 5usize) , };
-            let ruleset = __rustylr_generated_ruleset![(5usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 2usize , (__rustylr_ident , 31usize) , (__rustylr_lbracket , 34usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 3usize , (Pattern , 51usize) , (TerminalSet , 50usize) , (TokenMapped , 61usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 3usize , (_rustylr_generated_terminals_4 , 8usize) , };
-            let ruleset = __rustylr_generated_ruleset![
-                (7usize, 1usize),
-                (8usize, 1usize),
-                (10usize, 0usize),
-                (11usize, 0usize),
-                (14usize, 0usize),
-                (21usize, 0usize),
-                (22usize, 0usize),
-                (23usize, 0usize),
-                (24usize, 0usize),
-                (25usize, 0usize),
-                (26usize, 0usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 5usize , (_rustylr_generated_terminals_8 , 7usize) , };
-            let ruleset = __rustylr_generated_ruleset![(7usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 0usize) , };
-            let ruleset = __rustylr_generated_ruleset![(0usize, 5usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 2usize , (_rustylr_generated_terminals_10 , 54usize) , };
-            let ruleset = __rustylr_generated_ruleset![(54usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 17usize , (__rustylr_bracegroup , 2usize) , (__rustylr_bracketgroup , 3usize) , (__rustylr_caret , 4usize) , (__rustylr_colon , 5usize) , (__rustylr_equal , 6usize) , (__rustylr_exclamation , 7usize) , (__rustylr_ident , 8usize) , (__rustylr_literal , 9usize) , (__rustylr_minus , 10usize) , (__rustylr_nonegroup , 11usize) , (__rustylr_otherpunct , 12usize) , (__rustylr_parengroup , 13usize) , (__rustylr_percent , 14usize) , (__rustylr_pipe , 15usize) , (__rustylr_plus , 16usize) , (__rustylr_question , 17usize) , (__rustylr_star , 18usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 3usize , (RustCode , 65usize) , (_RustyLRGenerated5 , 21usize) , (_RustyLRGenerated6 , 23usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![
-                (30usize, 0usize),
-                (31usize, 0usize),
-                (32usize, 0usize),
-                (33usize, 0usize),
-                (34usize, 0usize),
-                (35usize, 0usize),
-                (36usize, 0usize),
-                (37usize, 0usize),
-                (38usize, 0usize),
-                (39usize, 0usize),
-                (40usize, 0usize),
-                (41usize, 0usize),
-                (42usize, 0usize),
-                (43usize, 0usize),
-                (44usize, 0usize),
-                (45usize, 0usize),
-                (46usize, 0usize),
-                (47usize, 0usize),
-                (48usize, 0usize),
-                (49usize, 0usize),
-                (59usize, 1usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_semicolon , 66usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(59usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 59usize) , };
-            let ruleset = __rustylr_generated_ruleset![(59usize, 3usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 2usize , (_rustylr_generated_terminals_10 , 55usize) , };
-            let ruleset = __rustylr_generated_ruleset![(55usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_ident , 69usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(50usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_semicolon , 70usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(50usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 50usize) , };
-            let ruleset = __rustylr_generated_ruleset![(50usize, 3usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_ident , 72usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(29usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 17usize , (__rustylr_bracegroup , 2usize) , (__rustylr_bracketgroup , 3usize) , (__rustylr_caret , 4usize) , (__rustylr_colon , 5usize) , (__rustylr_equal , 6usize) , (__rustylr_exclamation , 7usize) , (__rustylr_ident , 8usize) , (__rustylr_literal , 9usize) , (__rustylr_minus , 10usize) , (__rustylr_nonegroup , 11usize) , (__rustylr_otherpunct , 12usize) , (__rustylr_parengroup , 13usize) , (__rustylr_percent , 14usize) , (__rustylr_pipe , 15usize) , (__rustylr_plus , 16usize) , (__rustylr_question , 17usize) , (__rustylr_star , 18usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 3usize , (RustCode , 73usize) , (_RustyLRGenerated5 , 21usize) , (_RustyLRGenerated6 , 23usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![
-                (29usize, 2usize),
-                (30usize, 0usize),
-                (31usize, 0usize),
-                (32usize, 0usize),
-                (33usize, 0usize),
-                (34usize, 0usize),
-                (35usize, 0usize),
-                (36usize, 0usize),
-                (37usize, 0usize),
-                (38usize, 0usize),
-                (39usize, 0usize),
-                (40usize, 0usize),
-                (41usize, 0usize),
-                (42usize, 0usize),
-                (43usize, 0usize),
-                (44usize, 0usize),
-                (45usize, 0usize),
-                (46usize, 0usize),
-                (47usize, 0usize),
-                (48usize, 0usize),
-                (49usize, 0usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_semicolon , 74usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(29usize, 3usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 29usize) , };
-            let ruleset = __rustylr_generated_ruleset![(29usize, 4usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 17usize , (__rustylr_bracegroup , 2usize) , (__rustylr_bracketgroup , 3usize) , (__rustylr_caret , 4usize) , (__rustylr_colon , 5usize) , (__rustylr_equal , 6usize) , (__rustylr_exclamation , 7usize) , (__rustylr_ident , 8usize) , (__rustylr_literal , 9usize) , (__rustylr_minus , 10usize) , (__rustylr_nonegroup , 11usize) , (__rustylr_otherpunct , 12usize) , (__rustylr_parengroup , 13usize) , (__rustylr_percent , 14usize) , (__rustylr_pipe , 15usize) , (__rustylr_plus , 16usize) , (__rustylr_question , 17usize) , (__rustylr_star , 18usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 3usize , (RustCode , 76usize) , (_RustyLRGenerated5 , 21usize) , (_RustyLRGenerated6 , 23usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![
-                (30usize, 0usize),
-                (31usize, 0usize),
-                (32usize, 0usize),
-                (33usize, 0usize),
-                (34usize, 0usize),
-                (35usize, 0usize),
-                (36usize, 0usize),
-                (37usize, 0usize),
-                (38usize, 0usize),
-                (39usize, 0usize),
-                (40usize, 0usize),
-                (41usize, 0usize),
-                (42usize, 0usize),
-                (43usize, 0usize),
-                (44usize, 0usize),
-                (45usize, 0usize),
-                (46usize, 0usize),
-                (47usize, 0usize),
-                (48usize, 0usize),
-                (49usize, 0usize),
-                (52usize, 1usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_semicolon , 77usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(52usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 52usize) , };
-            let ruleset = __rustylr_generated_ruleset![(52usize, 3usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 17usize , (__rustylr_bracegroup , 2usize) , (__rustylr_bracketgroup , 3usize) , (__rustylr_caret , 4usize) , (__rustylr_colon , 5usize) , (__rustylr_equal , 6usize) , (__rustylr_exclamation , 7usize) , (__rustylr_ident , 8usize) , (__rustylr_literal , 9usize) , (__rustylr_minus , 10usize) , (__rustylr_nonegroup , 11usize) , (__rustylr_otherpunct , 12usize) , (__rustylr_parengroup , 13usize) , (__rustylr_percent , 14usize) , (__rustylr_pipe , 15usize) , (__rustylr_plus , 16usize) , (__rustylr_question , 17usize) , (__rustylr_star , 18usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 3usize , (RustCode , 79usize) , (_RustyLRGenerated5 , 21usize) , (_RustyLRGenerated6 , 23usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![
-                (30usize, 0usize),
-                (31usize, 0usize),
-                (32usize, 0usize),
-                (33usize, 0usize),
-                (34usize, 0usize),
-                (35usize, 0usize),
-                (36usize, 0usize),
-                (37usize, 0usize),
-                (38usize, 0usize),
-                (39usize, 0usize),
-                (40usize, 0usize),
-                (41usize, 0usize),
-                (42usize, 0usize),
-                (43usize, 0usize),
-                (44usize, 0usize),
-                (45usize, 0usize),
-                (46usize, 0usize),
-                (47usize, 0usize),
-                (48usize, 0usize),
-                (49usize, 0usize),
-                (53usize, 1usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_semicolon , 80usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(53usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 53usize) , };
-            let ruleset = __rustylr_generated_ruleset![(53usize, 3usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 67usize) , };
-            let ruleset = __rustylr_generated_ruleset![(67usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 75usize) , };
-            let ruleset = __rustylr_generated_ruleset![(75usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 11usize , (__rustylr_eof , 84usize) , (__rustylr_eofdef , 1usize) , (__rustylr_errortype , 24usize) , (__rustylr_ident , 27usize) , (__rustylr_left , 63usize) , (__rustylr_moduleprefix , 64usize) , (__rustylr_right , 67usize) , (__rustylr_start , 68usize) , (__rustylr_token , 71usize) , (__rustylr_tokentype , 75usize) , (__rustylr_userdata , 78usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 10usize , (EofDef , 85usize) , (ErrorDef , 86usize) , (ModulePrefixDef , 87usize) , (ReduceDef , 88usize) , (ReduceType , 89usize) , (Rule , 98usize) , (StartDef , 99usize) , (TokenDef , 100usize) , (TokenTypeDef , 101usize) , (UserDataDef , 102usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![
-                (0usize, 0usize),
-                (29usize, 0usize),
-                (50usize, 0usize),
-                (51usize, 0usize),
-                (52usize, 0usize),
-                (53usize, 0usize),
-                (54usize, 0usize),
-                (55usize, 0usize),
-                (56usize, 0usize),
-                (57usize, 0usize),
-                (58usize, 0usize),
-                (59usize, 0usize),
-                (60usize, 1usize),
-                (62usize, 1usize),
-                (64usize, 1usize),
-                (66usize, 1usize),
-                (68usize, 1usize),
-                (70usize, 1usize),
-                (72usize, 1usize),
-                (74usize, 1usize),
-                (76usize, 1usize),
-                (78usize, 1usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(78usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 66usize) , };
-            let ruleset = __rustylr_generated_ruleset![(66usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 74usize) , };
-            let ruleset = __rustylr_generated_ruleset![(74usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 76usize) , };
-            let ruleset = __rustylr_generated_ruleset![(76usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 72usize) , };
-            let ruleset = __rustylr_generated_ruleset![(72usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 2usize , (__rustylr_ident , 90usize) , (__rustylr_lbracket , 92usize) , };
-            let shift_goto_map_nonterm =
-                __rustylr_generated_shift_nonterm! { 1usize , (TerminalSet , 96usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![
-                (14usize, 0usize),
-                (56usize, 1usize),
-                (57usize, 1usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_semicolon , 91usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(56usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 56usize) , };
-            let ruleset = __rustylr_generated_ruleset![(56usize, 3usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_caret , 35usize) , };
-            let shift_goto_map_nonterm =
-                __rustylr_generated_shift_nonterm! { 1usize , (_RustyLRGenerated2 , 93usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 2usize , (_rustylr_generated_terminals_6 , 16usize) , };
-            let ruleset = __rustylr_generated_ruleset![
-                (14usize, 1usize),
-                (15usize, 0usize),
-                (16usize, 0usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_ident , 37usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 3usize , (TerminalSetItem , 40usize) , (_RustyLRGenerated3 , 94usize) , (_RustyLRGenerated4 , 43usize) , };
-            let reduce_map = __rustylr_generated_reduce_map! { 1usize , (_rustylr_generated_terminals_7 , 20usize) , };
-            let ruleset = __rustylr_generated_ruleset![
-                (12usize, 0usize),
-                (13usize, 0usize),
-                (14usize, 2usize),
-                (17usize, 0usize),
-                (18usize, 0usize),
-                (19usize, 0usize),
-                (20usize, 0usize),
-            ];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_rbracket , 95usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(14usize, 3usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 1usize , (_rustylr_generated_terminals_2 , 14usize) , };
-            let ruleset = __rustylr_generated_ruleset![(14usize, 4usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term =
-                __rustylr_generated_shift_term! { 1usize , (__rustylr_semicolon , 97usize) , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 0usize , };
-            let ruleset = __rustylr_generated_ruleset![(57usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 57usize) , };
-            let ruleset = __rustylr_generated_ruleset![(57usize, 3usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 60usize) , };
-            let ruleset = __rustylr_generated_ruleset![(60usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 64usize) , };
-            let ruleset = __rustylr_generated_ruleset![(64usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 62usize) , };
-            let ruleset = __rustylr_generated_ruleset![(62usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 68usize) , };
-            let ruleset = __rustylr_generated_ruleset![(68usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 70usize) , };
-            let ruleset = __rustylr_generated_ruleset![(70usize, 2usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 77usize) , };
-            let ruleset = __rustylr_generated_ruleset![(77usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 73usize) , };
-            let ruleset = __rustylr_generated_ruleset![(73usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 61usize) , };
-            let ruleset = __rustylr_generated_ruleset![(61usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 65usize) , };
-            let ruleset = __rustylr_generated_ruleset![(65usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 63usize) , };
-            let ruleset = __rustylr_generated_ruleset![(63usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 69usize) , };
-            let ruleset = __rustylr_generated_ruleset![(69usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        {
-            let shift_goto_map_term = __rustylr_generated_shift_term! { 0usize , };
-            let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm! { 0usize , };
-            let reduce_map = __rustylr_generated_reduce_map! { 11usize , (_rustylr_generated_terminals_1 , 71usize) , };
-            let ruleset = __rustylr_generated_ruleset![(71usize, 1usize),];
-            states.push(GrammarState {
-                shift_goto_map_term,
-                shift_goto_map_nonterm,
-                reduce_map,
-                ruleset,
-            });
-        }
-        Self { rules, states }
+            Err(GrammarParseError::InvalidTerminal(error))
+        }
+    }
+    #[doc = r" Create new context for parsing"]
+    #[inline]
+    pub fn begin(&self) -> GrammarContext {
+        GrammarContext::new()
     }
     #[doc = r" give lookahead token to parser, and check if there is any reduce action"]
     fn lookahead(
@@ -3594,22 +1250,6 @@ impl GrammarParser {
         }
         Ok(())
     }
-    #[doc = r" feed one terminal to parser, and update state stack"]
-    pub fn feed(&self, context: &mut GrammarContext, term: Lexed) -> Result<(), GrammarParseError> {
-        self.lookahead(context, &term)?;
-        let state = &self.states[*context.state_stack.last().unwrap()];
-        if let Some(next_state_id) = state.shift_goto_term(&term) {
-            context.state_stack.push(next_state_id);
-            context.push(term);
-            Ok(())
-        } else {
-            let error = GrammarInvalidTerminalError {
-                term,
-                expected: state.expected().into_iter().cloned().collect(),
-            };
-            Err(GrammarParseError::InvalidTerminal(error))
-        }
-    }
     #[doc = r" feed one non-terminal to parser, and update state stack"]
     fn feed_nonterm(
         &self,
@@ -3619,13 +1259,1752 @@ impl GrammarParser {
         let state = &self.states[*context.state_stack.last().unwrap()];
         if let Some(next_state_id) = state.shift_goto_nonterm(nonterm) {
             context.state_stack.push(next_state_id);
-            Ok(())
         } else {
             unreachable!("Invalid NonTerminal: {}", nonterm);
         }
+        Ok(())
     }
-    pub fn begin(&self) -> GrammarContext {
-        GrammarContext::new()
+    #[doc = r" Create new parser instance."]
+    #[doc = r" Parser can be reused with different context, for multiple parsing."]
+    pub fn new() -> Self {
+        let __rustylr_terminals = vec![
+            Lexed::Ident(Ident::new("id", Span::call_site())),
+            Lexed::Colon(punct!(':')),
+            Lexed::Semicolon(punct!(';')),
+            Lexed::Pipe(punct!('|')),
+            Lexed::Percent(punct!('%')),
+            Lexed::Equal(punct!('=')),
+            Lexed::Plus(punct!('+')),
+            Lexed::Star(punct!('*')),
+            Lexed::Question(punct!('?')),
+            Lexed::Caret(punct!('^')),
+            Lexed::Minus(punct!('-')),
+            Lexed::Exclamation(punct!('!')),
+            Lexed::OtherPunct(punct!('.')),
+            Lexed::Literal(None),
+            Lexed::ParenGroup(None),
+            Lexed::BraceGroup(None),
+            Lexed::BracketGroup(None),
+            Lexed::NoneGroup(None),
+            Lexed::LParen(Span::call_site()),
+            Lexed::RParen(Span::call_site()),
+            Lexed::LBrace(Span::call_site()),
+            Lexed::RBrace(Span::call_site()),
+            Lexed::LBracket(Span::call_site()),
+            Lexed::RBracket(Span::call_site()),
+            Lexed::Left(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::Right(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::Token(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::Start(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::EofDef(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::TokenType(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::UserData(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::ErrorType(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::ModulePrefix(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::Eof,
+        ];
+        let rules: Vec<GrammarRule> = [
+            (
+                GrammarNonTerminals::Rule,
+                vec![
+                    ::rusty_lr_core::Token::Term(0usize),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleType),
+                    ::rusty_lr_core::Token::Term(1usize),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLines),
+                    ::rusty_lr_core::Token::Term(2usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::RuleType,
+                vec![::rusty_lr_core::Token::Term(14usize)],
+            ),
+            (GrammarNonTerminals::RuleType, vec![]),
+            (
+                GrammarNonTerminals::RuleLines,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLines),
+                    ::rusty_lr_core::Token::Term(3usize),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLine),
+                ],
+            ),
+            (
+                GrammarNonTerminals::RuleLines,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::RuleLine,
+                )],
+            ),
+            (
+                GrammarNonTerminals::RuleLine,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_RustyLRGenerated0),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Action),
+                ],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated1,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::TokenMapped,
+                )],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated1,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_RustyLRGenerated1),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TokenMapped),
+                ],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated0,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::_RustyLRGenerated1,
+                )],
+            ),
+            (GrammarNonTerminals::_RustyLRGenerated0, vec![]),
+            (
+                GrammarNonTerminals::TokenMapped,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::Pattern,
+                )],
+            ),
+            (
+                GrammarNonTerminals::TokenMapped,
+                vec![
+                    ::rusty_lr_core::Token::Term(0usize),
+                    ::rusty_lr_core::Token::Term(5usize),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
+                ],
+            ),
+            (
+                GrammarNonTerminals::TerminalSetItem,
+                vec![::rusty_lr_core::Token::Term(0usize)],
+            ),
+            (
+                GrammarNonTerminals::TerminalSetItem,
+                vec![
+                    ::rusty_lr_core::Token::Term(0usize),
+                    ::rusty_lr_core::Token::Term(10usize),
+                    ::rusty_lr_core::Token::Term(0usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::TerminalSet,
+                vec![
+                    ::rusty_lr_core::Token::Term(22usize),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_RustyLRGenerated2),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_RustyLRGenerated3),
+                    ::rusty_lr_core::Token::Term(23usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated2,
+                vec![::rusty_lr_core::Token::Term(9usize)],
+            ),
+            (GrammarNonTerminals::_RustyLRGenerated2, vec![]),
+            (
+                GrammarNonTerminals::_RustyLRGenerated4,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::TerminalSetItem,
+                )],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated4,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_RustyLRGenerated4),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalSetItem),
+                ],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated3,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::_RustyLRGenerated4,
+                )],
+            ),
+            (GrammarNonTerminals::_RustyLRGenerated3, vec![]),
+            (
+                GrammarNonTerminals::Pattern,
+                vec![::rusty_lr_core::Token::Term(0usize)],
+            ),
+            (
+                GrammarNonTerminals::Pattern,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
+                    ::rusty_lr_core::Token::Term(6usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::Pattern,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
+                    ::rusty_lr_core::Token::Term(7usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::Pattern,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
+                    ::rusty_lr_core::Token::Term(8usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::Pattern,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
+                    ::rusty_lr_core::Token::Term(11usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::Pattern,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::TerminalSet,
+                )],
+            ),
+            (
+                GrammarNonTerminals::Action,
+                vec![::rusty_lr_core::Token::Term(15usize)],
+            ),
+            (GrammarNonTerminals::Action, vec![]),
+            (
+                GrammarNonTerminals::TokenDef,
+                vec![
+                    ::rusty_lr_core::Token::Term(26usize),
+                    ::rusty_lr_core::Token::Term(0usize),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+                    ::rusty_lr_core::Token::Term(2usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::RustCode,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::_RustyLRGenerated5,
+                )],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(15usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(16usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(9usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(1usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(5usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(11usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(0usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(13usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(10usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(17usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(12usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(14usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(4usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(3usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(6usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(8usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated6,
+                vec![::rusty_lr_core::Token::Term(7usize)],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated5,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::_RustyLRGenerated6,
+                )],
+            ),
+            (
+                GrammarNonTerminals::_RustyLRGenerated5,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_RustyLRGenerated5),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_RustyLRGenerated6),
+                ],
+            ),
+            (
+                GrammarNonTerminals::StartDef,
+                vec![
+                    ::rusty_lr_core::Token::Term(27usize),
+                    ::rusty_lr_core::Token::Term(0usize),
+                    ::rusty_lr_core::Token::Term(2usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::EofDef,
+                vec![
+                    ::rusty_lr_core::Token::Term(28usize),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+                    ::rusty_lr_core::Token::Term(2usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::TokenTypeDef,
+                vec![
+                    ::rusty_lr_core::Token::Term(29usize),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+                    ::rusty_lr_core::Token::Term(2usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::UserDataDef,
+                vec![
+                    ::rusty_lr_core::Token::Term(30usize),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+                    ::rusty_lr_core::Token::Term(2usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::ReduceType,
+                vec![::rusty_lr_core::Token::Term(24usize)],
+            ),
+            (
+                GrammarNonTerminals::ReduceType,
+                vec![::rusty_lr_core::Token::Term(25usize)],
+            ),
+            (
+                GrammarNonTerminals::ReduceDef,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::ReduceType),
+                    ::rusty_lr_core::Token::Term(0usize),
+                    ::rusty_lr_core::Token::Term(2usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::ReduceDef,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::ReduceType),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalSet),
+                    ::rusty_lr_core::Token::Term(2usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::ErrorDef,
+                vec![
+                    ::rusty_lr_core::Token::Term(31usize),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+                    ::rusty_lr_core::Token::Term(2usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::ModulePrefixDef,
+                vec![
+                    ::rusty_lr_core::Token::Term(32usize),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+                    ::rusty_lr_core::Token::Term(2usize),
+                ],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Rule),
+                ],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Rule)],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TokenDef),
+                ],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::TokenDef,
+                )],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::StartDef),
+                ],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::StartDef,
+                )],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::EofDef),
+                ],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::EofDef)],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TokenTypeDef),
+                ],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::TokenTypeDef,
+                )],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::UserDataDef),
+                ],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::UserDataDef,
+                )],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::ReduceDef),
+                ],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::ReduceDef,
+                )],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::ErrorDef),
+                ],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::ErrorDef,
+                )],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::ModulePrefixDef),
+                ],
+            ),
+            (
+                GrammarNonTerminals::Grammar,
+                vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::ModulePrefixDef,
+                )],
+            ),
+            (
+                GrammarNonTerminals::Augmented,
+                vec![
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
+                    ::rusty_lr_core::Token::Term(33usize),
+                ],
+            ),
+        ]
+        .into_iter()
+        .map(|(name, tokens)| GrammarRule {
+            name,
+            rule: tokens
+                .into_iter()
+                .map(|token| match token {
+                    ::rusty_lr_core::Token::Term(term) => {
+                        ::rusty_lr_core::Token::Term(__rustylr_terminals[term].clone())
+                    }
+                    ::rusty_lr_core::Token::NonTerm(nonterm) => {
+                        ::rusty_lr_core::Token::NonTerm(nonterm)
+                    }
+                })
+                .collect(),
+        })
+        .collect();
+        let __rustylr_reduce_terminals = vec![
+            vec![
+                15usize, 16usize, 9usize, 1usize, 5usize, 11usize, 0usize, 13usize, 10usize,
+                17usize, 12usize, 14usize, 4usize, 3usize, 6usize, 8usize, 2usize, 7usize,
+            ],
+            vec![
+                33usize, 28usize, 31usize, 0usize, 24usize, 32usize, 25usize, 27usize, 26usize,
+                29usize, 30usize,
+            ],
+            vec![2usize],
+            vec![1usize],
+            vec![15usize, 3usize, 2usize],
+            vec![
+                15usize, 11usize, 0usize, 22usize, 3usize, 6usize, 8usize, 2usize, 7usize,
+            ],
+            vec![0usize, 23usize],
+            vec![23usize],
+            vec![15usize, 0usize, 22usize, 3usize, 2usize],
+            vec![3usize, 2usize],
+            vec![0usize, 22usize],
+        ];
+        let states: Vec<GrammarState> = [
+            (
+                vec![
+                    (28usize, 1usize),
+                    (31usize, 24usize),
+                    (0usize, 27usize),
+                    (24usize, 63usize),
+                    (32usize, 64usize),
+                    (25usize, 67usize),
+                    (27usize, 68usize),
+                    (26usize, 71usize),
+                    (29usize, 75usize),
+                    (30usize, 78usize),
+                ],
+                vec![
+                    (GrammarNonTerminals::EofDef, 81usize),
+                    (GrammarNonTerminals::ErrorDef, 82usize),
+                    (GrammarNonTerminals::Grammar, 83usize),
+                    (GrammarNonTerminals::ModulePrefixDef, 103usize),
+                    (GrammarNonTerminals::ReduceDef, 104usize),
+                    (GrammarNonTerminals::ReduceType, 89usize),
+                    (GrammarNonTerminals::Rule, 105usize),
+                    (GrammarNonTerminals::StartDef, 106usize),
+                    (GrammarNonTerminals::TokenDef, 107usize),
+                    (GrammarNonTerminals::TokenTypeDef, 108usize),
+                    (GrammarNonTerminals::UserDataDef, 109usize),
+                ],
+                vec![],
+                vec![
+                    (0usize, 0usize),
+                    (29usize, 0usize),
+                    (50usize, 0usize),
+                    (51usize, 0usize),
+                    (52usize, 0usize),
+                    (53usize, 0usize),
+                    (54usize, 0usize),
+                    (55usize, 0usize),
+                    (56usize, 0usize),
+                    (57usize, 0usize),
+                    (58usize, 0usize),
+                    (59usize, 0usize),
+                    (60usize, 0usize),
+                    (61usize, 0usize),
+                    (62usize, 0usize),
+                    (63usize, 0usize),
+                    (64usize, 0usize),
+                    (65usize, 0usize),
+                    (66usize, 0usize),
+                    (67usize, 0usize),
+                    (68usize, 0usize),
+                    (69usize, 0usize),
+                    (70usize, 0usize),
+                    (71usize, 0usize),
+                    (72usize, 0usize),
+                    (73usize, 0usize),
+                    (74usize, 0usize),
+                    (75usize, 0usize),
+                    (76usize, 0usize),
+                    (77usize, 0usize),
+                    (78usize, 0usize),
+                ],
+            ),
+            (
+                vec![
+                    (15usize, 2usize),
+                    (16usize, 3usize),
+                    (9usize, 4usize),
+                    (1usize, 5usize),
+                    (5usize, 6usize),
+                    (11usize, 7usize),
+                    (0usize, 8usize),
+                    (13usize, 9usize),
+                    (10usize, 10usize),
+                    (17usize, 11usize),
+                    (12usize, 12usize),
+                    (14usize, 13usize),
+                    (4usize, 14usize),
+                    (3usize, 15usize),
+                    (6usize, 16usize),
+                    (8usize, 17usize),
+                    (7usize, 18usize),
+                ],
+                vec![
+                    (GrammarNonTerminals::RustCode, 19usize),
+                    (GrammarNonTerminals::_RustyLRGenerated5, 21usize),
+                    (GrammarNonTerminals::_RustyLRGenerated6, 23usize),
+                ],
+                vec![],
+                vec![
+                    (30usize, 0usize),
+                    (31usize, 0usize),
+                    (32usize, 0usize),
+                    (33usize, 0usize),
+                    (34usize, 0usize),
+                    (35usize, 0usize),
+                    (36usize, 0usize),
+                    (37usize, 0usize),
+                    (38usize, 0usize),
+                    (39usize, 0usize),
+                    (40usize, 0usize),
+                    (41usize, 0usize),
+                    (42usize, 0usize),
+                    (43usize, 0usize),
+                    (44usize, 0usize),
+                    (45usize, 0usize),
+                    (46usize, 0usize),
+                    (47usize, 0usize),
+                    (48usize, 0usize),
+                    (49usize, 0usize),
+                    (51usize, 1usize),
+                ],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 31usize)],
+                vec![(31usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 32usize)],
+                vec![(32usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 33usize)],
+                vec![(33usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 34usize)],
+                vec![(34usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 35usize)],
+                vec![(35usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 36usize)],
+                vec![(36usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 37usize)],
+                vec![(37usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 38usize)],
+                vec![(38usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 39usize)],
+                vec![(39usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 40usize)],
+                vec![(40usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 41usize)],
+                vec![(41usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 42usize)],
+                vec![(42usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 43usize)],
+                vec![(43usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 44usize)],
+                vec![(44usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 45usize)],
+                vec![(45usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 46usize)],
+                vec![(46usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 47usize)],
+                vec![(47usize, 1usize)],
+            ),
+            (
+                vec![(2usize, 20usize)],
+                vec![],
+                vec![],
+                vec![(51usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 51usize)],
+                vec![(51usize, 3usize)],
+            ),
+            (
+                vec![
+                    (15usize, 2usize),
+                    (16usize, 3usize),
+                    (9usize, 4usize),
+                    (1usize, 5usize),
+                    (5usize, 6usize),
+                    (11usize, 7usize),
+                    (0usize, 8usize),
+                    (13usize, 9usize),
+                    (10usize, 10usize),
+                    (17usize, 11usize),
+                    (12usize, 12usize),
+                    (14usize, 13usize),
+                    (4usize, 14usize),
+                    (3usize, 15usize),
+                    (6usize, 16usize),
+                    (8usize, 17usize),
+                    (7usize, 18usize),
+                ],
+                vec![(GrammarNonTerminals::_RustyLRGenerated6, 22usize)],
+                vec![(2usize, 30usize)],
+                vec![
+                    (30usize, 1usize),
+                    (31usize, 0usize),
+                    (32usize, 0usize),
+                    (33usize, 0usize),
+                    (34usize, 0usize),
+                    (35usize, 0usize),
+                    (36usize, 0usize),
+                    (37usize, 0usize),
+                    (38usize, 0usize),
+                    (39usize, 0usize),
+                    (40usize, 0usize),
+                    (41usize, 0usize),
+                    (42usize, 0usize),
+                    (43usize, 0usize),
+                    (44usize, 0usize),
+                    (45usize, 0usize),
+                    (46usize, 0usize),
+                    (47usize, 0usize),
+                    (49usize, 1usize),
+                ],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 49usize)],
+                vec![(49usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(0usize, 48usize)],
+                vec![(48usize, 1usize)],
+            ),
+            (
+                vec![
+                    (15usize, 2usize),
+                    (16usize, 3usize),
+                    (9usize, 4usize),
+                    (1usize, 5usize),
+                    (5usize, 6usize),
+                    (11usize, 7usize),
+                    (0usize, 8usize),
+                    (13usize, 9usize),
+                    (10usize, 10usize),
+                    (17usize, 11usize),
+                    (12usize, 12usize),
+                    (14usize, 13usize),
+                    (4usize, 14usize),
+                    (3usize, 15usize),
+                    (6usize, 16usize),
+                    (8usize, 17usize),
+                    (7usize, 18usize),
+                ],
+                vec![
+                    (GrammarNonTerminals::RustCode, 25usize),
+                    (GrammarNonTerminals::_RustyLRGenerated5, 21usize),
+                    (GrammarNonTerminals::_RustyLRGenerated6, 23usize),
+                ],
+                vec![],
+                vec![
+                    (30usize, 0usize),
+                    (31usize, 0usize),
+                    (32usize, 0usize),
+                    (33usize, 0usize),
+                    (34usize, 0usize),
+                    (35usize, 0usize),
+                    (36usize, 0usize),
+                    (37usize, 0usize),
+                    (38usize, 0usize),
+                    (39usize, 0usize),
+                    (40usize, 0usize),
+                    (41usize, 0usize),
+                    (42usize, 0usize),
+                    (43usize, 0usize),
+                    (44usize, 0usize),
+                    (45usize, 0usize),
+                    (46usize, 0usize),
+                    (47usize, 0usize),
+                    (48usize, 0usize),
+                    (49usize, 0usize),
+                    (58usize, 1usize),
+                ],
+            ),
+            (
+                vec![(2usize, 26usize)],
+                vec![],
+                vec![],
+                vec![(58usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 58usize)],
+                vec![(58usize, 3usize)],
+            ),
+            (
+                vec![(14usize, 28usize)],
+                vec![(GrammarNonTerminals::RuleType, 29usize)],
+                vec![(3usize, 2usize)],
+                vec![(0usize, 1usize), (1usize, 0usize), (2usize, 0usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(3usize, 1usize)],
+                vec![(1usize, 1usize)],
+            ),
+            (
+                vec![(1usize, 30usize)],
+                vec![],
+                vec![],
+                vec![(0usize, 2usize)],
+            ),
+            (
+                vec![(0usize, 31usize), (22usize, 34usize)],
+                vec![
+                    (GrammarNonTerminals::Pattern, 51usize),
+                    (GrammarNonTerminals::RuleLine, 52usize),
+                    (GrammarNonTerminals::RuleLines, 53usize),
+                    (GrammarNonTerminals::TerminalSet, 50usize),
+                    (GrammarNonTerminals::TokenMapped, 56usize),
+                    (GrammarNonTerminals::_RustyLRGenerated0, 57usize),
+                    (GrammarNonTerminals::_RustyLRGenerated1, 60usize),
+                ],
+                vec![(4usize, 9usize)],
+                vec![
+                    (0usize, 3usize),
+                    (3usize, 0usize),
+                    (4usize, 0usize),
+                    (5usize, 0usize),
+                    (6usize, 0usize),
+                    (7usize, 0usize),
+                    (8usize, 0usize),
+                    (9usize, 0usize),
+                    (10usize, 0usize),
+                    (11usize, 0usize),
+                    (14usize, 0usize),
+                    (21usize, 0usize),
+                    (22usize, 0usize),
+                    (23usize, 0usize),
+                    (24usize, 0usize),
+                    (25usize, 0usize),
+                    (26usize, 0usize),
+                ],
+            ),
+            (
+                vec![(5usize, 32usize)],
+                vec![],
+                vec![(5usize, 21usize)],
+                vec![(11usize, 1usize), (21usize, 1usize)],
+            ),
+            (
+                vec![(0usize, 33usize), (22usize, 34usize)],
+                vec![
+                    (GrammarNonTerminals::Pattern, 45usize),
+                    (GrammarNonTerminals::TerminalSet, 50usize),
+                ],
+                vec![],
+                vec![
+                    (11usize, 2usize),
+                    (14usize, 0usize),
+                    (21usize, 0usize),
+                    (22usize, 0usize),
+                    (23usize, 0usize),
+                    (24usize, 0usize),
+                    (25usize, 0usize),
+                    (26usize, 0usize),
+                ],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(5usize, 21usize)],
+                vec![(21usize, 1usize)],
+            ),
+            (
+                vec![(9usize, 35usize)],
+                vec![(GrammarNonTerminals::_RustyLRGenerated2, 36usize)],
+                vec![(6usize, 16usize)],
+                vec![(14usize, 1usize), (15usize, 0usize), (16usize, 0usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(6usize, 15usize)],
+                vec![(15usize, 1usize)],
+            ),
+            (
+                vec![(0usize, 37usize)],
+                vec![
+                    (GrammarNonTerminals::TerminalSetItem, 40usize),
+                    (GrammarNonTerminals::_RustyLRGenerated3, 41usize),
+                    (GrammarNonTerminals::_RustyLRGenerated4, 43usize),
+                ],
+                vec![(7usize, 20usize)],
+                vec![
+                    (12usize, 0usize),
+                    (13usize, 0usize),
+                    (14usize, 2usize),
+                    (17usize, 0usize),
+                    (18usize, 0usize),
+                    (19usize, 0usize),
+                    (20usize, 0usize),
+                ],
+            ),
+            (
+                vec![(10usize, 38usize)],
+                vec![],
+                vec![(6usize, 12usize)],
+                vec![(12usize, 1usize), (13usize, 1usize)],
+            ),
+            (
+                vec![(0usize, 39usize)],
+                vec![],
+                vec![],
+                vec![(13usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(6usize, 13usize)],
+                vec![(13usize, 3usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(6usize, 17usize)],
+                vec![(17usize, 1usize)],
+            ),
+            (
+                vec![(23usize, 42usize)],
+                vec![],
+                vec![],
+                vec![(14usize, 3usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(5usize, 14usize)],
+                vec![(14usize, 4usize)],
+            ),
+            (
+                vec![(0usize, 37usize)],
+                vec![(GrammarNonTerminals::TerminalSetItem, 44usize)],
+                vec![(7usize, 19usize)],
+                vec![
+                    (12usize, 0usize),
+                    (13usize, 0usize),
+                    (18usize, 1usize),
+                    (19usize, 1usize),
+                ],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(6usize, 18usize)],
+                vec![(18usize, 2usize)],
+            ),
+            (
+                vec![
+                    (11usize, 46usize),
+                    (6usize, 47usize),
+                    (8usize, 48usize),
+                    (7usize, 49usize),
+                ],
+                vec![],
+                vec![(8usize, 11usize)],
+                vec![
+                    (11usize, 3usize),
+                    (22usize, 1usize),
+                    (23usize, 1usize),
+                    (24usize, 1usize),
+                    (25usize, 1usize),
+                ],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(5usize, 25usize)],
+                vec![(25usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(5usize, 22usize)],
+                vec![(22usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(5usize, 24usize)],
+                vec![(24usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(5usize, 23usize)],
+                vec![(23usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(5usize, 26usize)],
+                vec![(26usize, 1usize)],
+            ),
+            (
+                vec![
+                    (11usize, 46usize),
+                    (6usize, 47usize),
+                    (8usize, 48usize),
+                    (7usize, 49usize),
+                ],
+                vec![],
+                vec![(8usize, 10usize)],
+                vec![
+                    (10usize, 1usize),
+                    (22usize, 1usize),
+                    (23usize, 1usize),
+                    (24usize, 1usize),
+                    (25usize, 1usize),
+                ],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(9usize, 4usize)],
+                vec![(4usize, 1usize)],
+            ),
+            (
+                vec![(3usize, 54usize), (2usize, 62usize)],
+                vec![],
+                vec![],
+                vec![(0usize, 4usize), (3usize, 1usize)],
+            ),
+            (
+                vec![(0usize, 31usize), (22usize, 34usize)],
+                vec![
+                    (GrammarNonTerminals::Pattern, 51usize),
+                    (GrammarNonTerminals::RuleLine, 55usize),
+                    (GrammarNonTerminals::TerminalSet, 50usize),
+                    (GrammarNonTerminals::TokenMapped, 56usize),
+                    (GrammarNonTerminals::_RustyLRGenerated0, 57usize),
+                    (GrammarNonTerminals::_RustyLRGenerated1, 60usize),
+                ],
+                vec![(4usize, 9usize)],
+                vec![
+                    (3usize, 2usize),
+                    (5usize, 0usize),
+                    (6usize, 0usize),
+                    (7usize, 0usize),
+                    (8usize, 0usize),
+                    (9usize, 0usize),
+                    (10usize, 0usize),
+                    (11usize, 0usize),
+                    (14usize, 0usize),
+                    (21usize, 0usize),
+                    (22usize, 0usize),
+                    (23usize, 0usize),
+                    (24usize, 0usize),
+                    (25usize, 0usize),
+                    (26usize, 0usize),
+                ],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(9usize, 3usize)],
+                vec![(3usize, 3usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(8usize, 6usize)],
+                vec![(6usize, 1usize)],
+            ),
+            (
+                vec![(15usize, 58usize)],
+                vec![(GrammarNonTerminals::Action, 59usize)],
+                vec![(9usize, 28usize)],
+                vec![(5usize, 1usize), (27usize, 0usize), (28usize, 0usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(9usize, 27usize)],
+                vec![(27usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(9usize, 5usize)],
+                vec![(5usize, 2usize)],
+            ),
+            (
+                vec![(0usize, 31usize), (22usize, 34usize)],
+                vec![
+                    (GrammarNonTerminals::Pattern, 51usize),
+                    (GrammarNonTerminals::TerminalSet, 50usize),
+                    (GrammarNonTerminals::TokenMapped, 61usize),
+                ],
+                vec![(4usize, 8usize)],
+                vec![
+                    (7usize, 1usize),
+                    (8usize, 1usize),
+                    (10usize, 0usize),
+                    (11usize, 0usize),
+                    (14usize, 0usize),
+                    (21usize, 0usize),
+                    (22usize, 0usize),
+                    (23usize, 0usize),
+                    (24usize, 0usize),
+                    (25usize, 0usize),
+                    (26usize, 0usize),
+                ],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(8usize, 7usize)],
+                vec![(7usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 0usize)],
+                vec![(0usize, 5usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(10usize, 54usize)],
+                vec![(54usize, 1usize)],
+            ),
+            (
+                vec![
+                    (15usize, 2usize),
+                    (16usize, 3usize),
+                    (9usize, 4usize),
+                    (1usize, 5usize),
+                    (5usize, 6usize),
+                    (11usize, 7usize),
+                    (0usize, 8usize),
+                    (13usize, 9usize),
+                    (10usize, 10usize),
+                    (17usize, 11usize),
+                    (12usize, 12usize),
+                    (14usize, 13usize),
+                    (4usize, 14usize),
+                    (3usize, 15usize),
+                    (6usize, 16usize),
+                    (8usize, 17usize),
+                    (7usize, 18usize),
+                ],
+                vec![
+                    (GrammarNonTerminals::RustCode, 65usize),
+                    (GrammarNonTerminals::_RustyLRGenerated5, 21usize),
+                    (GrammarNonTerminals::_RustyLRGenerated6, 23usize),
+                ],
+                vec![],
+                vec![
+                    (30usize, 0usize),
+                    (31usize, 0usize),
+                    (32usize, 0usize),
+                    (33usize, 0usize),
+                    (34usize, 0usize),
+                    (35usize, 0usize),
+                    (36usize, 0usize),
+                    (37usize, 0usize),
+                    (38usize, 0usize),
+                    (39usize, 0usize),
+                    (40usize, 0usize),
+                    (41usize, 0usize),
+                    (42usize, 0usize),
+                    (43usize, 0usize),
+                    (44usize, 0usize),
+                    (45usize, 0usize),
+                    (46usize, 0usize),
+                    (47usize, 0usize),
+                    (48usize, 0usize),
+                    (49usize, 0usize),
+                    (59usize, 1usize),
+                ],
+            ),
+            (
+                vec![(2usize, 66usize)],
+                vec![],
+                vec![],
+                vec![(59usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 59usize)],
+                vec![(59usize, 3usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(10usize, 55usize)],
+                vec![(55usize, 1usize)],
+            ),
+            (
+                vec![(0usize, 69usize)],
+                vec![],
+                vec![],
+                vec![(50usize, 1usize)],
+            ),
+            (
+                vec![(2usize, 70usize)],
+                vec![],
+                vec![],
+                vec![(50usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 50usize)],
+                vec![(50usize, 3usize)],
+            ),
+            (
+                vec![(0usize, 72usize)],
+                vec![],
+                vec![],
+                vec![(29usize, 1usize)],
+            ),
+            (
+                vec![
+                    (15usize, 2usize),
+                    (16usize, 3usize),
+                    (9usize, 4usize),
+                    (1usize, 5usize),
+                    (5usize, 6usize),
+                    (11usize, 7usize),
+                    (0usize, 8usize),
+                    (13usize, 9usize),
+                    (10usize, 10usize),
+                    (17usize, 11usize),
+                    (12usize, 12usize),
+                    (14usize, 13usize),
+                    (4usize, 14usize),
+                    (3usize, 15usize),
+                    (6usize, 16usize),
+                    (8usize, 17usize),
+                    (7usize, 18usize),
+                ],
+                vec![
+                    (GrammarNonTerminals::RustCode, 73usize),
+                    (GrammarNonTerminals::_RustyLRGenerated5, 21usize),
+                    (GrammarNonTerminals::_RustyLRGenerated6, 23usize),
+                ],
+                vec![],
+                vec![
+                    (29usize, 2usize),
+                    (30usize, 0usize),
+                    (31usize, 0usize),
+                    (32usize, 0usize),
+                    (33usize, 0usize),
+                    (34usize, 0usize),
+                    (35usize, 0usize),
+                    (36usize, 0usize),
+                    (37usize, 0usize),
+                    (38usize, 0usize),
+                    (39usize, 0usize),
+                    (40usize, 0usize),
+                    (41usize, 0usize),
+                    (42usize, 0usize),
+                    (43usize, 0usize),
+                    (44usize, 0usize),
+                    (45usize, 0usize),
+                    (46usize, 0usize),
+                    (47usize, 0usize),
+                    (48usize, 0usize),
+                    (49usize, 0usize),
+                ],
+            ),
+            (
+                vec![(2usize, 74usize)],
+                vec![],
+                vec![],
+                vec![(29usize, 3usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 29usize)],
+                vec![(29usize, 4usize)],
+            ),
+            (
+                vec![
+                    (15usize, 2usize),
+                    (16usize, 3usize),
+                    (9usize, 4usize),
+                    (1usize, 5usize),
+                    (5usize, 6usize),
+                    (11usize, 7usize),
+                    (0usize, 8usize),
+                    (13usize, 9usize),
+                    (10usize, 10usize),
+                    (17usize, 11usize),
+                    (12usize, 12usize),
+                    (14usize, 13usize),
+                    (4usize, 14usize),
+                    (3usize, 15usize),
+                    (6usize, 16usize),
+                    (8usize, 17usize),
+                    (7usize, 18usize),
+                ],
+                vec![
+                    (GrammarNonTerminals::RustCode, 76usize),
+                    (GrammarNonTerminals::_RustyLRGenerated5, 21usize),
+                    (GrammarNonTerminals::_RustyLRGenerated6, 23usize),
+                ],
+                vec![],
+                vec![
+                    (30usize, 0usize),
+                    (31usize, 0usize),
+                    (32usize, 0usize),
+                    (33usize, 0usize),
+                    (34usize, 0usize),
+                    (35usize, 0usize),
+                    (36usize, 0usize),
+                    (37usize, 0usize),
+                    (38usize, 0usize),
+                    (39usize, 0usize),
+                    (40usize, 0usize),
+                    (41usize, 0usize),
+                    (42usize, 0usize),
+                    (43usize, 0usize),
+                    (44usize, 0usize),
+                    (45usize, 0usize),
+                    (46usize, 0usize),
+                    (47usize, 0usize),
+                    (48usize, 0usize),
+                    (49usize, 0usize),
+                    (52usize, 1usize),
+                ],
+            ),
+            (
+                vec![(2usize, 77usize)],
+                vec![],
+                vec![],
+                vec![(52usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 52usize)],
+                vec![(52usize, 3usize)],
+            ),
+            (
+                vec![
+                    (15usize, 2usize),
+                    (16usize, 3usize),
+                    (9usize, 4usize),
+                    (1usize, 5usize),
+                    (5usize, 6usize),
+                    (11usize, 7usize),
+                    (0usize, 8usize),
+                    (13usize, 9usize),
+                    (10usize, 10usize),
+                    (17usize, 11usize),
+                    (12usize, 12usize),
+                    (14usize, 13usize),
+                    (4usize, 14usize),
+                    (3usize, 15usize),
+                    (6usize, 16usize),
+                    (8usize, 17usize),
+                    (7usize, 18usize),
+                ],
+                vec![
+                    (GrammarNonTerminals::RustCode, 79usize),
+                    (GrammarNonTerminals::_RustyLRGenerated5, 21usize),
+                    (GrammarNonTerminals::_RustyLRGenerated6, 23usize),
+                ],
+                vec![],
+                vec![
+                    (30usize, 0usize),
+                    (31usize, 0usize),
+                    (32usize, 0usize),
+                    (33usize, 0usize),
+                    (34usize, 0usize),
+                    (35usize, 0usize),
+                    (36usize, 0usize),
+                    (37usize, 0usize),
+                    (38usize, 0usize),
+                    (39usize, 0usize),
+                    (40usize, 0usize),
+                    (41usize, 0usize),
+                    (42usize, 0usize),
+                    (43usize, 0usize),
+                    (44usize, 0usize),
+                    (45usize, 0usize),
+                    (46usize, 0usize),
+                    (47usize, 0usize),
+                    (48usize, 0usize),
+                    (49usize, 0usize),
+                    (53usize, 1usize),
+                ],
+            ),
+            (
+                vec![(2usize, 80usize)],
+                vec![],
+                vec![],
+                vec![(53usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 53usize)],
+                vec![(53usize, 3usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 67usize)],
+                vec![(67usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 75usize)],
+                vec![(75usize, 1usize)],
+            ),
+            (
+                vec![
+                    (33usize, 84usize),
+                    (28usize, 1usize),
+                    (31usize, 24usize),
+                    (0usize, 27usize),
+                    (24usize, 63usize),
+                    (32usize, 64usize),
+                    (25usize, 67usize),
+                    (27usize, 68usize),
+                    (26usize, 71usize),
+                    (29usize, 75usize),
+                    (30usize, 78usize),
+                ],
+                vec![
+                    (GrammarNonTerminals::EofDef, 85usize),
+                    (GrammarNonTerminals::ErrorDef, 86usize),
+                    (GrammarNonTerminals::ModulePrefixDef, 87usize),
+                    (GrammarNonTerminals::ReduceDef, 88usize),
+                    (GrammarNonTerminals::ReduceType, 89usize),
+                    (GrammarNonTerminals::Rule, 98usize),
+                    (GrammarNonTerminals::StartDef, 99usize),
+                    (GrammarNonTerminals::TokenDef, 100usize),
+                    (GrammarNonTerminals::TokenTypeDef, 101usize),
+                    (GrammarNonTerminals::UserDataDef, 102usize),
+                ],
+                vec![],
+                vec![
+                    (0usize, 0usize),
+                    (29usize, 0usize),
+                    (50usize, 0usize),
+                    (51usize, 0usize),
+                    (52usize, 0usize),
+                    (53usize, 0usize),
+                    (54usize, 0usize),
+                    (55usize, 0usize),
+                    (56usize, 0usize),
+                    (57usize, 0usize),
+                    (58usize, 0usize),
+                    (59usize, 0usize),
+                    (60usize, 1usize),
+                    (62usize, 1usize),
+                    (64usize, 1usize),
+                    (66usize, 1usize),
+                    (68usize, 1usize),
+                    (70usize, 1usize),
+                    (72usize, 1usize),
+                    (74usize, 1usize),
+                    (76usize, 1usize),
+                    (78usize, 1usize),
+                ],
+            ),
+            (vec![], vec![], vec![], vec![(78usize, 2usize)]),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 66usize)],
+                vec![(66usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 74usize)],
+                vec![(74usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 76usize)],
+                vec![(76usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 72usize)],
+                vec![(72usize, 2usize)],
+            ),
+            (
+                vec![(0usize, 90usize), (22usize, 92usize)],
+                vec![(GrammarNonTerminals::TerminalSet, 96usize)],
+                vec![],
+                vec![(14usize, 0usize), (56usize, 1usize), (57usize, 1usize)],
+            ),
+            (
+                vec![(2usize, 91usize)],
+                vec![],
+                vec![],
+                vec![(56usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 56usize)],
+                vec![(56usize, 3usize)],
+            ),
+            (
+                vec![(9usize, 35usize)],
+                vec![(GrammarNonTerminals::_RustyLRGenerated2, 93usize)],
+                vec![(6usize, 16usize)],
+                vec![(14usize, 1usize), (15usize, 0usize), (16usize, 0usize)],
+            ),
+            (
+                vec![(0usize, 37usize)],
+                vec![
+                    (GrammarNonTerminals::TerminalSetItem, 40usize),
+                    (GrammarNonTerminals::_RustyLRGenerated3, 94usize),
+                    (GrammarNonTerminals::_RustyLRGenerated4, 43usize),
+                ],
+                vec![(7usize, 20usize)],
+                vec![
+                    (12usize, 0usize),
+                    (13usize, 0usize),
+                    (14usize, 2usize),
+                    (17usize, 0usize),
+                    (18usize, 0usize),
+                    (19usize, 0usize),
+                    (20usize, 0usize),
+                ],
+            ),
+            (
+                vec![(23usize, 95usize)],
+                vec![],
+                vec![],
+                vec![(14usize, 3usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(2usize, 14usize)],
+                vec![(14usize, 4usize)],
+            ),
+            (
+                vec![(2usize, 97usize)],
+                vec![],
+                vec![],
+                vec![(57usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 57usize)],
+                vec![(57usize, 3usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 60usize)],
+                vec![(60usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 64usize)],
+                vec![(64usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 62usize)],
+                vec![(62usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 68usize)],
+                vec![(68usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 70usize)],
+                vec![(70usize, 2usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 77usize)],
+                vec![(77usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 73usize)],
+                vec![(73usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 61usize)],
+                vec![(61usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 65usize)],
+                vec![(65usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 63usize)],
+                vec![(63usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 69usize)],
+                vec![(69usize, 1usize)],
+            ),
+            (
+                vec![],
+                vec![],
+                vec![(1usize, 71usize)],
+                vec![(71usize, 1usize)],
+            ),
+        ]
+        .into_iter()
+        .map(
+            |(shift_goto_map_term, shift_goto_map_nonterm, reduce_map_init, ruleset)| {
+                let mut reduce_map = ::rusty_lr_core::HashMap::default();
+                for (terminal_set_id, ruleid) in reduce_map_init.into_iter() {
+                    for term_idx in __rustylr_reduce_terminals[terminal_set_id].iter() {
+                        reduce_map.insert(__rustylr_terminals[*term_idx].clone(), ruleid);
+                    }
+                }
+                GrammarState {
+                    shift_goto_map_term: shift_goto_map_term
+                        .into_iter()
+                        .map(|(term_idx, goto)| (__rustylr_terminals[term_idx].clone(), goto))
+                        .collect(),
+                    shift_goto_map_nonterm: shift_goto_map_nonterm.into_iter().collect(),
+                    reduce_map,
+                    ruleset: ruleset
+                        .into_iter()
+                        .map(|(ruleid, shifted)| ::rusty_lr_core::ShiftedRuleRef {
+                            rule: ruleid,
+                            shifted,
+                        })
+                        .collect(),
+                }
+            },
+        )
+        .collect();
+        Self { rules, states }
     }
 }
 impl ::rusty_lr_core::GetParser<Lexed, GrammarNonTerminals> for GrammarParser {

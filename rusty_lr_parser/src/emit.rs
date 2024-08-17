@@ -88,8 +88,6 @@ impl Grammar {
     }
     // build grammar at compile time
     fn emit_grammar_compiletime(&self, lalr: bool) -> Result<TokenStream, Box<EmitError>> {
-        let module_prefix = &self.module_prefix;
-
         let mut grammar = self.create_grammar();
 
         // build
@@ -138,251 +136,206 @@ impl Grammar {
             },
         };
 
+        let module_prefix = &self.module_prefix;
         let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
         let rule_typename = format_ident!("{}Rule", &self.start_rule_name);
         let state_typename = format_ident!("{}State", &self.start_rule_name);
 
-        let mut write_macros = quote! {
-            /// make new terminal shift_map with pairs of (term, goto)
-            macro_rules! __rustylr_generated_shift_term_extend {
-                    {$shift_map:ident, ($term:ident, $stateid:literal), $(($terms:ident, $stateids:literal),)*} => {
-                        $shift_map.insert( $term!(), $stateid );
-                        __rustylr_generated_shift_term_extend!{ $shift_map, $(($terms, $stateids),)* }
-                    };
-                    {$shift_map:ident, } => {}
-                }
-            macro_rules! __rustylr_generated_shift_term {
-                    {$len: literal, $(($terms:ident, $stateids:literal),)* } => {
-                        {
-                            let mut shift_map = #module_prefix::HashMap::default();
-                            shift_map.reserve($len);
-                            __rustylr_generated_shift_term_extend!{ shift_map, $(($terms, $stateids),)* }
-                            shift_map
-                        }
-                    };
-                }
-
-            /// make new non-terminal shift_map with pairs of (nonterm, goto)
-            macro_rules! __rustylr_generated_shift_nonterm_extend {
-                    {$shift_map:ident, ($nonterm:ident, $stateid:literal), $(($nonterms:ident, $stateids:literal),)*} => {
-                        $shift_map.insert( #nonterminals_enum_name::$nonterm, $stateid );
-                        __rustylr_generated_shift_nonterm_extend!{ $shift_map, $(($nonterms, $stateids),)* }
-                    };
-                    {$shift_map:ident, } => {}
-                }
-            macro_rules! __rustylr_generated_shift_nonterm {
-                    {$len: literal, $(($nonterms:ident, $stateids:literal),)* } => {
-                        {
-                            let mut shift_map = #module_prefix::HashMap::default();
-                            shift_map.reserve($len);
-                            __rustylr_generated_shift_nonterm_extend!{ shift_map, $(($nonterms, $stateids),)* }
-                            shift_map
-                        }
-                    };
-                }
-
-
-            /// make new reduce_map with pairs of (terminal_set, rule_id)
-            macro_rules! __rustylr_generated_reduce_map_extend {
-                    {$reduce_map:ident, ($terminals:ident, $ruleid:literal), $(($terminals1:ident, $ruleid1:literal),)*} => {
-                        for term in $terminals.iter() {
-                            $reduce_map.insert(term.clone(), $ruleid);
-                        }
-                        __rustylr_generated_reduce_map_extend!{$reduce_map, $(($terminals1, $ruleid1),)*}
-                    };
-                    {$reduce_map:ident, } => {}
-                }
-            macro_rules! __rustylr_generated_reduce_map {
-                    {$len: literal, $(($terminals1:ident, $ruleid1:literal),)* } => {
-                        {
-                            let mut reduce_map = #module_prefix::HashMap::default();
-                            reduce_map.reserve($len);
-                            __rustylr_generated_reduce_map_extend!{reduce_map, $(($terminals1, $ruleid1),)*}
-                            reduce_map
-                        }
-                    };
-                }
-            /// make new LookaheadRuleRefSet with pairs of (ruleid, shifted)
-            macro_rules! __rustylr_generated_ruleset {
-                // must end with comma
-                [$($pairs:expr,)*] => {
-                    {
-                        let rule_shifted_pairs = vec![ $($pairs),* ];
-                        std::collections::BTreeSet::from_iter(
-                            rule_shifted_pairs.into_iter().map(
-                                |(rule, shifted):(usize,usize)| -> #module_prefix::ShiftedRuleRef {
-                                        #module_prefix::ShiftedRuleRef {
-                                            rule,
-                                            shifted,
-                                        }
-                                }
-                            ),
-                        )
-                    }
-                }
+        // write vector of terminals
+        let comma_separated_terminals = {
+            let mut comma_separated_terminals = TokenStream::new();
+            for term in self.terminals_index.iter() {
+                let stream = &self.terminals.get(term).unwrap().1;
+                comma_separated_terminals.extend(quote! {
+                    #stream,
+                });
             }
+            comma_separated_terminals
         };
-        // write macros for terminal tokens
-        for term in self.terminals_index.iter() {
-            let macro_name = format_ident!("__rustylr_{}", term);
-            let stream = &self.terminals.get(term).unwrap().1;
-            write_macros.extend(quote! {
-                macro_rules! #macro_name {
-                    () => {
-                        #stream
-                    }
-                }
-            });
-        }
 
-        // generate code that copy rules and states to parser
         // =====================================================================
         // ==================Writing Production Rules===========================
         // =====================================================================
-        let mut comma_separated_rules = TokenStream::new();
-        for rule in grammar.rules.iter() {
-            let mut comma_separated_tokens = quote! {};
-            for token in rule.rule.iter() {
-                match token {
-                    rlr::Token::Term(term) => {
-                        let macro_name = format_ident!("__rustylr_{}", term);
-                        comma_separated_tokens
-                            .extend(quote! {#module_prefix::Token::Term(#macro_name!()),});
-                    }
-                    rlr::Token::NonTerm(nonterm) => {
-                        comma_separated_tokens
-                            .extend(quote! {#module_prefix::Token::NonTerm(#nonterminals_enum_name::#nonterm),});
+        let comma_separated_rules_initializer = {
+            let mut comma_separated_rules_initializer = TokenStream::new();
+            for rule in grammar.rules.iter() {
+                let mut comma_separated_tokens = TokenStream::new();
+                for token in rule.rule.iter() {
+                    match token {
+                        rlr::Token::Term(term) => {
+                            let term_idx = self.terminals.get(term).unwrap().0;
+                            comma_separated_tokens
+                                .extend(quote! {#module_prefix::Token::Term(#term_idx),});
+                        }
+                        rlr::Token::NonTerm(nonterm) => {
+                            comma_separated_tokens
+                                .extend(quote! {#module_prefix::Token::NonTerm(#nonterminals_enum_name::#nonterm),});
+                        }
                     }
                 }
-            }
 
-            let nonterm_name = &rule.name;
-            comma_separated_rules.extend(quote! {
-                #rule_typename {
-                    name: #nonterminals_enum_name::#nonterm_name,
-                    rule: vec![#comma_separated_tokens],
-                },
-            });
-        }
-        let write_rules = quote! {
-            let rules = vec![
-                #comma_separated_rules
-            ];
+                let nonterm_name = &rule.name;
+                comma_separated_rules_initializer.extend(quote! {
+                    ( #nonterminals_enum_name::#nonterm_name, vec![ #comma_separated_tokens ] ),
+                });
+            }
+            comma_separated_rules_initializer
         };
 
         // =====================================================================
         // =========================Writing States==============================
         // =====================================================================
+        let mut comma_separated_reduce_terminal_sets = TokenStream::new();
 
-        let state_len = dfa.states.len();
-        let mut write_states = quote! {
-            let mut states = Vec::with_capacity(#state_len);
-        };
+        let comma_separated_states_initializer = {
+            let mut comma_separated_states_initializer = TokenStream::new();
 
-        // when generating code for 'inserting tokens to reduce_map',
-        // there could be multiple lookahead tokens for one rule
-        // inserting all of them one by one is inefficient
-        let mut reduce_terminals_map = BTreeMap::new();
-        let mut init_reduce_terminals_stream = TokenStream::new();
+            // when generating code for 'inserting tokens to reduce_map',
+            // there could be multiple lookahead tokens for one rule
+            // inserting all of them one by one is inefficient
+            let mut reduce_terminals_map = BTreeMap::new();
 
-        for state in dfa.states.into_iter() {
-            let shift_term_len = state.shift_goto_map_term.len();
-            let shift_nonterm_len = state.shift_goto_map_nonterm.len();
-            let reduce_map_len = state.reduce_map.len();
-
-            // use BTreeMap to sort keys, for consistent output
-            let shift_goto_map_term: BTreeMap<_, _> =
-                state.shift_goto_map_term.into_iter().collect();
-            let mut init_shift_term_comma_separated_terminal_stateid = TokenStream::new();
-            for (term, goto) in shift_goto_map_term.into_iter() {
-                let macro_name = format_ident!("__rustylr_{}", term);
-                init_shift_term_comma_separated_terminal_stateid.extend(quote! {
-                    (#macro_name, #goto),
-                });
-            }
-
-            // use BTreeMap to sort keys, for consistent output
-            let shift_goto_map_nonterm: BTreeMap<_, _> =
-                state.shift_goto_map_nonterm.into_iter().collect();
-            let mut init_shift_nonterm_comma_separated_terminal_stateid = TokenStream::new();
-            for (nonterm, goto) in shift_goto_map_nonterm.into_iter() {
-                init_shift_nonterm_comma_separated_terminal_stateid.extend(quote! {
-                    (#nonterm, #goto),
-                });
-            }
-
-            // use BTreeMap to sort keys, for consistent output
-            let mut reduce_map_by_rule_id = BTreeMap::new();
-            for (term, ruleid) in state.reduce_map.into_iter() {
-                reduce_map_by_rule_id
-                    .entry(ruleid)
-                    .or_insert_with(BTreeSet::new)
-                    .insert(term);
-            }
-
-            let mut init_reduce_comma_separated_terminals_rules = TokenStream::new();
-            for (ruleid, tokens) in reduce_map_by_rule_id.into_iter() {
-                let terminal_set_ident_num = if let Some(id) = reduce_terminals_map.get(&tokens) {
-                    *id
-                } else {
-                    let len = reduce_terminals_map.len();
-                    reduce_terminals_map.insert(tokens.clone(), len);
-
-                    let mut init_terminals_comma_separated = TokenStream::new();
-                    for term_name in tokens.into_iter() {
-                        let macro_name = format_ident!("__rustylr_{}", term_name);
-                        init_terminals_comma_separated.extend(quote! {
-                            #macro_name!(),
+            for state in dfa.states.into_iter() {
+                // use BTreeMap to sort keys, for consistent output
+                let shift_term_initializer = {
+                    let mut term_state_comma_separated = TokenStream::new();
+                    let shift_goto_map_term: BTreeMap<_, _> =
+                        state.shift_goto_map_term.into_iter().collect();
+                    for (term, goto) in shift_goto_map_term.into_iter() {
+                        let term_idx = self.terminals.get(&term).unwrap().0;
+                        term_state_comma_separated.extend(quote! {
+                            (#term_idx, #goto),
                         });
                     }
-
-                    let terminals_ident = format_ident!("_rustylr_generated_terminals_{}", len);
-                    init_reduce_terminals_stream.extend(quote! {
-                        let #terminals_ident = vec![
-                            #init_terminals_comma_separated
-                        ];
-                    });
-
-                    len
+                    quote! {
+                        vec![#term_state_comma_separated]
+                    }
                 };
-                let terminals_ident =
-                    format_ident!("_rustylr_generated_terminals_{}", terminal_set_ident_num);
 
-                init_reduce_comma_separated_terminals_rules.extend(quote! {
-                    (#terminals_ident, #ruleid),
-                });
-            }
+                let shift_nonterm_initializer = {
+                    let mut nonterm_state_comma_separated = TokenStream::new();
+                    let shift_goto_map_nonterm: BTreeMap<_, _> =
+                        state.shift_goto_map_nonterm.into_iter().collect();
+                    for (nonterm, goto) in shift_goto_map_nonterm.into_iter() {
+                        nonterm_state_comma_separated.extend(quote! {
+                            (#nonterminals_enum_name::#nonterm, #goto),
+                        });
+                    }
+                    quote! {
+                        vec![#nonterm_state_comma_separated]
+                    }
+                };
 
-            let mut comma_separated_rule_shifted = TokenStream::new();
-            for (rule, _lookaheads) in state.ruleset.rules.into_iter() {
-                let rule_id = rule.rule;
-                let shifted = rule.shifted;
-                comma_separated_rule_shifted.extend(quote! {
-                    ( #rule_id, #shifted ),
-                });
-            }
-
-            write_states.extend(quote! {
-                {
-                    let shift_goto_map_term = __rustylr_generated_shift_term!{ #shift_term_len, #init_shift_term_comma_separated_terminal_stateid };
-                    let shift_goto_map_nonterm = __rustylr_generated_shift_nonterm!{ #shift_nonterm_len, #init_shift_nonterm_comma_separated_terminal_stateid };
-                    let reduce_map = __rustylr_generated_reduce_map!{ #reduce_map_len, #init_reduce_comma_separated_terminals_rules };
-                    let ruleset = __rustylr_generated_ruleset![ #comma_separated_rule_shifted ];
-                    states.push( #state_typename {
-                        shift_goto_map_term,
-                        shift_goto_map_nonterm,
-                        reduce_map,
-                        ruleset,
-                    });
+                // use BTreeMap to sort keys, for consistent output
+                let mut reduce_map_by_rule_id = BTreeMap::new();
+                for (term, ruleid) in state.reduce_map.into_iter() {
+                    reduce_map_by_rule_id
+                        .entry(ruleid)
+                        .or_insert_with(BTreeSet::new)
+                        .insert(term);
                 }
-            });
-        }
+
+                let reduce_map_initializer = {
+                    let mut init_reduce_comma_separated_terminals_rules = TokenStream::new();
+                    for (ruleid, tokens) in reduce_map_by_rule_id.into_iter() {
+                        let terminal_set_num = if let Some(id) = reduce_terminals_map.get(&tokens) {
+                            *id
+                        } else {
+                            let len = reduce_terminals_map.len();
+                            reduce_terminals_map.insert(tokens.clone(), len);
+
+                            let mut init_terminals_comma_separated = TokenStream::new();
+                            for term_name in tokens.into_iter() {
+                                let term_idx = self.terminals.get(&term_name).unwrap().0;
+                                init_terminals_comma_separated.extend(quote! {
+                                    #term_idx,
+                                });
+                            }
+
+                            comma_separated_reduce_terminal_sets.extend(quote! {
+                                vec![#init_terminals_comma_separated],
+                            });
+
+                            len
+                        };
+
+                        init_reduce_comma_separated_terminals_rules.extend(quote! {
+                            (#terminal_set_num, #ruleid),
+                        });
+                    }
+                    quote! {
+                        vec![#init_reduce_comma_separated_terminals_rules]
+                    }
+                };
+                let ruleset_initializer = {
+                    let mut comma_separated_rules = TokenStream::new();
+                    for rule in state.ruleset.rules.into_keys() {
+                        let ruleid = rule.rule;
+                        let shifted = rule.shifted;
+                        comma_separated_rules.extend(quote! {
+                            (#ruleid,#shifted),
+                        });
+                    }
+                    quote! {
+                        vec![#comma_separated_rules]
+                    }
+                };
+
+                comma_separated_states_initializer.extend(quote! {
+                    ( #shift_term_initializer, #shift_nonterm_initializer, #reduce_map_initializer, #ruleset_initializer),
+                });
+            }
+            comma_separated_states_initializer
+        };
 
         Ok(quote! {
-            #write_macros
-            #write_rules
-            #init_reduce_terminals_stream
-            #write_states
+            let __rustylr_terminals = vec![#comma_separated_terminals];
+
+            let rules:Vec<#rule_typename> = [#comma_separated_rules_initializer].into_iter().map(
+                | (name, tokens) | {
+                    #rule_typename {
+                        name,
+                        rule: tokens.into_iter().map(
+                            | token | {
+                                match token {
+                                    #module_prefix::Token::Term(term) => #module_prefix::Token::Term(__rustylr_terminals[term].clone()),
+                                    #module_prefix::Token::NonTerm(nonterm) => #module_prefix::Token::NonTerm(nonterm),
+                                }
+                            }
+                        ).collect(),
+                    }
+                }
+            ).collect();
+
+            let __rustylr_reduce_terminals = vec![#comma_separated_reduce_terminal_sets];
+
+            let states:Vec<#state_typename> = [#comma_separated_states_initializer].into_iter().map(
+                | (shift_goto_map_term, shift_goto_map_nonterm, reduce_map_init, ruleset) | {
+                    let mut reduce_map = #module_prefix::HashMap::default();
+                    for (terminal_set_id, ruleid) in reduce_map_init.into_iter() {
+                        for term_idx in __rustylr_reduce_terminals[terminal_set_id].iter() {
+                            reduce_map.insert(__rustylr_terminals[*term_idx].clone(), ruleid);
+                        }
+                    }
+                    #state_typename {
+                        shift_goto_map_term: shift_goto_map_term.into_iter().map(
+                            | (term_idx, goto) | {
+                                (__rustylr_terminals[term_idx].clone(), goto)
+                            }
+                        ).collect(),
+                        shift_goto_map_nonterm: shift_goto_map_nonterm.into_iter().collect(),
+                        reduce_map,
+                        ruleset: ruleset.into_iter().map(
+                            | (ruleid, shifted) | {
+                                #module_prefix::ShiftedRuleRef {
+                                    rule: ruleid,
+                                    shifted,
+                                }
+                            }
+                        ).collect(),
+                    }
+                }
+            ).collect();
         })
     }
 
@@ -592,7 +545,9 @@ impl Grammar {
         }
 
         Ok(quote! {
-        /// struct that holds internal parser data, for reduce action and state transition
+        /// struct that holds internal parser data,
+        /// including data stack for each non-terminal,
+        /// and state stack for DFA
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         pub struct #context_struct_name {
             /// state stack, user must not modify this
@@ -626,11 +581,13 @@ impl Grammar {
             }
 
             /// pop value from start rule
+            #[inline]
             pub fn accept(&mut self) -> #start_rule_typename {
                 #pop_from_start_rule_stack
             }
 
             /// push terminal symbol to stack, this function is called automatically by parser
+            #[inline]
             pub fn push( &mut self, term: #token_typename ) {
                 self.#terms_stack_name.push(term);
             }
@@ -643,6 +600,7 @@ impl Grammar {
 
         /// struct that holds parser data, DFA tables
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
+        #[derive(Clone)]
         pub struct #parser_struct_name {
             /// production rules
             pub rules: Vec<#rule_typename>,
@@ -680,7 +638,8 @@ impl Grammar {
                     Err(#parseerror_typename::InvalidTerminal(error))
                 }
             }
-            /// Crate new context for parsing
+            /// Create new context for parsing
+            #[inline]
             pub fn begin(&self) -> #context_struct_name {
                 #context_struct_name::new()
             }
@@ -734,10 +693,10 @@ impl Grammar {
                 // for shift/reduce confict, shift has higher priority
                 if let Some(next_state_id) = state.shift_goto_nonterm(nonterm) {
                     context.state_stack.push(next_state_id);
-                    Ok(())
                 }else {
                     unreachable!( "Invalid NonTerminal: {}", nonterm );
                 }
+                Ok(())
             }
 
 
