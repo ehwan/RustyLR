@@ -201,33 +201,15 @@ The `long_message` function requires the reference to the parser and the context
 It will make a detailed error message of what current state was trying to parse, and what the expected terminal symbols were.
 ### Example of long_message
 ```
-Invalid Terminal: *
-Expected one of:  , (, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
--------------------------------Backtracing state--------------------------------
-WS0 -> • _RustyLRGenerated0
-_RustyLRGenerated1 -> •  
-_RustyLRGenerated1 -> • _RustyLRGenerated1  
-_RustyLRGenerated0 -> • _RustyLRGenerated1
-_RustyLRGenerated0 ->  •
-Number -> • WS0 _RustyLRGenerated3 WS0
-M -> • M * M
-M -> M * • M
-M -> • P
-P -> • Number
-P -> • WS0 ( E ) WS0
------------------------------------Prev state-----------------------------------
-M -> M • * M
------------------------------------Prev state-----------------------------------
-A -> • A + A
-A -> A + • A
-A -> • M
-M -> • M * M
------------------------------------Prev state-----------------------------------
-A -> A • + A
------------------------------------Prev state-----------------------------------
-A -> • A + A
-E -> • A
-Augmented -> • E 
+Invalid Terminal: *. Expected one of:  , (, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+>>> In:
+	M -> M * • M
+>>> Backtrace:
+	M -> M • * M
+>>> Backtrace:
+	A -> A + • A
+>>> Backtrace:
+	A -> A • + A
 ```
 
 

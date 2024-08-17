@@ -46,8 +46,9 @@ impl<Term: Display + Debug> std::error::Error for InvalidTerminalError<Term> {
 
 impl<Term> InvalidTerminalError<Term> {
     /// Generate backtrace information.
-    /// Returned `Vec` holds a list of ruleset, each ruleset is what current state was trying to parse.
-    /// 0'th index is the latest, that is, the last element of `Vec` will hold the initial state's ruleset
+    /// This trace back on the state stack, and fetch the ruleset of each state.
+    /// Each ruleset in the returned `Vec` contains every rule that the state was trying to parse, that is, only the rules with shifted > 0.
+    /// 0'th index is the latest, that is, the last element of `Vec` will hold the initial state's ruleset.
     pub fn backtrace<NonTerm>(
         parser: &impl GetParser<Term, NonTerm>,
         context: &impl GetContext<Term, NonTerm>,
@@ -61,7 +62,12 @@ impl<Term> InvalidTerminalError<Term> {
         let mut backtrace = Vec::with_capacity(state_stack.len());
 
         let state = &states[*state_stack.last().unwrap()];
-        let mut cur_rules = state.ruleset.clone();
+        let mut cur_rules = state
+            .ruleset
+            .iter()
+            .copied()
+            .filter(|r| r.shifted > 0)
+            .collect::<BTreeSet<_>>();
         for prev_state in state_stack.iter().rev().skip(1) {
             backtrace.push(cur_rules.clone());
 
@@ -103,9 +109,8 @@ impl<Term> InvalidTerminalError<Term> {
                 }
             }
 
-            cur_rules = prev_rules;
+            cur_rules = prev_rules.into_iter().filter(|r| r.shifted > 0).collect();
         }
-        backtrace.push(cur_rules);
         backtrace
     }
 
@@ -148,18 +153,19 @@ impl<Term> InvalidTerminalError<Term> {
         let backtrace = Self::backtrace(parser, context);
         for (id, ruleset) in backtrace.iter().enumerate() {
             if id == 0 {
-                message.push_str(&format!("{:-^80}\n", "Backtracing state"));
+                message.push_str(">>> In:\n");
             } else {
-                message.push_str(&format!("{:-^80}\n", "Prev state"));
+                message.push_str(">>> Backtrace:\n");
             }
             for rule in ruleset.iter() {
                 let shifted = ShiftedRuleRef2 {
                     rule: &rules[rule.rule],
                     shifted: rule.shifted,
                 };
-                message.push_str(&format!("{}\n", shifted));
+                message.push_str(&format!("\t{}\n", shifted));
             }
         }
+        message.push_str(">>> Initial state");
         format!("{}\n{}", &self.message(), message)
     }
 }
