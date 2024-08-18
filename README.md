@@ -284,10 +284,32 @@ Every line in the macro must follow the syntax below.
 
 [Bootstrap](rusty_lr_parser/src/parser/parser.rs), [Expanded Bootstrap](rusty_lr_parser/src/parser/parser_expanded.rs) would be a good example to understand the syntax and generated code. It is RustyLR syntax parser written in RustyLR itself.
 
+
 <details>
 <summary>
 <big> Click to expand the syntax </big>
 </summary>
+
+
+### Quick Reference
+ - [`%tokentype`](#token-type-must-defined)
+ - [`%token`](#token-definition-must-defined)
+ - [`%start`](#start-symbol-must-defined)
+ - [`%eof`](#eof-symbol-must-defined)
+ - [`%userdata`](#userdata-type-optional)
+ - [`%left`, `%right`](#reduce-type-optional)
+ - [`%derive`](#derive-optional)
+ - [`%err`, `%error`](#error-type-optional)
+ - [`%derive`](#derive-optional)
+ - [Production rules](#production-rules)
+ - [Regex pattern](#regex-pattern)
+ - [RuleType](#ruletype-optional)
+ - [ReduceAction](#reduceaction-optional)
+ - [Accessing token data in ReduceAction](#accessing-token-data-in-reduceaction)
+ - [Error type](#error-type-optional)
+ - [Exclamation mark `!`](#exclamation-mark-)
+
+
 
 ### Token type <sub><sup>(must defined)</sup></sub>
 ```
@@ -461,6 +483,45 @@ Example
 ```
 
 </details>
+
+
+
+### Derive <sub><sup>(optional)</sup></sub>
+Specify the derive attributes for the generated `Context` struct.
+By default, the generated `Context` does not implement any traits.
+But in some cases, you may want to derive traits like `Clone`, `Debug`, or `Serialize`, `Deserialize` of `serde`.
+
+You can specify the derive attributes by `%derive` directive.
+In this case, user must ensure that every member of the `Context` must implement the trait.
+Currently, `Context` is holding the stack data,
+which is `Vec<usize>` for state stack and `Vec<T>` for every `<RuleType>` in the grammar.
+
+```
+'%derive' <DeriveAttributes> ';'
+```
+
+<details>
+<summary>
+Example
+</summary>
+
+```rust
+// here, #[derive(Clone,Debug)] will be added to the generated `Context` struct
+%derive Clone, Debug;
+
+...
+
+let mut context = parser.begin();
+// do something with context...
+
+println!( "{:?}", context );          // debug-print context
+let cloned_context = context.clone(); // clone context, you can re-feed the input sequence using cloned context
+```
+
+</details>
+
+
+
 
 ### Production rules
 ```
@@ -729,39 +790,6 @@ C: A!*; // A will be ignored first, and then repeatance pattern will be applied
 </details>
 
 
-### Derive <sub><sup>(optional)</sup></sub>
-Specify the derive attributes for the generated `Context` struct.
-By default, the generated `Context` does not implement any traits.
-But in some cases, you may want to derive traits like `Clone`, `Debug`, or `Serialize`, `Deserialize` of `serde`.
-
-You can specify the derive attributes by `%derive` directive.
-In this case, user must ensure that every member of the `Context` must implement the trait.
-Currently, `Context` is holding the stack data,
-which is `Vec<usize>` for state stack and `Vec<T>` for every `<RuleType>` in the grammar.
-
-```
-'%derive' <DeriveAttributes> ';'
-```
-
-<details>
-<summary>
-Example
-</summary>
-
-```rust
-// here, #[derive(Clone,Debug)] will be added to the generated `Context` struct
-%derive Clone, Debug;
-
-...
-
-let mut context = parser.begin();
-// do something with context...
-
-println!( "{:?}", context );          // debug-print context
-let cloned_context = context.clone(); // clone context, you can re-feed the input sequence using cloned context
-```
-
-</details>
 
 
 
