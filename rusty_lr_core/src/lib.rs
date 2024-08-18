@@ -9,6 +9,7 @@ pub(crate) mod rule;
 pub(crate) mod state;
 pub(crate) mod token;
 
+/// module for build DFA tables from CFG
 #[cfg(feature = "builder")]
 pub mod builder;
 

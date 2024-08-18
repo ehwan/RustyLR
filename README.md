@@ -1,39 +1,28 @@
 # RustyLR
 [![crates.io](https://img.shields.io/crates/v/rusty_lr.svg)](https://crates.io/crates/rusty_lr)
 [![docs.rs](https://docs.rs/rusty_lr/badge.svg)](https://docs.rs/rusty_lr)
-for [proc-macro](#proc-macro)
-
-[![crates.io](https://img.shields.io/crates/v/rustylr.svg)](https://crates.io/crates/rustylr)
-for [executable](#executable-rustylr)
 
 yacc-like LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from Context Free Grammar (CFGs).
 
-RustyLR provides both [executable](#executable-rustylr) and [procedural macros](#proc-macro) to generate LR(1) and LALR(1) parser.
+RustyLR provides [procedural macros](#proc-macro) and [buildscript tools](#integrating-with-buildrs) to generate LR(1) and LALR(1) parser.
 The generated parser will be a pure Rust code, and the calculation of building DFA will be done at compile time.
 Reduce action can be written in Rust code,
-and the error messages are [readable and detailed](#readable-error-messages-with-codespan) with [executable](#executable-rustylr).
-For huge and complex grammars, it is recommended to use the [executable](#executable-rustylr) version.
+and the error messages are [readable and detailed](#readable-error-messages-with-codespan).
+For huge and complex grammars, it is recommended to use the [buildscipt](#integrating-with-buildrs).
 
-By default, RustyLR uses `std::collections::HashMap` for the parser tables.
-If you want to use `FxHashMap` from [`rustc-hash`](https://github.com/rust-lang/rustc-hash), add `features=["fxhash"]` to your `Cargo.toml`.
-```toml
-[dependencies]
-rusty_lr = { version = "...", features = ["fxhash"] }
-```
+#### `features` in `Cargo.toml`
+ - `build` : Enable buildscript tools.
+ - `fxhash` : In parser table, replace `std::collections::HashMap` with `FxHashMap` from [`rustc-hash`](https://github.com/rust-lang/rustc-hash).
 
 ### Example
 ```rust
 // this define `EParser` struct
 // where `E` is the start symbol
 lr1! {
-    // userdata type
-    %userdata i32;
-    // token type
-    %tokentype char;
-    // start symbol
-    %start E;
-    // eof symbol
-    %eof '\0';
+    %userdata i32;           // userdata type
+    %tokentype char;         // token type
+    %start E;                // start symbol
+    %eof '\0';               // eof token
 
     // token definition
     %token zero '0';
@@ -53,19 +42,19 @@ lr1! {
     %token space ' ';
 
     // conflict resolving
-    %left [plus star]; // reduce first for token 'plus', 'star'
+    %left [plus star];                  // reduce first for token 'plus', 'star'
 
     // context-free grammars
-    Digit(char): [zero-nine]; // character set '0' to '9'
+    Digit(char): [zero-nine];           // character set '0' to '9'
 
-    Number(i32) // type assigned to production rule `Number`
-        : space* Digit+ space* // regex pattern
+    Number(i32)                         // type assigned to production rule `Number`
+        : space* Digit+ space*          // regex pattern
     { Digit.into_iter().collect::<String>().parse().unwrap() }; 
     //    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ this will be the value of `Number`
-    // reduce action written in Rust code
+                                        // reduce action written in Rust code
 
     A(f32): A plus a2=A {
-        *data += 1; // access userdata by `data`
+        *data += 1;                     // access userdata by `data`
         println!( "{:?} {:?} {:?}", A, plus, a2 );
         A + a2
     }
@@ -84,12 +73,9 @@ lr1! {
 }
 ```
 ```rust
-// generate `EParser`
-let parser = EParser::new();
-// create context
-let mut context = parser.begin();
-// define userdata
-let mut userdata: i32 = 0;
+let parser = EParser::new();         // generate `EParser`
+let mut context = parser.begin();    // create context
+let mut userdata: i32 = 0;           // define userdata
 
 let input_sequence = "1 + 2 * ( 3 + 4 )";
 
@@ -97,7 +83,7 @@ let input_sequence = "1 + 2 * ( 3 + 4 )";
 for token in input_sequence.chars() {
     match parser.feed(&mut context, token, &mut userdata) {
         //                          ^^^^^   ^^^^^^^^^^^^ userdata passed here as `&mut i32`
-        //                           |- feed token
+        //                          feed token
         Ok(_) => {}
         Err(e) => {
             match e {
@@ -114,11 +100,9 @@ for token in input_sequence.chars() {
         }
     }
 }
-// feed `eof` token
-parser.feed(&mut context, '\0', &mut userdata).unwrap();
+parser.feed(&mut context, '\0', &mut userdata).unwrap();    // feed `eof` token
 
-// res = value of start symbol
-let res = context.accept();
+let res = context.accept();   // get the value of start symbol
 println!("{}", res);
 println!("userdata: {}", userdata);
 ```
@@ -126,13 +110,7 @@ println!("userdata: {}", userdata);
 ### Readable error messages (with [codespan](https://github.com/brendanzab/codespan))
 ![images/error1.png](images/error1.png)
 ![images/error2.png](images/error2.png)
-
-## Contents
- - [Proc-macro](#proc-macro)
- - [Start Parsing](#start-parsing)
- - [Error Handling](#error-handling)
- - [Syntax](#syntax)
- - [Executable `rustylr`](#executable-rustylr)
+ - This error message is generated by the buildscript tool, not the procedural macros.
 
 ## Features
  - pure Rust implementation
@@ -141,12 +119,20 @@ println!("userdata: {}", userdata);
  - customizable reduce action
  - resolving conflicts of ambiguous grammar
  - regex patterns partially supported
- - executable for generating parser tables
+ - tools for integrating with `build.rs`
+
+## Contents
+ - [Proc-macro](#proc-macro)
+ - [Integrating with `build.rs`](#integrating-with-buildrs)
+ - [Start Parsing](#start-parsing)
+ - [Error Handling](#error-handling)
+ - [Syntax](#syntax)
+
 
 ## proc-macro
 Below procedural macros are provided:
- - `lr1!` : LR(1) parser
- - `lalr1!` : LALR(1) parser
+ - `lr1!` : generate LR(1) parser
+ - `lalr1!` : generate LALR(1) parser
 
 These macros will generate structs:
  - `Parser` : contains DFA tables and production rules
@@ -158,6 +144,68 @@ These macros will generate structs:
 
 All structs above are prefixed by `<StartSymbol>`.
 In most cases, what you want is the `Parser` and `ParseError` structs, and the others are used internally.
+
+## Integrating with `build.rs`
+This buildscripting tool will provide much more detailed, pretty-printed error messages than the procedural macros.
+If you are writing a huge, complex grammar, it is recommended to use buildscript than the procedural macros.
+Generated code will contain the same structs and functions as the procedural macros. In your actual source code, you can `include!` the generated file.
+
+The program searches for `%%` in the input file, not the `lr1!`, `lalr1!` macro.
+The contents before `%%` will be copied into the output file as it is.
+And the context-free grammar must be followed by `%%`.
+
+```rust
+// parser.rs
+use some_crate::some_module::SomeStruct;
+
+enum SomeTypeDef {
+    A,
+    B,
+    C,
+}
+
+%% // <-- input file splitted here
+
+%tokentype u8;
+%start E;
+%eof b'\0';
+
+%token a b'a';
+%token lparen b'(';
+%token rparen b')';
+
+E: lparen E rparen
+ | P
+ ;
+
+P: a;
+```
+
+You must enable the feature `build` to use in the build script.
+```toml
+[build-dependencies]
+rusty_lr = { version = "...", features = ["build"] }
+```
+
+```rust
+// build.rs
+use rusty_lr::build;
+
+fn main() {
+    println!("cargo::rerun-if-changed=src/parser.rs");
+
+    let output = format!("{}/parser.rs", std::env::var("OUT_DIR").unwrap());
+    build::Builder::new()
+        .file("src/parser.rs") // path to the input file
+    //  .lalr()                // to generate LALR(1) parser
+        .build(&output);       // path to the output file
+}
+```
+
+In your source code, include the generated file.
+```rust
+include!(concat!(env!("OUT_DIR"), "/parser.rs"));
+```
 
 ## Start Parsing
 The `Parser` struct has the following functions:
@@ -285,7 +333,6 @@ Example
 
 
 ```rust
-lr1! {
 %tokentype u8;
 
 %token zero b'0';
@@ -295,7 +342,6 @@ lr1! {
 
 // 'zero' and 'one' will be replaced by b'0' and b'1' respectively
 E: zero one;
-}
 ```
 
 </details>
@@ -312,12 +358,10 @@ Example
 </summary>
 
 ```rust
-lr1! {
 %start E;
 // this internally generate augmented rule <Augmented> -> E eof
 
 E: ... ;
-}
 ```
 
 </details>
@@ -336,11 +380,9 @@ Example
 </summary>
 
 ```rust
-lr1! {
 %eof b'\0';
 // you can access eof terminal symbol by 'eof' in the grammar
 // without %token eof ...;
-}
 ```
 
 </details>
@@ -359,10 +401,9 @@ Example
 ```rust
 struct MyUserData { ... }
 
-lr1! {
 ...
+
 %userdata MyUserData;
-}
 
 ...
 
@@ -396,7 +437,6 @@ Example
 </summary>
 
 ```rust
-lr1! {
 // define tokens
 %token plus '+';
 %token hat '^';
@@ -407,11 +447,9 @@ lr1! {
 
 // shift first for token 'hat'
 %right hat;
-}
 ```
 
 ```rust
-lr1! {
 // define tokens
 %token zero b'0';
 %token one b'1';
@@ -420,7 +458,6 @@ lr1! {
 
 // shift first for tokens in range 'zero' to 'nine'
 %shift [zero-nine];
-}
 ```
 
 </details>
@@ -457,9 +494,7 @@ Example
 This production rule defines non-terminal `E` to be `A`, then zero or more `plus`, then `D` mapped to variable `d`.
 For more information, please refer to the [Accessing token data in ReduceAction](#accessing-token-data-in-reduceaction) section below.
 ```rust
-lr1! {
 E: A plus* d=D;
-}
 ```
 
 </details>
@@ -509,9 +544,7 @@ Example
 </summary>
 
 ```rust
-lr1! {
 E(MyType<...>): ... Tokens ... ;
-}
 ```
 
 </details>
@@ -542,19 +575,16 @@ Example
 
 Omitting `ReduceAction`:
 ```rust
-lr1! {
 NoRuleType: ... ;
 
 RuleTypeI32(i32): ... { 0 } ;
 
 // RuleTypeI32 will be chosen
 E(i32): NoRuleType NoRuleType RuleTypeI32 NoRuleType;
-}
 ```
 
 Returning `Result<(),String>` from ReduceAction:
 ```rust
-lr1! {
 // set Err variant type to String
 %err String;
 
@@ -569,7 +599,6 @@ E(i32): A div a2=A {
 };
 
 A(i32): ... ;
-}
 ```
 
 </details>
@@ -598,7 +627,6 @@ Example
 </summary>
 
 ```rust
-lr1! {
 %token plus ...;
 
 // one or more 'A', then optional 'plus', then zero or more 'B'
@@ -625,7 +653,6 @@ E(f32) : A+ plus? b=B* minus_or_star=[minus star]
 
 A(i32): ... ;
 B(f32): ... ;
-}
 ```
 
 </details>
@@ -649,14 +676,12 @@ enum MyErrorType<T> {
     ErrVar1,
     ErrVar2,
     ErrVar3(T),
-    ...
 }
 
-lr1! {
+...
+
 
 %err MyErrorType<GenericType> ;
-
-}
 
 ...
 
@@ -689,7 +714,6 @@ Example
 </summary>
 
 ```rust
-lr1! {
 %token plus ...;
 
 A(i32) : ... ;
@@ -700,7 +724,6 @@ E(i32) : A! A A!;
 B: A*!; // Vec<i32> will be built from the value of A, and then ignored
 
 C: A!*; // A will be ignored first, and then repeatance pattern will be applied
-}
 ```
 
 </details>
@@ -709,90 +732,3 @@ C: A!*; // A will be ignored first, and then repeatance pattern will be applied
 
 </details>
 
-
-
-
-
-
-## executable `rustylr`
-An executable version of `lr1!` and `lalr1!` macro.
-Converts a context-free grammar into a deterministic finite automaton (DFA) tables,
-and generates a Rust code that can be used as a parser for that grammar.
-
-```
-cargo install rustylr
-```
-
-This executable will provide much more detailed, pretty-printed error messages than the procedural macros.
-If you are writing a huge, complex grammar, it is recommended to use this executable than the procedural macros.
-`--verbose` option is useful for debugging the grammar. It will print where the auto-generated rules are originated from and the resolving process of shift/reduce conflicts. [like](images/example1.png) [this](images/example2.png)
-
-Although it is convenient to use the proc-macros for small grammars,
-since modern IDEs feature (rust-analyzer's auto completion, inline error messages) could be enabled.
-
-This program searches for `%%` in the input file. ( Not the `lr1!`, `lalr1!` macro )
-
-The contents before `%%` will be copied into the output file as it is.
-Context-free grammar must be followed by `%%`.
-Each line must follow the syntax of [rusty_lr#syntax](#syntax)
-
-```rust
-// my_grammar.rs
-use some_crate::some_module::SomeStruct;
-
-enum SomeTypeDef {
-    A,
-    B,
-    C,
-}
-
-%% // <-- input file splitted here
-
-%tokentype u8;
-%start E;
-%eof b'\0';
-
-%token a b'a';
-%token lparen b'(';
-%token rparen b')';
-
-E: lparen E rparen
- | P
- ;
-
-P: a;
-```
-
-Calling the command will generate a Rust code `my_parser.rs`.
-```
-$ rustylr my_grammar.rs my_parser.rs --verbose
-```
-
-
-Possible options can be found by `--help`.
-```
-$ rustylr --help
-Usage: rustylr [OPTIONS] <INPUT_FILE> [OUTPUT_FILE]
-
-Arguments:
-  <INPUT_FILE>
-          input_file to read
-
-  [OUTPUT_FILE]
-          output_file to write
-
-          [default: out.tab.rs]
-
-Options:
-      --no-format
-          do not rustfmt the output
-
-  -l, --lalr
-          build LALR(1) parser
-
-  -v, --verbose
-          print debug information.
-    
-          print the auto-generated rules, and where they are originated from.
-          print the shift/reduce conflicts, and the resolving process.
-```

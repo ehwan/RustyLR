@@ -5,3 +5,7 @@ edition = "2021"
 
 [dependencies]
 rusty_lr = { path = "../../rusty_lr" }
+
+
+[build-dependencies]
+rusty_lr = { path = "../../rusty_lr", features = ["build"] }

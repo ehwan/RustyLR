@@ -1,4 +1,6 @@
-mod parser;
+mod parser_expanded;
+
+use parser_expanded as parser;
 
 fn main() {
     use parser::Token;

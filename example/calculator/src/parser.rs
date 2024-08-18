@@ -1,8 +1,3 @@
-#![allow(unused_imports)]
-
-use rusty_lr::lalr1;
-use rusty_lr::lr1;
-
 #[derive(Debug, Clone, Copy)]
 pub enum Token {
     Num(i32),
@@ -46,60 +41,61 @@ impl Ord for Token {
     }
 }
 
+%%
+
 // this define struct `EParser`
 // where 'E' is the start symbol
-lalr1! {
-    // type of userdata
-    %userdata i32;
-    // type of token ( as Terminal symbol )
-    %tokentype Token;
 
-    // start symbol
-    %start E;
-    // eof symbol; for augmented rule generation
-    %eof Token::Eof;
+// type of userdata
+%userdata i32;
+// type of token ( as Terminal symbol )
+%tokentype Token;
 
-    // define tokens
-    %token num Token::Num(0); // `num` maps to `Token::Num(0)`
-    %token plus Token::Plus;
-    %token star Token::Star;
-    %token lparen Token::LParen;
-    %token rparen Token::RParen;
+// start symbol
+%start E;
+// eof symbol; for augmented rule generation
+%eof Token::Eof;
 
-    // resolving shift/reduce conflict
-    %left plus;
-    %left star;
+// define tokens
+%token num Token::Num(0); // `num` maps to `Token::Num(0)`
+%token plus Token::Plus;
+%token star Token::Star;
+%token lparen Token::LParen;
+%token rparen Token::RParen;
 
-    // data that each token holds can be accessed by its name
-    // s is slice of shifted terminal symbols captured by current rule
-    // userdata can be accessed by `data` ( &mut i32, for this situation )
-    A(i32) : A plus a2=A {
-            println!("{:?} {:?} {:?}", A, plus, a2 );
-            //                         ^    ^    ^
-            //                         |    |    |- value of 2nd 'A'
-            //                         |    |- Token
-            //                         |- value of 1st 'A'
-            *data += 1;
-            A + a2 // --> this will be new value of current 'A'
-        //  ^    ^
-        //  |    |- value of 2nd 'A'
-        //  |- value of 1st 'A'
-        }
-      | M
-      ;
+// resolving shift/reduce conflict
+%left plus;
+%left star;
 
-    M(i32) : M star m2=M { M * m2 }
-      | P
-      ;
-
-    P(i32) : num {
-        if let Token::Num(n) = num { n }
-        else { return Err(format!("{:?}", num)); }
-        //            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-        //             reduce action returns Result<(), String>
+// data that each token holds can be accessed by its name
+// s is slice of shifted terminal symbols captured by current rule
+// userdata can be accessed by `data` ( &mut i32, for this situation )
+A(i32) : A plus a2=A {
+        println!("{:?} {:?} {:?}", A, plus, a2 );
+        //                         ^    ^    ^
+        //                         |    |    |- value of 2nd 'A'
+        //                         |    |- Token
+        //                         |- value of 1st 'A'
+        *data += 1;
+        A + a2 // --> this will be new value of current 'A'
+    //  ^    ^
+    //  |    |- value of 2nd 'A'
+    //  |- value of 1st 'A'
     }
-      | lparen E rparen { E }
-      ;
+    | M
+    ;
 
-    E(i32) : A;
+M(i32) : M star m2=M { M * m2 }
+    | P
+    ;
+
+P(i32) : num {
+    if let Token::Num(n) = num { n }
+    else { return Err(format!("{:?}", num)); }
+    //            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    //             reduce action returns Result<(), String>
 }
+    | lparen E rparen { E }
+    ;
+
+E(i32) : A;

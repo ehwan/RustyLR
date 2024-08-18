@@ -1,0 +1,20 @@
+[package]
+name = "rusty_lr_buildscript"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "buildscipt tools for rusty_lr"
+repository = "https://github.com/ehwan/RustyLR"
+readme = "../README.md"
+keywords = ["parser", "yacc", "context-free-grammar", "lr", "compiler"]
+categories = ["parsing"]
+
+
+[dependencies]
+proc-macro2 = { version = "1.0.86", features = ["span-locations"] }
+quote = "1.0"
+# rusty_lr_parser = { path = "../rusty_lr_parser" }
+rusty_lr_parser = "3.4"
+# rusty_lr_core = { path = "../rusty_lr_core", features = ["fxhash", "builder"] }
+rusty_lr_core = { version = "2.2", features = ["fxhash", "builder"] }
+codespan-reporting = "0.11"

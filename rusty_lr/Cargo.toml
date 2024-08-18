@@ -1,17 +1,19 @@
 [package]
 name = "rusty_lr"
-version = "2.0.4"
+version = "2.1.0"
 edition = "2021"
 license = "MIT"
 description = "yacc-like, LR(1) and LALR(1) parser generator with custom reduce action"
 repository = "https://github.com/ehwan/RustyLR"
 readme = "../README.md"
 keywords = ["parser", "yacc", "context-free-grammar", "lr", "compiler"]
-categories = ["parsing", "compilers"]
+categories = ["parsing", "compilers", "parser-implementations"]
 
 [dependencies]
 rusty_lr_core = "2.2"
 rusty_lr_derive = "1.6"
+rusty_lr_buildscript = { version = "0.1", optional = true }
+# rusty_lr_buildscript = { path = "../rusty_lr_buildscript", optional = true }
 # rusty_lr_core = { path = "../rusty_lr_core" }
 # rusty_lr_derive = { path = "../rusty_lr_derive" }
 
@@ -19,6 +21,7 @@ rusty_lr_derive = "1.6"
 default = []
 fxhash = ["rusty_lr_core/fxhash"]
 builder = ["rusty_lr_core/builder"]
+build = ["dep:rusty_lr_buildscript"]
 # default = ["core", "derive"]
 # core = ["rusty_lr_core"]
 # derive = ["rusty_lr_derive"]

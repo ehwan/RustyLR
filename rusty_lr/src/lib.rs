@@ -1,18 +1,15 @@
 //! # RustyLR
 //! yacc-like LR(1) and LALR(1) Deterministic Finite Automata (DFA) generator from Context Free Grammar (CFGs).
 //!
-//! RustyLR provides both [executable](#executable-rustylr) and [procedural macros](#proc-macro) to generate LR(1) and LALR(1) parser.
+//! RustyLR provides [procedural macros](#proc-macro) and [buildscript tools](#integrating-with-buildrs) to generate LR(1) and LALR(1) parser.
 //! The generated parser will be a pure Rust code, and the calculation of building DFA will be done at compile time.
 //! Reduce action can be written in Rust code,
-//! and the error messages are readable and detailed with [executable](#executable-rustylr).
-//! For huge and complex grammars, it is recommended to use the [executable](#executable-rustylr) version.
+//! and the error messages are **readable and detailed**.
+//! For huge and complex grammars, it is recommended to use the [buildscipt](#integrating-with-buildrs).
 //!
-//! By default, RustyLR uses [`std::collections::HashMap`] for the parser tables.
-//! If you want to use `FxHashMap` from [`rustc-hash`](https://github.com/rust-lang/rustc-hash), add `features=["fxhash"]` to your `Cargo.toml`.
-//! ```toml
-//! [dependencies]
-//! rusty_lr = { version = "...", features = ["fxhash"] }
-//! ```
+//! #### `features` in `Cargo.toml`
+//!  - `build` : Enable buildscript tools.
+//!  - `fxhash` : In parser table, replace `std::collections::HashMap` with `FxHashMap` from [`rustc-hash`](https://github.com/rust-lang/rustc-hash).
 //!
 //! ## Features
 //!  - pure Rust implementation
@@ -21,7 +18,7 @@
 //!  - customizable reduce action
 //!  - resolving conflicts of ambiguous grammar
 //!  - regex patterns partially supported
-//!  - executable for generating parser tables
+//!  - tools for integrating with `build.rs`
 //!
 //! ## proc-macro
 //! Below procedural macros are provided:
@@ -38,6 +35,68 @@
 //!
 //! All structs above are prefixed by `<StartSymbol>`.
 //! In most cases, what you want is the `Parser` and `ParseError` structs, and the others are used internally.
+//!
+//! ## Integrating with `build.rs`
+//! This buildscripting tool will provide much more detailed, pretty-printed error messages than the procedural macros.
+//! If you are writing a huge, complex grammar, it is recommended to use buildscript than the procedural macros.
+//! Generated code will contain the same structs and functions as the procedural macros. In your actual source code, you can `include!` the generated file.
+//!
+//! The program searches for `%%` in the input file, not the `lr1!`, `lalr1!` macro.
+//! The contents before `%%` will be copied into the output file as it is.
+//! And the context-free grammar must be followed by `%%`.
+//!
+//! ```rust
+//! // parser.rs
+//! use some_crate::some_module::SomeStruct;
+//!
+//! enum SomeTypeDef {
+//!    A,
+//!    B,
+//!    C,
+//! }
+//!
+//! %% // <-- input file splitted here
+//!
+//! %tokentype u8;
+//! %start E;
+//! %eof b'\0';
+//!
+//! %token a b'a';
+//! %token lparen b'(';
+//! %token rparen b')';
+//!
+//! E: lparen E rparen
+//!  | P
+//!  ;
+//!
+//! P: a;
+//! ```
+//!
+//! You must enable the feature `build` to use in the build script.
+//! ```toml
+//! [build-dependencies]
+//! rusty_lr = { version = "...", features = ["build"] }
+//! ```
+//!
+//! ```rust
+//! // build.rs
+//! use rusty_lr::build;
+//!
+//! fn main() {
+//!     println!("cargo::rerun-if-changed=src/parser.rs");
+//!
+//!     let output = format!("{}/parser.rs", std::env::var("OUT_DIR").unwrap());
+//!     build::Builder::new()
+//!         .file("src/parser.rs") // path to the input file
+//!     //  .lalr()                // to generate LALR(1) parser
+//!         .build(&output);       // path to the output file
+//! }
+//! ```
+//!
+//! In your source code, include the generated file.
+//! ```rust
+//! include!(concat!(env!("OUT_DIR"), "/parser.rs"));
+//! ```
 //!
 //! ## Start Parsing
 //! The `Parser` struct has the following functions:
@@ -116,92 +175,14 @@
 //! Syntax can be found in [repository](https://github.com/ehwan/RustyLR/tree/main?tab=readme-ov-file#syntax).
 //!
 //!
-//! ## executable `rustylr`
-//! An executable version of `lr1!` and `lalr1!` macro.
-//! Converts a context-free grammar into a deterministic finite automaton (DFA) tables,
-//! and generates a Rust code that can be used as a parser for that grammar.
-//!
-//! ```
-//! cargo install rustylr
-//! ```
-//!
-//! This executable will provide much more detailed, pretty-printed error messages than the procedural macros.
-//! If you are writing a huge, complex grammar, it is recommended to use this executable than the procedural macros.
-//! `--verbose` option is useful for debugging the grammar.
-//! It will print where the auto-generated rules are originated from and the resolving process of shift/reduce conflicts.
-//! [like](https://github.com/ehwan/RustyLR/blob/main/images/example1.png) [this](https://github.com/ehwan/RustyLR/blob/main/images/example2.png)
-//!
-//! Although it is convenient to use the proc-macros for small grammars,
-//! since modern IDEs feature (rust-analyzer's auto completion, inline error messages) could be enabled.
-//!
-//! This program searches for `%%` in the input file. ( Not the `lr1!`, `lalr1!` macro )
-//!
-//! The contents before `%%` will be copied into the output file as it is.
-//! Context-free grammar must be followed by `%%`.
-//! Each line must follow the syntax of [rusty_lr#syntax](#syntax)
-//!
-//! ```rust
-//! // my_grammar.rs
-//! use some_crate::some_module::SomeStruct;
-//!
-//! enum SomeTypeDef {
-//!     A,
-//!     B,
-//!     C,
-//! }
-//!
-//! %% // <-- input file splitted here
-//!
-//! %tokentype u8;
-//! %start E;
-//! %eof b'\0';
-//!
-//! %token a b'a';
-//! %token lparen b'(';
-//! %token rparen b')';
-//!
-//! E: lparen E rparen
-//!  | P
-//!  ;
-//!
-//! P: a;
-//! ```
-//!
-//! Calling the command will generate a Rust code `my_parser.rs`.
-//! ```
-//! $ rustylr my_grammar.rs my_parser.rs --verbose
-//! ```
-//!
-//!
-//! Possible options can be found by `--help`.
-//! ```
-//! $ rustylr --help
-//! Usage: rustylr [OPTIONS] <INPUT_FILE> [OUTPUT_FILE]
-//!
-//! Arguments:
-//!   <INPUT_FILE>
-//!           input_file to read
-//!
-//!   [OUTPUT_FILE]
-//!           output_file to write
-//!
-//!           [default: out.tab.rs]
-//!
-//! Options:
-//!       --no-format
-//!           do not rustfmt the output
-//!
-//!   -l, --lalr
-//!           build LALR(1) parser
-//!
-//!   -v, --verbose
-//!           print debug information.
-//!     
-//!           print the auto-generated rules, and where they are originated from.
-//!           print the shift/reduce conflicts, and the resolving process.
-//! ```
 
 // re-exports
 
 pub use rusty_lr_core::*;
 pub use rusty_lr_derive::*;
+
+/// tools for build.rs
+#[cfg(feature = "build")]
+pub mod build {
+    pub use rusty_lr_buildscript::*;
+}
