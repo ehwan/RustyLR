@@ -96,5 +96,6 @@ pub struct GrammarArgs {
     pub error_typename: Vec<(Span, TokenStream)>,
     pub terminals: Vec<(Ident, TokenStream)>,
     pub reduce_types: Vec<(ReduceTypeArgs, ReduceType)>,
+    pub derives: Vec<TokenStream>,
     pub rules: Vec<RuleDefArgs>,
 }

@@ -35,6 +35,8 @@ pub struct Grammar {
     /// %left or %right for terminals
     pub reduce_types: HashMap<Ident, rusty_lr_core::ReduceType>,
 
+    pub(crate) derives: Vec<TokenStream>,
+
     /// setted reduce types originated from
     pub reduce_types_origin: HashMap<Ident, (Span, Span)>,
     /// %err
@@ -80,7 +82,10 @@ impl Grammar {
         let parser = GrammarParser::new();
         let mut context = parser.begin();
 
-        match crate::parser::lexer::feed_recursive(input, &parser, &mut context) {
+        let mut grammar_args = GrammarArgs::default();
+
+        match crate::parser::lexer::feed_recursive(input, &parser, &mut context, &mut grammar_args)
+        {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();
@@ -91,7 +96,7 @@ impl Grammar {
                 return Err(ParseArgError::MacroLineParse { span, message });
             }
         }
-        match parser.feed(&mut context, Lexed::Eof) {
+        match parser.feed(&mut context, Lexed::Eof, &mut grammar_args) {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();
@@ -99,7 +104,7 @@ impl Grammar {
             }
         }
 
-        Ok(context.accept())
+        Ok(grammar_args)
     }
     pub fn arg_check_error(grammar_args: &GrammarArgs) -> Result<(), ArgError> {
         // %error
@@ -181,6 +186,7 @@ impl Grammar {
             terminals: Default::default(),
             terminals_index: Default::default(),
             reduce_types: Default::default(),
+            derives: grammar_args.derives,
             reduce_types_origin: Default::default(),
             rules: Default::default(),
             nonterm_typenames: Default::default(),

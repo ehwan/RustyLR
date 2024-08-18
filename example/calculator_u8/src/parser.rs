@@ -22,6 +22,8 @@ lr1! {
     %token rparen ')';
     %token space ' ';
 
+    %derive Clone, Debug;
+
     %left plus;
     %left star;
 

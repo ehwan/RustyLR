@@ -583,11 +583,19 @@ impl Grammar {
             });
         }
 
+        let mut derives_stream = TokenStream::new();
+        for derive in &self.derives {
+            derives_stream.extend(quote! {
+                #derive,
+            });
+        }
+
         Ok(quote! {
         /// struct that holds internal parser data,
         /// including data stack for each non-terminal,
         /// and state stack for DFA
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
+        #[derive(#derives_stream)]
         pub struct #context_struct_name {
             /// state stack, user must not modify this
             pub state_stack: Vec<usize>,

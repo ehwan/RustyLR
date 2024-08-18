@@ -1,20 +1,14 @@
 [package]
 name = "rustylr"
-version = "0.7.2"
+version = "0.8.0"
 edition = "2021"
 license = "MIT"
-description = "LR(1), LALR(1) parser generator with custom reduce action"
+description = "executable for rusty_lr"
 repository = "https://github.com/ehwan/RustyLR"
 readme = "../README.md"
 keywords = ["parser", "yacc", "context-free-grammar", "lr", "compiler"]
 categories = ["parsing"]
 
 [dependencies]
-proc-macro2 = { version = "1.0.86", features = ["span-locations"] }
-quote = "1.0"
 clap = { version = "4.5.7", features = ["derive"] }
-# rusty_lr_parser = { path = "../rusty_lr_parser" }
-rusty_lr_parser = "3.4"
-# rusty_lr_core = { path = "../rusty_lr_core", features = ["fxhash", "builder"] }
-rusty_lr_core = { version = "2.2", features = ["fxhash", "builder"] }
-codespan-reporting = "0.11"
+rusty_lr_buildscript = "0.2"

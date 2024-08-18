@@ -729,6 +729,41 @@ C: A!*; // A will be ignored first, and then repeatance pattern will be applied
 </details>
 
 
+### Derive <sub><sup>(optional)</sup></sub>
+Specify the derive attributes for the generated `Context` struct.
+By default, the generated `Context` does not implement any traits.
+But in some cases, you may want to derive traits like `Clone`, `Debug`, or `Serialize`, `Deserialize` of `serde`.
+
+You can specify the derive attributes by `%derive` directive.
+In this case, user must ensure that every member of the `Context` must implement the trait.
+Currently, `Context` is holding the stack data,
+which is `Vec<usize>` for state stack and `Vec<T>` for every `<RuleType>` in the grammar.
+
+```
+'%derive' <DeriveAttributes> ';'
+```
+
+<details>
+<summary>
+Example
+</summary>
+
+```rust
+// here, #[derive(Clone,Debug)] will be added to the generated `Context` struct
+%derive Clone, Debug;
+
+...
+
+let mut context = parser.begin();
+// do something with context...
+
+println!( "{:?}", context );          // debug-print context
+let cloned_context = context.clone(); // clone context, you can re-feed the input sequence using cloned context
+```
+
+</details>
+
+
 
 </details>
 

@@ -34,6 +34,8 @@ macro_rules! punct(
 
 %moduleprefix ::rusty_lr_core;
 
+%userdata GrammarArgs;
+
 %tokentype Lexed;
 %token ident Lexed::Ident(Ident::new("id", Span::call_site()));
 %token colon Lexed::Colon(punct!(':'));
@@ -72,6 +74,7 @@ macro_rules! punct(
 %token userdata Lexed::UserData(punct!('%'),Ident::new("id", Span::call_site()));
 %token errortype Lexed::ErrorType(punct!('%'),Ident::new("id", Span::call_site()));
 %token moduleprefix Lexed::ModulePrefix(punct!('%'),Ident::new("id", Span::call_site()));
+%token derive Lexed::Derive(punct!('%'),Ident::new("id", Span::call_site()));
 
 %eof Lexed::Eof;
 
@@ -251,7 +254,7 @@ TokenDef((Ident, TokenStream)): token ident RustCode semicolon
 }
 ;
 
-RustCode(TokenStream): t=[^semicolon lparen-moduleprefix ]+ {
+RustCode(TokenStream): t=[^semicolon lparen-derive]+ {
     let mut tokens = TokenStream::new();
     for token in t.into_iter() {
         token.append_to_stream(&mut tokens);
@@ -295,85 +298,20 @@ ErrorDef((Span,TokenStream)): errortype RustCode semicolon { (errortype.span(), 
 
 ModulePrefixDef((Span,TokenStream)): moduleprefix RustCode semicolon { (moduleprefix.span(), RustCode) };
 
-Grammar(GrammarArgs): Grammar Rule {
-    Grammar.rules.push( Rule );
-    Grammar 
-}
-| Rule {
-    let mut g:GrammarArgs = Default::default();
-    g.rules.push( Rule );
-    g
-}
-| Grammar TokenDef {
-    Grammar.terminals.push( TokenDef );
-    Grammar
-}
-| TokenDef {
-    let mut g:GrammarArgs = Default::default();
-    g.terminals.push( TokenDef );
-    g
-}
-| Grammar StartDef {
-    Grammar.start_rule_name.push(StartDef);
-    Grammar
-}
-| StartDef {
-    let mut g:GrammarArgs = Default::default();
-    g.start_rule_name.push(StartDef);
-    g
-}
-| Grammar EofDef {
-    Grammar.eof.push(EofDef);
-    Grammar
-}
-| EofDef {
-    let mut g:GrammarArgs = Default::default();
-    g.eof.push(EofDef);
-    g
-}
-| Grammar TokenTypeDef {
-    Grammar.token_typename.push(TokenTypeDef);
-    Grammar
-}
-| TokenTypeDef {
-    let mut g:GrammarArgs = Default::default();
-    g.token_typename.push(TokenTypeDef);
-    g
-}
-| Grammar UserDataDef {
-    Grammar.userdata_typename.push(UserDataDef);
-    Grammar
-}
-| UserDataDef {
-    let mut g:GrammarArgs = Default::default();
-    g.userdata_typename.push(UserDataDef);
-    g
-}
-| Grammar ReduceDef {
-    Grammar.reduce_types.push( ReduceDef );
-    Grammar
-}
-| ReduceDef {
-    let mut g:GrammarArgs = Default::default();
-    g.reduce_types.push( ReduceDef );
-    g
-}
-| Grammar ErrorDef {
-    Grammar.error_typename.push(ErrorDef);
-    Grammar
-}
-| ErrorDef {
-    let mut g:GrammarArgs = Default::default();
-    g.error_typename.push(ErrorDef);
-    g
-}
-| Grammar ModulePrefixDef {
-    Grammar.module_prefix.push(ModulePrefixDef);
-    Grammar
-}
-| ModulePrefixDef {
-    let mut g:GrammarArgs = Default::default();
-    g.module_prefix.push(ModulePrefixDef);
-    g
-}
+DeriveDef(TokenStream): derive RustCode semicolon {
+    RustCode
+};
+
+GrammarLine : Rule { data.rules.push(Rule); }
+| TokenDef  { data.terminals.push(TokenDef); }
+| StartDef  { data.start_rule_name.push(StartDef); }
+| EofDef    { data.eof.push(EofDef); }
+| TokenTypeDef  { data.token_typename.push(TokenTypeDef); }
+| UserDataDef  { data.userdata_typename.push(UserDataDef); }
+| ReduceDef  { data.reduce_types.push(ReduceDef); }
+| ErrorDef   { data.error_typename.push(ErrorDef); }
+| ModulePrefixDef { data.module_prefix.push(ModulePrefixDef); }
+| DeriveDef { data.derives.push(DeriveDef); }
 ;
+
+Grammar: GrammarLine+;
