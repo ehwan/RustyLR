@@ -239,7 +239,7 @@ There are two error variants returned from `feed()` function:
  - `InvalidTerminal(InvalidTerminalError)` : when invalid terminal symbol is fed
  - `ReduceAction(ReduceActionError)` : when the reduce action returns `Err(Error)`
 
-For `ReduceActionError`, the error type can be defined by [`%err`](#error-type-optional) directive. If not defined, `String` will be used.
+For `ReduceActionError`, the error type can be defined by [`%err`](#error-type-optional) directive. If not defined, `DefaultReduceActionError` will be used.
 
 When printing the error message, there are two ways to get the error message:
  - `e.long_message( &parser, &context )` : get the error message as `String`, in a detailed format
