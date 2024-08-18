@@ -56,6 +56,9 @@ impl Ord for Token {
 // eof symbol; for augmented rule generation
 %eof Token::Eof;
 
+// error type
+%err String;
+
 // define tokens
 %token num Token::Num(0); // `num` maps to `Token::Num(0)`
 %token plus Token::Plus;

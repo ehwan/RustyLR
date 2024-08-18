@@ -165,24 +165,29 @@ impl Grammar {
 
     /// parse the input TokenStream and return a parsed Grammar
     pub fn from_grammar_args(grammar_args: GrammarArgs) -> Result<Self, ParseError> {
-        let mut grammar = Grammar {
-            module_prefix: if let Some(module_prefix) = grammar_args.module_prefix.first() {
-                module_prefix.1.clone()
+        let module_prefix =
+            if let Some(module_prefix) = grammar_args.module_prefix.into_iter().next() {
+                module_prefix.1
             } else {
                 quote! { ::rusty_lr }
-            },
-            token_typename: grammar_args.token_typename[0].1.clone(),
+            };
+        let error_typename =
+            if let Some(error_typename) = grammar_args.error_typename.into_iter().next() {
+                error_typename.1
+            } else {
+                quote! { #module_prefix::DefaultReduceActionError }
+            };
+        let mut grammar = Grammar {
+            module_prefix,
+            token_typename: grammar_args.token_typename.into_iter().next().unwrap().1,
             userdata_typename: grammar_args
                 .userdata_typename
-                .first()
-                .map(|(_, stream)| stream.clone()),
-            start_rule_name: grammar_args.start_rule_name[0].clone(),
-            eof: grammar_args.eof[0].1.clone(),
-            error_typename: if let Some(error_typename) = grammar_args.error_typename.first() {
-                error_typename.1.clone()
-            } else {
-                quote! { String }
-            },
+                .into_iter()
+                .next()
+                .map(|(_, stream)| stream),
+            start_rule_name: grammar_args.start_rule_name.into_iter().next().unwrap(),
+            eof: grammar_args.eof.into_iter().next().unwrap().1,
+            error_typename,
             terminals: Default::default(),
             terminals_index: Default::default(),
             reduce_types: Default::default(),

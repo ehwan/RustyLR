@@ -725,7 +725,7 @@ B(f32): ... ;
 '%err' <RustType> ';'
 '%error' <RustType> ';'
 ```
-Define the type of `Err` variant in `Result<(), Err>` returned from `<ReduceAction>`. If not defined, `String` will be used.
+Define the type of `Err` variant in `Result<(), Err>` returned from `<ReduceAction>`. If not defined, `DefaultReduceActionError` will be used.
 
 <details>
 <summary>

@@ -227,3 +227,23 @@ impl<Term, ReduceActionError> ParseError<Term, ReduceActionError> {
         }
     }
 }
+
+/// Default error type for reduce action
+#[derive(Debug)]
+pub struct DefaultReduceActionError;
+impl Display for DefaultReduceActionError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Default reduce action error")
+    }
+}
+impl std::error::Error for DefaultReduceActionError {
+    fn cause(&self) -> Option<&dyn std::error::Error> {
+        None
+    }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
+    fn description(&self) -> &str {
+        "Default reduce action error"
+    }
+}

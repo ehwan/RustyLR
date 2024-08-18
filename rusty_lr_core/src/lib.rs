@@ -30,5 +30,6 @@ pub use rule::ReduceType;
 pub use state::State;
 pub use token::Token;
 
+pub use error::DefaultReduceActionError;
 pub use error::InvalidTerminalError;
 pub use error::ParseError;

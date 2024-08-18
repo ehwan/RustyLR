@@ -352,9 +352,13 @@ impl Grammar {
                 | (shift_goto_map_term, (shift_goto_map_nonterm, (reduce_map_init, ruleset))) | {
                     let mut reduce_map = #module_prefix::HashMap::default();
                     for (terminal_set_id, ruleid) in reduce_map_init.into_iter() {
-                        for term_idx in __rustylr_reduce_terminals[terminal_set_id].iter() {
-                            reduce_map.insert(__rustylr_terminals[*term_idx].clone(), ruleid);
-                        }
+                        reduce_map.extend(
+                            __rustylr_reduce_terminals[terminal_set_id].iter().map(
+                                | term_idx | {
+                                    (__rustylr_terminals[*term_idx].clone(), ruleid)
+                                }
+                            )
+                        );
                     }
                     #state_typename {
                         shift_goto_map_term: shift_goto_map_term.into_iter().map(
@@ -555,18 +559,18 @@ impl Grammar {
 
         // TokenStream for <RuleType> of start rule
         // and pop from start rule stack
-        let (start_rule_typename, pop_from_start_rule_stack) = {
+        let (return_start_rule_typename, pop_from_start_rule_stack) = {
             if let Some(start_typename) = self.nonterm_typenames.get(&self.start_rule_name) {
                 let start_rule_stack_name =
                     stack_names_by_nonterm.get(&self.start_rule_name).unwrap();
                 (
-                    start_typename.clone(),
+                    quote! { -> #start_typename },
                     quote! {
                         self.#start_rule_stack_name.pop().unwrap()
                     },
                 )
             } else {
-                (quote! {()}, TokenStream::new())
+                (TokenStream::new(), TokenStream::new())
             }
         };
 
@@ -589,19 +593,26 @@ impl Grammar {
                 #derive,
             });
         }
+        derives_stream = if self.derives.is_empty() {
+            TokenStream::new()
+        } else {
+            quote! {
+                #[derive(#derives_stream)]
+            }
+        };
 
         Ok(quote! {
         /// struct that holds internal parser data,
         /// including data stack for each non-terminal,
         /// and state stack for DFA
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-        #[derive(#derives_stream)]
+        #derives_stream
         pub struct #context_struct_name {
             /// state stack, user must not modify this
             pub state_stack: Vec<usize>,
             #stack_def_streams
         }
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
         impl #context_struct_name {
             pub fn new() -> Self {
                 Self {
@@ -629,7 +640,7 @@ impl Grammar {
 
             /// pop value from start rule
             #[inline]
-            pub fn accept(&mut self) -> #start_rule_typename {
+            pub fn accept(&mut self) #return_start_rule_typename {
                 #pop_from_start_rule_stack
             }
 
