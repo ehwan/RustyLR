@@ -32,26 +32,42 @@ pub enum PatternArgs {
 }
 
 impl PatternArgs {
-    pub fn to_pattern(&self, grammar: &Grammar) -> Result<Pattern, ParseError> {
+    /// When converting to Pattern, if any exclamation mark `!` is present, put it in the most inner pattern.
+    /// e.g. Pattern like `A+?!` will be converted to `A!+?`
+    /// Since `A+` or `A?` will generate new rule with RuleType Vec<T> or Option<T>,
+    /// it is more efficient to put the exclamation mark inside the pattern.
+    pub fn into_pattern(
+        self,
+        grammar: &Grammar,
+        put_exclamation: bool,
+    ) -> Result<Pattern, ParseError> {
         match self {
             PatternArgs::Ident(ident, _) => {
-                utils::check_reserved_name(ident)?;
-                Ok(Pattern::Ident(ident.clone()))
+                utils::check_reserved_name(&ident)?;
+                let pattern = Pattern::Ident(ident);
+                if put_exclamation {
+                    Ok(Pattern::Exclamation(Box::new(pattern)))
+                } else {
+                    Ok(pattern)
+                }
             }
-            PatternArgs::Plus(pattern, _) => {
-                Ok(Pattern::Plus(Box::new(pattern.to_pattern(grammar)?)))
-            }
-            PatternArgs::Star(pattern, _) => {
-                Ok(Pattern::Star(Box::new(pattern.to_pattern(grammar)?)))
-            }
-            PatternArgs::Question(pattern, _) => {
-                Ok(Pattern::Question(Box::new(pattern.to_pattern(grammar)?)))
-            }
-            PatternArgs::Exclamation(pattern, _) => {
-                Ok(Pattern::Exclamation(Box::new(pattern.to_pattern(grammar)?)))
-            }
+            PatternArgs::Plus(pattern, _) => Ok(Pattern::Plus(Box::new(
+                pattern.into_pattern(grammar, put_exclamation)?,
+            ))),
+            PatternArgs::Star(pattern, _) => Ok(Pattern::Star(Box::new(
+                pattern.into_pattern(grammar, put_exclamation)?,
+            ))),
+            PatternArgs::Question(pattern, _) => Ok(Pattern::Question(Box::new(
+                pattern.into_pattern(grammar, put_exclamation)?,
+            ))),
+            PatternArgs::Exclamation(pattern, _) => pattern.into_pattern(grammar, true),
             PatternArgs::TerminalSet(terminal_set) => {
-                Ok(Pattern::TerminalSet(terminal_set.to_terminal_set(grammar)?))
+                let pattern = Pattern::TerminalSet(terminal_set.to_terminal_set(grammar)?);
+                if put_exclamation {
+                    Ok(Pattern::Exclamation(Box::new(pattern)))
+                } else {
+                    Ok(pattern)
+                }
             }
         }
     }

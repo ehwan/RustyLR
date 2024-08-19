@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_parser"
-version = "3.6.0"
+version = "3.6.1"
 edition = "2021"
 license = "MIT"
 description = "macro line parser for rusty_lr"

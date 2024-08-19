@@ -7,7 +7,7 @@ pub struct TokenMapped {
     pub token: Ident,
 
     /// variable name that the token's data will be mapped to
-    pub mapto: Ident,
+    pub mapto: Option<Ident>,
 
     /// span of the token
     pub begin_span: Span,

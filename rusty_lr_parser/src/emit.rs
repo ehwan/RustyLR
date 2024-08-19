@@ -459,19 +459,35 @@ impl Grammar {
                 let mut token_pop_stream = TokenStream::new();
                 for token in rule.tokens.iter().rev() {
                     if self.terminals.contains_key(&token.token) {
-                        let mapto = &token.mapto;
-                        token_pop_stream.extend(quote! {
-                            let mut #mapto = self.#terms_stack_name.pop().unwrap();
-                        });
+                        match &token.mapto {
+                            Some(mapto) => {
+                                token_pop_stream.extend(quote! {
+                                    let mut #mapto = self.#terms_stack_name.pop().unwrap();
+                                });
+                            }
+                            None => {
+                                token_pop_stream.extend(quote! {
+                                    self.#terms_stack_name.pop();
+                                });
+                            }
+                        }
                     } else if self.nonterm_typenames.contains_key(&token.token) {
                         // if <RuleType> is defined for this nonterm,
                         // pop value from the stack to 'mapto'
                         let stack_name = stack_names_by_nonterm.get(&token.token).unwrap();
 
-                        let mapto = &token.mapto;
-                        token_pop_stream.extend(quote! {
-                            let mut #mapto = self.#stack_name.pop().unwrap();
-                        });
+                        match &token.mapto {
+                            Some(mapto) => {
+                                token_pop_stream.extend(quote! {
+                                    let mut #mapto = self.#stack_name.pop().unwrap();
+                                });
+                            }
+                            None => {
+                                token_pop_stream.extend(quote! {
+                                    self.#stack_name.pop();
+                                });
+                            }
+                        }
                     }
                 }
 
@@ -507,13 +523,12 @@ impl Grammar {
                         // the unique value will be pushed to stack
                         let mut unique_mapto = None;
                         for token in rule.tokens.iter() {
-                            let typename = self.get_typename(&token.token);
-                            if typename.is_some() {
+                            if token.mapto.is_some() {
                                 if unique_mapto.is_some() {
                                     unique_mapto = None;
                                     break;
                                 } else {
-                                    unique_mapto = Some(&token.mapto);
+                                    unique_mapto = token.mapto.as_ref();
                                 }
                             }
                         }

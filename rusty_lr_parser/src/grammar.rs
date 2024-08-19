@@ -264,7 +264,7 @@ impl Grammar {
             }
         }
 
-        // insert rule typenames
+        // insert rule typenames first, since it will be used when inserting rule definitions below
         for rules in grammar_args.rules.iter() {
             // check reserved name
             utils::check_reserved_name(&rules.name)?;
@@ -291,9 +291,12 @@ impl Grammar {
                 let mut tokens = Vec::new();
                 for (mapto, pattern) in rule.tokens.into_iter() {
                     let (begin_span, end_span) = pattern.span_pair();
-                    let pattern = pattern.to_pattern(&grammar)?;
+                    let pattern = pattern.into_pattern(&grammar, false)?;
                     let token_rule = pattern.get_rule(&mut grammar, (begin_span, end_span))?;
-                    let mapto = mapto.unwrap_or_else(|| pattern.base_ident());
+                    let mapto = match pattern.typename(&grammar) {
+                        Some(_) => mapto.or_else(|| pattern.map_to()),
+                        None => None,
+                    };
 
                     tokens.push(TokenMapped {
                         token: token_rule,
@@ -325,13 +328,13 @@ impl Grammar {
                     tokens: vec![
                         TokenMapped {
                             token: grammar.start_rule_name.clone(),
-                            mapto: grammar.start_rule_name.clone(),
+                            mapto: None,
                             begin_span: Span::call_site(),
                             end_span: Span::call_site(),
                         },
                         TokenMapped {
                             token: Ident::new(utils::EOF_NAME, Span::call_site()),
-                            mapto: Ident::new(utils::EOF_NAME, Span::call_site()),
+                            mapto: None,
                             begin_span: Span::call_site(),
                             end_span: Span::call_site(),
                         },
