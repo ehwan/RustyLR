@@ -206,22 +206,26 @@ impl Grammar {
         // =========================Writing States==============================
         // =====================================================================
         let mut comma_separated_reduce_terminal_sets = TokenStream::new();
+        let mut comma_separated_ruleset0_sets = TokenStream::new();
 
         let (
             shift_term_initializer,
             shift_nonterm_initializer,
             reduce_map_initializer,
             ruleset_initializer,
+            ruleset0_initializer,
         ) = {
             // when generating code for 'inserting tokens to reduce_map',
             // there could be multiple lookahead tokens for one rule
             // inserting all of them one by one is inefficient
             let mut reduce_terminals_map = BTreeMap::new();
+            let mut ruleset0_map = BTreeMap::new();
 
             let mut shift_term_initializer = TokenStream::new();
             let mut shift_nonterm_initializer = TokenStream::new();
             let mut reduce_map_initializer = TokenStream::new();
             let mut ruleset_initializer = TokenStream::new();
+            let mut ruleset0_initializer = TokenStream::new();
 
             for state in states.into_iter() {
                 // use BTreeMap to sort keys, for consistent output
@@ -291,24 +295,53 @@ impl Grammar {
                         vec![#init_reduce_comma_separated_terminals_rules],
                     }
                 };
-                let ruleset = {
+                let (ruleset, ruleset0_id) = {
                     let mut comma_separated_rules = TokenStream::new();
+
+                    let mut ruleset0 = BTreeSet::new();
                     for rule in state.ruleset.into_iter() {
                         let ruleid = rule.rule;
                         let shifted = rule.shifted;
-                        comma_separated_rules.extend(quote! {
-                            (#ruleid,#shifted),
+
+                        if shifted == 0 {
+                            ruleset0.insert(ruleid);
+                        } else {
+                            comma_separated_rules.extend(quote! {
+                                (#ruleid,#shifted),
+                            });
+                        }
+                    }
+
+                    let ruleset0_id = if let Some(ruleset0) = ruleset0_map.get(&ruleset0) {
+                        *ruleset0
+                    } else {
+                        let len = ruleset0_map.len();
+                        ruleset0_map.insert(ruleset0.clone(), len);
+
+                        let mut comma_separated_ruleset0 = TokenStream::new();
+                        for ruleid in ruleset0.into_iter() {
+                            comma_separated_ruleset0.extend(quote! {
+                                #ruleid,
+                            });
+                        }
+
+                        comma_separated_ruleset0_sets.extend(quote! {
+                            vec![#comma_separated_ruleset0],
                         });
-                    }
-                    quote! {
-                        vec![#comma_separated_rules],
-                    }
+
+                        len
+                    };
+
+                    (quote! { vec![#comma_separated_rules], }, ruleset0_id)
                 };
 
                 shift_term_initializer.extend(shift_term);
                 shift_nonterm_initializer.extend(shift_nonterm);
                 reduce_map_initializer.extend(reduce_map);
                 ruleset_initializer.extend(ruleset);
+                ruleset0_initializer.extend(quote! {
+                    #ruleset0_id,
+                });
             }
 
             (
@@ -316,6 +349,7 @@ impl Grammar {
                 shift_nonterm_initializer,
                 reduce_map_initializer,
                 ruleset_initializer,
+                ruleset0_initializer,
             )
         };
 
@@ -341,15 +375,18 @@ impl Grammar {
             ).collect();
 
             let __rustylr_reduce_terminals = vec![#comma_separated_reduce_terminal_sets];
+            let __rustylr_ruleset0s = vec![#comma_separated_ruleset0_sets];
 
             let states:Vec<#state_typename> = [#shift_term_initializer].into_iter().zip(
                 [#shift_nonterm_initializer].into_iter().zip(
                     [#reduce_map_initializer].into_iter().zip(
-                        [#ruleset_initializer]
+                        [#ruleset_initializer].into_iter().zip(
+                            [#ruleset0_initializer]
+                        )
                     )
                 )
             ).map(
-                | (shift_goto_map_term, (shift_goto_map_nonterm, (reduce_map_init, ruleset))) | {
+                | (shift_goto_map_term, (shift_goto_map_nonterm, (reduce_map_init, (ruleset,ruleset0_id)))) | {
                     let mut reduce_map = #module_prefix::HashMap::default();
                     for (terminal_set_id, ruleid) in reduce_map_init.into_iter() {
                         reduce_map.extend(
@@ -360,6 +397,26 @@ impl Grammar {
                             )
                         );
                     }
+
+
+                    let mut ruleset: std::collections::BTreeSet<#module_prefix::ShiftedRuleRef> = ruleset.into_iter().map(
+                        | (ruleid, shifted) | {
+                            #module_prefix::ShiftedRuleRef {
+                                rule: ruleid,
+                                shifted,
+                            }
+                        }
+                    ).collect();
+                    for ruleid in __rustylr_ruleset0s[ruleset0_id].iter().copied() {
+                        ruleset.insert(
+                            #module_prefix::ShiftedRuleRef {
+                                rule: ruleid,
+                                shifted: 0,
+                            }
+                        );
+                    }
+
+
                     #state_typename {
                         shift_goto_map_term: shift_goto_map_term.into_iter().map(
                             | (term_idx, goto) | {
@@ -368,14 +425,7 @@ impl Grammar {
                         ).collect(),
                         shift_goto_map_nonterm: shift_goto_map_nonterm.into_iter().collect(),
                         reduce_map,
-                        ruleset: ruleset.into_iter().map(
-                            | (ruleid, shifted) | {
-                                #module_prefix::ShiftedRuleRef {
-                                    rule: ruleid,
-                                    shifted,
-                                }
-                            }
-                        ).collect(),
+                        ruleset,
                     }
                 }
             ).collect();
