@@ -66,7 +66,7 @@ lr1! {
         ;
 
     P(f32): Number { Number as f32 }
-        | WS0 lparen E rparen WS0 { E }
+        | space* lparen E rparen space* { E }
         ;
 
     E(f32) : A ;
@@ -150,7 +150,7 @@ This buildscripting tool will provide much more detailed, pretty-printed error m
 If you are writing a huge, complex grammar, it is recommended to use buildscript than the procedural macros.
 Generated code will contain the same structs and functions as the procedural macros. In your actual source code, you can `include!` the generated file.
 
-The program searches for `%%` in the input file, not the `lr1!`, `lalr1!` macro.
+Unlike the procedural macros, the program searches for `%%` in the input file, not the `lr1!`, `lalr1!` macro.
 The contents before `%%` will be copied into the output file as it is.
 And the context-free grammar must be followed by `%%`.
 
