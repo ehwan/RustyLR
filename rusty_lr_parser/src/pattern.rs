@@ -1,5 +1,3 @@
-use crate::utils;
-
 use super::error::ParseError;
 use super::grammar::Grammar;
 use super::rule::{RuleLine, RuleLines};
@@ -44,21 +42,17 @@ impl Pattern {
         match self {
             Pattern::Ident(ident) => Ok(ident.clone()),
             Pattern::Plus(pattern) => {
+                let base_rule = pattern.get_rule(grammar, root_span_pair)?;
+                let typename = self.typename(grammar);
+
                 let new_ident = Ident::new(
-                    &format!(
-                        "{}{}",
-                        utils::AUTO_GENERATED_RULE_PREFIX,
-                        grammar.pattern_map.len()
-                    ),
-                    Span::call_site(),
+                    &format!("_{}_Plus{}", base_rule, grammar.pattern_map.len()),
+                    root_span_pair.0,
                 );
                 grammar.pattern_map.insert(self.clone(), new_ident.clone());
                 grammar
                     .generated_root_span
                     .insert(new_ident.clone(), root_span_pair);
-
-                let base_rule = pattern.get_rule(grammar, root_span_pair)?;
-                let typename = self.typename(grammar);
 
                 if let Some(typename) = typename {
                     // typename exist, make new rule with typename Vec<base_typename>
@@ -146,21 +140,18 @@ impl Pattern {
                 Ok(new_ident)
             }
             Pattern::Star(pattern) => {
+                let plus_pattern = Pattern::Plus(pattern.clone());
+                let plus_rule = plus_pattern.get_rule(grammar, root_span_pair)?;
+                let base_rule = pattern.get_rule(grammar, root_span_pair)?;
+
                 let new_ident = Ident::new(
-                    &format!(
-                        "{}{}",
-                        utils::AUTO_GENERATED_RULE_PREFIX,
-                        grammar.pattern_map.len()
-                    ),
-                    Span::call_site(),
+                    &format!("_{}_Star{}", base_rule, grammar.pattern_map.len()),
+                    root_span_pair.0,
                 );
                 grammar.pattern_map.insert(self.clone(), new_ident.clone());
                 grammar
                     .generated_root_span
                     .insert(new_ident.clone(), root_span_pair);
-
-                let plus_pattern = Pattern::Plus(pattern.clone());
-                let plus_rule = plus_pattern.get_rule(grammar, root_span_pair)?;
                 let typename = self.typename(grammar);
 
                 if let Some(typename) = typename {
@@ -223,20 +214,17 @@ impl Pattern {
                 Ok(new_ident)
             }
             Pattern::Question(pattern) => {
+                let base_rule = pattern.get_rule(grammar, root_span_pair)?;
+
                 let new_ident = Ident::new(
-                    &format!(
-                        "{}{}",
-                        utils::AUTO_GENERATED_RULE_PREFIX,
-                        grammar.pattern_map.len()
-                    ),
-                    Span::call_site(),
+                    &format!("_{}_Option{}", base_rule, grammar.pattern_map.len()),
+                    root_span_pair.0,
                 );
                 grammar.pattern_map.insert(self.clone(), new_ident.clone());
                 grammar
                     .generated_root_span
                     .insert(new_ident.clone(), root_span_pair);
 
-                let base_rule = pattern.get_rule(grammar, root_span_pair)?;
                 let typename = self.typename(grammar);
 
                 if let Some(typename) = typename {
@@ -302,12 +290,8 @@ impl Pattern {
             Pattern::Exclamation(pattern) => pattern.get_rule(grammar, root_span_pair),
             Pattern::TerminalSet(terminal_set) => {
                 let new_ident = Ident::new(
-                    &format!(
-                        "{}{}",
-                        utils::AUTO_GENERATED_RULE_PREFIX,
-                        grammar.pattern_map.len()
-                    ),
-                    Span::call_site(),
+                    &format!("_TerminalSet{}", grammar.pattern_map.len()),
+                    root_span_pair.0,
                 );
                 grammar.pattern_map.insert(self.clone(), new_ident.clone());
                 grammar

@@ -93,8 +93,6 @@ pub enum ParseError {
     EofDefined(Ident),
     /// 'Augmented' is reserved name
     AugmentedDefined(Ident),
-    /// '_RustyLRGenerated*' is reserved name
-    ReservedName(Ident),
 }
 #[allow(unused)]
 impl ArgError {
@@ -222,7 +220,6 @@ impl ParseError {
 
             ParseError::EofDefined(ident) => ident.span(),
             ParseError::AugmentedDefined(ident) => ident.span(),
-            ParseError::ReservedName(ident) => ident.span(),
         }
     }
 
@@ -268,9 +265,6 @@ impl ParseError {
             }
             ParseError::AugmentedDefined(ident) => {
                 format!("'{}' is reserved name", utils::AUGMENTED_NAME)
-            }
-            ParseError::ReservedName(ident) => {
-                format!("'{}' is reserved name", utils::AUTO_GENERATED_RULE_PREFIX)
             }
         }
     }

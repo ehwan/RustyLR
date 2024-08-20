@@ -103,6 +103,33 @@ impl Builder {
         write(output_file, output.to_string()).expect("Failed to write to file");
     }
 
+    fn extend_rule_source_label(
+        labels: &mut Vec<codespan_reporting::diagnostic::Label<usize>>,
+        fileid: usize,
+        ruleid: usize,
+        grammar: &rusty_lr_parser::grammar::Grammar,
+    ) {
+        let (rule_name, rules, rule) = grammar.get_rule_by_id(ruleid).expect("Rule not found");
+        if let Some(origin_span) = grammar.generated_root_span.get(rule_name) {
+            let origin_range = origin_span.0.byte_range().start..origin_span.1.byte_range().end;
+            labels.push(
+                Label::primary(fileid, origin_range)
+                    .with_message(format!("{} was generated here", rule_name)),
+            );
+        } else {
+            let (rule_begin, rule_end) = rules.rule_lines[rule].span_pair();
+            let rule_range = rule_begin.byte_range().start..rule_end.byte_range().end;
+
+            labels.push(
+                Label::primary(fileid, rule_name.span().byte_range())
+                    .with_message(format!("{} was defined here", rule_name)),
+            );
+            labels.push(
+                Label::secondary(fileid, rule_range).with_message("in this line".to_string()),
+            );
+        }
+    }
+
     /// for internal use
     pub fn build_impl(&self) -> Result<output::Output, String> {
         if self.input_file.is_none() {
@@ -481,14 +508,6 @@ impl Builder {
                             .with_labels(vec![Label::primary(file_id, range)
                                 .with_message("This name is reserved")])
                     }
-                    ParseError::ReservedName(ident) => {
-                        let range = ident.span().byte_range();
-
-                        Diagnostic::error()
-                            .with_message(format!("'{}' is reserved name", ident))
-                            .with_labels(vec![Label::primary(file_id, range)
-                                .with_message("This name is reserved")])
-                    }
                     _ => {
                         let message = e.short_message();
                         let span = e.span().byte_range();
@@ -553,76 +572,17 @@ impl Builder {
                         for (_, shifted_rule) in shift_rules.iter() {
                             message.push_str(format!("\n\t>>> {}", shifted_rule).as_str());
                         }
-
-                        let (name, rules, rule) =
-                            grammar.get_rule_by_id(*reduceid).expect("Rule not found");
                         let mut labels = Vec::new();
 
-                        if !name
-                            .to_string()
-                            .starts_with(rusty_lr_parser::utils::AUTO_GENERATED_RULE_PREFIX)
-                        {
-                            let (rule_begin, rule_end) = rules.rule_lines[rule].span_pair();
-                            let rule_range =
-                                rule_begin.byte_range().start..rule_end.byte_range().end;
+                        Self::extend_rule_source_label(&mut labels, file_id, *reduceid, &grammar);
 
-                            labels.push(
-                                Label::primary(file_id, name.span().byte_range())
-                                    .with_message(format!("Reduce rule {} was defined here", name)),
+                        for (shiftid, _) in shift_rules.iter() {
+                            Self::extend_rule_source_label(
+                                &mut labels,
+                                file_id,
+                                *shiftid,
+                                &grammar,
                             );
-                            labels.push(
-                                Label::secondary(file_id, rule_range)
-                                    .with_message("in this line".to_string()),
-                            );
-                        } else {
-                            let origin_span = grammar
-                                .generated_root_span
-                                .get(name)
-                                .expect("generated_root_span::rule not found");
-                            let origin_range =
-                                origin_span.0.byte_range().start..origin_span.1.byte_range().end;
-                            labels.push(
-                                Label::primary(file_id, origin_range).with_message(format!(
-                                    "Reduce rule {} was generated here",
-                                    name
-                                )),
-                            );
-                        }
-
-                        for (shiftid, shift_rule) in shift_rules.iter() {
-                            let (name, rules, rule) =
-                                grammar.get_rule_by_id(*shiftid).expect("Rule not found");
-                            if !name
-                                .to_string()
-                                .starts_with(rusty_lr_parser::utils::AUTO_GENERATED_RULE_PREFIX)
-                            {
-                                let first_shift_token_byte = rules.rule_lines[rule].tokens
-                                    [shift_rule.shifted]
-                                    .begin_span
-                                    .byte_range()
-                                    .start;
-                                let (_, rule_end) = rules.rule_lines[rule].span_pair();
-                                let rule_range = first_shift_token_byte..rule_end.byte_range().end;
-                                labels.push(
-                                    Label::primary(file_id, name.span().byte_range()).with_message(
-                                        format!("Shift rule {} was defined here", name),
-                                    ),
-                                );
-                                labels.push(
-                                    Label::secondary(file_id, rule_range)
-                                        .with_message("in this line".to_string()),
-                                );
-                            } else {
-                                let origin_span = grammar
-                                    .generated_root_span
-                                    .get(name)
-                                    .expect("generated_root_span::rule not found");
-                                let origin_range = origin_span.0.byte_range().start
-                                    ..origin_span.1.byte_range().end;
-                                labels.push(Label::secondary(file_id, origin_range).with_message(
-                                    format!("Shift rule {} was generated here", name),
-                                ));
-                            }
                         }
                         Diagnostic::error()
                             .with_message(message)
@@ -641,70 +601,11 @@ impl Builder {
                         rule1: (ruleid1, production_rule1),
                         rule2: (ruleid2, production_rule2),
                     } => {
-                        let (name1, rules1, rule1) =
-                            grammar.get_rule_by_id(*ruleid1).expect("Rule not found 1");
-                        let (rule1_begin, rule1_end) = rules1.rule_lines[rule1].span_pair();
-                        let rule_range1 =
-                            rule1_begin.byte_range().start..rule1_end.byte_range().end;
-                        let (name2, rules2, rule2) =
-                            grammar.get_rule_by_id(*ruleid2).expect("Rule not found 2");
-                        let (rule2_begin, rule2_end) = rules2.rule_lines[rule2].span_pair();
-                        let rule_range2 =
-                            rule2_begin.byte_range().start..rule2_end.byte_range().end;
-
                         let mut labels = Vec::new();
 
-                        // no byte range for auto generated rules
-                        if !name1
-                            .to_string()
-                            .starts_with(rusty_lr_parser::utils::AUTO_GENERATED_RULE_PREFIX)
-                        {
-                            labels.push(
-                                Label::primary(file_id, name1.span().byte_range())
-                                    .with_message(format!("{} was defined here", name1)),
-                            );
-                            labels.push(
-                                Label::secondary(file_id, rule_range1)
-                                    .with_message("in this line".to_string()),
-                            );
-                        } else {
-                            let origin_span = grammar
-                                .generated_root_span
-                                .get(name1)
-                                .expect("generated_root_span::rule not found");
-                            let origin_range =
-                                origin_span.0.byte_range().start..origin_span.1.byte_range().end;
+                        Self::extend_rule_source_label(&mut labels, file_id, *ruleid1, &grammar);
+                        Self::extend_rule_source_label(&mut labels, file_id, *ruleid2, &grammar);
 
-                            labels.push(
-                                Label::primary(file_id, origin_range)
-                                    .with_message(format!("{} was generated here", name1)),
-                            );
-                        }
-                        if !name2
-                            .to_string()
-                            .starts_with(rusty_lr_parser::utils::AUTO_GENERATED_RULE_PREFIX)
-                        {
-                            labels.push(
-                                Label::primary(file_id, name2.span().byte_range())
-                                    .with_message(format!("{} was defined here", name2)),
-                            );
-                            labels.push(
-                                Label::secondary(file_id, rule_range2)
-                                    .with_message("in this line".to_string()),
-                            );
-                        } else {
-                            let origin_span = grammar
-                                .generated_root_span
-                                .get(name2)
-                                .expect("generated_root_span::rule not found");
-                            let origin_range =
-                                origin_span.0.byte_range().start..origin_span.1.byte_range().end;
-
-                            labels.push(
-                                Label::primary(file_id, origin_range)
-                                    .with_message(format!("{} was generated here", name2)),
-                            );
-                        }
                         Diagnostic::error()
                             .with_message(format!(
                                 "Reduce/Reduce conflict:\n>>> {}\n>>> {}",
@@ -865,79 +766,22 @@ impl Builder {
                                 message.push_str(format!("\n>>> {}", shifted_rule).as_str());
                             }
 
-                            let (name, rules, rule) = grammar
-                                .get_rule_by_id(*reduce_rule)
-                                .expect("Rule not found");
                             let mut labels = Vec::new();
 
-                            if !name
-                                .to_string()
-                                .starts_with(rusty_lr_parser::utils::AUTO_GENERATED_RULE_PREFIX)
-                            {
-                                let (rule_begin, rule_end) = rules.rule_lines[rule].span_pair();
-                                let rule_range =
-                                    rule_begin.byte_range().start..rule_end.byte_range().end;
-                                labels.push(
-                                    Label::primary(file_id, name.span().byte_range()).with_message(
-                                        format!("Reduce rule {} was defined here", name),
-                                    ),
-                                );
-                                labels.push(
-                                    Label::secondary(file_id, rule_range)
-                                        .with_message("in this line".to_string()),
-                                );
-                            } else {
-                                let origin_span = grammar
-                                    .generated_root_span
-                                    .get(name)
-                                    .expect("generated_root_span::rule not found");
-                                let origin_range = origin_span.0.byte_range().start
-                                    ..origin_span.1.byte_range().end;
-                                labels.push(Label::primary(file_id, origin_range).with_message(
-                                    format!("Reduce rule {} was generated here", name),
-                                ));
-                            }
+                            Self::extend_rule_source_label(
+                                &mut labels,
+                                file_id,
+                                *reduce_rule,
+                                &grammar,
+                            );
 
                             for shift_rule in shift_rules.iter() {
-                                let (name, rules, rule) = grammar
-                                    .get_rule_by_id(shift_rule.rule)
-                                    .expect("Rule not found");
-                                if !name
-                                    .to_string()
-                                    .starts_with(rusty_lr_parser::utils::AUTO_GENERATED_RULE_PREFIX)
-                                {
-                                    let first_shift_token_byte = rules.rule_lines[rule].tokens
-                                        [shift_rule.shifted]
-                                        .begin_span
-                                        .byte_range()
-                                        .start;
-                                    let (_, rule_end) = rules.rule_lines[rule].span_pair();
-                                    let rule_range =
-                                        first_shift_token_byte..rule_end.byte_range().end;
-                                    labels.push(
-                                        Label::primary(file_id, name.span().byte_range())
-                                            .with_message(format!(
-                                                "Shift rule {} was defined here",
-                                                name
-                                            )),
-                                    );
-                                    labels.push(
-                                        Label::secondary(file_id, rule_range)
-                                            .with_message("in this line".to_string()),
-                                    );
-                                } else {
-                                    let origin_span = grammar
-                                        .generated_root_span
-                                        .get(name)
-                                        .expect("generated_root_span::rule not found");
-                                    let origin_range = origin_span.0.byte_range().start
-                                        ..origin_span.1.byte_range().end;
-                                    labels.push(
-                                        Label::secondary(file_id, origin_range).with_message(
-                                            format!("Shift rule {} was generated here", name),
-                                        ),
-                                    );
-                                }
+                                Self::extend_rule_source_label(
+                                    &mut labels,
+                                    file_id,
+                                    shift_rule.rule,
+                                    &grammar,
+                                );
                             }
 
                             let reduce_type_origin = grammar
