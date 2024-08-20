@@ -108,13 +108,14 @@ impl Builder {
         fileid: usize,
         ruleid: usize,
         grammar: &rusty_lr_parser::grammar::Grammar,
+        prefix_str: &str,
     ) {
         let (rule_name, rules, rule) = grammar.get_rule_by_id(ruleid).expect("Rule not found");
         if let Some(origin_span) = grammar.generated_root_span.get(rule_name) {
             let origin_range = origin_span.0.byte_range().start..origin_span.1.byte_range().end;
             labels.push(
                 Label::primary(fileid, origin_range)
-                    .with_message(format!("{} was generated here", rule_name)),
+                    .with_message(format!("{}{} was generated here", prefix_str, rule_name)),
             );
         } else {
             let (rule_begin, rule_end) = rules.rule_lines[rule].span_pair();
@@ -122,7 +123,7 @@ impl Builder {
 
             labels.push(
                 Label::primary(fileid, rule_name.span().byte_range())
-                    .with_message(format!("{} was defined here", rule_name)),
+                    .with_message(format!("{}{} was defined here", prefix_str, rule_name)),
             );
             labels.push(
                 Label::secondary(fileid, rule_range).with_message("in this line".to_string()),
@@ -574,7 +575,13 @@ impl Builder {
                         }
                         let mut labels = Vec::new();
 
-                        Self::extend_rule_source_label(&mut labels, file_id, *reduceid, &grammar);
+                        Self::extend_rule_source_label(
+                            &mut labels,
+                            file_id,
+                            *reduceid,
+                            &grammar,
+                            "(Reduce) ",
+                        );
 
                         for (shiftid, _) in shift_rules.iter() {
                             Self::extend_rule_source_label(
@@ -582,6 +589,7 @@ impl Builder {
                                 file_id,
                                 *shiftid,
                                 &grammar,
+                                "(Shift) ",
                             );
                         }
                         Diagnostic::error()
@@ -603,8 +611,20 @@ impl Builder {
                     } => {
                         let mut labels = Vec::new();
 
-                        Self::extend_rule_source_label(&mut labels, file_id, *ruleid1, &grammar);
-                        Self::extend_rule_source_label(&mut labels, file_id, *ruleid2, &grammar);
+                        Self::extend_rule_source_label(
+                            &mut labels,
+                            file_id,
+                            *ruleid1,
+                            &grammar,
+                            "(Rule1) ",
+                        );
+                        Self::extend_rule_source_label(
+                            &mut labels,
+                            file_id,
+                            *ruleid2,
+                            &grammar,
+                            "(Rule2) ",
+                        );
 
                         Diagnostic::error()
                             .with_message(format!(
@@ -773,6 +793,7 @@ impl Builder {
                                 file_id,
                                 *reduce_rule,
                                 &grammar,
+                                "(Reduce) ",
                             );
 
                             for shift_rule in shift_rules.iter() {
@@ -781,6 +802,7 @@ impl Builder {
                                     file_id,
                                     shift_rule.rule,
                                     &grammar,
+                                    "(Shift) ",
                                 );
                             }
 
