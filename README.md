@@ -285,300 +285,49 @@ Every line in the macro must follow the syntax below.
 [Bootstrap](rusty_lr_parser/src/parser/parser.rs), [Expanded Bootstrap](rusty_lr_parser/src/parser/parser_expanded.rs) would be a good example to understand the syntax and generated code. It is RustyLR syntax parser written in RustyLR itself.
 
 
-<details>
-<summary>
-<big> Click to expand the syntax </big>
-</summary>
-
-
 ### Quick Reference
+ - [Production rules](#production-rules)
+ - [Regex pattern](#regex-pattern)
+ - [RuleType](#ruletype-optional)
+ - [ReduceAction](#reduceaction-optional)
+ - [Accessing token data in ReduceAction](#accessing-token-data-in-reduceaction)
+ - [Exclamation mark `!`](#exclamation-mark-)
  - [`%tokentype`](#token-type-must-defined)
  - [`%token`](#token-definition-must-defined)
  - [`%start`](#start-symbol-must-defined)
  - [`%eof`](#eof-symbol-must-defined)
  - [`%userdata`](#userdata-type-optional)
  - [`%left`, `%right`](#reduce-type-optional)
- - [`%derive`](#derive-optional)
  - [`%err`, `%error`](#error-type-optional)
  - [`%derive`](#derive-optional)
- - [Production rules](#production-rules)
- - [Regex pattern](#regex-pattern)
- - [RuleType](#ruletype-optional)
- - [ReduceAction](#reduceaction-optional)
- - [Accessing token data in ReduceAction](#accessing-token-data-in-reduceaction)
- - [Error type](#error-type-optional)
- - [Exclamation mark `!`](#exclamation-mark-)
+ - [`%derive`](#derive-optional)
 
 
-
-### Token type <sub><sup>(must defined)</sup></sub>
-```
-'%tokentype' <RustType> ';'
-```
-Define the type of terminal symbols.
-`<RustType>` must be accessible at the point where the macro is called.
-
-<details>
-<summary>
-Example
-</summary>
-
-```rust
-enum MyTokenType<Generic> {
-    Digit,
-    Ident,
-    ...
-    VariantWithGeneric<Generic>
-}
-
-lr! {
-...
-%tokentype MyTokenType<i32>;
-}
-```
-
-</details>
-
-
-### Token definition <sub><sup>(must defined)</sup></sub>
-```
-'%token' <Ident> <RustExpr> ';'
-```
-Map terminal symbol's name `<Ident>` to the actual value `<RustExpr>`.
-`<RustExpr>` must be accessible at the point where the macro is called.
-
-<details>
-
-<summary>
-Example
-</summary>
-
-
-```rust
-%tokentype u8;
-
-%token zero b'0';
-%token one b'1';
-
-...
-
-// 'zero' and 'one' will be replaced by b'0' and b'1' respectively
-E: zero one;
-```
-
-</details>
-
-### Start symbol <sub><sup>(must defined)</sup></sub>
-```
-'%start' <Ident> ';'
-```
-Define the start symbol of the grammar.
-
-<details>
-<summary>
-Example
-</summary>
-
-```rust
-%start E;
-// this internally generate augmented rule <Augmented> -> E eof
-
-E: ... ;
-```
-
-</details>
-
-### Eof symbol <sub><sup>(must defined)</sup></sub>
-```
-'%eof' <RustExpr> ';'
-```
-Define the `eof` terminal symbol.
-`<RustExpr>` must be accessible at the point where the macro is called.
-'eof' terminal symbol will be automatically added to the grammar.
-
-<details>
-<summary>
-Example
-</summary>
-
-```rust
-%eof b'\0';
-// you can access eof terminal symbol by 'eof' in the grammar
-// without %token eof ...;
-```
-
-</details>
-
-### Userdata type <sub><sup>(optional)</sup></sub>
-```
-'%userdata' <RustType> ';'
-```
-Define the type of userdata passed to `feed()` function.
-
-<details>
-<summary>
-Example
-</summary>
-
-```rust
-struct MyUserData { ... }
-
-...
-
-%userdata MyUserData;
-
-...
-
-fn main() {
-    ...
-    let mut userdata = MyUserData { ... };
-    parser.feed( ..., token, &mut userdata); // <-- userdata feed here
-}
-```
-
-</details>
-
-
-### Reduce type <sub><sup>(optional)</sup></sub>
-```
-// reduce first
-'%left' <Ident> ';'
-'%left' <TerminalSet> ';'
-
-// shift first
-'%right' <Ident> ';'
-'%right' <TerminalSet> ';'
-```
-Set the shift/reduce precedence for terminal symbols. `<Ident>` must be defined in `%token`.
-With `<TerminalSet>`, you can define reduce type to multiple terminals at once. Please refer to the [Regex Pattern](#regex-pattern) section below.
-`%left` can be abbreviated as `%reduce` or `%l`, and `%right` can be abbreviated as `%shift` or `%r`.
-
-<details>
-<summary>
-Example
-</summary>
-
-```rust
-// define tokens
-%token plus '+';
-%token hat '^';
-
-
-// reduce first for token 'plus'
-%left plus;
-
-// shift first for token 'hat'
-%right hat;
-```
-
-```rust
-// define tokens
-%token zero b'0';
-%token one b'1';
-...
-%token nine b'9';
-
-// shift first for tokens in range 'zero' to 'nine'
-%shift [zero-nine];
-```
-
-</details>
-
-
-
-### Derive <sub><sup>(optional)</sup></sub>
-Specify the derive attributes for the generated `Context` struct.
-By default, the generated `Context` does not implement any traits.
-But in some cases, you may want to derive traits like `Clone`, `Debug`, or `Serialize`, `Deserialize` of `serde`.
-
-You can specify the derive attributes by `%derive` directive.
-In this case, user must ensure that every member of the `Context` must implement the trait.
-Currently, `Context` is holding the stack data,
-which is `Vec<usize>` for state stack and `Vec<T>` for every `<RuleType>` in the grammar.
-
-```
-'%derive' <DeriveAttributes> ';'
-```
-
-<details>
-<summary>
-Example
-</summary>
-
-```rust
-// here, #[derive(Clone,Debug)] will be added to the generated `Context` struct
-%derive Clone, Debug;
-
-...
-
-let mut context = parser.begin();
-// do something with context...
-
-println!( "{:?}", context );          // debug-print context
-let cloned_context = context.clone(); // clone context, you can re-feed the input sequence using cloned context
-```
-
-</details>
-
-
+---
 
 
 ### Production rules
+Every production rules have the base form:
 ```
-<Ident><RuleType>
-  ':' <TokenMapped>* <ReduceAction>
-  '|' <TokenMapped>* <ReduceAction>
-  ...
-  ';'
-```
-Define the production rules.
-
-```
-<TokenMapped> : <Ident as var_name> '=' <TokenPattern>
-              | <TokenPattern>
-              ;
-```
-```
-<TokenPattern> : <Ident as terminal or non-terminal>
-               | <TerminalSet>
-               | <TokenPattern> '*'    (zero or more)
-               | <TokenPattern> '+'    (one or more)
-               | <TokenPattern> '?'    (zero or one)
-               ;
+NonTerminalName
+    : Pattern1 Pattern2 ... PatternN { ReduceAction }
+    | Pattern1 Pattern2 ... PatternN { ReduceAction }
+   ...
+    ;
 ```
 
-<details>
-<summary>
-Example
-</summary>
+Each `Pattern` follows the syntax:
+ - `name` : Non-terminal or terminal symbol `name` defined in the grammar.
+ - `[term1 term_start-term_last]`, `[^term1 term_start-term_last]` : Set of terminal symbols. [`eof`](#eof-symbol-must-defined) will be automatically removed from the terminal set.
+ - `P*` : Zero or more repetition of `P`.
+ - `P+` : One or more repetition of `P`.
+ - `P?` : Zero or one repetition of `P`.
+ - `P / term`, `P / [term1 term_start-term_last]`, `P / [^term1 term_start-term_last]` :
+ Lookaheads; `P` followed by one of given terminal set. Lookaheads are not consumed.
 
-This production rule defines non-terminal `E` to be `A`, then zero or more `plus`, then `D` mapped to variable `d`.
-For more information, please refer to the [Accessing token data in ReduceAction](#accessing-token-data-in-reduceaction) section below.
-```rust
-E: A plus* d=D;
-```
-
-</details>
-
-### Regex pattern
-Regex patterns are partially supported. You can use `*`, `+`, `?` to define the number of repetitions, and `[]` to define the set of terminal symbols.
-
-```
-%token lparen '(';
-%token rparen ')';
-%token zero '0';
-...
-%token nine '9';
-
-A: [zero-nine]+; // zero to nine
-
-B: [^lparen rparen]; // any token except lparen and rparen
-
-C: [lparen rparen one-nine]*; // lparen and rparen, and one to nine
-```
-
-Note that when using range pattern `[first-last]`,
-the range is constructed by the order of the `%token` directives,
+#### Notes
+When using range pattern `[first-last]`,
+the range is constructed by the order of the [`%token`](#token-definition-must-defined) directives,
 not by the actual value of the token.
 If you define tokens in the following order:
 ```
@@ -590,51 +339,44 @@ If you define tokens in the following order:
 ```
 The range `[zero-nine]` will be `['0', '9']`, not `['0'-'9']`.
 
+---
+
 
 ### RuleType <sub><sup>(optional)</sup></sub>
-```
-<RuleType> : '(' <RustType> ')'
-           |
-           ;
-```
-Define the type of value that this production rule holds.
-
-<details>
-<summary>
-Example
-</summary>
+You can assign a value for each non-terminal symbol.
+In [reduce action](#reduceaction-optional),
+you can access the value of each pattern holds,
+and can assign new value to current non-terminal symbol.
+Please refer to the [ReduceAction](#reduceaction-optional) and [Accessing token data in ReduceAction](#accessing-token-data-in-reduceaction) section below.
+At the end of parsing, the value of the start symbol will be the result of the parsing.
+By default, terminal symbols hold the value of [`%tokentype`](#token-type-must-defined) passed by `feed()` function.
 
 ```rust
-E(MyType<...>): ... Tokens ... ;
+struct MyType<T> {
+    ...
+}
+```
+```
+E(MyType<i32>) : ... Patterns ... { <This will be new value of E> } ;
 ```
 
-</details>
+---
+
 
 ### ReduceAction <sub><sup>(optional)</sup></sub>
-```
-<ReduceAction> : '{' <RustExpr> '}'
-               |
-               ;
-```
+Reduce action can be written in Rust code. It is executed when the rule is matched and reduced.
 
-Define the action to be executed when the rule is matched and reduced.
+- If [`RuleType`](#ruletype-optional) is defined for current non-terminal symbol, `ReduceAction` itself must be the value of [`RuleType`](#ruletype-optional) (i.e. no semicolon at the end of the statement).
 
-- If `<RuleType>` is defined, `<ReduceAction>` itself must be the value of `<RuleType>` (i.e. no semicolon at the end of the statement).
+- `ReduceAction` can be omitted if:
+  - [`RuleType`](#ruletype-optional) is not defined.
+  - Only one token is holding value in the production rule.
 
-- `<ReduceAction>` can be omitted if:
-  - `<RuleType>` is not defined
-  - Only one token is holding value in the production rule ( Non-terminal symbol with `<RuleType>` defined, or terminal symbols are considered as holding value )
-
-- `Result<(),Error>` can be returned from `<ReduceAction>`.
+- `Result<(),Error>` can be returned from `ReduceAction`.
   - Returned `Error` will be delivered to the caller of `feed()` function.
   - `ErrorType` can be defined by `%err` or `%error` directive. See [Error type](#error-type-optional) section.
 
-<details>
-<summary>
-Example
-</summary>
 
-Omitting `ReduceAction`:
 ```rust
 NoRuleType: ... ;
 
@@ -644,7 +386,6 @@ RuleTypeI32(i32): ... { 0 } ;
 E(i32): NoRuleType NoRuleType RuleTypeI32 NoRuleType;
 ```
 
-Returning `Result<(),String>` from ReduceAction:
 ```rust
 // set Err variant type to String
 %err String;
@@ -662,75 +403,203 @@ E(i32): A div a2=A {
 A(i32): ... ;
 ```
 
-</details>
+---
 
 ### Accessing token data in ReduceAction
 
-**predefined variables** can be used in `<ReduceAction>`:
+**predefined variables** can be used in `ReduceAction`:
  - `data` : userdata passed to `feed()` function.
 
 To access the data of each token, you can directly use the name of the token as a variable.
-For non-terminal symbols, the type of variable is `<RuleType>`.
-For terminal symbols, the type of variable is `%tokentype`.
-
-If multiple variables are defined with the same name, the variable on the front-most will be used.
-
-For regex pattern, type of variable will be modified by following:
- | Pattern | Non-Terminal<br/>`<RuleType>=T` | Non-Terminal<br/>`<RuleType>=(not defined)` | Terminal<br/>TerminalSet |
- |:-------:|:--------------:|:--------------------------:|:--------:|
- | '*'     | `Vec<T>`       | (not defined)              | `Vec<TermType>` |
- | '+'     | `Vec<T>`       | (not defined)              | `Vec<TermType>` |
- | '?'     | `Option<T>`    | (not defined)              | `Option<TermType>` |
-
-<details>
-<summary>
-Example
-</summary>
+ - For non-terminal symbols, the type of variable is `RuleType`.
+ - For terminal symbols, the type of variable is `%tokentype`.
+ - If multiple variables are defined with the same name, the variable on the front-most will be used.
+ - You can remap the variable name by using `=` operator.
 
 ```rust
-%token plus ...;
+E(i32) : A plus a2=A {
+    println!("Value of A: {:?}", A);
+    println!("Value of plus: {:?}", plus);
+    println!("Value of a2: {:?}", a2);
 
-// one or more 'A', then optional 'plus', then zero or more 'B'
-E(f32) : A+ plus? b=B* minus_or_star=[minus star]
-  {
-    println!("Value of A: {:?}", A);         // Vec<i32>
-    println!("Value of plus: {:?}", plus); // Option<TermType>
-    println!("Value of b: {:?}", b);       // Vec<f32>
-    println!("Value of minus_or_star: {:?}", minus_or_star); // must explicitly define the variable name
-
-    let first_A = A[0];
-    let first_B = b.first(); // Option<&f32>
-
-
-    // this will be the new value of E
-    if let Some(first_B) = first_B {
-        let value = first_A as f32 + *first_B;
-        value
-    } else {
-        first_a as f32
-    }
-  }
-  ;
-
-A(i32): ... ;
-B(f32): ... ;
+    A + a2 // new value of E
+};
 ```
 
-</details>
+For some regex pattern, the type of variable will be modified as follows:
+ - `P*` : `Vec<P>`
+ - `P+` : `Vec<P>`
+ - `P?` : `Option<P>`
 
+You can still access the `Vec` or `Option` by using the base name of the pattern.
+```rust
+E(i32) : A* {
+    println!( "Value of A: {:?}", A ); // Vec<A>
+};
+```
+
+For terminal set `[term1 term_start-term_end]`, `[^term1 term_start-term_end]`, there is no predefined variable name. You must explicitly define the variable name.
+```rust
+E: digit=[zero-nine] {
+    println!( "Value of digit: {:?}", digit ); // %tokentype
+};
+```
+
+---
+
+### Exclamation mark `!`
+An exclamation mark `!` can be used right after the token to ignore the value of the token.
+The token will be treated as if it is not holding any value.
+
+```rust
+A(i32) : ... ;
+
+// A in the middle will be chosen, since other A's are ignored
+E(i32) : A! A A!;
+```
+
+---
+
+
+### Token type <sub><sup>(must defined)</sup></sub>
+```
+%tokentype <RustType> ;
+```
+Define the type of terminal symbols.
+`<RustType>` must be accessible at the point where the macro is called.
+
+```rust
+enum MyTokenType<Generic> {
+    Digit,
+    Ident,
+    ...
+    VariantWithGeneric<Generic>
+}
+
+lr! {
+...
+%tokentype MyTokenType<i32>;
+}
+```
+
+---
+
+### Token definition <sub><sup>(must defined)</sup></sub>
+```
+%token name <RustExpr> ;
+```
+Map terminal symbol `name` to the actual value `<RustExpr>`.
+`<RustExpr>` must be accessible at the point where the macro is called.
+
+```rust
+%tokentype u8;
+
+%token zero b'0';
+%token one b'1';
+
+...
+
+// 'zero' and 'one' will be replaced by b'0' and b'1' respectively
+E: zero one;
+```
+
+---
+
+### Start symbol <sub><sup>(must defined)</sup></sub>
+```
+%start NonTerminalName ;
+```
+Set the start symbol of the grammar as `NonTerminalName`.
+
+```rust
+%start E;
+// this internally generate augmented rule <Augmented> -> E eof
+
+E: ... ;
+```
+
+---
+
+
+### Eof symbol <sub><sup>(must defined)</sup></sub>
+```
+%eof <RustExpr> ;
+```
+Define the `eof` terminal symbol.
+`<RustExpr>` must be accessible at the point where the macro is called.
+'eof' terminal symbol will be automatically added to the grammar.
+
+
+```rust
+%eof b'\0';
+// you can access eof terminal symbol by 'eof' in the grammar
+// without %token eof ...;
+```
+
+---
+
+### Userdata type <sub><sup>(optional)</sup></sub>
+```
+%userdata <RustType> ;
+```
+Define the type of userdata passed to `feed()` function.
+
+
+```rust
+struct MyUserData { ... }
+
+...
+
+%userdata MyUserData;
+
+...
+
+fn main() {
+    ...
+    let mut userdata = MyUserData { ... };
+    parser.feed( ..., token, &mut userdata); // <-- userdata feed here
+}
+```
+
+---
+
+
+### Reduce type <sub><sup>(optional)</sup></sub>
+```
+// reduce first
+%left term1 ;
+%left [term1 term_start-term_last] ;
+
+// shift first
+%right term1 ;
+%right [term1 term_start-term_last] ;
+```
+Set the shift/reduce precedence for terminal symbols.
+`%left` can be abbreviated as `%reduce` or `%l`, and `%right` can be abbreviated as `%shift` or `%r`.
+
+```rust
+// define tokens
+%token plus '+';
+%token hat '^';
+
+
+// reduce first for token 'plus'
+%left plus;
+
+// shift first for token 'hat'
+%right hat;
+```
+
+---
 
 
 ### Error type <sub><sup>(optional)</sup></sub>
 ```
-'%err' <RustType> ';'
-'%error' <RustType> ';'
+%err <RustType> ;
+%error <RustType> ;
 ```
-Define the type of `Err` variant in `Result<(), Err>` returned from `<ReduceAction>`. If not defined, `DefaultReduceActionError` will be used.
+Define the type of `Err` variant in `Result<(), Err>` returned from [`ReduceAction`](#reduceaction-optional). If not defined, `DefaultReduceActionError` will be used.
 
-<details>
-<summary>
-Example
-</summary>
 
 ```rust
 enum MyErrorType<T> {
@@ -759,39 +628,33 @@ match parser.feed( ... ) {
 }
 ```
 
-</details>
 
-### Exclamation mark `!`
-An exclamation mark `!` can be used right after the token to ignore the value of the token.
-The token will be treated as if it is not holding any value.
+---
 
-**Tip**
-When combining with repeatance pattern `*`, `+`, `?`, use `!` first.
-It can prevent `Vec<T>` built from the value of the token internally.
 
-<details>
-<summary>
-Example
-</summary>
+### Derive <sub><sup>(optional)</sup></sub>
+Specify the derive attributes for the generated `Context` struct.
+By default, the generated `Context` does not implement any traits.
+But in some cases, you may want to derive traits like `Clone`, `Debug`, or `Serialize`, `Deserialize` of `serde`.
 
-```rust
-%token plus ...;
+In this case, user must ensure that every member of the `Context` must implement the trait.
+Currently, `Context` is holding the stack data,
+which is `Vec<usize>` for state stack and `Vec<T>` for every [`RuleType`](#ruletype-optional) in the grammar.
 
-A(i32) : ... ;
-
-// A in the middle will be chosen, since other A's are ignored
-E(i32) : A! A A!;
-
-B: A*!; // Vec<i32> will be built from the value of A, and then ignored
-
-C: A!*; // A will be ignored first, and then repeatance pattern will be applied
+```
+%derive Clone, Debug, serde::Serialize ;
 ```
 
-</details>
 
+```rust
+// here, #[derive(Clone,Debug)] will be added to the generated `Context` struct
+%derive Clone, Debug;
 
+...
 
+let mut context = parser.begin();
+// do something with context...
 
-
-</details>
-
+println!( "{:?}", context );          // debug-print context
+let cloned_context = context.clone(); // clone context, you can re-feed the input sequence using cloned context
+```

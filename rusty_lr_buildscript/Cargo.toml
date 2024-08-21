@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_buildscript"
-version = "0.4.1"
+version = "0.5.0"
 edition = "2021"
 license = "MIT"
 description = "buildscipt tools for rusty_lr"
@@ -14,7 +14,7 @@ categories = ["parsing"]
 proc-macro2 = { version = "1.0.86", features = ["span-locations"] }
 quote = "1.0"
 # rusty_lr_parser = { path = "../rusty_lr_parser" }
-rusty_lr_parser = "3.7"
+rusty_lr_parser = "3.8"
 # rusty_lr_core = { path = "../rusty_lr_core", features = ["fxhash", "builder"] }
-rusty_lr_core = { version = "2.3", features = ["fxhash", "builder"] }
+rusty_lr_core = { version = "2.4", features = ["fxhash", "builder"] }
 codespan-reporting = "0.11"

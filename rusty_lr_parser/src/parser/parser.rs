@@ -3,7 +3,7 @@ use crate::parser::args::GrammarArgs;
 use crate::parser::args::RuleDefArgs;
 use crate::parser::args::RuleLineArgs;
 use crate::parser::lexer::Lexed;
-use crate::parser::args::ReduceTypeArgs;
+use crate::parser::args::TerminalSetOrIdent;
 use crate::terminalset::TerminalSet;
 use crate::terminalset::TerminalSetItem;
 
@@ -49,6 +49,7 @@ macro_rules! punct(
 %token caret Lexed::Caret(punct!('^'));
 %token minus Lexed::Minus(punct!('-'));
 %token exclamation Lexed::Exclamation(punct!('!'));
+%token slash Lexed::Slash(punct!('/'));
 %token otherpunct Lexed::OtherPunct(punct!('.'));
 
 %token literal Lexed::Literal(None);
@@ -194,8 +195,7 @@ TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
 
 Pattern(PatternArgs): ident {
     if let Lexed::Ident(ident) = ident {
-        let span = ident.span();
-        PatternArgs::Ident( ident, span )
+        PatternArgs::Ident( ident )
     }else {
         unreachable!( "Pattern-Ident" );
     }
@@ -230,6 +230,9 @@ Pattern(PatternArgs): ident {
 }
 | TerminalSet {
     PatternArgs::TerminalSet( TerminalSet )
+}
+| Pattern slash TerminalSetOrIdent {
+    PatternArgs::Lookaheads( Box::new(Pattern), TerminalSetOrIdent )
 }
 ;
 
@@ -277,19 +280,22 @@ TokenTypeDef((Span,TokenStream)): tokentype RustCode semicolon { (tokentype.span
 UserDataDef((Span,TokenStream)): userdata RustCode semicolon { (userdata.span(),RustCode) }
 ;
 
+TerminalSetOrIdent(TerminalSetOrIdent): TerminalSet { TerminalSetOrIdent::TerminalSet( TerminalSet ) }
+| ident {
+    if let Lexed::Ident(ident) = ident {
+        TerminalSetOrIdent::Ident( ident )
+    }else {
+        unreachable!( "TerminalSetOrIdent-Ident" );
+    }
+}
+;
+
 ReduceType(ReduceType): left { ReduceType::Left }
 | right { ReduceType::Right }
 ;
 
-ReduceDef((ReduceTypeArgs, ReduceType)): reducetype=ReduceType ident semicolon {
-    if let Lexed::Ident(ident) = ident {
-        ( ReduceTypeArgs::Ident(ident), reducetype )
-    }else {
-        unreachable!( "ReduceDef-Ident (Left)" );
-    }
-}
-| reducetype=ReduceType TerminalSet semicolon {
-    ( ReduceTypeArgs::TerminalSet( TerminalSet ), reducetype )
+ReduceDef((TerminalSetOrIdent, ReduceType)): reducetype=ReduceType TerminalSetOrIdent semicolon {
+    ( TerminalSetOrIdent, reducetype )
 }
 ;
 

@@ -7,7 +7,6 @@ use crate::error::ArgError;
 use crate::error::ParseArgError;
 use crate::error::ParseError;
 use crate::parser::args::GrammarArgs;
-use crate::parser::args::ReduceTypeArgs;
 use crate::parser::lexer::Lexed;
 use crate::parser::parser_expanded::GrammarParseError;
 use crate::parser::parser_expanded::GrammarParser;
@@ -224,43 +223,17 @@ impl Grammar {
 
         // reduce types
         for (terminals, reduce_type) in grammar_args.reduce_types.into_iter() {
-            match terminals {
-                ReduceTypeArgs::Ident(terminal) => {
-                    let new_span = terminal.span();
-
-                    if !grammar.terminals.contains_key(&terminal) {
-                        return Err(ParseError::TerminalNotDefined(terminal));
-                    }
-                    if let Some(old) = grammar.reduce_types.insert(terminal.clone(), reduce_type) {
-                        if old != reduce_type {
-                            let old_span = grammar.reduce_types_origin.get(&terminal).unwrap();
-                            return Err(ParseError::MultipleReduceDefinition {
-                                terminal,
-                                old: (old_span.0, old_span.1, old),
-                                new: (new_span, new_span, reduce_type),
-                            });
-                        }
-                    }
-                    grammar
-                        .reduce_types_origin
-                        .insert(terminal, (new_span, new_span));
+            let new_span = terminals.span_pair();
+            for terminal in terminals.to_terminal_set(&grammar)?.into_iter() {
+                if let Some(old) = grammar.reduce_types.insert(terminal.clone(), reduce_type) {
+                    let old_span = grammar.reduce_types_origin.get(&terminal).unwrap();
+                    return Err(ParseError::MultipleReduceDefinition {
+                        terminal,
+                        old: (old_span.0, old_span.1, old),
+                        new: (new_span.0, new_span.1, reduce_type),
+                    });
                 }
-                ReduceTypeArgs::TerminalSet(terminal_set) => {
-                    let new_span = (terminal_set.open_span, terminal_set.close_span);
-                    for terminal in terminal_set.to_terminal_set(&grammar)?.into_iter() {
-                        if let Some(old) =
-                            grammar.reduce_types.insert(terminal.clone(), reduce_type)
-                        {
-                            let old_span = grammar.reduce_types_origin.get(&terminal).unwrap();
-                            return Err(ParseError::MultipleReduceDefinition {
-                                terminal,
-                                old: (old_span.0, old_span.1, old),
-                                new: (new_span.0, new_span.1, reduce_type),
-                            });
-                        }
-                        grammar.reduce_types_origin.insert(terminal, new_span);
-                    }
-                }
+                grammar.reduce_types_origin.insert(terminal, new_span);
             }
         }
 
@@ -310,6 +283,7 @@ impl Grammar {
                     tokens,
                     reduce_action: rule.reduce_action,
                     separator_span: rule.separator_span,
+                    lookaheads: None,
                 });
             }
 
@@ -341,6 +315,7 @@ impl Grammar {
                     ],
                     reduce_action: None,
                     separator_span: Span::call_site(),
+                    lookaheads: None,
                 }],
             },
         );
@@ -422,7 +397,11 @@ impl Grammar {
                     }
                 }
 
-                grammar.add_rule(name.clone(), tokens);
+                if let Some(lookaheads) = rule.lookaheads.as_ref() {
+                    grammar.add_rule_with_lookaheads(name.clone(), tokens, lookaheads.clone());
+                } else {
+                    grammar.add_rule(name.clone(), tokens);
+                }
             }
         }
 

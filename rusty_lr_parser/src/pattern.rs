@@ -20,6 +20,7 @@ pub enum Pattern {
     Question(Box<Pattern>),
     Exclamation(Box<Pattern>),
     TerminalSet(BTreeSet<Ident>),
+    Lookaheads(Box<Pattern>, BTreeSet<Ident>),
 }
 
 impl Pattern {
@@ -69,6 +70,7 @@ impl Pattern {
                             { vec![A] }
                         }),
                         separator_span: Span::call_site(),
+                        lookaheads: None,
                     };
                     let line2 = RuleLine {
                         tokens: vec![
@@ -89,6 +91,7 @@ impl Pattern {
                             { Ap.push(A); Ap }
                         }),
                         separator_span: Span::call_site(),
+                        lookaheads: None,
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -111,6 +114,7 @@ impl Pattern {
                         }],
                         reduce_action: None,
                         separator_span: Span::call_site(),
+                        lookaheads: None,
                     };
                     let line2 = RuleLine {
                         tokens: vec![
@@ -129,6 +133,7 @@ impl Pattern {
                         ],
                         reduce_action: None,
                         separator_span: Span::call_site(),
+                        lookaheads: None,
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -169,6 +174,7 @@ impl Pattern {
                             { Ap }
                         }),
                         separator_span: Span::call_site(),
+                        lookaheads: None,
                     };
                     let line2 = RuleLine {
                         tokens: vec![],
@@ -176,6 +182,7 @@ impl Pattern {
                             { vec![] }
                         }),
                         separator_span: Span::call_site(),
+                        lookaheads: None,
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -198,11 +205,13 @@ impl Pattern {
                         }],
                         reduce_action: None,
                         separator_span: Span::call_site(),
+                        lookaheads: None,
                     };
                     let line2 = RuleLine {
                         tokens: vec![],
                         reduce_action: None,
                         separator_span: Span::call_site(),
+                        lookaheads: None,
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -242,6 +251,7 @@ impl Pattern {
                             { Some(A) }
                         }),
                         separator_span: Span::call_site(),
+                        lookaheads: None,
                     };
                     let line2 = RuleLine {
                         tokens: vec![],
@@ -249,6 +259,7 @@ impl Pattern {
                             { None }
                         }),
                         separator_span: Span::call_site(),
+                        lookaheads: None,
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -271,11 +282,13 @@ impl Pattern {
                         }],
                         reduce_action: None,
                         separator_span: Span::call_site(),
+                        lookaheads: None,
                     };
                     let line2 = RuleLine {
                         tokens: vec![],
                         reduce_action: None,
                         separator_span: Span::call_site(),
+                        lookaheads: None,
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -311,6 +324,7 @@ impl Pattern {
                             term
                         }),
                         separator_span: Span::call_site(),
+                        lookaheads: None,
                     };
                     rule_lines.push(rule);
                 }
@@ -321,6 +335,65 @@ impl Pattern {
                 grammar
                     .nonterm_typenames
                     .insert(new_ident.clone(), grammar.token_typename.clone());
+                Ok(new_ident)
+            }
+            Pattern::Lookaheads(pattern, lookaheads) => {
+                let base_rule = pattern.get_rule(grammar, root_span_pair)?;
+                let new_ident = Ident::new(
+                    &format!("_{}_Lookaheads{}", base_rule, grammar.pattern_map.len()),
+                    root_span_pair.0,
+                );
+                grammar.pattern_map.insert(self.clone(), new_ident.clone());
+                grammar
+                    .generated_root_span
+                    .insert(new_ident.clone(), root_span_pair);
+                let typename = self.typename(grammar);
+
+                if let Some(typename) = typename {
+                    let mut rule_lines = Vec::new();
+                    let rule = RuleLine {
+                        tokens: vec![TokenMapped {
+                            token: base_rule,
+                            mapto: Some(Ident::new("A", Span::call_site())),
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
+                        }],
+                        reduce_action: Some(quote! {
+                            A
+                        }),
+                        separator_span: Span::call_site(),
+                        lookaheads: Some(lookaheads.clone()),
+                    };
+                    rule_lines.push(rule);
+
+                    grammar
+                        .rules
+                        .insert(new_ident.clone(), RuleLines { rule_lines });
+                    grammar.rules_index.push(new_ident.clone());
+                    grammar
+                        .nonterm_typenames
+                        .insert(new_ident.clone(), typename);
+                } else {
+                    let mut rule_lines = Vec::new();
+                    let rule = RuleLine {
+                        tokens: vec![TokenMapped {
+                            token: base_rule,
+                            mapto: None,
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
+                        }],
+                        reduce_action: None,
+                        separator_span: Span::call_site(),
+                        lookaheads: Some(lookaheads.clone()),
+                    };
+                    rule_lines.push(rule);
+
+                    grammar
+                        .rules
+                        .insert(new_ident.clone(), RuleLines { rule_lines });
+                    grammar.rules_index.push(new_ident.clone());
+                }
+
                 Ok(new_ident)
             }
         }
@@ -340,6 +413,7 @@ impl Pattern {
             }),
             Pattern::Exclamation(_) => None,
             Pattern::TerminalSet(_) => Some(grammar.token_typename.clone()),
+            Pattern::Lookaheads(pattern, _) => pattern.typename(grammar),
         }
     }
 
@@ -352,6 +426,7 @@ impl Pattern {
             Pattern::Question(pattern) => pattern.map_to(),
             Pattern::Exclamation(_) => None,
             Pattern::TerminalSet(_) => Some(Ident::new("__rustylr_term", Span::call_site())),
+            Pattern::Lookaheads(pattern, _) => pattern.map_to(),
         }
     }
 }

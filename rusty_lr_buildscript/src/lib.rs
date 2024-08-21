@@ -662,7 +662,7 @@ impl Builder {
         {
             let mut builder = grammar.create_grammar();
             debug_comments.push_str(format!("{:=^80}\n", "Grammar").as_str());
-            for rule in builder.rules.iter() {
+            for (rule, _) in builder.rules.iter() {
                 debug_comments.push_str(format!("{}\n", rule).as_str());
             }
             let parser = if self.lalr {
@@ -747,7 +747,7 @@ impl Builder {
                     for (shifted_rule_ref, lookaheads) in state.ruleset.rules.iter() {
                         // is end of rule, add to reduce
                         if shifted_rule_ref.shifted
-                            == builder.rules[shifted_rule_ref.rule].rule.len()
+                            == builder.rules[shifted_rule_ref.rule].0.rule.len()
                         {
                             for token in lookaheads.iter() {
                                 reduce_rules.insert(token, shifted_rule_ref.rule);
@@ -757,6 +757,7 @@ impl Builder {
                         // if it is not end, and next token is terminal, add to shift
                         if let Some(rusty_lr_core::Token::Term(token)) = builder.rules
                             [shifted_rule_ref.rule]
+                            .0
                             .rule
                             .get(shifted_rule_ref.shifted)
                         {
@@ -776,11 +777,11 @@ impl Builder {
                             let mut message = format!(
                         "Shift/Reduce conflict with token {} was resolved:\nReduce rule:\n>>> {}\nShift rules:",
                         term,
-                        &builder.rules[*reduce_rule]
+                        &builder.rules[*reduce_rule].0
                     );
                             for shifted_rule in shift_rules.iter() {
                                 let shifted_rule = ShiftedRule {
-                                    rule: builder.rules[shifted_rule.rule].clone(),
+                                    rule: builder.rules[shifted_rule.rule].0.clone(),
                                     shifted: shifted_rule.shifted,
                                 };
                                 message.push_str(format!("\n>>> {}", shifted_rule).as_str());

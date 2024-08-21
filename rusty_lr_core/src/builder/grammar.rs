@@ -15,7 +15,7 @@ use crate::token::Token;
 #[derive(Debug, Clone)]
 pub struct Grammar<Term, NonTerm> {
     /// set of production rules
-    pub rules: Vec<ProductionRule<Term, NonTerm>>,
+    pub rules: Vec<(ProductionRule<Term, NonTerm>, Option<BTreeSet<Term>>)>,
 
     /// first terminal tokens for each nonterminals
     /// true if it can be empty
@@ -46,7 +46,22 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         let id = self.rules.len();
         self.rules_map.entry(name.clone()).or_default().push(id);
         let rule = ProductionRule { name, rule };
-        self.rules.push(rule);
+        self.rules.push((rule, None));
+        id
+    }
+    pub fn add_rule_with_lookaheads(
+        &mut self,
+        name: NonTerm,
+        rule: Vec<Token<Term, NonTerm>>,
+        lookaheads: BTreeSet<Term>,
+    ) -> usize
+    where
+        NonTerm: Clone + Hash + Eq,
+    {
+        let id = self.rules.len();
+        self.rules_map.entry(name.clone()).or_default().push(id);
+        let rule = ProductionRule { name, rule };
+        self.rules.push((rule, Some(lookaheads)));
         id
     }
 
@@ -155,7 +170,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     {
         loop {
             let mut changed = false;
-            for rule in self.rules.iter() {
+            for (rule, _) in self.rules.iter() {
                 let (mut firsts, mut canbe_empty) = self
                     .firsts
                     .entry(rule.name.clone())
@@ -257,7 +272,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         loop {
             let mut new_rules = Vec::new();
             for (rule_ref, lookaheads) in rules.rules.iter() {
-                let rule = &self.rules[rule_ref.rule];
+                let (rule, _) = &self.rules[rule_ref.rule];
                 if let Some(Token::NonTerm(ref nonterm_name)) = rule.rule.get(rule_ref.shifted) {
                     let searched_rules = self.search_rules(nonterm_name);
                     if !searched_rules.is_empty() {
@@ -271,7 +286,13 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                                 rule: *searched_rule,
                                 shifted: 0,
                             };
-                            new_rules.push((rule, lookaheads.clone()));
+
+                            // if there are forced lookaheads for this rule, use it
+                            if let Some(force_lookaheads) = self.rules[*searched_rule].1.as_ref() {
+                                new_rules.push((rule, force_lookaheads.clone()));
+                            } else {
+                                new_rules.push((rule, lookaheads.clone()));
+                            }
                         }
                     } else {
                         // rule not found
@@ -319,7 +340,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         let mut next_rules_nonterm = BTreeMap::new();
         let mut empty_rules = Vec::new();
         for (mut rule_ref, lookaheads) in rules.rules.into_iter() {
-            let rule = &self.rules[rule_ref.rule];
+            let (rule, _) = &self.rules[rule_ref.rule];
             match rule.rule.get(rule_ref.shifted) {
                 Some(Token::Term(term)) => {
                     rule_ref.shifted += 1;
@@ -511,7 +532,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             .into_iter()
             .zip(states[state_id].ruleset.rules.iter_mut())
         {
-            let rule = &self.rules[rule_ref.rule];
+            let (rule, _) = &self.rules[rule_ref.rule];
             let lookaheads_diff: BTreeSet<_> =
                 lookaheads_src.difference(lookaheads_dst).cloned().collect();
             lookaheads_empty &= lookaheads_diff.is_empty();

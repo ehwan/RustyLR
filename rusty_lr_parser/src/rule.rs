@@ -1,4 +1,7 @@
+use std::collections::BTreeSet;
+
 use super::token::TokenMapped;
+use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
@@ -7,6 +10,8 @@ pub struct RuleLine {
     pub tokens: Vec<TokenMapped>,
     pub reduce_action: Option<TokenStream>,
     pub separator_span: Span,
+    /// force lookahead tokens for this pattern.
+    pub lookaheads: Option<BTreeSet<Ident>>,
 }
 
 impl RuleLine {

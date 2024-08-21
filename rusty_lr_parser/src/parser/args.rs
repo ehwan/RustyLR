@@ -2,6 +2,8 @@ use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
+use std::collections::BTreeSet;
+
 use rusty_lr_core::ReduceType;
 
 use crate::error::ParseError;
@@ -11,16 +13,39 @@ use crate::terminalset::TerminalSet;
 use crate::utils;
 
 /// parsed arguments for reduce type def
-pub enum ReduceTypeArgs {
+pub enum TerminalSetOrIdent {
     Ident(Ident),
     TerminalSet(TerminalSet),
 }
 
+impl TerminalSetOrIdent {
+    pub fn to_terminal_set(&self, grammar: &Grammar) -> Result<BTreeSet<Ident>, ParseError> {
+        match self {
+            TerminalSetOrIdent::Ident(ident) => {
+                if grammar.terminals.contains_key(ident) {
+                    Ok(BTreeSet::from([ident.clone()]))
+                } else {
+                    Err(ParseError::TerminalNotDefined(ident.clone()))
+                }
+            }
+            TerminalSetOrIdent::TerminalSet(terminal_set) => terminal_set.to_terminal_set(grammar),
+        }
+    }
+    pub fn span_pair(&self) -> (Span, Span) {
+        match self {
+            TerminalSetOrIdent::Ident(ident) => (ident.span(), ident.span()),
+            TerminalSetOrIdent::TerminalSet(terminal_set) => {
+                (terminal_set.open_span, terminal_set.close_span)
+            }
+        }
+    }
+}
+
 /// parsed arguments for pattern
 pub enum PatternArgs {
-    /// span of the ident
-    Ident(Ident, Span),
-    /// span of '+' or '*' or '?' after the pattern
+    Ident(Ident),
+
+    /// span of punctuation('+', '*', ...) after the pattern
     Plus(Box<PatternArgs>, Span),
     Star(Box<PatternArgs>, Span),
     Question(Box<PatternArgs>, Span),
@@ -29,6 +54,11 @@ pub enum PatternArgs {
     /// span of '[' and ']' containing terminal set
     /// a group delimited by '[' and ']' containing terminal set
     TerminalSet(TerminalSet),
+
+    /// force lookahead tokens for this pattern.
+    /// lookaheads will not be consumed.
+    /// span of the rightmost of this pattern
+    Lookaheads(Box<PatternArgs>, TerminalSetOrIdent),
 }
 
 impl PatternArgs {
@@ -42,7 +72,7 @@ impl PatternArgs {
         put_exclamation: bool,
     ) -> Result<Pattern, ParseError> {
         match self {
-            PatternArgs::Ident(ident, _) => {
+            PatternArgs::Ident(ident) => {
                 utils::check_reserved_name(&ident)?;
                 let pattern = Pattern::Ident(ident);
                 if put_exclamation {
@@ -69,17 +99,31 @@ impl PatternArgs {
                     Ok(pattern)
                 }
             }
+            PatternArgs::Lookaheads(pattern, terminalset) => {
+                let terminal_set = terminalset.to_terminal_set(grammar)?;
+                let pattern = Pattern::Lookaheads(
+                    Box::new(pattern.into_pattern(grammar, put_exclamation)?),
+                    terminal_set,
+                );
+                Ok(pattern)
+            }
         }
     }
     pub fn span_pair(&self) -> (Span, Span) {
         match self {
-            PatternArgs::Ident(_, span) => (*span, *span),
+            PatternArgs::Ident(ident) => {
+                let span = ident.span();
+                (span, span)
+            }
             PatternArgs::Plus(base, span) => (base.span_pair().0, *span),
             PatternArgs::Star(base, span) => (base.span_pair().0, *span),
             PatternArgs::Question(base, span) => (base.span_pair().0, *span),
             PatternArgs::Exclamation(base, span) => (base.span_pair().0, *span),
             PatternArgs::TerminalSet(terminal_set) => {
                 (terminal_set.open_span, terminal_set.close_span)
+            }
+            PatternArgs::Lookaheads(base, terminal_set) => {
+                (base.span_pair().0, terminal_set.span_pair().1)
             }
         }
     }
@@ -111,7 +155,7 @@ pub struct GrammarArgs {
     pub eof: Vec<(Span, TokenStream)>,
     pub error_typename: Vec<(Span, TokenStream)>,
     pub terminals: Vec<(Ident, TokenStream)>,
-    pub reduce_types: Vec<(ReduceTypeArgs, ReduceType)>,
+    pub reduce_types: Vec<(TerminalSetOrIdent, ReduceType)>,
     pub derives: Vec<TokenStream>,
     pub rules: Vec<RuleDefArgs>,
 }

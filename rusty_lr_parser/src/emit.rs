@@ -110,8 +110,8 @@ impl Grammar {
                 } => {
                     return Err(Box::new(EmitError::ReduceReduceConflict {
                         lookahead,
-                        rule1: (rule1, grammar.rules[rule1].clone()),
-                        rule2: (rule2, grammar.rules[rule2].clone()),
+                        rule1: (rule1, grammar.rules[rule1].0.clone()),
+                        rule2: (rule2, grammar.rules[rule2].0.clone()),
                     }))
                 }
                 BuildError::ShiftReduceConflict {
@@ -122,7 +122,7 @@ impl Grammar {
                     let mut shift_rules = Vec::new();
                     for (r, _) in shift.rules.into_iter() {
                         let shifted_rule = ShiftedRule {
-                            rule: grammar.rules[r.rule].clone(),
+                            rule: grammar.rules[r.rule].0.clone(),
                             shifted: r.shifted,
                         };
                         shift_rules.push((r.rule, shifted_rule));
@@ -130,7 +130,7 @@ impl Grammar {
 
                     return Err(Box::new(EmitError::ShiftReduceConflict {
                         term,
-                        reduce_rule: (reduce, grammar.rules[reduce].clone()),
+                        reduce_rule: (reduce, grammar.rules[reduce].0.clone()),
                         shift_rules,
                     }));
                 }
@@ -160,7 +160,7 @@ impl Grammar {
             let rules: Vec<_> = grammar
                 .rules
                 .into_iter()
-                .map(|r| r.map(term_mapper, nonterm_mapper))
+                .map(|(r, _)| r.map(term_mapper, nonterm_mapper))
                 .collect();
             let states: Vec<_> = dfa
                 .states
