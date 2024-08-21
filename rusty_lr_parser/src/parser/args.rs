@@ -59,6 +59,10 @@ pub enum PatternArgs {
     /// lookaheads will not be consumed.
     /// span of the rightmost of this pattern
     Lookaheads(Box<PatternArgs>, TerminalSetOrIdent),
+
+    /// ( Pattern+ )
+    /// span of '(' and ')'
+    Group(Vec<PatternArgs>, Span, Span),
 }
 
 impl PatternArgs {
@@ -107,6 +111,20 @@ impl PatternArgs {
                 );
                 Ok(pattern)
             }
+            PatternArgs::Group(group, _, _) => {
+                if group.len() == 1 {
+                    return group
+                        .into_iter()
+                        .next()
+                        .unwrap()
+                        .into_pattern(grammar, put_exclamation);
+                }
+                let mut patterns = Vec::with_capacity(group.len());
+                for pattern in group.into_iter() {
+                    patterns.push(pattern.into_pattern(grammar, put_exclamation)?);
+                }
+                Ok(Pattern::Group(patterns))
+            }
         }
     }
     pub fn span_pair(&self) -> (Span, Span) {
@@ -125,6 +143,7 @@ impl PatternArgs {
             PatternArgs::Lookaheads(base, terminal_set) => {
                 (base.span_pair().0, terminal_set.span_pair().1)
             }
+            PatternArgs::Group(_, open, close) => (*open, *close),
         }
     }
 }

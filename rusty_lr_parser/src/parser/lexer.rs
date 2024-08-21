@@ -310,24 +310,19 @@ pub fn feed_recursive(
             },
             TokenTree::Group(group) => match group.delimiter() {
                 Delimiter::Parenthesis => {
-                    // for now, splitted for brace is not in syntax, so ignore it
-                    parser.feed(
-                        context,
-                        Lexed::ParenGroup(Some(group.clone())),
-                        grammar_args,
-                    )?;
-
-                    // feed the compound token
-                    // if parser
-                    //     .feed(context, Lexed::ParenGroup(Some(group.clone())))
-                    //     .is_err()
-                    // {
-                    //     // compound token failed
-                    //     // feed the splitted tokens
-                    //     parser.feed(context, Lexed::LParen(group.span_open()))?;
-                    //     feed_recursive(group.stream(), parser, context)?;
-                    //     parser.feed(context, Lexed::RParen(group.span_close()))?;
-                    // }
+                    if let Err(GrammarParseError::InvalidTerminal(err)) =
+                        parser.feed(context, Lexed::ParenGroup(Some(group)), grammar_args)
+                    {
+                        let group = if let Lexed::ParenGroup(group) = err.term {
+                            group.unwrap()
+                        } else {
+                            unreachable!();
+                        };
+                        // feed the splitted tokens
+                        parser.feed(context, Lexed::LParen(group.span_open()), grammar_args)?;
+                        feed_recursive(group.stream(), parser, context, grammar_args)?;
+                        parser.feed(context, Lexed::RParen(group.span_close()), grammar_args)?;
+                    }
                 }
                 Delimiter::Brace => {
                     // for now, splitted for brace is not in syntax, so ignore it
@@ -365,7 +360,7 @@ pub fn feed_recursive(
                 }
                 _ => {
                     // for now, compound for nonegroup is not in syntax, so ignore it
-                    parser.feed(context, Lexed::NoneGroup(Some(group.clone())), grammar_args)?;
+                    parser.feed(context, Lexed::NoneGroup(Some(group)), grammar_args)?;
 
                     // feed the compound token
                     // if parser

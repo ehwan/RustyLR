@@ -267,7 +267,7 @@ impl Grammar {
                     let pattern = pattern.into_pattern(&grammar, false)?;
                     let token_rule = pattern.get_rule(&mut grammar, (begin_span, end_span))?;
                     let mapto = match pattern.typename(&grammar) {
-                        Some(_) => mapto.or_else(|| pattern.map_to()),
+                        Some((_, mapto_)) => mapto.or(Some(mapto_)),
                         None => None,
                     };
 

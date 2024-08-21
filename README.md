@@ -322,6 +322,7 @@ Each `Pattern` follows the syntax:
  - `P*` : Zero or more repetition of `P`.
  - `P+` : One or more repetition of `P`.
  - `P?` : Zero or one repetition of `P`.
+ - `(P1 P2 P3)` : Grouping of patterns.
  - `P / term`, `P / [term1 term_start-term_last]`, `P / [^term1 term_start-term_last]` :
  Lookaheads; `P` followed by one of given terminal set. Lookaheads are not consumed.
 
@@ -412,7 +413,7 @@ A(i32): ... ;
 
 To access the data of each token, you can directly use the name of the token as a variable.
  - For non-terminal symbols, the type of variable is `RuleType`.
- - For terminal symbols, the type of variable is `%tokentype`.
+ - For terminal symbols, the type of variable is [`%tokentype`](#token-type-must-defined).
  - If multiple variables are defined with the same name, the variable on the front-most will be used.
  - You can remap the variable name by using `=` operator.
 
@@ -444,6 +445,30 @@ E: digit=[zero-nine] {
     println!( "Value of digit: {:?}", digit ); // %tokentype
 };
 ```
+
+For group `(P1 P2 P3)`:
+ - If none of the patterns hold value, the group itself will not hold any value.
+ - If only one of the patterns holds value, the group will hold the value of the very pattern. And the variable name will be same as the pattern.
+ (i.e. If `P1` holds value, and others don't, then `(P1 P2 P3)` will hold the value of `P1`, and can be accessed via name `P1`)
+ - If there are multiple patterns holding value, the group will hold `Tuple` of the values. There is no default variable name for the group, you must define the variable name explicitly by `=` operator.
+
+ ```rust
+ NoRuleType: ... ;
+
+ I(i32): ... ;
+
+ // I will be chosen
+ A: (NoRuleType I NoRuleType) {
+     println!( "Value of I: {:?}", I ); // can access by 'I'
+     I
+ };
+
+ // ( i32, i32 )
+ B: i2=( I NoRuleType I ) {
+     println!( "Value of I: {:?}", i2 ); // must explicitly define the variable name
+ };
+
+ ```
 
 ---
 

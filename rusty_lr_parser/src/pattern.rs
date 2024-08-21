@@ -21,6 +21,7 @@ pub enum Pattern {
     Exclamation(Box<Pattern>),
     TerminalSet(BTreeSet<Ident>),
     Lookaheads(Box<Pattern>, BTreeSet<Ident>),
+    Group(Vec<Pattern>),
 }
 
 impl Pattern {
@@ -55,7 +56,7 @@ impl Pattern {
                     .generated_root_span
                     .insert(new_ident.clone(), root_span_pair);
 
-                if let Some(typename) = typename {
+                if let Some((typename, _)) = typename {
                     // typename exist, make new rule with typename Vec<base_typename>
                     // A+ -> A+ A { Ap.push(A); Ap }
                     //     | A    { vec![A] }
@@ -159,7 +160,7 @@ impl Pattern {
                     .insert(new_ident.clone(), root_span_pair);
                 let typename = self.typename(grammar);
 
-                if let Some(typename) = typename {
+                if let Some((typename, _)) = typename {
                     // typename exist, make new rule with typename Vec<base_typename>
                     // A* -> A+ { Ap }
                     //     |    { vec![] }
@@ -236,7 +237,7 @@ impl Pattern {
 
                 let typename = self.typename(grammar);
 
-                if let Some(typename) = typename {
+                if let Some((typename, _)) = typename {
                     // typename exist, make new rule with typename Option<base_typename>
                     // A? -> A { Some(A) }
                     //     |   { None }
@@ -349,7 +350,7 @@ impl Pattern {
                     .insert(new_ident.clone(), root_span_pair);
                 let typename = self.typename(grammar);
 
-                if let Some(typename) = typename {
+                if let Some((typename, _)) = typename {
                     let mut rule_lines = Vec::new();
                     let rule = RuleLine {
                         tokens: vec![TokenMapped {
@@ -396,37 +397,158 @@ impl Pattern {
 
                 Ok(new_ident)
             }
+
+            Pattern::Group(group) => {
+                // Consider parenthesis-ed group of patterns
+                // ( A B C D ... )
+                // if there are no pattern holding a value, then the RuleType of the group is None
+                // if there is only one pattern holding a value, T, then the RuleType of the group is T
+                // otherwise, the RuleType of the group is (T1, T2, T3, ...) where T1 T2 T3 ... are the RuleType of the patterns holding a value
+
+                let new_ident = Ident::new(
+                    &format!("_Group{}", grammar.pattern_map.len()),
+                    root_span_pair.0,
+                );
+                grammar.pattern_map.insert(self.clone(), new_ident.clone());
+                grammar
+                    .generated_root_span
+                    .insert(new_ident.clone(), root_span_pair);
+
+                let mut vars = Vec::with_capacity(group.len());
+                let mut typenames = Vec::with_capacity(group.len());
+                let mut tokens = Vec::with_capacity(group.len());
+
+                for (idx, child) in group.iter().enumerate() {
+                    let child_rule = child.get_rule(grammar, root_span_pair)?;
+                    if let Some((child_typename, _)) = child.typename(grammar) {
+                        let var_name = Ident::new(format!("v{}", idx).as_str(), Span::call_site());
+                        vars.push(var_name.clone());
+                        typenames.push(child_typename);
+                        tokens.push(TokenMapped {
+                            token: child_rule,
+                            mapto: Some(var_name),
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
+                        });
+                    } else {
+                        tokens.push(TokenMapped {
+                            token: child_rule,
+                            mapto: None,
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
+                        });
+                    }
+                }
+                let mut rule_lines = Vec::new();
+                let (typename, rule) = match typenames.len() {
+                    0 => (
+                        None,
+                        RuleLine {
+                            tokens,
+                            reduce_action: None,
+                            separator_span: Span::call_site(),
+                            lookaheads: None,
+                        },
+                    ),
+
+                    1 => {
+                        let v0 = &vars[0];
+                        (
+                            typenames.into_iter().next(),
+                            RuleLine {
+                                tokens,
+                                reduce_action: Some(quote! {
+                                    {#v0}
+                                }),
+                                separator_span: Span::call_site(),
+                                lookaheads: None,
+                            },
+                        )
+                    }
+                    _ => {
+                        let mut reduce_action = TokenStream::new();
+                        for var in vars.iter() {
+                            reduce_action.extend(quote! { #var, });
+                        }
+                        let mut typename = TokenStream::new();
+                        for child_type in typenames {
+                            typename.extend(quote! { #child_type, });
+                        }
+                        (
+                            Some(quote! { (#typename) }),
+                            RuleLine {
+                                tokens,
+                                reduce_action: Some(quote! {
+                                    { (#reduce_action) }
+                                }),
+                                separator_span: Span::call_site(),
+                                lookaheads: None,
+                            },
+                        )
+                    }
+                };
+                rule_lines.push(rule);
+
+                grammar
+                    .rules
+                    .insert(new_ident.clone(), RuleLines { rule_lines });
+                grammar.rules_index.push(new_ident.clone());
+
+                if let Some(typename) = typename {
+                    grammar
+                        .nonterm_typenames
+                        .insert(new_ident.clone(), typename);
+                }
+
+                Ok(new_ident)
+            }
         }
     }
 
-    pub fn typename(&self, grammar: &Grammar) -> Option<TokenStream> {
+    pub fn typename(&self, grammar: &Grammar) -> Option<(TokenStream, Ident)> {
         match self {
-            Pattern::Ident(ident) => grammar.get_typename(ident).cloned(),
+            Pattern::Ident(ident) => grammar
+                .get_typename(ident)
+                .map(|typename| (typename.clone(), ident.clone())),
             Pattern::Plus(pattern) => pattern
                 .typename(grammar)
-                .map(|typename| quote! { Vec<#typename> }),
+                .map(|(typename, ident)| (quote! { Vec<#typename> }, ident)),
             Pattern::Star(pattern) => pattern
                 .typename(grammar)
-                .map(|typename| quote! { Vec<#typename> }),
-            Pattern::Question(pattern) => pattern.typename(grammar).map(|typename| {
-                quote! { Option<#typename> }
-            }),
+                .map(|(typename, ident)| (quote! { Vec<#typename> }, ident)),
+            Pattern::Question(pattern) => pattern
+                .typename(grammar)
+                .map(|(typename, ident)| (quote! { Option<#typename> }, ident)),
             Pattern::Exclamation(_) => None,
-            Pattern::TerminalSet(_) => Some(grammar.token_typename.clone()),
+            Pattern::TerminalSet(_) => Some((
+                grammar.token_typename.clone(),
+                Ident::new("__rustylr_term", Span::call_site()),
+            )),
             Pattern::Lookaheads(pattern, _) => pattern.typename(grammar),
-        }
-    }
+            Pattern::Group(group) => {
+                let mut child_types = Vec::with_capacity(group.len());
+                for child in group.iter() {
+                    if let Some(typename) = child.typename(grammar) {
+                        child_types.push(typename);
+                    }
+                }
 
-    /// if explicit mapto is not defined, map to default variable name
-    pub fn map_to(&self) -> Option<Ident> {
-        match self {
-            Pattern::Ident(ident) => Some(ident.clone()),
-            Pattern::Plus(pattern) => pattern.map_to(),
-            Pattern::Star(pattern) => pattern.map_to(),
-            Pattern::Question(pattern) => pattern.map_to(),
-            Pattern::Exclamation(_) => None,
-            Pattern::TerminalSet(_) => Some(Ident::new("__rustylr_term", Span::call_site())),
-            Pattern::Lookaheads(pattern, _) => pattern.map_to(),
+                match child_types.len() {
+                    0 => None,                           // none of the children have typename
+                    1 => child_types.into_iter().next(), // single child with typename
+                    _ => {
+                        // multiple children with typename
+                        let mut typename = TokenStream::new();
+                        for (child_type, _) in child_types {
+                            typename.extend(quote! { #child_type, });
+                        }
+                        Some((
+                            quote! { (#typename) },
+                            Ident::new("__rustylr_group", Span::call_site()),
+                        ))
+                    }
+                }
+            }
         }
     }
 }

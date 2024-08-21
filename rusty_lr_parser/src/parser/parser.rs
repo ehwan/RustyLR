@@ -234,6 +234,19 @@ Pattern(PatternArgs): ident {
 | Pattern slash TerminalSetOrIdent {
     PatternArgs::Lookaheads( Box::new(Pattern), TerminalSetOrIdent )
 }
+| lparen Pattern+ rparen {
+    let open = if let Lexed::LParen(lparen) = lparen {
+        lparen
+    } else {
+        unreachable!( "Pattern-Group-Open" );
+    };
+    let close = if let Lexed::RParen(rparen) = rparen {
+        rparen
+    } else {
+        unreachable!( "Pattern-Group-Close" );
+    };
+    PatternArgs::Group(Pattern, open, close)
+}
 ;
 
 
