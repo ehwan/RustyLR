@@ -74,7 +74,7 @@ macro_rules! punct(
 %token userdata Lexed::UserData(punct!('%'),Ident::new("id", Span::call_site()));
 %token errortype Lexed::ErrorType(punct!('%'),Ident::new("id", Span::call_site()));
 %token moduleprefix Lexed::ModulePrefix(punct!('%'),Ident::new("id", Span::call_site()));
-%token glr Lexed::GLR(punct!('%'),Ident::new("id", Span::call_site()));
+%token glr Lexed::Glr(punct!('%'),Ident::new("id", Span::call_site()));
 %token derive Lexed::Derive(punct!('%'),Ident::new("id", Span::call_site()));
 
 %eof Lexed::Eof;

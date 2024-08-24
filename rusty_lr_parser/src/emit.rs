@@ -889,7 +889,7 @@ impl Grammar {
                                 });
                             }
                         }
-                    } else if let Some(_) = self.nonterm_typenames.get(&token.token) {
+                    } else if self.nonterm_typenames.contains_key(&token.token) {
                         // if <RuleType> is defined for this nonterm,
                         // extract data from enum
 

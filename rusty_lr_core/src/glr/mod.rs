@@ -75,7 +75,7 @@ where
         reduce_errors,
     )?;
 
-    if let Some(next_state_id) = parser.get_states()[node.state()].shift_goto_term(&term) {
+    if let Some(next_state_id) = parser.get_states()[node.state()].shift_goto_term(term) {
         let node_rule = node.rule();
         let new_node = N::make_term_children(node, next_state_id, term.clone());
         // check conflict
@@ -109,7 +109,7 @@ where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
-    if let Some(reduce_rules) = parser.get_states()[node.state()].reduce(&term) {
+    if let Some(reduce_rules) = parser.get_states()[node.state()].reduce(term) {
         for reduce_rule in reduce_rules.iter().copied() {
             let mut children_reversed = Vec::new();
             let mut n = Rc::clone(&node);
