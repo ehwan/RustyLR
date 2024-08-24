@@ -52,6 +52,9 @@ pub struct Grammar {
     pub(crate) pattern_map: HashMap<Pattern, Ident>,
     /// span range that generated rule was originated from
     pub generated_root_span: HashMap<Ident, (Span, Span)>,
+
+    /// whether to generate GLR parser
+    pub(crate) glr: bool,
 }
 
 impl Grammar {
@@ -197,6 +200,7 @@ impl Grammar {
             rules_index: Default::default(),
             pattern_map: Default::default(),
             generated_root_span: Default::default(),
+            glr: grammar_args.glr,
         };
 
         for (index, (ident, typename)) in grammar_args.terminals.into_iter().enumerate() {
@@ -373,6 +377,9 @@ impl Grammar {
     pub fn create_grammar(&self) -> rusty_lr_core::builder::Grammar<Ident, Ident> {
         let mut grammar: rusty_lr_core::builder::Grammar<Ident, Ident> =
             rusty_lr_core::builder::Grammar::new();
+        if self.glr {
+            grammar.allow_conflict();
+        }
 
         // reduce types
         for (term, reduce_type) in self.reduce_types.iter() {

@@ -177,4 +177,5 @@ pub struct GrammarArgs {
     pub reduce_types: Vec<(TerminalSetOrIdent, ReduceType)>,
     pub derives: Vec<TokenStream>,
     pub rules: Vec<RuleDefArgs>,
+    pub glr: bool,
 }

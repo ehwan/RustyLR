@@ -1,18 +1,18 @@
 [package]
 name = "rusty_lr"
-version = "2.4.0"
+version = "2.5.0"
 edition = "2021"
 license = "MIT"
-description = "yacc-like, LR(1) and LALR(1) parser generator with custom reduce action"
+description = "GLR, LR(1) and LALR(1) parser generator with custom reduce action"
 repository = "https://github.com/ehwan/RustyLR"
 readme = "../README.md"
-keywords = ["parser", "yacc", "context-free-grammar", "lr", "compiler"]
+keywords = ["parser", "bison", "context-free-grammar", "lr", "compiler"]
 categories = ["parsing", "compilers", "parser-implementations"]
 
 [dependencies]
-rusty_lr_core = "2.4"
-rusty_lr_derive = "1.11"
-rusty_lr_buildscript = { version = "0.6", optional = true }
+rusty_lr_core = "2.5"
+rusty_lr_derive = "1.12"
+rusty_lr_buildscript = { version = "0.7", optional = true }
 # rusty_lr_core = { path = "../rusty_lr_core" }
 # rusty_lr_derive = { path = "../rusty_lr_derive" }
 # rusty_lr_buildscript = { path = "../rusty_lr_buildscript", optional = true }

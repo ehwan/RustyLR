@@ -3,21 +3,22 @@
 //! This crate is private and not intended to be used directly.
 //! Please use the [`rusty_lr`](https://crates.io/crates/rusty_lr) crate instead.
 
-pub(crate) mod error;
 pub(crate) mod hashmap;
 pub(crate) mod rule;
-pub(crate) mod state;
 pub(crate) mod token;
 
 /// module for build DFA tables from CFG
 #[cfg(feature = "builder")]
 pub mod builder;
 
+/// module for LR(1), LALR(1) parser
+pub mod lr;
+
+/// module for GLR parser
+pub mod glr;
+
 pub use hashmap::HashMap;
 pub use hashmap::HashSet;
-
-pub use error::GetContext;
-pub use error::GetParser;
 
 pub use rule::ProductionRule;
 
@@ -27,9 +28,24 @@ pub use rule::ShiftedRule;
 pub use rule::ShiftedRuleRef;
 
 pub use rule::ReduceType;
-pub use state::State;
 pub use token::Token;
 
-pub use error::DefaultReduceActionError;
-pub use error::InvalidTerminalError;
-pub use error::ParseError;
+/// Default error type for reduce action
+#[derive(Debug)]
+pub struct DefaultReduceActionError;
+impl std::fmt::Display for DefaultReduceActionError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Default reduce action error")
+    }
+}
+impl std::error::Error for DefaultReduceActionError {
+    fn cause(&self) -> Option<&dyn std::error::Error> {
+        None
+    }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
+    fn description(&self) -> &str {
+        "Default reduce action error"
+    }
+}

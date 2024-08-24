@@ -21,8 +21,7 @@ use rusty_lr_core::ReduceType;
 
 // bootstrap the parser for the grammar
 // this define the actual parser for proc-macro line parsing
-
-// rusty_lr_expand parser.rs parser_expanded.rs
+// This should be changed to GLR parser in the future
 
 macro_rules! punct(
     ($l:literal) => {
@@ -75,6 +74,7 @@ macro_rules! punct(
 %token userdata Lexed::UserData(punct!('%'),Ident::new("id", Span::call_site()));
 %token errortype Lexed::ErrorType(punct!('%'),Ident::new("id", Span::call_site()));
 %token moduleprefix Lexed::ModulePrefix(punct!('%'),Ident::new("id", Span::call_site()));
+%token glr Lexed::GLR(punct!('%'),Ident::new("id", Span::call_site()));
 %token derive Lexed::Derive(punct!('%'),Ident::new("id", Span::call_site()));
 
 %eof Lexed::Eof;
@@ -317,6 +317,8 @@ ErrorDef((Span,TokenStream)): errortype RustCode semicolon { (errortype.span(), 
 
 ModulePrefixDef((Span,TokenStream)): moduleprefix RustCode semicolon { (moduleprefix.span(), RustCode) };
 
+GLR: glr semicolon;
+
 DeriveDef(TokenStream): derive RustCode semicolon {
     RustCode
 };
@@ -330,6 +332,7 @@ GrammarLine : Rule { data.rules.push(Rule); }
 | ReduceDef  { data.reduce_types.push(ReduceDef); }
 | ErrorDef   { data.error_typename.push(ErrorDef); }
 | ModulePrefixDef { data.module_prefix.push(ModulePrefixDef); }
+| GLR { data.glr = true; }
 | DeriveDef { data.derives.push(DeriveDef); }
 ;
 

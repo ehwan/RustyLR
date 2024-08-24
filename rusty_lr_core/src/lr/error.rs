@@ -4,18 +4,11 @@ use std::fmt::Display;
 use std::hash::Hash;
 
 use crate::rule::ShiftedRuleRef2;
-use crate::state::State;
-use crate::ProductionRule;
 use crate::ShiftedRuleRef;
 use crate::Token;
 
-pub trait GetContext<Term, NonTerm> {
-    fn get_state_stack(&self) -> &[usize];
-}
-pub trait GetParser<Term, NonTerm> {
-    fn get_rules(&self) -> &[ProductionRule<Term, NonTerm>];
-    fn get_states(&self) -> &[State<Term, NonTerm>];
-}
+use super::Context;
+use super::Parser;
 
 /// Error type for feed(), when invalid terminal is feeded
 #[derive(Debug)]
@@ -50,8 +43,8 @@ impl<Term> InvalidTerminalError<Term> {
     /// Each ruleset in the returned `Vec` contains every rule that the state was trying to parse, that is, only the rules with shifted > 0.
     /// 0'th index is the latest, that is, the last element of `Vec` will hold the initial state's ruleset.
     pub fn backtrace<NonTerm>(
-        parser: &impl GetParser<Term, NonTerm>,
-        context: &impl GetContext<Term, NonTerm>,
+        parser: &impl Parser<Term = Term, NonTerm = NonTerm>,
+        context: &impl Context<Term = Term>,
     ) -> Vec<BTreeSet<ShiftedRuleRef>>
     where
         NonTerm: PartialEq,
@@ -141,8 +134,8 @@ impl<Term> InvalidTerminalError<Term> {
     /// Generate long, detailed error message.
     pub fn long_message<NonTerm>(
         &self,
-        parser: &impl GetParser<Term, NonTerm>,
-        context: &impl GetContext<Term, NonTerm>,
+        parser: &impl Parser<Term = Term, NonTerm = NonTerm>,
+        context: &impl Context<Term = Term>,
     ) -> String
     where
         Term: Display + Hash + Eq,
@@ -211,8 +204,8 @@ impl<Term, ReduceActionError> ParseError<Term, ReduceActionError> {
     /// Generate long, detailed error message.
     pub fn long_message<NonTerm>(
         &self,
-        parser: &impl GetParser<Term, NonTerm>,
-        context: &impl GetContext<Term, NonTerm>,
+        parser: &impl Parser<Term = Term, NonTerm = NonTerm>,
+        context: &impl Context<Term = Term, ReduceActionError = ReduceActionError>,
     ) -> String
     where
         Term: Display + Hash + Eq,
@@ -225,25 +218,5 @@ impl<Term, ReduceActionError> ParseError<Term, ReduceActionError> {
                 format!("ReduceActionError: {}", err)
             }
         }
-    }
-}
-
-/// Default error type for reduce action
-#[derive(Debug)]
-pub struct DefaultReduceActionError;
-impl Display for DefaultReduceActionError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Default reduce action error")
-    }
-}
-impl std::error::Error for DefaultReduceActionError {
-    fn cause(&self) -> Option<&dyn std::error::Error> {
-        None
-    }
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        None
-    }
-    fn description(&self) -> &str {
-        "Default reduce action error"
     }
 }

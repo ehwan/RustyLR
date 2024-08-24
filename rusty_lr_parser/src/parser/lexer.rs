@@ -53,6 +53,7 @@ pub enum Lexed {
     UserData(Punct, Ident),     // %userdata
     ErrorType(Punct, Ident),    // %err %error
     ModulePrefix(Punct, Ident), // %moduleprefix
+    GLR(Punct, Ident),          // %glr
     Derive(Punct, Ident),       // %derive
     Eof,
 }
@@ -124,6 +125,10 @@ impl Lexed {
                 stream.append(punct);
                 stream.append(ident);
             }
+            Lexed::GLR(punct, ident) => {
+                stream.append(punct);
+                stream.append(ident);
+            }
             Lexed::Derive(punct, ident) => {
                 stream.append(punct);
                 stream.append(ident);
@@ -172,6 +177,7 @@ impl Lexed {
             Lexed::UserData(punct, ident) => ident.span(),
             Lexed::ErrorType(punct, ident) => ident.span(),
             Lexed::ModulePrefix(punct, ident) => ident.span(),
+            Lexed::GLR(punct, ident) => ident.span(),
             Lexed::Derive(punct, ident) => ident.span(),
 
             Lexed::Eof => Span::call_site(),
@@ -217,6 +223,7 @@ impl std::fmt::Display for Lexed {
             Lexed::UserData(_, _) => write!(f, "%userdata"),
             Lexed::ErrorType(_, _) => write!(f, "%error"),
             Lexed::ModulePrefix(_, _) => write!(f, "%moduleprefix"),
+            Lexed::GLR(_, _) => write!(f, "%glr"),
             Lexed::Derive(_, _) => write!(f, "%derive"),
 
             Lexed::Eof => write!(f, "<eof>"),
@@ -246,6 +253,7 @@ fn ident_to_keyword(percent: Punct, ident: Ident) -> Option<Lexed> {
         "userdata" => Some(Lexed::UserData(percent, ident)),
         "err" | "error" => Some(Lexed::ErrorType(percent, ident)),
         "moduleprefix" => Some(Lexed::ModulePrefix(percent, ident)),
+        "glr" => Some(Lexed::GLR(percent, ident)),
         "derive" => Some(Lexed::Derive(percent, ident)),
         _ => None,
     }

@@ -8,5 +8,5 @@ members = [
   "rusty_lr_executable",
   "example/calculator",
   "example/calculator_u8",
-  "example/lrtest",
+  "example/lrtest", "example/glr",
 ]
