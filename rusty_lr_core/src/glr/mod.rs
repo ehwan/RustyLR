@@ -23,11 +23,7 @@ use node::Node;
 
 /// feed one terminal to parser, and update state stack.
 /// For GLR parsing, this function will create multiple path if needed.
-pub fn feed<
-    P: Parser,
-    N: Node<Term = P::Term, NonTerm = P::NonTerm> + Hash + Eq,
-    C: Context<Node = N>,
->(
+pub fn feed<P: Parser, N: Node<Term = P::Term, NonTerm = P::NonTerm>, C: Context<Node = N>>(
     parser: &P,
     context: &mut C,
     term: P::Term,
@@ -42,7 +38,7 @@ where
     let mut states_list = Vec::with_capacity(current_nodes.nodes.len());
     for node in current_nodes.nodes.into_iter() {
         states_list.push(node.state());
-        feed_impl(parser, node, context, &term, userdata, &mut reduce_errors)?;
+        feed_impl(parser, node, context, &term, userdata, &mut reduce_errors);
     }
     if context.is_empty() {
         let mut expected = parser.get_states()[states_list[0]].expected();
@@ -62,19 +58,14 @@ where
     }
 }
 /// feed one terminal to parser, and update state stack
-fn feed_impl<
-    P: Parser,
-    N: Node<Term = P::Term, NonTerm = P::NonTerm> + Hash + Eq,
-    C: Context<Node = N>,
->(
+fn feed_impl<P: Parser, N: Node<Term = P::Term, NonTerm = P::NonTerm>, C: Context<Node = N>>(
     parser: &P,
     node: Rc<N>,
     context: &mut C,
     term: &P::Term,
     userdata: &mut N::UserData,
     reduce_errors: &mut Vec<N::ReduceActionError>,
-) -> Result<(), InvalidTerminalError<P::Term, N::ReduceActionError>>
-where
+) where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
@@ -86,29 +77,22 @@ where
             .push(Rc::new(new_node));
     }
 
-    lookahead_impl(parser, node, context, term, userdata, reduce_errors)?;
-
-    Ok(())
+    lookahead_impl(parser, node, context, term, userdata, reduce_errors);
 }
 /// give lookahead token to parser, and check if there is any reduce action
-fn lookahead_impl<
-    P: Parser,
-    N: Node<Term = P::Term, NonTerm = P::NonTerm> + Hash + Eq,
-    C: Context<Node = N>,
->(
+fn lookahead_impl<P: Parser, N: Node<Term = P::Term, NonTerm = P::NonTerm>, C: Context<Node = N>>(
     parser: &P,
     node: Rc<N>,
     context: &mut C,
     term: &P::Term,
     userdata: &mut N::UserData,
     reduce_errors: &mut Vec<N::ReduceActionError>,
-) -> Result<(), InvalidTerminalError<P::Term, N::ReduceActionError>>
-where
+) where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
     if let Some(reduce_rules) = parser.get_states()[node.state()].reduce(term) {
-        for reduce_rule in reduce_rules.iter().copied().skip(1) {
+        for reduce_rule in reduce_rules.iter().skip(1).copied() {
             match N::reduce(
                 Rc::clone(&node),
                 reduce_rule,
@@ -129,7 +113,7 @@ where
                             term,
                             userdata,
                             reduce_errors,
-                        )?;
+                        );
                     }
                 }
                 Err(err) => {
@@ -158,7 +142,7 @@ where
                         term,
                         userdata,
                         reduce_errors,
-                    )?;
+                    );
                 }
             }
             Err(err) => {
@@ -166,5 +150,4 @@ where
             }
         }
     }
-    Ok(())
 }

@@ -1,4 +1,4 @@
-use std::{hash::Hash, rc::Rc};
+use std::rc::Rc;
 
 use super::{MultiplePathError, Parser, Tree1};
 
@@ -38,6 +38,7 @@ where
     fn tree(&self) -> Option<&Tree1>;
 }
 
+/*
 pub fn hash_node<H: std::hash::Hasher, N: Node>(node: &N, state: &mut H) {
     node.state().hash(state);
     if let Some(parent) = node.parent() {
@@ -54,6 +55,7 @@ pub fn eq_node<N: Node>(node1: &N, node2: &N) -> bool {
         _ => false,
     }
 }
+*/
 
 pub struct NodeSet<N> {
     /// Set of nodes.

@@ -1167,17 +1167,6 @@ impl Grammar {
         impl #node_struct_name {
             #fn_reduce_for_each_rule_stream
         }
-        impl std::hash::Hash for #node_struct_name {
-            fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-                #module_prefix::glr::node::hash_node( self, state );
-            }
-        }
-        impl std::cmp::PartialEq for #node_struct_name {
-            fn eq(&self, other: &Self) -> bool {
-                #module_prefix::glr::node::eq_node( self, other )
-            }
-        }
-        impl std::cmp::Eq for #node_struct_name {}
 
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         impl #module_prefix::glr::node::Node for #node_struct_name {
