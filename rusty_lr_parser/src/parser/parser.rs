@@ -127,12 +127,31 @@ RuleLines(Vec<RuleLineArgs>): RuleLines pipe RuleLine {
 }
 ;
 
-RuleLine(RuleLineArgs): TokenMapped* Action
+RuleId(usize): percent literal {
+    if let Lexed::Literal(literal) = literal {
+        let id: usize = match literal.unwrap().to_string().parse() {
+            Ok(id) => id,
+            Err(err) => {
+                panic!("Failed to parse rule id: {}", err);
+            }
+        };
+        id
+    }else {
+        unreachable!( "RuleId-Literal" );
+    }
+}
+| {
+    0
+}
+;
+
+RuleLine(RuleLineArgs): TokenMapped* RuleId Action
 {
     RuleLineArgs {
         tokens: TokenMapped,
         reduce_action: Action.map(|action| action.to_token_stream()),
         separator_span: Span::call_site(),
+        id: RuleId,
     }
 }
 ;
@@ -317,7 +336,7 @@ ErrorDef((Span,TokenStream)): errortype RustCode semicolon { (errortype.span(), 
 
 ModulePrefixDef((Span,TokenStream)): moduleprefix RustCode semicolon { (moduleprefix.span(), RustCode) };
 
-GLR: glr semicolon;
+Glr: glr semicolon;
 
 DeriveDef(TokenStream): derive RustCode semicolon {
     RustCode
@@ -332,7 +351,7 @@ GrammarLine : Rule { data.rules.push(Rule); }
 | ReduceDef  { data.reduce_types.push(ReduceDef); }
 | ErrorDef   { data.error_typename.push(ErrorDef); }
 | ModulePrefixDef { data.module_prefix.push(ModulePrefixDef); }
-| GLR { data.glr = true; }
+| Glr { data.glr = true; }
 | DeriveDef { data.derives.push(DeriveDef); }
 ;
 

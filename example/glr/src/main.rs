@@ -5,7 +5,7 @@ fn main() {
     let p = parser::EParser::new();
     let mut c = p.begin();
 
-    let input = "1+2*3+4";
+    let input = "1+2+3+4";
     for ch in input.chars() {
         println!("feed: {}", ch);
         match p.feed(&mut c, ch) {
@@ -13,8 +13,8 @@ fn main() {
                 println!("nodes: {}", c.current_nodes.nodes.len());
             }
             Err(e) => {
-                println!("Error: {:?}", e);
-                break;
+                println!("Error: {}", e);
+                return;
             }
         }
     }
@@ -24,11 +24,18 @@ fn main() {
             println!("nodes: {}", c.current_nodes.nodes.len());
         }
         Err(e) => {
-            println!("Error: {:?}", e);
+            println!("Error: {}", e);
         }
     }
 
-    println!("{}", c.accept());
+    let result = match c.accept(&p) {
+        Ok(n) => n,
+        Err(e) => {
+            println!("Error: {}", e);
+            return;
+        }
+    };
+    println!("Result: {}", result);
 
     // for mut n in c.current_nodes.nodes.into_iter() {
     //     loop {

@@ -30,6 +30,8 @@ impl Display for ReduceType {
 pub struct ProductionRule<Term, NonTerm> {
     pub name: NonTerm,
     pub rule: Vec<Token<Term, NonTerm>>,
+    /// id user assigned to this rule
+    pub id: usize,
 }
 impl<Term: Display, NonTerm: Display> Display for ProductionRule<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -74,6 +76,7 @@ impl<Term, NonTerm> ProductionRule<Term, NonTerm> {
                     Token::NonTerm(nonterm) => Token::NonTerm(nonterm_map(nonterm)),
                 })
                 .collect(),
+            id: self.id,
         }
     }
 }

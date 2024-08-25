@@ -72,6 +72,7 @@ impl Pattern {
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: None,
+                        id: 0,
                     };
                     let line2 = RuleLine {
                         tokens: vec![
@@ -93,6 +94,7 @@ impl Pattern {
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: None,
+                        id: 0,
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -116,6 +118,7 @@ impl Pattern {
                         reduce_action: None,
                         separator_span: Span::call_site(),
                         lookaheads: None,
+                        id: 0,
                     };
                     let line2 = RuleLine {
                         tokens: vec![
@@ -135,6 +138,7 @@ impl Pattern {
                         reduce_action: None,
                         separator_span: Span::call_site(),
                         lookaheads: None,
+                        id: 0,
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -176,6 +180,7 @@ impl Pattern {
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: None,
+                        id: 0,
                     };
                     let line2 = RuleLine {
                         tokens: vec![],
@@ -184,6 +189,7 @@ impl Pattern {
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: None,
+                        id: 0,
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -207,12 +213,14 @@ impl Pattern {
                         reduce_action: None,
                         separator_span: Span::call_site(),
                         lookaheads: None,
+                        id: 0,
                     };
                     let line2 = RuleLine {
                         tokens: vec![],
                         reduce_action: None,
                         separator_span: Span::call_site(),
                         lookaheads: None,
+                        id: 0,
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -253,6 +261,7 @@ impl Pattern {
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: None,
+                        id: 0,
                     };
                     let line2 = RuleLine {
                         tokens: vec![],
@@ -261,6 +270,7 @@ impl Pattern {
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: None,
+                        id: 0,
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -284,12 +294,14 @@ impl Pattern {
                         reduce_action: None,
                         separator_span: Span::call_site(),
                         lookaheads: None,
+                        id: 0,
                     };
                     let line2 = RuleLine {
                         tokens: vec![],
                         reduce_action: None,
                         separator_span: Span::call_site(),
                         lookaheads: None,
+                        id: 0,
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
@@ -326,6 +338,7 @@ impl Pattern {
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: None,
+                        id: 0,
                     };
                     rule_lines.push(rule);
                 }
@@ -364,6 +377,7 @@ impl Pattern {
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: Some(lookaheads.clone()),
+                        id: 0,
                     };
                     rule_lines.push(rule);
 
@@ -386,6 +400,7 @@ impl Pattern {
                         reduce_action: None,
                         separator_span: Span::call_site(),
                         lookaheads: Some(lookaheads.clone()),
+                        id: 0,
                     };
                     rule_lines.push(rule);
 
@@ -448,6 +463,7 @@ impl Pattern {
                             reduce_action: None,
                             separator_span: Span::call_site(),
                             lookaheads: None,
+                            id: 0,
                         },
                     ),
 
@@ -462,6 +478,7 @@ impl Pattern {
                                 }),
                                 separator_span: Span::call_site(),
                                 lookaheads: None,
+                                id: 0,
                             },
                         )
                     }
@@ -483,6 +500,7 @@ impl Pattern {
                                 }),
                                 separator_span: Span::call_site(),
                                 lookaheads: None,
+                                id: 0,
                             },
                         )
                     }

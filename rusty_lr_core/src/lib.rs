@@ -31,7 +31,7 @@ pub use rule::ReduceType;
 pub use token::Token;
 
 /// Default error type for reduce action
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct DefaultReduceActionError;
 impl std::fmt::Display for DefaultReduceActionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

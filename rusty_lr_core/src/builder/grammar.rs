@@ -49,30 +49,31 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     }
 
     /// add new production rule for given nonterminal 'name'
-    pub fn add_rule(&mut self, name: NonTerm, rule: Vec<Token<Term, NonTerm>>) -> usize
+    pub fn add_rule(&mut self, name: NonTerm, rule: Vec<Token<Term, NonTerm>>, id: usize) -> usize
     where
         NonTerm: Clone + Hash + Eq,
     {
-        let id = self.rules.len();
-        self.rules_map.entry(name.clone()).or_default().push(id);
-        let rule = ProductionRule { name, rule };
+        let index = self.rules.len();
+        self.rules_map.entry(name.clone()).or_default().push(index);
+        let rule = ProductionRule { name, rule, id };
         self.rules.push((rule, None));
-        id
+        index
     }
     pub fn add_rule_with_lookaheads(
         &mut self,
         name: NonTerm,
         rule: Vec<Token<Term, NonTerm>>,
+        id: usize,
         lookaheads: BTreeSet<Term>,
     ) -> usize
     where
         NonTerm: Clone + Hash + Eq,
     {
-        let id = self.rules.len();
-        self.rules_map.entry(name.clone()).or_default().push(id);
-        let rule = ProductionRule { name, rule };
+        let index = self.rules.len();
+        self.rules_map.entry(name.clone()).or_default().push(index);
+        let rule = ProductionRule { name, rule, id };
         self.rules.push((rule, Some(lookaheads)));
-        id
+        index
     }
 
     /// error if different reduce type is assigned to same terminal symbol

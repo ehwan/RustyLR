@@ -1,15 +1,15 @@
 [package]
 name = "rustylr"
-version = "0.13.0"
+version = "0.13.1"
 edition = "2021"
 license = "MIT"
 description = "executable for rusty_lr"
 repository = "https://github.com/ehwan/RustyLR"
 readme = "../README.md"
-keywords = ["parser", "bison", "context-free-grammar", "lr", "compiler"]
+keywords = ["parser", "bison", "lr", "glr", "compiler"]
 categories = ["parsing"]
 
 [dependencies]
 clap = { version = "4.5.7", features = ["derive"] }
-rusty_lr_buildscript = "0.7"
+rusty_lr_buildscript = "0.8"
 # rusty_lr_buildscript = { path = "../rusty_lr_buildscript" }

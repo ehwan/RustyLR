@@ -12,6 +12,8 @@ pub struct RuleLine {
     pub separator_span: Span,
     /// force lookahead tokens for this pattern.
     pub lookaheads: Option<BTreeSet<Ident>>,
+    /// user assigned id for this rule line.
+    pub id: usize,
 }
 
 impl RuleLine {

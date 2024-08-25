@@ -155,6 +155,8 @@ pub struct RuleLineArgs {
     pub reduce_action: Option<TokenStream>,
     /// span of ':' or '|' in front of this rule line
     pub separator_span: Span,
+    /// user assigned id for this rule line
+    pub id: usize,
 }
 
 /// parsed arguments for multiple lines of a rule

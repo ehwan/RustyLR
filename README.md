@@ -252,10 +252,47 @@ You can resolve the ambiguties through the [reduce action](#reduceaction-optiona
 Simply, returning `Result::Err(Error)` from the reduce action will revoke current path.
 The `Error` variant type can be defined by [`%err`](#error-type-optional) directive.
 
+Consider the following grammar:
+```
+E : E plus E   { reduce action... }
+  | digit
+  ;
+```
+And you are trying to feed `1 + 2 + 3 eof` to the parser.
+At the time when you feed the `eof`, the parser will diverge into two paths:
+ - `E -> (E plus E) plus E`
+ - `E -> E plus (E plus E)`
+
+ Without additional information, These two paths cannot be merged into a single path, so parser will return an `MultiplePath` error.
+ But we want the plus operator to be left-reduced, so everytime we encounter the right-reduced plus operator, we returns `Err` from the reduce action.
+
+ There might be several ways to resolve the ambiguity, but in this case, we will use `rule id` to distinguish the patterns.
+ You can assign a unique id(`usize`) for each rule, by using `%ruleid` directive right before the reduce action.
+ ```
+ E : E plus E %1 { ... }
+   | digit    %2 { ... }
+   ;
+ ```
+ In this case, id `1` is assigned to the first rule, and id `2` is assigned to the second rule. If you don't assign any id, the default id will be `0`.
+ Just like [accessing token data in reduce action](#accessing-token-data-in-reduceaction),
+ you can access the rule id of non-terminal token by variable suffixed by `_rule`.
+ So, to revoke the right-reduced path, you can write the reduce action as follows:
+
+ ```rust
+ %err <YourErrorType>;
+
+ E : E plus e2=E %1 { if e2_rule == 1 { return Err(YourErrorType); } ... }
+   | digit       %2 { ... }
+   ;
+ ```
+ This will revoke the reduce action if the right hand side of the plus operator is plus-reduced rule.
+
+
 ### Note on GLR Parser
  - Still in development, not have been tested enough (patches are welcome!).
  - Since there are multiple paths, the reduce action can be called multiple times, even if the result will be thrown away in the future.
     - Every `RuleType` and `Term` must implement `Clone` trait.
+    - `clone()` will be called carefully, only when there are multiple paths.
  - User must be aware of the point where shift/reduce or reduce/reduce conflicts occur.
  Every time the parser diverges, the calculation cost will increase.
 
@@ -469,6 +506,32 @@ For group `(P1 P2 P3)`:
  };
 
  ```
+
+---
+
+ ### Rule ID in ReduceAction (GLR Parser)
+ As mentioned in [Resolving Ambiguities](#resolving-ambiguities) section,
+ you can access the rule id of non-terminal token by variable suffixed by `_rule`,
+ just like accessing token data.
+
+ You can define unique rule id (`usize`) for each production rule by using `%your_id` directive right before the reduce action.
+ ```
+E : E plus e2=E %1 { ... } // rule id 1
+  | digit    %2 { ... } // rule id 2
+  ;
+```
+
+And by `E_rule` variable, you can access the rule id where `E` is reduced from.
+```
+E: E plus e2=E %1 {
+    if E_rule == 1 {
+        // E is reduced from `E plus E`
+    }
+    if e2_rule == 1 {
+        // e2 is reduced from `E plus E`
+    }
+};
+```
 
 ---
 

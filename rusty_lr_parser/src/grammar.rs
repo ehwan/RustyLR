@@ -288,6 +288,7 @@ impl Grammar {
                     reduce_action: rule.reduce_action,
                     separator_span: rule.separator_span,
                     lookaheads: None,
+                    id: rule.id,
                 });
             }
 
@@ -320,6 +321,7 @@ impl Grammar {
                     reduce_action: None,
                     separator_span: Span::call_site(),
                     lookaheads: None,
+                    id: 0,
                 }],
             },
         );
@@ -405,9 +407,14 @@ impl Grammar {
                 }
 
                 if let Some(lookaheads) = rule.lookaheads.as_ref() {
-                    grammar.add_rule_with_lookaheads(name.clone(), tokens, lookaheads.clone());
+                    grammar.add_rule_with_lookaheads(
+                        name.clone(),
+                        tokens,
+                        rule.id,
+                        lookaheads.clone(),
+                    );
                 } else {
-                    grammar.add_rule(name.clone(), tokens);
+                    grammar.add_rule(name.clone(), tokens, rule.id);
                 }
             }
         }

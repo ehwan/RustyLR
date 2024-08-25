@@ -1,12 +1,11 @@
 use rusty_lr::lr1;
 
 lr1! {
+    %err String;
     %glr;
     %tokentype char;
     %start E;
     %eof '\0';
-
-    %left [plus star];
 
     %token plus '+';
     %token star '*';
@@ -21,11 +20,18 @@ lr1! {
     %token eight '8';
     %token nine '9';
 
-    Digit(char): ch=[zero-nine] { println!("Digit: {}", ch); ch };
+    Digit(char): ch=[zero-nine] { ch };
 
-    E(i32) : E plus e2=E  {  println!("Plus"); E + e2 }
-           | E star e2=E  {  println!("Star"); E * e2 }
-           | Digit { println!("D2E"); Digit as i32 - '0' as i32 }
+    E(i32) : E plus e2=E  %1
+        {
+            if e2_rule == 1
+            { return Err("".to_string()); }
+            else {
+                E + e2
+            }
+        }
+           | E star e2=E  %2 {  E * e2 }
+           | Digit %3 { Digit as i32 - '0' as i32 }
            ;
 
 }
