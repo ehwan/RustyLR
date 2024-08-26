@@ -23,14 +23,26 @@ lr1! {
     Digit(char): ch=[zero-nine] { ch };
 
     E(i32) : E plus e2=E  %1
-        {
-            if e2_rule == 1
-            { return Err("".to_string()); }
-            else {
+            {
+                match e2_rule {
+                    1 => { return Err("".to_string()); }
+                    _ => {}
+                }
                 E + e2
             }
-        }
-           | E star e2=E  %2 {  E * e2 }
+           | E star e2=E  %2
+            {
+                match E_rule {
+                    1 => { return Err("".to_string()); }
+                    _ => {}
+                }
+                match e2_rule {
+                    1 => { return Err("".to_string()); }
+                    2 => { return Err("".to_string()); }
+                    _ => {}
+                }
+                E * e2
+            }
            | Digit %3 { Digit as i32 - '0' as i32 }
            ;
 

@@ -5,7 +5,7 @@ fn main() {
     let p = parser::EParser::new();
     let mut c = p.begin();
 
-    let input = "1+2+3+4";
+    let input = "1+2*3+4";
     for ch in input.chars() {
         println!("feed: {}", ch);
         match p.feed(&mut c, ch) {

@@ -55,6 +55,9 @@ pub struct Builder {
     /// print the auto-generated rules, and where they are originated from.
     /// print the shift/reduce conflicts, and the resolving process.
     verbose: bool,
+
+    /// print verbose information to stderr
+    verbose_on_stderr: bool,
 }
 
 impl Builder {
@@ -63,6 +66,7 @@ impl Builder {
             input_file: None,
             lalr: false,
             verbose: false,
+            verbose_on_stderr: false,
         }
     }
 
@@ -84,6 +88,20 @@ impl Builder {
         self
     }
 
+    /// print debug information to stderr.
+    pub fn verbose_on_stderr(&mut self) -> &mut Self {
+        self.verbose_on_stderr = true;
+        self
+    }
+
+    fn verbose_stream(&self) -> StandardStream {
+        if self.verbose_on_stderr {
+            StandardStream::stderr(ColorChoice::Auto)
+        } else {
+            StandardStream::stdout(ColorChoice::Auto)
+        }
+    }
+
     /// build and emit code to output file
     pub fn build(&self, output_file: &str) {
         let output = match self.build_impl() {
@@ -103,6 +121,9 @@ impl Builder {
         write(output_file, output.to_string()).expect("Failed to write to file");
     }
 
+    /// extend `labels` with messages about the source of the rule
+    /// if `ruleid` is auto-generated rule, "{} was generated here" will be added
+    /// if `ruleid` is user-written rule, "{} was defined here" will be added
     fn extend_rule_source_label(
         labels: &mut Vec<codespan_reporting::diagnostic::Label<usize>>,
         fileid: usize,
@@ -683,8 +704,10 @@ impl Builder {
                 }
             };
 
-            // print note about generated rules
+            // 'verbose' option is on, print debug information
             if self.verbose {
+                // print infos about auto-generated rules
+                // where they are generated from
                 let mut rules_on_same_root = BTreeMap::new();
 
                 // `generated_root_span` contains only auto-generated rules
@@ -733,13 +756,13 @@ impl Builder {
                         .with_labels(vec![Label::primary(file_id, root_range.0..root_range.1)
                             .with_message("was generated here")]);
 
-                    let writer = StandardStream::stderr(ColorChoice::Auto);
+                    let writer = self.verbose_stream();
                     let config = codespan_reporting::term::Config::default();
                     term::emit(&mut writer.lock(), &config, &files, &diag)
                         .expect("Failed to write to stderr");
                 }
 
-                // about shift/reduce conflict resolving
+                // print note about shift/reduce conflict resolved with `%left` or `%right`
                 for state in parser.states.iter() {
                     let mut reduce_rules = BTreeMap::new();
                     let mut shift_rules = BTreeMap::new();
@@ -775,16 +798,16 @@ impl Builder {
                             // since there were not error reaching here, 'term' must be set reduce_type
 
                             let mut message = format!(
-                        "Shift/Reduce conflict with token {} was resolved:\nReduce rule:\n>>> {}\nShift rules:",
-                        term,
-                        &builder.rules[*reduce_rule].0
-                    );
+                                "Shift/Reduce conflict with token {} was resolved:\nReduce rule:\n\t>>> {}\nShift rules:",
+                                term,
+                                &builder.rules[*reduce_rule].0
+                            );
                             for shifted_rule in shift_rules.iter() {
                                 let shifted_rule = ShiftedRule {
                                     rule: builder.rules[shifted_rule.rule].0.clone(),
                                     shifted: shifted_rule.shifted,
                                 };
-                                message.push_str(format!("\n>>> {}", shifted_rule).as_str());
+                                message.push_str(format!("\n\t>>> {}", shifted_rule).as_str());
                             }
 
                             let mut labels = Vec::new();
@@ -797,42 +820,178 @@ impl Builder {
                                 "(Reduce) ",
                             );
 
+                            let mut shift_source_inserted = BTreeSet::new();
                             for shift_rule in shift_rules.iter() {
+                                let name = &builder.rules[shift_rule.rule].0.name;
+                                if !shift_source_inserted.contains(name) {
+                                    shift_source_inserted.insert(name);
+                                    Self::extend_rule_source_label(
+                                        &mut labels,
+                                        file_id,
+                                        shift_rule.rule,
+                                        &grammar,
+                                        "(Shift) ",
+                                    );
+                                }
+                            }
+
+                            if let Some(reduce_type_origin) = grammar.reduce_types_origin.get(term)
+                            {
+                                let range = reduce_type_origin.0.byte_range().start
+                                    ..reduce_type_origin.1.byte_range().end;
+                                let reduce_type = *grammar
+                                    .reduce_types
+                                    .get(term)
+                                    .expect("reduce_types not found");
+                                let type_string = match reduce_type {
+                                    rusty_lr_core::ReduceType::Left => "%left",
+                                    rusty_lr_core::ReduceType::Right => "%right",
+                                };
+                                labels.push(Label::primary(file_id, range).with_message(format!(
+                                    "Reduce type was set as {} here",
+                                    type_string
+                                )));
+
+                                let diag =
+                                    Diagnostic::note().with_message(message).with_labels(labels);
+
+                                let writer = self.verbose_stream();
+                                let config = codespan_reporting::term::Config::default();
+                                term::emit(&mut writer.lock(), &config, &files, &diag)
+                                    .expect("Failed to write to stderr");
+                            }
+                        }
+                    }
+                }
+
+                // print note about reduce/reduce conflict and shift/reduce conflict not resolved
+                {
+                    // to prevent duplicated messages, collect them into BTreeMap first
+                    let mut reduce_rules_set = BTreeMap::new();
+                    for state in parser.states.iter() {
+                        for (term, reduce_rules) in state.reduce_map.iter() {
+                            if reduce_rules.len() > 1 {
+                                reduce_rules_set
+                                    .entry(reduce_rules)
+                                    .or_insert_with(BTreeSet::new)
+                                    .insert(term);
+                            }
+                        }
+                    }
+
+                    for (reduce_rules, terms) in reduce_rules_set.into_iter() {
+                        let mut message = "Reduce/Reduce conflict:".to_string();
+                        let mut labels = Vec::new();
+                        let mut note = "with lookaheads: ".to_string();
+                        let len = terms.len();
+                        for (idx, term) in terms.into_iter().enumerate() {
+                            if idx < len - 1 {
+                                note.push_str(format!("{}, ", term).as_str());
+                            } else {
+                                note.push_str(format!("{}", term).as_str());
+                            }
+                        }
+
+                        let mut reduce_source_inserted = BTreeSet::new();
+                        for reduce_rule in reduce_rules.iter() {
+                            message.push_str(
+                                format!("\n\t>>> {}", &builder.rules[*reduce_rule].0).as_str(),
+                            );
+                            let name = &builder.rules[*reduce_rule].0.name;
+                            if !reduce_source_inserted.contains(name) {
+                                reduce_source_inserted.insert(name);
                                 Self::extend_rule_source_label(
                                     &mut labels,
                                     file_id,
-                                    shift_rule.rule,
+                                    *reduce_rule,
+                                    &grammar,
+                                    "",
+                                );
+                            }
+                        }
+
+                        let diag = Diagnostic::note()
+                            .with_message(message)
+                            .with_labels(labels)
+                            .with_notes(vec![note]);
+
+                        let writer = self.verbose_stream();
+                        let config = codespan_reporting::term::Config::default();
+                        term::emit(&mut writer.lock(), &config, &files, &diag)
+                            .expect("Failed to write to stderr");
+                    }
+
+                    let mut shift_map = BTreeMap::new();
+                    for state in parser.states.iter() {
+                        for (term, reduce_rules) in state.reduce_map.iter() {
+                            if let Some(next_state) = state.shift_goto_map_term.get(term) {
+                                shift_map
+                                    .entry(
+                                        parser.states[*next_state]
+                                            .ruleset
+                                            .rules
+                                            .keys()
+                                            .copied()
+                                            .collect::<BTreeSet<_>>(),
+                                    )
+                                    .or_insert_with(BTreeSet::new)
+                                    .append(&mut reduce_rules.clone());
+                            }
+                        }
+                    }
+
+                    for (shift_ruleset, reduce_rules) in shift_map.into_iter() {
+                        let mut message = "Shift/Reduce conflict:".to_string();
+                        let mut labels = Vec::new();
+
+                        let mut reduce_source_inserted = BTreeSet::new();
+                        message.push_str("\nReduce rules:");
+                        for reduce_rule in reduce_rules.iter() {
+                            message.push_str(
+                                format!("\n\t>>> {}", &builder.rules[*reduce_rule].0).as_str(),
+                            );
+                            let name = &builder.rules[*reduce_rule].0.name;
+                            if !reduce_source_inserted.contains(name) {
+                                reduce_source_inserted.insert(name);
+                                Self::extend_rule_source_label(
+                                    &mut labels,
+                                    file_id,
+                                    *reduce_rule,
+                                    &grammar,
+                                    "(Reduce) ",
+                                );
+                            }
+                        }
+
+                        let mut shift_source_inserted = BTreeSet::new();
+                        message.push_str("\nShift rules:");
+                        for shifted_rule in shift_ruleset.into_iter() {
+                            let shifted_rule_ = ShiftedRule {
+                                rule: builder.rules[shifted_rule.rule].0.clone(),
+                                shifted: shifted_rule.shifted,
+                            };
+                            message.push_str(format!("\n\t>>> {}", shifted_rule_).as_str());
+
+                            let name = &builder.rules[shifted_rule.rule].0.name;
+
+                            if !shift_source_inserted.contains(name) {
+                                shift_source_inserted.insert(name);
+                                Self::extend_rule_source_label(
+                                    &mut labels,
+                                    file_id,
+                                    shifted_rule.rule,
                                     &grammar,
                                     "(Shift) ",
                                 );
                             }
-
-                            let reduce_type_origin = grammar
-                                .reduce_types_origin
-                                .get(term)
-                                .expect("reduce_types_origin not found");
-                            let range = reduce_type_origin.0.byte_range().start
-                                ..reduce_type_origin.1.byte_range().end;
-                            let reduce_type = *grammar
-                                .reduce_types
-                                .get(term)
-                                .expect("reduce_types not found");
-                            let type_string = match reduce_type {
-                                rusty_lr_core::ReduceType::Left => "%left",
-                                rusty_lr_core::ReduceType::Right => "%right",
-                            };
-                            labels.push(Label::primary(file_id, range).with_message(format!(
-                                "Reduce type was set as {} here",
-                                type_string
-                            )));
-
-                            let diag = Diagnostic::note().with_message(message).with_labels(labels);
-
-                            let writer = StandardStream::stderr(ColorChoice::Auto);
-                            let config = codespan_reporting::term::Config::default();
-                            term::emit(&mut writer.lock(), &config, &files, &diag)
-                                .expect("Failed to write to stderr");
                         }
+
+                        let diag = Diagnostic::note().with_message(message).with_labels(labels);
+
+                        let writer = self.verbose_stream();
+                        let config = codespan_reporting::term::Config::default();
+                        term::emit(&mut writer.lock(), &config, &files, &diag)
+                            .expect("Failed to write to stderr");
                     }
                 }
             }
