@@ -11,6 +11,7 @@ fn main() {
         match p.feed(&mut c, ch) {
             Ok(_) => {
                 println!("nodes: {}", c.current_nodes.nodes.len());
+                c.current_nodes.backtrace(8, &p);
             }
             Err(e) => {
                 println!("Error: {}", e);

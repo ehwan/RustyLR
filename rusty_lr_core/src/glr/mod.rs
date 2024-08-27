@@ -9,6 +9,8 @@ pub mod node;
 pub use context::Context;
 pub use error::InvalidTerminalError;
 pub use error::MultiplePathError;
+pub use node::Node;
+pub use node::NodeSet;
 pub use parser::Parser;
 pub use state::State;
 pub use tree::Tree0;
@@ -18,8 +20,6 @@ pub use tree::TreeNonTerminal1;
 
 use std::hash::Hash;
 use std::rc::Rc;
-
-use node::Node;
 
 /// feed one terminal to parser, and update state stack.
 /// For GLR parsing, this function will create multiple path if needed.
@@ -149,5 +149,33 @@ fn lookahead_impl<P: Parser, N: Node<Term = P::Term, NonTerm = P::NonTerm>, C: C
                 reduce_errors.push(err);
             }
         }
+    }
+}
+
+/// For debugging.
+/// Print last n tokens for node.
+pub fn backtrace<P: Parser, N: Node<Term = P::Term, NonTerm = P::NonTerm>>(
+    n: usize,
+    mut node: Rc<N>,
+    parser: &P,
+) where
+    P::Term: Clone + std::fmt::Display,
+    P::NonTerm: Clone + std::fmt::Display,
+{
+    let mut nodes = Vec::new();
+    loop {
+        if let Some(par) = node.parent().cloned() {
+            nodes.push(node);
+            node = par;
+            if nodes.len() == n {
+                break;
+            }
+        } else {
+            break;
+        }
+    }
+    for n in nodes.into_iter().rev() {
+        let tree = n.tree().unwrap();
+        println!("{}", tree.to_string(parser));
     }
 }

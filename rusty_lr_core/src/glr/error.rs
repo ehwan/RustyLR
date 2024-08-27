@@ -126,12 +126,15 @@ impl<Term, NonTerm> SinglePath<Term, NonTerm> {
 impl<Term: Display, NonTerm: Display> Display for SinglePath<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "{} (ID: %{}) -> ", self.rule, self.ruleid)?;
-        for token in &self.tokens {
+        for (idx, token) in self.tokens.iter().enumerate() {
             match token {
-                TerminalOrProductionRule::Terminal(term) => writeln!(f, "\t{}", term)?,
+                TerminalOrProductionRule::Terminal(term) => write!(f, "\t{}", term)?,
                 TerminalOrProductionRule::ProductionRule(rule) => {
-                    writeln!(f, "\t{} / ID: %{}", rule, rule.id)?
+                    write!(f, "\t{} / ID: %{}", rule, rule.id)?
                 }
+            }
+            if idx < self.tokens.len() - 1 {
+                writeln!(f)?;
             }
         }
         Ok(())

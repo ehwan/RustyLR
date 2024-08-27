@@ -1,3 +1,7 @@
+use std::fmt::Display;
+
+use super::{error::SinglePath, Parser};
+
 /// Tree represention of single non-terminal token.
 /// This tree contains only 2-height nodes.
 /// Used for error reporting and conflict resolving in reduce action.
@@ -29,6 +33,19 @@ impl Tree1 {
                 rule: non_terminal.rule,
                 ruleid: non_terminal.ruleid,
             }),
+        }
+    }
+
+    /// For debug.
+    /// Convert this tree to visual string.
+    pub fn to_string<P: Parser>(&self, parser: &P) -> String
+    where
+        P::Term: Clone + Display,
+        P::NonTerm: Clone + Display,
+    {
+        match self {
+            Tree1::Terminal => "Terminal".to_string(),
+            Tree1::NonTerminal(_) => SinglePath::from_tree1(self, parser).to_string(),
         }
     }
 }

@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{fmt::Display, rc::Rc};
 
 use super::{MultiplePathError, Parser, Tree1};
 
@@ -98,6 +98,23 @@ impl<N> NodeSet<N> {
                     .map(|node| node.parent().unwrap().tree().unwrap()),
                 parser,
             ))
+        }
+    }
+
+    /// For debugging.
+    /// Print last n tokens for every node in this set.
+    pub fn backtrace<P: Parser<Term = N::Term, NonTerm = N::NonTerm>>(
+        &self,
+        token_count: usize,
+        parser: &P,
+    ) where
+        N: Node,
+        P::Term: Clone + Display,
+        P::NonTerm: Clone + Display,
+    {
+        for node in self.nodes.iter() {
+            super::backtrace(token_count, Rc::clone(node), parser);
+            println!();
         }
     }
 }
