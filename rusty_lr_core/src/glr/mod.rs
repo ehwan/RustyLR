@@ -10,6 +10,7 @@ pub use context::Context;
 pub use error::InvalidTerminalError;
 pub use error::MultiplePathError;
 pub use node::Node;
+pub use node::NodeData;
 pub use node::NodeSet;
 pub use parser::Parser;
 pub use state::State;
@@ -23,12 +24,16 @@ use std::rc::Rc;
 
 /// feed one terminal to parser, and update state stack.
 /// For GLR parsing, this function will create multiple path if needed.
-pub fn feed<P: Parser, N: Node<Term = P::Term, NonTerm = P::NonTerm>, C: Context<Node = N>>(
+pub fn feed<
+    P: Parser,
+    Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone,
+    C: Context<Data = Data>,
+>(
     parser: &P,
     context: &mut C,
     term: P::Term,
-    userdata: &mut N::UserData,
-) -> Result<(), InvalidTerminalError<P::Term, N::ReduceActionError>>
+    userdata: &mut Data::UserData,
+) -> Result<(), InvalidTerminalError<P::Term, Data::ReduceActionError>>
 where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
@@ -37,7 +42,7 @@ where
     let mut reduce_errors = Vec::new();
     let mut states_list = Vec::with_capacity(current_nodes.nodes.len());
     for node in current_nodes.nodes.into_iter() {
-        states_list.push(node.state());
+        states_list.push(node.state);
         feed_impl(parser, node, context, &term, userdata, &mut reduce_errors);
     }
     if context.is_empty() {
@@ -58,19 +63,28 @@ where
     }
 }
 /// feed one terminal to parser, and update state stack
-fn feed_impl<P: Parser, N: Node<Term = P::Term, NonTerm = P::NonTerm>, C: Context<Node = N>>(
+fn feed_impl<
+    P: Parser,
+    Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone,
+    C: Context<Data = Data>,
+>(
     parser: &P,
-    node: Rc<N>,
+    node: Rc<Node<Data>>,
     context: &mut C,
     term: &P::Term,
-    userdata: &mut N::UserData,
-    reduce_errors: &mut Vec<N::ReduceActionError>,
+    userdata: &mut Data::UserData,
+    reduce_errors: &mut Vec<Data::ReduceActionError>,
 ) where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
-    if let Some(next_state_id) = parser.get_states()[node.state()].shift_goto_term(term) {
-        let new_node = N::make_term_children(Rc::clone(&node), next_state_id, term.clone());
+    if let Some(next_state_id) = parser.get_states()[node.state].shift_goto_term(term) {
+        let new_node = Node {
+            parent: Some(Rc::clone(&node)),
+            tree: Some(Tree1::Terminal),
+            data: Some(Data::new_term(term.clone())),
+            state: next_state_id,
+        };
         context
             .get_current_nodes_mut()
             .nodes
@@ -79,36 +93,84 @@ fn feed_impl<P: Parser, N: Node<Term = P::Term, NonTerm = P::NonTerm>, C: Contex
 
     lookahead_impl(parser, node, context, term, userdata, reduce_errors);
 }
-/// give lookahead token to parser, and check if there is any reduce action
-fn lookahead_impl<P: Parser, N: Node<Term = P::Term, NonTerm = P::NonTerm>, C: Context<Node = N>>(
+
+/// from current node, get the last n nodes and create new non-terminal node
+/// use Rc::try_unwrap to avoid clone if possible
+fn clone_pop_nodes<
+    Data: NodeData + Clone,
+    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+>(
+    node: Rc<Node<Data>>,
+    rule_index: usize,
     parser: &P,
-    node: Rc<N>,
+) -> (Vec<Data>, Rc<Node<Data>>, Tree1) {
+    let rule = &parser.get_rules()[rule_index];
+    let count = rule.rule.len();
+    let mut nodes = Vec::with_capacity(count);
+    let mut trees = Vec::with_capacity(count);
+    let mut current_node = node;
+    for _ in 0..count {
+        let (data, tree) = match Rc::try_unwrap(current_node) {
+            Ok(node) => {
+                let data = node.data.unwrap();
+                let tree = node.tree.unwrap();
+                current_node = node.parent.unwrap();
+                (data, tree.to_tree0())
+            }
+            Err(rc_node) => {
+                let data = rc_node.data.as_ref().unwrap().clone();
+                let tree = rc_node.tree.as_ref().unwrap().clone();
+                current_node = Rc::clone(rc_node.parent.as_ref().unwrap());
+                (data, tree.to_tree0())
+            }
+        };
+        trees.push(tree);
+        nodes.push(data);
+    }
+    (
+        nodes,
+        current_node,
+        Tree1::NonTerminal(TreeNonTerminal1 {
+            rule: rule_index,
+            tokens: trees,
+        }),
+    )
+}
+
+/// give lookahead token to parser, and check if there is any reduce action
+fn lookahead_impl<
+    P: Parser,
+    Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone,
+    C: Context<Data = Data>,
+>(
+    parser: &P,
+    node: Rc<Node<Data>>,
     context: &mut C,
     term: &P::Term,
-    userdata: &mut N::UserData,
-    reduce_errors: &mut Vec<N::ReduceActionError>,
+    userdata: &mut Data::UserData,
+    reduce_errors: &mut Vec<Data::ReduceActionError>,
 ) where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
-    if let Some(reduce_rules) = parser.get_states()[node.state()].reduce(term) {
+    if let Some(reduce_rules) = parser.get_states()[node.state].reduce(term) {
         for reduce_rule in reduce_rules.iter().skip(1).copied() {
-            match N::reduce(
-                Rc::clone(&node),
-                reduce_rule,
-                parser.get_rules()[reduce_rule].id,
-                term,
-                userdata,
-            ) {
-                Ok(mut nonterm_shifted_node) => {
-                    if let Some(nonterm_shift_state) = parser.get_states()
-                        [nonterm_shifted_node.parent().unwrap().state()]
-                    .shift_goto_nonterm(&parser.get_rules()[reduce_rule].name)
+            let (data_args, parent, tree) = clone_pop_nodes(Rc::clone(&node), reduce_rule, parser);
+            match Data::new_nonterm(reduce_rule, data_args, term, userdata) {
+                Ok(new_data) => {
+                    if let Some(nonterm_shift_state) = parser.get_states()[parent.state]
+                        .shift_goto_nonterm(&parser.get_rules()[reduce_rule].name)
                     {
-                        nonterm_shifted_node.set_state(nonterm_shift_state);
+                        let new_node = Node {
+                            parent: Some(parent),
+                            tree: Some(tree),
+                            data: Some(new_data),
+                            state: nonterm_shift_state,
+                        };
+
                         feed_impl(
                             parser,
-                            Rc::new(nonterm_shifted_node),
+                            Rc::new(new_node),
                             context,
                             term,
                             userdata,
@@ -122,31 +184,33 @@ fn lookahead_impl<P: Parser, N: Node<Term = P::Term, NonTerm = P::NonTerm>, C: C
             }
         }
         // Do not clone for the first reduce rule
-        match N::reduce(
-            node,
-            reduce_rules[0],
-            parser.get_rules()[reduce_rules[0]].id,
-            term,
-            userdata,
-        ) {
-            Ok(mut nonterm_shifted_node) => {
-                if let Some(nonterm_shift_state) = parser.get_states()
-                    [nonterm_shifted_node.parent().unwrap().state()]
-                .shift_goto_nonterm(&parser.get_rules()[reduce_rules[0]].name)
-                {
-                    nonterm_shifted_node.set_state(nonterm_shift_state);
-                    feed_impl(
-                        parser,
-                        Rc::new(nonterm_shifted_node),
-                        context,
-                        term,
-                        userdata,
-                        reduce_errors,
-                    );
+        {
+            let (data_args, parent, tree) = clone_pop_nodes(node, reduce_rules[0], parser);
+            match Data::new_nonterm(reduce_rules[0], data_args, term, userdata) {
+                Ok(new_data) => {
+                    if let Some(nonterm_shift_state) = parser.get_states()[parent.state]
+                        .shift_goto_nonterm(&parser.get_rules()[reduce_rules[0]].name)
+                    {
+                        let new_node = Node {
+                            parent: Some(parent),
+                            tree: Some(tree),
+                            data: Some(new_data),
+                            state: nonterm_shift_state,
+                        };
+
+                        feed_impl(
+                            parser,
+                            Rc::new(new_node),
+                            context,
+                            term,
+                            userdata,
+                            reduce_errors,
+                        );
+                    }
                 }
-            }
-            Err(err) => {
-                reduce_errors.push(err);
+                Err(err) => {
+                    reduce_errors.push(err);
+                }
             }
         }
     }
@@ -154,9 +218,9 @@ fn lookahead_impl<P: Parser, N: Node<Term = P::Term, NonTerm = P::NonTerm>, C: C
 
 /// For debugging.
 /// Print last n tokens for node.
-pub fn backtrace<P: Parser, N: Node<Term = P::Term, NonTerm = P::NonTerm>>(
+pub fn backtrace<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm>>(
     n: usize,
-    mut node: Rc<N>,
+    mut node: Rc<Node<Data>>,
     parser: &P,
 ) where
     P::Term: Clone + std::fmt::Display,
@@ -164,7 +228,7 @@ pub fn backtrace<P: Parser, N: Node<Term = P::Term, NonTerm = P::NonTerm>>(
 {
     let mut nodes = Vec::new();
     loop {
-        if let Some(par) = node.parent().cloned() {
+        if let Some(par) = node.parent.clone() {
             nodes.push(node);
             node = par;
             if nodes.len() == n {
@@ -175,7 +239,7 @@ pub fn backtrace<P: Parser, N: Node<Term = P::Term, NonTerm = P::NonTerm>>(
         }
     }
     for n in nodes.into_iter().rev() {
-        let tree = n.tree().unwrap();
+        let tree = n.tree.clone().unwrap();
         println!("{}", tree.to_string(parser));
     }
 }

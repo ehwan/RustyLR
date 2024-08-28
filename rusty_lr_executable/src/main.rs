@@ -23,6 +23,15 @@ fn main() {
     if args.verbose {
         builder.verbose();
     }
+    if args.verbose_conflict {
+        builder.verbose_conflicts();
+    }
+    if args.verbose_generated_source {
+        builder.verbose_generated_source();
+    }
+    if args.verbose_conflict_resolve {
+        builder.verbose_conflicts_resolving();
+    }
 
     let out = match builder.build_impl() {
         Ok(out) => out,

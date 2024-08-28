@@ -23,10 +23,22 @@ pub struct Args {
     #[arg(short, long, default_value = "false")]
     pub lalr: bool,
 
-    /// print debug information.
-    ///
-    /// print the auto-generated rules, and where they are originated from.
-    /// print the shift/reduce conflicts, and the resolving process.
+    /// turns on all verbose options
     #[arg(short, long, default_value = "false")]
     pub verbose: bool,
+
+    /// verbose output for any shift/reduce or reduce/reduce conflicts.
+    ///
+    /// This option is for GLR parser.
+    /// Since such conflicts are not treated as errors, this option is useful for debugging.
+    #[arg(short = 'c', long, default_value = "false")]
+    pub verbose_conflict: bool,
+
+    /// verbose output for where the generated rule was originated from.
+    #[arg(short = 'g', long, default_value = "false")]
+    pub verbose_generated_source: bool,
+
+    /// verbose output for the conflict resolution process, by '%left' or '%right' directive.
+    #[arg(short = 'r', long, default_value = "false")]
+    pub verbose_conflict_resolve: bool,
 }

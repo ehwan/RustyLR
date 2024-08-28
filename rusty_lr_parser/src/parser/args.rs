@@ -155,7 +155,7 @@ pub struct RuleLineArgs {
     pub reduce_action: Option<TokenStream>,
     /// span of ':' or '|' in front of this rule line
     pub separator_span: Span,
-    /// user assigned id for this rule line
+    /// user assigned id for this rule line, currently not in use
     pub id: usize,
 }
 

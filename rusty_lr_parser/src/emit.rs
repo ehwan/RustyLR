@@ -33,8 +33,6 @@ impl Grammar {
 
         if self.glr {
             let multiple_path_error = format_ident!("{}MultiplePathError", start_rule_name);
-            let tree_typename = format_ident!("{}Tree", start_rule_name);
-            let tree_nonterminal_typename = format_ident!("{}TreeNonTerminal", start_rule_name);
             quote! {
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
@@ -48,12 +46,6 @@ impl Grammar {
                 /// type alias for `MultiplePathError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #multiple_path_error = #module_prefix::glr::MultiplePathError<#token_typename, #enum_name>;
-                /// type alias for `Tree`
-                #[allow(non_camel_case_types,dead_code)]
-                pub type #tree_typename = #module_prefix::glr::Tree0;
-                /// type alias for `TreeNonTerminal`
-                #[allow(non_camel_case_types,dead_code)]
-                pub type #tree_nonterminal_typename = #module_prefix::glr::TreeNonTerminal0;
             }
         } else {
             quote! {
@@ -847,16 +839,13 @@ impl Grammar {
         let rule_typename = format_ident!("{}Rule", self.start_rule_name);
         let state_typename = format_ident!("{}State", self.start_rule_name);
         let parser_struct_name = format_ident!("{}Parser", self.start_rule_name);
-        let node_struct_name = format_ident!("{}Node", self.start_rule_name);
         let node_enum_name = format_ident!("{}NodeEnum", self.start_rule_name);
         let context_struct_name = format_ident!("{}Context", self.start_rule_name);
         let token_typename = &self.token_typename;
-        let tree0_typename = format_ident!("{}Tree", self.start_rule_name);
         let multiple_path_error_typename =
             format_ident!("{}MultiplePathError", self.start_rule_name);
         let invalid_terminal_error_typename =
             format_ident!("{}InvalidTerminalError", self.start_rule_name);
-        // let tree0_nonterminal_typename = format_ident!("{}TreeNonTerminal", self.start_rule_name);
 
         // =====================================================================
         // =========================Writing Parser==============================
@@ -889,23 +878,12 @@ impl Grammar {
             let rules = self.rules.get(name).unwrap();
             for (rule_local_id, rule) in rules.rule_lines.iter().enumerate() {
                 let mut extract_data_from_node_enum = TokenStream::new();
-                for (token_idx, token) in rule.tokens.iter().enumerate().rev() {
-                    let tree_token_ident = format_ident!("__rustylr_tree_token_{}", token_idx);
+                for token in rule.tokens.iter() {
                     if self.terminals.contains_key(&token.token) {
                         match &token.mapto {
                             Some(mapto) => {
                                 extract_data_from_node_enum.extend(quote! {
-                                    let (__rustylr_data,#tree_token_ident) = match std::rc::Rc::try_unwrap(__rustylr_node) {
-                                        Ok(node) => {
-                                            __rustylr_node = node.parent.unwrap();
-                                            (node.data.unwrap(), node.tree.unwrap().to_tree0())
-                                        }
-                                        Err(rc_node) => {
-                                            __rustylr_node = std::rc::Rc::clone(rc_node.parent.as_ref().unwrap());
-                                            (rc_node.data.as_ref().unwrap().clone(), rc_node.tree.as_ref().unwrap().to_tree0())
-                                        }
-                                    };
-                                    let mut #mapto = if let #node_enum_name::#terms_enum_name(#mapto) = __rustylr_data {
+                                    let mut #mapto = if let #node_enum_name::#terms_enum_name(#mapto) = __rustylr_args.pop().unwrap() {
                                         #mapto
                                     } else {
                                         unreachable!()
@@ -914,16 +892,7 @@ impl Grammar {
                             }
                             None => {
                                 extract_data_from_node_enum.extend(quote! {
-                                    let #tree_token_ident = match std::rc::Rc::try_unwrap(__rustylr_node) {
-                                        Ok(node) => {
-                                            __rustylr_node = node.parent.unwrap();
-                                            node.tree.unwrap().to_tree0()
-                                        }
-                                        Err(rc_node) => {
-                                            __rustylr_node = std::rc::Rc::clone(rc_node.parent.as_ref().unwrap());
-                                            rc_node.tree.as_ref().unwrap().to_tree0()
-                                        }
-                                    };
+                                    __rustylr_args.pop();
                                 });
                             }
                         }
@@ -935,73 +904,31 @@ impl Grammar {
 
                         match &token.mapto {
                             Some(mapto) => {
-                                let ruleid_mapto = format_ident!("{}_rule", mapto);
                                 extract_data_from_node_enum.extend(quote! {
-                                    let (__rustylr_data,#tree_token_ident) = match std::rc::Rc::try_unwrap(__rustylr_node) {
-                                        Ok(node) => {
-                                            __rustylr_node = node.parent.unwrap();
-                                            (node.data.unwrap(), node.tree.unwrap().to_tree0())
-                                        }
-                                        Err(rc_node) => {
-                                            __rustylr_node = std::rc::Rc::clone(rc_node.parent.as_ref().unwrap());
-                                            (rc_node.data.as_ref().unwrap().clone(), rc_node.tree.as_ref().unwrap().to_tree0())
-                                        }
-                                    };
-                                    let mut #mapto = if let #node_enum_name::#variant_name(#mapto) = __rustylr_data {
+                                    let mut #mapto = if let #node_enum_name::#variant_name(#mapto) = __rustylr_args.pop().unwrap() {
                                         #mapto
                                     } else {
                                         unreachable!()
                                     };
-                                    let #ruleid_mapto = #tree_token_ident.rule_id();
                                 });
                             }
                             None => {
                                 extract_data_from_node_enum.extend(quote! {
-                                    let #tree_token_ident = match std::rc::Rc::try_unwrap(__rustylr_node) {
-                                        Ok(node) => {
-                                            __rustylr_node = node.parent.unwrap();
-                                            node.tree.unwrap().to_tree0()
-                                        }
-                                        Err(rc_node) => {
-                                            __rustylr_node = std::rc::Rc::clone(rc_node.parent.as_ref().unwrap());
-                                            rc_node.tree.as_ref().unwrap().to_tree0()
-                                        }
-                                    };
+                                    __rustylr_args.pop();
                                 });
                             }
                         }
                     } else {
                         extract_data_from_node_enum.extend(quote! {
-                            let #tree_token_ident = match std::rc::Rc::try_unwrap(__rustylr_node) {
-                                Ok(node) => {
-                                    __rustylr_node = node.parent.unwrap();
-                                    node.tree.unwrap().to_tree0()
-                                }
-                                Err(rc_node) => {
-                                    __rustylr_node = std::rc::Rc::clone(rc_node.parent.as_ref().unwrap());
-                                    rc_node.tree.as_ref().unwrap().to_tree0()
-                                }
-                            };
+                            __rustylr_args.pop();
                         });
                     }
                 }
-                let mut tree_initializer = TokenStream::new();
-                for (token_idx, _) in rule.tokens.iter().enumerate() {
-                    let tree_token_ident = format_ident!("__rustylr_tree_token_{}", token_idx);
-                    tree_initializer.extend(quote! {
-                        #tree_token_ident,
-                    });
-                }
-                extract_data_from_node_enum.extend(quote! {
-                    let __rustylr_tree = vec![#tree_initializer];
-                    let tree:&[#module_prefix::glr::Tree0] = &__rustylr_tree;
-                });
-
                 let reduce_fn_ident = format_ident!("reduce_{}_{}", name, rule_local_id);
 
                 case_streams.extend(quote! {
                     #rule_index => {
-                        Self::#reduce_fn_ident( node, lookahead, #user_data_var )?
+                        Self::#reduce_fn_ident( data_args, lookahead, #user_data_var )
                     }
                 });
 
@@ -1013,13 +940,13 @@ impl Grammar {
                     if let Some(action) = &rule.reduce_action {
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             fn #reduce_fn_ident(
-                                mut __rustylr_node: std::rc::Rc<Self>,
+                                mut __rustylr_args: Vec<#node_enum_name>,
                                 lookahead: &#token_typename,
                                 #user_data_parameter_def
-                            ) -> Result<(#node_enum_name,std::rc::Rc<Self>,Vec<#tree0_typename>), #reduce_error_typename> {
+                            ) -> Result<#node_enum_name, #reduce_error_typename> {
                                 #extract_data_from_node_enum
 
-                                Ok(( #node_enum_name::#name(#action), __rustylr_node, __rustylr_tree ))
+                                Ok( #node_enum_name::#name(#action) )
                             }
                         });
                     } else {
@@ -1042,13 +969,13 @@ impl Grammar {
                         if let Some(unique_mapto) = unique_mapto {
                             fn_reduce_for_each_rule_stream.extend(quote! {
                                 fn #reduce_fn_ident(
-                                    mut __rustylr_node: std::rc::Rc<Self>,
+                                    mut __rustylr_args: Vec<#node_enum_name>,
                                     lookahead: &#token_typename,
                                     #user_data_parameter_def
-                                ) -> Result<(#node_enum_name,std::rc::Rc<Self>, Vec<#tree0_typename>), #reduce_error_typename> {
+                                ) -> Result<#node_enum_name, #reduce_error_typename> {
                                     #extract_data_from_node_enum
 
-                                    Ok(( #node_enum_name::#name(#unique_mapto), __rustylr_node, __rustylr_tree ))
+                                    Ok( #node_enum_name::#name(#unique_mapto) )
                                 }
                             });
                         } else {
@@ -1065,26 +992,24 @@ impl Grammar {
                         fn_reduce_for_each_rule_stream.extend(quote! {
 
                             fn #reduce_fn_ident(
-                                mut __rustylr_node: std::rc::Rc<Self>,
+                                mut __rustylr_args: Vec<#node_enum_name>,
                                 lookahead: &#token_typename,
                                 #user_data_parameter_def
-                            ) -> Result<(#node_enum_name,std::rc::Rc<Self>,Vec<#tree0_typename>), #reduce_error_typename> {
+                            ) -> Result<#node_enum_name, #reduce_error_typename> {
                                 #extract_data_from_node_enum
                                 #action
 
-                                Ok(( #node_enum_name::#name, __rustylr_node, __rustylr_tree ))
+                                Ok( #node_enum_name::#name )
                             }
                         });
                     } else {
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             fn #reduce_fn_ident(
-                                mut __rustylr_node: std::rc::Rc<Self>,
+                                __rustylr_args: Vec<#node_enum_name>,
                                 lookahead: &#token_typename,
                                 #user_data_parameter_def
-                            ) -> Result<(#node_enum_name,std::rc::Rc<Self>,Vec<#tree0_typename>), #reduce_error_typename> {
-                                #extract_data_from_node_enum
-
-                                Ok(( #node_enum_name::#name, __rustylr_node, __rustylr_tree ))
+                            ) -> Result<#node_enum_name, #reduce_error_typename> {
+                                Ok( #node_enum_name::#name )
                             }
                         });
                     }
@@ -1152,85 +1077,36 @@ impl Grammar {
             #enum_variants_stream
         }
 
-
-        /// Each node represents single state transition.
-        /// Either shifting one terminal or non-temrinal symbol.
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-        #derives_stream
-        pub struct #node_struct_name {
-            data: Option<#node_enum_name>,
-            state: usize,
-            parent: Option<std::rc::Rc<Self>>,
-            tree: Option<#module_prefix::glr::Tree1>,
-        }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
-        impl #node_struct_name {
+        impl #node_enum_name {
             #fn_reduce_for_each_rule_stream
         }
 
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-        impl #module_prefix::glr::node::Node for #node_struct_name {
+
+        #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types, unused_variables)]
+        impl #module_prefix::glr::NodeData for #node_enum_name {
             type Term = #token_typename;
             type NonTerm = #nonterminals_enum_name;
             type ReduceActionError = #reduce_error_typename;
             type UserData = #user_data_typename;
 
-            fn state(&self) -> usize {
-                self.state
+            fn new_term(term: #token_typename) -> Self {
+                #node_enum_name::#terms_enum_name(term)
             }
-            fn set_state(&mut self, state: usize) {
-                self.state = state;
-            }
-            fn parent(&self) -> Option<&std::rc::Rc<Self>> {
-                self.parent.as_ref()
-            }
-
-            fn make_term_children(parent: std::rc::Rc<Self>, state: usize, term: #token_typename) -> Self {
-                Self {
-                    data: Some(#node_enum_name::#terms_enum_name(term)),
-                    state,
-                    parent: Some(parent),
-                    tree: Some(#module_prefix::glr::Tree1::Terminal),
-                }
-            }
-            fn reduce(
-                node: std::rc::Rc<Self>,
+            fn new_nonterm(
                 rule_index: usize,
-                rule_id: usize,
+                data_args: Vec<Self>,
                 lookahead: &Self::Term,
-                data: &mut #user_data_typename,
-            ) -> Result<Self, #reduce_error_typename> {
-                let (data, parent, tree) = match rule_index {
+                data: &mut Self::UserData,
+            ) -> Result<Self, Self::ReduceActionError> {
+                match rule_index {
                     #case_streams
                     _ => {
                         unreachable!( "Invalid Rule: {}", rule_index );
                     }
-                };
-
-
-                Ok(
-                    Self {
-                        data: Some(data),
-                        state: 0,
-                        parent: Some(parent),
-                        tree: Some(
-                            #module_prefix::glr::Tree1::NonTerminal(
-                                #module_prefix::glr::TreeNonTerminal1 {
-                                    rule: rule_index,
-                                    ruleid: rule_id,
-                                    tokens: tree,
-                                }
-                            )
-                        ),
-                    }
-                )
-            }
-
-            fn tree(&self) -> Option<&#module_prefix::glr::Tree1> {
-                self.tree.as_ref()
+                }
             }
         }
-
 
 
         /// Context is holding multiple nodes, that represents current state of parser.
@@ -1239,7 +1115,7 @@ impl Grammar {
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         #derives_stream
         pub struct #context_struct_name {
-            pub current_nodes: #module_prefix::glr::node::NodeSet<#node_struct_name>,
+            pub current_nodes: #module_prefix::glr::node::NodeSet<#node_enum_name>,
         }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
         impl #context_struct_name {
@@ -1247,12 +1123,7 @@ impl Grammar {
                 let mut nodeset = #module_prefix::glr::node::NodeSet::new();
                 nodeset.nodes.push(
                     std::rc::Rc::new(
-                        #node_struct_name {
-                            data: None,
-                            state: 0,
-                            parent: None,
-                            tree: None,
-                        }
+                        #module_prefix::glr::Node::new_root()
                     )
                 );
                 Self {
@@ -1271,16 +1142,16 @@ impl Grammar {
             }
         }
         impl #module_prefix::glr::Context for #context_struct_name {
-            type Node = #node_struct_name;
+            type Data = #node_enum_name;
 
-            fn take_current_nodes(&mut self) -> #module_prefix::glr::node::NodeSet<#node_struct_name> {
+            fn take_current_nodes(&mut self) -> #module_prefix::glr::node::NodeSet<#node_enum_name> {
                 std::mem::take( &mut self.current_nodes )
             }
             fn is_empty(&self) -> bool {
                 self.current_nodes.is_empty()
             }
 
-            fn get_current_nodes_mut(&mut self) -> &mut #module_prefix::glr::node::NodeSet<#node_struct_name> {
+            fn get_current_nodes_mut(&mut self) -> &mut #module_prefix::glr::node::NodeSet<#node_enum_name> {
                 &mut self.current_nodes
             }
         }

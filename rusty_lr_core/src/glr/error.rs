@@ -81,7 +81,6 @@ pub enum TerminalOrProductionRule<Term, NonTerm> {
 #[derive(Debug)]
 pub struct SinglePath<Term, NonTerm> {
     pub rule: NonTerm,
-    pub ruleid: usize,
     pub tokens: Vec<TerminalOrProductionRule<Term, NonTerm>>,
 }
 impl<Term, NonTerm> SinglePath<Term, NonTerm> {
@@ -116,7 +115,6 @@ impl<Term, NonTerm> SinglePath<Term, NonTerm> {
                 }
                 SinglePath {
                     rule: rule.name.clone(),
-                    ruleid: rule.id,
                     tokens,
                 }
             }
@@ -125,13 +123,11 @@ impl<Term, NonTerm> SinglePath<Term, NonTerm> {
 }
 impl<Term: Display, NonTerm: Display> Display for SinglePath<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{} (ID: %{}) -> ", self.rule, self.ruleid)?;
+        writeln!(f, "{} -> ", self.rule)?;
         for (idx, token) in self.tokens.iter().enumerate() {
             match token {
                 TerminalOrProductionRule::Terminal(term) => write!(f, "\t{}", term)?,
-                TerminalOrProductionRule::ProductionRule(rule) => {
-                    write!(f, "\t{} / ID: %{}", rule, rule.id)?
-                }
+                TerminalOrProductionRule::ProductionRule(rule) => write!(f, "\t{}", rule)?,
             }
             if idx < self.tokens.len() - 1 {
                 writeln!(f)?;
