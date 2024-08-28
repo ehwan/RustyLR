@@ -9,6 +9,7 @@ use crate::Token;
 
 use super::Context;
 use super::Parser;
+use super::Stack;
 
 /// Error type for feed(), when invalid terminal is feeded
 #[derive(Debug)]
@@ -42,14 +43,14 @@ impl<Term> InvalidTerminalError<Term> {
     /// This trace back on the state stack, and fetch the ruleset of each state.
     /// Each ruleset in the returned `Vec` contains every rule that the state was trying to parse, that is, only the rules with shifted > 0.
     /// 0'th index is the latest, that is, the last element of `Vec` will hold the initial state's ruleset.
-    pub fn backtrace<NonTerm>(
-        parser: &impl Parser<Term = Term, NonTerm = NonTerm>,
-        context: &impl Context<Term = Term>,
+    pub fn backtrace<S: Stack<Term = Term>>(
+        parser: &impl Parser<Term = S::Term, NonTerm = S::NonTerm>,
+        context: &Context<S>,
     ) -> Vec<BTreeSet<ShiftedRuleRef>>
     where
-        NonTerm: PartialEq,
+        S::NonTerm: PartialEq,
     {
-        let state_stack = context.get_state_stack();
+        let state_stack = &context.state_stack;
         let rules = parser.get_rules();
         let states = parser.get_states();
         let mut backtrace = Vec::with_capacity(state_stack.len());
@@ -132,14 +133,14 @@ impl<Term> InvalidTerminalError<Term> {
     }
 
     /// Generate long, detailed error message.
-    pub fn long_message<NonTerm>(
+    pub fn long_message<S: Stack<Term = Term>>(
         &self,
-        parser: &impl Parser<Term = Term, NonTerm = NonTerm>,
-        context: &impl Context<Term = Term>,
+        parser: &impl Parser<Term = S::Term, NonTerm = S::NonTerm>,
+        context: &Context<S>,
     ) -> String
     where
         Term: Display + Hash + Eq,
-        NonTerm: Display + PartialEq,
+        S::NonTerm: Display + PartialEq,
     {
         let rules = parser.get_rules();
         let mut message = String::new();
@@ -202,15 +203,15 @@ impl<Term: Display + Debug + Hash + Eq, ReduceActionError: std::error::Error> st
 
 impl<Term, ReduceActionError> ParseError<Term, ReduceActionError> {
     /// Generate long, detailed error message.
-    pub fn long_message<NonTerm>(
+    pub fn long_message<S: Stack<Term = Term, ReduceActionError = ReduceActionError>>(
         &self,
-        parser: &impl Parser<Term = Term, NonTerm = NonTerm>,
-        context: &impl Context<Term = Term, ReduceActionError = ReduceActionError>,
+        parser: &impl Parser<Term = S::Term, NonTerm = S::NonTerm>,
+        context: &Context<S>,
     ) -> String
     where
         Term: Display + Hash + Eq,
         ReduceActionError: Display,
-        NonTerm: Display + PartialEq,
+        S::NonTerm: Display + PartialEq,
     {
         match self {
             ParseError::InvalidTerminal(err) => err.long_message(parser, context),

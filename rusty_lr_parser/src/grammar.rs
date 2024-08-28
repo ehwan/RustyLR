@@ -34,8 +34,6 @@ pub struct Grammar {
     /// %left or %right for terminals
     pub reduce_types: HashMap<Ident, rusty_lr_core::ReduceType>,
 
-    pub(crate) derives: Vec<TokenStream>,
-
     /// setted reduce types originated from
     pub reduce_types_origin: HashMap<Ident, (Span, Span)>,
     /// %err
@@ -193,7 +191,6 @@ impl Grammar {
             terminals: Default::default(),
             terminals_index: Default::default(),
             reduce_types: Default::default(),
-            derives: grammar_args.derives,
             reduce_types_origin: Default::default(),
             rules: Default::default(),
             nonterm_typenames: Default::default(),

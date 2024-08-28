@@ -75,7 +75,6 @@ macro_rules! punct(
 %token errortype Lexed::ErrorType(punct!('%'),Ident::new("id", Span::call_site()));
 %token moduleprefix Lexed::ModulePrefix(punct!('%'),Ident::new("id", Span::call_site()));
 %token glr Lexed::Glr(punct!('%'),Ident::new("id", Span::call_site()));
-%token derive Lexed::Derive(punct!('%'),Ident::new("id", Span::call_site()));
 
 %eof Lexed::Eof;
 
@@ -289,7 +288,7 @@ TokenDef((Ident, TokenStream)): token ident RustCode semicolon
 }
 ;
 
-RustCode(TokenStream): t=[^semicolon lparen-derive]+ {
+RustCode(TokenStream): t=[^semicolon lparen-glr]+ {
     let mut tokens = TokenStream::new();
     for token in t.into_iter() {
         token.append_to_stream(&mut tokens);
@@ -338,10 +337,6 @@ ModulePrefixDef((Span,TokenStream)): moduleprefix RustCode semicolon { (modulepr
 
 Glr: glr semicolon;
 
-DeriveDef(TokenStream): derive RustCode semicolon {
-    RustCode
-};
-
 GrammarLine : Rule { data.rules.push(Rule); }
 | TokenDef  { data.terminals.push(TokenDef); }
 | StartDef  { data.start_rule_name.push(StartDef); }
@@ -352,7 +347,6 @@ GrammarLine : Rule { data.rules.push(Rule); }
 | ErrorDef   { data.error_typename.push(ErrorDef); }
 | ModulePrefixDef { data.module_prefix.push(ModulePrefixDef); }
 | Glr { data.glr = true; }
-| DeriveDef { data.derives.push(DeriveDef); }
 ;
 
 Grammar: GrammarLine+;

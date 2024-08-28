@@ -31,13 +31,14 @@ impl Grammar {
         let reduce_error_typename = &self.error_typename;
         let parse_error_typename = format_ident!("{}ParseError", start_rule_name);
         let invalid_terminal_error = format_ident!("{}InvalidTerminalError", start_rule_name);
+        let context_struct_name = format_ident!("{}Context", start_rule_name);
 
         if self.glr {
             let multiple_path_error = format_ident!("{}MultiplePathError", start_rule_name);
-            let context_struct_name = format_ident!("{}Context", start_rule_name);
             let node_enum_name = format_ident!("{}NodeEnum", start_rule_name);
             quote! {
                 /// type alias for `Context`
+                #[allow(non_camel_case_types,dead_code)]
                 pub type #context_struct_name = #module_prefix::glr::Context<#node_enum_name>;
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
@@ -53,7 +54,11 @@ impl Grammar {
                 pub type #multiple_path_error = #module_prefix::glr::MultiplePathError<#token_typename, #enum_name>;
             }
         } else {
+            let stack_struct_name = format_ident!("{}Stack", start_rule_name);
             quote! {
+                /// type alias for `Context`
+                #[allow(non_camel_case_types,dead_code)]
+                pub type #context_struct_name = #module_prefix::lr::Context<#stack_struct_name>;
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #rule_typename = #module_prefix::ProductionRule<#token_typename, #enum_name>;
@@ -526,6 +531,7 @@ impl Grammar {
         let state_typename = format_ident!("{}State", self.start_rule_name);
         let parser_struct_name = format_ident!("{}Parser", self.start_rule_name);
         let context_struct_name = format_ident!("{}Context", self.start_rule_name);
+        let stack_struct_name = format_ident!("{}Stack", self.start_rule_name);
 
         // stack_name for each non-terminal
         let mut stack_names_by_nonterm = rusty_lr_core::HashMap::default();
@@ -710,18 +716,18 @@ impl Grammar {
 
         // TokenStream for <RuleType> of start rule
         // and pop from start rule stack
-        let (return_start_rule_typename, pop_from_start_rule_stack) = {
+        let (start_typename, pop_from_start_rule_stack) = {
             if let Some(start_typename) = self.nonterm_typenames.get(&self.start_rule_name) {
                 let start_rule_stack_name =
                     stack_names_by_nonterm.get(&self.start_rule_name).unwrap();
                 (
-                    quote! { -> #start_typename },
+                    start_typename.clone(),
                     quote! {
                         self.#start_rule_stack_name.pop().unwrap()
                     },
                 )
             } else {
-                (TokenStream::new(), TokenStream::new())
+                (quote! {()}, quote! {()})
             }
         };
 
@@ -738,59 +744,40 @@ impl Grammar {
             });
         }
 
-        let mut derives_stream = TokenStream::new();
-        for derive in &self.derives {
-            derives_stream.extend(quote! {
-                #derive,
-            });
-        }
-        derives_stream = if self.derives.is_empty() {
-            TokenStream::new()
-        } else {
-            quote! {
-                #[derive(#derives_stream)]
-            }
-        };
-
         Ok(quote! {
         /// struct that holds internal parser data,
         /// including data stack for each non-terminal,
         /// and state stack for DFA
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-        #derives_stream
-        pub struct #context_struct_name {
-            /// state stack, user must not modify this
-            pub state_stack: Vec<usize>,
+        pub struct #stack_struct_name {
             #stack_def_streams
         }
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
-        impl #context_struct_name {
-            pub fn new() -> Self {
-                Self {
-                    state_stack: vec![0],
-                    #stack_init_streams
-                }
-            }
-
+        impl #stack_struct_name {
             #fn_reduce_for_each_rule_stream
-
-            /// pop value from start rule
-            #[inline]
-            pub fn accept(&mut self) #return_start_rule_typename {
-                #pop_from_start_rule_stack
-            }
         }
-
-        impl #module_prefix::lr::Context for #context_struct_name {
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
+        impl #module_prefix::lr::Stack for #stack_struct_name {
             type Term = #token_typename;
+            type NonTerm = #nonterminals_enum_name;
             type ReduceActionError = #reduce_error_typename;
             type UserData = #user_data_typename;
 
+            type StartType = #start_typename;
+
+            fn new() -> Self {
+                Self {
+                    #stack_init_streams
+                }
+            }
+            fn push( &mut self, term: Self::Term ) {
+                self.#terms_stack_name.push(term);
+            }
             fn reduce(&mut self,
                 rustylr_macro_generated_ruleid__: usize,
-                data: &mut #user_data_typename,
-                lookahead: &#token_typename,
-            ) -> Result<(), #reduce_error_typename> {
+                data: &mut Self::UserData,
+                lookahead: &Self::Term,
+            ) -> Result<(), Self::ReduceActionError> {
                 match rustylr_macro_generated_ruleid__ {
                     #case_streams
                     _ => {
@@ -798,18 +785,11 @@ impl Grammar {
                     }
                 }
             }
-            fn push( &mut self, term: #token_typename ) {
-                self.#terms_stack_name.push(term);
-            }
 
-            fn get_state_stack(&self) -> &[usize] {
-                &self.state_stack
-            }
-            fn get_state_stack_mut(&mut self) -> &mut Vec<usize> {
-                &mut self.state_stack
+            fn pop_start(&mut self) -> Self::StartType {
+                #pop_from_start_rule_stack
             }
         }
-
 
         /// struct that holds parser data, DFA tables
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]

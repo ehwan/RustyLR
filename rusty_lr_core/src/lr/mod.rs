@@ -1,6 +1,7 @@
 pub(crate) mod context;
 pub(crate) mod error;
 pub(crate) mod parser;
+pub(crate) mod stack;
 pub(crate) mod state;
 
 use std::hash::Hash;
@@ -9,24 +10,25 @@ pub use context::Context;
 pub use error::InvalidTerminalError;
 pub use error::ParseError;
 pub use parser::Parser;
+pub use stack::Stack;
 pub use state::State;
 
 /// feed one terminal to parser, and update state & data stack
-pub fn feed<P: Parser, C: Context<Term = P::Term>>(
+pub fn feed<P: Parser, S: Stack<Term = P::Term, NonTerm = P::NonTerm>>(
     parser: &P,
-    context: &mut C,
+    context: &mut Context<S>,
     mut term: P::Term,
-    data: &mut C::UserData,
-) -> Result<(), ParseError<P::Term, C::ReduceActionError>>
+    data: &mut S::UserData,
+) -> Result<(), ParseError<P::Term, S::ReduceActionError>>
 where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq,
 {
     term = lookahead(parser, context, term, data)?;
-    let state = &parser.get_states()[*context.get_state_stack().last().unwrap()];
+    let state = &parser.get_states()[*context.state_stack.last().unwrap()];
     if let Some(next_state_id) = state.shift_goto_term(&term) {
-        context.get_state_stack_mut().push(next_state_id);
-        context.push(term);
+        context.state_stack.push(next_state_id);
+        context.data_stack.push(term);
         Ok(())
     } else {
         let error = InvalidTerminalError {
@@ -37,36 +39,37 @@ where
     }
 }
 /// give lookahead token to parser, and check if there is any reduce action
-fn lookahead<P: Parser, C: Context<Term = P::Term>>(
+fn lookahead<P: Parser, S: Stack<Term = P::Term, NonTerm = P::NonTerm>>(
     parser: &P,
-    context: &mut C,
+    context: &mut Context<S>,
     term: P::Term,
-    data: &mut C::UserData,
-) -> Result<P::Term, ParseError<P::Term, C::ReduceActionError>>
+    data: &mut S::UserData,
+) -> Result<P::Term, ParseError<P::Term, S::ReduceActionError>>
 where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq,
 {
     if let Some(reduce_rule) =
-        parser.get_states()[*context.get_state_stack().last().unwrap()].reduce(&term)
+        parser.get_states()[*context.state_stack.last().unwrap()].reduce(&term)
     {
         let rule = &parser.get_rules()[reduce_rule];
         {
-            let new_len = context.get_state_stack().len() - rule.rule.len();
-            context.get_state_stack_mut().truncate(new_len);
+            let new_len = context.state_stack.len() - rule.rule.len();
+            context.state_stack.truncate(new_len);
         }
         context
+            .data_stack
             .reduce(reduce_rule, data, &term)
             .map_err(ParseError::ReduceAction)?;
-        if let Some(next_state_id) = parser.get_states()[*context.get_state_stack().last().unwrap()]
-            .shift_goto_nonterm(&rule.name)
+        if let Some(next_state_id) =
+            parser.get_states()[*context.state_stack.last().unwrap()].shift_goto_nonterm(&rule.name)
         {
-            context.get_state_stack_mut().push(next_state_id);
+            context.state_stack.push(next_state_id);
             lookahead(parser, context, term, data)
         } else {
             Err(ParseError::InvalidTerminal(InvalidTerminalError {
                 term,
-                expected: parser.get_states()[*context.get_state_stack().last().unwrap()]
+                expected: parser.get_states()[*context.state_stack.last().unwrap()]
                     .expected()
                     .into_iter()
                     .cloned()

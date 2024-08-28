@@ -6,6 +6,7 @@ use super::{MultiplePathError, NodeData, Parser};
 
 /// Context trait for GLR parser.
 /// This handles the divergence and merging of the parser.
+#[derive(Debug)]
 pub struct Context<Data> {
     pub current_nodes: Vec<Rc<Node<Data>>>,
 }
