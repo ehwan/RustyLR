@@ -34,24 +34,26 @@ where
     P::NonTerm: Hash + Eq + Clone,
 {
     let current_nodes = std::mem::take(&mut context.current_nodes);
-    let mut reduce_errors = Vec::new();
-    let mut states_list = Vec::with_capacity(current_nodes.len());
+    context.current_nodes.reserve(current_nodes.len());
+    context.reduce_errors.clear();
+    context.state_list.clear();
+    context.state_list.reserve(current_nodes.len());
     for node in current_nodes.into_iter() {
-        states_list.push(node.state);
-        feed_impl(parser, node, context, &term, userdata, &mut reduce_errors);
+        context.state_list.push(node.state);
+        feed_impl(parser, node, context, &term, userdata);
     }
     if context.current_nodes.is_empty() {
-        let mut expected = parser.get_states()[states_list[0]].expected();
-        for state in states_list.into_iter().skip(1) {
+        let mut expected = parser.get_states()[context.state_list[0]].expected();
+        for state in context.state_list.iter().skip(1) {
             expected = expected
-                .union(&parser.get_states()[state].expected())
+                .union(&parser.get_states()[*state].expected())
                 .cloned()
                 .collect();
         }
         Err(InvalidTerminalError {
             term,
             expected: expected.into_iter().cloned().collect(),
-            reduce_errors,
+            reduce_errors: std::mem::take(&mut context.reduce_errors),
         })
     } else {
         Ok(())
@@ -64,7 +66,6 @@ fn feed_impl<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + C
     context: &mut Context<Data>,
     term: &P::Term,
     userdata: &mut Data::UserData,
-    reduce_errors: &mut Vec<Data::ReduceActionError>,
 ) where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
@@ -79,7 +80,7 @@ fn feed_impl<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + C
         context.current_nodes.push(Rc::new(new_node));
     }
 
-    lookahead_impl(parser, node, context, term, userdata, reduce_errors);
+    lookahead_impl(parser, node, context, term, userdata);
 }
 
 /// from current node, get the last n nodes and create new non-terminal node
@@ -132,7 +133,6 @@ fn lookahead_impl<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm
     context: &mut Context<Data>,
     term: &P::Term,
     userdata: &mut Data::UserData,
-    reduce_errors: &mut Vec<Data::ReduceActionError>,
 ) where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
@@ -152,18 +152,11 @@ fn lookahead_impl<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm
                             state: nonterm_shift_state,
                         };
 
-                        feed_impl(
-                            parser,
-                            Rc::new(new_node),
-                            context,
-                            term,
-                            userdata,
-                            reduce_errors,
-                        );
+                        feed_impl(parser, Rc::new(new_node), context, term, userdata);
                     }
                 }
                 Err(err) => {
-                    reduce_errors.push(err);
+                    context.reduce_errors.push(err);
                 }
             }
         }
@@ -182,18 +175,11 @@ fn lookahead_impl<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm
                             state: nonterm_shift_state,
                         };
 
-                        feed_impl(
-                            parser,
-                            Rc::new(new_node),
-                            context,
-                            term,
-                            userdata,
-                            reduce_errors,
-                        );
+                        feed_impl(parser, Rc::new(new_node), context, term, userdata);
                     }
                 }
                 Err(err) => {
-                    reduce_errors.push(err);
+                    context.reduce_errors.push(err);
                 }
             }
         }

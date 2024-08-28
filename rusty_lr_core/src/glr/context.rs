@@ -7,14 +7,25 @@ use super::{MultiplePathError, NodeData, Parser};
 /// Context trait for GLR parser.
 /// This handles the divergence and merging of the parser.
 #[derive(Debug)]
-pub struct Context<Data> {
+pub struct Context<Data: NodeData> {
+    /// each element represents an end-point of diverged paths.
     pub current_nodes: Vec<Rc<Node<Data>>>,
+
+    /// For temporary use. store state of each node in `current_nodes`.
+    /// But we don't want to reallocate every `feed` call
+    pub(crate) state_list: Vec<usize>,
+
+    /// For temporary use. store reduce errors returned from `reduce_action`.
+    /// But we don't want to reallocate every `feed` call
+    pub(crate) reduce_errors: Vec<Data::ReduceActionError>,
 }
 
-impl<Data> Context<Data> {
+impl<Data: NodeData> Context<Data> {
     pub fn new() -> Self {
         Context {
             current_nodes: vec![Rc::new(Node::new_root())],
+            state_list: Vec::new(),
+            reduce_errors: Vec::new(),
         }
     }
 
