@@ -1,4 +1,5 @@
 use proc_macro2::Ident;
+use proc_macro2::Literal;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
@@ -33,7 +34,11 @@ impl Grammar {
 
         if self.glr {
             let multiple_path_error = format_ident!("{}MultiplePathError", start_rule_name);
+            let context_struct_name = format_ident!("{}Context", start_rule_name);
+            let node_enum_name = format_ident!("{}NodeEnum", start_rule_name);
             quote! {
+                /// type alias for `Context`
+                pub type #context_struct_name = #module_prefix::glr::Context<#node_enum_name>;
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #rule_typename = #module_prefix::ProductionRule<#token_typename, #enum_name>;
@@ -187,6 +192,23 @@ impl Grammar {
                 .collect();
             (rules, states)
         };
+        // get TokenStream of typename that can represent 'count'
+        fn integer_typename(count: usize) -> TokenStream {
+            if count < 256 {
+                quote! {u8}
+            } else if count < 65536 {
+                quote! {u16}
+            } else {
+                quote! {usize}
+            }
+        }
+
+        let rule_index_typename = integer_typename(rules.len());
+        let state_index_typename = integer_typename(states.len());
+        let terminal_index_typename = integer_typename(self.terminals_index.len());
+
+        let shift_typename =
+            integer_typename(rules.iter().map(|rule| rule.rule.len()).max().unwrap());
 
         // =====================================================================
         // ==================Writing Production Rules===========================
@@ -201,7 +223,7 @@ impl Grammar {
                 for token in rule.rule.into_iter() {
                     match token {
                         rlr::Token::Term(term) => {
-                            let term = term as u16;
+                            let term = Literal::usize_unsuffixed(term);
                             comma_separated_tokens
                                 .extend(quote! {#module_prefix::Token::Term(#term),});
                         }
@@ -219,7 +241,7 @@ impl Grammar {
                 rule_names_initializer.extend(quote! {
                     #nonterminals_enum_name::#name,
                 });
-                let id = rule.id;
+                let id = Literal::usize_unsuffixed(rule.id);
                 rule_id_initializer.extend(quote! {
                     #id,
                 });
@@ -237,7 +259,7 @@ impl Grammar {
         let mut ruleset_initializer = TokenStream::new();
         let mut ruleset_shifted0_initialiezr = TokenStream::new();
 
-        {
+        let (reduce_terminals_cache_count, ruleset0_cache_count) = {
             // when generating code for 'inserting tokens to reduce_map',
             // there could be multiple lookahead tokens for one rule
             // inserting all of them one by one is inefficient
@@ -251,8 +273,8 @@ impl Grammar {
                     let shift_goto_map_term: BTreeMap<_, _> =
                         state.shift_goto_map_term.into_iter().collect();
                     for (term, goto) in shift_goto_map_term.into_iter() {
-                        let term = term as u16;
-                        let goto = goto as u16;
+                        let term = Literal::usize_unsuffixed(term);
+                        let goto = Literal::usize_unsuffixed(goto);
                         term_state_comma_separated.extend(quote! {
                             (#term, #goto),
                         });
@@ -267,7 +289,7 @@ impl Grammar {
                     let shift_goto_map_nonterm: BTreeMap<_, _> =
                         state.shift_goto_map_nonterm.into_iter().collect();
                     for (nonterm, goto) in shift_goto_map_nonterm.into_iter() {
-                        let goto = goto as u16;
+                        let goto = Literal::usize_unsuffixed(goto);
                         nonterm_state_comma_separated.extend(quote! {
                             (#nonterminals_enum_name::#nonterm, #goto),
                         });
@@ -297,7 +319,7 @@ impl Grammar {
 
                             let mut init_terminals_comma_separated = TokenStream::new();
                             for term in tokens.into_iter() {
-                                let term = term as u16;
+                                let term = Literal::usize_unsuffixed(term);
                                 init_terminals_comma_separated.extend(quote! {
                                     #term,
                                 });
@@ -310,8 +332,8 @@ impl Grammar {
                             len
                         };
 
-                        let ruleid = ruleid as u16;
-                        let terminal_set_num = terminal_set_num as u16;
+                        let ruleid = Literal::usize_unsuffixed(ruleid);
+                        let terminal_set_num = Literal::usize_unsuffixed(terminal_set_num);
                         terminalsetid_rule_comma_separated.extend(quote! {
                             (#terminal_set_num, #ruleid),
                         });
@@ -329,8 +351,8 @@ impl Grammar {
                                 let ruleid = rule.rule;
                                 ruleset0.insert(ruleid);
                             } else {
-                                let ruleid = rule.rule as u16;
-                                let shifted = rule.shifted as u16;
+                                let ruleid = Literal::usize_unsuffixed(rule.rule);
+                                let shifted = Literal::usize_unsuffixed(rule.shifted);
                                 shifted_rules_comma_separated.extend(quote! {
                                     (#ruleid,#shifted),
                                 });
@@ -349,7 +371,7 @@ impl Grammar {
 
                         let mut comma_separated_ruleset0 = TokenStream::new();
                         for ruleid in ruleset0.into_iter() {
-                            let ruleid = ruleid as u16;
+                            let ruleid = Literal::usize_unsuffixed(ruleid);
                             comma_separated_ruleset0.extend(quote! {
                                 #ruleid,
                             });
@@ -365,12 +387,14 @@ impl Grammar {
                     ruleset0_id
                 };
 
-                let ruleset0_id = ruleset0_id as u16;
+                let ruleset0_id = Literal::usize_unsuffixed(ruleset0_id);
                 ruleset_shifted0_initialiezr.extend(quote! {
                     #ruleset0_id,
                 });
             }
-        }
+
+            (reduce_terminals_map.len(), ruleset0_map.len())
+        };
         let init_reduce_map = if self.glr {
             quote! {
                 let mut reduce_map = #module_prefix::HashMap::default();
@@ -397,11 +421,22 @@ impl Grammar {
             }
         };
 
+        let rule_id_typename = integer_typename(
+            self.rules
+                .iter()
+                .map(|(_, rules)| rules.rule_lines.iter().map(|rule| rule.id).max().unwrap())
+                .max()
+                .unwrap()
+                + 1,
+        );
+        let reduce_terminals_cache_typename = integer_typename(reduce_terminals_cache_count);
+        let ruleset0_cache_typename = integer_typename(ruleset0_cache_count);
+
         Ok(quote! {
             let __rustylr_terminals = vec![#comma_separated_terminals];
-            const RUSTYLR_RULES_TOKENS: &[&[#module_prefix::Token<u16, #nonterminals_enum_name>]] = &[#tokens_initializer];
+            const RUSTYLR_RULES_TOKENS: &[&[#module_prefix::Token<#terminal_index_typename, #nonterminals_enum_name>]] = &[#tokens_initializer];
             const RUSTYLR_RULES_NAME: &[#nonterminals_enum_name] = &[#rule_names_initializer];
-            const RUSTYLR_RULES_ID: &[usize] = &[#rule_id_initializer];
+            const RUSTYLR_RULES_ID: &[#rule_id_typename] = &[#rule_id_initializer];
 
             let rules: Vec<#rule_typename> = RUSTYLR_RULES_NAME.iter().zip(
                 RUSTYLR_RULES_TOKENS.iter().zip(
@@ -419,18 +454,18 @@ impl Grammar {
                                 }
                             }
                         ).collect(),
-                        id: *id,
+                        id: *id as usize,
                     }
                 }
             ).collect();
 
-            const RUSTYLR_REDUCE_TERMINALS_CACHE: &[&[u16]] = &[#reduce_terminals_cache_initializer];
-            const RUSTYLR_RULESET_SHIFTED0_CACHE: &[&[u16]] = &[#ruleset_shifted0_cache_initializer];
-            const RUSTYLR_SHIFT_TERM_MAP: &[&[(u16, u16)]] = &[#shift_term_initializer];
-            const RUSTYLR_SHIFT_NONTERM_MAP: &[&[(#nonterminals_enum_name, u16)]] = &[#shift_nonterm_initializer];
-            const RUSTYLR_REDUCE_MAP: &[&[(u16, u16)]] = &[#reduce_initializer];
-            const RUSTYLR_RULESET_MAP: &[&[(u16,u16)]] = &[#ruleset_initializer];
-            const RUSTYLR_RULESET_SHIFTED0_MAP: &[u16] = &[#ruleset_shifted0_initialiezr];
+            const RUSTYLR_REDUCE_TERMINALS_CACHE: &[&[#terminal_index_typename]] = &[#reduce_terminals_cache_initializer];
+            const RUSTYLR_RULESET_SHIFTED0_CACHE: &[&[#rule_index_typename]] = &[#ruleset_shifted0_cache_initializer];
+            const RUSTYLR_SHIFT_TERM_MAP: &[&[(#terminal_index_typename, #state_index_typename)]] = &[#shift_term_initializer];
+            const RUSTYLR_SHIFT_NONTERM_MAP: &[&[(#nonterminals_enum_name, #state_index_typename)]] = &[#shift_nonterm_initializer];
+            const RUSTYLR_REDUCE_MAP: &[&[(#terminal_index_typename, #reduce_terminals_cache_typename)]] = &[#reduce_initializer];
+            const RUSTYLR_RULESET_MAP: &[&[(#rule_index_typename,#shift_typename)]] = &[#ruleset_initializer];
+            const RUSTYLR_RULESET_SHIFTED0_MAP: &[#ruleset0_cache_typename] = &[#ruleset_shifted0_initialiezr];
 
             let states:Vec<#state_typename> = RUSTYLR_SHIFT_TERM_MAP.iter().zip(
                 RUSTYLR_SHIFT_NONTERM_MAP.iter().zip(
@@ -839,11 +874,9 @@ impl Grammar {
         let rule_typename = format_ident!("{}Rule", self.start_rule_name);
         let state_typename = format_ident!("{}State", self.start_rule_name);
         let parser_struct_name = format_ident!("{}Parser", self.start_rule_name);
-        let node_enum_name = format_ident!("{}NodeEnum", self.start_rule_name);
         let context_struct_name = format_ident!("{}Context", self.start_rule_name);
+        let node_enum_name = format_ident!("{}NodeEnum", self.start_rule_name);
         let token_typename = &self.token_typename;
-        let multiple_path_error_typename =
-            format_ident!("{}MultiplePathError", self.start_rule_name);
         let invalid_terminal_error_typename =
             format_ident!("{}InvalidTerminalError", self.start_rule_name);
 
@@ -1019,33 +1052,15 @@ impl Grammar {
             }
         }
 
-        let mut derives_stream = TokenStream::new();
-        for derive in &self.derives {
-            derives_stream.extend(quote! {
-                #derive,
-            });
-        }
-        derives_stream = if self.derives.is_empty() {
-            TokenStream::new()
-        } else {
-            quote! {
-                #[derive(#derives_stream)]
-            }
-        };
-
         let (start_typename, start_extract) =
             if let Some(start_typename) = self.nonterm_typenames.get(&self.start_rule_name) {
                 let startname = &self.start_rule_name;
                 (
                     start_typename.clone(),
                     quote! {
-                        {
-                            let data_enum = std::rc::Rc::into_inner(node).unwrap().data.unwrap();
-                            if let #node_enum_name::#startname(start) = data_enum {
-                                start
-                            } else {
-                                unreachable!()
-                            }
+                        match self {
+                            #node_enum_name::#startname(start) => start,
+                            _ => unreachable!(),
                         }
                     },
                 )
@@ -1090,6 +1105,8 @@ impl Grammar {
             type ReduceActionError = #reduce_error_typename;
             type UserData = #user_data_typename;
 
+            type StartType = #start_typename;
+
             fn new_term(term: #token_typename) -> Self {
                 #node_enum_name::#terms_enum_name(term)
             }
@@ -1106,53 +1123,9 @@ impl Grammar {
                     }
                 }
             }
-        }
 
-
-        /// Context is holding multiple nodes, that represents current state of parser.
-        /// If there are multiple nodes, it means parser is in ambiguous state.
-        /// It must be resolved(merged) into single node by feeding more terminal symbols.
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-        #derives_stream
-        pub struct #context_struct_name {
-            pub current_nodes: #module_prefix::glr::node::NodeSet<#node_enum_name>,
-        }
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
-        impl #context_struct_name {
-            pub fn new() -> Self {
-                let mut nodeset = #module_prefix::glr::node::NodeSet::new();
-                nodeset.nodes.push(
-                    std::rc::Rc::new(
-                        #module_prefix::glr::Node::new_root()
-                    )
-                );
-                Self {
-                    current_nodes: nodeset,
-                }
-            }
-
-            /// pop value from start rule
-            #[inline]
-            pub fn accept(self, parser: &#parser_struct_name) -> Result<#start_typename,#multiple_path_error_typename> {
-                let node = self.current_nodes.accept(
-                    parser
-                )?;
-                let data = #start_extract;
-                Ok(data)
-            }
-        }
-        impl #module_prefix::glr::Context for #context_struct_name {
-            type Data = #node_enum_name;
-
-            fn take_current_nodes(&mut self) -> #module_prefix::glr::node::NodeSet<#node_enum_name> {
-                std::mem::take( &mut self.current_nodes )
-            }
-            fn is_empty(&self) -> bool {
-                self.current_nodes.is_empty()
-            }
-
-            fn get_current_nodes_mut(&mut self) -> &mut #module_prefix::glr::node::NodeSet<#node_enum_name> {
-                &mut self.current_nodes
+            fn into_start(self) -> Self::StartType {
+                #start_extract
             }
         }
 

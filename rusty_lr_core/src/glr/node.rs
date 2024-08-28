@@ -1,6 +1,6 @@
-use std::{fmt::Display, rc::Rc};
+use std::rc::Rc;
 
-use super::{MultiplePathError, Parser, Tree1};
+use super::Tree1;
 
 /// Trait for user-defined data in node.
 pub trait NodeData: Sized {
@@ -9,6 +9,8 @@ pub trait NodeData: Sized {
     type UserData;
     type ReduceActionError;
 
+    type StartType;
+
     fn new_term(term: Self::Term) -> Self;
     fn new_nonterm(
         rule_index: usize,
@@ -16,6 +18,9 @@ pub trait NodeData: Sized {
         lookahead: &Self::Term,
         userdata: &mut Self::UserData,
     ) -> Result<Self, Self::ReduceActionError>;
+
+    /// get data of start symbol
+    fn into_start(self) -> Self::StartType;
 }
 
 /// Node represents single shift action in GLR parser.
@@ -39,72 +44,6 @@ impl<Data> Node<Data> {
             tree: None,
             data: None,
             state: 0,
-        }
-    }
-}
-
-pub struct NodeSet<Data> {
-    /// Set of nodes.
-    /// Node is equal if their state-stack from the root is equal.
-    pub nodes: Vec<Rc<Node<Data>>>,
-}
-impl<Data> Default for NodeSet<Data> {
-    fn default() -> Self {
-        NodeSet::new()
-    }
-}
-
-impl<Data> NodeSet<Data> {
-    /// crate new empty NodeSet
-    pub fn new() -> Self {
-        NodeSet {
-            nodes: Default::default(),
-        }
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.nodes.is_empty()
-    }
-
-    pub fn accept<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        self,
-        parser: &P,
-    ) -> Result<Rc<Node<Data>>, MultiplePathError<Data::Term, Data::NonTerm>>
-    where
-        Data: NodeData,
-        Data::Term: Clone,
-        Data::NonTerm: Clone,
-    {
-        if self.nodes.len() == 1 {
-            let mut it = self.nodes.into_iter();
-            let eof_node = it.next().unwrap();
-            let eof_node = Rc::into_inner(eof_node).unwrap();
-            let node = eof_node.parent.unwrap();
-            Ok(node)
-        } else {
-            Err(MultiplePathError::from_tree1(
-                self.nodes
-                    .iter()
-                    .map(|node| node.parent.as_ref().unwrap().tree.as_ref().unwrap()),
-                parser,
-            ))
-        }
-    }
-
-    /// For debugging.
-    /// Print last n tokens for every node in this set.
-    pub fn backtrace<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
-        token_count: usize,
-        parser: &P,
-    ) where
-        Data: NodeData,
-        P::Term: Clone + Display,
-        P::NonTerm: Clone + Display,
-    {
-        for node in self.nodes.iter() {
-            super::backtrace(token_count, Rc::clone(node), parser);
-            println!();
         }
     }
 }

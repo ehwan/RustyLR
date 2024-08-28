@@ -11,7 +11,6 @@ pub use error::InvalidTerminalError;
 pub use error::MultiplePathError;
 pub use node::Node;
 pub use node::NodeData;
-pub use node::NodeSet;
 pub use parser::Parser;
 pub use state::State;
 pub use tree::Tree0;
@@ -24,13 +23,9 @@ use std::rc::Rc;
 
 /// feed one terminal to parser, and update state stack.
 /// For GLR parsing, this function will create multiple path if needed.
-pub fn feed<
-    P: Parser,
-    Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone,
-    C: Context<Data = Data>,
->(
+pub fn feed<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
     parser: &P,
-    context: &mut C,
+    context: &mut Context<Data>,
     term: P::Term,
     userdata: &mut Data::UserData,
 ) -> Result<(), InvalidTerminalError<P::Term, Data::ReduceActionError>>
@@ -38,14 +33,14 @@ where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
-    let current_nodes = context.take_current_nodes();
+    let current_nodes = std::mem::take(&mut context.current_nodes);
     let mut reduce_errors = Vec::new();
-    let mut states_list = Vec::with_capacity(current_nodes.nodes.len());
-    for node in current_nodes.nodes.into_iter() {
+    let mut states_list = Vec::with_capacity(current_nodes.len());
+    for node in current_nodes.into_iter() {
         states_list.push(node.state);
         feed_impl(parser, node, context, &term, userdata, &mut reduce_errors);
     }
-    if context.is_empty() {
+    if context.current_nodes.is_empty() {
         let mut expected = parser.get_states()[states_list[0]].expected();
         for state in states_list.into_iter().skip(1) {
             expected = expected
@@ -63,14 +58,10 @@ where
     }
 }
 /// feed one terminal to parser, and update state stack
-fn feed_impl<
-    P: Parser,
-    Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone,
-    C: Context<Data = Data>,
->(
+fn feed_impl<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
     parser: &P,
     node: Rc<Node<Data>>,
-    context: &mut C,
+    context: &mut Context<Data>,
     term: &P::Term,
     userdata: &mut Data::UserData,
     reduce_errors: &mut Vec<Data::ReduceActionError>,
@@ -85,10 +76,7 @@ fn feed_impl<
             data: Some(Data::new_term(term.clone())),
             state: next_state_id,
         };
-        context
-            .get_current_nodes_mut()
-            .nodes
-            .push(Rc::new(new_node));
+        context.current_nodes.push(Rc::new(new_node));
     }
 
     lookahead_impl(parser, node, context, term, userdata, reduce_errors);
@@ -138,14 +126,10 @@ fn clone_pop_nodes<
 }
 
 /// give lookahead token to parser, and check if there is any reduce action
-fn lookahead_impl<
-    P: Parser,
-    Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone,
-    C: Context<Data = Data>,
->(
+fn lookahead_impl<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
     parser: &P,
     node: Rc<Node<Data>>,
-    context: &mut C,
+    context: &mut Context<Data>,
     term: &P::Term,
     userdata: &mut Data::UserData,
     reduce_errors: &mut Vec<Data::ReduceActionError>,

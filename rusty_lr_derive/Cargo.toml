@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_derive"
-version = "1.15.0"
+version = "1.16.0"
 edition = "2021"
 license = "MIT"
 description = "proc-macro definitions for rusty_lr"
@@ -15,4 +15,4 @@ proc-macro = true
 [dependencies]
 proc-macro2 = "1.0.86"
 # rusty_lr_parser = { path = "../rusty_lr_parser" }
-rusty_lr_parser = "3.13.0"
+rusty_lr_parser = "3.14.0"

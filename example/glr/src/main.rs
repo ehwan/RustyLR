@@ -10,8 +10,8 @@ fn main() {
         println!("feed: {}", ch);
         match p.feed(&mut c, ch) {
             Ok(_) => {
-                println!("nodes: {}", c.current_nodes.nodes.len());
-                c.current_nodes.backtrace(8, &p);
+                println!("nodes: {}", c.current_nodes.len());
+                c.backtrace(8, &p);
             }
             Err(e) => {
                 println!("Error: {}", e);
@@ -22,7 +22,7 @@ fn main() {
     println!("feed eof");
     match p.feed(&mut c, '\0') {
         Ok(_) => {
-            println!("nodes: {}", c.current_nodes.nodes.len());
+            println!("nodes: {}", c.current_nodes.len());
         }
         Err(e) => {
             println!("Error: {}", e);
