@@ -169,70 +169,11 @@
 //! │     │ └─_space_Star1
 //! │     │   └─_space_Plus0
 //! │     │     ├─_space_Plus0
-//! │     │     │ └─' '
-//! │     │     └─' '
-//! │     ├─_Digit_Plus3
-//! │     │ ├─_Digit_Plus3
-//! │     │ │ └─Digit
-//! │     │ │   └─_TerminalSet2
-//! │     │ │     └─'2'
-//! │     │ └─Digit
-//! │     │   └─_TerminalSet2
-//! │     │     └─'0'
-//! │     └─WS0
-//! │       └─_space_Star1
-//! │         └─_space_Plus0
-//! │           └─' '
-//! ├─'*'
-//! ├─WS0
-//! │ └─_space_Star1
-//! │   └─_space_Plus0
-//! │     ├─_space_Plus0
-//! │     │ ├─_space_Plus0
-//! │     │ │ └─' '
-//! │     │ └─' '
-//! │     └─' '
-//! ├─'('
-//! ├─E
-//! │ └─A
-//! │   ├─A
-//! │   │ └─M
-//! │   │   └─P
-//! │   │     └─Number
-//! │   │       ├─WS0
-//! │   │       │ └─_space_Star1
-//! │   │       ├─_Digit_Plus3
-//! │   │       │ └─Digit
-//! │   │       │   └─_TerminalSet2
-//! │   │       │     └─'3'
-//! │   │       └─WS0
-//! │   │         └─_space_Star1
-//! │   │           └─_space_Plus0
-//! │   │             └─' '
-//! │   ├─'+'
-//! │   └─A
-//! │     └─M
-//! │       └─P
-//! │         └─Number
-//! │           ├─WS0
-//! │           │ └─_space_Star1
-//! │           │   └─_space_Plus0
-//! │           │     └─' '
-//! │           ├─_Digit_Plus3
-//! │           │ └─Digit
-//! │           │   └─_TerminalSet2
-//! │           │     └─'4'
-//! │           └─WS0
-//! │             └─_space_Star1
-//! │               └─_space_Plus0
-//! │                 └─' '
-//! ├─')'
-//! ├─_space_Plus0
-//! │ ├─_space_Plus0
-//! │ │ └─' '
-//! │ └─' '
-//! └─' '
+//! ... continue
 //! ```
+//!
+//! Note that default `Display` and `Debug` trait will print the whole tree recursively.
+//! If you want to limit the depth of the printed tree, you can use [`Tree::pretty_print()`] or [`TreeList::pretty_print()`] function with `max_level` parameter.
 //!
 //!
 //! ## GLR Parser

@@ -40,7 +40,7 @@ impl<S: Stack> Context<S> {
     }
 
     /// For debugging.
-    /// Get `TreeList` current context holds.
+    /// Get `TreeList` that current context holds.
     #[cfg(feature = "tree")]
     pub fn to_tree_list(&self) -> TreeList<S::Term, S::NonTerm>
     where
