@@ -13,6 +13,8 @@ For huge and complex grammars, it is recommended to use the [buildscipt](#integr
 #### `features` in `Cargo.toml`
  - `build` : Enable buildscript tools.
  - `fxhash` : In parser table, replace `std::collections::HashMap` with `FxHashMap` from [`rustc-hash`](https://github.com/rust-lang/rustc-hash).
+ - `tree` : Enable automatic Tree construction.
+    This feature should be used on debug purpose only, since it will consume much more memory and time.
 
 ### Example
 ```rust
@@ -125,6 +127,7 @@ println!("userdata: {}", userdata);
  - [Proc-macro](#proc-macro)
  - [Integrating with `build.rs`](#integrating-with-buildrs)
  - [Start Parsing](#start-parsing)
+ - [Syntax Tree](#syntax-tree)
  - [GLR Parser](#glr-parser)
  - [Syntax](#syntax)
 
@@ -232,6 +235,112 @@ for token in input_sequence {
     }
 }
 let start_symbol_value = context.accept();
+```
+
+## Syntax Tree
+With the `tree` feature, `feed()` function will automatically construct the parse tree.
+By calling `context.to_tree_list()`,
+you can get current syntax tree. Simply print the tree list with `Display` or `Debug` will give you the pretty-printed tree.
+
+```rust
+let parser = Parser::new();
+let mut context = parser.begin();
+/// feed tokens...
+println!( "{:?}", context.to_tree_list() ); // print tree list with `Debug` trait
+println!( "{}", context.to_tree_list() );   // print tree list with `Display` trait
+```
+
+```
+TreeList
+├─A
+│ └─M
+│   └─P
+│     └─Number
+│       ├─WS0
+│       │ └─_space_Star1
+│       │   └─_space_Plus0
+│       │     ├─_space_Plus0
+│       │     │ └─' '
+│       │     └─' '
+│       ├─_Digit_Plus3
+│       │ └─Digit
+│       │   └─_TerminalSet2
+│       │     └─'1'
+│       └─WS0
+│         └─_space_Star1
+│           └─_space_Plus0
+│             └─' '
+├─'+'
+├─M
+│ └─P
+│   └─Number
+│     ├─WS0
+│     │ └─_space_Star1
+│     │   └─_space_Plus0
+│     │     ├─_space_Plus0
+│     │     │ └─' '
+│     │     └─' '
+│     ├─_Digit_Plus3
+│     │ ├─_Digit_Plus3
+│     │ │ └─Digit
+│     │ │   └─_TerminalSet2
+│     │ │     └─'2'
+│     │ └─Digit
+│     │   └─_TerminalSet2
+│     │     └─'0'
+│     └─WS0
+│       └─_space_Star1
+│         └─_space_Plus0
+│           └─' '
+├─'*'
+├─WS0
+│ └─_space_Star1
+│   └─_space_Plus0
+│     ├─_space_Plus0
+│     │ ├─_space_Plus0
+│     │ │ └─' '
+│     │ └─' '
+│     └─' '
+├─'('
+├─E
+│ └─A
+│   ├─A
+│   │ └─M
+│   │   └─P
+│   │     └─Number
+│   │       ├─WS0
+│   │       │ └─_space_Star1
+│   │       ├─_Digit_Plus3
+│   │       │ └─Digit
+│   │       │   └─_TerminalSet2
+│   │       │     └─'3'
+│   │       └─WS0
+│   │         └─_space_Star1
+│   │           └─_space_Plus0
+│   │             └─' '
+│   ├─'+'
+│   └─A
+│     └─M
+│       └─P
+│         └─Number
+│           ├─WS0
+│           │ └─_space_Star1
+│           │   └─_space_Plus0
+│           │     └─' '
+│           ├─_Digit_Plus3
+│           │ └─Digit
+│           │   └─_TerminalSet2
+│           │     └─'4'
+│           └─WS0
+│             └─_space_Star1
+│               └─_space_Plus0
+│                 └─' '
+├─')'
+├─_space_Plus0
+│ ├─_space_Plus0
+│ │ └─' '
+│ └─' '
+└─' '
 ```
 
 ## GLR Parser

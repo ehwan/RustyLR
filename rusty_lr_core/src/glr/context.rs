@@ -1,12 +1,13 @@
-use std::fmt::Display;
 use std::rc::Rc;
 
 use super::Node;
-use super::{MultiplePathError, NodeData, Parser};
+use super::{MultiplePathError, NodeData};
+
+#[cfg(feature = "tree")]
+use crate::TreeList;
 
 /// Context trait for GLR parser.
 /// This handles the divergence and merging of the parser.
-#[derive(Debug)]
 pub struct Context<Data: NodeData> {
     /// each element represents an end-point of diverged paths.
     pub current_nodes: Vec<Rc<Node<Data>>>,
@@ -18,6 +19,10 @@ pub struct Context<Data: NodeData> {
     /// For temporary use. store reduce errors returned from `reduce_action`.
     /// But we don't want to reallocate every `feed` call
     pub(crate) reduce_errors: Vec<Data::ReduceActionError>,
+
+    /// For temporary use. store arguments for calling `reduce_action`.
+    /// But we don't want to reallocate every `feed` call
+    pub reduce_args: Vec<Data>,
 }
 
 impl<Data: NodeData> Context<Data> {
@@ -26,14 +31,12 @@ impl<Data: NodeData> Context<Data> {
             current_nodes: vec![Rc::new(Node::new_root())],
             state_list: Vec::new(),
             reduce_errors: Vec::new(),
+            reduce_args: Vec::new(),
         }
     }
 
     /// after feeding all tokens (include EOF), call this function to get result.
-    pub fn accept<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        self,
-        parser: &P,
-    ) -> Result<Data::StartType, MultiplePathError<Data::Term, Data::NonTerm>>
+    pub fn accept(self) -> Result<Data::StartType, MultiplePathError>
     where
         Data: NodeData,
         Data::Term: Clone,
@@ -54,29 +57,31 @@ impl<Data: NodeData> Context<Data> {
                 .unwrap();
             Ok(data.into_start())
         } else {
-            Err(MultiplePathError::from_tree1(
-                self.current_nodes
-                    .iter()
-                    .map(|node| node.parent.as_ref().unwrap().tree.as_ref().unwrap()),
-                parser,
-            ))
+            Err(MultiplePathError)
         }
     }
 
     /// For debugging.
-    /// Print last n tokens for every node in this set.
-    pub fn backtrace<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
-        token_count: usize,
-        parser: &P,
-    ) where
+    /// Get all token trees (from the root) for every diverged path.
+    #[cfg(feature = "tree")]
+    pub fn to_tree_lists(&self) -> Vec<TreeList<Data::Term, Data::NonTerm>>
+    where
         Data: NodeData,
-        P::Term: Clone + Display,
-        P::NonTerm: Clone + Display,
+        Data::Term: Clone,
+        Data::NonTerm: Clone,
     {
-        for node in self.current_nodes.iter() {
-            super::backtrace(token_count, Rc::clone(node), parser);
-            println!();
-        }
+        self.current_nodes
+            .iter()
+            .map(|node| {
+                let mut trees = Vec::new();
+                let mut current_node = Rc::clone(node);
+                while let Some(parent) = &current_node.parent {
+                    trees.push(current_node.to_tree().clone());
+                    current_node = Rc::clone(parent);
+                }
+                trees.reverse();
+                TreeList { trees }
+            })
+            .collect()
     }
 }

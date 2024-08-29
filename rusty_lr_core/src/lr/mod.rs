@@ -13,6 +13,9 @@ pub use parser::Parser;
 pub use stack::Stack;
 pub use state::State;
 
+#[cfg(feature = "tree")]
+use crate::Tree;
+
 /// feed one terminal to parser, and update state & data stack
 pub fn feed<P: Parser, S: Stack<Term = P::Term, NonTerm = P::NonTerm>>(
     parser: &P,
@@ -22,13 +25,18 @@ pub fn feed<P: Parser, S: Stack<Term = P::Term, NonTerm = P::NonTerm>>(
 ) -> Result<(), ParseError<P::Term, S::ReduceActionError>>
 where
     P::Term: Hash + Eq + Clone,
-    P::NonTerm: Hash + Eq,
+    P::NonTerm: Hash + Eq + Clone,
 {
     term = lookahead(parser, context, term, data)?;
     let state = &parser.get_states()[*context.state_stack.last().unwrap()];
     if let Some(next_state_id) = state.shift_goto_term(&term) {
         context.state_stack.push(next_state_id);
+
+        #[cfg(feature = "tree")]
+        context.tree_stack.push(Tree::new_terminal(term.clone()));
+
         context.data_stack.push(term);
+
         Ok(())
     } else {
         let error = InvalidTerminalError {
@@ -47,7 +55,7 @@ fn lookahead<P: Parser, S: Stack<Term = P::Term, NonTerm = P::NonTerm>>(
 ) -> Result<P::Term, ParseError<P::Term, S::ReduceActionError>>
 where
     P::Term: Hash + Eq + Clone,
-    P::NonTerm: Hash + Eq,
+    P::NonTerm: Hash + Eq + Clone,
 {
     if let Some(reduce_rule) =
         parser.get_states()[*context.state_stack.last().unwrap()].reduce(&term)
@@ -61,6 +69,21 @@ where
             .data_stack
             .reduce(reduce_rule, data, &term)
             .map_err(ParseError::ReduceAction)?;
+
+        #[cfg(feature = "tree")]
+        {
+            let mut children = Vec::new();
+            for _ in 0..rule.rule.len() {
+                let tree = context.tree_stack.pop().unwrap();
+                children.push(tree);
+            }
+            children.reverse();
+
+            context
+                .tree_stack
+                .push(Tree::new_nonterminal(rule.name.clone(), children));
+        }
+
         if let Some(next_state_id) =
             parser.get_states()[*context.state_stack.last().unwrap()].shift_goto_nonterm(&rule.name)
         {

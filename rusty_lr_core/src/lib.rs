@@ -7,6 +7,15 @@ pub(crate) mod hashmap;
 pub(crate) mod rule;
 pub(crate) mod token;
 
+#[cfg(feature = "tree")]
+pub(crate) mod tree;
+#[cfg(feature = "tree")]
+pub use tree::Tree;
+#[cfg(feature = "tree")]
+pub use tree::TreeList;
+#[cfg(feature = "tree")]
+pub use tree::TreeNonTerminal;
+
 /// module for build DFA tables from CFG
 #[cfg(feature = "builder")]
 pub mod builder;

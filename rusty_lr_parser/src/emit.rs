@@ -33,9 +33,31 @@ impl Grammar {
         let invalid_terminal_error = format_ident!("{}InvalidTerminalError", start_rule_name);
         let context_struct_name = format_ident!("{}Context", start_rule_name);
 
+        #[cfg(feature = "tree")]
+        let tree_typename = format_ident!("{}Tree", start_rule_name);
+        #[cfg(feature = "tree")]
+        let treelist_typename = format_ident!("{}TreeList", start_rule_name);
+        #[cfg(feature = "tree")]
+        let treenonterm_typename = format_ident!("{}TreeNonTerminal", start_rule_name);
+        #[cfg(feature = "tree")]
+        let tree_alias = quote! {
+            /// type alias for `Tree`
+            pub type #tree_typename = #module_prefix::Tree<#token_typename, #enum_name>;
+
+            /// type alias for `TreeNonTerminal`
+            pub type #treenonterm_typename = #module_prefix::TreeNonTerminal<#token_typename, #enum_name>;
+
+            /// type alias for `TreeList`
+            pub type #treelist_typename = #module_prefix::TreeList<#token_typename, #enum_name>;
+        };
+
+        #[cfg(not(feature = "tree"))]
+        let tree_alias = quote! {};
+
         if self.glr {
             let multiple_path_error = format_ident!("{}MultiplePathError", start_rule_name);
             let node_enum_name = format_ident!("{}NodeEnum", start_rule_name);
+
             quote! {
                 /// type alias for `Context`
                 #[allow(non_camel_case_types,dead_code)]
@@ -51,7 +73,9 @@ impl Grammar {
                 pub type #invalid_terminal_error = #module_prefix::glr::InvalidTerminalError<#token_typename, #reduce_error_typename>;
                 /// type alias for `MultiplePathError`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #multiple_path_error = #module_prefix::glr::MultiplePathError<#token_typename, #enum_name>;
+                pub type #multiple_path_error = #module_prefix::glr::MultiplePathError;
+
+                #tree_alias
             }
         } else {
             let stack_struct_name = format_ident!("{}Stack", start_rule_name);
@@ -71,6 +95,8 @@ impl Grammar {
                 /// type alias for `InvalidTerminalError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #invalid_terminal_error = #module_prefix::lr::InvalidTerminalError<#token_typename>;
+
+                #tree_alias
             }
         }
     }
@@ -941,7 +967,7 @@ impl Grammar {
 
                 case_streams.extend(quote! {
                     #rule_index => {
-                        Self::#reduce_fn_ident( data_args, lookahead, #user_data_var )
+                        Self::#reduce_fn_ident( &mut context.reduce_args, lookahead, #user_data_var )
                     }
                 });
 
@@ -953,7 +979,7 @@ impl Grammar {
                     if let Some(action) = &rule.reduce_action {
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             fn #reduce_fn_ident(
-                                mut __rustylr_args: Vec<#node_enum_name>,
+                                __rustylr_args: &mut Vec<#node_enum_name>,
                                 lookahead: &#token_typename,
                                 #user_data_parameter_def
                             ) -> Result<#node_enum_name, #reduce_error_typename> {
@@ -982,7 +1008,7 @@ impl Grammar {
                         if let Some(unique_mapto) = unique_mapto {
                             fn_reduce_for_each_rule_stream.extend(quote! {
                                 fn #reduce_fn_ident(
-                                    mut __rustylr_args: Vec<#node_enum_name>,
+                                    __rustylr_args: &mut Vec<#node_enum_name>,
                                     lookahead: &#token_typename,
                                     #user_data_parameter_def
                                 ) -> Result<#node_enum_name, #reduce_error_typename> {
@@ -1005,7 +1031,7 @@ impl Grammar {
                         fn_reduce_for_each_rule_stream.extend(quote! {
 
                             fn #reduce_fn_ident(
-                                mut __rustylr_args: Vec<#node_enum_name>,
+                                __rustylr_args: &mut Vec<#node_enum_name>,
                                 lookahead: &#token_typename,
                                 #user_data_parameter_def
                             ) -> Result<#node_enum_name, #reduce_error_typename> {
@@ -1018,10 +1044,11 @@ impl Grammar {
                     } else {
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             fn #reduce_fn_ident(
-                                __rustylr_args: Vec<#node_enum_name>,
+                                __rustylr_args: &mut Vec<#node_enum_name>,
                                 lookahead: &#token_typename,
                                 #user_data_parameter_def
                             ) -> Result<#node_enum_name, #reduce_error_typename> {
+                                __rustylr_args.clear();
                                 Ok( #node_enum_name::#name )
                             }
                         });
@@ -1092,7 +1119,7 @@ impl Grammar {
             }
             fn new_nonterm(
                 rule_index: usize,
-                data_args: Vec<Self>,
+                context: &mut #module_prefix::glr::Context<Self>,
                 lookahead: &Self::Term,
                 data: &mut Self::UserData,
             ) -> Result<Self, Self::ReduceActionError> {

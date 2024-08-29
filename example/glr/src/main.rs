@@ -11,7 +11,9 @@ fn main() {
         match p.feed(&mut c, ch) {
             Ok(_) => {
                 println!("nodes: {}", c.current_nodes.len());
-                c.backtrace(8, &p);
+                for tree_stream in c.to_tree_lists().into_iter() {
+                    println!("{}", tree_stream);
+                }
             }
             Err(e) => {
                 println!("Error: {}", e);
@@ -29,7 +31,7 @@ fn main() {
         }
     }
 
-    let result = match c.accept(&p) {
+    let result = match c.accept() {
         Ok(n) => n,
         Err(e) => {
             println!("Error: {}", e);

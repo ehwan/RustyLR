@@ -1,6 +1,5 @@
 use clap::Parser;
 
-use rusty_lr_buildscript;
 use std::fs::write;
 use std::process::Command;
 

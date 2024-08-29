@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr"
-version = "2.5.5"
+version = "2.6.0"
 edition = "2021"
 license = "MIT"
 description = "GLR, LR(1) and LALR(1) parser generator with custom reduce action"
@@ -10,9 +10,9 @@ keywords = ["parser", "bison", "lr", "glr", "compiler"]
 categories = ["parsing", "compilers", "parser-implementations"]
 
 [dependencies]
-rusty_lr_core = "2.9.0"
-rusty_lr_derive = "1.17.0"
-rusty_lr_buildscript = { version = "0.12.0", optional = true }
+rusty_lr_core = "2.10.0"
+rusty_lr_derive = "1.18.0"
+rusty_lr_buildscript = { version = "0.13.0", optional = true }
 # rusty_lr_core = { path = "../rusty_lr_core" }
 # rusty_lr_derive = { path = "../rusty_lr_derive" }
 # rusty_lr_buildscript = { path = "../rusty_lr_buildscript", optional = true }
@@ -22,6 +22,11 @@ default = []
 fxhash = ["rusty_lr_core/fxhash"]
 builder = ["rusty_lr_core/builder"]
 build = ["dep:rusty_lr_buildscript"]
+tree = [
+  "rusty_lr_core/tree",
+  "rusty_lr_derive/tree",
+  "rusty_lr_buildscript/tree",
+]
 # default = ["core", "derive"]
 # core = ["rusty_lr_core"]
 # derive = ["rusty_lr_derive"]

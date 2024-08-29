@@ -33,9 +33,6 @@ impl<Term: Display + Debug> std::error::Error for InvalidTerminalError<Term> {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         None
     }
-    fn description(&self) -> &str {
-        "Invalid terminal feeded"
-    }
 }
 
 impl<Term> InvalidTerminalError<Term> {
@@ -195,9 +192,6 @@ impl<Term: Display + Debug + Hash + Eq, ReduceActionError: std::error::Error> st
     }
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         None
-    }
-    fn description(&self) -> &str {
-        "Parse error"
     }
 }
 
