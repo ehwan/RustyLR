@@ -9,6 +9,7 @@ use rusty_lr_core::ReduceType;
 use crate::error::ParseError;
 use crate::grammar::Grammar;
 use crate::pattern::Pattern;
+use crate::pattern::PatternType;
 use crate::terminalset::TerminalSet;
 use crate::utils;
 
@@ -41,6 +42,15 @@ impl TerminalSetOrIdent {
     }
 }
 
+impl std::fmt::Display for TerminalSetOrIdent {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            TerminalSetOrIdent::Ident(ident) => write!(f, "{}", ident),
+            TerminalSetOrIdent::TerminalSet(terminal_set) => write!(f, "{}", terminal_set),
+        }
+    }
+}
+
 /// parsed arguments for pattern
 pub enum PatternArgs {
     Ident(Ident),
@@ -65,6 +75,33 @@ pub enum PatternArgs {
     Group(Vec<PatternArgs>, Span, Span),
 }
 
+impl std::fmt::Display for PatternArgs {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            PatternArgs::Ident(ident) => write!(f, "{}", ident),
+            PatternArgs::Plus(base, _) => write!(f, "{}+", base),
+            PatternArgs::Star(base, _) => write!(f, "{}*", base),
+            PatternArgs::Question(base, _) => write!(f, "{}?", base),
+            PatternArgs::Exclamation(base, _) => write!(f, "{}", base),
+            PatternArgs::TerminalSet(terminal_set) => write!(f, "{}", terminal_set),
+            PatternArgs::Lookaheads(base, terminal_set) => {
+                write!(f, "{}/{}", base, terminal_set)
+            }
+            PatternArgs::Group(group, _, _) => {
+                write!(
+                    f,
+                    "({})",
+                    group
+                        .iter()
+                        .map(|p| p.to_string())
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                )
+            }
+        }
+    }
+}
+
 impl PatternArgs {
     /// When converting to Pattern, if any exclamation mark `!` is present, put it in the most inner pattern.
     /// e.g. Pattern like `A+?!` will be converted to `A!+?`
@@ -75,40 +112,65 @@ impl PatternArgs {
         grammar: &Grammar,
         put_exclamation: bool,
     ) -> Result<Pattern, ParseError> {
+        let pretty_name = format!("{}", self);
         match self {
             PatternArgs::Ident(ident) => {
                 utils::check_reserved_name(&ident)?;
-                let pattern = Pattern::Ident(ident);
+                let pattern = Pattern {
+                    pattern_type: PatternType::Ident(ident),
+                    pretty_name: pretty_name.clone(),
+                };
                 if put_exclamation {
-                    Ok(Pattern::Exclamation(Box::new(pattern)))
+                    Ok(Pattern {
+                        pattern_type: PatternType::Exclamation(Box::new(pattern)),
+                        pretty_name,
+                    })
                 } else {
                     Ok(pattern)
                 }
             }
-            PatternArgs::Plus(pattern, _) => Ok(Pattern::Plus(Box::new(
-                pattern.into_pattern(grammar, put_exclamation)?,
-            ))),
-            PatternArgs::Star(pattern, _) => Ok(Pattern::Star(Box::new(
-                pattern.into_pattern(grammar, put_exclamation)?,
-            ))),
-            PatternArgs::Question(pattern, _) => Ok(Pattern::Question(Box::new(
-                pattern.into_pattern(grammar, put_exclamation)?,
-            ))),
+            PatternArgs::Plus(pattern, _) => Ok(Pattern {
+                pattern_type: PatternType::Plus(Box::new(
+                    pattern.into_pattern(grammar, put_exclamation)?,
+                )),
+                pretty_name,
+            }),
+            PatternArgs::Star(pattern, _) => Ok(Pattern {
+                pattern_type: PatternType::Star(Box::new(
+                    pattern.into_pattern(grammar, put_exclamation)?,
+                )),
+                pretty_name,
+            }),
+            PatternArgs::Question(pattern, _) => Ok(Pattern {
+                pattern_type: PatternType::Question(Box::new(
+                    pattern.into_pattern(grammar, put_exclamation)?,
+                )),
+                pretty_name,
+            }),
             PatternArgs::Exclamation(pattern, _) => pattern.into_pattern(grammar, true),
             PatternArgs::TerminalSet(terminal_set) => {
-                let pattern = Pattern::TerminalSet(terminal_set.to_terminal_set(grammar)?);
+                let pattern = Pattern {
+                    pattern_type: PatternType::TerminalSet(terminal_set.to_terminal_set(grammar)?),
+                    pretty_name: pretty_name.clone(),
+                };
                 if put_exclamation {
-                    Ok(Pattern::Exclamation(Box::new(pattern)))
+                    Ok(Pattern {
+                        pattern_type: PatternType::Exclamation(Box::new(pattern)),
+                        pretty_name,
+                    })
                 } else {
                     Ok(pattern)
                 }
             }
             PatternArgs::Lookaheads(pattern, terminalset) => {
                 let terminal_set = terminalset.to_terminal_set(grammar)?;
-                let pattern = Pattern::Lookaheads(
-                    Box::new(pattern.into_pattern(grammar, put_exclamation)?),
-                    terminal_set,
-                );
+                let pattern = Pattern {
+                    pattern_type: PatternType::Lookaheads(
+                        Box::new(pattern.into_pattern(grammar, put_exclamation)?),
+                        terminal_set,
+                    ),
+                    pretty_name,
+                };
                 Ok(pattern)
             }
             PatternArgs::Group(group, _, _) => {
@@ -123,7 +185,10 @@ impl PatternArgs {
                 for pattern in group.into_iter() {
                     patterns.push(pattern.into_pattern(grammar, put_exclamation)?);
                 }
-                Ok(Pattern::Group(patterns))
+                Ok(Pattern {
+                    pattern_type: PatternType::Group(patterns),
+                    pretty_name,
+                })
             }
         }
     }

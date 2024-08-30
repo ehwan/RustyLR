@@ -289,9 +289,13 @@ impl Grammar {
                 });
             }
 
-            grammar
-                .rules
-                .insert(rules.name.clone(), RuleLines { rule_lines });
+            grammar.rules.insert(
+                rules.name.clone(),
+                RuleLines {
+                    rule_lines,
+                    pretty_name: rules.name.to_string(),
+                },
+            );
         }
         // insert augmented rule
         grammar
@@ -320,6 +324,7 @@ impl Grammar {
                     lookaheads: None,
                     id: 0,
                 }],
+                pretty_name: utils::AUGMENTED_NAME.to_string(),
             },
         );
 

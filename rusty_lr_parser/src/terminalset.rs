@@ -13,6 +13,15 @@ pub enum TerminalSetItem {
     Range(Ident, Ident),
 }
 
+impl std::fmt::Display for TerminalSetItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            TerminalSetItem::Terminal(ident) => write!(f, "{}", ident),
+            TerminalSetItem::Range(first, last) => write!(f, "{}-{}", first, last),
+        }
+    }
+}
+
 impl TerminalSetItem {
     pub fn to_terminal_set(&self, grammar: &Grammar) -> Result<BTreeSet<Ident>, ParseError> {
         match self {
@@ -71,5 +80,21 @@ impl TerminalSet {
         // exclude eof on any case
         terminal_set.remove(&Ident::new(utils::EOF_NAME, Span::call_site()));
         Ok(terminal_set)
+    }
+}
+
+impl std::fmt::Display for TerminalSet {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "[")?;
+        if self.negate {
+            write!(f, "^")?;
+        }
+        for (i, item) in self.items.iter().enumerate() {
+            if i > 0 {
+                write!(f, ", ")?;
+            }
+            write!(f, "{}", item)?;
+        }
+        write!(f, "]")
     }
 }

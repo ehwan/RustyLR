@@ -117,7 +117,7 @@ impl Grammar {
                 #name,
             });
 
-            let name_str = name.to_string();
+            let name_str = &self.rules.get(name).unwrap().pretty_name;
             case_display.extend(quote! {
                 #enum_typename::#name=> write!(f, #name_str),
             });
@@ -126,12 +126,19 @@ impl Grammar {
         quote! {
             /// An enum that represents non-terminal symbols
             #[allow(non_camel_case_types)]
-            #[derive(Debug, Clone, Copy, std::hash::Hash, std::cmp::PartialEq, std::cmp::Eq, std::cmp::PartialOrd, std::cmp::Ord)]
+            #[derive(Clone, Copy, std::hash::Hash, std::cmp::PartialEq, std::cmp::Eq, std::cmp::PartialOrd, std::cmp::Ord)]
             pub enum #enum_typename {
                 #comma_separated_variants
             }
 
             impl std::fmt::Display for #enum_typename {
+                fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    match self {
+                        #case_display
+                    }
+                }
+            }
+            impl std::fmt::Debug for #enum_typename {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                     match self {
                         #case_display
@@ -153,42 +160,69 @@ impl Grammar {
         };
         let dfa = match dfa {
             Ok(dfa) => dfa,
-            Err(e) => match e {
-                BuildError::NoAugmented | BuildError::RuleNotFound(_) => {
-                    unreachable!("Unreachable grammar build error")
-                }
-                BuildError::ReduceReduceConflict {
-                    lookahead,
-                    rule1,
-                    rule2,
-                } => {
-                    return Err(Box::new(EmitError::ReduceReduceConflict {
-                        lookahead,
-                        rule1: (rule1, grammar.rules[rule1].0.clone()),
-                        rule2: (rule2, grammar.rules[rule2].0.clone()),
-                    }))
-                }
-                BuildError::ShiftReduceConflict {
-                    reduce,
-                    shift,
-                    term,
-                } => {
-                    let mut shift_rules = Vec::new();
-                    for (r, _) in shift.rules.into_iter() {
-                        let shifted_rule = ShiftedRule {
-                            rule: grammar.rules[r.rule].0.clone(),
-                            shifted: r.shifted,
-                        };
-                        shift_rules.push((r.rule, shifted_rule));
+            Err(e) => {
+                // to map production rule to its pretty name abbreviation
+                let term_mapper = |term: Ident| term.to_string();
+                let nonterm_mapper =
+                    |nonterm: Ident| self.rules.get(&nonterm).unwrap().pretty_name.clone();
+                match e {
+                    BuildError::NoAugmented | BuildError::RuleNotFound(_) => {
+                        unreachable!("Unreachable grammar build error")
                     }
-
-                    return Err(Box::new(EmitError::ShiftReduceConflict {
+                    BuildError::ReduceReduceConflict {
+                        lookahead,
+                        rule1,
+                        rule2,
+                    } => {
+                        return Err(Box::new(EmitError::ReduceReduceConflict {
+                            lookahead,
+                            rule1: (
+                                rule1,
+                                grammar.rules[rule1]
+                                    .0
+                                    .clone()
+                                    .map(term_mapper, nonterm_mapper),
+                            ),
+                            rule2: (
+                                rule2,
+                                grammar.rules[rule2]
+                                    .0
+                                    .clone()
+                                    .map(term_mapper, nonterm_mapper),
+                            ),
+                        }));
+                    }
+                    BuildError::ShiftReduceConflict {
+                        reduce,
+                        shift,
                         term,
-                        reduce_rule: (reduce, grammar.rules[reduce].0.clone()),
-                        shift_rules,
-                    }));
+                    } => {
+                        let mut shift_rules = Vec::new();
+                        for (r, _) in shift.rules.into_iter() {
+                            let shifted_rule = ShiftedRule {
+                                rule: grammar.rules[r.rule]
+                                    .0
+                                    .clone()
+                                    .map(term_mapper, nonterm_mapper),
+                                shifted: r.shifted,
+                            };
+                            shift_rules.push((r.rule, shifted_rule));
+                        }
+
+                        return Err(Box::new(EmitError::ShiftReduceConflict {
+                            term,
+                            reduce_rule: (
+                                reduce,
+                                grammar.rules[reduce]
+                                    .0
+                                    .clone()
+                                    .map(term_mapper, nonterm_mapper),
+                            ),
+                            shift_rules,
+                        }));
+                    }
                 }
-            },
+            }
         };
 
         let module_prefix = &self.module_prefix;

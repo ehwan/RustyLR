@@ -31,4 +31,8 @@ impl RuleLine {
 #[derive(Debug)]
 pub struct RuleLines {
     pub rule_lines: Vec<RuleLine>,
+
+    /// Name of auto generated rule are in the format of `__AutoRule ...`
+    /// So we need other abbreviation for auto generated rules.
+    pub pretty_name: String,
 }

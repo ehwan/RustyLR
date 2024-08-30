@@ -52,7 +52,7 @@ pub struct Builder {
 
     /// when `vebose` is on, print debug information about
     /// where the auto-generated rules are originated from.
-    verbose_generated_source: bool,
+    // verbose_generated_source: bool,
 
     /// when `vebose` is on, print debug information about
     /// any shift/reduce, reduce/reduce conflicts.
@@ -72,7 +72,7 @@ impl Builder {
         Self {
             input_file: None,
             lalr: false,
-            verbose_generated_source: false,
+            // verbose_generated_source: false,
             verbose_conflicts: false,
             verbose_conflicts_resolving: false,
             verbose_on_stderr: false,
@@ -102,7 +102,7 @@ impl Builder {
     /// when `vebose` is on, print debug information about
     /// where the auto-generated rules are originated from.
     pub fn verbose_generated_source(&mut self) -> &mut Self {
-        self.verbose_generated_source = true;
+        // self.verbose_generated_source = true;
         self
     }
 
@@ -166,17 +166,19 @@ impl Builder {
         let (rule_name, rules, rule) = grammar.get_rule_by_id(ruleid).expect("Rule not found");
         if let Some(origin_span) = grammar.generated_root_span.get(rule_name) {
             let origin_range = origin_span.0.byte_range().start..origin_span.1.byte_range().end;
-            labels.push(
-                Label::primary(fileid, origin_range)
-                    .with_message(format!("{}{} was generated here", prefix_str, rule_name)),
-            );
+            labels.push(Label::primary(fileid, origin_range).with_message(format!(
+                "{}{} was generated here",
+                prefix_str, rules.pretty_name
+            )));
         } else {
             let (rule_begin, rule_end) = rules.rule_lines[rule].span_pair();
             let rule_range = rule_begin.byte_range().start..rule_end.byte_range().end;
 
             labels.push(
-                Label::primary(fileid, rule_name.span().byte_range())
-                    .with_message(format!("{}{} was defined here", prefix_str, rule_name)),
+                Label::primary(fileid, rule_name.span().byte_range()).with_message(format!(
+                    "{}{} was defined here",
+                    prefix_str, rules.pretty_name
+                )),
             );
             labels.push(
                 Label::secondary(fileid, rule_range).with_message("in this line".to_string()),
@@ -736,63 +738,10 @@ impl Builder {
                 }
             };
 
-            // print infos about auto-generated rules
-            // where they are generated from
-            if self.verbose_generated_source {
-                let mut rules_on_same_root = BTreeMap::new();
-
-                // `generated_root_span` contains only auto-generated rules
-                for (rule_name, root_span) in grammar.generated_root_span.iter() {
-                    let start = root_span.0.byte_range().start;
-                    let end = root_span.1.byte_range().end;
-                    rules_on_same_root
-                        .entry((start, end))
-                        .or_insert_with(Vec::new)
-                        .push(rule_name);
-                }
-
-                for (root_range, rules) in rules_on_same_root.into_iter() {
-                    let mut rules_string = String::new();
-                    for rule_name in rules.into_iter() {
-                        let name_str = rule_name.to_string();
-                        let name_len = name_str.len();
-                        let front_padding = " ".repeat(name_len);
-                        let rule_lines = grammar.rules.get(rule_name).expect("Rule not found");
-
-                        for (idx, rule_line) in rule_lines.rule_lines.iter().enumerate() {
-                            let mut line_string = String::new();
-                            for (idx, token) in rule_line.tokens.iter().enumerate() {
-                                line_string.push_str(token.token.to_string().as_str());
-                                if idx < rule_line.tokens.len() - 1 {
-                                    line_string.push(' ');
-                                }
-                            }
-
-                            if idx == 0 {
-                                rules_string.push_str(
-                                    format!("\n{} -> {}", name_str, line_string).as_str(),
-                                );
-                            } else {
-                                rules_string.push_str(
-                                    format!("\n{}  | {}", front_padding, line_string).as_str(),
-                                );
-                            }
-                        }
-                        rules_string.push_str(format!("\n{}  ;", front_padding).as_str());
-                    }
-
-                    let message = format!("Auto-generated rules:{}", rules_string);
-                    let diag = Diagnostic::note()
-                        .with_message(message)
-                        .with_labels(vec![Label::primary(file_id, root_range.0..root_range.1)
-                            .with_message("was generated here")]);
-
-                    let writer = self.verbose_stream();
-                    let config = codespan_reporting::term::Config::default();
-                    term::emit(&mut writer.lock(), &config, &files, &diag)
-                        .expect("Failed to write to stderr");
-                }
-            }
+            // to map production rule to its pretty name abbreviation
+            let term_mapper = |term: Ident| term.to_string();
+            let nonterm_mapper =
+                |nonterm: Ident| grammar.rules.get(&nonterm).unwrap().pretty_name.clone();
 
             // print note about shift/reduce conflict resolved with `%left` or `%right`
             if self.verbose_conflicts_resolving {
@@ -833,11 +782,14 @@ impl Builder {
                             let mut message = format!(
                                 "Shift/Reduce conflict with token {} was resolved:\nReduce rule:\n\t>>> {}\nShift rules:",
                                 term,
-                                &builder.rules[*reduce_rule].0
+                                builder.rules[*reduce_rule].0.clone().map(term_mapper, nonterm_mapper)
                             );
                             for shifted_rule in shift_rules.iter() {
                                 let shifted_rule = ShiftedRule {
-                                    rule: builder.rules[shifted_rule.rule].0.clone(),
+                                    rule: builder.rules[shifted_rule.rule]
+                                        .0
+                                        .clone()
+                                        .map(term_mapper, nonterm_mapper),
                                     shifted: shifted_rule.shifted,
                                 };
                                 message.push_str(format!("\n\t>>> {}", shifted_rule).as_str());
@@ -929,7 +881,14 @@ impl Builder {
                     let mut reduce_source_inserted = BTreeSet::new();
                     for reduce_rule in reduce_rules.iter() {
                         message.push_str(
-                            format!("\n\t>>> {}", &builder.rules[*reduce_rule].0).as_str(),
+                            format!(
+                                "\n\t>>> {}",
+                                builder.rules[*reduce_rule]
+                                    .0
+                                    .clone()
+                                    .map(term_mapper, nonterm_mapper)
+                            )
+                            .as_str(),
                         );
                         let name = &builder.rules[*reduce_rule].0.name;
                         if !reduce_source_inserted.contains(name) {
@@ -982,7 +941,14 @@ impl Builder {
                     message.push_str("\nReduce rules:");
                     for reduce_rule in reduce_rules.iter() {
                         message.push_str(
-                            format!("\n\t>>> {}", &builder.rules[*reduce_rule].0).as_str(),
+                            format!(
+                                "\n\t>>> {}",
+                                builder.rules[*reduce_rule]
+                                    .0
+                                    .clone()
+                                    .map(term_mapper, nonterm_mapper)
+                            )
+                            .as_str(),
                         );
                         let name = &builder.rules[*reduce_rule].0.name;
                         if !reduce_source_inserted.contains(name) {
@@ -1001,7 +967,10 @@ impl Builder {
                     message.push_str("\nShift rules:");
                     for shifted_rule in shift_ruleset.into_iter() {
                         let shifted_rule_ = ShiftedRule {
-                            rule: builder.rules[shifted_rule.rule].0.clone(),
+                            rule: builder.rules[shifted_rule.rule]
+                                .0
+                                .clone()
+                                .map(term_mapper, nonterm_mapper),
                             shifted: shifted_rule.shifted,
                         };
                         message.push_str(format!("\n\t>>> {}", shifted_rule_).as_str());

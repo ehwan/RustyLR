@@ -13,7 +13,7 @@ use quote::quote;
 
 /// Some regex pattern
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
-pub enum Pattern {
+pub enum PatternType {
     Ident(Ident),
     Plus(Box<Pattern>),
     Star(Box<Pattern>),
@@ -23,6 +23,23 @@ pub enum Pattern {
     Lookaheads(Box<Pattern>, BTreeSet<Ident>),
     Group(Vec<Pattern>),
 }
+
+#[derive(Debug, Clone)]
+pub struct Pattern {
+    pub pattern_type: PatternType,
+    pub pretty_name: String,
+}
+impl std::hash::Hash for Pattern {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.pattern_type.hash(state);
+    }
+}
+impl std::cmp::PartialEq for Pattern {
+    fn eq(&self, other: &Self) -> bool {
+        self.pattern_type == other.pattern_type
+    }
+}
+impl std::cmp::Eq for Pattern {}
 
 impl Pattern {
     /// get rule for the pattern
@@ -41,9 +58,9 @@ impl Pattern {
         if let Some(existing) = grammar.pattern_map.get(self) {
             return Ok(existing.clone());
         }
-        match self {
-            Pattern::Ident(ident) => Ok(ident.clone()),
-            Pattern::Plus(pattern) => {
+        match &self.pattern_type {
+            PatternType::Ident(ident) => Ok(ident.clone()),
+            PatternType::Plus(pattern) => {
                 let base_rule = pattern.get_rule(grammar, root_span_pair)?;
                 let typename = self.typename(grammar);
 
@@ -98,6 +115,7 @@ impl Pattern {
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
+                        pretty_name: self.pretty_name.clone(),
                     };
                     grammar.rules.insert(new_ident.clone(), rule_lines);
                     grammar.rules_index.push(new_ident.clone());
@@ -142,6 +160,7 @@ impl Pattern {
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
+                        pretty_name: self.pretty_name.clone(),
                     };
                     grammar.rules.insert(new_ident.clone(), rule_lines);
                     grammar.rules_index.push(new_ident.clone());
@@ -149,8 +168,11 @@ impl Pattern {
 
                 Ok(new_ident)
             }
-            Pattern::Star(pattern) => {
-                let plus_pattern = Pattern::Plus(pattern.clone());
+            PatternType::Star(pattern) => {
+                let plus_pattern = Pattern {
+                    pattern_type: PatternType::Plus(pattern.clone()),
+                    pretty_name: format!("{}+", pattern.pretty_name),
+                };
                 let plus_rule = plus_pattern.get_rule(grammar, root_span_pair)?;
                 let base_rule = pattern.get_rule(grammar, root_span_pair)?;
 
@@ -193,6 +215,7 @@ impl Pattern {
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
+                        pretty_name: self.pretty_name.clone(),
                     };
                     grammar.rules.insert(new_ident.clone(), rule_lines);
                     grammar.rules_index.push(new_ident.clone());
@@ -224,6 +247,7 @@ impl Pattern {
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
+                        pretty_name: self.pretty_name.clone(),
                     };
                     grammar.rules.insert(new_ident.clone(), rule_lines);
                     grammar.rules_index.push(new_ident.clone());
@@ -231,7 +255,7 @@ impl Pattern {
 
                 Ok(new_ident)
             }
-            Pattern::Question(pattern) => {
+            PatternType::Question(pattern) => {
                 let base_rule = pattern.get_rule(grammar, root_span_pair)?;
 
                 let new_ident = Ident::new(
@@ -274,6 +298,7 @@ impl Pattern {
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
+                        pretty_name: self.pretty_name.clone(),
                     };
                     grammar.rules.insert(new_ident.clone(), rule_lines);
                     grammar.rules_index.push(new_ident.clone());
@@ -305,6 +330,7 @@ impl Pattern {
                     };
                     let rule_lines = RuleLines {
                         rule_lines: vec![line1, line2],
+                        pretty_name: self.pretty_name.clone(),
                     };
                     grammar.rules.insert(new_ident.clone(), rule_lines);
                     grammar.rules_index.push(new_ident.clone());
@@ -313,8 +339,8 @@ impl Pattern {
                 Ok(new_ident)
             }
 
-            Pattern::Exclamation(pattern) => pattern.get_rule(grammar, root_span_pair),
-            Pattern::TerminalSet(terminal_set) => {
+            PatternType::Exclamation(pattern) => pattern.get_rule(grammar, root_span_pair),
+            PatternType::TerminalSet(terminal_set) => {
                 let new_ident = Ident::new(
                     &format!("_TerminalSet{}", grammar.pattern_map.len()),
                     root_span_pair.0,
@@ -342,16 +368,20 @@ impl Pattern {
                     };
                     rule_lines.push(rule);
                 }
-                grammar
-                    .rules
-                    .insert(new_ident.clone(), RuleLines { rule_lines });
+                grammar.rules.insert(
+                    new_ident.clone(),
+                    RuleLines {
+                        rule_lines,
+                        pretty_name: self.pretty_name.clone(),
+                    },
+                );
                 grammar.rules_index.push(new_ident.clone());
                 grammar
                     .nonterm_typenames
                     .insert(new_ident.clone(), grammar.token_typename.clone());
                 Ok(new_ident)
             }
-            Pattern::Lookaheads(pattern, lookaheads) => {
+            PatternType::Lookaheads(pattern, lookaheads) => {
                 let base_rule = pattern.get_rule(grammar, root_span_pair)?;
                 let new_ident = Ident::new(
                     &format!("_{}_Lookaheads{}", base_rule, grammar.pattern_map.len()),
@@ -381,9 +411,13 @@ impl Pattern {
                     };
                     rule_lines.push(rule);
 
-                    grammar
-                        .rules
-                        .insert(new_ident.clone(), RuleLines { rule_lines });
+                    grammar.rules.insert(
+                        new_ident.clone(),
+                        RuleLines {
+                            rule_lines,
+                            pretty_name: self.pretty_name.clone(),
+                        },
+                    );
                     grammar.rules_index.push(new_ident.clone());
                     grammar
                         .nonterm_typenames
@@ -404,16 +438,20 @@ impl Pattern {
                     };
                     rule_lines.push(rule);
 
-                    grammar
-                        .rules
-                        .insert(new_ident.clone(), RuleLines { rule_lines });
+                    grammar.rules.insert(
+                        new_ident.clone(),
+                        RuleLines {
+                            rule_lines,
+                            pretty_name: self.pretty_name.clone(),
+                        },
+                    );
                     grammar.rules_index.push(new_ident.clone());
                 }
 
                 Ok(new_ident)
             }
 
-            Pattern::Group(group) => {
+            PatternType::Group(group) => {
                 // Consider parenthesis-ed group of patterns
                 // ( A B C D ... )
                 // if there are no pattern holding a value, then the RuleType of the group is None
@@ -507,9 +545,13 @@ impl Pattern {
                 };
                 rule_lines.push(rule);
 
-                grammar
-                    .rules
-                    .insert(new_ident.clone(), RuleLines { rule_lines });
+                grammar.rules.insert(
+                    new_ident.clone(),
+                    RuleLines {
+                        rule_lines,
+                        pretty_name: self.pretty_name.clone(),
+                    },
+                );
                 grammar.rules_index.push(new_ident.clone());
 
                 if let Some(typename) = typename {
@@ -524,26 +566,26 @@ impl Pattern {
     }
 
     pub fn typename(&self, grammar: &Grammar) -> Option<(TokenStream, Ident)> {
-        match self {
-            Pattern::Ident(ident) => grammar
+        match &self.pattern_type {
+            PatternType::Ident(ident) => grammar
                 .get_typename(ident)
                 .map(|typename| (typename.clone(), ident.clone())),
-            Pattern::Plus(pattern) => pattern
+            PatternType::Plus(pattern) => pattern
                 .typename(grammar)
                 .map(|(typename, ident)| (quote! { Vec<#typename> }, ident)),
-            Pattern::Star(pattern) => pattern
+            PatternType::Star(pattern) => pattern
                 .typename(grammar)
                 .map(|(typename, ident)| (quote! { Vec<#typename> }, ident)),
-            Pattern::Question(pattern) => pattern
+            PatternType::Question(pattern) => pattern
                 .typename(grammar)
                 .map(|(typename, ident)| (quote! { Option<#typename> }, ident)),
-            Pattern::Exclamation(_) => None,
-            Pattern::TerminalSet(_) => Some((
+            PatternType::Exclamation(_) => None,
+            PatternType::TerminalSet(_) => Some((
                 grammar.token_typename.clone(),
                 Ident::new("__rustylr_term", Span::call_site()),
             )),
-            Pattern::Lookaheads(pattern, _) => pattern.typename(grammar),
-            Pattern::Group(group) => {
+            PatternType::Lookaheads(pattern, _) => pattern.typename(grammar),
+            PatternType::Group(group) => {
                 let mut child_types = Vec::with_capacity(group.len());
                 for child in group.iter() {
                     if let Some(typename) = child.typename(grammar) {

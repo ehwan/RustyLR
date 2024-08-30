@@ -126,31 +126,13 @@ RuleLines(Vec<RuleLineArgs>): RuleLines pipe RuleLine {
 }
 ;
 
-RuleId(usize): percent literal {
-    if let Lexed::Literal(literal) = literal {
-        let id: usize = match literal.unwrap().to_string().parse() {
-            Ok(id) => id,
-            Err(err) => {
-                panic!("Failed to parse rule id: {}", err);
-            }
-        };
-        id
-    }else {
-        unreachable!( "RuleId-Literal" );
-    }
-}
-| {
-    0
-}
-;
-
-RuleLine(RuleLineArgs): TokenMapped* RuleId Action
+RuleLine(RuleLineArgs): TokenMapped* Action
 {
     RuleLineArgs {
         tokens: TokenMapped,
         reduce_action: Action.map(|action| action.to_token_stream()),
         separator_span: Span::call_site(),
-        id: RuleId,
+        id: 0,
     }
 }
 ;

@@ -48,14 +48,14 @@ pub enum EmitError {
     /// error building given CFG
     ShiftReduceConflict {
         term: Ident,
-        reduce_rule: (usize, ProductionRule<Ident, Ident>),
-        shift_rules: Vec<(usize, ShiftedRule<Ident, Ident>)>,
+        reduce_rule: (usize, ProductionRule<String, String>),
+        shift_rules: Vec<(usize, ShiftedRule<String, String>)>,
     },
     /// error building given CFG
     ReduceReduceConflict {
         lookahead: Ident,
-        rule1: (usize, ProductionRule<Ident, Ident>),
-        rule2: (usize, ProductionRule<Ident, Ident>),
+        rule1: (usize, ProductionRule<String, String>),
+        rule2: (usize, ProductionRule<String, String>),
     },
 }
 
