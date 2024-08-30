@@ -2,78 +2,64 @@ use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
+use rusty_lr_core::Token;
 
 use crate::error::ArgError;
 use crate::error::ParseArgError;
 use crate::error::ParseError;
+use crate::nonterminal_info::NonTerminalInfo;
+use crate::nonterminal_info::Rule;
 use crate::parser::args::GrammarArgs;
 use crate::parser::lexer::Lexed;
 use crate::parser::parser_expanded::GrammarParseError;
 use crate::parser::parser_expanded::GrammarParser;
 use crate::pattern::Pattern;
-use crate::rule::RuleLine;
-use crate::rule::RuleLines;
+use crate::pattern::PatternResult;
+use crate::terminal_info::ReduceTypeInfo;
+use crate::terminal_info::TerminalInfo;
 use crate::token::TokenMapped;
 use crate::utils;
 
 use rusty_lr_core::HashMap;
 
-#[derive(Debug)]
 pub struct Grammar {
-    /// for bootstrapping the generated code; the prefix for the '::rusty_lr' module
+    /// %moduleprefix
     pub(crate) module_prefix: TokenStream,
+
+    /// %tokentype
     pub(crate) token_typename: TokenStream,
+
+    /// %userdata
     pub(crate) userdata_typename: Option<TokenStream>,
-    pub(crate) start_rule_name: Ident,
-    pub(crate) eof: TokenStream,
-    // index, typename
-    pub(crate) terminals: HashMap<Ident, (usize, TokenStream)>,
-    /// terminals sorted by index, insertion order
-    pub(crate) terminals_index: Vec<Ident>,
 
-    /// %left or %right for terminals
-    pub reduce_types: HashMap<Ident, rusty_lr_core::ReduceType>,
-
-    /// setted reduce types originated from
-    pub reduce_types_origin: HashMap<Ident, (Span, Span)>,
     /// %err
     pub(crate) error_typename: TokenStream,
 
-    /// rule definitions
-    pub rules: HashMap<Ident, RuleLines>,
-    /// rule typenames
-    pub(crate) nonterm_typenames: HashMap<Ident, TokenStream>,
-    /// rules sorted by index, insertion order
-    pub(crate) rules_index: Vec<Ident>,
+    /// %start
+    pub(crate) start_rule_name: Ident,
 
-    /// pattern map for auto-generated rules
-    pub(crate) pattern_map: HashMap<Pattern, Ident>,
-    /// span range that generated rule was originated from
-    pub generated_root_span: HashMap<Ident, (Span, Span)>,
+    pub terminals: Vec<TerminalInfo>,
+    /// ident -> index map for terminals
+    pub terminals_index: HashMap<Ident, usize>,
+
+    /// rule definitions
+    pub nonterminals: Vec<NonTerminalInfo>,
+    /// ident - index map for non-terminals
+    pub nonterminals_index: HashMap<Ident, usize>,
 
     /// whether to generate GLR parser
     pub(crate) glr: bool,
 }
 
 impl Grammar {
-    /// get typename(TokenStream) for given name of terminal or non-terminal symbol
-    pub(crate) fn get_typename(&self, ident: &Ident) -> Option<&TokenStream> {
-        if self.terminals.contains_key(ident) {
-            Some(&self.token_typename)
-        } else {
-            self.nonterm_typenames.get(ident)
-        }
-    }
-
     /// get rule by ruleid
-    pub fn get_rule_by_id(&self, mut ruleid: usize) -> Option<(&Ident, &RuleLines, usize)> {
-        for name in self.rules_index.iter() {
+    pub fn get_rule_by_id(&self, mut ruleid: usize) -> Option<(&NonTerminalInfo, usize)> {
+        for nonterm in self.nonterminals.iter() {
             // rule_name is same as name, but can have different Span
-            let (rule_name, rules) = self.rules.get_key_value(name).unwrap();
-            if ruleid < rules.rule_lines.len() {
-                return Some((rule_name, rules, ruleid));
+            if ruleid < nonterm.rules.len() {
+                return Some((nonterm, ruleid));
             }
-            ruleid -= rules.rule_lines.len();
+            ruleid -= nonterm.rules.len();
         }
         None
     }
@@ -185,102 +171,129 @@ impl Grammar {
                 .into_iter()
                 .next()
                 .map(|(_, stream)| stream),
-            start_rule_name: grammar_args.start_rule_name.into_iter().next().unwrap(),
-            eof: grammar_args.eof.into_iter().next().unwrap().1,
             error_typename,
+            start_rule_name: grammar_args.start_rule_name.into_iter().next().unwrap(),
+
             terminals: Default::default(),
             terminals_index: Default::default(),
-            reduce_types: Default::default(),
-            reduce_types_origin: Default::default(),
-            rules: Default::default(),
-            nonterm_typenames: Default::default(),
-            rules_index: Default::default(),
-            pattern_map: Default::default(),
-            generated_root_span: Default::default(),
+
+            nonterminals: Default::default(),
+            nonterminals_index: Default::default(),
+
             glr: grammar_args.glr,
         };
 
-        for (index, (ident, typename)) in grammar_args.terminals.into_iter().enumerate() {
+        // add terminals
+        for (index, (ident, token_expr)) in grammar_args.terminals.into_iter().enumerate() {
             // check reserved name
             utils::check_reserved_name(&ident)?;
 
             // check duplicate
-            if let Some((k, _)) = grammar.terminals.get_key_value(&ident) {
+            if let Some((k, _)) = grammar.terminals_index.get_key_value(&ident) {
                 return Err(ParseError::MultipleTokenDefinition(k.clone(), ident));
             }
-            grammar.terminals.insert(ident.clone(), (index, typename));
-            grammar.terminals_index.push(ident);
-        }
-        // add eof as terminal
 
+            let terminal_info = TerminalInfo {
+                name: ident.clone(),
+                reduce_type: None,
+                body: token_expr,
+            };
+            grammar.terminals.push(terminal_info);
+            grammar.terminals_index.insert(ident, index);
+        }
         // add eof
-        grammar.terminals.insert(
-            Ident::new(utils::EOF_NAME, Span::call_site()),
-            (grammar.terminals_index.len(), grammar.eof.clone()),
-        );
-        grammar
-            .terminals_index
-            .push(Ident::new(utils::EOF_NAME, Span::call_site()));
+        {
+            let eof_ident = Ident::new(utils::EOF_NAME, Span::call_site());
+
+            let terminal_info = TerminalInfo {
+                name: eof_ident.clone(),
+                reduce_type: None,
+                body: grammar_args.eof.into_iter().next().unwrap().1,
+            };
+            let idx = grammar.terminals.len();
+            grammar.terminals.push(terminal_info);
+            grammar.terminals_index.insert(eof_ident, idx);
+        }
 
         // reduce types
         for (terminals, reduce_type) in grammar_args.reduce_types.into_iter() {
             let new_span = terminals.span_pair();
-            for terminal in terminals.to_terminal_set(&grammar)?.into_iter() {
-                if let Some(old) = grammar.reduce_types.insert(terminal.clone(), reduce_type) {
-                    let old_span = grammar.reduce_types_origin.get(&terminal).unwrap();
-                    return Err(ParseError::MultipleReduceDefinition {
-                        terminal,
-                        old: (old_span.0, old_span.1, old),
-                        new: (new_span.0, new_span.1, reduce_type),
+            for term_idx in terminals.to_terminal_set(&grammar)?.into_iter() {
+                let terminal_name = grammar.terminals[term_idx].name.clone();
+                if let Some(old) = &mut grammar.terminals[term_idx].reduce_type {
+                    if old.reduce_type != reduce_type {
+                        return Err(ParseError::MultipleReduceDefinition {
+                            terminal: terminal_name,
+                            old: (old.sources[0].0, old.sources[0].1, old.reduce_type),
+                            new: (new_span.0, new_span.1, reduce_type),
+                        });
+                    } else {
+                        old.sources.push(new_span);
+                    }
+                } else {
+                    grammar.terminals[term_idx].reduce_type = Some(ReduceTypeInfo {
+                        reduce_type,
+                        sources: vec![new_span],
                     });
                 }
-                grammar.reduce_types_origin.insert(terminal, new_span);
             }
         }
 
         // insert rule typenames first, since it will be used when inserting rule definitions below
-        for rules in grammar_args.rules.iter() {
+        for (rule_idx, rules_arg) in grammar_args.rules.iter().enumerate() {
             // check reserved name
-            utils::check_reserved_name(&rules.name)?;
+            utils::check_reserved_name(&rules_arg.name)?;
 
-            if let Some(typename) = rules.typename.as_ref() {
-                grammar
-                    .nonterm_typenames
-                    .insert(rules.name.clone(), typename.clone());
+            let nonterminal = NonTerminalInfo {
+                name: rules_arg.name.clone(),
+                pretty_name: rules_arg.name.to_string(),
+                ruletype: rules_arg.typename.clone(),
+                rules: Vec::new(), // production rules will be added later
+                regex_span: None,
+            };
+
+            grammar.nonterminals.push(nonterminal);
+
+            // check duplicate
+            if let Some(old) = grammar
+                .nonterminals_index
+                .insert(rules_arg.name.clone(), rule_idx)
+            {
+                return Err(ParseError::MultipleRuleDefinition(
+                    grammar.nonterminals[old].name.clone(),
+                    rules_arg.name.clone(),
+                ));
             }
         }
 
-        // insert rules
-        for rules in grammar_args.rules.into_iter() {
-            if let Some((old, _)) = grammar.rules.get_key_value(&rules.name) {
-                return Err(ParseError::MultipleRuleDefinition(
-                    old.clone(),
-                    rules.name.clone(),
-                ));
-            }
-            grammar.rules_index.push(rules.name.clone());
+        // pattern map for auto-generated rules
+        let mut pattern_map: HashMap<Pattern, PatternResult> = HashMap::default();
 
+        // insert production rules & auto-generated rules from regex pattern
+        for (rule_idx, rules) in grammar_args.rules.into_iter().enumerate() {
             let mut rule_lines = Vec::new();
             for rule in rules.rule_lines.into_iter() {
-                let mut tokens = Vec::new();
+                let mut tokens = Vec::with_capacity(rule.tokens.len());
                 for (mapto, pattern) in rule.tokens.into_iter() {
                     let (begin_span, end_span) = pattern.span_pair();
                     let pattern = pattern.into_pattern(&grammar, false)?;
-                    let token_rule = pattern.get_rule(&mut grammar, (begin_span, end_span))?;
-                    let mapto = match pattern.typename(&grammar) {
-                        Some((_, mapto_)) => mapto.or(Some(mapto_)),
+                    let pattern_rule =
+                        pattern.to_rule(&mut grammar, &mut pattern_map, (begin_span, end_span))?;
+
+                    let mapto = match &pattern_rule.ruletype_map {
+                        Some((_, mapto_)) => mapto.or(Some(mapto_.clone())),
                         None => None,
                     };
 
                     tokens.push(TokenMapped {
-                        token: token_rule,
+                        token: pattern_rule.token,
                         mapto,
                         begin_span,
                         end_span,
                     });
                 }
 
-                rule_lines.push(RuleLine {
+                rule_lines.push(Rule {
                     tokens,
                     reduce_action: rule.reduce_action,
                     separator_span: rule.separator_span,
@@ -289,73 +302,65 @@ impl Grammar {
                 });
             }
 
-            grammar.rules.insert(
-                rules.name.clone(),
-                RuleLines {
-                    rule_lines,
-                    pretty_name: rules.name.to_string(),
-                },
-            );
+            // production rules set here
+            grammar.nonterminals[rule_idx].rules = rule_lines;
         }
-        // insert augmented rule
-        grammar
-            .rules_index
-            .push(Ident::new(utils::AUGMENTED_NAME, Span::call_site()));
-        grammar.rules.insert(
-            Ident::new(utils::AUGMENTED_NAME, Span::call_site()),
-            RuleLines {
-                rule_lines: vec![RuleLine {
-                    tokens: vec![
-                        TokenMapped {
-                            token: grammar.start_rule_name.clone(),
-                            mapto: None,
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
-                        },
-                        TokenMapped {
-                            token: Ident::new(utils::EOF_NAME, Span::call_site()),
-                            mapto: None,
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
-                        },
-                    ],
-                    reduce_action: None,
-                    separator_span: Span::call_site(),
-                    lookaheads: None,
-                    id: 0,
-                }],
-                pretty_name: utils::AUGMENTED_NAME.to_string(),
-            },
-        );
-
-        // check all token is defined as one of terminal or non-terminal
-        for (_name, rule_lines) in grammar.rules.iter() {
-            for rule in rule_lines.rule_lines.iter() {
-                for token in rule.tokens.iter() {
-                    let is_terminal = grammar.terminals.get_key_value(&token.token);
-                    let is_non_terminal = grammar.rules.get_key_value(&token.token);
-                    match (is_terminal, is_non_terminal) {
-                        (Some(term), Some(nonterm)) => {
-                            return Err(ParseError::TermNonTermConflict {
-                                name: token.token.clone(),
-                                terminal: term.0.clone(),
-                                non_terminal: nonterm.0.clone(),
-                            });
-                        }
-                        (None, None) => {
-                            return Err(ParseError::TerminalNotDefined(token.token.clone()));
-                        }
-                        _ => {}
-                    }
-                }
-            }
-        }
+        drop(pattern_map);
 
         // check start rule is valid
-        if !grammar.rules.contains_key(&grammar.start_rule_name) {
+        if !grammar
+            .nonterminals_index
+            .contains_key(&grammar.start_rule_name)
+        {
             return Err(ParseError::StartNonTerminalNotDefined(
                 grammar.start_rule_name.clone(),
             ));
+        }
+
+        // insert augmented rule
+        {
+            let augmented_ident = Ident::new(utils::AUGMENTED_NAME, Span::call_site());
+            let start_idx = grammar
+                .nonterminals_index
+                .get(&grammar.start_rule_name)
+                .unwrap();
+            let eof_idx = grammar
+                .terminals_index
+                .get(&Ident::new(utils::EOF_NAME, Span::call_site()))
+                .unwrap();
+            let augmented_rule = Rule {
+                tokens: vec![
+                    TokenMapped {
+                        token: Token::NonTerm(*start_idx),
+                        mapto: None,
+                        begin_span: Span::call_site(),
+                        end_span: Span::call_site(),
+                    },
+                    TokenMapped {
+                        token: Token::Term(*eof_idx),
+                        mapto: None,
+                        begin_span: Span::call_site(),
+                        end_span: Span::call_site(),
+                    },
+                ],
+                reduce_action: None,
+                separator_span: Span::call_site(),
+                lookaheads: None,
+                id: 0,
+            };
+            let nonterminal_info = NonTerminalInfo {
+                name: augmented_ident.clone(),
+                pretty_name: utils::AUGMENTED_NAME.to_string(),
+                ruletype: None,
+                regex_span: None,
+                rules: vec![augmented_rule],
+            };
+
+            let augmented_idx = grammar.nonterminals.len();
+            grammar.nonterminals.push(nonterminal_info);
+            grammar
+                .nonterminals_index
+                .insert(augmented_ident, augmented_idx);
         }
 
         Ok(grammar)
@@ -378,45 +383,34 @@ impl Grammar {
     }
 
     /// create the rusty_lr_core::Grammar from the parsed CFGs
-    pub fn create_grammar(&self) -> rusty_lr_core::builder::Grammar<Ident, Ident> {
-        let mut grammar: rusty_lr_core::builder::Grammar<Ident, Ident> =
+    pub fn create_grammar(&self) -> rusty_lr_core::builder::Grammar<usize, usize> {
+        let mut grammar: rusty_lr_core::builder::Grammar<usize, usize> =
             rusty_lr_core::builder::Grammar::new();
         if self.glr {
             grammar.allow_conflict();
         }
 
         // reduce types
-        for (term, reduce_type) in self.reduce_types.iter() {
-            if !grammar.set_reduce_type(term.clone(), *reduce_type) {
-                unreachable!("set_reduce_type error");
+        for (idx, term_info) in self.terminals.iter().enumerate() {
+            if let Some(reduce_type) = &term_info.reduce_type {
+                if !grammar.set_reduce_type(idx, reduce_type.reduce_type) {
+                    unreachable!("set_reduce_type error");
+                }
             }
         }
 
         // add rules
-        for name in self.rules_index.iter() {
-            let rule_lines = self.rules.get(name).unwrap();
-
-            for rule in rule_lines.rule_lines.iter() {
-                let mut tokens = Vec::with_capacity(rule.tokens.len());
-                for token in rule.tokens.iter() {
-                    if self.terminals.contains_key(&token.token) {
-                        tokens.push(rusty_lr_core::Token::Term(token.token.clone()));
-                    } else if self.rules.contains_key(&token.token) {
-                        tokens.push(rusty_lr_core::Token::NonTerm(token.token.clone()));
-                    } else {
-                        unreachable!("create_grammar: token not found");
-                    }
-                }
-
+        for (idx, nonterminal) in self.nonterminals.iter().enumerate() {
+            for rule in nonterminal.rules.iter() {
+                let tokens = rule
+                    .tokens
+                    .iter()
+                    .map(|token_mapped| token_mapped.token)
+                    .collect();
                 if let Some(lookaheads) = rule.lookaheads.as_ref() {
-                    grammar.add_rule_with_lookaheads(
-                        name.clone(),
-                        tokens,
-                        rule.id,
-                        lookaheads.clone(),
-                    );
+                    grammar.add_rule_with_lookaheads(idx, tokens, rule.id, lookaheads.clone());
                 } else {
-                    grammar.add_rule(name.clone(), tokens, rule.id);
+                    grammar.add_rule(idx, tokens, rule.id);
                 }
             }
         }

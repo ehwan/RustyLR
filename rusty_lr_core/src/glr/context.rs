@@ -26,6 +26,8 @@ pub struct Context<Data: NodeData> {
 }
 
 impl<Data: NodeData> Context<Data> {
+    /// Create a new context.
+    /// `current_nodes` is initialized with a root node.
     pub fn new() -> Self {
         Context {
             current_nodes: vec![Rc::new(Node::new_root())],
@@ -83,5 +85,11 @@ impl<Data: NodeData> Context<Data> {
                 TreeList { trees }
             })
             .collect()
+    }
+}
+
+impl<Data: NodeData> Default for Context<Data> {
+    fn default() -> Self {
+        Self::new()
     }
 }

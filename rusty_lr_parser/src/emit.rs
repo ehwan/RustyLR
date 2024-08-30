@@ -7,7 +7,9 @@ use quote::format_ident;
 use quote::quote;
 
 use rusty_lr_core::builder::error::BuildError;
+use rusty_lr_core::HashMap;
 use rusty_lr_core::ShiftedRule;
+use rusty_lr_core::Token;
 
 use crate::error::EmitError;
 use crate::grammar::Grammar;
@@ -27,7 +29,7 @@ impl Grammar {
         let rule_typename = format_ident!("{}Rule", start_rule_name);
         let state_typename = format_ident!("{}State", start_rule_name);
         let token_typename = &self.token_typename;
-        let enum_name = utils::generate_enum_name(start_rule_name);
+        let enum_name = format_ident!("{}NonTerminals", start_rule_name);
         let reduce_error_typename = &self.error_typename;
         let parse_error_typename = format_ident!("{}ParseError", start_rule_name);
         let invalid_terminal_error = format_ident!("{}InvalidTerminalError", start_rule_name);
@@ -108,18 +110,20 @@ impl Grammar {
         // =====================================================================
 
         let start_rule_name = &self.start_rule_name;
-        let enum_typename = utils::generate_enum_name(start_rule_name);
+        let enum_typename = format_ident!("{}NonTerminals", start_rule_name);
 
+        // for impl `Display` and `Debug`
         let mut comma_separated_variants = TokenStream::new();
         let mut case_display = TokenStream::new();
-        for name in self.rules_index.iter() {
+        for nonterm in self.nonterminals.iter() {
+            let name = &nonterm.name;
             comma_separated_variants.extend(quote! {
                 #name,
             });
 
-            let name_str = &self.rules.get(name).unwrap().pretty_name;
+            let display_str = &nonterm.pretty_name;
             case_display.extend(quote! {
-                #enum_typename::#name=> write!(f, #name_str),
+                #enum_typename::#name=> write!(f, #display_str),
             });
         }
 
@@ -153,18 +157,22 @@ impl Grammar {
         let mut grammar = self.create_grammar();
 
         // build
+        let augmented_idx = *self
+            .nonterminals_index
+            .get(&Ident::new(utils::AUGMENTED_NAME, Span::call_site()))
+            .unwrap();
         let dfa = if lalr {
-            grammar.build_lalr(Ident::new(utils::AUGMENTED_NAME, Span::call_site()))
+            grammar.build_lalr(augmented_idx)
         } else {
-            grammar.build(Ident::new(utils::AUGMENTED_NAME, Span::call_site()))
+            grammar.build(augmented_idx)
         };
         let dfa = match dfa {
             Ok(dfa) => dfa,
             Err(e) => {
                 // to map production rule to its pretty name abbreviation
-                let term_mapper = |term: Ident| term.to_string();
+                let term_mapper = |term_idx: usize| self.terminals[term_idx].name.to_string();
                 let nonterm_mapper =
-                    |nonterm: Ident| self.rules.get(&nonterm).unwrap().pretty_name.clone();
+                    |nonterm_idx: usize| self.nonterminals[nonterm_idx].pretty_name.clone();
                 match e {
                     BuildError::NoAugmented | BuildError::RuleNotFound(_) => {
                         unreachable!("Unreachable grammar build error")
@@ -175,7 +183,7 @@ impl Grammar {
                         rule2,
                     } => {
                         return Err(Box::new(EmitError::ReduceReduceConflict {
-                            lookahead,
+                            lookahead: self.terminals[lookahead].name.clone(),
                             rule1: (
                                 rule1,
                                 grammar.rules[rule1]
@@ -210,7 +218,7 @@ impl Grammar {
                         }
 
                         return Err(Box::new(EmitError::ShiftReduceConflict {
-                            term,
+                            term: self.terminals[term].name.clone(),
                             reduce_rule: (
                                 reduce,
                                 grammar.rules[reduce]
@@ -226,15 +234,15 @@ impl Grammar {
         };
 
         let module_prefix = &self.module_prefix;
-        let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
+        let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
         let rule_typename = format_ident!("{}Rule", &self.start_rule_name);
         let state_typename = format_ident!("{}State", &self.start_rule_name);
 
         // write vector of terminals
         let comma_separated_terminals = {
             let mut comma_separated_terminals = TokenStream::new();
-            for term in self.terminals_index.iter() {
-                let stream = &self.terminals.get(term).unwrap().1;
+            for term in self.terminals.iter() {
+                let stream = &term.body;
                 comma_separated_terminals.extend(quote! {
                     #stream,
                 });
@@ -243,8 +251,8 @@ impl Grammar {
         };
 
         let (rules, states) = {
-            let term_mapper = |term: Ident| self.terminals.get(&term).unwrap().0;
-            let nonterm_mapper = |nonterm: Ident| nonterm;
+            let term_mapper = |term_idx: usize| term_idx;
+            let nonterm_mapper = |nonterm_idx: usize| self.nonterminals[nonterm_idx].name.clone();
             let rules: Vec<_> = grammar
                 .rules
                 .into_iter()
@@ -487,9 +495,9 @@ impl Grammar {
         };
 
         let rule_id_typename = integer_typename(
-            self.rules
+            self.nonterminals
                 .iter()
-                .map(|(_, rules)| rules.rule_lines.iter().map(|rule| rule.id).max().unwrap())
+                .map(|nonterm| nonterm.rules.iter().map(|rule| rule.id).max().unwrap())
                 .max()
                 .unwrap()
                 + 1,
@@ -584,7 +592,7 @@ impl Grammar {
 
     fn emit_parser(&self, grammar_emit: TokenStream) -> Result<TokenStream, Box<EmitError>> {
         let module_prefix = &self.module_prefix;
-        let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
+        let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
         let reduce_error_typename = &self.error_typename;
         let parseerror_typename = format_ident!("{}ParseError", self.start_rule_name);
         let rule_typename = format_ident!("{}Rule", self.start_rule_name);
@@ -592,40 +600,46 @@ impl Grammar {
         let parser_struct_name = format_ident!("{}Parser", self.start_rule_name);
         let context_struct_name = format_ident!("{}Context", self.start_rule_name);
         let stack_struct_name = format_ident!("{}Stack", self.start_rule_name);
+        let token_typename = &self.token_typename;
+        let terms_stack_name = Ident::new(utils::TERMINAL_STACK_NAME, Span::call_site());
 
-        // stack_name for each non-terminal
-        let mut stack_names_by_nonterm = rusty_lr_core::HashMap::default();
+        // stack name for each non-terminal
+        let mut stack_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
+
+        // (<RuleType as ToString>, stack_name) map
+        let mut ruletype_stackname_map = HashMap::default();
+
         // (stack_name, TokenStream for typename) sorted in rule insertion order
         // for consistent output
         let mut stack_names_in_order = Vec::new();
-        {
-            // <RuleType as ToString> - <Stackname> map
-            let mut stack_name_by_typename = rusty_lr_core::HashMap::default();
 
-            // insert terminal token type
-            let term_stack_name = Ident::new(utils::TERMINAL_STACK_NAME, Span::call_site());
-            stack_name_by_typename.insert(self.token_typename.to_string(), term_stack_name.clone());
-            stack_names_in_order.push((term_stack_name, self.token_typename.clone()));
+        // insert terminal token type
+        ruletype_stackname_map.insert(self.token_typename.to_string(), terms_stack_name.clone());
+        stack_names_in_order.push((terms_stack_name.clone(), self.token_typename.clone()));
 
-            // for non-terminal have <RuleType> defined
-            for name in self.rules_index.iter() {
-                if let Some(typename) = self.nonterm_typenames.get(name) {
-                    let len = stack_names_in_order.len();
-                    let stack_name = stack_name_by_typename
-                        .entry(typename.to_string())
-                        .or_insert_with(|| {
-                            let new_stack_name = Ident::new(
-                                &format!("__rustylr_generated_stack_{}", len),
-                                Span::call_site(),
-                            );
-                            stack_names_in_order.push((new_stack_name.clone(), typename.clone()));
+        for nonterm in self.nonterminals.iter() {
+            if let Some(ruletype) = &nonterm.ruletype {
+                let ruletype_str = ruletype.to_string();
 
-                            new_stack_name
-                        });
-                    stack_names_by_nonterm.insert(name.clone(), stack_name.clone());
-                }
+                let cur_len = ruletype_stackname_map.len();
+                let stack_name = ruletype_stackname_map
+                    .entry(ruletype_str)
+                    .or_insert_with(|| {
+                        let new_stack_name = Ident::new(
+                            &format!("__rustylr_generated_stack_{}", cur_len),
+                            Span::call_site(),
+                        );
+                        stack_names_in_order.push((new_stack_name.clone(), ruletype.clone()));
+                        new_stack_name
+                    })
+                    .clone();
+
+                stack_names_for_nonterm.push(Some(stack_name));
+            } else {
+                stack_names_for_nonterm.push(None);
             }
         }
+        drop(ruletype_stackname_map);
 
         // =====================================================================
         // =========================Writing Parser==============================
@@ -649,51 +663,44 @@ impl Grammar {
         let mut ruleid: usize = 0;
         let mut case_streams = quote! {};
         // stack for end index of each rule in term stack
-        let terms_stack_name = Ident::new(utils::TERMINAL_STACK_NAME, Span::call_site());
-        let token_typename = &self.token_typename;
 
         // TokenStream to define reduce function for each production rule
         let mut fn_reduce_for_each_rule_stream = TokenStream::new();
 
-        for name in self.rules_index.iter() {
-            let rules = self.rules.get(name).unwrap();
-            for (rule_local_id, rule) in rules.rule_lines.iter().enumerate() {
+        // define reduce function for each production rule
+        for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
+            for (rule_local_id, rule) in nonterm.rules.iter().enumerate() {
                 let mut token_pop_stream = TokenStream::new();
                 for token in rule.tokens.iter().rev() {
-                    if self.terminals.contains_key(&token.token) {
-                        match &token.mapto {
-                            Some(mapto) => {
+                    match &token.token {
+                        Token::Term(_) => {
+                            if let Some(mapto) = &token.mapto {
                                 token_pop_stream.extend(quote! {
                                     let mut #mapto = self.#terms_stack_name.pop().unwrap();
                                 });
-                            }
-                            None => {
+                            } else {
                                 token_pop_stream.extend(quote! {
                                     self.#terms_stack_name.pop();
                                 });
                             }
                         }
-                    } else if self.nonterm_typenames.contains_key(&token.token) {
-                        // if <RuleType> is defined for this nonterm,
-                        // pop value from the stack to 'mapto'
-                        let stack_name = stack_names_by_nonterm.get(&token.token).unwrap();
-
-                        match &token.mapto {
-                            Some(mapto) => {
-                                token_pop_stream.extend(quote! {
-                                    let mut #mapto = self.#stack_name.pop().unwrap();
-                                });
-                            }
-                            None => {
-                                token_pop_stream.extend(quote! {
-                                    self.#stack_name.pop();
-                                });
+                        Token::NonTerm(nonterm_idx) => {
+                            if let Some(stack_name) = &stack_names_for_nonterm[*nonterm_idx] {
+                                if let Some(mapto) = &token.mapto {
+                                    token_pop_stream.extend(quote! {
+                                        let mut #mapto = self.#stack_name.pop().unwrap();
+                                    });
+                                } else {
+                                    token_pop_stream.extend(quote! {
+                                        self.#stack_name.pop();
+                                    });
+                                }
                             }
                         }
                     }
                 }
 
-                let reduce_fn_ident = format_ident!("reduce_{}_{}", name, rule_local_id);
+                let reduce_fn_ident = format_ident!("reduce_{}_{}", nonterm.name, rule_local_id);
 
                 case_streams.extend(quote! {
                     #ruleid => {
@@ -703,10 +710,13 @@ impl Grammar {
 
                 // if typename is defined for this rule, push result of action to stack
                 // else, just execute action
-                let typename = self.nonterm_typenames.get(name);
-                if typename.is_some() {
+                if nonterm.ruletype.is_some() {
                     // push result to this stack
-                    let stack_name = stack_names_by_nonterm.get(name).unwrap();
+                    let stack_name = stack_names_for_nonterm[nonterm_idx]
+                        .as_ref()
+                        .unwrap_or_else(|| {
+                            unreachable!("Non-terminal stack name must be defined for <RuleType>")
+                        });
 
                     // typename is defined, reduce action must be defined
                     if let Some(action) = &rule.reduce_action {
@@ -744,7 +754,7 @@ impl Grammar {
                             });
                         } else {
                             return Err(Box::new(EmitError::RuleTypeDefinedButActionNotDefined {
-                                name: name.clone(),
+                                name: nonterm.name.clone(),
                                 rule_local_id,
                             }));
                         }
@@ -776,14 +786,17 @@ impl Grammar {
 
         // TokenStream for <RuleType> of start rule
         // and pop from start rule stack
+        let start_nonterm_idx = self.nonterminals_index.get(&self.start_rule_name).unwrap();
         let (start_typename, pop_from_start_rule_stack) = {
-            if let Some(start_typename) = self.nonterm_typenames.get(&self.start_rule_name) {
-                let start_rule_stack_name =
-                    stack_names_by_nonterm.get(&self.start_rule_name).unwrap();
+            if let Some(start_stack_name) = &stack_names_for_nonterm[*start_nonterm_idx] {
                 (
-                    start_typename.clone(),
+                    self.nonterminals[*start_nonterm_idx]
+                        .ruletype
+                        .as_ref()
+                        .unwrap()
+                        .clone(),
                     quote! {
-                        self.#start_rule_stack_name.pop().unwrap()
+                        self.#start_stack_name.pop().unwrap()
                     },
                 )
             } else {
@@ -909,7 +922,7 @@ impl Grammar {
 
     fn emit_parser_glr(&self, grammar_emit: TokenStream) -> Result<TokenStream, Box<EmitError>> {
         let module_prefix = &self.module_prefix;
-        let nonterminals_enum_name = utils::generate_enum_name(&self.start_rule_name);
+        let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
         let reduce_error_typename = &self.error_typename;
         let rule_typename = format_ident!("{}Rule", self.start_rule_name);
         let state_typename = format_ident!("{}State", self.start_rule_name);
@@ -919,12 +932,11 @@ impl Grammar {
         let token_typename = &self.token_typename;
         let invalid_terminal_error_typename =
             format_ident!("{}InvalidTerminalError", self.start_rule_name);
+        let terms_enum_name = Ident::new("__Terminals", Span::call_site());
 
         // =====================================================================
         // =========================Writing Parser==============================
         // =====================================================================
-
-        let terms_enum_name = Ident::new("__Terminals", Span::call_site());
 
         // TokenStream for userdata parameter definition, if defined
         let user_data_parameter_name =
@@ -947,13 +959,12 @@ impl Grammar {
         // TokenStream to define reduce function for each production rule
         let mut fn_reduce_for_each_rule_stream = TokenStream::new();
 
-        for name in self.rules_index.iter() {
-            let rules = self.rules.get(name).unwrap();
-            for (rule_local_id, rule) in rules.rule_lines.iter().enumerate() {
+        for nonterm in self.nonterminals.iter() {
+            for (rule_local_id, rule) in nonterm.rules.iter().enumerate() {
                 let mut extract_data_from_node_enum = TokenStream::new();
                 for token in rule.tokens.iter() {
-                    if self.terminals.contains_key(&token.token) {
-                        match &token.mapto {
+                    match &token.token {
+                        Token::Term(_) => match &token.mapto {
                             Some(mapto) => {
                                 extract_data_from_node_enum.extend(quote! {
                                     let mut #mapto = if let #node_enum_name::#terms_enum_name(#mapto) = __rustylr_args.pop().unwrap() {
@@ -968,36 +979,38 @@ impl Grammar {
                                     __rustylr_args.pop();
                                 });
                             }
-                        }
-                    } else if self.nonterm_typenames.contains_key(&token.token) {
-                        // if <RuleType> is defined for this nonterm,
-                        // extract data from enum
-
-                        let variant_name = &token.token;
-
-                        match &token.mapto {
-                            Some(mapto) => {
-                                extract_data_from_node_enum.extend(quote! {
-                                    let mut #mapto = if let #node_enum_name::#variant_name(#mapto) = __rustylr_args.pop().unwrap() {
-                                        #mapto
-                                    } else {
-                                        unreachable!()
-                                    };
-                                });
+                        },
+                        Token::NonTerm(nonterm_idx) => {
+                            match &self.nonterminals[*nonterm_idx].ruletype {
+                                Some(_) => {
+                                    let variant_name = &self.nonterminals[*nonterm_idx].name;
+                                    match &token.mapto {
+                                        Some(mapto) => {
+                                            extract_data_from_node_enum.extend(quote! {
+                                            let mut #mapto = if let #node_enum_name::#variant_name(#mapto) = __rustylr_args.pop().unwrap() {
+                                                #mapto
+                                            } else {
+                                                unreachable!()
+                                            };
+                                            });
+                                        }
+                                        None => {
+                                            extract_data_from_node_enum.extend(quote! {
+                                                __rustylr_args.pop();
+                                            });
+                                        }
+                                    }
+                                }
+                                None => {
+                                    extract_data_from_node_enum.extend(quote! {
+                                        __rustylr_args.pop();
+                                    });
+                                }
                             }
-                            None => {
-                                extract_data_from_node_enum.extend(quote! {
-                                    __rustylr_args.pop();
-                                });
-                            }
                         }
-                    } else {
-                        extract_data_from_node_enum.extend(quote! {
-                            __rustylr_args.pop();
-                        });
                     }
                 }
-                let reduce_fn_ident = format_ident!("reduce_{}_{}", name, rule_local_id);
+                let reduce_fn_ident = format_ident!("reduce_{}_{}", nonterm.name, rule_local_id);
 
                 case_streams.extend(quote! {
                     #rule_index => {
@@ -1007,9 +1020,9 @@ impl Grammar {
 
                 // if typename is defined for this rule, push result of action to stack
                 // else, just execute action
-                let typename = self.nonterm_typenames.get(name);
-                if typename.is_some() {
+                if nonterm.ruletype.is_some() {
                     // typename is defined, reduce action must be defined
+                    let name = &nonterm.name;
                     if let Some(action) = &rule.reduce_action {
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             fn #reduce_fn_ident(
@@ -1059,6 +1072,7 @@ impl Grammar {
                         }
                     }
                 } else {
+                    let name = &nonterm.name;
                     // <RuleType> is not defined,
                     // just execute action
                     if let Some(action) = &rule.reduce_action {
@@ -1093,8 +1107,9 @@ impl Grammar {
             }
         }
 
+        let start_idx = self.nonterminals_index.get(&self.start_rule_name).unwrap();
         let (start_typename, start_extract) =
-            if let Some(start_typename) = self.nonterm_typenames.get(&self.start_rule_name) {
+            if let Some(start_typename) = self.nonterminals[*start_idx].ruletype.as_ref() {
                 let startname = &self.start_rule_name;
                 (
                     start_typename.clone(),
@@ -1113,8 +1128,9 @@ impl Grammar {
         let mut enum_variants_stream = quote! {
             #terms_enum_name(#token_typename),
         };
-        for name in self.rules_index.iter() {
-            if let Some(typename) = self.nonterm_typenames.get(name) {
+        for nonterm in self.nonterminals.iter() {
+            let name = &nonterm.name;
+            if let Some(typename) = &nonterm.ruletype {
                 enum_variants_stream.extend(quote! {
                     #name(#typename),
                 });

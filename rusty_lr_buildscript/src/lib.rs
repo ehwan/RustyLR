@@ -163,21 +163,21 @@ impl Builder {
         grammar: &rusty_lr_parser::grammar::Grammar,
         prefix_str: &str,
     ) {
-        let (rule_name, rules, rule) = grammar.get_rule_by_id(ruleid).expect("Rule not found");
-        if let Some(origin_span) = grammar.generated_root_span.get(rule_name) {
+        let (nonterm, local_rule) = grammar.get_rule_by_id(ruleid).expect("Rule not found");
+        if let Some(origin_span) = &nonterm.regex_span {
             let origin_range = origin_span.0.byte_range().start..origin_span.1.byte_range().end;
             labels.push(Label::primary(fileid, origin_range).with_message(format!(
                 "{}{} was generated here",
-                prefix_str, rules.pretty_name
+                prefix_str, nonterm.pretty_name,
             )));
         } else {
-            let (rule_begin, rule_end) = rules.rule_lines[rule].span_pair();
+            let (rule_begin, rule_end) = nonterm.rules[local_rule].span_pair();
             let rule_range = rule_begin.byte_range().start..rule_end.byte_range().end;
 
             labels.push(
-                Label::primary(fileid, rule_name.span().byte_range()).with_message(format!(
+                Label::primary(fileid, nonterm.name.span().byte_range()).with_message(format!(
                     "{}{} was defined here",
-                    prefix_str, rules.pretty_name
+                    prefix_str, nonterm.pretty_name
                 )),
             );
             labels.push(
@@ -596,8 +596,8 @@ impl Builder {
                         // `name` must not be generated rule,
                         // since it is programmically generated, it must have a proper reduce action
 
-                        let rule_line =
-                            &grammar.rules.get(name).unwrap().rule_lines[*rule_local_id];
+                        let rule_id = *grammar.nonterminals_index.get(name).unwrap();
+                        let rule_line = &grammar.nonterminals[rule_id].rules[*rule_local_id];
                         let rule_line_range = if rule_line.tokens.is_empty() {
                             rule_line.separator_span.byte_range()
                         } else {
@@ -715,33 +715,35 @@ impl Builder {
         // since many informations are removed in the rusty_lr_parser output
         let mut debug_comments = String::new();
         {
+            // to map production rule to its pretty name abbreviation
+            let term_mapper = |term_idx: usize| grammar.terminals[term_idx].name.to_string();
+            let nonterm_mapper = |nonterm: usize| grammar.nonterminals[nonterm].pretty_name.clone();
+
             let mut builder = grammar.create_grammar();
             debug_comments.push_str(format!("{:=^80}\n", "Grammar").as_str());
             for (rule, _) in builder.rules.iter() {
-                debug_comments.push_str(format!("{}\n", rule).as_str());
+                debug_comments.push_str(
+                    format!("{}\n", rule.clone().map(term_mapper, nonterm_mapper)).as_str(),
+                );
             }
-            let parser = if self.lalr {
-                match builder.build_lalr(Ident::new(
+            let augmented_rule_id = *grammar
+                .nonterminals_index
+                .get(&Ident::new(
                     rusty_lr_parser::utils::AUGMENTED_NAME,
                     Span::call_site(),
-                )) {
+                ))
+                .unwrap();
+            let parser = if self.lalr {
+                match builder.build_lalr(augmented_rule_id) {
                     Ok(parser) => parser,
                     Err(_) => unreachable!("Grammar building failed"),
                 }
             } else {
-                match builder.build(Ident::new(
-                    rusty_lr_parser::utils::AUGMENTED_NAME,
-                    Span::call_site(),
-                )) {
+                match builder.build(augmented_rule_id) {
                     Ok(parser) => parser,
                     Err(_) => unreachable!("Grammar building failed"),
                 }
             };
-
-            // to map production rule to its pretty name abbreviation
-            let term_mapper = |term: Ident| term.to_string();
-            let nonterm_mapper =
-                |nonterm: Ident| grammar.rules.get(&nonterm).unwrap().pretty_name.clone();
 
             // print note about shift/reduce conflict resolved with `%left` or `%right`
             if self.verbose_conflicts_resolving {
@@ -820,22 +822,19 @@ impl Builder {
                                 }
                             }
 
-                            if let Some(reduce_type_origin) = grammar.reduce_types_origin.get(term)
-                            {
-                                let range = reduce_type_origin.0.byte_range().start
-                                    ..reduce_type_origin.1.byte_range().end;
-                                let reduce_type = *grammar
-                                    .reduce_types
-                                    .get(term)
-                                    .expect("reduce_types not found");
+                            let term_info = &grammar.terminals[*term];
+                            if let Some(reduce_type_origin) = &term_info.reduce_type {
+                                let reduce_type = reduce_type_origin.reduce_type;
                                 let type_string = match reduce_type {
                                     rusty_lr_core::ReduceType::Left => "%left",
                                     rusty_lr_core::ReduceType::Right => "%right",
                                 };
-                                labels.push(Label::primary(file_id, range).with_message(format!(
-                                    "Reduce type was set as {} here",
-                                    type_string
-                                )));
+                                for (first, last) in reduce_type_origin.sources.iter() {
+                                    let range = first.byte_range().start..last.byte_range().end;
+                                    labels.push(Label::primary(file_id, range).with_message(
+                                        format!("Reduce type was set as {} here", type_string),
+                                    ));
+                                }
 
                                 let diag =
                                     Diagnostic::note().with_message(message).with_labels(labels);

@@ -3,7 +3,7 @@ use std::fmt::Display;
 use std::hash::Hash;
 
 /// Token represents a terminal or non-terminal symbol in the grammar.
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Token<Term, NonTerm> {
     Term(Term),
     NonTerm(NonTerm),

@@ -20,11 +20,11 @@ pub enum TerminalSetOrIdent {
 }
 
 impl TerminalSetOrIdent {
-    pub fn to_terminal_set(&self, grammar: &Grammar) -> Result<BTreeSet<Ident>, ParseError> {
+    pub fn to_terminal_set(&self, grammar: &Grammar) -> Result<BTreeSet<usize>, ParseError> {
         match self {
             TerminalSetOrIdent::Ident(ident) => {
-                if grammar.terminals.contains_key(ident) {
-                    Ok(BTreeSet::from([ident.clone()]))
+                if let Some(idx) = grammar.terminals_index.get(ident) {
+                    Ok(BTreeSet::from([*idx]))
                 } else {
                     Err(ParseError::TerminalNotDefined(ident.clone()))
                 }
@@ -149,8 +149,9 @@ impl PatternArgs {
             }),
             PatternArgs::Exclamation(pattern, _) => pattern.into_pattern(grammar, true),
             PatternArgs::TerminalSet(terminal_set) => {
+                let terminal_set = terminal_set.to_terminal_set(grammar)?;
                 let pattern = Pattern {
-                    pattern_type: PatternType::TerminalSet(terminal_set.to_terminal_set(grammar)?),
+                    pattern_type: PatternType::TerminalSet(terminal_set),
                     pretty_name: pretty_name.clone(),
                 };
                 if put_exclamation {

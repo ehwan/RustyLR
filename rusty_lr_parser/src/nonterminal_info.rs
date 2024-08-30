@@ -5,18 +5,18 @@ use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
-#[derive(Debug)]
-pub struct RuleLine {
+pub struct Rule {
     pub tokens: Vec<TokenMapped>,
     pub reduce_action: Option<TokenStream>,
+    /// span of '|' or ':' before this production rule
     pub separator_span: Span,
     /// force lookahead tokens for this pattern.
-    pub lookaheads: Option<BTreeSet<Ident>>,
+    pub lookaheads: Option<BTreeSet<usize>>,
     /// user assigned id for this rule line, currently not in use
     pub id: usize,
 }
 
-impl RuleLine {
+impl Rule {
     pub fn span_pair(&self) -> (Span, Span) {
         let begin = self.separator_span;
         let end = if let Some(token) = self.tokens.last() {
@@ -28,11 +28,20 @@ impl RuleLine {
     }
 }
 
-#[derive(Debug)]
-pub struct RuleLines {
-    pub rule_lines: Vec<RuleLine>,
+pub struct NonTerminalInfo {
+    pub name: Ident,
 
     /// Name of auto generated rule are in the format of `__AutoRule ...`
     /// So we need other abbreviation for auto generated rules.
     pub pretty_name: String,
+
+    /// The rule type of this non-terminal
+    pub ruletype: Option<TokenStream>,
+
+    /// Every set of production rules
+    pub rules: Vec<Rule>,
+
+    /// If this non-terminal is auto-generated from regex pattern,
+    /// the (begin, end) span-pair of the regex pattern.
+    pub regex_span: Option<(Span, Span)>,
 }

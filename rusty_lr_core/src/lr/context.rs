@@ -18,6 +18,8 @@ pub struct Context<S: Stack> {
 }
 
 impl<S: Stack> Context<S> {
+    /// Create a new context.
+    /// `state_stack` is initialized with 0 (root state).
     pub fn new() -> Self
     where
         S: Stack,
@@ -50,5 +52,14 @@ impl<S: Stack> Context<S> {
         TreeList {
             trees: self.tree_stack.clone(),
         }
+    }
+}
+
+impl<S: Stack> Default for Context<S>
+where
+    S: Stack,
+{
+    fn default() -> Self {
+        Self::new()
     }
 }

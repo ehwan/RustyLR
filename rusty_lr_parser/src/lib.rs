@@ -6,9 +6,10 @@
 pub mod emit;
 pub mod error;
 pub mod grammar;
+pub(crate) mod nonterminal_info;
 pub(crate) mod parser;
 pub(crate) mod pattern;
-pub(crate) mod rule;
+pub mod terminal_info;
 pub(crate) mod terminalset;
 pub(crate) mod token;
 pub mod utils;

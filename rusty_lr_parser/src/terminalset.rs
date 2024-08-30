@@ -23,34 +23,39 @@ impl std::fmt::Display for TerminalSetItem {
 }
 
 impl TerminalSetItem {
-    pub fn to_terminal_set(&self, grammar: &Grammar) -> Result<BTreeSet<Ident>, ParseError> {
+    pub fn to_terminal_set(&self, grammar: &Grammar) -> Result<BTreeSet<usize>, ParseError> {
         match self {
             TerminalSetItem::Terminal(terminal) => {
-                if grammar.terminals.contains_key(terminal) {
-                    Ok(BTreeSet::from([terminal.clone()]))
+                if let Some(idx) = grammar.terminals_index.get(terminal) {
+                    Ok(BTreeSet::from([*idx]))
                 } else {
                     Err(ParseError::TerminalNotDefined(terminal.clone()))
                 }
             }
             TerminalSetItem::Range(first, last) => {
-                let (first_index, first_stream) = match grammar.terminals.get(first) {
+                let first_index = match grammar.terminals_index.get(first) {
                     Some(f) => f,
                     None => return Err(ParseError::TerminalNotDefined(first.clone())),
                 };
-                let (last_index, last_stream) = match grammar.terminals.get(last) {
+                let last_index = match grammar.terminals_index.get(last) {
                     Some(l) => l,
                     None => return Err(ParseError::TerminalNotDefined(last.clone())),
                 };
                 if last_index < first_index {
                     return Err(ParseError::InvalidTerminalRange(
-                        (first.clone(), *first_index, first_stream.clone()),
-                        (last.clone(), *last_index, last_stream.clone()),
+                        (
+                            first.clone(),
+                            *first_index,
+                            grammar.terminals[*first_index].body.clone(),
+                        ),
+                        (
+                            last.clone(),
+                            *last_index,
+                            grammar.terminals[*last_index].body.clone(),
+                        ),
                     ));
                 }
-                Ok(grammar.terminals_index[*first_index..=*last_index]
-                    .iter()
-                    .cloned()
-                    .collect())
+                Ok((*first_index..=*last_index).collect())
             }
         }
     }
@@ -66,19 +71,23 @@ pub struct TerminalSet {
     pub close_span: Span,
 }
 impl TerminalSet {
-    pub fn to_terminal_set(&self, grammar: &Grammar) -> Result<BTreeSet<Ident>, ParseError> {
+    pub fn to_terminal_set(&self, grammar: &Grammar) -> Result<BTreeSet<usize>, ParseError> {
         let mut terminal_set = BTreeSet::new();
         for item in &self.items {
             let mut item_set = item.to_terminal_set(grammar)?;
             terminal_set.append(&mut item_set);
         }
         if self.negate {
-            let full_terminals: BTreeSet<_> = grammar.terminals.keys().cloned().collect();
+            let full_terminals: BTreeSet<usize> = (0..grammar.terminals.len()).collect();
             terminal_set = full_terminals.difference(&terminal_set).cloned().collect();
         }
 
         // exclude eof on any case
-        terminal_set.remove(&Ident::new(utils::EOF_NAME, Span::call_site()));
+        let eof_idx = grammar
+            .terminals_index
+            .get(&Ident::new(utils::EOF_NAME, Span::call_site()))
+            .unwrap();
+        terminal_set.remove(eof_idx);
         Ok(terminal_set)
     }
 }
