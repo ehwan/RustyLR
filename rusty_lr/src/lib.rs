@@ -148,27 +148,29 @@
 //! │   └─P
 //! │     └─Number
 //! │       ├─WS0
-//! │       │ └─_space_Star1
-//! │       │   └─_space_Plus0
-//! │       │     ├─_space_Plus0
+//! │       │ └─space*
+//! │       │   └─space+
+//! │       │     ├─space+
 //! │       │     │ └─' '
 //! │       │     └─' '
-//! │       ├─_Digit_Plus3
+//! │       ├─Digit+
 //! │       │ └─Digit
-//! │       │   └─_TerminalSet2
+//! │       │   └─[zero-nine]
 //! │       │     └─'1'
 //! │       └─WS0
-//! │         └─_space_Star1
-//! │           └─_space_Plus0
+//! │         └─space*
+//! │           └─space+
 //! │             └─' '
 //! ├─'+'
 //! ├─M
 //! │ └─P
 //! │   └─Number
 //! │     ├─WS0
-//! │     │ └─_space_Star1
-//! │     │   └─_space_Plus0
-//! │     │     ├─_space_Plus0
+//! │     │ └─space*
+//! │     │   └─space+
+//! │     │     ├─space+
+//! │     │     │ └─' '
+//! │     │     └─' '
 //! ... continue
 //! ```
 //!
