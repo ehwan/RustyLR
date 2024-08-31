@@ -4,6 +4,8 @@ use super::Context;
 
 #[cfg(feature = "tree")]
 use crate::Tree;
+#[cfg(feature = "tree")]
+use crate::TreeList;
 
 /// Trait for user-defined data in node.
 pub trait NodeData: Sized {
@@ -31,11 +33,11 @@ pub trait NodeData: Sized {
 pub struct Node<Data: NodeData> {
     /// parent node
     pub parent: Option<Rc<Node<Data>>>,
-    /// actual data(RuleType) of this node
-    pub data: Option<Data>,
     /// index of state in parser
     pub state: usize,
 
+    /// actual data(RuleType) of this node
+    pub data: Option<Data>,
     /// tree representation of this node
     #[cfg(feature = "tree")]
     pub tree: Option<Tree<Data::Term, Data::NonTerm>>,
@@ -46,8 +48,9 @@ impl<Data: NodeData> Node<Data> {
     pub fn new_root() -> Self {
         Self {
             parent: None,
-            data: None,
             state: 0,
+
+            data: None,
             #[cfg(feature = "tree")]
             tree: None,
         }
@@ -55,11 +58,25 @@ impl<Data: NodeData> Node<Data> {
 
     /// get token tree for this node
     #[cfg(feature = "tree")]
-    pub fn to_tree(&self) -> &Tree<Data::Term, Data::NonTerm>
-    where
-        Data::Term: Clone,
-        Data::NonTerm: Clone,
-    {
+    pub fn to_tree(&self) -> &Tree<Data::Term, Data::NonTerm> {
         self.tree.as_ref().unwrap()
     }
+}
+
+/// get sequence of trees from root to this node
+#[cfg(feature = "tree")]
+pub(crate) fn to_tree_list<Data: NodeData>(
+    mut node: Rc<Node<Data>>,
+) -> TreeList<Data::Term, Data::NonTerm>
+where
+    Data::Term: Clone,
+    Data::NonTerm: Clone,
+{
+    let mut trees = Vec::new();
+    while let Some(parent) = node.parent.as_ref() {
+        trees.push(node.to_tree().clone());
+        node = Rc::clone(parent);
+    }
+    trees.reverse();
+    TreeList { trees }
 }

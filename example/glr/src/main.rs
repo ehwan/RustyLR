@@ -10,7 +10,7 @@ fn main() {
         println!("feed: {}", ch);
         match p.feed(&mut c, ch) {
             Ok(_) => {
-                println!("nodes: {}", c.current_nodes.len());
+                println!("nodes: {}", c.len_paths());
                 for tree_stream in c.to_tree_lists().into_iter() {
                     println!("{}", tree_stream);
                 }
@@ -24,21 +24,16 @@ fn main() {
     println!("feed eof");
     match p.feed(&mut c, '\0') {
         Ok(_) => {
-            println!("nodes: {}", c.current_nodes.len());
+            println!("nodes: {}", c.len_paths());
         }
         Err(e) => {
             println!("Error: {}", e);
         }
     }
 
-    let result = match c.accept() {
-        Ok(n) => n,
-        Err(e) => {
-            println!("Error: {}", e);
-            return;
-        }
-    };
-    println!("Result: {}", result);
+    for result in c.accept_all() {
+        println!("Result: {}", result);
+    }
 
     // for mut n in c.current_nodes.nodes.into_iter() {
     //     loop {

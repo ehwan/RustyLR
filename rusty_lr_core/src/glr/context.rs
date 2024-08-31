@@ -3,6 +3,10 @@ use std::rc::Rc;
 use super::Node;
 use super::{MultiplePathError, NodeData};
 
+use crate::HashMap;
+
+#[cfg(feature = "tree")]
+use super::node::to_tree_list;
 #[cfg(feature = "tree")]
 use crate::TreeList;
 
@@ -10,7 +14,7 @@ use crate::TreeList;
 /// This handles the divergence and merging of the parser.
 pub struct Context<Data: NodeData> {
     /// each element represents an end-point of diverged paths.
-    pub current_nodes: Vec<Rc<Node<Data>>>,
+    pub(crate) current_nodes: HashMap<usize, Vec<Rc<Node<Data>>>>,
 
     /// For temporary use. store state of each node in `current_nodes`.
     /// But we don't want to reallocate every `feed` call
@@ -30,61 +34,90 @@ impl<Data: NodeData> Context<Data> {
     /// `current_nodes` is initialized with a root node.
     pub fn new() -> Self {
         Context {
-            current_nodes: vec![Rc::new(Node::new_root())],
+            current_nodes: HashMap::from_iter([(0, vec![Rc::new(Node::new_root())])]),
             state_list: Vec::new(),
             reduce_errors: Vec::new(),
             reduce_args: Vec::new(),
         }
     }
 
-    /// after feeding all tokens (include EOF), call this function to get result.
+    /// get number of diverged paths
+    pub fn len_paths(&self) -> usize {
+        self.current_nodes
+            .iter()
+            .map(|(_, nodes)| nodes.len())
+            .sum()
+    }
+
+    /// After feeding all tokens (include EOF), call this function to get result.
+    /// Get value of start symbol, if there is only one path.
     pub fn accept(self) -> Result<Data::StartType, MultiplePathError>
     where
-        Data: NodeData,
-        Data::Term: Clone,
-        Data::NonTerm: Clone,
+        Data: Clone,
     {
-        if self.current_nodes.len() == 1 {
-            // since `eof` is feeded, there must be only one node in the set.
-            // and it must be
+        if self.len_paths() == 1 {
+            // if there is only one path, we can get the result
+
+            // since `eof` is feeded, the node graph should be like this:
             // Augmented -> Start EOF
             //                    ^^^ here, current_node
 
-            // we have to extract data from `Start` node
-            let mut it = self.current_nodes.into_iter();
-            let eof_node = Rc::into_inner(it.next().unwrap()).unwrap();
-            let data = Rc::into_inner(eof_node.parent.unwrap())
+            let rc_eof_node = self
+                .current_nodes
+                .into_iter()
+                .next()
                 .unwrap()
-                .data
+                .1
+                .into_iter()
+                .next()
                 .unwrap();
-            Ok(data.into_start())
+            let rc_data_node = Rc::clone(rc_eof_node.parent.as_ref().unwrap());
+            let data_node = match Rc::try_unwrap(rc_data_node) {
+                Ok(data_node) => data_node.data.unwrap(),
+                Err(rc_data_node) => rc_data_node.data.as_ref().unwrap().clone(),
+            };
+            Ok(data_node.into_start())
         } else {
-            Err(MultiplePathError)
+            return Err(MultiplePathError);
         }
     }
 
+    /// After feeding all tokens (include EOF), call this function to get result.
+    /// Unlike `accept`, this function will return all possible results if there are multiple paths.
+    pub fn accept_all(self) -> impl Iterator<Item = Data::StartType>
+    where
+        Data: Clone,
+    {
+        // since `eof` is feeded, the node graph should be like this:
+        // Augmented -> Start EOF
+        //                    ^^^ here, current_node
+        self.current_nodes.into_iter().flat_map(|(_, nodes)| {
+            nodes.into_iter().map(|rc_eof_node| {
+                let rc_data_node = Rc::clone(rc_eof_node.parent.as_ref().unwrap());
+                drop(rc_eof_node);
+
+                let data_node = match Rc::try_unwrap(rc_data_node) {
+                    Ok(data_node) => data_node.data.unwrap(),
+                    Err(rc_data_node) => rc_data_node.data.as_ref().unwrap().clone(),
+                };
+                data_node.into_start()
+            })
+        })
+    }
+
     /// For debugging.
-    /// Get all token trees (from the root) for every diverged path.
+    /// Get all sequence of token trees (from root to current node) for every diverged path.
     #[cfg(feature = "tree")]
-    pub fn to_tree_lists(&self) -> Vec<TreeList<Data::Term, Data::NonTerm>>
+    pub fn to_tree_lists(&self) -> impl Iterator<Item = TreeList<Data::Term, Data::NonTerm>>
     where
         Data: NodeData,
         Data::Term: Clone,
         Data::NonTerm: Clone,
     {
         self.current_nodes
-            .iter()
-            .map(|node| {
-                let mut trees = Vec::new();
-                let mut current_node = Rc::clone(node);
-                while let Some(parent) = &current_node.parent {
-                    trees.push(current_node.to_tree().clone());
-                    current_node = Rc::clone(parent);
-                }
-                trees.reverse();
-                TreeList { trees }
-            })
-            .collect()
+            .clone()
+            .into_iter()
+            .flat_map(|(_, nodes)| nodes.into_iter().map(|node| to_tree_list(node)))
     }
 }
 

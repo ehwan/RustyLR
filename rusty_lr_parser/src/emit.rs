@@ -607,7 +607,7 @@ impl Grammar {
         let mut stack_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
 
         // (<RuleType as ToString>, stack_name) map
-        let mut ruletype_stackname_map = HashMap::default();
+        let mut ruletype_stackname_map: HashMap<String, Ident> = HashMap::default();
 
         // (stack_name, TokenStream for typename) sorted in insertion order
         // for consistent output
@@ -934,7 +934,7 @@ impl Grammar {
         let mut variant_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
 
         // (<RuleType as ToString>, variant_name) map
-        let mut ruletype_variant_map = HashMap::default();
+        let mut ruletype_variant_map: HashMap<String, Ident> = HashMap::default();
 
         // (variant_name, TokenStream for typename) sorted in insertion order
         // for consistent output

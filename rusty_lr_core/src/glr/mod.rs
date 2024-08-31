@@ -5,6 +5,7 @@ pub(crate) mod state;
 
 pub mod node;
 
+use crate::HashMap;
 pub use context::Context;
 pub use error::InvalidTerminalError;
 pub use error::MultiplePathError;
@@ -36,9 +37,9 @@ where
     context.reduce_errors.clear();
     context.state_list.clear();
     context.state_list.reserve(current_nodes.len());
-    for node in current_nodes.into_iter() {
-        context.state_list.push(node.state);
-        feed_impl(parser, node, context, &term, userdata);
+    for (state, nodes) in current_nodes.into_iter() {
+        context.state_list.push(state);
+        feed_impl(parser, state, nodes, context, &term, userdata);
     }
     if context.current_nodes.is_empty() {
         let mut expected = parser.get_states()[context.state_list[0]].expected();
@@ -60,7 +61,8 @@ where
 /// feed one terminal to parser, and update state stack
 fn feed_impl<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
     parser: &P,
-    node: Rc<Node<Data>>,
+    state: usize,
+    nodes: Vec<Rc<Node<Data>>>,
     context: &mut Context<Data>,
     term: &P::Term,
     userdata: &mut Data::UserData,
@@ -68,18 +70,22 @@ fn feed_impl<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + C
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
-    if let Some(next_state_id) = parser.get_states()[node.state].shift_goto_term(term) {
-        let new_node = Node {
-            parent: Some(Rc::clone(&node)),
-            data: Some(Data::new_term(term.clone())),
-            state: next_state_id,
-            #[cfg(feature = "tree")]
-            tree: Some(Tree::Terminal(term.clone())),
-        };
-        context.current_nodes.push(Rc::new(new_node));
+    if let Some(next_state_id) = parser.get_states()[state].shift_goto_term(term) {
+        let next_nodes = context.current_nodes.entry(next_state_id).or_default();
+        for node in nodes.iter() {
+            let new_node = Node {
+                parent: Some(Rc::clone(&node)),
+                state: next_state_id,
+
+                data: Some(Data::new_term(term.clone())),
+                #[cfg(feature = "tree")]
+                tree: Some(Tree::Terminal(term.clone())),
+            };
+            next_nodes.push(Rc::new(new_node));
+        }
     }
 
-    lookahead_impl(parser, node, context, term, userdata);
+    lookahead_impl(parser, state, nodes, context, term, userdata);
 }
 
 #[cfg(feature = "tree")]
@@ -156,7 +162,8 @@ where
 /// give lookahead token to parser, and check if there is any reduce action
 fn lookahead_impl<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
     parser: &P,
-    node: Rc<Node<Data>>,
+    state: usize,
+    nodes: Vec<Rc<Node<Data>>>,
     context: &mut Context<Data>,
     term: &P::Term,
     userdata: &mut Data::UserData,
@@ -164,110 +171,80 @@ fn lookahead_impl<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
-    if let Some(reduce_rules) = parser.get_states()[node.state].reduce(term) {
-        for reduce_rule in reduce_rules.iter().skip(1).copied() {
-            let reduce_args = clone_pop_nodes(Rc::clone(&node), reduce_rule, parser, context);
+    let mut reduced_nodes: HashMap<usize, Vec<Rc<Node<Data>>>> = HashMap::default();
+    if let Some(reduce_rules) = parser.get_states()[state].reduce(term) {
+        for node in nodes.into_iter() {
+            for reduce_rule in reduce_rules.iter().skip(1).copied() {
+                context.reduce_args.clear();
+                let data_extracted =
+                    clone_pop_nodes(Rc::clone(&node), reduce_rule, parser, context);
 
-            #[cfg(feature = "tree")]
-            let (parent, tree) = reduce_args;
-            #[cfg(not(feature = "tree"))]
-            let parent = reduce_args;
+                #[cfg(feature = "tree")]
+                let (parent, tree) = data_extracted;
+                #[cfg(not(feature = "tree"))]
+                let parent = data_extracted;
 
-            match Data::new_nonterm(reduce_rule, context, term, userdata) {
-                Ok(new_data) => {
-                    if let Some(nonterm_shift_state) = parser.get_states()[parent.state]
-                        .shift_goto_nonterm(&parser.get_rules()[reduce_rule].name)
-                    {
-                        let new_node = Node {
-                            parent: Some(parent),
-                            data: Some(new_data),
-                            state: nonterm_shift_state,
-                            #[cfg(feature = "tree")]
-                            tree: Some(tree),
-                        };
+                match Data::new_nonterm(reduce_rule, context, term, userdata) {
+                    Ok(new_data) => {
+                        if let Some(nonterm_shift_state) = parser.get_states()[parent.state]
+                            .shift_goto_nonterm(&parser.get_rules()[reduce_rule].name)
+                        {
+                            let new_node = Node {
+                                parent: Some(parent),
+                                data: Some(new_data),
+                                state: nonterm_shift_state,
+                                #[cfg(feature = "tree")]
+                                tree: Some(tree),
+                            };
 
-                        feed_impl(parser, Rc::new(new_node), context, term, userdata);
+                            reduced_nodes
+                                .entry(nonterm_shift_state)
+                                .or_default()
+                                .push(Rc::new(new_node));
+                        }
+                    }
+                    Err(err) => {
+                        context.reduce_errors.push(err);
                     }
                 }
-                Err(err) => {
-                    context.reduce_errors.push(err);
+            }
+            // Do not clone for the first reduce rule
+            {
+                let reduce_args = clone_pop_nodes(node, reduce_rules[0], parser, context);
+
+                #[cfg(feature = "tree")]
+                let (parent, tree) = reduce_args;
+                #[cfg(not(feature = "tree"))]
+                let parent = reduce_args;
+
+                match Data::new_nonterm(reduce_rules[0], context, term, userdata) {
+                    Ok(new_data) => {
+                        if let Some(nonterm_shift_state) = parser.get_states()[parent.state]
+                            .shift_goto_nonterm(&parser.get_rules()[reduce_rules[0]].name)
+                        {
+                            let new_node = Node {
+                                parent: Some(parent),
+                                data: Some(new_data),
+                                state: nonterm_shift_state,
+                                #[cfg(feature = "tree")]
+                                tree: Some(tree),
+                            };
+
+                            reduced_nodes
+                                .entry(nonterm_shift_state)
+                                .or_default()
+                                .push(Rc::new(new_node));
+                        }
+                    }
+                    Err(err) => {
+                        context.reduce_errors.push(err);
+                    }
                 }
             }
         }
-        // Do not clone for the first reduce rule
-        {
-            let reduce_args = clone_pop_nodes(node, reduce_rules[0], parser, context);
-
-            #[cfg(feature = "tree")]
-            let (parent, tree) = reduce_args;
-            #[cfg(not(feature = "tree"))]
-            let parent = reduce_args;
-
-            match Data::new_nonterm(reduce_rules[0], context, term, userdata) {
-                Ok(new_data) => {
-                    if let Some(nonterm_shift_state) = parser.get_states()[parent.state]
-                        .shift_goto_nonterm(&parser.get_rules()[reduce_rules[0]].name)
-                    {
-                        let new_node = Node {
-                            parent: Some(parent),
-                            data: Some(new_data),
-                            state: nonterm_shift_state,
-                            #[cfg(feature = "tree")]
-                            tree: Some(tree),
-                        };
-
-                        feed_impl(parser, Rc::new(new_node), context, term, userdata);
-                    }
-                }
-                Err(err) => {
-                    context.reduce_errors.push(err);
-                }
-            }
-        }
     }
-}
 
-/// For debugging.
-/// Print last n tokens for node.
-#[cfg(feature = "tree")]
-pub fn backtrace<Data: NodeData>(num_tokens: usize, mut node: Rc<Node<Data>>)
-where
-    Data::Term: Clone + std::fmt::Display,
-    Data::NonTerm: Clone + std::fmt::Display,
-{
-    let mut nodes = Vec::new();
-    while let Some(par) = node.parent.clone() {
-        nodes.push(node);
-        node = par;
-        if nodes.len() == num_tokens {
-            break;
-        }
-    }
-    for n in nodes.into_iter().rev() {
-        let tree = n.tree.clone().unwrap();
-        print!("{}", tree);
-    }
-}
-
-/// For debugging.
-/// Print last n tokens for node.
-/// This uses `Debug` trait to print tokens.
-#[cfg(feature = "tree")]
-pub fn backtrace_debug<Data: NodeData>(num_tokens: usize, mut node: Rc<Node<Data>>)
-where
-    Data::Term: Clone + std::fmt::Debug,
-    Data::NonTerm: Clone + std::fmt::Debug,
-{
-    let mut nodes = Vec::new();
-    while let Some(par) = node.parent.clone() {
-        nodes.push(node);
-        node = par;
-        if nodes.len() == num_tokens {
-            break;
-        }
-    }
-    for n in nodes.into_iter().rev() {
-        let tree = n.tree.clone().unwrap();
-        print!("{:?}", tree);
+    for (state, nodes) in reduced_nodes.into_iter() {
+        feed_impl(parser, state, nodes, context, term, userdata);
     }
 }
