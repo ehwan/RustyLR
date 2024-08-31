@@ -93,3 +93,12 @@ impl<Data: NodeData> Default for Context<Data> {
         Self::new()
     }
 }
+
+impl<Data: NodeData> Clone for Context<Data> {
+    fn clone(&self) -> Self {
+        Context {
+            current_nodes: self.current_nodes.clone(),
+            ..Default::default()
+        }
+    }
+}
