@@ -19,8 +19,13 @@ lr1! {
     %token seven '7';
     %token eight '8';
     %token nine '9';
+    %token space ' ';
+
+    WS0: space*;
 
     Digit(char): ch=[zero-nine] { ch };
+
+    Number(i32): WS0 Digit+ WS0 { Digit.into_iter().collect::<String>().parse().unwrap() };
 
     E(i32) : E plus e2=E
             {
@@ -43,7 +48,7 @@ lr1! {
                 // }
                 E * e2
             }
-           | Digit { Digit as i32 - '0' as i32 }
+           | Number
            ;
 
 }
