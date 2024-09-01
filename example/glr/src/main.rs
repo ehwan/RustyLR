@@ -11,9 +11,7 @@ fn main() {
         match p.feed(&mut c, ch) {
             Ok(_) => {
                 println!("nodes: {}", c.len_paths());
-                for tree_stream in c.to_tree_lists().into_iter() {
-                    println!("{}", tree_stream);
-                }
+                println!("{:?}", c);
             }
             Err(e) => {
                 println!("Error: {}", e);

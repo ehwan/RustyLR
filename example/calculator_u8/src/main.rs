@@ -16,8 +16,7 @@ fn main() {
             }
         }
     }
-    context.to_tree_list().pretty_print_debug(2);
-    // println!("{:?}", context.to_tree_list());
+    println!("{:?}", context);
     parser.feed(&mut context, 0 as char, &mut userdata).unwrap(); // feed EOF
 
     let result = context.accept(); // get value of start 'E'

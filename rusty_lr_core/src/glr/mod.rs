@@ -11,6 +11,7 @@ pub use error::InvalidTerminalError;
 pub use error::MultiplePathError;
 pub use node::Node;
 pub use node::NodeData;
+pub use node::NodeRefIterator;
 pub use parser::Parser;
 pub use state::State;
 
@@ -48,6 +49,7 @@ where
                     let mut shift_for_this_node = false;
 
                     // In reduce action, we call `Rc::try_unwrap` to avoid `clone()` data if possible.
+                    // So we need to avoid `Rc::clone()` if possible.
                     for reduce_rule in reduce_rules.iter().skip(1).copied() {
                         shift_for_this_node |= reduce(
                             parser,

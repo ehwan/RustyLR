@@ -234,6 +234,7 @@ impl<Term: Debug, NonTerm: Debug> Debug for Tree<Term, NonTerm> {
 }
 
 /// List of [`Tree`]
+#[derive(Clone)]
 pub struct TreeList<Term, NonTerm> {
     pub trees: Vec<Tree<Term, NonTerm>>,
 }

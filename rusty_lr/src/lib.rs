@@ -10,13 +10,13 @@
 //! #### `features` in `Cargo.toml`
 //!  - `build` : Enable buildscript tools.
 //!  - `fxhash` : In parser table, replace `std::collections::HashMap` with `FxHashMap` from [`rustc-hash`](https://github.com/rust-lang/rustc-hash).
-//!  - `tree` : Enable automatic Tree construction.
+//!  - `tree` : Enable automatic syntax tree construction.
 //!     This feature should be used on debug purpose only, since it will consume much more memory and time.
 //!
 //! ## Features
 //!  - pure Rust implementation
-//!  - readable error messages, both for grammar building and parsing
-//!  - compile-time DFA construction from CFGs
+//!  - readable error messages, for resolving conflicts in the grammar
+//!  - pretty-printed syntax tree
 //!  - customizable reduce action
 //!  - resolving conflicts of ambiguous grammar
 //!  - regex patterns partially supported
@@ -128,17 +128,16 @@
 //! ```
 //!
 //!
-//! ## Syntax Tree
-//! With the `tree` feature, `feed()` function will automatically construct the parse tree.
-//! By calling `context.to_tree_list()`,
-//! you can get current syntax tree. Simply print the tree list with `Display` or `Debug` will give you the pretty-printed tree.
+//! ## Debugging with Syntax Tree
+//! With the `tree` feature, `feed()` function will automatically construct the syntax tree.
+//! `Context` will implement `Display` and `Debug` trait, and will print the pretty-printed syntax tree.
 //!
 //! ```rust
 //! let parser = Parser::new();
 //! let mut context = parser.begin();
 //! /// feed tokens...
-//! println!( "{:?}", context.to_tree_list() ); // print tree list with `Debug` trait
-//! println!( "{}", context.to_tree_list() );   // print tree list with `Display` trait
+//! println!( "{:?}", context ); // print tree list with `Debug` trait
+//! println!( "{}", context );   // print tree list with `Display` trait
 //! ```
 //!
 //! ```text
@@ -175,7 +174,7 @@
 //! ```
 //!
 //! Note that default `Display` and `Debug` trait will print the whole tree recursively.
-//! If you want to limit the depth of the printed tree, you can use [`Tree::pretty_print()`] or [`TreeList::pretty_print()`] function with `max_level` parameter.
+//! If you want to limit the depth of the printed tree, you can use `.pretty_print()` function with `max_level` parameter.
 //!
 //!
 //! ## GLR Parser

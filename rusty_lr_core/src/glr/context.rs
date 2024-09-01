@@ -6,8 +6,6 @@ use super::{MultiplePathError, NodeData};
 use crate::HashMap;
 
 #[cfg(feature = "tree")]
-use super::node::to_tree_list;
-#[cfg(feature = "tree")]
 use crate::TreeList;
 
 /// Context trait for GLR parser.
@@ -41,12 +39,28 @@ impl<Data: NodeData> Context<Data> {
         }
     }
 
-    /// get number of diverged paths
+    /// Get number of diverged paths
     pub fn len_paths(&self) -> usize {
+        self.current_nodes.values().map(|nodes| nodes.len()).sum()
+    }
+
+    /// Get index of states in parser for every diverged paths.
+    pub fn states(&self) -> impl Iterator<Item = &usize> {
+        self.current_nodes.keys()
+    }
+
+    /// Get every nodes in current diverged paths.
+    /// Note that node is tail of the path.
+    pub fn nodes(&self) -> impl Iterator<Item = &Rc<Node<Data>>> {
+        self.current_nodes.values().flat_map(|nodes| nodes.iter())
+    }
+
+    /// Get every nodes in current diverged paths.
+    /// Note that node is tail of the path.
+    pub fn into_nodes(self) -> impl Iterator<Item = Rc<Node<Data>>> {
         self.current_nodes
-            .iter()
-            .map(|(_, nodes)| nodes.len())
-            .sum()
+            .into_values()
+            .flat_map(|nodes| nodes.into_iter())
     }
 
     /// After feeding all tokens (include EOF), call this function to get result.
@@ -78,7 +92,7 @@ impl<Data: NodeData> Context<Data> {
             };
             Ok(data_node.into_start())
         } else {
-            return Err(MultiplePathError);
+            Err(MultiplePathError)
         }
     }
 
@@ -108,16 +122,47 @@ impl<Data: NodeData> Context<Data> {
     /// For debugging.
     /// Get all sequence of token trees (from root to current node) for every diverged path.
     #[cfg(feature = "tree")]
-    pub fn to_tree_lists(&self) -> impl Iterator<Item = TreeList<Data::Term, Data::NonTerm>>
+    pub fn to_tree_lists<'a>(
+        &'a self,
+    ) -> impl Iterator<Item = TreeList<Data::Term, Data::NonTerm>> + 'a
     where
-        Data: NodeData,
         Data::Term: Clone,
         Data::NonTerm: Clone,
     {
-        self.current_nodes
-            .clone()
-            .into_iter()
-            .flat_map(|(_, nodes)| nodes.into_iter().map(|node| to_tree_list(node)))
+        self.nodes().map(|node| node.to_tree_list())
+    }
+    /// For debugging.
+    /// Get all sequence of token trees (from root to current node) for every diverged path.
+    #[cfg(feature = "tree")]
+    pub fn into_tree_lists(self) -> impl Iterator<Item = TreeList<Data::Term, Data::NonTerm>>
+    where
+        Data::Term: Clone,
+        Data::NonTerm: Clone,
+    {
+        self.into_nodes().map(|node| node.to_tree_list())
+    }
+
+    /// Get all sequence of data (from root to current node) for every diverged path.
+    pub fn to_data_lists(&self) -> impl Iterator<Item = Vec<Data>> + '_
+    where
+        Data: Clone,
+    {
+        self.nodes().map(|node| {
+            node.iter()
+                .map(|node| node.data.as_ref().unwrap().clone())
+                .collect()
+        })
+    }
+    /// Get all sequence of data (from root to current node) for every diverged path.
+    pub fn into_data_lists(self) -> impl Iterator<Item = Vec<Data>>
+    where
+        Data: Clone,
+    {
+        self.into_nodes().map(|node| {
+            node.iter()
+                .map(|node| node.data.as_ref().unwrap().clone())
+                .collect()
+        })
     }
 }
 
@@ -133,5 +178,34 @@ impl<Data: NodeData> Clone for Context<Data> {
             current_nodes: self.current_nodes.clone(),
             ..Default::default()
         }
+    }
+}
+
+#[cfg(feature = "tree")]
+impl<Data: NodeData> std::fmt::Display for Context<Data>
+where
+    Data::Term: std::fmt::Display + Clone,
+    Data::NonTerm: std::fmt::Display + Clone,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for (i, path) in self.to_tree_lists().enumerate() {
+            writeln!(f, "Path {}:", i)?;
+            writeln!(f, "{}", path)?;
+        }
+        Ok(())
+    }
+}
+#[cfg(feature = "tree")]
+impl<Data: NodeData> std::fmt::Debug for Context<Data>
+where
+    Data::Term: std::fmt::Debug + Clone,
+    Data::NonTerm: std::fmt::Debug + Clone,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for (i, path) in self.to_tree_lists().enumerate() {
+            writeln!(f, "Path {}:", i)?;
+            writeln!(f, "{:?}", path)?;
+        }
+        Ok(())
     }
 }
