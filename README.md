@@ -300,10 +300,11 @@ the parser will diverge into multiple states, and will try every paths until it 
 Of course, there must be single unique path left at the end of parsing (the point where you feed `eof` token).
 
 ### Resolving Ambiguities
+In GLR parser, there can be both shift/reduce action possible at the same time, this leads to ambiguity of the grammar.
 You can resolve the ambiguties through the [reduce action](#reduceaction-optional).
-Simply, returning `Result::Err(Error)` from the reduce action will revoke current path.
-The `Error` variant type can be defined by [`%err`](#error-type-optional) directive.
-And, setting predefined variable `shift: &mut bool` to `false` will revoke the shift action with lookahead token.
+ - Returning `Result::Err(Error)` from the reduce action will revoke current reducing path.
+   The `Error` variant type can be defined by [`%err`](#error-type-optional) directive.
+ - Setting predefined variable `shift: &mut bool` to `false` will revoke the shift action with lookahead token.
 
 Consider the following example:
 ```rust
