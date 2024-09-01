@@ -32,15 +32,91 @@ where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
-    let current_nodes = std::mem::take(&mut context.current_nodes);
-    context.current_nodes.reserve(current_nodes.len());
-    context.reduce_errors.clear();
+    let mut reduce_nodes = std::mem::take(&mut context.current_nodes);
+
     context.state_list.clear();
-    context.state_list.reserve(current_nodes.len());
-    for (state, nodes) in current_nodes.into_iter() {
-        context.state_list.push(state);
-        feed_impl(parser, state, nodes, context, &term, userdata);
+    context.reduce_errors.clear();
+
+    // BFS reduce
+    while !reduce_nodes.is_empty() {
+        let mut reduce_nodes_pong: HashMap<usize, Vec<Rc<Node<Data>>>> = HashMap::default();
+        for (state, nodes) in reduce_nodes.into_iter() {
+            let next_term_shift_state = parser.get_states()[state].shift_goto_term(&term);
+            context.state_list.push(state);
+            if let Some(reduce_rules) = parser.get_states()[state].reduce(&term) {
+                for node in nodes.into_iter() {
+                    let mut shift_for_this_node = false;
+
+                    // In reduce action, we call `Rc::try_unwrap` to avoid `clone()` data if possible.
+                    for reduce_rule in reduce_rules.iter().skip(1).copied() {
+                        shift_for_this_node |= reduce(
+                            parser,
+                            reduce_rule,
+                            Rc::clone(&node),
+                            context,
+                            &mut reduce_nodes_pong,
+                            &term,
+                            userdata,
+                        );
+                    }
+                    if let Some(next_term_shift_state) = next_term_shift_state {
+                        shift_for_this_node |= reduce(
+                            parser,
+                            reduce_rules[0],
+                            Rc::clone(&node),
+                            context,
+                            &mut reduce_nodes_pong,
+                            &term,
+                            userdata,
+                        );
+                        if shift_for_this_node {
+                            let next_node = Node {
+                                parent: Some(node),
+                                state: next_term_shift_state,
+                                data: Some(Data::new_term(term.clone())),
+                                #[cfg(feature = "tree")]
+                                tree: Some(Tree::new_terminal(term.clone())),
+                            };
+
+                            context
+                                .current_nodes
+                                .entry(next_term_shift_state)
+                                .or_default()
+                                .push(Rc::new(next_node));
+                        }
+                    } else {
+                        reduce(
+                            parser,
+                            reduce_rules[0],
+                            node,
+                            context,
+                            &mut reduce_nodes_pong,
+                            &term,
+                            userdata,
+                        );
+                    }
+                }
+            } else if let Some(next_term_shift_state) = next_term_shift_state {
+                for node in nodes.into_iter() {
+                    let next_node = Node {
+                        parent: Some(node),
+                        state: next_term_shift_state,
+                        data: Some(Data::new_term(term.clone())),
+                        #[cfg(feature = "tree")]
+                        tree: Some(Tree::new_terminal(term.clone())),
+                    };
+
+                    context
+                        .current_nodes
+                        .entry(next_term_shift_state)
+                        .or_default()
+                        .push(Rc::new(next_node));
+                }
+            }
+        }
+        reduce_nodes = reduce_nodes_pong;
     }
+
     if context.current_nodes.is_empty() {
         let mut expected = parser.get_states()[context.state_list[0]].expected();
         for state in context.state_list.iter().skip(1) {
@@ -57,35 +133,6 @@ where
     } else {
         Ok(())
     }
-}
-/// feed one terminal to parser, and update state stack
-fn feed_impl<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
-    parser: &P,
-    state: usize,
-    nodes: Vec<Rc<Node<Data>>>,
-    context: &mut Context<Data>,
-    term: &P::Term,
-    userdata: &mut Data::UserData,
-) where
-    P::Term: Hash + Eq + Clone,
-    P::NonTerm: Hash + Eq + Clone,
-{
-    if let Some(next_state_id) = parser.get_states()[state].shift_goto_term(term) {
-        let next_nodes = context.current_nodes.entry(next_state_id).or_default();
-        for node in nodes.iter() {
-            let new_node = Node {
-                parent: Some(Rc::clone(&node)),
-                state: next_state_id,
-
-                data: Some(Data::new_term(term.clone())),
-                #[cfg(feature = "tree")]
-                tree: Some(Tree::Terminal(term.clone())),
-            };
-            next_nodes.push(Rc::new(new_node));
-        }
-    }
-
-    lookahead_impl(parser, state, nodes, context, term, userdata);
 }
 
 #[cfg(feature = "tree")]
@@ -158,93 +205,51 @@ where
         current_node
     }
 }
-
-/// give lookahead token to parser, and check if there is any reduce action
-fn lookahead_impl<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
+/// give lookahead token to parser, and check if there is any reduce action.
+/// returns false if shift action is revoked
+fn reduce<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
     parser: &P,
-    state: usize,
-    nodes: Vec<Rc<Node<Data>>>,
+    reduce_rule: usize,
+    node: Rc<Node<Data>>,
     context: &mut Context<Data>,
+    out: &mut HashMap<usize, Vec<Rc<Node<Data>>>>,
     term: &P::Term,
     userdata: &mut Data::UserData,
-) where
+) -> bool
+where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
-    let mut reduced_nodes: HashMap<usize, Vec<Rc<Node<Data>>>> = HashMap::default();
-    if let Some(reduce_rules) = parser.get_states()[state].reduce(term) {
-        for node in nodes.into_iter() {
-            for reduce_rule in reduce_rules.iter().skip(1).copied() {
-                context.reduce_args.clear();
-                let data_extracted =
-                    clone_pop_nodes(Rc::clone(&node), reduce_rule, parser, context);
+    context.reduce_args.clear();
+    let data_extracted = clone_pop_nodes(Rc::clone(&node), reduce_rule, parser, context);
 
-                #[cfg(feature = "tree")]
-                let (parent, tree) = data_extracted;
-                #[cfg(not(feature = "tree"))]
-                let parent = data_extracted;
+    #[cfg(feature = "tree")]
+    let (parent, tree) = data_extracted;
+    #[cfg(not(feature = "tree"))]
+    let parent = data_extracted;
 
-                match Data::new_nonterm(reduce_rule, context, term, userdata) {
-                    Ok(new_data) => {
-                        if let Some(nonterm_shift_state) = parser.get_states()[parent.state]
-                            .shift_goto_nonterm(&parser.get_rules()[reduce_rule].name)
-                        {
-                            let new_node = Node {
-                                parent: Some(parent),
-                                data: Some(new_data),
-                                state: nonterm_shift_state,
-                                #[cfg(feature = "tree")]
-                                tree: Some(tree),
-                            };
-
-                            reduced_nodes
-                                .entry(nonterm_shift_state)
-                                .or_default()
-                                .push(Rc::new(new_node));
-                        }
-                    }
-                    Err(err) => {
-                        context.reduce_errors.push(err);
-                    }
-                }
-            }
-            // Do not clone for the first reduce rule
+    let mut do_shift = true;
+    match Data::new_nonterm(reduce_rule, context, &mut do_shift, term, userdata) {
+        Ok(new_data) => {
+            if let Some(nonterm_shift_state) = parser.get_states()[parent.state]
+                .shift_goto_nonterm(&parser.get_rules()[reduce_rule].name)
             {
-                let reduce_args = clone_pop_nodes(node, reduce_rules[0], parser, context);
+                let new_node = Node {
+                    parent: Some(parent),
+                    data: Some(new_data),
+                    state: nonterm_shift_state,
+                    #[cfg(feature = "tree")]
+                    tree: Some(tree),
+                };
 
-                #[cfg(feature = "tree")]
-                let (parent, tree) = reduce_args;
-                #[cfg(not(feature = "tree"))]
-                let parent = reduce_args;
-
-                match Data::new_nonterm(reduce_rules[0], context, term, userdata) {
-                    Ok(new_data) => {
-                        if let Some(nonterm_shift_state) = parser.get_states()[parent.state]
-                            .shift_goto_nonterm(&parser.get_rules()[reduce_rules[0]].name)
-                        {
-                            let new_node = Node {
-                                parent: Some(parent),
-                                data: Some(new_data),
-                                state: nonterm_shift_state,
-                                #[cfg(feature = "tree")]
-                                tree: Some(tree),
-                            };
-
-                            reduced_nodes
-                                .entry(nonterm_shift_state)
-                                .or_default()
-                                .push(Rc::new(new_node));
-                        }
-                    }
-                    Err(err) => {
-                        context.reduce_errors.push(err);
-                    }
-                }
+                out.entry(nonterm_shift_state)
+                    .or_default()
+                    .push(Rc::new(new_node));
             }
         }
+        Err(err) => {
+            context.reduce_errors.push(err);
+        }
     }
-
-    for (state, nodes) in reduced_nodes.into_iter() {
-        feed_impl(parser, state, nodes, context, term, userdata);
-    }
+    do_shift
 }

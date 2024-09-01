@@ -1049,7 +1049,7 @@ impl Grammar {
 
                 case_streams.extend(quote! {
                     #rule_index => {
-                        Self::#reduce_fn_ident( &mut context.reduce_args, lookahead, #user_data_var )
+                        Self::#reduce_fn_ident( &mut context.reduce_args, shift, lookahead, #user_data_var )
                     }
                 });
 
@@ -1062,6 +1062,7 @@ impl Grammar {
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             fn #reduce_fn_ident(
                                 __rustylr_args: &mut Vec<#node_enum_name>,
+                                shift: &mut bool,
                                 lookahead: &#token_typename,
                                 #user_data_parameter_def
                             ) -> Result<#node_enum_name, #reduce_error_typename> {
@@ -1091,6 +1092,7 @@ impl Grammar {
                             fn_reduce_for_each_rule_stream.extend(quote! {
                                 fn #reduce_fn_ident(
                                     __rustylr_args: &mut Vec<#node_enum_name>,
+                                    shift: &mut bool,
                                     lookahead: &#token_typename,
                                     #user_data_parameter_def
                                 ) -> Result<#node_enum_name, #reduce_error_typename> {
@@ -1116,6 +1118,7 @@ impl Grammar {
 
                             fn #reduce_fn_ident(
                                 __rustylr_args: &mut Vec<#node_enum_name>,
+                                shift: &mut bool,
                                 lookahead: &#token_typename,
                                 #user_data_parameter_def
                             ) -> Result<#node_enum_name, #reduce_error_typename> {
@@ -1129,6 +1132,7 @@ impl Grammar {
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             fn #reduce_fn_ident(
                                 __rustylr_args: &mut Vec<#node_enum_name>,
+                                shift: &mut bool,
                                 lookahead: &#token_typename,
                                 #user_data_parameter_def
                             ) -> Result<#node_enum_name, #reduce_error_typename> {
@@ -1203,6 +1207,7 @@ impl Grammar {
             fn new_nonterm(
                 rule_index: usize,
                 context: &mut #module_prefix::glr::Context<Self>,
+                shift: &mut bool,
                 lookahead: &Self::Term,
                 data: &mut Self::UserData,
             ) -> Result<Self, Self::ReduceActionError> {

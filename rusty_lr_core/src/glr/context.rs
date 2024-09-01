@@ -59,8 +59,8 @@ impl<Data: NodeData> Context<Data> {
             // if there is only one path, we can get the result
 
             // since `eof` is feeded, the node graph should be like this:
-            // Augmented -> Start EOF
-            //                    ^^^ here, current_node
+            // Root <- Start <- EOF
+            //                  ^^^ here, current_node
 
             let rc_eof_node = self
                 .current_nodes
@@ -89,8 +89,8 @@ impl<Data: NodeData> Context<Data> {
         Data: Clone,
     {
         // since `eof` is feeded, the node graph should be like this:
-        // Augmented -> Start EOF
-        //                    ^^^ here, current_node
+        // Root <- Start <- EOF
+        //                  ^^^ here, current_node
         self.current_nodes.into_iter().flat_map(|(_, nodes)| {
             nodes.into_iter().map(|rc_eof_node| {
                 let rc_data_node = Rc::clone(rc_eof_node.parent.as_ref().unwrap());

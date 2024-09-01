@@ -195,6 +195,61 @@
 //! You can resolve the ambiguties through the reduce action.
 //! Simply, returning `Result::Err(Error)` from the reduce action will revoke current path.
 //! The `Error` variant type can be defined by `%err` directive.
+//! And, setting predefined variable `shift: &mut bool` to `false` will revoke the shift action with lookahead token.
+//!
+//! Consider the following example:
+//! ```text
+//! E : E plus E
+//!   | E star E
+//!   | digit
+//!   ;
+//! ```
+//! And you are trying to feed `1 + 2 * 3 + 4 eof` to the parser.
+//! There are 5 ways to represent the input sequence:
+//!  - `((1 + 2) * 3) + 4`
+//!  - `(1 + (2 * 3)) + 4`
+//!  - `1 + ((2 * 3) + 4)`
+//!  - `1 + (2 * (3 + 4))`
+//!  - `(1 + 2) * (3 + 4)`
+//!
+//! However, we know the 2nd path is the only correct one,
+//! since the `star` has higher precedence than `plus`, and both are left-associative.
+//!
+//! To resolve the ambiguity, you can write the reduce action as follows:
+//!
+//! ```rust
+//! E : E plus E {
+//!       match *lookahead {
+//!           '*' => {
+//!               // no reduce if the next token is '*'
+//!               // this prevent
+//!               // E + E   /   *
+//!               //             ^ lookahead
+//!               // to be  E *  ...
+//!               //        ^ (E + E)
+//!               return Err("".to_string());
+//!           }
+//!           _ => {
+//!               // revoke the shift action
+//!               // this prevent
+//!               // E + E   /  +
+//!               //            ^ lookahead
+//!               // to be E + E +  ...
+//!               // and enforce the reduced token takes place
+//!               // E + ...
+//!               // ^ (E + E)
+//!               *shift = false;
+//!           }
+//!
+//!       }
+//!   }
+//!   | E star E {
+//!       *shift = false;
+//!   }
+//!   | Number
+//!   ;
+//! ```
+//!
 //!
 //! ### Note on GLR Parser
 //!  - Still in development, not have been tested enough (patches are welcome!).

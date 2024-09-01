@@ -29,23 +29,20 @@ lr1! {
 
     E(i32) : E plus e2=E
             {
-                // match e2_rule {
-                //     1 => { return Err("".to_string()); }
-                //     _ => {}
-                // }
-                E + e2
+                match *lookahead {
+                    '*' => {
+                        return Err("".to_string());
+                    }
+                    _ => {
+                        *shift = false;
+                        E + e2
+                    }
+
+                }
             }
            | E star e2=E
             {
-                // match E_rule {
-                //     1 => { return Err("".to_string()); }
-                //     _ => {}
-                // }
-                // match e2_rule {
-                //     1 => { return Err("".to_string()); }
-                //     2 => { return Err("".to_string()); }
-                //     _ => {}
-                // }
+                *shift = false;
                 E * e2
             }
            | Number

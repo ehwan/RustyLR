@@ -20,6 +20,7 @@ pub trait NodeData: Sized {
     fn new_nonterm(
         rule_index: usize,
         context: &mut Context<Self>,
+        shift: &mut bool,
         lookahead: &Self::Term,
         userdata: &mut Self::UserData,
     ) -> Result<Self, Self::ReduceActionError>;

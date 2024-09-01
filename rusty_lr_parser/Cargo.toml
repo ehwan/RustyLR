@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_parser"
-version = "3.18.1"
+version = "3.19.0"
 edition = "2021"
 license = "MIT"
 description = "macro line parser for rusty_lr"
@@ -12,9 +12,11 @@ categories = ["parsing"]
 [dependencies]
 proc-macro2 = "1.0.86"
 quote = "1.0"
-rusty_lr_core = { version = "2.10.2", features = ["fxhash", "builder"] }
-# rusty_lr_core = { path = "../rusty_lr_core", features = ["fxhash", "builder"] }
+rusty_lr_core = { version = "2.11.0", path = "../rusty_lr_core", features = [
+  "builder",
+] }
 
 [features]
 default = []
 tree = []
+fxhash = ["rusty_lr_core/fxhash"]
