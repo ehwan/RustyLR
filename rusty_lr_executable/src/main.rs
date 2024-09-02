@@ -16,17 +16,11 @@ fn main() {
 
     let mut builder = rusty_lr_buildscript::Builder::new();
     builder.file(&args.input_file);
-    if args.lalr {
-        builder.lalr();
-    }
     if args.verbose {
         builder.verbose();
     }
     if args.verbose_conflict {
         builder.verbose_conflicts();
-    }
-    if args.verbose_generated_source {
-        builder.verbose_generated_source();
     }
     if args.verbose_conflict_resolve {
         builder.verbose_conflicts_resolving();

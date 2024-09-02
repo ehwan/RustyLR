@@ -18,10 +18,10 @@ fn main() {
     ];
 
     let parser = parser::EParser::new();
-    let mut context = parser.begin();
+    let mut context = parser::EContext::new();
     let mut userdata: i32 = 0;
     for token in input {
-        match parser.feed(&mut context, token, &mut userdata) {
+        match context.feed(&parser, token, &mut userdata) {
             //                          ^^^^^   ^^^^^^^^^^^^ userdata passed here as `&mut i32`
             //                           |- feed token
             Ok(_) => {}

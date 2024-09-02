@@ -53,6 +53,7 @@ pub enum Lexed {
     UserData(Punct, Ident),     // %userdata
     ErrorType(Punct, Ident),    // %err %error
     ModulePrefix(Punct, Ident), // %moduleprefix
+    Lalr(Punct, Ident),         // %lalr
     Glr(Punct, Ident),          // %glr
     Eof,
 }
@@ -124,6 +125,10 @@ impl Lexed {
                 stream.append(punct);
                 stream.append(ident);
             }
+            Lexed::Lalr(punct, ident) => {
+                stream.append(punct);
+                stream.append(ident);
+            }
             Lexed::Glr(punct, ident) => {
                 stream.append(punct);
                 stream.append(ident);
@@ -172,6 +177,7 @@ impl Lexed {
             Lexed::UserData(punct, ident) => ident.span(),
             Lexed::ErrorType(punct, ident) => ident.span(),
             Lexed::ModulePrefix(punct, ident) => ident.span(),
+            Lexed::Lalr(punct, ident) => ident.span(),
             Lexed::Glr(punct, ident) => ident.span(),
 
             Lexed::Eof => Span::call_site(),
@@ -217,6 +223,7 @@ impl std::fmt::Display for Lexed {
             Lexed::UserData(_, _) => write!(f, "%userdata"),
             Lexed::ErrorType(_, _) => write!(f, "%error"),
             Lexed::ModulePrefix(_, _) => write!(f, "%moduleprefix"),
+            Lexed::Lalr(_, _) => write!(f, "%lalr"),
             Lexed::Glr(_, _) => write!(f, "%glr"),
 
             Lexed::Eof => write!(f, "<eof>"),
@@ -246,6 +253,7 @@ fn ident_to_keyword(percent: Punct, ident: Ident) -> Option<Lexed> {
         "userdata" => Some(Lexed::UserData(percent, ident)),
         "err" | "error" => Some(Lexed::ErrorType(percent, ident)),
         "moduleprefix" => Some(Lexed::ModulePrefix(percent, ident)),
+        "lalr" => Some(Lexed::Lalr(percent, ident)),
         "glr" => Some(Lexed::Glr(percent, ident)),
         _ => None,
     }
@@ -266,20 +274,20 @@ pub fn feed_recursive(
     while let Some(next) = input.next() {
         match next {
             TokenTree::Ident(ident) => {
-                parser.feed(context, Lexed::Ident(ident), grammar_args)?;
+                context.feed(parser, Lexed::Ident(ident), grammar_args)?;
             }
             TokenTree::Punct(punct) => match punct.as_char() {
-                ':' => parser.feed(context, Lexed::Colon(punct), grammar_args)?,
-                ';' => parser.feed(context, Lexed::Semicolon(punct), grammar_args)?,
-                '|' => parser.feed(context, Lexed::Pipe(punct), grammar_args)?,
-                '+' => parser.feed(context, Lexed::Plus(punct), grammar_args)?,
-                '*' => parser.feed(context, Lexed::Star(punct), grammar_args)?,
-                '?' => parser.feed(context, Lexed::Question(punct), grammar_args)?,
-                '^' => parser.feed(context, Lexed::Caret(punct), grammar_args)?,
-                '-' => parser.feed(context, Lexed::Minus(punct), grammar_args)?,
-                '=' => parser.feed(context, Lexed::Equal(punct), grammar_args)?,
-                '!' => parser.feed(context, Lexed::Exclamation(punct), grammar_args)?,
-                '/' => parser.feed(context, Lexed::Slash(punct), grammar_args)?,
+                ':' => context.feed(parser, Lexed::Colon(punct), grammar_args)?,
+                ';' => context.feed(parser, Lexed::Semicolon(punct), grammar_args)?,
+                '|' => context.feed(parser, Lexed::Pipe(punct), grammar_args)?,
+                '+' => context.feed(parser, Lexed::Plus(punct), grammar_args)?,
+                '*' => context.feed(parser, Lexed::Star(punct), grammar_args)?,
+                '?' => context.feed(parser, Lexed::Question(punct), grammar_args)?,
+                '^' => context.feed(parser, Lexed::Caret(punct), grammar_args)?,
+                '-' => context.feed(parser, Lexed::Minus(punct), grammar_args)?,
+                '=' => context.feed(parser, Lexed::Equal(punct), grammar_args)?,
+                '!' => context.feed(parser, Lexed::Exclamation(punct), grammar_args)?,
+                '/' => context.feed(parser, Lexed::Slash(punct), grammar_args)?,
                 '%' => {
                     // check next is ident, and is a keyword
                     let next_ident = input.peek().cloned();
@@ -289,29 +297,29 @@ pub fn feed_recursive(
                         {
                             input.next();
                             // feed the compound token
-                            if parser
-                                .feed(context, keyword_compound, grammar_args)
+                            if context
+                                .feed(parser, keyword_compound, grammar_args)
                                 .is_err()
                             {
                                 // compound token failed
                                 // feed the splitted tokens
-                                parser.feed(context, Lexed::Percent(punct), grammar_args)?;
-                                parser.feed(context, Lexed::Ident(next_ident), grammar_args)?;
+                                context.feed(parser, Lexed::Percent(punct), grammar_args)?;
+                                context.feed(parser, Lexed::Ident(next_ident), grammar_args)?;
                             }
                         } else {
-                            parser.feed(context, Lexed::Percent(punct), grammar_args)?;
+                            context.feed(parser, Lexed::Percent(punct), grammar_args)?;
                         }
                     } else {
-                        parser.feed(context, Lexed::Percent(punct), grammar_args)?;
+                        context.feed(parser, Lexed::Percent(punct), grammar_args)?;
                     }
                 }
 
-                _ => parser.feed(context, Lexed::OtherPunct(punct), grammar_args)?,
+                _ => context.feed(parser, Lexed::OtherPunct(punct), grammar_args)?,
             },
             TokenTree::Group(group) => match group.delimiter() {
                 Delimiter::Parenthesis => {
                     if let Err(GrammarParseError::InvalidTerminal(err)) =
-                        parser.feed(context, Lexed::ParenGroup(Some(group)), grammar_args)
+                        context.feed(parser, Lexed::ParenGroup(Some(group)), grammar_args)
                     {
                         let group = if let Lexed::ParenGroup(group) = err.term {
                             group.unwrap()
@@ -319,14 +327,14 @@ pub fn feed_recursive(
                             unreachable!();
                         };
                         // feed the splitted tokens
-                        parser.feed(context, Lexed::LParen(group.span_open()), grammar_args)?;
+                        context.feed(parser, Lexed::LParen(group.span_open()), grammar_args)?;
                         feed_recursive(group.stream(), parser, context, grammar_args)?;
-                        parser.feed(context, Lexed::RParen(group.span_close()), grammar_args)?;
+                        context.feed(parser, Lexed::RParen(group.span_close()), grammar_args)?;
                     }
                 }
                 Delimiter::Brace => {
                     // for now, splitted for brace is not in syntax, so ignore it
-                    parser.feed(context, Lexed::BraceGroup(Some(group)), grammar_args)?;
+                    context.feed(parser, Lexed::BraceGroup(Some(group)), grammar_args)?;
 
                     // feed the compound token
                     // if parser
@@ -342,9 +350,9 @@ pub fn feed_recursive(
                 }
                 Delimiter::Bracket => {
                     // for now, compound for bracket is not in syntax, so ignore it
-                    parser.feed(context, Lexed::LBracket(group.span_open()), grammar_args)?;
+                    context.feed(parser, Lexed::LBracket(group.span_open()), grammar_args)?;
                     feed_recursive(group.stream(), parser, context, grammar_args)?;
-                    parser.feed(context, Lexed::RBracket(group.span_close()), grammar_args)?;
+                    context.feed(parser, Lexed::RBracket(group.span_close()), grammar_args)?;
 
                     // feed the compound token
                     // if parser
@@ -360,7 +368,7 @@ pub fn feed_recursive(
                 }
                 _ => {
                     // for now, compound for nonegroup is not in syntax, so ignore it
-                    parser.feed(context, Lexed::NoneGroup(Some(group)), grammar_args)?;
+                    context.feed(parser, Lexed::NoneGroup(Some(group)), grammar_args)?;
 
                     // feed the compound token
                     // if parser
@@ -374,7 +382,7 @@ pub fn feed_recursive(
                 }
             },
             TokenTree::Literal(literal) => {
-                parser.feed(context, Lexed::Literal(Some(literal)), grammar_args)?
+                context.feed(parser, Lexed::Literal(Some(literal)), grammar_args)?
             }
         };
     }

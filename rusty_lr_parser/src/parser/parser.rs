@@ -74,6 +74,7 @@ macro_rules! punct(
 %token userdata Lexed::UserData(punct!('%'),Ident::new("id", Span::call_site()));
 %token errortype Lexed::ErrorType(punct!('%'),Ident::new("id", Span::call_site()));
 %token moduleprefix Lexed::ModulePrefix(punct!('%'),Ident::new("id", Span::call_site()));
+%token lalr Lexed::Lalr(punct!('%'),Ident::new("id", Span::call_site()));
 %token glr Lexed::Glr(punct!('%'),Ident::new("id", Span::call_site()));
 
 %eof Lexed::Eof;
@@ -319,6 +320,8 @@ ModulePrefixDef((Span,TokenStream)): moduleprefix RustCode semicolon { (modulepr
 
 Glr: glr semicolon;
 
+Lalr: lalr semicolon;
+
 GrammarLine : Rule { data.rules.push(Rule); }
 | TokenDef  { data.terminals.push(TokenDef); }
 | StartDef  { data.start_rule_name.push(StartDef); }
@@ -328,6 +331,7 @@ GrammarLine : Rule { data.rules.push(Rule); }
 | ReduceDef  { data.reduce_types.push(ReduceDef); }
 | ErrorDef   { data.error_typename.push(ErrorDef); }
 | ModulePrefixDef { data.module_prefix.push(ModulePrefixDef); }
+| Lalr { data.lalr = true; }
 | Glr { data.glr = true; }
 ;
 

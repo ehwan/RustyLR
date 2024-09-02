@@ -46,6 +46,9 @@ impl Ord for Token {
 // this define struct `EParser`
 // where 'E' is the start symbol
 
+// lalr parser
+%lalr;
+
 // type of userdata
 %userdata i32;
 // type of token ( as Terminal symbol )

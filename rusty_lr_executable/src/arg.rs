@@ -19,10 +19,6 @@ pub struct Args {
     #[arg(long, default_value = "false")]
     pub no_format: bool,
 
-    /// build LALR(1) parser
-    #[arg(short, long, default_value = "false")]
-    pub lalr: bool,
-
     /// turns on all verbose options
     #[arg(short, long, default_value = "false")]
     pub verbose: bool,
@@ -33,10 +29,6 @@ pub struct Args {
     /// Since such conflicts are not treated as errors, this option is useful for debugging.
     #[arg(short = 'c', long, default_value = "false")]
     pub verbose_conflict: bool,
-
-    /// verbose output for where the generated rule was originated from.
-    #[arg(short = 'g', long, default_value = "false")]
-    pub verbose_generated_source: bool,
 
     /// verbose output for the conflict resolution process, by '%left' or '%right' directive.
     #[arg(short = 'r', long, default_value = "false")]

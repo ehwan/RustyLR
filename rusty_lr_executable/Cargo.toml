@@ -1,8 +1,8 @@
 [package]
 name = "rustylr"
-version = "0.18.0"
+version = "1.0.0"
 edition = "2021"
-license = "MIT"
+license = "MIT OR Apache-2.0"
 description = "executable for rusty_lr"
 repository = "https://github.com/ehwan/RustyLR"
 readme = "../README.md"
@@ -11,6 +11,6 @@ categories = ["parsing"]
 
 [dependencies]
 clap = { version = "4.5.7", features = ["derive"] }
-rusty_lr_buildscript = { version = "0.17.0", path = "../rusty_lr_buildscript", features = [
+rusty_lr_buildscript = { version = "0.18.0", path = "../rusty_lr_buildscript", features = [
   "fxhash",
 ] }

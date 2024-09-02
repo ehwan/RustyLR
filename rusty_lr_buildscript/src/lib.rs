@@ -47,13 +47,6 @@ pub struct Builder {
     /// input_file to read
     input_file: Option<String>,
 
-    /// build LALR(1) parser
-    lalr: bool,
-
-    /// when `vebose` is on, print debug information about
-    /// where the auto-generated rules are originated from.
-    // verbose_generated_source: bool,
-
     /// when `vebose` is on, print debug information about
     /// any shift/reduce, reduce/reduce conflicts.
     /// This is for GLR parser, to show where the conflicts occured.
@@ -71,8 +64,6 @@ impl Builder {
     pub fn new() -> Self {
         Self {
             input_file: None,
-            lalr: false,
-            // verbose_generated_source: false,
             verbose_conflicts: false,
             verbose_conflicts_resolving: false,
             verbose_on_stderr: false,
@@ -85,24 +76,10 @@ impl Builder {
         self
     }
 
-    /// set to build LALR(1) parser
-    pub fn lalr(&mut self) -> &mut Self {
-        self.lalr = true;
-        self
-    }
-
     /// turns on all verbose options
     pub fn verbose(&mut self) -> &mut Self {
         self.verbose_conflicts();
-        self.verbose_generated_source();
         self.verbose_conflicts_resolving();
-        self
-    }
-
-    /// when `vebose` is on, print debug information about
-    /// where the auto-generated rules are originated from.
-    pub fn verbose_generated_source(&mut self) -> &mut Self {
-        // self.verbose_generated_source = true;
         self
     }
 
@@ -585,7 +562,7 @@ impl Builder {
         };
 
         // expand macro
-        let expanded_stream = match grammar.emit_compiletime(self.lalr) {
+        let expanded_stream = match grammar.emit_compiletime() {
             Ok(expanded_stream) => expanded_stream,
             Err(e) => {
                 let diag = match e.as_ref() {
@@ -733,7 +710,7 @@ impl Builder {
                     Span::call_site(),
                 ))
                 .unwrap();
-            let parser = if self.lalr {
+            let parser = if grammar.lalr {
                 match builder.build_lalr(augmented_rule_id) {
                     Ok(parser) => parser,
                     Err(_) => unreachable!("Grammar building failed"),

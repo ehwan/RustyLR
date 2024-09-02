@@ -11,6 +11,7 @@ use crate::nonterminal_info::NonTerminalInfo;
 use crate::nonterminal_info::Rule;
 use crate::parser::args::GrammarArgs;
 use crate::parser::lexer::Lexed;
+use crate::parser::parser_expanded::GrammarContext;
 use crate::parser::parser_expanded::GrammarParseError;
 use crate::parser::parser_expanded::GrammarParser;
 use crate::pattern::Pattern;
@@ -32,7 +33,7 @@ pub struct Grammar {
     pub(crate) token_typename: TokenStream,
 
     /// %userdata
-    pub(crate) userdata_typename: Option<TokenStream>,
+    pub(crate) userdata_typename: TokenStream,
 
     /// %err
     pub(crate) error_typename: TokenStream,
@@ -49,8 +50,11 @@ pub struct Grammar {
     /// ident - index map for non-terminals
     pub nonterminals_index: HashMap<Ident, usize>,
 
+    /// whether to generate LALR parser
+    pub lalr: bool,
+
     /// whether to generate GLR parser
-    pub(crate) glr: bool,
+    pub glr: bool,
 }
 
 impl Grammar {
@@ -68,7 +72,7 @@ impl Grammar {
 
     pub fn parse_args(input: TokenStream) -> Result<GrammarArgs, ParseArgError> {
         let parser = GrammarParser::new();
-        let mut context = parser.begin();
+        let mut context = GrammarContext::new();
 
         let mut grammar_args = GrammarArgs::default();
 
@@ -97,7 +101,7 @@ impl Grammar {
                 return Err(ParseArgError::MacroLineParse { span, message });
             }
         }
-        match parser.feed(&mut context, Lexed::Eof, &mut grammar_args) {
+        match context.feed(&parser, Lexed::Eof, &mut grammar_args) {
             Ok(_) => {}
             Err(err) => {
                 let expected: BTreeSet<String> = context
@@ -198,7 +202,9 @@ impl Grammar {
                 .userdata_typename
                 .into_iter()
                 .next()
-                .map(|(_, stream)| stream),
+                .map(|(_, stream)| stream)
+                .unwrap_or(quote! { () }),
+
             error_typename,
             start_rule_name: grammar_args.start_rule_name.into_iter().next().unwrap(),
 
@@ -208,6 +214,7 @@ impl Grammar {
             nonterminals: Default::default(),
             nonterminals_index: Default::default(),
 
+            lalr: grammar_args.lalr,
             glr: grammar_args.glr,
         };
 

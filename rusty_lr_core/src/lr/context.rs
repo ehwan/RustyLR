@@ -1,3 +1,6 @@
+use std::hash::Hash;
+
+use super::ParseError;
 use super::Parser;
 use super::Stack;
 
@@ -74,6 +77,20 @@ impl<S: Stack> Context<S> {
         S::NonTerm: 'a,
     {
         p.get_states()[self.last_state].expected()
+    }
+
+    /// Feed one terminal to parser, and update state stack.
+    pub fn feed<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+        &mut self,
+        parser: &P,
+        term: S::Term,
+        userdata: &mut S::UserData,
+    ) -> Result<(), ParseError<S::Term, S::ReduceActionError>>
+    where
+        S::Term: Hash + Eq + Clone,
+        S::NonTerm: Hash + Eq + Clone,
+    {
+        super::feed(parser, self, term, userdata)
     }
 }
 

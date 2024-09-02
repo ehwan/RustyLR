@@ -244,5 +244,6 @@ pub struct GrammarArgs {
     pub terminals: Vec<(Ident, TokenStream)>,
     pub reduce_types: Vec<(TerminalSetOrIdent, ReduceType)>,
     pub rules: Vec<RuleDefArgs>,
+    pub lalr: bool,
     pub glr: bool,
 }

@@ -1,5 +1,7 @@
+use std::hash::Hash;
 use std::rc::Rc;
 
+use super::InvalidTerminalError;
 use super::Node;
 use super::Parser;
 use super::{MultiplePathError, NodeData};
@@ -42,6 +44,11 @@ impl<Data: NodeData> Context<Data> {
     /// Get number of diverged paths
     pub fn len_paths(&self) -> usize {
         self.current_nodes.values().map(|nodes| nodes.len()).sum()
+    }
+
+    /// Is there any path alive?
+    pub fn is_empty(&self) -> bool {
+        self.current_nodes.is_empty()
     }
 
     /// Get index of states in parser for every diverged paths.
@@ -192,6 +199,50 @@ impl<Data: NodeData> Context<Data> {
     {
         let dedupped: HashSet<&'a Data::Term> = self.expected(p).collect();
         dedupped.into_iter()
+    }
+
+    /// move all nodes in `other` to `self`.
+    pub fn append(&mut self, other: &mut Self) {
+        for (state, mut nodes) in other.current_nodes.drain() {
+            self.current_nodes
+                .entry(state)
+                .or_default()
+                .append(&mut nodes);
+        }
+    }
+
+    /// feed a terminal symbol to the context.
+    pub fn feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &mut self,
+        parser: &P,
+        term: P::Term,
+        userdata: &mut Data::UserData,
+    ) -> Result<(), InvalidTerminalError<Data::Term, Data::ReduceActionError>>
+    where
+        Data: Clone,
+        P::Term: Hash + Eq + Clone,
+        P::NonTerm: Hash + Eq + Clone,
+    {
+        super::feed(parser, self, term, userdata)
+    }
+
+    /// Search for the shortest path that can be accepted and represented as CurrentState -> Terms^N -> Tails.
+    /// Where Terms is set of terminals `terms`, and Tails is a sequence of terminals `tails`.
+    /// Returns true if there is a alive path.
+    pub fn complete<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &mut self,
+        parser: &P,
+        terms: impl Iterator<Item = P::Term> + Clone,
+        userdata: &mut Data::UserData,
+        tails: impl Iterator<Item = P::Term> + Clone,
+        max_depth: usize,
+    ) -> bool
+    where
+        Data: Clone,
+        P::Term: Clone + Hash + Eq,
+        P::NonTerm: Clone + Hash + Eq,
+    {
+        super::completion::complete(parser, self, terms, userdata, tails, max_depth)
     }
 }
 

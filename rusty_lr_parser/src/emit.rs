@@ -153,7 +153,7 @@ impl Grammar {
     }
 
     // build grammar at compile time
-    fn emit_grammar_compiletime(&self, lalr: bool) -> Result<TokenStream, Box<EmitError>> {
+    fn emit_grammar_compiletime(&self) -> Result<TokenStream, Box<EmitError>> {
         let mut grammar = self.create_grammar();
 
         // build
@@ -161,7 +161,7 @@ impl Grammar {
             .nonterminals_index
             .get(&Ident::new(utils::AUGMENTED_NAME, Span::call_site()))
             .unwrap();
-        let dfa = if lalr {
+        let dfa = if self.lalr {
             grammar.build_lalr(augmented_idx)
         } else {
             grammar.build(augmented_idx)
@@ -591,14 +591,15 @@ impl Grammar {
         let module_prefix = &self.module_prefix;
         let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
         let reduce_error_typename = &self.error_typename;
-        let parseerror_typename = format_ident!("{}ParseError", self.start_rule_name);
         let rule_typename = format_ident!("{}Rule", self.start_rule_name);
         let state_typename = format_ident!("{}State", self.start_rule_name);
         let parser_struct_name = format_ident!("{}Parser", self.start_rule_name);
-        let context_struct_name = format_ident!("{}Context", self.start_rule_name);
         let stack_struct_name = format_ident!("{}Stack", self.start_rule_name);
         let token_typename = &self.token_typename;
         let terms_stack_name = Ident::new(utils::TERMINAL_STACK_NAME, Span::call_site());
+        let user_data_parameter_name =
+            Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
+        let user_data_typename = &self.userdata_typename;
 
         // stack name for each non-terminal
         let mut stack_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
@@ -637,21 +638,6 @@ impl Grammar {
             }
         }
         drop(ruletype_stackname_map);
-
-        // TokenStream for userdata parameter definition, if defined
-        let user_data_parameter_name =
-            Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
-        let (user_data_typename, user_data_parameter_def, user_data_var, user_data_dummy) =
-            if let Some(user_data) = &self.userdata_typename {
-                (
-                    user_data.clone(),
-                    quote! { #user_data_parameter_name: &mut #user_data, },
-                    quote! { #user_data_parameter_name, },
-                    quote! { #user_data_parameter_name },
-                )
-            } else {
-                (quote! {()}, quote! {}, quote! {}, quote! {&mut ()})
-            };
 
         let mut ruleid: usize = 0;
         let mut case_streams = quote! {};
@@ -697,7 +683,7 @@ impl Grammar {
 
                 case_streams.extend(quote! {
                     #ruleid => {
-                        self.#reduce_fn_ident( lookahead, #user_data_var )
+                        self.#reduce_fn_ident( lookahead, user_data )
                     }
                 });
 
@@ -714,7 +700,7 @@ impl Grammar {
                     // typename is defined, reduce action must be defined
                     if let Some(action) = &rule.reduce_action {
                         fn_reduce_for_each_rule_stream.extend(quote! {
-                            fn #reduce_fn_ident(&mut self, lookahead: &#token_typename, #user_data_parameter_def) -> Result<(), #reduce_error_typename> {
+                            fn #reduce_fn_ident(&mut self, lookahead: &#token_typename, #user_data_parameter_name: &mut #user_data_typename ) -> Result<(), #reduce_error_typename> {
                                 #token_pop_stream
                                 self.#stack_name.push(#action);
                                 Ok(())
@@ -739,7 +725,7 @@ impl Grammar {
                         }
                         if let Some(unique_mapto) = unique_mapto {
                             fn_reduce_for_each_rule_stream.extend(quote! {
-                                fn #reduce_fn_ident(&mut self, lookahead: &#token_typename, #user_data_parameter_def) -> Result<(), #reduce_error_typename> {
+                                fn #reduce_fn_ident(&mut self, lookahead: &#token_typename, #user_data_parameter_name:&mut #user_data_typename) -> Result<(), #reduce_error_typename> {
                                     #token_pop_stream
                                     self.#stack_name.push(#unique_mapto);
                                     Ok(())
@@ -757,7 +743,7 @@ impl Grammar {
                     // just execute action
                     if let Some(action) = &rule.reduce_action {
                         fn_reduce_for_each_rule_stream.extend(quote! {
-                            fn #reduce_fn_ident(&mut self, lookahead: &#token_typename, #user_data_parameter_def) -> Result<(), #reduce_error_typename> {
+                            fn #reduce_fn_ident(&mut self, lookahead: &#token_typename, #user_data_parameter_name:&mut #user_data_typename) -> Result<(), #reduce_error_typename> {
                                 #token_pop_stream
                                 #action
                                 Ok(())
@@ -765,7 +751,7 @@ impl Grammar {
                         });
                     } else {
                         fn_reduce_for_each_rule_stream.extend(quote! {
-                            fn #reduce_fn_ident(&mut self, lookahead: &#token_typename, #user_data_parameter_def) -> Result<(), #reduce_error_typename> {
+                            fn #reduce_fn_ident(&mut self, lookahead: &#token_typename, #user_data_parameter_name: &mut #user_data_typename) -> Result<(), #reduce_error_typename> {
                                 #token_pop_stream
                                 Ok(())
                             }
@@ -841,7 +827,7 @@ impl Grammar {
             }
             fn reduce(&mut self,
                 rustylr_macro_generated_ruleid__: usize,
-                data: &mut Self::UserData,
+                user_data: &mut Self::UserData,
                 lookahead: &Self::Term,
             ) -> Result<(), Self::ReduceActionError> {
                 match rustylr_macro_generated_ruleid__ {
@@ -879,26 +865,6 @@ impl Grammar {
 
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         impl #parser_struct_name {
-            /// feed one terminal to parser, and update state stack
-            pub fn feed(
-                &self,
-                context: &mut #context_struct_name,
-                term: #token_typename,
-                #user_data_parameter_def
-            ) -> Result<(), #parseerror_typename> {
-                #module_prefix::lr::feed(
-                    self,
-                    context,
-                    term,
-                    #user_data_dummy,
-                )
-            }
-            /// Create new context for parsing
-            #[inline]
-            pub fn begin(&self) -> #context_struct_name {
-                #context_struct_name::new()
-            }
-
             /// Create new parser instance.
             /// Parser can be reused with different context, for multiple parsing.
             pub fn new() -> Self {
@@ -920,12 +886,13 @@ impl Grammar {
         let rule_typename = format_ident!("{}Rule", self.start_rule_name);
         let state_typename = format_ident!("{}State", self.start_rule_name);
         let parser_struct_name = format_ident!("{}Parser", self.start_rule_name);
-        let context_struct_name = format_ident!("{}Context", self.start_rule_name);
         let node_enum_name = format_ident!("{}NodeEnum", self.start_rule_name);
         let token_typename = &self.token_typename;
-        let invalid_terminal_error_typename =
-            format_ident!("{}InvalidTerminalError", self.start_rule_name);
         let terms_variant_name = Ident::new("Terminals", Span::call_site());
+
+        let user_data_parameter_name =
+            Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
+        let user_data_typename = &self.userdata_typename;
 
         // enum variant name for each non-terminal
         let mut variant_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
@@ -969,21 +936,6 @@ impl Grammar {
             variant_names_for_nonterm.push(variant_name);
         }
         drop(ruletype_variant_map);
-
-        // TokenStream for userdata parameter definition, if defined
-        let user_data_parameter_name =
-            Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
-        let (user_data_typename, user_data_parameter_def, user_data_var, user_data_dummy) =
-            if let Some(user_data) = &self.userdata_typename {
-                (
-                    user_data.clone(),
-                    quote! { #user_data_parameter_name: &mut #user_data, },
-                    quote! { #user_data_parameter_name, },
-                    quote! { #user_data_parameter_name },
-                )
-            } else {
-                (quote! {()}, quote! {}, quote! {}, quote! {&mut ()})
-            };
 
         let mut rule_index: usize = 0;
         let mut case_streams = quote! {};
@@ -1046,7 +998,7 @@ impl Grammar {
 
                 case_streams.extend(quote! {
                     #rule_index => {
-                        Self::#reduce_fn_ident( reduce_args, shift, lookahead, #user_data_var )
+                        Self::#reduce_fn_ident( reduce_args, shift, lookahead, user_data )
                     }
                 });
 
@@ -1061,7 +1013,7 @@ impl Grammar {
                                 __rustylr_args: &mut Vec<Self>,
                                 shift: &mut bool,
                                 lookahead: &#token_typename,
-                                #user_data_parameter_def
+                                #user_data_parameter_name: &mut #user_data_typename
                             ) -> Result<#node_enum_name, #reduce_error_typename> {
                                 #extract_data_from_node_enum
 
@@ -1091,7 +1043,7 @@ impl Grammar {
                                     __rustylr_args: &mut Vec<Self>,
                                     shift: &mut bool,
                                     lookahead: &#token_typename,
-                                    #user_data_parameter_def
+                                    #user_data_parameter_name: &mut #user_data_typename
                                 ) -> Result<#node_enum_name, #reduce_error_typename> {
                                     #extract_data_from_node_enum
 
@@ -1117,7 +1069,7 @@ impl Grammar {
                                 __rustylr_args: &mut Vec<Self>,
                                 shift: &mut bool,
                                 lookahead: &#token_typename,
-                                #user_data_parameter_def
+                                #user_data_parameter_name: &mut #user_data_typename
                             ) -> Result<#node_enum_name, #reduce_error_typename> {
                                 #extract_data_from_node_enum
                                 #action
@@ -1131,7 +1083,7 @@ impl Grammar {
                                 __rustylr_args: &mut Vec<Self>,
                                 shift: &mut bool,
                                 lookahead: &#token_typename,
-                                #user_data_parameter_def
+                                #user_data_parameter_name: &mut #user_data_typename
                             ) -> Result<#node_enum_name, #reduce_error_typename> {
                                 __rustylr_args.clear();
                                 Ok( #node_enum_name::#variant_name )
@@ -1206,7 +1158,7 @@ impl Grammar {
                 reduce_args: &mut Vec<Self>,
                 shift: &mut bool,
                 lookahead: &Self::Term,
-                data: &mut Self::UserData,
+                user_data: &mut Self::UserData,
             ) -> Result<Self, Self::ReduceActionError> {
                 match rule_index {
                     #case_streams
@@ -1245,26 +1197,6 @@ impl Grammar {
         /// Parser is holding DFA state tables and production rules
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         impl #parser_struct_name {
-            /// feed one terminal to parser, and update state stack
-            pub fn feed(
-                &self,
-                context: &mut #context_struct_name,
-                term: #token_typename,
-                #user_data_parameter_def
-            ) -> Result<(), #invalid_terminal_error_typename> {
-                #module_prefix::glr::feed(
-                    self,
-                    context,
-                    term,
-                    #user_data_dummy,
-                )
-            }
-            /// Create new context for parsing
-            #[inline]
-            pub fn begin(&self) -> #context_struct_name {
-                #context_struct_name::new()
-            }
-
             /// Create new parser instance.
             /// Parser can be reused with different context, for multiple parsing.
             pub fn new() -> Self {
@@ -1279,10 +1211,10 @@ impl Grammar {
         })
     }
 
-    pub fn emit_compiletime(&self, lalr: bool) -> Result<TokenStream, Box<EmitError>> {
+    pub fn emit_compiletime(&self) -> Result<TokenStream, Box<EmitError>> {
         let type_alias_emit = self.emit_type_alises();
         let enum_emit = self.emit_nonterm_enum();
-        let grammar_emit = self.emit_grammar_compiletime(lalr)?;
+        let grammar_emit = self.emit_grammar_compiletime()?;
         let parser_emit = if self.glr {
             self.emit_parser_glr(grammar_emit)?
         } else {

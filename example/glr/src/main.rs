@@ -3,12 +3,12 @@ pub mod parser;
 
 fn main() {
     let p = parser::EParser::new();
-    let mut c = p.begin();
+    let mut c = parser::EContext::new();
 
     let input = "1+2*3+4";
     for ch in input.chars() {
         println!("feed: {}", ch);
-        match p.feed(&mut c, ch) {
+        match c.feed(&p, ch, &mut ()) {
             Ok(_) => {
                 println!("nodes: {}", c.len_paths());
                 println!("{:?}", c);
@@ -20,7 +20,7 @@ fn main() {
         }
     }
     println!("feed eof");
-    match p.feed(&mut c, '\0') {
+    match c.feed(&p, '\0', &mut ()) {
         Ok(_) => {
             println!("nodes: {}", c.len_paths());
         }

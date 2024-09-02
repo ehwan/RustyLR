@@ -300,7 +300,10 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
                             // if there are forced lookaheads for this rule, use it
                             if let Some(force_lookaheads) = self.rules[*searched_rule].1.as_ref() {
-                                new_rules.push((rule, force_lookaheads.clone()));
+                                new_rules.push((
+                                    rule,
+                                    lookaheads.intersection(force_lookaheads).cloned().collect(),
+                                ));
                             } else {
                                 new_rules.push((rule, lookaheads.clone()));
                             }

@@ -1,8 +1,8 @@
 [package]
 name = "rusty_lr_derive"
-version = "1.22.0"
+version = "2.0.0"
 edition = "2021"
-license = "MIT"
+license = "MIT OR Apache-2.0"
 description = "proc-macro definitions for rusty_lr"
 repository = "https://github.com/ehwan/RustyLR"
 readme = "../README.md"
@@ -14,7 +14,7 @@ proc-macro = true
 
 [dependencies]
 proc-macro2 = "1.0.86"
-rusty_lr_parser = { version = "3.20.0", path = "../rusty_lr_parser" }
+rusty_lr_parser = { version = "3.21.0", path = "../rusty_lr_parser" }
 
 
 [features]

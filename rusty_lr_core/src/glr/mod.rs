@@ -1,9 +1,10 @@
+pub(crate) mod completion;
 pub(crate) mod context;
 pub(crate) mod error;
 pub(crate) mod parser;
 pub(crate) mod state;
 
-pub mod node;
+pub(crate) mod node;
 
 pub use context::Context;
 pub use error::InvalidTerminalError;
