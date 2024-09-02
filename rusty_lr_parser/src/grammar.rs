@@ -22,6 +22,8 @@ use crate::utils;
 
 use rusty_lr_core::HashMap;
 
+use std::collections::BTreeSet;
+
 pub struct Grammar {
     /// %moduleprefix
     pub(crate) module_prefix: TokenStream,
@@ -74,7 +76,20 @@ impl Grammar {
         {
             Ok(_) => {}
             Err(err) => {
-                let message = err.to_string();
+                let expected: BTreeSet<String> = context
+                    .expected(&parser)
+                    .map(|term| term.to_string())
+                    .collect();
+
+                let mut message = err.to_string();
+                for (idx, expected) in expected.into_iter().enumerate() {
+                    if idx == 0 {
+                        message.push_str("\nExpected: ");
+                    } else {
+                        message.push_str(", ");
+                    }
+                    message.push_str(&expected);
+                }
                 let span = match err {
                     GrammarParseError::InvalidTerminal(term) => term.term.span(),
                     _ => unreachable!("feed error"),
@@ -85,7 +100,20 @@ impl Grammar {
         match parser.feed(&mut context, Lexed::Eof, &mut grammar_args) {
             Ok(_) => {}
             Err(err) => {
-                let message = err.to_string();
+                let expected: BTreeSet<String> = context
+                    .expected(&parser)
+                    .map(|term| term.to_string())
+                    .collect();
+
+                let mut message = err.to_string();
+                for (idx, expected) in expected.into_iter().enumerate() {
+                    if idx == 0 {
+                        message.push_str("\nExpected: ");
+                    } else {
+                        message.push_str(", ");
+                    }
+                    message.push_str(&expected);
+                }
                 return Err(ParseArgError::MacroLineParseEnd { message });
             }
         }

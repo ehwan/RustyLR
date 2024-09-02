@@ -1,15 +1,14 @@
-use crate::hashmap::HashMap;
 use crate::rule::LookaheadRuleRefSet;
 
+use std::collections::BTreeMap;
 use std::collections::BTreeSet;
-use std::hash::Hash;
 
 /// state in DFA building
 #[derive(Debug, Clone)]
 pub struct State<Term, NonTerm> {
-    pub shift_goto_map_term: HashMap<Term, usize>,
-    pub shift_goto_map_nonterm: HashMap<NonTerm, usize>,
-    pub reduce_map: HashMap<Term, BTreeSet<usize>>,
+    pub shift_goto_map_term: BTreeMap<Term, usize>,
+    pub shift_goto_map_nonterm: BTreeMap<NonTerm, usize>,
+    pub reduce_map: BTreeMap<Term, BTreeSet<usize>>,
     pub ruleset: LookaheadRuleRefSet<Term>,
 }
 impl<Term, NonTerm> State<Term, NonTerm> {
@@ -21,40 +20,31 @@ impl<Term, NonTerm> State<Term, NonTerm> {
             ruleset: LookaheadRuleRefSet::new(),
         }
     }
-    /// We have two different `State` types. One in the `crate::builder` module and one in the `crate`.
-    /// This state in `crate::builder` is used to build the DFA, which contains the lookaheads of the rules.
-    /// This method converts the `State` in `crate::builder` to the `State` in `crate`.
-    pub fn to_export(self) -> crate::lr::State<Term, NonTerm>
-    where
-        Term: Hash + Eq,
-    {
-        crate::lr::State {
-            shift_goto_map_term: self.shift_goto_map_term,
-            shift_goto_map_nonterm: self.shift_goto_map_nonterm,
+
+    /// Map terminal and non-terminal symbols to another type.
+    /// This is useful when exporting & importing rules.
+    pub fn map<NewTerm: Ord, NewNonTerm: Ord>(
+        self,
+        term_map: impl Fn(Term) -> NewTerm,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+    ) -> State<NewTerm, NewNonTerm> {
+        State {
+            shift_goto_map_term: self
+                .shift_goto_map_term
+                .into_iter()
+                .map(|(term, state)| (term_map(term), state))
+                .collect(),
+            shift_goto_map_nonterm: self
+                .shift_goto_map_nonterm
+                .into_iter()
+                .map(|(nonterm, state)| (nonterm_map(nonterm), state))
+                .collect(),
             reduce_map: self
                 .reduce_map
                 .into_iter()
-                .map(|(k, v)| (k, v.into_iter().next().unwrap()))
+                .map(|(term, rule)| (term_map(term), rule))
                 .collect(),
-            ruleset: self.ruleset.rules.into_keys().collect(),
-        }
-    }
-    /// We have two different `State` types. One in the `crate::builder` module and one in the `crate`.
-    /// This state in `crate::builder` is used to build the DFA, which contains the lookaheads of the rules.
-    /// This method converts the `State` in `crate::builder` to the `State` in `crate`.
-    pub fn to_export_glr(self) -> crate::glr::State<Term, NonTerm>
-    where
-        Term: Hash + Eq,
-    {
-        crate::glr::State {
-            shift_goto_map_term: self.shift_goto_map_term,
-            shift_goto_map_nonterm: self.shift_goto_map_nonterm,
-            reduce_map: self
-                .reduce_map
-                .into_iter()
-                .map(|(k, v)| -> (Term, Vec<usize>) { (k, v.into_iter().collect()) })
-                .collect(),
-            ruleset: self.ruleset.rules.into_keys().collect(),
+            ruleset: self.ruleset.map(term_map),
         }
     }
 }

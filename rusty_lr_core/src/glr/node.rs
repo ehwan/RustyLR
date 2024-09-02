@@ -2,8 +2,6 @@ use std::ops::Deref;
 use std::ops::DerefMut;
 use std::rc::Rc;
 
-use super::Context;
-
 #[cfg(feature = "tree")]
 use crate::Tree;
 #[cfg(feature = "tree")]
@@ -43,7 +41,7 @@ pub trait NodeData: Sized {
     fn new_term(term: Self::Term) -> Self;
     fn new_nonterm(
         rule_index: usize,
-        context: &mut Context<Self>,
+        reduce_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Self::Term,
         userdata: &mut Self::UserData,
@@ -145,9 +143,9 @@ impl<Data: NodeData> Node<Data> {
 }
 
 #[cfg(feature = "tree")]
-impl<Data: NodeData> Into<Tree<Data::Term, Data::NonTerm>> for Node<Data> {
-    fn into(self) -> Tree<Data::Term, Data::NonTerm> {
-        self.into_tree()
+impl<Data: NodeData> From<Node<Data>> for Tree<Data::Term, Data::NonTerm> {
+    fn from(node: Node<Data>) -> Self {
+        node.into_tree()
     }
 }
 

@@ -261,7 +261,7 @@ impl Grammar {
             let states: Vec<_> = dfa
                 .states
                 .into_iter()
-                .map(|s| s.to_export_glr().map(term_mapper, nonterm_mapper))
+                .map(|s| s.map(term_mapper, nonterm_mapper))
                 .collect();
             (rules, states)
         };
@@ -334,17 +334,15 @@ impl Grammar {
 
         let (reduce_terminals_cache_count, ruleset0_cache_count) = {
             // when generating code for 'inserting tokens to reduce_map',
-            // there could be multiple lookahead tokens for one rule
+            // for each states, there are many same 'set of tokens' that reduce to the same rule.
             // inserting all of them one by one is inefficient
             let mut reduce_terminals_map = BTreeMap::new();
             let mut ruleset0_map = BTreeMap::new();
 
             for state in states.into_iter() {
-                // use BTreeMap to sort keys, for consistent output
                 {
                     let mut term_state_comma_separated = TokenStream::new();
-                    let shift_goto_map_term: BTreeMap<_, _> =
-                        state.shift_goto_map_term.into_iter().collect();
+                    let shift_goto_map_term = state.shift_goto_map_term;
                     for (term, goto) in shift_goto_map_term.into_iter() {
                         let term = Literal::usize_unsuffixed(term);
                         let goto = Literal::usize_unsuffixed(goto);
@@ -359,8 +357,7 @@ impl Grammar {
 
                 {
                     let mut nonterm_state_comma_separated = TokenStream::new();
-                    let shift_goto_map_nonterm: BTreeMap<_, _> =
-                        state.shift_goto_map_nonterm.into_iter().collect();
+                    let shift_goto_map_nonterm = state.shift_goto_map_nonterm;
                     for (nonterm, goto) in shift_goto_map_nonterm.into_iter() {
                         let goto = Literal::usize_unsuffixed(goto);
                         nonterm_state_comma_separated.extend(quote! {
@@ -419,7 +416,7 @@ impl Grammar {
                     let mut ruleset0 = BTreeSet::new();
                     {
                         let mut shifted_rules_comma_separated = TokenStream::new();
-                        for rule in state.ruleset.into_iter() {
+                        for rule in state.ruleset.rules.into_keys() {
                             if rule.shifted == 0 {
                                 let ruleid = rule.rule;
                                 ruleset0.insert(ruleid);
@@ -1049,7 +1046,7 @@ impl Grammar {
 
                 case_streams.extend(quote! {
                     #rule_index => {
-                        Self::#reduce_fn_ident( &mut context.reduce_args, shift, lookahead, #user_data_var )
+                        Self::#reduce_fn_ident( reduce_args, shift, lookahead, #user_data_var )
                     }
                 });
 
@@ -1061,7 +1058,7 @@ impl Grammar {
                     if let Some(action) = &rule.reduce_action {
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             fn #reduce_fn_ident(
-                                __rustylr_args: &mut Vec<#node_enum_name>,
+                                __rustylr_args: &mut Vec<Self>,
                                 shift: &mut bool,
                                 lookahead: &#token_typename,
                                 #user_data_parameter_def
@@ -1091,7 +1088,7 @@ impl Grammar {
                         if let Some(unique_mapto) = unique_mapto {
                             fn_reduce_for_each_rule_stream.extend(quote! {
                                 fn #reduce_fn_ident(
-                                    __rustylr_args: &mut Vec<#node_enum_name>,
+                                    __rustylr_args: &mut Vec<Self>,
                                     shift: &mut bool,
                                     lookahead: &#token_typename,
                                     #user_data_parameter_def
@@ -1117,7 +1114,7 @@ impl Grammar {
                         fn_reduce_for_each_rule_stream.extend(quote! {
 
                             fn #reduce_fn_ident(
-                                __rustylr_args: &mut Vec<#node_enum_name>,
+                                __rustylr_args: &mut Vec<Self>,
                                 shift: &mut bool,
                                 lookahead: &#token_typename,
                                 #user_data_parameter_def
@@ -1131,7 +1128,7 @@ impl Grammar {
                     } else {
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             fn #reduce_fn_ident(
-                                __rustylr_args: &mut Vec<#node_enum_name>,
+                                __rustylr_args: &mut Vec<Self>,
                                 shift: &mut bool,
                                 lookahead: &#token_typename,
                                 #user_data_parameter_def
@@ -1206,7 +1203,7 @@ impl Grammar {
             }
             fn new_nonterm(
                 rule_index: usize,
-                context: &mut #module_prefix::glr::Context<Self>,
+                reduce_args: &mut Vec<Self>,
                 shift: &mut bool,
                 lookahead: &Self::Term,
                 data: &mut Self::UserData,

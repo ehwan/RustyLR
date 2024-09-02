@@ -1,9 +1,11 @@
 use std::rc::Rc;
 
 use super::Node;
+use super::Parser;
 use super::{MultiplePathError, NodeData};
 
 use crate::HashMap;
+use crate::HashSet;
 
 #[cfg(feature = "tree")]
 use crate::TreeList;
@@ -24,19 +26,17 @@ pub struct Context<Data: NodeData> {
 
     /// For temporary use. store arguments for calling `reduce_action`.
     /// But we don't want to reallocate every `feed` call
-    pub reduce_args: Vec<Data>,
+    pub(crate) reduce_args: Vec<Data>,
+
+    /// For temporary use. store nodes for next reduce.
+    pub(crate) nodes_pong: HashMap<usize, Vec<Rc<Node<Data>>>>,
 }
 
 impl<Data: NodeData> Context<Data> {
     /// Create a new context.
     /// `current_nodes` is initialized with a root node.
     pub fn new() -> Self {
-        Context {
-            current_nodes: HashMap::from_iter([(0, vec![Rc::new(Node::new_root())])]),
-            state_list: Vec::new(),
-            reduce_errors: Vec::new(),
-            reduce_args: Vec::new(),
-        }
+        Default::default()
     }
 
     /// Get number of diverged paths
@@ -122,9 +122,7 @@ impl<Data: NodeData> Context<Data> {
     /// For debugging.
     /// Get all sequence of token trees (from root to current node) for every diverged path.
     #[cfg(feature = "tree")]
-    pub fn to_tree_lists<'a>(
-        &'a self,
-    ) -> impl Iterator<Item = TreeList<Data::Term, Data::NonTerm>> + 'a
+    pub fn to_tree_lists(&self) -> impl Iterator<Item = TreeList<Data::Term, Data::NonTerm>> + '_
     where
         Data::Term: Clone,
         Data::NonTerm: Clone,
@@ -164,11 +162,48 @@ impl<Data: NodeData> Context<Data> {
                 .collect()
         })
     }
+
+    /// This function should be called after `feed()` returns `Error`.
+    /// Get expected tokens for last `feed()` call.
+    /// The iterator can contain duplicate tokens.
+    pub fn expected<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &'a self,
+        p: &'a P,
+    ) -> impl Iterator<Item = &'a Data::Term>
+    where
+        Data::Term: 'a,
+        Data::NonTerm: 'a,
+    {
+        self.state_list
+            .iter()
+            .flat_map(|state| p.get_states()[*state].expected())
+    }
+
+    /// This function should be called after `feed()` returns `Error`.
+    /// Get expected tokens for last `feed()` call.
+    /// The iterator does not contain duplicate tokens.
+    pub fn expected_dedup<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &'a self,
+        p: &'a P,
+    ) -> impl Iterator<Item = &'a Data::Term>
+    where
+        Data::Term: 'a + std::hash::Hash + Eq,
+        Data::NonTerm: 'a,
+    {
+        let dedupped: HashSet<&'a Data::Term> = self.expected(p).collect();
+        dedupped.into_iter()
+    }
 }
 
 impl<Data: NodeData> Default for Context<Data> {
     fn default() -> Self {
-        Self::new()
+        Context {
+            current_nodes: HashMap::from_iter([(0, vec![Rc::new(Node::new_root())])]),
+            state_list: Default::default(),
+            reduce_errors: Default::default(),
+            reduce_args: Default::default(),
+            nodes_pong: Default::default(),
+        }
     }
 }
 

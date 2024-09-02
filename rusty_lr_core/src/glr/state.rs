@@ -1,8 +1,8 @@
 use std::collections::BTreeSet;
 use std::hash::Hash;
 
+use crate::HashMap;
 use crate::ShiftedRuleRef;
-use crate::{HashMap, HashSet};
 
 /// State in DFA.
 /// This accepts multiple reduce for single terminal.
@@ -55,15 +55,10 @@ impl<Term, NonTerm> State<Term, NonTerm> {
     }
 
     /// get expected terms set
-    pub fn expected(&self) -> HashSet<&Term>
-    where
-        Term: Hash + Eq,
-    {
-        HashSet::from_iter(
-            self.shift_goto_map_term
-                .keys()
-                .chain(self.reduce_map.keys()),
-        )
+    pub fn expected(&self) -> impl Iterator<Item = &Term> {
+        self.shift_goto_map_term
+            .keys()
+            .chain(self.reduce_map.keys())
     }
 
     /// Map terminal and non-terminal symbols to another type.

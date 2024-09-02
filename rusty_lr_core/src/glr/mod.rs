@@ -5,7 +5,6 @@ pub(crate) mod state;
 
 pub mod node;
 
-use crate::HashMap;
 pub use context::Context;
 pub use error::InvalidTerminalError;
 pub use error::MultiplePathError;
@@ -34,14 +33,14 @@ where
     P::NonTerm: Hash + Eq + Clone,
 {
     let mut reduce_nodes = std::mem::take(&mut context.current_nodes);
+    context.nodes_pong.clear();
 
     context.state_list.clear();
     context.reduce_errors.clear();
 
     // BFS reduce
     while !reduce_nodes.is_empty() {
-        let mut reduce_nodes_pong: HashMap<usize, Vec<Rc<Node<Data>>>> = HashMap::default();
-        for (state, nodes) in reduce_nodes.into_iter() {
+        for (state, nodes) in reduce_nodes.drain() {
             let next_term_shift_state = parser.get_states()[state].shift_goto_term(&term);
             context.state_list.push(state);
             if let Some(reduce_rules) = parser.get_states()[state].reduce(&term) {
@@ -56,7 +55,6 @@ where
                             reduce_rule,
                             Rc::clone(&node),
                             context,
-                            &mut reduce_nodes_pong,
                             &term,
                             userdata,
                         );
@@ -67,7 +65,6 @@ where
                             reduce_rules[0],
                             Rc::clone(&node),
                             context,
-                            &mut reduce_nodes_pong,
                             &term,
                             userdata,
                         );
@@ -87,15 +84,7 @@ where
                                 .push(Rc::new(next_node));
                         }
                     } else {
-                        reduce(
-                            parser,
-                            reduce_rules[0],
-                            node,
-                            context,
-                            &mut reduce_nodes_pong,
-                            &term,
-                            userdata,
-                        );
+                        reduce(parser, reduce_rules[0], node, context, &term, userdata);
                     }
                 }
             } else if let Some(next_term_shift_state) = next_term_shift_state {
@@ -116,20 +105,12 @@ where
                 }
             }
         }
-        reduce_nodes = reduce_nodes_pong;
+        std::mem::swap(&mut reduce_nodes, &mut context.nodes_pong);
     }
 
     if context.current_nodes.is_empty() {
-        let mut expected = parser.get_states()[context.state_list[0]].expected();
-        for state in context.state_list.iter().skip(1) {
-            expected = expected
-                .union(&parser.get_states()[*state].expected())
-                .cloned()
-                .collect();
-        }
         Err(InvalidTerminalError {
             term,
-            expected: expected.into_iter().cloned().collect(),
             reduce_errors: std::mem::take(&mut context.reduce_errors),
         })
     } else {
@@ -214,7 +195,6 @@ fn reduce<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clon
     reduce_rule: usize,
     node: Rc<Node<Data>>,
     context: &mut Context<Data>,
-    out: &mut HashMap<usize, Vec<Rc<Node<Data>>>>,
     term: &P::Term,
     userdata: &mut Data::UserData,
 ) -> bool
@@ -231,7 +211,13 @@ where
     let parent = data_extracted;
 
     let mut do_shift = true;
-    match Data::new_nonterm(reduce_rule, context, &mut do_shift, term, userdata) {
+    match Data::new_nonterm(
+        reduce_rule,
+        &mut context.reduce_args,
+        &mut do_shift,
+        term,
+        userdata,
+    ) {
         Ok(new_data) => {
             if let Some(nonterm_shift_state) = parser.get_states()[parent.state]
                 .shift_goto_nonterm(&parser.get_rules()[reduce_rule].name)
@@ -244,7 +230,9 @@ where
                     tree: Some(tree),
                 };
 
-                out.entry(nonterm_shift_state)
+                context
+                    .nodes_pong
+                    .entry(nonterm_shift_state)
                     .or_default()
                     .push(Rc::new(new_node));
             }

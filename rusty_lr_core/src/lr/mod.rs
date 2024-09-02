@@ -28,6 +28,7 @@ where
     P::NonTerm: Hash + Eq + Clone,
 {
     let state0 = *context.state_stack.last().unwrap();
+    context.last_state = state0;
     // check if there is any reduce action with given terminal
     while let Some(reduce_rule) =
         parser.get_states()[*context.state_stack.last().unwrap()].reduce(&term)
@@ -66,14 +67,7 @@ where
             context.state_stack.push(next_state_id);
         } else {
             // this should not happen, if the DFA is built correctly
-            return Err(ParseError::InvalidTerminal(InvalidTerminalError {
-                term,
-                expected: parser.get_states()[state0]
-                    .expected()
-                    .into_iter()
-                    .cloned()
-                    .collect(),
-            }));
+            return Err(ParseError::InvalidTerminal(InvalidTerminalError { term }));
         }
     }
 
@@ -90,10 +84,7 @@ where
 
         Ok(())
     } else {
-        let error = InvalidTerminalError {
-            term,
-            expected: state.expected().into_iter().cloned().collect(),
-        };
+        let error = InvalidTerminalError { term };
         Err(ParseError::InvalidTerminal(error))
     }
 }

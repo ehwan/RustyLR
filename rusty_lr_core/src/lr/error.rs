@@ -16,13 +16,11 @@ use super::Stack;
 pub struct InvalidTerminalError<Term> {
     /// invalid terminal feeded
     pub term: Term,
-    /// expected terminals
-    pub expected: Vec<Term>,
 }
 
 impl<Term: Display> Display for InvalidTerminalError<Term> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.message())
+        write!(f, "Invalid Terminal: {}. ", self.term)
     }
 }
 
@@ -110,23 +108,7 @@ impl<Term> InvalidTerminalError<Term> {
     where
         Term: Display,
     {
-        let mut message = format!("Invalid Terminal: {}. ", self.term);
-
-        if self.expected.is_empty() {
-            message.push_str("No expected token");
-        } else {
-            let expected: BTreeSet<String> =
-                self.expected.iter().map(|t| format!("{}", t)).collect();
-            message.push_str("Expected one of: ");
-            let len = expected.len();
-            for (id, term) in expected.into_iter().enumerate() {
-                message.push_str(&term);
-                if id < len - 1 {
-                    message.push_str(", ");
-                }
-            }
-        }
-        message
+        self.to_string()
     }
 
     /// Generate long, detailed error message.

@@ -1,3 +1,4 @@
+use super::Parser;
 use super::Stack;
 
 #[cfg(feature = "tree")]
@@ -8,6 +9,11 @@ use crate::TreeList;
 pub struct Context<S: Stack> {
     /// state stack
     pub state_stack: Vec<usize>,
+
+    /// The top of state stack before `feed()` called.
+    /// This is used for `expected()` method.
+    pub(crate) last_state: usize,
+
     pub(crate) data_stack: S,
 
     #[cfg(feature = "tree")]
@@ -23,6 +29,8 @@ impl<S: Stack> Context<S> {
     {
         Context {
             state_stack: vec![0],
+            last_state: 0,
+
             data_stack: S::new(),
 
             #[cfg(feature = "tree")]
@@ -54,6 +62,19 @@ impl<S: Stack> Context<S> {
     pub fn into_tree_list(self) -> TreeList<S::Term, S::NonTerm> {
         self.tree_stack
     }
+
+    /// This function should be called after `feed()` returns `Error`.
+    /// Get expected tokens for last `feed()` call.
+    pub fn expected<'a, P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+        &self,
+        p: &'a P,
+    ) -> impl Iterator<Item = &'a S::Term>
+    where
+        S::Term: 'a,
+        S::NonTerm: 'a,
+    {
+        p.get_states()[self.last_state].expected()
+    }
 }
 
 impl<S: Stack> Default for Context<S>
@@ -74,6 +95,7 @@ where
     fn clone(&self) -> Self {
         Context {
             state_stack: self.state_stack.clone(),
+            last_state: self.last_state,
             data_stack: self.data_stack.clone(),
 
             #[cfg(feature = "tree")]
