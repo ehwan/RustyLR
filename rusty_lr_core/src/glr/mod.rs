@@ -28,11 +28,23 @@ pub fn feed<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Cl
     context: &mut Context<Data>,
     term: P::Term,
     userdata: &mut Data::UserData,
-) -> Result<(), InvalidTerminalError<P::Term, Data::ReduceActionError>>
+) -> Result<(), InvalidTerminalError<P::Term, P::NonTerm, Data::ReduceActionError>>
 where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
+    #[cfg(feature = "error")]
+    let expected = context
+        .nodes()
+        .flat_map(|node| parser.get_states()[node.state].expected())
+        .cloned()
+        .collect::<Vec<_>>();
+    #[cfg(feature = "error")]
+    let backtraces = context
+        .nodes()
+        .map(|node| node.backtrace(parser))
+        .collect::<Vec<_>>();
+
     let mut reduce_nodes = std::mem::take(&mut context.current_nodes);
     context.nodes_pong.clear();
 
@@ -113,6 +125,13 @@ where
         Err(InvalidTerminalError {
             term,
             reduce_errors: std::mem::take(&mut context.reduce_errors),
+            #[cfg(feature = "error")]
+            expected,
+            #[cfg(feature = "error")]
+            backtraces,
+
+            #[cfg(not(feature = "error"))]
+            _phantom: std::marker::PhantomData,
         })
     } else {
         Ok(())

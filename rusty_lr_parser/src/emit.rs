@@ -72,10 +72,10 @@ impl Grammar {
                 pub type #state_typename = #module_prefix::glr::State<#token_typename, #enum_name>;
                 /// type alias for `InvalidTerminalError`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #invalid_terminal_error = #module_prefix::glr::InvalidTerminalError<#token_typename, #reduce_error_typename>;
+                pub type #invalid_terminal_error = #module_prefix::glr::InvalidTerminalError<#token_typename, #enum_name, #reduce_error_typename>;
                 /// type alias for `MultiplePathError`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #multiple_path_error = #module_prefix::glr::MultiplePathError;
+                pub type #multiple_path_error = #module_prefix::glr::MultiplePathError<#token_typename, #enum_name>;
 
                 #tree_alias
             }
@@ -93,10 +93,10 @@ impl Grammar {
                 pub type #state_typename = #module_prefix::lr::State<#token_typename, #enum_name>;
                 /// type alias for `ParseError`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #parse_error_typename = #module_prefix::lr::ParseError<#token_typename, #reduce_error_typename>;
+                pub type #parse_error_typename = #module_prefix::lr::ParseError<#token_typename, #enum_name, #reduce_error_typename>;
                 /// type alias for `InvalidTerminalError`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #invalid_terminal_error = #module_prefix::lr::InvalidTerminalError<#token_typename>;
+                pub type #invalid_terminal_error = #module_prefix::lr::InvalidTerminalError<#token_typename, #enum_name>;
 
                 #tree_alias
             }
@@ -550,7 +550,7 @@ impl Grammar {
                     #init_reduce_map
 
 
-                    let mut ruleset: std::collections::BTreeSet<#module_prefix::ShiftedRuleRef> = ruleset.iter().map(
+                    let mut ruleset: Vec<#module_prefix::ShiftedRuleRef> = ruleset.iter().map(
                         | (ruleid, shifted) | {
                             #module_prefix::ShiftedRuleRef {
                                 rule: *ruleid as usize,

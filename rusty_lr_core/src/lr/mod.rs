@@ -22,11 +22,16 @@ pub fn feed<P: Parser, S: Stack<Term = P::Term, NonTerm = P::NonTerm>>(
     context: &mut Context<S>,
     term: P::Term,
     data: &mut S::UserData,
-) -> Result<(), ParseError<P::Term, S::ReduceActionError>>
+) -> Result<(), ParseError<P::Term, S::NonTerm, S::ReduceActionError>>
 where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
+    #[cfg(feature = "error")]
+    let expected: Vec<_> = context.expected(parser).cloned().collect();
+    #[cfg(feature = "error")]
+    let backtrace = context.backtrace(parser);
+
     let state0 = *context.state_stack.last().unwrap();
     context.last_state = state0;
     // check if there is any reduce action with given terminal
@@ -67,7 +72,16 @@ where
             context.state_stack.push(next_state_id);
         } else {
             // this should not happen, if the DFA is built correctly
-            return Err(ParseError::InvalidTerminal(InvalidTerminalError { term }));
+            let error = InvalidTerminalError {
+                term,
+                #[cfg(feature = "error")]
+                expected,
+                #[cfg(feature = "error")]
+                backtrace,
+                #[cfg(not(feature = "error"))]
+                _phantom: std::marker::PhantomData,
+            };
+            return Err(ParseError::InvalidTerminal(error));
         }
     }
 
@@ -84,7 +98,15 @@ where
 
         Ok(())
     } else {
-        let error = InvalidTerminalError { term };
+        let error = InvalidTerminalError {
+            term,
+            #[cfg(feature = "error")]
+            expected,
+            #[cfg(feature = "error")]
+            backtrace,
+            #[cfg(not(feature = "error"))]
+            _phantom: std::marker::PhantomData,
+        };
         Err(ParseError::InvalidTerminal(error))
     }
 }

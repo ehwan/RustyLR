@@ -11,7 +11,40 @@ fn main() {
         match c.feed(&p, ch, &mut ()) {
             Ok(_) => {
                 println!("nodes: {}", c.len_paths());
-                println!("{:?}", c);
+            }
+            Err(e) => {
+                println!("Error: {}", e);
+                return;
+            }
+        }
+    }
+    println!("feed eof");
+    match c.feed(&p, '\0', &mut ()) {
+        Ok(_) => {
+            println!("nodes: {}", c.len_paths());
+        }
+        Err(e) => {
+            println!("Error: {}", e);
+        }
+    }
+
+    match c.accept() {
+        Ok(res) => {
+            println!("Result: {}", res);
+        }
+
+        Err(e) => {
+            println!("Error: {}", e);
+        }
+    }
+
+    let input = "1+2**3+4";
+    let mut c = parser::EContext::new();
+    for ch in input.chars() {
+        println!("feed: {}", ch);
+        match c.feed(&p, ch, &mut ()) {
+            Ok(_) => {
+                println!("nodes: {}", c.len_paths());
             }
             Err(e) => {
                 println!("Error: {}", e);

@@ -34,7 +34,7 @@ lr1! {
                         return Err("".to_string());
                     }
                     _ => {
-                        *shift = false;
+                        // *shift = false;
                         E + e2
                     }
 

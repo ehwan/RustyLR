@@ -9,11 +9,13 @@ GLR, LR(1) and LALR(1) parser generator for Rust.
  - `fxhash` : In parser table, replace `std::collections::HashMap` with `FxHashMap` from [`rustc-hash`](https://github.com/rust-lang/rustc-hash).
  - `tree` : Enable automatic syntax tree construction.
     This feature should be used on debug purpose only, since it will consume much more memory and time.
+ - `error` : Enable detailed parsing error messages, for `Display` and `Debug` trait.
+    This feature should be used on debug purpose only, since it will consume much more memory and time.
 
 ## Features
  - GLR, LR(1) and LALR(1) parser generator
  - Provides procedural macros and buildscript tools
- - readable error messages, for resolving conflicts in the grammar
+ - readable error messages, both for parsing and building grammar
  - pretty-printed syntax tree
  - compile-time DFA construction
  - customizable reduce action
@@ -121,6 +123,10 @@ println!("userdata: {}", userdata);
 ## Visualized syntax tree
 ![images/tree.png](images/tree.png)
  - With `tree` feature enabled.
+
+## detailed `ParseError` message
+![images/parse_error.png](images/parse_error.png)
+ - With `error` feature enabled.
 
 ## Syntax
 See [SYNTAX.md](SYNTAX.md) for details of grammar-definition syntax.

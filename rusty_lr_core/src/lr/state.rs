@@ -1,4 +1,3 @@
-use std::collections::BTreeSet;
 use std::fmt::Display;
 use std::hash::Hash;
 
@@ -11,7 +10,7 @@ pub struct State<Term, NonTerm> {
     pub shift_goto_map_term: HashMap<Term, usize>,
     pub shift_goto_map_nonterm: HashMap<NonTerm, usize>,
     pub reduce_map: HashMap<Term, usize>,
-    pub ruleset: BTreeSet<ShiftedRuleRef>,
+    pub ruleset: Vec<ShiftedRuleRef>,
 }
 impl<Term, NonTerm> State<Term, NonTerm> {
     pub fn new() -> Self {

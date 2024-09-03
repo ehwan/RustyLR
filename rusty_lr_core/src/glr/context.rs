@@ -72,9 +72,11 @@ impl<Data: NodeData> Context<Data> {
 
     /// After feeding all tokens (include EOF), call this function to get result.
     /// Get value of start symbol, if there is only one path.
-    pub fn accept(self) -> Result<Data::StartType, MultiplePathError>
+    pub fn accept(self) -> Result<Data::StartType, MultiplePathError<Data::Term, Data::NonTerm>>
     where
         Data: Clone,
+        Data::Term: Clone,
+        Data::NonTerm: Clone,
     {
         if self.len_paths() == 1 {
             // if there is only one path, we can get the result
@@ -99,7 +101,13 @@ impl<Data: NodeData> Context<Data> {
             };
             Ok(data_node.into_start())
         } else {
-            Err(MultiplePathError)
+            Err(MultiplePathError {
+                #[cfg(feature = "tree")]
+                tree_lists: self.to_tree_lists().collect(),
+
+                #[cfg(not(feature = "tree"))]
+                _phantom: std::marker::PhantomData,
+            })
         }
     }
 
@@ -170,35 +178,54 @@ impl<Data: NodeData> Context<Data> {
         })
     }
 
-    /// This function should be called after `feed()` returns `Error`.
-    /// Get expected tokens for last `feed()` call.
-    /// The iterator can contain duplicate tokens.
+    /// Get expected tokens for next `feed()` call.
+    /// This function should not be called after `feed()` returns `Error`.
     pub fn expected<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &'a self,
-        p: &'a P,
-    ) -> impl Iterator<Item = &'a Data::Term>
-    where
-        Data::Term: 'a,
-        Data::NonTerm: 'a,
-    {
-        self.state_list
-            .iter()
-            .flat_map(|state| p.get_states()[*state].expected())
-    }
-
-    /// This function should be called after `feed()` returns `Error`.
-    /// Get expected tokens for last `feed()` call.
-    /// The iterator does not contain duplicate tokens.
-    pub fn expected_dedup<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &'a self,
-        p: &'a P,
+        parser: &'a P,
     ) -> impl Iterator<Item = &'a Data::Term>
     where
         Data::Term: 'a + std::hash::Hash + Eq,
         Data::NonTerm: 'a,
     {
-        let dedupped: HashSet<&'a Data::Term> = self.expected(p).collect();
+        let dedupped: HashSet<&'a Data::Term> = self
+            .nodes()
+            .flat_map(|node| parser.get_states()[node.state].expected())
+            .collect();
+
         dedupped.into_iter()
+    }
+
+    /// This function should be called after `feed()` returns `Error`.
+    /// Get expected tokens for last `feed()` call.
+    pub fn expected_on_error<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &'a self,
+        parser: &'a P,
+    ) -> impl Iterator<Item = &'a Data::Term>
+    where
+        Data::Term: 'a + std::hash::Hash + Eq,
+        Data::NonTerm: 'a,
+    {
+        let dedupped: HashSet<&'a Data::Term> = self
+            .state_list
+            .iter()
+            .flat_map(|state| parser.get_states()[*state].expected())
+            .collect();
+
+        dedupped.into_iter()
+    }
+
+    #[cfg(feature = "error")]
+    /// Get backtrace infos for all paths.
+    pub fn backtraces<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &'a self,
+        parser: &'a P,
+    ) -> impl Iterator<Item = crate::Backtrace<P::Term, P::NonTerm>> + 'a
+    where
+        Data::Term: Clone,
+        Data::NonTerm: Clone + Hash + Eq,
+    {
+        self.nodes().map(|node| node.backtrace(parser))
     }
 
     /// move all nodes in `other` to `self`.
@@ -217,7 +244,7 @@ impl<Data: NodeData> Context<Data> {
         parser: &P,
         term: P::Term,
         userdata: &mut Data::UserData,
-    ) -> Result<(), InvalidTerminalError<Data::Term, Data::ReduceActionError>>
+    ) -> Result<(), InvalidTerminalError<Data::Term, Data::NonTerm, Data::ReduceActionError>>
     where
         Data: Clone,
         P::Term: Hash + Eq + Clone,

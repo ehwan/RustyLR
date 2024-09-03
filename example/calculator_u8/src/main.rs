@@ -33,9 +33,9 @@ fn main() {
             Ok(_) => {}
             Err(e) => {
                 // this will print error messages
-                eprintln!("error: {}", e);
-                let message = e.long_message(&parser, &context);
-                eprintln!("long message: {}", message);
+                eprintln!("error: {:?}", e);
+
+                // eprintln!("{:?}", context.backtrace(&parser));
                 return;
             }
         }
