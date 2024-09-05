@@ -71,7 +71,11 @@ pub struct TerminalSet {
     pub close_span: Span,
 }
 impl TerminalSet {
-    pub fn to_terminal_set(&self, grammar: &Grammar) -> Result<BTreeSet<usize>, ParseError> {
+    pub fn to_terminal_set(
+        &self,
+        grammar: &Grammar,
+        include_eof: bool,
+    ) -> Result<BTreeSet<usize>, ParseError> {
         let mut terminal_set = BTreeSet::new();
         for item in &self.items {
             let mut item_set = item.to_terminal_set(grammar)?;
@@ -82,12 +86,14 @@ impl TerminalSet {
             terminal_set = full_terminals.difference(&terminal_set).cloned().collect();
         }
 
-        // exclude eof on any case
-        let eof_idx = grammar
-            .terminals_index
-            .get(&Ident::new(utils::EOF_NAME, Span::call_site()))
-            .unwrap();
-        terminal_set.remove(eof_idx);
+        if !include_eof {
+            // include eof when TerminalSet is used in a lookahead set
+            let eof_idx = grammar
+                .terminals_index
+                .get(&Ident::new(utils::EOF_NAME, Span::call_site()))
+                .unwrap();
+            terminal_set.remove(eof_idx);
+        }
         Ok(terminal_set)
     }
 }

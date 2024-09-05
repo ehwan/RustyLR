@@ -20,7 +20,11 @@ pub enum TerminalSetOrIdent {
 }
 
 impl TerminalSetOrIdent {
-    pub fn to_terminal_set(&self, grammar: &Grammar) -> Result<BTreeSet<usize>, ParseError> {
+    pub fn to_terminal_set(
+        &self,
+        grammar: &Grammar,
+        include_eof: bool,
+    ) -> Result<BTreeSet<usize>, ParseError> {
         match self {
             TerminalSetOrIdent::Ident(ident) => {
                 if let Some(idx) = grammar.terminals_index.get(ident) {
@@ -29,7 +33,9 @@ impl TerminalSetOrIdent {
                     Err(ParseError::TerminalNotDefined(ident.clone()))
                 }
             }
-            TerminalSetOrIdent::TerminalSet(terminal_set) => terminal_set.to_terminal_set(grammar),
+            TerminalSetOrIdent::TerminalSet(terminal_set) => {
+                terminal_set.to_terminal_set(grammar, include_eof)
+            }
         }
     }
     pub fn span_pair(&self) -> (Span, Span) {
@@ -149,7 +155,7 @@ impl PatternArgs {
             }),
             PatternArgs::Exclamation(pattern, _) => pattern.into_pattern(grammar, true),
             PatternArgs::TerminalSet(terminal_set) => {
-                let terminal_set = terminal_set.to_terminal_set(grammar)?;
+                let terminal_set = terminal_set.to_terminal_set(grammar, false)?;
                 let pattern = Pattern {
                     pattern_type: PatternType::TerminalSet(terminal_set),
                     pretty_name: pretty_name.clone(),
@@ -164,7 +170,7 @@ impl PatternArgs {
                 }
             }
             PatternArgs::Lookaheads(pattern, terminalset) => {
-                let terminal_set = terminalset.to_terminal_set(grammar)?;
+                let terminal_set = terminalset.to_terminal_set(grammar, true)?;
                 let pattern = Pattern {
                     pattern_type: PatternType::Lookaheads(
                         Box::new(pattern.into_pattern(grammar, put_exclamation)?),

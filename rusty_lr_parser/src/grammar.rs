@@ -225,7 +225,7 @@ impl Grammar {
         // reduce types
         for (terminals, reduce_type) in grammar_args.reduce_types.into_iter() {
             let new_span = terminals.span_pair();
-            for term_idx in terminals.to_terminal_set(&grammar)?.into_iter() {
+            for term_idx in terminals.to_terminal_set(&grammar, false)?.into_iter() {
                 let terminal_name = grammar.terminals[term_idx].name.clone();
                 if let Some(old) = &mut grammar.terminals[term_idx].reduce_type {
                     if old.reduce_type != reduce_type {
