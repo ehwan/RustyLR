@@ -49,13 +49,13 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     }
 
     /// add new production rule for given nonterminal 'name'
-    pub fn add_rule(&mut self, name: NonTerm, rule: Vec<Token<Term, NonTerm>>, id: usize) -> usize
+    pub fn add_rule(&mut self, name: NonTerm, rule: Vec<Token<Term, NonTerm>>) -> usize
     where
         NonTerm: Clone + Hash + Eq,
     {
         let index = self.rules.len();
         self.rules_map.entry(name.clone()).or_default().push(index);
-        let rule = ProductionRule { name, rule, id };
+        let rule = ProductionRule { name, rule };
         self.rules.push((rule, None));
         index
     }
@@ -63,7 +63,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         &mut self,
         name: NonTerm,
         rule: Vec<Token<Term, NonTerm>>,
-        id: usize,
         lookaheads: BTreeSet<Term>,
     ) -> usize
     where
@@ -71,7 +70,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     {
         let index = self.rules.len();
         self.rules_map.entry(name.clone()).or_default().push(index);
-        let rule = ProductionRule { name, rule, id };
+        let rule = ProductionRule { name, rule };
         self.rules.push((rule, Some(lookaheads)));
         index
     }

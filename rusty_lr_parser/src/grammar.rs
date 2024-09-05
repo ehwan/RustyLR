@@ -23,8 +23,6 @@ use crate::utils;
 
 use rusty_lr_core::HashMap;
 
-use std::collections::BTreeSet;
-
 pub struct Grammar {
     /// %moduleprefix
     pub(crate) module_prefix: TokenStream,
@@ -80,20 +78,7 @@ impl Grammar {
         {
             Ok(_) => {}
             Err(err) => {
-                let expected: BTreeSet<String> = context
-                    .expected(&parser)
-                    .map(|term| term.to_string())
-                    .collect();
-
-                let mut message = err.to_string();
-                for (idx, expected) in expected.into_iter().enumerate() {
-                    if idx == 0 {
-                        message.push_str("\nExpected: ");
-                    } else {
-                        message.push_str(", ");
-                    }
-                    message.push_str(&expected);
-                }
+                let message = err.to_string();
                 let span = match err {
                     GrammarParseError::InvalidTerminal(term) => term.term.span(),
                     _ => unreachable!("feed error"),
@@ -104,20 +89,7 @@ impl Grammar {
         match context.feed(&parser, Lexed::Eof, &mut grammar_args) {
             Ok(_) => {}
             Err(err) => {
-                let expected: BTreeSet<String> = context
-                    .expected(&parser)
-                    .map(|term| term.to_string())
-                    .collect();
-
-                let mut message = err.to_string();
-                for (idx, expected) in expected.into_iter().enumerate() {
-                    if idx == 0 {
-                        message.push_str("\nExpected: ");
-                    } else {
-                        message.push_str(", ");
-                    }
-                    message.push_str(&expected);
-                }
+                let message = err.to_string();
                 return Err(ParseArgError::MacroLineParseEnd { message });
             }
         }
@@ -443,9 +415,9 @@ impl Grammar {
                     .map(|token_mapped| token_mapped.token)
                     .collect();
                 if let Some(lookaheads) = rule.lookaheads.as_ref() {
-                    grammar.add_rule_with_lookaheads(idx, tokens, rule.id, lookaheads.clone());
+                    grammar.add_rule_with_lookaheads(idx, tokens, lookaheads.clone());
                 } else {
-                    grammar.add_rule(idx, tokens, rule.id);
+                    grammar.add_rule(idx, tokens);
                 }
             }
         }

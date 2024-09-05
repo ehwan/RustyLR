@@ -83,7 +83,7 @@
 //! The `Context` struct has the following functions:
 //!  - `feed(&mut self, &Parser, TerminalType, &mut UserData) -> Result<(), ParseError>` : feed token to the parser
 //!
-//! Node that `UserData` is `()` by default, unless it is defined by [`%userdata`](#userdata-type-optional) directive.
+//! Note that `UserData` is `()` by default, unless it is defined by [`%userdata`](#userdata-type-optional) directive.
 //! All you need to do is to call `new()` to generate the parser, a context.
 //! Then, you can feed the input sequence one by one with `feed()` function.
 //! Once the input sequence is feeded (including `eof` token), without errors,
@@ -267,6 +267,7 @@
 //!  - [`%left`, `%right`](#reduce-type-optional)
 //!  - [`%err`, `%error`](#error-type-optional)
 //!  - [`%glr`](#glr-parser-generation)
+//!  - [`%lalr`](#lalr-parser-generation)
 //!
 //!
 //! ---
@@ -374,7 +375,8 @@
 //! **predefined variables** can be used in `ReduceAction`:
 //!  - `data` ( `&mut UserData` ) : userdata passed to the `feed()` function.
 //!  - `lookahead` ( `&Term` ) : lookahead token that caused the reduce action.
-//!  - `shift` ( `&mut bool` ) : revoke the shift action if set to `false`. See [Resolving Ambiguities](#resolving-ambiguities) section.
+//!  - `shift` ( `&mut bool` ) : revoke the shift action if set to `false`. Default value is whether the shift action is possible.
+//!     See [Resolving Ambiguities](#resolving-ambiguities) section.
 //!
 //! To access the data of each token, you can directly use the name of the token as a variable.
 //!  - For non-terminal symbols, the type of variable is `RuleType`.

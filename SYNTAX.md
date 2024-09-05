@@ -14,6 +14,7 @@
  - [`%left`, `%right`](#reduce-type-optional)
  - [`%err`, `%error`](#error-type-optional)
  - [`%glr`](#glr-parser-generation)
+ - [`%lalr`](#lalr-parser-generation)
 
 
 ---

@@ -288,7 +288,6 @@ impl Grammar {
         // =====================================================================
         let mut tokens_initializer = TokenStream::new();
         let mut rule_names_initializer = TokenStream::new();
-        let mut rule_id_initializer = TokenStream::new();
 
         {
             for rule in rules.into_iter() {
@@ -313,10 +312,6 @@ impl Grammar {
                 let name = rule.name;
                 rule_names_initializer.extend(quote! {
                     #nonterminals_enum_name::#name,
-                });
-                let id = Literal::usize_unsuffixed(rule.id);
-                rule_id_initializer.extend(quote! {
-                    #id,
                 });
             }
         };
@@ -491,29 +486,20 @@ impl Grammar {
             }
         };
 
-        let rule_id_typename = integer_typename(
-            self.nonterminals
-                .iter()
-                .map(|nonterm| nonterm.rules.iter().map(|rule| rule.id).max().unwrap())
-                .max()
-                .unwrap()
-                + 1,
-        );
         let reduce_terminals_cache_typename = integer_typename(reduce_terminals_cache_count);
         let ruleset0_cache_typename = integer_typename(ruleset0_cache_count);
 
+        let token_typename = &self.token_typename;
+
         Ok(quote! {
-            let __rustylr_terminals = vec![#comma_separated_terminals];
+            let __rustylr_terminals:Vec<#token_typename> = vec![#comma_separated_terminals];
             const RUSTYLR_RULES_TOKENS: &[&[#module_prefix::Token<#terminal_index_typename, #nonterminals_enum_name>]] = &[#tokens_initializer];
             const RUSTYLR_RULES_NAME: &[#nonterminals_enum_name] = &[#rule_names_initializer];
-            const RUSTYLR_RULES_ID: &[#rule_id_typename] = &[#rule_id_initializer];
 
             let rules: Vec<#rule_typename> = RUSTYLR_RULES_NAME.iter().zip(
-                RUSTYLR_RULES_TOKENS.iter().zip(
-                    RUSTYLR_RULES_ID.iter()
-                )
+                RUSTYLR_RULES_TOKENS.iter()
             ).map(
-                | (name, (tokens, id)) | {
+                | (name, tokens) | {
                     #rule_typename {
                         name: *name,
                         rule: tokens.iter().map(
@@ -524,7 +510,6 @@ impl Grammar {
                                 }
                             }
                         ).collect(),
-                        id: *id as usize,
                     }
                 }
             ).collect();
@@ -800,15 +785,15 @@ impl Grammar {
         /// struct that holds internal parser data,
         /// including data stack for each non-terminal,
         /// and state stack for DFA
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, non_snake_case, non_camel_case_types)]
         pub struct #stack_struct_name {
             #stack_def_streams
         }
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, non_snake_case, non_camel_case_types, dead_code)]
         impl #stack_struct_name {
             #fn_reduce_for_each_rule_stream
         }
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, non_snake_case, non_camel_case_types, dead_code)]
         impl #module_prefix::lr::Stack for #stack_struct_name {
             type Term = #token_typename;
             type NonTerm = #nonterminals_enum_name;
@@ -844,7 +829,7 @@ impl Grammar {
         }
 
         /// struct that holds parser data, DFA tables
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
         pub struct #parser_struct_name {
             /// production rules
             pub rules: Vec<#rule_typename>,
@@ -863,7 +848,7 @@ impl Grammar {
             }
         }
 
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
         impl #parser_struct_name {
             /// Create new parser instance.
             /// Parser can be reused with different context, for multiple parsing.

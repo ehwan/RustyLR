@@ -69,6 +69,7 @@ where
                             Rc::clone(&node),
                             context,
                             &term,
+                            next_term_shift_state.is_some(),
                             userdata,
                         );
                     }
@@ -79,6 +80,7 @@ where
                             Rc::clone(&node),
                             context,
                             &term,
+                            true,
                             userdata,
                         );
                         if shift_for_this_node {
@@ -97,7 +99,15 @@ where
                                 .push(Rc::new(next_node));
                         }
                     } else {
-                        reduce(parser, reduce_rules[0], node, context, &term, userdata);
+                        reduce(
+                            parser,
+                            reduce_rules[0],
+                            node,
+                            context,
+                            &term,
+                            false,
+                            userdata,
+                        );
                     }
                 }
             } else if let Some(next_term_shift_state) = next_term_shift_state {
@@ -216,6 +226,7 @@ fn reduce<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clon
     node: Rc<Node<Data>>,
     context: &mut Context<Data>,
     term: &P::Term,
+    has_shift: bool,
     userdata: &mut Data::UserData,
 ) -> bool
 where
@@ -230,7 +241,7 @@ where
     #[cfg(not(feature = "tree"))]
     let parent = data_extracted;
 
-    let mut do_shift = true;
+    let mut do_shift = has_shift;
     match Data::new_nonterm(
         reduce_rule,
         &mut context.reduce_args,

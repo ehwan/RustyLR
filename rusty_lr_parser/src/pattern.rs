@@ -563,8 +563,14 @@ impl Pattern {
                 // otherwise, the RuleType of the group is (T1, T2, T3, ...) where T1 T2 T3 ... are the RuleType of the patterns holding a value
 
                 let mut elements = Vec::with_capacity(group.len());
-                for child in group.iter() {
-                    let child_rule = child.to_rule(grammar, pattern_map, root_span_pair)?;
+                for (child_idx, child) in group.iter().enumerate() {
+                    let mut child_rule = child.to_rule(grammar, pattern_map, root_span_pair)?;
+                    if let Some((_, mapto)) = &mut child_rule.ruletype_map {
+                        *mapto = Ident::new(
+                            format!("__rustylr_group_elem{}", child_idx).as_str(),
+                            Span::call_site(),
+                        );
+                    }
                     elements.push(child_rule);
                 }
                 let mut tokens = Vec::with_capacity(group.len());

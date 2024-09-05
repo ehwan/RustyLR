@@ -83,14 +83,14 @@ impl<Data: NodeData> Node<Data> {
     /// This function should not be called from root node.
     #[cfg(feature = "tree")]
     pub fn to_tree(&self) -> &Tree<Data::Term, Data::NonTerm> {
-        assert!(self.parent.is_some());
+        debug_assert!(self.parent.is_some());
         self.tree.as_ref().unwrap()
     }
     /// Get token tree for this node.
     /// This function should not be called from root node.
     #[cfg(feature = "tree")]
     pub fn into_tree(self) -> Tree<Data::Term, Data::NonTerm> {
-        assert!(self.parent.is_some());
+        debug_assert!(self.parent.is_some());
         self.tree.unwrap()
     }
 
@@ -113,13 +113,13 @@ impl<Data: NodeData> Node<Data> {
     /// Get data for this node.
     /// This function should not be called from root node.
     pub fn to_data(&self) -> &Data {
-        assert!(self.parent.is_some());
+        debug_assert!(self.parent.is_some());
         self.data.as_ref().unwrap()
     }
     /// Get data for this node.
     /// This function should not be called from root node.
     pub fn into_data(self) -> Data {
-        assert!(self.parent.is_some());
+        debug_assert!(self.parent.is_some());
         self.data.unwrap()
     }
     /// Get list of data from root to this node.
