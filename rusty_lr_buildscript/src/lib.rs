@@ -760,7 +760,7 @@ impl Builder {
 
                             let mut message = format!(
                                 "Shift/Reduce conflict with token {} was resolved:\nReduce rule:\n\t>>> {}\nShift rules:",
-                                term,
+                                grammar.terminals[*term].name,
                                 builder.rules[*reduce_rule].0.clone().map(term_mapper, nonterm_mapper)
                             );
                             for shifted_rule in shift_rules.iter() {
