@@ -139,6 +139,7 @@ impl Builder {
         ruleid: usize,
         grammar: &rusty_lr_parser::grammar::Grammar,
         prefix_str: &str,
+        prefix_in_this_line: &str,
     ) {
         let (nonterm, local_rule) = grammar.get_rule_by_id(ruleid).expect("Rule not found");
         if let Some(origin_span) = &nonterm.regex_span {
@@ -158,7 +159,8 @@ impl Builder {
                 )),
             );
             labels.push(
-                Label::secondary(fileid, rule_range).with_message("in this line".to_string()),
+                Label::secondary(fileid, rule_range)
+                    .with_message(format!("{}in this line", prefix_in_this_line)),
             );
         }
     }
@@ -613,6 +615,7 @@ impl Builder {
                             *reduceid,
                             &grammar,
                             "(Reduce) ",
+                            "error ",
                         );
 
                         for (shiftid, _) in shift_rules.iter() {
@@ -622,6 +625,7 @@ impl Builder {
                                 *shiftid,
                                 &grammar,
                                 "(Shift) ",
+                                "error ",
                             );
                         }
                         Diagnostic::error()
@@ -649,6 +653,7 @@ impl Builder {
                             *ruleid1,
                             &grammar,
                             "(Rule1) ",
+                            "error ",
                         );
                         Self::extend_rule_source_label(
                             &mut labels,
@@ -656,6 +661,7 @@ impl Builder {
                             *ruleid2,
                             &grammar,
                             "(Rule2) ",
+                            "error ",
                         );
 
                         Diagnostic::error()
@@ -782,6 +788,7 @@ impl Builder {
                                 *reduce_rule,
                                 &grammar,
                                 "(Reduce) ",
+                                "error ",
                             );
 
                             let mut shift_source_inserted = BTreeSet::new();
@@ -795,6 +802,7 @@ impl Builder {
                                         shift_rule.rule,
                                         &grammar,
                                         "(Shift) ",
+                                        "error ",
                                     );
                                 }
                             }
@@ -847,6 +855,7 @@ impl Builder {
                     let mut note = "with lookaheads: ".to_string();
                     let len = terms.len();
                     for (idx, term) in terms.into_iter().enumerate() {
+                        let term = &grammar.terminals[*term].name;
                         if idx < len - 1 {
                             note.push_str(format!("{}, ", term).as_str());
                         } else {
@@ -875,6 +884,7 @@ impl Builder {
                                 *reduce_rule,
                                 &grammar,
                                 "",
+                                "error ",
                             );
                         }
                     }
@@ -935,6 +945,7 @@ impl Builder {
                                 *reduce_rule,
                                 &grammar,
                                 "(Reduce) ",
+                                "error ",
                             );
                         }
                     }
@@ -961,6 +972,7 @@ impl Builder {
                                 shifted_rule.rule,
                                 &grammar,
                                 "(Shift) ",
+                                "error ",
                             );
                         }
                     }
