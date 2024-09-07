@@ -58,6 +58,10 @@ impl<Term, NonTerm> State<Term, NonTerm> {
             .keys()
             .chain(self.reduce_map.keys())
     }
+    /// get expected non-terms set
+    pub fn expected_nonterm(&self) -> impl Iterator<Item = &NonTerm> {
+        self.shift_goto_map_nonterm.keys()
+    }
 
     /// Map terminal and non-terminal symbols to another type.
     /// This is useful when exporting & importing rules.

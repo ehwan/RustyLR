@@ -141,9 +141,9 @@ impl<Data: NodeData> Node<Data> {
         NodeRefIterator { node: Some(self) }
     }
 
-    #[cfg(feature = "error")]
     /// Get backtrace information for current state.
     /// What current state is trying to parse, and where it comes from.
+    #[cfg(feature = "error")]
     pub fn backtrace<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
@@ -279,6 +279,29 @@ impl<Data: NodeData> Node<Data> {
                 })
                 .collect(),
         }
+    }
+
+    /// get expected terminals for current state.
+    pub fn expected<'a, P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &'a P,
+    ) -> impl Iterator<Item = &'a Data::Term>
+    where
+        P::Term: 'a,
+        P::NonTerm: 'a,
+    {
+        parser.get_states()[self.state].expected()
+    }
+    /// get expected non-terminals for current state.
+    pub fn expected_nonterm<'a, P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &'a P,
+    ) -> impl Iterator<Item = &'a Data::NonTerm>
+    where
+        P::Term: 'a,
+        P::NonTerm: 'a,
+    {
+        parser.get_states()[self.state].expected_nonterm()
     }
 }
 

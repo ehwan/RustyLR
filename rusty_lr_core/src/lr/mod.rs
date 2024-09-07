@@ -27,13 +27,6 @@ where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
-    #[cfg(feature = "error")]
-    let expected: Vec<_> = context.expected(parser).cloned().collect();
-    #[cfg(feature = "error")]
-    let backtrace = context.backtrace(parser);
-
-    let state0 = *context.state_stack.last().unwrap();
-    context.last_state = state0;
     // check if there is any reduce action with given terminal
     while let Some(reduce_rule) =
         parser.get_states()[*context.state_stack.last().unwrap()].reduce(&term)
@@ -71,11 +64,20 @@ where
         {
             context.state_stack.push(next_state_id);
         } else {
+            #[cfg(feature = "error")]
+            let expected: Vec<_> = context.expected(parser).cloned().collect();
+            #[cfg(feature = "error")]
+            let expected_nonterm: Vec<_> = context.expected_nonterm(parser).cloned().collect();
+            #[cfg(feature = "error")]
+            let backtrace = context.backtrace(parser);
+
             // this should not happen, if the DFA is built correctly
             let error = InvalidTerminalError {
                 term,
                 #[cfg(feature = "error")]
                 expected,
+                #[cfg(feature = "error")]
+                expected_nonterm,
                 #[cfg(feature = "error")]
                 backtrace,
                 #[cfg(not(feature = "error"))]
@@ -98,10 +100,18 @@ where
 
         Ok(())
     } else {
+        #[cfg(feature = "error")]
+        let expected: Vec<_> = context.expected(parser).cloned().collect();
+        #[cfg(feature = "error")]
+        let expected_nonterm: Vec<_> = context.expected_nonterm(parser).cloned().collect();
+        #[cfg(feature = "error")]
+        let backtrace = context.backtrace(parser);
         let error = InvalidTerminalError {
             term,
             #[cfg(feature = "error")]
             expected,
+            #[cfg(feature = "error")]
+            expected_nonterm,
             #[cfg(feature = "error")]
             backtrace,
             #[cfg(not(feature = "error"))]

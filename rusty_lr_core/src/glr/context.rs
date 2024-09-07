@@ -18,10 +18,6 @@ pub struct Context<Data: NodeData> {
     /// each element represents an end-point of diverged paths.
     pub(crate) current_nodes: HashMap<usize, Vec<Rc<Node<Data>>>>,
 
-    /// For temporary use. store state of each node in `current_nodes`.
-    /// But we don't want to reallocate every `feed` call
-    pub(crate) state_list: Vec<usize>,
-
     /// For temporary use. store reduce errors returned from `reduce_action`.
     /// But we don't want to reallocate every `feed` call
     pub(crate) reduce_errors: Vec<Data::ReduceActionError>,
@@ -32,6 +28,10 @@ pub struct Context<Data: NodeData> {
 
     /// For temporary use. store nodes for next reduce.
     pub(crate) nodes_pong: HashMap<usize, Vec<Rc<Node<Data>>>>,
+    pub(crate) nodes_pong2: HashMap<usize, Vec<Rc<Node<Data>>>>,
+
+    /// For recovery from error
+    pub(crate) fallback_nodes: HashMap<usize, Vec<Rc<Node<Data>>>>,
 }
 
 impl<Data: NodeData> Context<Data> {
@@ -179,7 +179,6 @@ impl<Data: NodeData> Context<Data> {
     }
 
     /// Get expected tokens for next `feed()` call.
-    /// This function should not be called after `feed()` returns `Error`.
     pub fn expected<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &'a self,
         parser: &'a P,
@@ -190,14 +189,29 @@ impl<Data: NodeData> Context<Data> {
     {
         let dedupped: HashSet<&'a Data::Term> = self
             .nodes()
-            .flat_map(|node| parser.get_states()[node.state].expected())
+            .flat_map(|node| node.expected(parser))
+            .collect();
+
+        dedupped.into_iter()
+    }
+    /// Get expected non-terminal tokens for next `feed()` call.
+    pub fn expected_nonterm<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &'a self,
+        parser: &'a P,
+    ) -> impl Iterator<Item = &'a Data::NonTerm>
+    where
+        Data::Term: 'a,
+        Data::NonTerm: 'a + std::hash::Hash + Eq,
+    {
+        let dedupped: HashSet<&'a Data::NonTerm> = self
+            .nodes()
+            .flat_map(|node| node.expected_nonterm(parser))
             .collect();
 
         dedupped.into_iter()
     }
 
-    /// This function should be called after `feed()` returns `Error`.
-    /// Get expected tokens for last `feed()` call.
+    /// This does the same thing as `expected`, for backward compatibility.
     pub fn expected_on_error<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &'a self,
         parser: &'a P,
@@ -206,17 +220,11 @@ impl<Data: NodeData> Context<Data> {
         Data::Term: 'a + std::hash::Hash + Eq,
         Data::NonTerm: 'a,
     {
-        let dedupped: HashSet<&'a Data::Term> = self
-            .state_list
-            .iter()
-            .flat_map(|state| parser.get_states()[*state].expected())
-            .collect();
-
-        dedupped.into_iter()
+        self.expected(parser)
     }
 
-    #[cfg(feature = "error")]
     /// Get backtrace infos for all paths.
+    #[cfg(feature = "error")]
     pub fn backtraces<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &'a self,
         parser: &'a P,
@@ -277,10 +285,11 @@ impl<Data: NodeData> Default for Context<Data> {
     fn default() -> Self {
         Context {
             current_nodes: HashMap::from_iter([(0, vec![Rc::new(Node::new_root())])]),
-            state_list: Default::default(),
             reduce_errors: Default::default(),
             reduce_args: Default::default(),
             nodes_pong: Default::default(),
+            nodes_pong2: Default::default(),
+            fallback_nodes: Default::default(),
         }
     }
 }

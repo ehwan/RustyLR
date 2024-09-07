@@ -13,10 +13,6 @@ pub struct Context<S: Stack> {
     /// state stack
     pub state_stack: Vec<usize>,
 
-    /// The top of state stack before `feed()` called.
-    /// This is used for `expected()` method.
-    pub(crate) last_state: usize,
-
     pub(crate) data_stack: S,
 
     #[cfg(feature = "tree")]
@@ -32,7 +28,6 @@ impl<S: Stack> Context<S> {
     {
         Context {
             state_stack: vec![0],
-            last_state: 0,
 
             data_stack: S::new(),
 
@@ -66,8 +61,7 @@ impl<S: Stack> Context<S> {
         self.tree_stack
     }
 
-    /// This function should be called after `feed()` returns `Error`.
-    /// Get expected tokens for last `feed()` call.
+    /// Get expected tokens for next `feed()` call.
     pub fn expected<'a, P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
         &self,
         parser: &'a P,
@@ -76,7 +70,18 @@ impl<S: Stack> Context<S> {
         S::Term: 'a,
         S::NonTerm: 'a,
     {
-        parser.get_states()[self.last_state].expected()
+        parser.get_states()[*self.state_stack.last().unwrap()].expected()
+    }
+    /// Get expected non-terminal tokens for next `feed()` call.
+    pub fn expected_nonterm<'a, P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+        &self,
+        parser: &'a P,
+    ) -> impl Iterator<Item = &'a S::NonTerm>
+    where
+        S::Term: 'a,
+        S::NonTerm: 'a,
+    {
+        parser.get_states()[*self.state_stack.last().unwrap()].expected_nonterm()
     }
 
     /// Feed one terminal to parser, and update state stack.
@@ -212,7 +217,6 @@ where
     fn clone(&self) -> Self {
         Context {
             state_stack: self.state_stack.clone(),
-            last_state: self.last_state,
             data_stack: self.data_stack.clone(),
 
             #[cfg(feature = "tree")]

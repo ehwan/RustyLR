@@ -33,29 +33,20 @@ where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
-    #[cfg(feature = "error")]
-    let expected = context
-        .nodes()
-        .flat_map(|node| parser.get_states()[node.state].expected())
-        .cloned()
-        .collect::<Vec<_>>();
-    #[cfg(feature = "error")]
-    let backtraces = context
-        .nodes()
-        .map(|node| node.backtrace(parser))
-        .collect::<Vec<_>>();
-
+    // current_nodes <-> nodes_pong <-> nodes_pong2
+    // cycle for no unnecessary heap allocation
     let mut reduce_nodes = std::mem::take(&mut context.current_nodes);
+    std::mem::swap(&mut context.current_nodes, &mut context.nodes_pong2);
+    context.current_nodes.clear();
+    // here, nodes_pong2 is newlly created by `Default`, and we will assign it from `reduce_nodes` later
     context.nodes_pong.clear();
 
-    context.state_list.clear();
     context.reduce_errors.clear();
 
     // BFS reduce
     while !reduce_nodes.is_empty() {
         for (state, nodes) in reduce_nodes.drain() {
             let next_term_shift_state = parser.get_states()[state].shift_goto_term(&term);
-            context.state_list.push(state);
             if let Some(reduce_rules) = parser.get_states()[state].reduce(&term) {
                 for node in nodes.into_iter() {
                     let mut shift_for_this_node = false;
@@ -126,17 +117,35 @@ where
                         .or_default()
                         .push(Rc::new(next_node));
                 }
+            } else {
+                context.fallback_nodes.insert(state, nodes);
             }
         }
         std::mem::swap(&mut reduce_nodes, &mut context.nodes_pong);
     }
+    context.nodes_pong2 = reduce_nodes;
 
     if context.current_nodes.is_empty() {
+        std::mem::swap(&mut context.current_nodes, &mut context.fallback_nodes);
+        context.fallback_nodes.clear();
+
+        #[cfg(feature = "error")]
+        let expected = context.expected(parser).cloned().collect::<Vec<_>>();
+        #[cfg(feature = "error")]
+        let expected_nonterm = context
+            .expected_nonterm(parser)
+            .cloned()
+            .collect::<Vec<_>>();
+        #[cfg(feature = "error")]
+        let backtraces = context.backtraces(parser).collect::<Vec<_>>();
+
         Err(InvalidTerminalError {
             term,
             reduce_errors: std::mem::take(&mut context.reduce_errors),
             #[cfg(feature = "error")]
             expected,
+            #[cfg(feature = "error")]
+            expected_nonterm,
             #[cfg(feature = "error")]
             backtraces,
 
@@ -144,6 +153,7 @@ where
             _phantom: std::marker::PhantomData,
         })
     } else {
+        context.fallback_nodes.clear();
         Ok(())
     }
 }
