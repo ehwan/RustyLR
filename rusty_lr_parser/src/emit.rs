@@ -35,27 +35,6 @@ impl Grammar {
         let invalid_terminal_error = format_ident!("{}InvalidTerminalError", start_rule_name);
         let context_struct_name = format_ident!("{}Context", start_rule_name);
 
-        #[cfg(feature = "tree")]
-        let tree_typename = format_ident!("{}Tree", start_rule_name);
-        #[cfg(feature = "tree")]
-        let treelist_typename = format_ident!("{}TreeList", start_rule_name);
-        #[cfg(feature = "tree")]
-        let treenonterm_typename = format_ident!("{}TreeNonTerminal", start_rule_name);
-        #[cfg(feature = "tree")]
-        let tree_alias = quote! {
-            /// type alias for `Tree`
-            pub type #tree_typename = #module_prefix::Tree<#token_typename, #enum_name>;
-
-            /// type alias for `TreeNonTerminal`
-            pub type #treenonterm_typename = #module_prefix::TreeNonTerminal<#token_typename, #enum_name>;
-
-            /// type alias for `TreeList`
-            pub type #treelist_typename = #module_prefix::TreeList<#token_typename, #enum_name>;
-        };
-
-        #[cfg(not(feature = "tree"))]
-        let tree_alias = quote! {};
-
         if self.glr {
             let multiple_path_error = format_ident!("{}MultiplePathError", start_rule_name);
             let node_enum_name = format_ident!("{}NodeEnum", start_rule_name);
@@ -76,8 +55,6 @@ impl Grammar {
                 /// type alias for `MultiplePathError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #multiple_path_error = #module_prefix::glr::MultiplePathError<#token_typename, #enum_name>;
-
-                #tree_alias
             }
         } else {
             let stack_struct_name = format_ident!("{}Stack", start_rule_name);
@@ -97,8 +74,6 @@ impl Grammar {
                 /// type alias for `InvalidTerminalError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #invalid_terminal_error = #module_prefix::lr::InvalidTerminalError<#token_typename, #enum_name>;
-
-                #tree_alias
             }
         }
     }
