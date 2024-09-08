@@ -11,6 +11,14 @@ use crate::hashmap::HashMap;
 use crate::rule::*;
 use crate::token::Token;
 
+/// struct that holding pre-calculated information for `expand()` function.
+#[derive(Debug, Clone)]
+pub struct ExpandCache<Term> {
+    rule: usize,
+    lookaheads: BTreeSet<Term>,
+    include_origin_lookaheads: bool,
+}
+
 /// A struct for Context Free Grammar and DFA construction
 #[derive(Debug, Clone)]
 pub struct Grammar<Term, NonTerm> {
@@ -31,6 +39,8 @@ pub struct Grammar<Term, NonTerm> {
     /// this option is for GLR parser.
     /// conflict resolving through `reduce_types` is still applied.
     allow_conflict: bool,
+
+    expand_cache: HashMap<NonTerm, Vec<ExpandCache<Term>>>,
 }
 
 impl<Term, NonTerm> Grammar<Term, NonTerm> {
@@ -41,6 +51,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             reduce_types: Default::default(),
             rules_map: Default::default(),
             allow_conflict: false,
+            expand_cache: Default::default(),
         }
     }
 
@@ -98,6 +109,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         NonTerm: Copy + Hash + Ord,
     {
         self.calculate_first();
+        self.calculate_expand_cache()?;
 
         // add main augmented rule
         let augmented_rule_set = {
@@ -140,6 +152,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         NonTerm: Copy + Hash + Ord,
     {
         self.calculate_first();
+        self.calculate_expand_cache()?;
 
         // add main augmented rule
         let augmented_rule_set = {
@@ -183,6 +196,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             None => Err(BuildError::RuleNotFound(name)),
         }
     }
+
     /// calculate first terminals for each nonterminals
     fn calculate_first(&mut self)
     where
@@ -248,13 +262,88 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         }
     }
 
-    /// calculate lookahead tokens for given follow tokens and lookahead tokens
-    /// this is equivalent to FIRST( follow_tokens, lookahead )
+    /// pre calculate the information for `expand()` function.
+    fn calculate_expand_cache(&mut self) -> Result<(), BuildError<Term, NonTerm>>
+    where
+        Term: Ord + Copy,
+        NonTerm: Hash + Eq + Copy,
+    {
+        let mut pong: Vec<ExpandCache<Term>> = Vec::new();
+        for (nonterm, nonterm_rules) in self.rules_map.iter() {
+            let mut rules: BTreeMap<usize, ExpandCache<Term>> = nonterm_rules
+                .iter()
+                .map(|rule| {
+                    (
+                        *rule,
+                        ExpandCache {
+                            rule: *rule,
+                            lookaheads: BTreeSet::new(),
+                            include_origin_lookaheads: true,
+                        },
+                    )
+                })
+                .collect();
+            pong.clear();
+
+            loop {
+                pong.clear();
+                for (_, cur) in rules.iter() {
+                    let rule = &self.rules[cur.rule].0;
+                    if let Some(Token::NonTerm(nonterm_name)) = rule.rule.get(0) {
+                        // calculate lookaheads
+                        let (lookaheads, canbe_empty) =
+                            self.lookahead(&rule.rule[1..], &cur.lookaheads)?;
+
+                        for searched_rule in self.search_rules(*nonterm_name)?.iter() {
+                            pong.push(ExpandCache {
+                                rule: *searched_rule,
+                                lookaheads: lookaheads.clone(),
+                                include_origin_lookaheads: canbe_empty
+                                    && cur.include_origin_lookaheads,
+                            });
+                        }
+                    }
+                }
+
+                let mut changed = false;
+                for mut p in pong.drain(..) {
+                    let cur = rules.entry(p.rule).or_insert_with(|| {
+                        changed = true;
+                        ExpandCache {
+                            rule: p.rule,
+                            lookaheads: Default::default(),
+                            include_origin_lookaheads: false,
+                        }
+                    });
+                    if p.include_origin_lookaheads && !cur.include_origin_lookaheads {
+                        cur.include_origin_lookaheads = true;
+                        changed = true;
+                    }
+                    let len0 = cur.lookaheads.len();
+                    cur.lookaheads.append(&mut p.lookaheads);
+                    if len0 != cur.lookaheads.len() {
+                        changed = true;
+                    }
+                }
+                if !changed {
+                    break;
+                }
+            }
+
+            self.expand_cache
+                .insert(*nonterm, rules.into_values().collect());
+        }
+        Ok(())
+    }
+
+    /// calculate lookahead tokens for given follow tokens.
+    /// this is equivalent to FIRST( follow_tokens, lookahead ).
+    /// 1st `bool` of returned tuple is true if follow_tokens can be empty.
     fn lookahead(
         &self,
         follow_tokens: &[Token<Term, NonTerm>],
-        lookahead: &BTreeSet<Term>,
-    ) -> Result<BTreeSet<Term>, BuildError<Term, NonTerm>>
+        lookaheads: &BTreeSet<Term>,
+    ) -> Result<(BTreeSet<Term>, bool), BuildError<Term, NonTerm>>
     where
         Term: Ord + Copy,
         NonTerm: Copy + Hash + Eq,
@@ -264,7 +353,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             match token {
                 Token::Term(term) => {
                     ret.insert(*term);
-                    return Ok(ret);
+                    return Ok((ret, false));
                 }
                 Token::NonTerm(nonterm) => {
                     let (firsts, canbe_empty) = if let Some(nonterm) = self.firsts.get(nonterm) {
@@ -274,13 +363,13 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                     };
                     ret.append(&mut firsts.clone());
                     if !canbe_empty {
-                        return Ok(ret);
+                        return Ok((ret, false));
                     }
                 }
             }
         }
-        ret.append(&mut lookahead.clone());
-        Ok(ret)
+        ret.append(&mut lookaheads.clone());
+        Ok((ret, true))
     }
 
     /// for given set of production rules,
@@ -290,49 +379,40 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         Term: Copy + Ord,
         NonTerm: Copy + Hash + Eq,
     {
-        loop {
-            let mut new_rules = Vec::new();
-            for (rule_ref, lookaheads) in rules.rules.iter() {
-                let (rule, _) = &self.rules[rule_ref.rule];
-                if let Some(Token::NonTerm(ref nonterm_name)) = rule.rule.get(rule_ref.shifted) {
-                    let searched_rules = self.search_rules(*nonterm_name)?;
-                    if !searched_rules.is_empty() {
-                        // calculate lookaheads
-                        let lookaheads =
-                            self.lookahead(&rule.rule[rule_ref.shifted + 1..], lookaheads)?;
-
-                        // init new LookaheadRule with searched rules
-                        for searched_rule in searched_rules.iter() {
-                            let rule = ShiftedRuleRef {
-                                rule: *searched_rule,
-                                shifted: 0,
-                            };
-
-                            // if there are forced lookaheads for this rule, use it
-                            if let Some(force_lookaheads) = self.rules[*searched_rule].1.as_ref() {
-                                new_rules.push((
-                                    rule,
-                                    lookaheads.intersection(force_lookaheads).copied().collect(),
-                                ));
-                            } else {
-                                new_rules.push((rule, lookaheads.clone()));
-                            }
-                        }
+        let mut new_rules = Vec::new();
+        for (rule_ref, lookaheads) in rules.rules.iter() {
+            let (rule, _) = &self.rules[rule_ref.rule];
+            if let Some(Token::NonTerm(nonterm_name)) = rule.rule.get(rule_ref.shifted) {
+                let lookaheads = self
+                    .lookahead(&rule.rule[rule_ref.shifted + 1..], lookaheads)?
+                    .0;
+                for c in self.expand_cache.get(nonterm_name).unwrap().iter() {
+                    let lookaheads = if c.include_origin_lookaheads {
+                        lookaheads.union(&c.lookaheads).copied().collect()
                     } else {
-                        // rule not found
-                        return Err(BuildError::RuleNotFound(*nonterm_name));
-                    }
+                        c.lookaheads.clone()
+                    };
+                    // check for force lookahead
+                    let lookaheads = if let Some(force_lookaheads) = self.rules[c.rule].1.as_ref() {
+                        lookaheads.intersection(force_lookaheads).copied().collect()
+                    } else {
+                        lookaheads
+                    };
+
+                    new_rules.push((
+                        ShiftedRuleRef {
+                            rule: c.rule,
+                            shifted: 0,
+                        },
+                        lookaheads,
+                    ));
                 }
             }
-            let mut changed = false;
-            for (rule, lookaheads) in new_rules.into_iter() {
-                changed |= rules.add(rule, lookaheads);
-            }
-
-            if !changed {
-                return Ok(());
-            }
         }
+        for (new_rule, lookaheads) in new_rules.into_iter() {
+            rules.add(new_rule, lookaheads);
+        }
+        Ok(())
     }
 
     /// build new state with given production rules
