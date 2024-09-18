@@ -135,10 +135,11 @@ See [SYNTAX.md](SYNTAX.md) for details of grammar-definition syntax.
 
 ## Executable
 An executable version of buildscript tool is available [rustylr](https://crates.io/crates/rustylr).
+This executable shows detailed messages for conflicts resolving and grammar building.
 ```
 cargo install rustylr
 
-$ rustylr --help
+$ rustylr src/grammar.rs src/output.rs
 ```
 
 ## Contribution
@@ -149,3 +150,8 @@ $ rustylr --help
 Either of
  - MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
  - Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+
+
+## Other Examples
+ - [Simple Calculator](examples/calculator_u8/src/parser.rs)
+ - [lua 5.4 syntax parser](https://github.com/ehwan/lua_rust)

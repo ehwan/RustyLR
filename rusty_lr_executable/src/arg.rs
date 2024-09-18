@@ -20,7 +20,7 @@ pub struct Args {
     pub no_format: bool,
 
     /// turns on all verbose options
-    #[arg(short, long, default_value = "false")]
+    #[arg(short, long, default_value = "true")]
     pub verbose: bool,
 
     /// verbose output for any shift/reduce or reduce/reduce conflicts.
