@@ -22,6 +22,16 @@ GLR, LR(1) and LALR(1) parser generator for Rust.
  - resolving conflicts of ambiguous grammar
  - regex patterns partially supported
 
+## Executable
+An executable version of buildscript tool is available [rustylr](https://crates.io/crates/rustylr).
+This executable shows detailed messages for conflicts resolving and grammar building.
+```
+cargo install rustylr
+
+$ rustylr src/grammar.rs src/output.rs
+```
+Note that `src/grammar.rs` must follow the syntax described in [SYNTAX.md](SYNTAX.md).
+
 ## Example
 ```rust
 // this define `EParser` struct
@@ -133,14 +143,6 @@ See [SYNTAX.md](SYNTAX.md) for details of grammar-definition syntax.
 
  - [Bootstrap](rusty_lr_parser/src/parser/parser.rs) is written in `rusty_lr` itself.
 
-## Executable
-An executable version of buildscript tool is available [rustylr](https://crates.io/crates/rustylr).
-This executable shows detailed messages for conflicts resolving and grammar building.
-```
-cargo install rustylr
-
-$ rustylr src/grammar.rs src/output.rs
-```
 
 ## Contribution
  - Any contribution is welcome.
