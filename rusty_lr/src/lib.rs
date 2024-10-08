@@ -78,6 +78,16 @@
 //! include!(concat!(env!("OUT_DIR"), "/parser.rs"));
 //! ```
 //!
+//! # Executable
+//! An executable is available [rustylr](https://crates.io/crates/rustylr) for buildscript alternative.
+//! This executable shows detailed messages for conflicts resolving and grammar building.
+//! ```
+//! cargo install rustylr
+//!
+//! $ rustylr src/grammar.rs src/output.rs
+//! ```
+//! You can then use the generated `output.rs` in your project.
+//!
 //! # Start Parsing
 //! Either by procedural macros or buildscript, you will get `Parser` and `Context` structs.
 //! The `Context` struct has the following functions:

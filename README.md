@@ -4,6 +4,8 @@
 
 GLR, LR(1) and LALR(1) parser generator for Rust.
 
+Please refer to [docs.rs](https://docs.rs/rusty_lr) for detailed example and documentation.
+
 ## Cargo Features
  - `build` : Enable buildscript tools.
  - `fxhash` : In parser table, replace `std::collections::HashMap` with `FxHashMap` from [`rustc-hash`](https://github.com/rust-lang/rustc-hash).
@@ -22,14 +24,6 @@ GLR, LR(1) and LALR(1) parser generator for Rust.
  - resolving conflicts of ambiguous grammar
  - regex patterns partially supported
 
-## Executable
-An executable version of buildscript tool is available [rustylr](https://crates.io/crates/rustylr).
-This executable shows detailed messages for conflicts resolving and grammar building.
-```
-cargo install rustylr
-
-$ rustylr src/grammar.rs src/output.rs
-```
 Note that `src/grammar.rs` must follow the syntax described in [SYNTAX.md](SYNTAX.md).
 
 ## Example
