@@ -208,8 +208,8 @@ impl<Term> LookaheadRuleRefSet<Term> {
             rules: self
                 .rules
                 .into_iter()
-                .map(|(rule, lookaheads)| {
-                    (rule, lookaheads.into_iter().map(|t| term_map(t)).collect())
+                .map(move |(rule, lookaheads)| {
+                    (rule, lookaheads.into_iter().map(&term_map).collect())
                 })
                 .collect(),
         }

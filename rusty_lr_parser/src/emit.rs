@@ -760,15 +760,15 @@ impl Grammar {
         /// struct that holds internal parser data,
         /// including data stack for each non-terminal,
         /// and state stack for DFA
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, non_snake_case, non_camel_case_types)]
+        #[allow(unused_braces, unused_parens, unused_variables, unused_mut, non_snake_case, non_camel_case_types)]
         pub struct #stack_struct_name {
             #stack_def_streams
         }
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, non_snake_case, non_camel_case_types, dead_code)]
+        #[allow(unused_braces, unused_parens, unused_variables, unused_mut, non_snake_case, non_camel_case_types, dead_code)]
         impl #stack_struct_name {
             #fn_reduce_for_each_rule_stream
         }
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, non_snake_case, non_camel_case_types, dead_code)]
+        #[allow(unused_braces, unused_parens, unused_variables, unused_mut, non_snake_case, non_camel_case_types, dead_code)]
         impl #module_prefix::lr::Stack for #stack_struct_name {
             type Term = #token_typename;
             type NonTerm = #nonterminals_enum_name;
@@ -798,6 +798,7 @@ impl Grammar {
                 }
             }
 
+            #[allow(clippy::unused_unit)]
             fn pop_start(&mut self) -> Self::StartType {
                 #pop_from_start_rule_stack
             }
@@ -827,6 +828,7 @@ impl Grammar {
         impl #parser_struct_name {
             /// Create new parser instance.
             /// Parser can be reused with different context, for multiple parsing.
+            #[allow(clippy::clone_on_copy)]
             pub fn new() -> Self {
                 #grammar_emit
                 Self {
@@ -1159,6 +1161,7 @@ impl Grammar {
         impl #parser_struct_name {
             /// Create new parser instance.
             /// Parser can be reused with different context, for multiple parsing.
+            #[allow(clippy::clone_on_copy)]
             pub fn new() -> Self {
                 #grammar_emit
                 Self {

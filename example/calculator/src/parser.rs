@@ -7,39 +7,17 @@ pub enum Token {
     RParen,
     Eof,
 }
-impl Token {
-    pub fn enum_index(&self) -> usize {
-        match self {
-            Token::Num(_) => 0,
-            Token::Plus => 1,
-            Token::Star => 2,
-            Token::LParen => 3,
-            Token::RParen => 4,
-            Token::Eof => 5,
-        }
-    }
-}
 impl std::hash::Hash for Token {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.enum_index().hash(state);
+        std::mem::discriminant(self).hash(state);
     }
 }
 impl std::cmp::PartialEq for Token {
     fn eq(&self, other: &Self) -> bool {
-        self.enum_index() == other.enum_index()
+        std::mem::discriminant(self) == std::mem::discriminant(other)
     }
 }
 impl std::cmp::Eq for Token {}
-impl PartialOrd for Token {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.enum_index().partial_cmp(&other.enum_index())
-    }
-}
-impl Ord for Token {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.enum_index().cmp(&other.enum_index())
-    }
-}
 
 %%
 

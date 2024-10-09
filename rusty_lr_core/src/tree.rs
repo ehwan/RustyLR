@@ -252,7 +252,7 @@ impl<Term, NonTerm> DerefMut for TreeList<Term, NonTerm> {
 impl<Term, NonTerm> TreeList<Term, NonTerm> {
     /// create new empty tree list
     pub fn new() -> Self {
-        Self { trees: Vec::new() }
+        Default::default()
     }
 
     /// pretty print this tree list
@@ -340,6 +340,12 @@ impl<Term: Display, NonTerm: Display> Display for TreeList<Term, NonTerm> {
 impl<Term: Debug, NonTerm: Debug> Debug for TreeList<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.pretty_print_format_debug(DEFAULT_MAX_LEVEL, f)
+    }
+}
+impl<Term, NonTerm> Default for TreeList<Term, NonTerm> {
+    /// create new empty tree list
+    fn default() -> Self {
+        Self { trees: Vec::new() }
     }
 }
 

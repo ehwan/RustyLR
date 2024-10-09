@@ -3,7 +3,7 @@
 //! This crate is private and not intended to be used directly.
 //! Please use the [`rusty_lr`](https://crates.io/crates/rusty_lr) crate instead.
 //!
-//! ```no_run
+//! ```ignore
 //! fn main() {
 //!     println!("cargo::rerun-if-changed=src/parser/parser.rs");
 //!
@@ -992,5 +992,11 @@ impl Builder {
             generated_stream: expanded_stream,
             debug_comments,
         })
+    }
+}
+
+impl Default for Builder {
+    fn default() -> Self {
+        Self::new()
     }
 }

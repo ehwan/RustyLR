@@ -59,7 +59,7 @@
 //! rusty_lr = { version = "...", features = ["build"] }
 //! ```
 //!
-//! ```rust
+//! ```ignore
 //! // build.rs
 //! use rusty_lr::build;
 //!
@@ -253,7 +253,7 @@
 //!     - Every `RuleType` and `Term` must implement `Clone` trait.
 //!     - `clone()` will be called carefully, only when there are multiple paths.
 //!  - User must be aware of the point where shift/reduce or reduce/reduce conflicts occur.
-//!  Every time the parser diverges, the calculation cost will increase.
+//!    Every time the parser diverges, the calculation cost will increase.
 //!
 //!
 //!
@@ -301,7 +301,7 @@
 //!  - `P?` : Zero or one repetition of `P`.
 //!  - `(P1 P2 P3)` : Grouping of patterns.
 //!  - `P / term`, `P / [term1 term_start-term_last]`, `P / [^term1 term_start-term_last]` :
-//!  Lookaheads; `P` followed by one of given terminal set. Lookaheads are not consumed.
+//!    Lookaheads; `P` followed by one of given terminal set. Lookaheads are not consumed.
 //!
 //! ### Notes
 //! When using range pattern `[first-last]`,
@@ -426,7 +426,7 @@
 //! For group `(P1 P2 P3)`:
 //!  - If none of the patterns hold value, the group itself will not hold any value.
 //!  - If only one of the patterns holds value, the group will hold the value of the very pattern. And the variable name will be same as the pattern.
-//!  (i.e. If `P1` holds value, and others don't, then `(P1 P2 P3)` will hold the value of `P1`, and can be accessed via name `P1`)
+//!    (i.e. If `P1` holds value, and others don't, then `(P1 P2 P3)` will hold the value of `P1`, and can be accessed via name `P1`)
 //!  - If there are multiple patterns holding value, the group will hold `Tuple` of the values. There is no default variable name for the group, you must define the variable name explicitly by `=` operator.
 //!
 //!  ```rust

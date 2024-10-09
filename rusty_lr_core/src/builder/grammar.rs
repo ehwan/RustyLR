@@ -19,11 +19,14 @@ pub struct ExpandCache<Term> {
     include_origin_lookaheads: bool,
 }
 
+type ProductionRuleWithLookaheads<Term, NonTerm> =
+    (ProductionRule<Term, NonTerm>, Option<BTreeSet<Term>>);
+
 /// A struct for Context Free Grammar and DFA construction
 #[derive(Debug, Clone)]
 pub struct Grammar<Term, NonTerm> {
     /// set of production rules
-    pub rules: Vec<(ProductionRule<Term, NonTerm>, Option<BTreeSet<Term>>)>,
+    pub rules: Vec<ProductionRuleWithLookaheads<Term, NonTerm>>,
 
     /// first terminal tokens for each nonterminals
     /// true if it can be empty
@@ -289,7 +292,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 pong.clear();
                 for (_, cur) in rules.iter() {
                     let rule = &self.rules[cur.rule].0;
-                    if let Some(Token::NonTerm(nonterm_name)) = rule.rule.get(0) {
+                    if let Some(Token::NonTerm(nonterm_name)) = rule.rule.first() {
                         // calculate lookaheads
                         let (lookaheads, canbe_empty) =
                             self.lookahead(&rule.rule[1..], &cur.lookaheads)?;
