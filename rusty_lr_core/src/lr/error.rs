@@ -2,6 +2,7 @@ use std::fmt::Debug;
 use std::fmt::Display;
 
 /// Error type for feed(), when invalid terminal is feeded
+#[derive(Clone)]
 pub struct InvalidTerminalError<Term, NonTerm> {
     /// invalid terminal feeded
     pub term: Term,
@@ -87,6 +88,7 @@ impl<Term: Display + Debug, NonTerm: Display + Debug> std::error::Error
 }
 
 /// Error type for feed()
+#[derive(Clone)]
 pub enum ParseError<Term, NonTerm, ReduceActionError> {
     /// Invalid terminal feeded
     InvalidTerminal(InvalidTerminalError<Term, NonTerm>),

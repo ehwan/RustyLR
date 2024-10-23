@@ -5,6 +5,7 @@ use crate::ShiftedRule;
 
 /// Backtracing information for parsing context.
 /// What current parser was trying to parse, and what rules were applied.
+#[derive(Clone)]
 pub struct Backtrace<Term, NonTerm> {
     /// 0'th element is the current parsing state, and through the backtrace, it goes to the initial state.
     pub traces: Vec<Vec<ShiftedRule<Term, NonTerm>>>,

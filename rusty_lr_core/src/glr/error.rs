@@ -2,6 +2,7 @@ use std::fmt::Debug;
 use std::fmt::Display;
 
 /// Error when there is an invalid terminal feeded to the parser.
+#[derive(Clone)]
 pub struct InvalidTerminalError<Term, NonTerm, ReduceActionError> {
     /// The terminal that feeded to the parser.
     pub term: Term,
