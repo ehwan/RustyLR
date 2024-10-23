@@ -7,7 +7,7 @@ fn main() {
 
     let input = "1+2*3+4";
     for ch in input.chars() {
-        println!("feed: {}", ch);
+        println!("feed: {}, possible: {}", ch, c.can_feed(&p, &ch));
         match c.feed(&p, ch, &mut ()) {
             Ok(_) => {
                 println!("nodes: {}", c.len_paths());
@@ -41,7 +41,7 @@ fn main() {
     let input = "1+2**3+4";
     let mut c = parser::EContext::new();
     for ch in input.chars() {
-        println!("feed: {}", ch);
+        println!("feed: {}, can_feed(): {}", ch, c.can_feed(&p, &ch));
         match c.feed(&p, ch, &mut ()) {
             Ok(_) => {
                 println!("nodes: {}", c.len_paths());

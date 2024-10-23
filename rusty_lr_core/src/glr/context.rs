@@ -261,6 +261,76 @@ impl<Data: NodeData> Context<Data> {
         super::feed(parser, self, term, userdata)
     }
 
+    /// Check if `term` can be feeded to current state.
+    /// This does not check for reduce action error.
+    ///
+    /// This does not change the state of the context.
+    pub fn can_feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &P,
+        term: &P::Term,
+    ) -> bool
+    where
+        P::Term: Hash + Eq,
+        P::NonTerm: Hash + Eq,
+    {
+        let mut nodes = self.current_nodes.clone();
+        let mut nodes_pong: HashMap<usize, Vec<Rc<Node<Data>>>> = HashMap::default();
+
+        loop {
+            if nodes.is_empty() {
+                break;
+            }
+
+            nodes_pong.clear();
+            for (state, nodes) in nodes.drain() {
+                let state = &parser.get_states()[state];
+                if state.shift_goto_term(term).is_some() {
+                    return true;
+                }
+
+                if let Some(reduce_rules) = state.reduce(term) {
+                    for reduce_rule in reduce_rules {
+                        let reduce_rule = &parser.get_rules()[*reduce_rule];
+                        let reduce_len = reduce_rule.rule.len();
+
+                        for p in nodes.iter() {
+                            let mut parent = Rc::clone(p);
+                            for _ in 0..reduce_len {
+                                parent = Rc::clone(parent.parent.as_ref().unwrap());
+                            }
+                            if let Some(nonterm_shift_state) = parser.get_states()[parent.state]
+                                .shift_goto_nonterm(&reduce_rule.name)
+                            {
+                                if parser.get_states()[nonterm_shift_state]
+                                    .shift_goto_term(term)
+                                    .is_some()
+                                {
+                                    return true;
+                                }
+
+                                let nonterm_node = Rc::new(Node {
+                                    parent: Some(parent),
+                                    state: nonterm_shift_state,
+                                    data: None,
+                                    #[cfg(feature = "tree")]
+                                    tree: None,
+                                });
+                                nodes_pong
+                                    .entry(nonterm_shift_state)
+                                    .or_default()
+                                    .push(nonterm_node);
+                            }
+                        }
+                    }
+                }
+            }
+            std::mem::swap(&mut nodes, &mut nodes_pong);
+        }
+
+        false
+    }
+
     /// Search for the shortest path that can be accepted and represented as CurrentState -> Terms^N -> Tails.
     /// Where Terms is set of terminals `terms`, and Tails is a sequence of terminals `tails`.
     /// Returns true if there is a alive path.

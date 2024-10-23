@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_core"
-version = "3.3.4"
+version = "3.4.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "core library for rusty_lr"

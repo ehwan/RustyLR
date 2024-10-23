@@ -98,6 +98,47 @@ impl<S: Stack> Context<S> {
         super::feed(parser, self, term, userdata)
     }
 
+    /// Check if `term` can be feeded to current state.
+    /// This does not check for reduce action error.
+    ///
+    /// This does not change the state of the context.
+    pub fn can_feed<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+        &self,
+        parser: &P,
+        term: &S::Term,
+    ) -> bool
+    where
+        S::Term: Hash + Eq,
+        S::NonTerm: Hash + Eq,
+    {
+        if parser.get_states()[*self.state_stack.last().unwrap()]
+            .shift_goto_term(term)
+            .is_some()
+        {
+            return true;
+        }
+
+        let mut state_stack = self.state_stack.clone();
+        while let Some(reduce_rule) = parser.get_states()[*state_stack.last().unwrap()].reduce(term)
+        {
+            let rule = &parser.get_rules()[reduce_rule];
+            let new_len = state_stack.len() - rule.rule.len();
+            state_stack.truncate(new_len);
+
+            if let Some(next_state) =
+                parser.get_states()[*state_stack.last().unwrap()].shift_goto_nonterm(&rule.name)
+            {
+                state_stack.push(next_state);
+            } else {
+                return false;
+            }
+        }
+
+        parser.get_states()[*state_stack.last().unwrap()]
+            .shift_goto_term(term)
+            .is_some()
+    }
+
     #[cfg(feature = "error")]
     /// Get backtrace information for current state.
     /// What current state is trying to parse, and where it comes from.
