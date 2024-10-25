@@ -24,7 +24,7 @@ impl<Term: Display, NonTerm: Display, ReduceActionError: Display> Display
     for InvalidTerminalError<Term, NonTerm, ReduceActionError>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Invalid Terminal: {}. ", self.term)?;
+        write!(f, "Invalid Terminal: {}", self.term)?;
 
         for error in &self.reduce_errors {
             write!(f, "\nReduce action error: {}", error)?;
@@ -66,7 +66,7 @@ impl<Term: Debug, NonTerm: Debug, ReduceActionError: Debug> Debug
     for InvalidTerminalError<Term, NonTerm, ReduceActionError>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Invalid Terminal: {:?}. ", self.term)?;
+        write!(f, "Invalid Terminal: {:?}", self.term)?;
 
         for error in &self.reduce_errors {
             write!(f, "\nReduce action error: {:?}", error)?;

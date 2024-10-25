@@ -20,7 +20,7 @@ pub struct InvalidTerminalError<Term, NonTerm> {
 
 impl<Term: Display, NonTerm: Display> Display for InvalidTerminalError<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Invalid Terminal: {}. ", self.term)?;
+        write!(f, "Invalid Terminal: {}", self.term)?;
         #[cfg(feature = "error")]
         {
             use std::collections::BTreeSet;
@@ -50,7 +50,7 @@ impl<Term: Display, NonTerm: Display> Display for InvalidTerminalError<Term, Non
 }
 impl<Term: Debug, NonTerm: Debug> Debug for InvalidTerminalError<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Invalid Terminal: {:?}. ", self.term)?;
+        write!(f, "Invalid Terminal: {:?}", self.term)?;
         #[cfg(feature = "error")]
         {
             use std::collections::BTreeSet;
