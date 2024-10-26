@@ -248,6 +248,30 @@
 //! In reduce action, you can access the current lookahead token by [`lookahead: &Term`](#accessing-token-data-in-reduceaction) variable.
 //!
 //!
+//! ## Parsing with GLR parser
+//! Same parsing interface is provided for GLR parser. It will take care of multiple paths automatically.
+//! `accept()` function will return `Err` if there are multiple paths.
+//! You can access all the paths remaining by calling `accept_all()` function. The function will return `Iterator` of the values of start symbol.
+//!
+//! ```ignore
+//! let parser = Parser::new();
+//! let mut context = Context::new();
+//! for token in input_sequence {
+//!     match context.feed(&parser, token) {
+//!         Ok(_) => {}
+//!         Err(e) => { // e: ParseError
+//!             println!("{}", e);
+//!             return;
+//!         }
+//!     }
+//! }
+//! // let start_symbol_value = context.accept();
+//! for start_symbol_value in context.accept_all() {
+//!     ...
+//! }
+//! ```
+//!
+//!
 //! ## Note on GLR Parser
 //!  - Since there are multiple paths, the reduce action can be called multiple times, even if the result will be thrown away in the future.
 //!     - Every `RuleType` and `Term` must implement `Clone` trait.

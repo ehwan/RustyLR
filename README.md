@@ -16,15 +16,13 @@ Please refer to [docs.rs](https://docs.rs/rusty_lr) for detailed example and doc
 
 ## Features
  - GLR, LR(1) and LALR(1) parser generator
+ - Multiple paths of parsing with GLR parser
  - Provides procedural macros and buildscript tools
  - readable error messages, both for parsing and building grammar
- - pretty-printed syntax tree
- - compile-time DFA construction
  - customizable reduce action
  - resolving conflicts of ambiguous grammar
  - regex patterns partially supported
 
-Note that `src/grammar.rs` must follow the syntax described in [SYNTAX.md](SYNTAX.md).
 
 ## Example
 ```rust
@@ -61,14 +59,13 @@ lr1! {
 
     Number(i32)                         // type assigned to production rule `Number`
         : space* Digit+ space*          // regex pattern
-    { Digit.into_iter().collect::<String>().parse().unwrap() };
-    //    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ this will be the value of `Number`
-                                        // reduce action written in Rust code
+        { Digit.into_iter().collect::<String>().parse().unwrap() }; // this will be the value of `Number`
+                                                                // reduce action written in Rust code
 
     A(f32): A plus a2=A {
         *data += 1;                     // access userdata by `data`
         println!( "{:?} {:?} {:?}", A, plus, a2 );
-        A + a2
+        A + a2   // this will be the value of `A`
     }
         | M
         ;
