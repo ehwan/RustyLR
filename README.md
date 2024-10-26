@@ -135,7 +135,7 @@ println!("userdata: {}", userdata);
 ## Syntax
 See [SYNTAX.md](SYNTAX.md) for details of grammar-definition syntax.
 
- - [Bootstrap](rusty_lr_parser/src/parser/parser.rs) is written in `rusty_lr` itself.
+ - [Bootstrap](rusty_lr_parser/src/parser/parser.rs): rusty_lr syntax is written in rusty_lr itself.
 
 
 ## Contribution
