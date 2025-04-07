@@ -23,8 +23,11 @@ Please refer to [docs.rs](https://docs.rs/rusty_lr) for detailed example and doc
  - resolving conflicts of ambiguous grammar
  - regex patterns partially supported
 
+## Examples
+ - [Simple Calculator](examples/calculator_u8/src/parser.rs)
+ - [lua 5.4 syntax parser](https://github.com/ehwan/lua_rust/blob/main/parser/src/parser.rs)
+ - [Bootstrap](rusty_lr_parser/src/parser/parser.rs): rusty_lr syntax parser is written in rusty_lr itself.
 
-## Example
 ```rust
 // this define `EParser` struct
 // where `E` is the start symbol
@@ -52,20 +55,20 @@ lr1! {
     %token space ' ';
 
     // conflict resolving
-    %left [plus star];                  // reduce first for token 'plus', 'star'
+    %left [plus star];                  // reduce-first for token 'plus', 'star'
 
     // context-free grammars
     Digit(char): [zero-nine];           // character set '0' to '9'
 
-    Number(i32)                         // type assigned to production rule `Number`
+    Number(i32)                         // type assigned to production rule `Number` holds `i32`
         : space* Digit+ space*          // regex pattern
-        { Digit.into_iter().collect::<String>().parse().unwrap() }; // this will be the value of `Number`
-                                                                // reduce action written in Rust code
+        { Digit.into_iter().collect::<String>().parse().unwrap() }; // this will be the value of `Number` (i32)
+                                                                    // reduce action written in Rust code
 
     A(f32): A plus a2=A {
-        *data += 1;                     // access userdata by `data`
-        println!( "{:?} {:?} {:?}", A, plus, a2 );
-        A + a2   // this will be the value of `A`
+        *data += 1;                                 // access userdata by `data`
+        println!( "{:?} {:?} {:?}", A, plus, a2 );  // any Rust code can be written here
+        A + a2                                      // this will be the value of `A`
     }
         | M
         ;
@@ -74,11 +77,11 @@ lr1! {
         | P
         ;
 
-    P(f32): Number { Number as f32 }
+    P(f32): Number { Number as f32 } // Number is `i32`, so cast to `f32`
         | space* lparen E rparen space* { E }
         ;
 
-    E(f32) : A ;
+    E(f32) : A ; // start symbol
 }
 ```
 ```rust
@@ -143,8 +146,3 @@ See [SYNTAX.md](SYNTAX.md) for details of grammar-definition syntax.
 Either of
  - MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
  - Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-
-
-## Other Examples
- - [Simple Calculator](examples/calculator_u8/src/parser.rs)
- - [lua 5.4 syntax parser](https://github.com/ehwan/lua_rust)
