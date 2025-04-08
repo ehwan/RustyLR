@@ -15,7 +15,7 @@ rusty_lr_parser = { version = "3.25.1", path = "../rusty_lr_parser" }
 rusty_lr_core = { version = "3.4.2", path = "../rusty_lr_core", features = [
   "builder",
 ] }
-codespan-reporting = "0.11"
+codespan-reporting = "0.12"
 proc-macro2 = { version = "1.0.86", features = ["span-locations"] }
 quote = "1.0"
 
