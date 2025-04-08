@@ -24,53 +24,44 @@ Please refer to [docs.rs](https://docs.rs/rusty_lr) for detailed example and doc
 // this define `EParser` struct
 // where `E` is the start symbol
 lr1! {
-    %userdata i32;           // userdata type
-    %tokentype char;         // token type
-    %start E;                // start symbol
-    %eof '\0';               // eof token
+    %userdata i32;           // userdata type passed to parser
+    %tokentype char;         // token type; sequence of `tokentype` is fed to parser
+    %start E;                // start symbol; this is the final value of parser
+    %eof '\0';               // eof token; this token is used to finish parsing
 
     // token definition
     %token zero '0';
     %token one '1';
-    %token two '2';
-    %token three '3';
-    %token four '4';
-    %token five '5';
-    %token six '6';
-    %token seven '7';
-    %token eight '8';
+    ...
     %token nine '9';
     %token plus '+';
     %token star '*';
-    %token lparen '(';
-    %token rparen ')';
     %token space ' ';
 
-    // conflict resolving
     %left [plus star];                  // reduce-first for token 'plus', 'star'
 
-    // context-free grammars
+    // Context-free grammar
+    // Definition of production rules:
     Digit(char): [zero-nine];           // character set '0' to '9'
+    //    ^^^^ `Digit` holds `char` value
 
-    Number(i32)                         // type assigned to production rule `Number` holds `i32`
-        : space* Digit+ space*          // regex pattern
-        { Digit.into_iter().collect::<String>().parse().unwrap() }; // this will be the value of `Number` (i32)
-                                                                    // reduce action written in Rust code
+    Number(i32)                         // production rule `Number` holds `i32` value
+        : space* Digit+ space*          // `Number` is one or more `Digit` surrounded by zero or more spaces
+    //           ^^^^^-------------------- `Digit+` holds `Vec<char>`
+        { Digit.into_iter().collect::<String>().parse().unwrap() };
+    //    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^   this will be the value of `Number` (i32) by this production rule
 
-    A(f32): A plus a2=A {
-        *data += 1;                                 // access userdata by `data`
-        println!( "{:?} {:?} {:?}", A, plus, a2 );  // any Rust code can be written here
-        A + a2                                      // this will be the value of `A`
-    }
+    A(f32)
+        : A plus a2=A {
+            *data += 1;                                 // access userdata by `data`
+            println!( "{:?} {:?} {:?}", A, plus, a2 );  // any Rust code can be written here
+            A + a2                                      // this will be the value of `A` (f32) by this production rule
+        }
         | M
         ;
 
     M(f32): M star m2=M { M * m2 }
-        | P
-        ;
-
-    P(f32): Number { Number as f32 } // Number is `i32`, so cast to `f32`
-        | space* lparen E rparen space* { E }
+        | Number { Number as f32 } // Number is `i32`, so cast to `f32`
         ;
 
     E(f32) : A ; // start symbol
@@ -81,13 +72,13 @@ let parser = EParser::new();         // generate `EParser`
 let mut context = EContext::new();   // create context
 let mut userdata: i32 = 0;           // define userdata
 
-let input_sequence = "1 + 2 * ( 3 + 4 )";
+let input_sequence = "1 + 2 * 3 + 4"; // input sequence
 
 // start feeding tokens
 for token in input_sequence.chars() {
     match context.feed(&parser, token, &mut userdata) {
-        //                      ^^^^^   ^^^^^^^^^^^^ userdata passed here as `&mut i32`
-        //                     feed token
+        //                              ^^^^^^^^^^^^ userdata passed here as `&mut i32`
+        //                      ^^^^^--------------- feed token
         Ok(_) => {}
         Err(e) => {
             match e {
@@ -99,14 +90,13 @@ for token in input_sequence.chars() {
                 }
             }
             println!("{}", e);
-            // println!( "{}", e.long_message( &parser, &context ) );
             return;
         }
     }
 }
 context.feed(&parser, '\0', &mut userdata).unwrap();    // feed `eof` token
 
-let res = context.accept();   // get the value of start symbol
+let res = context.accept();   // get the value of start symbol `E(f32)`
 println!("{}", res);
 println!("userdata: {}", userdata);
 ```
