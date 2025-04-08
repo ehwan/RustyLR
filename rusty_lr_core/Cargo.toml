@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_core"
-version = "3.4.2"
+version = "3.5.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "core library for rusty_lr"
@@ -11,11 +11,12 @@ categories = ["parsing"]
 
 [dependencies]
 rustc-hash = { version = "2.0", optional = true }
+termtree = { version = "0.5", optional = true }
 
 [features]
 default = []
 # use `rustc-hash` crate for hash map
 fxhash = ["dep:rustc-hash"]
 builder = []
-tree = []
+tree = ["dep:termtree"]
 error = []

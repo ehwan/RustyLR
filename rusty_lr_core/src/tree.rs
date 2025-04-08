@@ -3,6 +3,8 @@ use std::fmt::Display;
 use std::ops::Deref;
 use std::ops::DerefMut;
 
+use termtree::Tree as TermTree;
+
 /// Default depth of tree when pretty printing through Display
 const DEFAULT_MAX_LEVEL: usize = usize::MAX;
 
@@ -22,90 +24,40 @@ impl<Term, NonTerm> TreeNonTerminal<Term, NonTerm> {
         Self { nonterm, tokens }
     }
 
-    /// pretty print this tree
-    /// This function is called by `Display` trait.
-    pub fn pretty_print(
-        &self,
-        current_level: usize,
-        max_level: usize,
-        prefix: &str,
-        f: &mut std::fmt::Formatter<'_>,
-    ) -> std::fmt::Result
+    /// convert this tree to termtree::Tree using Display trait
+    pub(crate) fn to_term_tree(&self, max_level: usize) -> TermTree<String>
     where
         Term: Display,
         NonTerm: Display,
     {
-        writeln!(f, "{}", self.nonterm)?;
-        if current_level < max_level {
-            for (idx, token) in self.tokens.iter().enumerate() {
-                if idx == self.tokens.len() - 1 {
-                    write!(f, "{}└─", prefix)?;
-                    token.pretty_print_format_impl(
-                        current_level + 1,
-                        max_level,
-                        format!("{}  ", prefix).as_str(),
-                        f,
-                    )?;
-                } else {
-                    write!(f, "{}├─", prefix)?;
-                    token.pretty_print_format_impl(
-                        current_level + 1,
-                        max_level,
-                        format!("{}│ ", prefix).as_str(),
-                        f,
-                    )?;
-                }
-            }
+        let tree = TermTree::new(format!("{}", self.nonterm));
+        if max_level == 0 {
+            tree
+        } else {
+            tree.with_leaves(
+                self.tokens
+                    .iter()
+                    .map(|token| token.to_term_tree(max_level - 1)),
+            )
         }
-        Ok(())
     }
 
-    /// pretty print this tree
-    /// This function is called by `Debug` trait.
-    pub fn pretty_print_debug(
-        &self,
-        current_level: usize,
-        max_level: usize,
-        prefix: &str,
-        f: &mut std::fmt::Formatter<'_>,
-    ) -> std::fmt::Result
+    /// convert this tree to termtree::Tree using Debug trait
+    pub(crate) fn to_term_tree_debug(&self, max_level: usize) -> TermTree<String>
     where
         Term: Debug,
         NonTerm: Debug,
     {
-        writeln!(f, "{:?}", self.nonterm)?;
-        if current_level < max_level {
-            for (idx, token) in self.tokens.iter().enumerate() {
-                if idx == self.tokens.len() - 1 {
-                    write!(f, "{}└─", prefix)?;
-                    token.pretty_print_format_debug_impl(
-                        current_level + 1,
-                        max_level,
-                        format!("{}  ", prefix).as_str(),
-                        f,
-                    )?;
-                } else {
-                    write!(f, "{}├─", prefix)?;
-                    token.pretty_print_format_debug_impl(
-                        current_level + 1,
-                        max_level,
-                        format!("{}│ ", prefix).as_str(),
-                        f,
-                    )?;
-                }
-            }
+        let tree = TermTree::new(format!("{:?}", self.nonterm));
+        if max_level == 0 {
+            tree
+        } else {
+            tree.with_leaves(
+                self.tokens
+                    .iter()
+                    .map(|token| token.to_term_tree_debug(max_level - 1)),
+            )
         }
-        Ok(())
-    }
-}
-
-impl<Term, NonTerm> Display for TreeNonTerminal<Term, NonTerm>
-where
-    Term: Display,
-    NonTerm: Display,
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.pretty_print(0, DEFAULT_MAX_LEVEL, "", f)
     }
 }
 
@@ -125,48 +77,31 @@ impl<Term, NonTerm> Tree<Term, NonTerm> {
         Tree::NonTerminal(TreeNonTerminal::new(nonterm, tokens))
     }
 
-    /// pretty print this tree
-    /// This function is called by `Display` trait.
-    pub(crate) fn pretty_print_format_impl(
-        &self,
-        current_level: usize,
-        max_level: usize,
-        prefix: &str,
-        f: &mut std::fmt::Formatter<'_>,
-    ) -> std::fmt::Result
+    /// convert this tree to termtree::Tree using Display trait
+    pub(crate) fn to_term_tree(&self, max_level: usize) -> TermTree<String>
     where
         Term: Display,
         NonTerm: Display,
     {
         match self {
-            Tree::Terminal(term) => writeln!(f, "{}", term),
-            Tree::NonTerminal(nonterm) => nonterm.pretty_print(current_level, max_level, prefix, f),
+            Tree::Terminal(term) => TermTree::new(format!("{}", term)),
+            Tree::NonTerminal(nonterm) => nonterm.to_term_tree(max_level),
         }
     }
 
-    /// pretty print this tree
-    /// This function is called by `Debug` trait.
-    pub(crate) fn pretty_print_format_debug_impl(
-        &self,
-        current_level: usize,
-        max_level: usize,
-        prefix: &str,
-        f: &mut std::fmt::Formatter<'_>,
-    ) -> std::fmt::Result
+    /// convert this tree to termtree::Tree using Debug trait
+    pub(crate) fn to_term_tree_debug(&self, max_level: usize) -> TermTree<String>
     where
         Term: Debug,
         NonTerm: Debug,
     {
         match self {
-            Tree::Terminal(term) => writeln!(f, "{:?}", term),
-            Tree::NonTerminal(nonterm) => {
-                nonterm.pretty_print_debug(current_level, max_level, prefix, f)
-            }
+            Tree::Terminal(term) => TermTree::new(format!("{:?}", term)),
+            Tree::NonTerminal(nonterm) => nonterm.to_term_tree_debug(max_level),
         }
     }
 
-    /// pretty print this tree
-    /// This function is called by `Display` trait.
+    /// pretty print this tree using Display trait
     pub fn pretty_print_format(
         &self,
         max_level: usize,
@@ -176,10 +111,10 @@ impl<Term, NonTerm> Tree<Term, NonTerm> {
         Term: Display,
         NonTerm: Display,
     {
-        self.pretty_print_format_impl(0, max_level, "", f)
+        write!(f, "{}", self.to_term_tree(max_level))
     }
-    /// pretty print this tree
-    /// This function is called by `Debug` trait.
+
+    /// pretty print this tree using Debug trait
     pub fn pretty_print_format_debug(
         &self,
         max_level: usize,
@@ -189,47 +124,35 @@ impl<Term, NonTerm> Tree<Term, NonTerm> {
         Term: Debug,
         NonTerm: Debug,
     {
-        self.pretty_print_format_debug_impl(0, max_level, "", f)
+        write!(f, "{}", self.to_term_tree_debug(max_level))
     }
 
-    /// pretty print this tree with max level
+    /// pretty print this tree with max level using Display trait
     pub fn pretty_print(&self, max_level: usize)
     where
         Term: Display,
         NonTerm: Display,
     {
-        print!(
-            "{}",
-            TreeWithMaxLevel {
-                tree: self,
-                max_level,
-            }
-        );
+        print!("{}", self.to_term_tree(max_level));
     }
-    /// pretty print this tree with max level
+    /// pretty print this tree with max level using Debug trait
     pub fn pretty_print_debug(&self, max_level: usize)
     where
         Term: Debug,
         NonTerm: Debug,
     {
-        print!(
-            "{:?}",
-            TreeWithMaxLevel {
-                tree: self,
-                max_level,
-            }
-        );
+        print!("{}", self.to_term_tree_debug(max_level));
     }
 }
 
 impl<Term: Display, NonTerm: Display> Display for Tree<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.pretty_print_format_impl(0, DEFAULT_MAX_LEVEL, "", f)
+        self.pretty_print_format(DEFAULT_MAX_LEVEL, f)
     }
 }
 impl<Term: Debug, NonTerm: Debug> Debug for Tree<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.pretty_print_format_debug_impl(0, DEFAULT_MAX_LEVEL, "", f)
+        self.pretty_print_format_debug(DEFAULT_MAX_LEVEL, f)
     }
 }
 
@@ -255,8 +178,7 @@ impl<Term, NonTerm> TreeList<Term, NonTerm> {
         Default::default()
     }
 
-    /// pretty print this tree list
-    /// This function is called by `Display` trait.
+    /// pretty print this tree list using `Display` trait
     pub fn pretty_print_format(
         &self,
         max_level: usize,
@@ -266,21 +188,21 @@ impl<Term, NonTerm> TreeList<Term, NonTerm> {
         Term: Display,
         NonTerm: Display,
     {
-        writeln!(f, "TreeList")?;
-        for (idx, tree) in self.trees.iter().enumerate() {
-            if idx == self.trees.len() - 1 {
-                write!(f, "└─")?;
-                tree.pretty_print_format_impl(0, max_level, "  ", f)?;
-            } else {
-                write!(f, "├─")?;
-                tree.pretty_print_format_impl(0, max_level, "│ ", f)?;
-            }
-        }
-        Ok(())
+        let tree = TermTree::new("TreeList".to_string());
+        let mut tree = if max_level == 0 {
+            tree
+        } else {
+            tree.with_leaves(
+                self.trees
+                    .iter()
+                    .map(|tree| tree.to_term_tree(max_level - 1)),
+            )
+        };
+        tree.set_multiline(false);
+        writeln!(f, "{}", tree)
     }
 
-    /// pretty print this tree
-    /// This function is called by `Debug` trait.
+    /// pretty print this tree using `Debug` trait
     pub fn pretty_print_format_debug(
         &self,
         max_level: usize,
@@ -290,32 +212,38 @@ impl<Term, NonTerm> TreeList<Term, NonTerm> {
         Term: Debug,
         NonTerm: Debug,
     {
-        writeln!(f, "TreeList")?;
-        for (idx, tree) in self.trees.iter().enumerate() {
-            if idx == self.trees.len() - 1 {
-                write!(f, "└─")?;
-                tree.pretty_print_format_debug_impl(0, max_level, "  ", f)?;
-            } else {
-                write!(f, "├─")?;
-                tree.pretty_print_format_debug_impl(0, max_level, "│ ", f)?;
-            }
-        }
-        Ok(())
+        let tree = TermTree::new("TreeList".to_string());
+        let mut tree = if max_level == 0 {
+            tree
+        } else {
+            tree.with_leaves(
+                self.trees
+                    .iter()
+                    .map(|tree| tree.to_term_tree_debug(max_level - 1)),
+            )
+        };
+        tree.set_multiline(true);
+        writeln!(f, "{}", tree)
     }
 
-    /// pretty print this tree with max level
+    /// pretty print this tree with max level using `Display` trait
     pub fn pretty_print(&self, max_level: usize)
     where
         Term: Display,
         NonTerm: Display,
     {
-        print!(
-            "{}",
-            TreeListWithMaxLevel {
-                trees: self,
-                max_level,
-            }
-        );
+        let tree = TermTree::new("TreeList".to_string());
+        let mut tree = if max_level == 0 {
+            tree
+        } else {
+            tree.with_leaves(
+                self.trees
+                    .iter()
+                    .map(|tree| tree.to_term_tree(max_level - 1)),
+            )
+        };
+        tree.set_multiline(false);
+        println!("{}", tree)
     }
     /// pretty print this tree with max level
     pub fn pretty_print_debug(&self, max_level: usize)
@@ -323,13 +251,18 @@ impl<Term, NonTerm> TreeList<Term, NonTerm> {
         Term: Debug,
         NonTerm: Debug,
     {
-        print!(
-            "{:?}",
-            TreeListWithMaxLevel {
-                trees: self,
-                max_level,
-            }
-        );
+        let tree = TermTree::new("TreeList".to_string());
+        let mut tree = if max_level == 0 {
+            tree
+        } else {
+            tree.with_leaves(
+                self.trees
+                    .iter()
+                    .map(|tree| tree.to_term_tree_debug(max_level - 1)),
+            )
+        };
+        tree.set_multiline(false);
+        println!("{}", tree)
     }
 }
 impl<Term: Display, NonTerm: Display> Display for TreeList<Term, NonTerm> {
@@ -346,38 +279,5 @@ impl<Term, NonTerm> Default for TreeList<Term, NonTerm> {
     /// create new empty tree list
     fn default() -> Self {
         Self { trees: Vec::new() }
-    }
-}
-
-/// Private struct to `Display` or `Debug` with max level
-struct TreeWithMaxLevel<'a, Term, NonTerm> {
-    tree: &'a Tree<Term, NonTerm>,
-    max_level: usize,
-}
-impl<'a, Term: Display, NonTerm: Display> Display for TreeWithMaxLevel<'a, Term, NonTerm> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.tree.pretty_print_format(self.max_level, f)
-    }
-}
-impl<'a, Term: Debug, NonTerm: Debug> Debug for TreeWithMaxLevel<'a, Term, NonTerm> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.tree.pretty_print_format_debug(self.max_level, f)
-    }
-}
-
-/// Private struct to `Display` or `Debug` with max level
-struct TreeListWithMaxLevel<'a, Term, NonTerm> {
-    trees: &'a TreeList<Term, NonTerm>,
-    max_level: usize,
-}
-
-impl<'a, Term: Display, NonTerm: Display> Display for TreeListWithMaxLevel<'a, Term, NonTerm> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.trees.pretty_print_format(self.max_level, f)
-    }
-}
-impl<'a, Term: Debug, NonTerm: Debug> Debug for TreeListWithMaxLevel<'a, Term, NonTerm> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.trees.pretty_print_format_debug(self.max_level, f)
     }
 }

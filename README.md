@@ -109,11 +109,11 @@ println!("userdata: {}", userdata);
 
 ## Visualized syntax tree
 ![images/tree.png](images/tree.png)
- - With `tree` feature enabled.
+ With `tree` feature enabled.
 
 ## detailed `ParseError` message
 ![images/parse_error.png](images/parse_error.png)
- - With `error` feature enabled.
+ With `error` feature enabled.
 
 ## Cargo Features
  - `build` : Enable buildscript tools.
