@@ -29,7 +29,7 @@ lr1! {
     %start E;                // start symbol; this is the final value of parser
     %eof '\0';               // eof token; this token is used to finish parsing
 
-    // token definition
+    // ================= Token definitions =================
     %token zero '0';
     %token one '1';
     ...
@@ -40,16 +40,16 @@ lr1! {
 
     %left [plus star];                  // reduce-first for token 'plus', 'star'
 
-    // Context-free grammar
-    // Definition of production rules:
+    // ================= Production rules =================
     Digit(char): [zero-nine];           // character set '0' to '9'
-    //    ^^^^ `Digit` holds `char` value
+    //    ^^^^---------------------------- `Digit` holds `char` value
 
     Number(i32)                         // production rule `Number` holds `i32` value
         : space* Digit+ space*          // `Number` is one or more `Digit` surrounded by zero or more spaces
     //           ^^^^^-------------------- `Digit+` holds `Vec<char>`
         { Digit.into_iter().collect::<String>().parse().unwrap() };
-    //    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^   this will be the value of `Number` (i32) by this production rule
+    //   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    //    this will be the value of `Number` (i32) by this production rule
 
     A(f32)
         : A plus a2=A {
@@ -68,8 +68,8 @@ lr1! {
 }
 ```
 ```rust
-let parser = EParser::new();         // generate `EParser`
-let mut context = EContext::new();   // create context
+let parser = EParser::new();         // generate `EParser`, this holds the parser table
+let mut context = EContext::new();   // create context, this holds current state of parser
 let mut userdata: i32 = 0;           // define userdata
 
 let input_sequence = "1 + 2 * 3 + 4"; // input sequence
