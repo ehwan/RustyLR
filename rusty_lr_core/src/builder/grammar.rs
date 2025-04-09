@@ -52,8 +52,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         }
     }
 
-    pub fn allow_conflict(&mut self) {}
-
     /// add new production rule for given nonterminal 'name'
     pub fn add_rule(&mut self, name: NonTerm, rule: Vec<Token<Term, NonTerm>>) -> usize
     where
