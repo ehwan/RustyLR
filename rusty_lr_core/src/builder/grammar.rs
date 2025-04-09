@@ -38,11 +38,6 @@ pub struct Grammar<Term, NonTerm> {
     /// rules for each nonterminals
     rules_map: HashMap<NonTerm, Vec<usize>>,
 
-    /// if true, allow any kind of conflict.
-    /// this option is for GLR parser.
-    /// conflict resolving through `reduce_types` is still applied.
-    allow_conflict: bool,
-
     expand_cache: HashMap<NonTerm, Vec<ExpandCache<Term>>>,
 }
 
@@ -53,14 +48,11 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             firsts: Default::default(),
             reduce_types: Default::default(),
             rules_map: Default::default(),
-            allow_conflict: false,
             expand_cache: Default::default(),
         }
     }
 
-    pub fn allow_conflict(&mut self) {
-        self.allow_conflict = true;
-    }
+    pub fn allow_conflict(&mut self) {}
 
     /// add new production rule for given nonterminal 'name'
     pub fn add_rule(&mut self, name: NonTerm, rule: Vec<Token<Term, NonTerm>>) -> usize
@@ -513,16 +505,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                             // check for reduce/reduce conflict
                             let reduce_ruleset = state.reduce_map.entry(lookahead).or_default();
                             reduce_ruleset.insert(empty_rule);
-                            if !self.allow_conflict && reduce_ruleset.len() > 1 {
-                                let mut iter = reduce_ruleset.iter();
-                                let rule1 = *iter.next().unwrap();
-                                let rule2 = *iter.next().unwrap();
-                                return Err(BuildError::ReduceReduceConflict {
-                                    lookahead,
-                                    rule1,
-                                    rule2,
-                                });
-                            }
                         }
                         Some(ReduceType::Right) => {
                             // shift first
@@ -531,34 +513,12 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                         }
                         None => {
                             // shift/reduce error
-
-                            if self.allow_conflict {
-                                state
-                                    .reduce_map
-                                    .entry(lookahead)
-                                    .or_default()
-                                    .insert(empty_rule);
-                            } else {
-                                // next_rules_term has set of rules that is already shifted.
-                                // so shift -= 1 again to get the rule that is not shifted yet
-                                let shifted_rules: BTreeMap<_, _> = next_rules_term[&lookahead]
-                                    .rules
-                                    .iter()
-                                    .map(|(rule_ref, lookaheads)| {
-                                        let mut rule_ref = *rule_ref;
-                                        rule_ref.shifted -= 1;
-                                        (rule_ref, lookaheads.clone())
-                                    })
-                                    .collect();
-
-                                return Err(BuildError::ShiftReduceConflict {
-                                    reduce: empty_rule,
-                                    shift: LookaheadRuleRefSet {
-                                        rules: shifted_rules,
-                                    },
-                                    term: lookahead,
-                                });
-                            }
+                            // just add this reduce action for now
+                            state
+                                .reduce_map
+                                .entry(lookahead)
+                                .or_default()
+                                .insert(empty_rule);
                         }
                     }
                 } else {
@@ -566,16 +526,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                     // check for reduce/reduce conflict
                     let reduce_ruleset = state.reduce_map.entry(lookahead).or_default();
                     reduce_ruleset.insert(empty_rule);
-                    if !self.allow_conflict && reduce_ruleset.len() > 1 {
-                        let mut iter = reduce_ruleset.iter();
-                        let rule1 = *iter.next().unwrap();
-                        let rule2 = *iter.next().unwrap();
-                        return Err(BuildError::ReduceReduceConflict {
-                            lookahead,
-                            rule1,
-                            rule2,
-                        });
-                    }
                 }
             }
         }
@@ -716,16 +666,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                             // check for reduce/reduce conflict
                             let reduce_ruleset = state.reduce_map.entry(lookahead).or_default();
                             reduce_ruleset.insert(empty_rule);
-                            if !self.allow_conflict && reduce_ruleset.len() > 1 {
-                                let mut iter = reduce_ruleset.iter();
-                                let rule1 = *iter.next().unwrap();
-                                let rule2 = *iter.next().unwrap();
-                                return Err(BuildError::ReduceReduceConflict {
-                                    lookahead,
-                                    rule1,
-                                    rule2,
-                                });
-                            }
                         }
                         Some(ReduceType::Right) => {
                             // shift first
@@ -734,33 +674,12 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                         }
                         None => {
                             // shift/reduce error
-                            if self.allow_conflict {
-                                state
-                                    .reduce_map
-                                    .entry(lookahead)
-                                    .or_default()
-                                    .insert(empty_rule);
-                            } else {
-                                // next_rules_term has set of rules that is already shifted.
-                                // so shift -= 1 again to get the rule that is not shifted yet
-                                let shifted_rules: BTreeMap<_, _> = next_rules_term[&lookahead]
-                                    .rules
-                                    .iter()
-                                    .map(|(rule_ref, lookaheads)| {
-                                        let mut rule_ref = *rule_ref;
-                                        rule_ref.shifted -= 1;
-                                        (rule_ref, lookaheads.clone())
-                                    })
-                                    .collect();
-
-                                return Err(BuildError::ShiftReduceConflict {
-                                    reduce: empty_rule,
-                                    shift: LookaheadRuleRefSet {
-                                        rules: shifted_rules,
-                                    },
-                                    term: lookahead,
-                                });
-                            }
+                            // just add this reduce action for now
+                            state
+                                .reduce_map
+                                .entry(lookahead)
+                                .or_default()
+                                .insert(empty_rule);
                         }
                     }
                 } else {
@@ -768,16 +687,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                     // check for reduce/reduce conflict
                     let reduce_ruleset = state.reduce_map.entry(lookahead).or_default();
                     reduce_ruleset.insert(empty_rule);
-                    if !self.allow_conflict && reduce_ruleset.len() > 1 {
-                        let mut iter = reduce_ruleset.iter();
-                        let rule1 = *iter.next().unwrap();
-                        let rule2 = *iter.next().unwrap();
-                        return Err(BuildError::ReduceReduceConflict {
-                            lookahead,
-                            rule1,
-                            rule2,
-                        });
-                    }
                 }
             }
         }
