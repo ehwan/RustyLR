@@ -14,15 +14,17 @@ pub struct State<Term, NonTerm> {
 
     /// what token is used to reach this state
     pub token: Option<Token<Term, NonTerm>>,
+    pub shortest_path: Vec<Token<Term, NonTerm>>,
 }
 impl<Term, NonTerm> State<Term, NonTerm> {
-    pub fn new(token: Option<Token<Term, NonTerm>>) -> Self {
+    pub fn new(token: Option<Token<Term, NonTerm>>, path: Vec<Token<Term, NonTerm>>) -> Self {
         State {
             shift_goto_map_term: Default::default(),
             shift_goto_map_nonterm: Default::default(),
             reduce_map: Default::default(),
             ruleset: LookaheadRuleRefSet::new(),
             token,
+            shortest_path: path,
         }
     }
 
@@ -55,12 +57,20 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 Token::Term(term) => Token::Term(term_map(term)),
                 Token::NonTerm(nonterm) => Token::NonTerm(nonterm_map(nonterm)),
             }),
+            shortest_path: self
+                .shortest_path
+                .into_iter()
+                .map(|token| match token {
+                    Token::Term(term) => Token::Term(term_map(term)),
+                    Token::NonTerm(nonterm) => Token::NonTerm(nonterm_map(nonterm)),
+                })
+                .collect(),
         }
     }
 }
 
 impl<Term, NonTerm> Default for State<Term, NonTerm> {
     fn default() -> Self {
-        Self::new(None)
+        Self::new(None, Vec::new())
     }
 }

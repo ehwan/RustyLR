@@ -137,7 +137,14 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
         let mut states = Vec::new();
         let mut state_map = BTreeMap::new();
-        let main_state = self.build_recursive(augmented_rule_set, &mut states, &mut state_map)?;
+        let mut stack = Vec::new();
+        let main_state = self.build_recursive(
+            augmented_rule_set,
+            &mut states,
+            &mut state_map,
+            None,
+            &mut stack,
+        )?;
         if main_state != 0 {
             panic!("main state is not 0");
         }
@@ -180,8 +187,14 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
         let mut states = Vec::new();
         let mut state_map = BTreeMap::new();
-        let main_state =
-            self.build_recursive_lalr(augmented_rule_set, &mut states, &mut state_map)?;
+        let mut stack = Vec::new();
+        let main_state = self.build_recursive_lalr(
+            augmented_rule_set,
+            &mut states,
+            &mut state_map,
+            None,
+            &mut stack,
+        )?;
         if main_state != 0 {
             panic!("main state is not 0");
         }
@@ -424,6 +437,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         mut rules: LookaheadRuleRefSet<Term>,
         states: &mut Vec<State<Term, NonTerm>>,
         state_map: &mut BTreeMap<LookaheadRuleRefSet<Term>, usize>,
+        token: Option<Token<Term, NonTerm>>,
+        stack: &mut Vec<Token<Term, NonTerm>>,
     ) -> Result<usize, BuildError<Term, NonTerm>>
     where
         Term: Hash + Ord + Copy,
@@ -433,14 +448,17 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         self.expand(&mut rules)?;
 
         // check if this set of production rules already exists
-        if let Some(state_id) = state_map.get(&rules) {
-            return Ok(*state_id);
+        if let Some(state_id) = state_map.get(&rules).copied() {
+            if states[state_id].shortest_path.len() > stack.len() {
+                states[state_id].shortest_path = stack.clone();
+            }
+            return Ok(state_id);
         }
 
         // new state id
         let state_id = states.len();
         state_map.insert(rules.clone(), state_id);
-        states.push(State::new(None));
+        states.push(State::new(token, stack.clone()));
         states[state_id].ruleset = rules.clone();
 
         let mut next_rules_term = BTreeMap::new();
@@ -565,8 +583,15 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         // process next rules with token
         // add shift and goto action
         for (next_term, next_rule_set) in next_rules_term.into_iter() {
-            let next_state_id = self.build_recursive(next_rule_set, states, state_map)?;
-            states[next_state_id].token = Some(Token::Term(*next_term));
+            stack.push(Token::Term(*next_term));
+            let next_state_id = self.build_recursive(
+                next_rule_set,
+                states,
+                state_map,
+                Some(Token::Term(*next_term)),
+                stack,
+            )?;
+            stack.pop();
 
             states[state_id]
                 .shift_goto_map_term
@@ -574,8 +599,15 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         }
 
         for (next_nonterm, next_rule_set) in next_rules_nonterm.into_iter() {
-            let next_state_id = self.build_recursive(next_rule_set, states, state_map)?;
-            states[next_state_id].token = Some(Token::NonTerm(*next_nonterm));
+            stack.push(Token::NonTerm(*next_nonterm));
+            let next_state_id = self.build_recursive(
+                next_rule_set,
+                states,
+                state_map,
+                Some(Token::NonTerm(*next_nonterm)),
+                stack,
+            )?;
+            stack.pop();
 
             states[state_id]
                 .shift_goto_map_nonterm
@@ -591,6 +623,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         mut rules: LookaheadRuleRefSet<Term>,
         states: &mut Vec<State<Term, NonTerm>>,
         state_map: &mut BTreeMap<BTreeSet<ShiftedRuleRef>, usize>,
+        token: Option<Token<Term, NonTerm>>,
+        stack: &mut Vec<Token<Term, NonTerm>>,
     ) -> Result<usize, BuildError<Term, NonTerm>>
     where
         Term: Hash + Eq + Ord + Copy,
@@ -605,7 +639,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         let state_id = *state_map.entry(shifted_rules).or_insert_with(|| {
             newly_added = true;
             let new_state_id = states.len();
-            states.push(State::new(None));
+            states.push(State::new(token, stack.clone()));
             for (shifted_rule, _) in rules.rules.iter() {
                 states[new_state_id]
                     .ruleset
@@ -614,6 +648,9 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             }
             new_state_id
         });
+        if states[state_id].shortest_path.len() > stack.len() {
+            states[state_id].shortest_path = stack.clone();
+        }
 
         let mut lookaheads_empty = true;
         let mut next_rules_term = BTreeMap::new();
@@ -749,8 +786,15 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         // add shift and goto action
         // if next_token is in reduce_map, then it is a reduce/shift conflict
         for (next_term, next_rule_set) in next_rules_term.into_iter() {
-            let next_state_id = self.build_recursive_lalr(next_rule_set, states, state_map)?;
-            states[next_state_id].token = Some(Token::Term(*next_term));
+            stack.push(Token::Term(*next_term));
+            let next_state_id = self.build_recursive_lalr(
+                next_rule_set,
+                states,
+                state_map,
+                Some(Token::Term(*next_term)),
+                stack,
+            )?;
+            stack.pop();
 
             states[state_id]
                 .shift_goto_map_term
@@ -758,8 +802,15 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         }
 
         for (next_nonterm, next_rule_set) in next_rules_nonterm.into_iter() {
-            let next_state_id = self.build_recursive_lalr(next_rule_set, states, state_map)?;
-            states[next_state_id].token = Some(Token::NonTerm(*next_nonterm));
+            stack.push(Token::NonTerm(*next_nonterm));
+            let next_state_id = self.build_recursive_lalr(
+                next_rule_set,
+                states,
+                state_map,
+                Some(Token::NonTerm(*next_nonterm)),
+                stack,
+            )?;
+            stack.pop();
 
             states[state_id]
                 .shift_goto_map_nonterm
