@@ -482,7 +482,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         // process rules that no more tokens left to shift
         // if next token is one of lookahead, add reduce action
         // if there are multiple recude rules for same lookahead, it is a reduce/reduce conflict
-
         for (empty_rule, lookaheads) in empty_rules.into_iter() {
             let state = &mut states[state_id];
             for lookahead in lookaheads.into_iter() {
@@ -491,16 +490,35 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 if next_rules_term.contains_key(&lookahead) {
                     // shift/reduce conflict may occur here, check reduce type
 
-                    // note that conflict resolving through `reduce_types` is still applied
-                    // even if `allow_conflict` is set to true
                     match self.reduce_types.get(&lookahead) {
                         Some(ReduceType::Left) => {
                             // reduce first
 
-                            // remove lookahead from next_rules_term
-                            next_rules_term.remove(&lookahead);
+                            // remove next shift token from next_rules_term
+                            // so no shift action will be added
+                            let shift_ruleset = next_rules_term.remove(&lookahead).unwrap();
+
+                            // shift action is removed, so add this information into current state
+                            // shift was += 1, so decrement it
+                            let shift_ruleset = shift_ruleset
+                                .rules
+                                .into_keys()
+                                .map(|rule_ref| ShiftedRuleRef {
+                                    rule: rule_ref.rule,
+                                    shifted: rule_ref.shifted - 1,
+                                })
+                                .collect();
+                            let (rt, reduces, _) =
+                                state.sr_resolved.entry(lookahead).or_insert_with(|| {
+                                    (ReduceType::Left, Default::default(), shift_ruleset)
+                                });
+                            if *rt != ReduceType::Left {
+                                unreachable!("conflict in reduce type");
+                            }
+                            reduces.push(empty_rule);
 
                             // check for reduce/reduce conflict
+                            // just add this reduce action for now
                             let reduce_ruleset = state.reduce_map.entry(lookahead).or_default();
                             reduce_ruleset.insert(empty_rule);
                         }
@@ -508,6 +526,27 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                             // shift first
                             // do not add this reduce action
                             // shift action will be added later
+
+                            // reduce action is removed, so add this information into current state
+                            // shift was += 1, so decrement it
+                            let shift_ruleset = next_rules_term
+                                .get(&lookahead)
+                                .unwrap()
+                                .rules
+                                .keys()
+                                .map(|rule_ref| ShiftedRuleRef {
+                                    rule: rule_ref.rule,
+                                    shifted: rule_ref.shifted - 1,
+                                })
+                                .collect();
+                            let (rt, reduces, _) =
+                                state.sr_resolved.entry(lookahead).or_insert_with(|| {
+                                    (ReduceType::Right, Default::default(), shift_ruleset)
+                                });
+                            if *rt != ReduceType::Right {
+                                unreachable!("conflict in reduce type");
+                            }
+                            reduces.push(empty_rule);
                         }
                         None => {
                             // shift/reduce error
@@ -522,6 +561,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 } else {
                     // no shift/reduce conflict
                     // check for reduce/reduce conflict
+                    // just add this reduce action for now
                     let reduce_ruleset = state.reduce_map.entry(lookahead).or_default();
                     reduce_ruleset.insert(empty_rule);
                 }
@@ -652,16 +692,35 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 if next_rules_term.contains_key(&lookahead) {
                     // shift/reduce conflict may occur here, check reduce type
 
-                    // note that conflict resolving through `reduce_types` is still applied
-                    // even if `allow_conflict` is set to true
                     match self.reduce_types.get(&lookahead) {
                         Some(ReduceType::Left) => {
                             // reduce first
 
-                            // remove lookahead from next_rules_term
-                            next_rules_term.remove(&lookahead);
+                            // remove next shift token from next_rules_term
+                            // so no shift action will be added
+                            let shift_ruleset = next_rules_term.remove(&lookahead).unwrap();
+
+                            // shift action is removed, so add this information into current state
+                            // shift was += 1, so decrement it
+                            let shift_ruleset = shift_ruleset
+                                .rules
+                                .into_keys()
+                                .map(|rule_ref| ShiftedRuleRef {
+                                    rule: rule_ref.rule,
+                                    shifted: rule_ref.shifted - 1,
+                                })
+                                .collect();
+                            let (rt, reduces, _) =
+                                state.sr_resolved.entry(lookahead).or_insert_with(|| {
+                                    (ReduceType::Left, Default::default(), shift_ruleset)
+                                });
+                            if *rt != ReduceType::Left {
+                                unreachable!("conflict in reduce type");
+                            }
+                            reduces.push(empty_rule);
 
                             // check for reduce/reduce conflict
+                            // just add this reduce action for now
                             let reduce_ruleset = state.reduce_map.entry(lookahead).or_default();
                             reduce_ruleset.insert(empty_rule);
                         }
@@ -669,6 +728,27 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                             // shift first
                             // do not add this reduce action
                             // shift action will be added later
+
+                            // reduce action is removed, so add this information into current state
+                            // shift was += 1, so decrement it
+                            let shift_ruleset = next_rules_term
+                                .get(&lookahead)
+                                .unwrap()
+                                .rules
+                                .keys()
+                                .map(|rule_ref| ShiftedRuleRef {
+                                    rule: rule_ref.rule,
+                                    shifted: rule_ref.shifted - 1,
+                                })
+                                .collect();
+                            let (rt, reduces, _) =
+                                state.sr_resolved.entry(lookahead).or_insert_with(|| {
+                                    (ReduceType::Left, Default::default(), shift_ruleset)
+                                });
+                            if *rt != ReduceType::Left {
+                                unreachable!("conflict in reduce type");
+                            }
+                            reduces.push(empty_rule);
                         }
                         None => {
                             // shift/reduce error
@@ -683,6 +763,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 } else {
                     // no shift/reduce conflict
                     // check for reduce/reduce conflict
+                    // just add this reduce action for now
                     let reduce_ruleset = state.reduce_map.entry(lookahead).or_default();
                     reduce_ruleset.insert(empty_rule);
                 }
