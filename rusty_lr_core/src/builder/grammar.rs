@@ -440,7 +440,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         // new state id
         let state_id = states.len();
         state_map.insert(rules.clone(), state_id);
-        states.push(State::new());
+        states.push(State::new(None));
         states[state_id].ruleset = rules.clone();
 
         let mut next_rules_term = BTreeMap::new();
@@ -566,6 +566,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         // add shift and goto action
         for (next_term, next_rule_set) in next_rules_term.into_iter() {
             let next_state_id = self.build_recursive(next_rule_set, states, state_map)?;
+            states[next_state_id].token = Some(Token::Term(*next_term));
 
             states[state_id]
                 .shift_goto_map_term
@@ -574,6 +575,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
         for (next_nonterm, next_rule_set) in next_rules_nonterm.into_iter() {
             let next_state_id = self.build_recursive(next_rule_set, states, state_map)?;
+            states[next_state_id].token = Some(Token::NonTerm(*next_nonterm));
 
             states[state_id]
                 .shift_goto_map_nonterm
@@ -603,7 +605,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         let state_id = *state_map.entry(shifted_rules).or_insert_with(|| {
             newly_added = true;
             let new_state_id = states.len();
-            states.push(State::new());
+            states.push(State::new(None));
             for (shifted_rule, _) in rules.rules.iter() {
                 states[new_state_id]
                     .ruleset
@@ -748,6 +750,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         // if next_token is in reduce_map, then it is a reduce/shift conflict
         for (next_term, next_rule_set) in next_rules_term.into_iter() {
             let next_state_id = self.build_recursive_lalr(next_rule_set, states, state_map)?;
+            states[next_state_id].token = Some(Token::Term(*next_term));
 
             states[state_id]
                 .shift_goto_map_term
@@ -756,6 +759,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
         for (next_nonterm, next_rule_set) in next_rules_nonterm.into_iter() {
             let next_state_id = self.build_recursive_lalr(next_rule_set, states, state_map)?;
+            states[next_state_id].token = Some(Token::NonTerm(*next_nonterm));
 
             states[state_id]
                 .shift_goto_map_nonterm
