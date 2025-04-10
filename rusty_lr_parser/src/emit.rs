@@ -6,7 +6,6 @@ use proc_macro2::TokenStream;
 use quote::format_ident;
 use quote::quote;
 
-use rusty_lr_core::builder::error::BuildError;
 use rusty_lr_core::HashMap;
 use rusty_lr_core::ShiftedRule;
 use rusty_lr_core::Token;
@@ -129,7 +128,7 @@ impl Grammar {
 
     // build grammar at compile time
     fn emit_grammar_compiletime(&self) -> Result<TokenStream, Box<EmitError>> {
-        let mut grammar = self.create_grammar();
+        let mut grammar: rusty_lr_core::builder::Grammar<usize, usize> = self.create_grammar();
 
         // build
         let augmented_idx = *self
@@ -143,70 +142,82 @@ impl Grammar {
         };
         let dfa = match dfa {
             Ok(dfa) => dfa,
-            Err(e) => {
-                // to map production rule to its pretty name abbreviation
-                let term_mapper = |term_idx: usize| self.terminals[term_idx].name.to_string();
-                let nonterm_mapper =
-                    |nonterm_idx: usize| self.nonterminals[nonterm_idx].pretty_name.clone();
-                match e {
-                    BuildError::NoAugmented | BuildError::RuleNotFound(_) => {
-                        unreachable!("Unreachable grammar build error")
-                    }
-                    BuildError::ReduceReduceConflict {
-                        lookahead,
-                        rule1,
-                        rule2,
-                    } => {
-                        return Err(Box::new(EmitError::ReduceReduceConflict {
-                            lookahead: self.terminals[lookahead].name.clone(),
-                            rule1: (
-                                rule1,
-                                grammar.rules[rule1]
-                                    .0
-                                    .clone()
-                                    .map(term_mapper, nonterm_mapper),
-                            ),
-                            rule2: (
-                                rule2,
-                                grammar.rules[rule2]
-                                    .0
-                                    .clone()
-                                    .map(term_mapper, nonterm_mapper),
-                            ),
-                        }));
-                    }
-                    BuildError::ShiftReduceConflict {
-                        reduce,
-                        shift,
-                        term,
-                    } => {
-                        let mut shift_rules = Vec::new();
-                        for (r, _) in shift.rules.into_iter() {
-                            let shifted_rule = ShiftedRule {
-                                rule: grammar.rules[r.rule]
-                                    .0
-                                    .clone()
-                                    .map(term_mapper, nonterm_mapper),
-                                shifted: r.shifted,
-                            };
-                            shift_rules.push((r.rule, shifted_rule));
-                        }
-
-                        return Err(Box::new(EmitError::ShiftReduceConflict {
-                            term: self.terminals[term].name.clone(),
-                            reduce_rule: (
-                                reduce,
-                                grammar.rules[reduce]
-                                    .0
-                                    .clone()
-                                    .map(term_mapper, nonterm_mapper),
-                            ),
-                            shift_rules,
-                        }));
-                    }
-                }
+            Err(_e) => {
+                unreachable!("Unreachable grammar build error");
             }
         };
+
+        // check for SR/RR conflicts if it's not GLR
+        if !self.glr {
+            // to map production rule to its pretty name abbreviation
+            let term_mapper = |term_idx: usize| self.terminals[term_idx].name.to_string();
+            let nonterm_mapper =
+                |nonterm_idx: usize| self.nonterminals[nonterm_idx].pretty_name.clone();
+            // rr conflicts
+            for state in dfa.states.iter() {
+                if let Some((rules, lookaheads)) = state.conflict_rr().next() {
+                    let lookahead = *lookaheads.into_iter().next().unwrap();
+                    let (rule1, rule2) = {
+                        let mut iter = rules.iter();
+                        let r1 = *iter.next().unwrap();
+                        (r1, *iter.next().unwrap())
+                    };
+                    return Err(Box::new(EmitError::ReduceReduceConflict {
+                        lookahead: self.terminals[lookahead].name.clone(),
+                        rule1: (
+                            rule1,
+                            grammar.rules[rule1]
+                                .0
+                                .clone()
+                                .map(&term_mapper, &nonterm_mapper),
+                        ),
+                        rule2: (
+                            rule2,
+                            grammar.rules[rule2]
+                                .0
+                                .clone()
+                                .map(&term_mapper, &nonterm_mapper),
+                        ),
+                    }));
+                }
+            }
+
+            // sr conflicts
+            for state in dfa.states.iter() {
+                if let Some((&term, reduces, shift_rules)) =
+                    state.conflict_sr(|idx| &dfa.states[idx]).next()
+                {
+                    let reduce = *reduces.iter().next().unwrap();
+                    let shift_rules = shift_rules
+                        .into_iter()
+                        .map(|rule| {
+                            let prod_rule = grammar.rules[rule.rule]
+                                .0
+                                .clone()
+                                .map(&term_mapper, &nonterm_mapper);
+                            (
+                                rule.rule,
+                                ShiftedRule {
+                                    rule: prod_rule,
+                                    shifted: rule.shifted,
+                                },
+                            )
+                        })
+                        .collect();
+                    return Err(Box::new(EmitError::ShiftReduceConflict {
+                        term: self.terminals[term].name.clone(),
+                        reduce_rule: (
+                            reduce,
+                            grammar.rules[reduce]
+                                .0
+                                .clone()
+                                .map(term_mapper, nonterm_mapper),
+                        ),
+                        shift_rules,
+                    }));
+                }
+            }
+        }
 
         let module_prefix = &self.module_prefix;
         let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
