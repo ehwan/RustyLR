@@ -590,7 +590,7 @@ impl Builder {
             // reduce/reduce conflicts
             for (lookaheads, reduce_rules) in state.conflict_rr() {
                 let mut labels = Vec::new();
-                for (idx, reduce_rule) in reduce_rules.into_iter().copied().enumerate() {
+                for (idx, reduce_rule) in reduce_rules.iter().copied().copied().enumerate() {
                     Self::extend_rule_source_label(
                         &mut labels,
                         file_id,
@@ -606,10 +606,37 @@ impl Builder {
                     .map(|lookahead| grammar.terminals[*lookahead].name.to_string())
                     .collect();
 
+                let shortest_path: Vec<_> = state
+                    .shortest_path
+                    .iter()
+                    .map(|token| match token {
+                        rusty_lr_core::Token::Term(term) => {
+                            format!("{} ", grammar.terminals[*term].name)
+                        }
+                        rusty_lr_core::Token::NonTerm(nonterm) => {
+                            format!("{} ", grammar.nonterminals[*nonterm].pretty_name)
+                        }
+                    })
+                    .collect();
+
+                let mut notes = vec![
+                    format!("lookaheads: [{}]", lookaheads.join(", ")),
+                    "Possible paths:".to_string(),
+                ];
+                for reduce_rule in reduce_rules.iter().copied().copied() {
+                    let rule = &dfa_builder.rules[reduce_rule].0;
+                    let mut path = shortest_path.clone();
+                    for _ in 0..rule.rule.len() {
+                        path.pop();
+                    }
+                    let nonterm = nonterm_mapper(rule.name);
+                    notes.push(format!("(Reduce): {} •{}", path.join(" "), nonterm));
+                }
+
                 let diag = Diagnostic::error()
                     .with_message("Reduce/Reduce conflict")
                     .with_labels(labels)
-                    .with_notes(vec![format!("lookaheads: [{}]", lookaheads.join(", "))]);
+                    .with_notes(notes);
                 conflict_diags.push(diag);
             }
             for (&term, reduce_rules, shift_rules) in state.conflict_sr(|idx| &dfa.states[idx]) {
@@ -660,17 +687,42 @@ impl Builder {
                 }
                 let term = grammar.terminals[term].name.to_string();
 
+                let shortest_path: Vec<_> = state
+                    .shortest_path
+                    .iter()
+                    .map(|token| match token {
+                        rusty_lr_core::Token::Term(term) => {
+                            format!("{} ", grammar.terminals[*term].name)
+                        }
+                        rusty_lr_core::Token::NonTerm(nonterm) => {
+                            format!("{} ", grammar.nonterminals[*nonterm].pretty_name)
+                        }
+                    })
+                    .collect();
+                let shift_note = format!("(Shift) : {} •{}", shortest_path.join(" "), term);
+
+                let mut notes = vec![
+                    format!("Trying to feed terminal: {}", term),
+                    format!("Try to rearrange the rules or resolve conflict by set reduce type"),
+                    format!(">>> %left {}", term),
+                    format!(">>> %right {}", term),
+                    "Possible paths:".to_string(),
+                    shift_note,
+                ];
+                for &reduce_rule in reduce_rules.iter() {
+                    let rule = &dfa_builder.rules[reduce_rule].0;
+                    let mut path = shortest_path.clone();
+                    for _ in 0..rule.rule.len() {
+                        path.pop();
+                    }
+                    let nonterm = nonterm_mapper(rule.name);
+                    notes.push(format!("(Reduce): {} •{}", path.join(" "), nonterm));
+                }
+
                 let diag = Diagnostic::error()
                     .with_message(message)
                     .with_labels(labels)
-                    .with_notes(vec![
-                        format!("Trying to feed terminal: {}", term),
-                        format!(
-                            "Try to rearrange the rules or resolve conflict by set reduce type"
-                        ),
-                        format!(">>> %left {}", term),
-                        format!(">>> %right {}", term),
-                    ]);
+                    .with_notes(notes);
                 conflict_diags.push(diag);
             }
         }
