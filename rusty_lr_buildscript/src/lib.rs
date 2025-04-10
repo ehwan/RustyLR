@@ -563,6 +563,133 @@ impl Builder {
             }
         };
 
+        // check conflicts
+        {
+            let mut dfa_builder = grammar.create_grammar();
+            let augmented_rule_id = *grammar
+                .nonterminals_index
+                .get(&Ident::new(
+                    rusty_lr_parser::utils::AUGMENTED_NAME,
+                    Span::call_site(),
+                ))
+                .unwrap();
+            let dfa = if grammar.lalr {
+                dfa_builder.build_lalr(augmented_rule_id)
+            } else {
+                dfa_builder.build(augmented_rule_id)
+            };
+            let dfa = match dfa {
+                Ok(dfa) => dfa,
+                Err(_err) => {
+                    unreachable!("Grammar building failed");
+                }
+            };
+
+            let mut conflict_diags = Vec::new();
+            // to map production rule to its pretty name abbreviation
+            let term_mapper = |term_idx: usize| grammar.terminals[term_idx].name.to_string();
+            let nonterm_mapper = |nonterm: usize| grammar.nonterminals[nonterm].pretty_name.clone();
+            for state in dfa.states.iter() {
+                // reduce/reduce conflicts
+                for (lookaheads, reduce_rules) in state.conflict_rr() {
+                    let mut labels = Vec::new();
+                    for (idx, reduce_rule) in reduce_rules.into_iter().copied().enumerate() {
+                        Self::extend_rule_source_label(
+                            &mut labels,
+                            file_id,
+                            reduce_rule,
+                            &grammar,
+                            format!("(Rule{}) ", idx + 1).as_str(),
+                            "error ",
+                        );
+                    }
+
+                    let lookaheads: Vec<_> = lookaheads
+                        .iter()
+                        .map(|lookahead| grammar.terminals[*lookahead].name.to_string())
+                        .collect();
+
+                    let diag = Diagnostic::error()
+                        .with_message("Reduce/Reduce conflict")
+                        .with_labels(labels)
+                        .with_notes(vec![format!("lookaheads: [{}]", lookaheads.join(", "))]);
+                    conflict_diags.push(diag);
+                }
+                for (&term, reduce_rules, shift_rules) in state.conflict_sr(|idx| &dfa.states[idx])
+                {
+                    let mut message = "Shift/Reduce conflict:\nShift rules:".to_string();
+                    for shifted_rule in shift_rules.iter() {
+                        let shifted_rule = ShiftedRule {
+                            rule: dfa_builder.rules[shifted_rule.rule]
+                                .0
+                                .clone()
+                                .map(&term_mapper, &nonterm_mapper),
+                            shifted: shifted_rule.shifted,
+                        };
+                        message.push_str(format!("\n\t>>> {}", shifted_rule).as_str());
+                    }
+
+                    let mut labels = Vec::new();
+                    for (idx, reduce_rule) in reduce_rules.into_iter().copied().enumerate() {
+                        let prefix = if reduce_rules.len() == 1 {
+                            "(Reduce) ".to_string()
+                        } else {
+                            format!("(Reduce{}) ", idx + 1)
+                        };
+                        Self::extend_rule_source_label(
+                            &mut labels,
+                            file_id,
+                            reduce_rule,
+                            &grammar,
+                            &prefix,
+                            &prefix,
+                        );
+                    }
+
+                    for (idx, shiftid) in shift_rules.iter().enumerate() {
+                        let prefix = if reduce_rules.len() == 1 {
+                            "(Shift) ".to_string()
+                        } else {
+                            format!("(Shift{}) ", idx + 1)
+                        };
+
+                        Self::extend_rule_source_label(
+                            &mut labels,
+                            file_id,
+                            shiftid.rule,
+                            &grammar,
+                            &prefix,
+                            &prefix,
+                        );
+                    }
+                    let term = grammar.terminals[term].name.to_string();
+
+                    let diag = Diagnostic::error()
+                        .with_message(message)
+                        .with_labels(labels)
+                        .with_notes(vec![
+                            format!("Trying to feed terminal: {}", term),
+                            format!(
+                                "Try to rearrange the rules or resolve conflict by set reduce type"
+                            ),
+                            format!(">>> %left {}", term),
+                            format!(">>> %right {}", term),
+                        ]);
+                    conflict_diags.push(diag);
+                }
+            }
+
+            for diag in conflict_diags.iter() {
+                let writer = StandardStream::stderr(ColorChoice::Auto);
+                let config = codespan_reporting::term::Config::default();
+                term::emit(&mut writer.lock(), &config, &files, diag)
+                    .expect("Failed to write to stderr");
+            }
+            if !conflict_diags.is_empty() {
+                return Err("Grammar building failed".to_string());
+            }
+        }
+
         // expand macro
         let expanded_stream = match grammar.emit_compiletime() {
             Ok(expanded_stream) => expanded_stream,
@@ -593,84 +720,6 @@ impl Builder {
                                     .with_message("This rule line has no reduce action"),
                             ])
                             .with_notes(vec!["".to_string()])
-                    }
-
-                    EmitError::ShiftReduceConflict {
-                        term,
-                        reduce_rule: (reduceid, reduce_production_rule),
-                        shift_rules,
-                    } => {
-                        let mut message = format!(
-                            "Shift/Reduce conflict:\nReduce rule:\n\t>>> {}\nShift rules:",
-                            reduce_production_rule
-                        );
-                        for (_, shifted_rule) in shift_rules.iter() {
-                            message.push_str(format!("\n\t>>> {}", shifted_rule).as_str());
-                        }
-                        let mut labels = Vec::new();
-
-                        Self::extend_rule_source_label(
-                            &mut labels,
-                            file_id,
-                            *reduceid,
-                            &grammar,
-                            "(Reduce) ",
-                            "error ",
-                        );
-
-                        for (shiftid, _) in shift_rules.iter() {
-                            Self::extend_rule_source_label(
-                                &mut labels,
-                                file_id,
-                                *shiftid,
-                                &grammar,
-                                "(Shift) ",
-                                "error ",
-                            );
-                        }
-                        Diagnostic::error()
-                            .with_message(message)
-                            .with_labels(labels)
-                            .with_notes(vec![
-                                format!("conflict terminal: {}", term),
-                                format!(
-                                "Try to rearrange the rules or resolve conflict by set reduce type"
-                            ),
-                                format!(">>> %left {}", term),
-                                format!(">>> %right {}", term),
-                            ])
-                    }
-                    EmitError::ReduceReduceConflict {
-                        lookahead,
-                        rule1: (ruleid1, production_rule1),
-                        rule2: (ruleid2, production_rule2),
-                    } => {
-                        let mut labels = Vec::new();
-
-                        Self::extend_rule_source_label(
-                            &mut labels,
-                            file_id,
-                            *ruleid1,
-                            &grammar,
-                            "(Rule1) ",
-                            "error ",
-                        );
-                        Self::extend_rule_source_label(
-                            &mut labels,
-                            file_id,
-                            *ruleid2,
-                            &grammar,
-                            "(Rule2) ",
-                            "error ",
-                        );
-
-                        Diagnostic::error()
-                            .with_message(format!(
-                                "Reduce/Reduce conflict:\n>>> {}\n>>> {}",
-                                production_rule1, production_rule2
-                            ))
-                            .with_labels(labels)
-                            .with_notes(vec![format!("with lookahead {}", lookahead)])
                     }
 
                     _ => {
