@@ -393,9 +393,6 @@ impl Grammar {
     pub fn create_grammar(&self) -> rusty_lr_core::builder::Grammar<usize, usize> {
         let mut grammar: rusty_lr_core::builder::Grammar<usize, usize> =
             rusty_lr_core::builder::Grammar::new();
-        if self.glr {
-            grammar.allow_conflict();
-        }
 
         // reduce types
         for (idx, term_info) in self.terminals.iter().enumerate() {
