@@ -603,19 +603,17 @@ impl Builder {
 
                 let lookaheads: Vec<_> = lookaheads
                     .iter()
-                    .map(|&&lookahead| grammar.terminals[lookahead].name.to_string())
+                    .copied()
+                    .copied()
+                    .map(&term_mapper)
                     .collect();
 
                 let shortest_path: Vec<_> = state
                     .shortest_path
                     .iter()
                     .map(|token| match token {
-                        rusty_lr_core::Token::Term(term) => {
-                            format!("{} ", grammar.terminals[*term].name)
-                        }
-                        rusty_lr_core::Token::NonTerm(nonterm) => {
-                            format!("{} ", grammar.nonterminals[*nonterm].pretty_name)
-                        }
+                        rusty_lr_core::Token::Term(term) => term_mapper(*term),
+                        rusty_lr_core::Token::NonTerm(nonterm) => nonterm_mapper(*nonterm),
                     })
                     .collect();
 
@@ -634,7 +632,8 @@ impl Builder {
                         path.pop();
                     }
                     let nonterm = nonterm_mapper(rule.name);
-                    notes.push(format!("(Reduce): {} •{}", path.join(" "), nonterm));
+                    path.push(nonterm);
+                    notes.push(format!("(Reduce): {} •<lookahead>", path.join(" "),));
                 }
 
                 let diag = Diagnostic::error()
@@ -720,7 +719,12 @@ impl Builder {
                         path.pop();
                     }
                     let nonterm = nonterm_mapper(rule.name);
-                    notes.push(format!("(Reduce): {} •{}", path.join(" "), nonterm));
+                    notes.push(format!(
+                        "(Reduce): {} {} •{}",
+                        path.join(" "),
+                        nonterm,
+                        term
+                    ));
                 }
 
                 let diag = Diagnostic::error()
@@ -732,22 +736,27 @@ impl Builder {
         }
 
         if !grammar.glr {
-            for diag in conflict_diags.iter() {
+            let has_diags = !conflict_diags.is_empty();
+            for diag in conflict_diags.into_iter() {
                 let writer = StandardStream::stderr(ColorChoice::Auto);
                 let config = codespan_reporting::term::Config::default();
-                term::emit(&mut writer.lock(), &config, &files, diag)
+                term::emit(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
             }
-            if !conflict_diags.is_empty() {
+            if has_diags {
                 return Err("Grammar building failed".to_string());
             }
         }
         // print note about reduce/reduce conflict and shift/reduce conflict not resolved
         else if self.verbose_conflicts {
-            for diag in conflict_diags.iter() {
+            for diag in conflict_diags.into_iter() {
+                let diag = Diagnostic::note()
+                    .with_message(diag.message)
+                    .with_labels(diag.labels)
+                    .with_notes(diag.notes);
                 let writer = self.verbose_stream();
                 let config = codespan_reporting::term::Config::default();
-                term::emit(&mut writer.lock(), &config, &files, diag)
+                term::emit(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
             }
         }
@@ -756,7 +765,7 @@ impl Builder {
         if self.verbose_conflicts_resolving {
             let mut diags = Vec::new();
             for state in dfa.states.iter() {
-                for (&term, (_, reduce_rules, shift_rules)) in state.sr_resolved.iter() {
+                for (&term, (reduce_type, reduce_rules, shift_rules)) in state.sr_resolved.iter() {
                     let mut message = "Shift/Reduce conflict:\nShift rules:".to_string();
                     for shifted_rule in shift_rules.iter() {
                         let shifted_rule = ShiftedRule {
@@ -819,26 +828,27 @@ impl Builder {
                     }
 
                     let term = grammar.terminals[term].name.to_string();
-
-                    let diag = Diagnostic::error()
+                    let mut notes = vec![format!("Trying to feed terminal: {}", term)];
+                    match *reduce_type {
+                        rusty_lr_core::ReduceType::Left => {
+                            notes.push("Shift rule will be ignored".to_string());
+                        }
+                        rusty_lr_core::ReduceType::Right => {
+                            notes.push("Reduce rule will be ignored".to_string());
+                        }
+                    }
+                    let diag = Diagnostic::note()
                         .with_message(message)
                         .with_labels(labels)
-                        .with_notes(vec![
-                            format!("Trying to feed terminal: {}", term),
-                            format!(
-                                "Try to rearrange the rules or resolve conflict by set reduce type"
-                            ),
-                            format!(">>> %left {}", term),
-                            format!(">>> %right {}", term),
-                        ]);
+                        .with_notes(notes);
                     diags.push(diag);
                 }
             }
 
-            for diag in conflict_diags.iter() {
+            for diag in diags.into_iter() {
                 let writer = self.verbose_stream();
                 let config = codespan_reporting::term::Config::default();
-                term::emit(&mut writer.lock(), &config, &files, diag)
+                term::emit(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
             }
         }
