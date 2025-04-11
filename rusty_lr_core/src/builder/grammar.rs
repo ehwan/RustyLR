@@ -233,7 +233,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
                         states[i]
                             .sr_resolved
-                            .insert(term, (ReduceType::Left, reduce_rules, shift_ruleset));
+                            .insert(term, (ReduceType::Right, reduce_rules, shift_ruleset));
                     }
                     None => {}
                 }
