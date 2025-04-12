@@ -31,12 +31,12 @@ use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
 use quote::quote;
-use rusty_lr_core::ShiftedRule;
 use rusty_lr_parser::error::ArgError;
 use rusty_lr_parser::error::EmitError;
 use rusty_lr_parser::error::ParseArgError;
 use rusty_lr_parser::error::ParseError;
 
+use std::collections::HashSet;
 use std::fs::read;
 use std::fs::write;
 
@@ -571,9 +571,9 @@ impl Builder {
             ))
             .unwrap();
         let dfa = if grammar.lalr {
-            dfa_builder.build_lalr(augmented_rule_id)
+            dfa_builder.build_lalr_without_resolving(augmented_rule_id)
         } else {
-            dfa_builder.build(augmented_rule_id)
+            dfa_builder.build_without_resolving(augmented_rule_id)
         };
         let dfa = match dfa {
             Ok(dfa) => dfa,
@@ -583,155 +583,180 @@ impl Builder {
         };
 
         let mut conflict_diags = Vec::new();
+        let mut conflict_diags_resolved = Vec::new();
         // to map production rule to its pretty name abbreviation
         let term_mapper = |term_idx: usize| grammar.terminals[term_idx].name.to_string();
         let nonterm_mapper = |nonterm: usize| grammar.nonterminals[nonterm].pretty_name.clone();
-        for state in dfa.states.iter() {
-            // reduce/reduce conflicts
-            for (reduce_rules, lookaheads) in state.conflict_rr() {
-                let mut labels = Vec::new();
-                for (idx, reduce_rule) in reduce_rules.iter().copied().enumerate() {
-                    Self::extend_rule_source_label(
-                        &mut labels,
-                        file_id,
-                        reduce_rule,
-                        &grammar,
-                        format!("(Rule{}) ", idx + 1).as_str(),
-                        "error ",
-                    );
+        let path_mapper = |path: &[rusty_lr_core::Token<usize, usize>]| {
+            path.iter()
+                .map(|token| match token {
+                    rusty_lr_core::Token::Term(term) => term_mapper(*term),
+                    rusty_lr_core::Token::NonTerm(nonterm) => nonterm_mapper(*nonterm),
+                })
+                .collect::<Vec<_>>()
+                .join(" ")
+        };
+
+        // calculate conflicts
+        for c in dfa.conflict_simulate(
+            |rule_id| dfa_builder.rules[rule_id].0.rule.len(),
+            |rule_id| dfa_builder.rules[rule_id].0.name,
+        ) {
+            for (&term, c) in c {
+                if c.reduces.len() == 1 && c.shift.is_none()
+                    || c.reduces.len() == 0 && c.shift.is_some()
+                {
+                    continue;
                 }
 
-                let lookaheads: Vec<_> = lookaheads
-                    .iter()
-                    .copied()
-                    .copied()
-                    .map(&term_mapper)
-                    .collect();
+                let term_string = term_mapper(term);
+                let reduce_type = dfa_builder.reduce_types.get(&term).copied();
+                let mut labels = Vec::new();
+                let mut notes = Vec::new();
 
-                let shortest_path: Vec<_> = state
-                    .shortest_path
-                    .iter()
-                    .map(|token| match token {
-                        rusty_lr_core::Token::Term(term) => term_mapper(*term),
-                        rusty_lr_core::Token::NonTerm(nonterm) => nonterm_mapper(*nonterm),
-                    })
-                    .collect();
+                let is_resolved =
+                    c.shift.is_some() && !c.reduces.is_empty() && reduce_type.is_some();
+                let is_conflict = match reduce_type {
+                    Some(rusty_lr_core::ReduceType::Left) => c.reduces.len() > 1,
+                    Some(rusty_lr_core::ReduceType::Right) => {
+                        if c.shift.is_none() {
+                            c.reduces.len() > 1
+                        } else {
+                            false
+                        }
+                    }
+                    None => c.reduces.len() > 1 || (c.shift.is_some() && !c.reduces.is_empty()),
+                };
+                let message = if is_conflict {
+                    format!("Conflict detected with terminal: {term_string}")
+                } else if is_resolved {
+                    let reduce_type = match reduce_type.unwrap() {
+                        rusty_lr_core::ReduceType::Left => "%left",
+                        rusty_lr_core::ReduceType::Right => "%right",
+                    };
+                    format!("ResolvedConflict detected with terminal: {term_string}\nReduce type: {reduce_type}")
+                } else {
+                    unreachable!("Unexpected conflict type")
+                };
 
-                let mut notes = vec![
-                    format!("lookaheads: [{}]", lookaheads.join(", ")),
-                    "Possible paths:".to_string(),
-                ];
+                if is_resolved {
+                    let term_info = &grammar.terminals[term];
+                    if let Some(reduce_type_origin) = &term_info.reduce_type {
+                        let reduce_type = reduce_type_origin.reduce_type;
+                        let type_string = match reduce_type {
+                            rusty_lr_core::ReduceType::Left => "%left",
+                            rusty_lr_core::ReduceType::Right => "%right",
+                        };
+                        for (first, last) in reduce_type_origin.sources.iter() {
+                            let range = first.byte_range().start..last.byte_range().end;
+                            labels.push(Label::primary(file_id, range).with_message(format!(
+                                "Reduce type was set as {} here",
+                                type_string
+                            )));
+                        }
+                    }
+                }
+
                 notes.push(format!(
-                    "(Origin): {} •<lookahead>",
-                    shortest_path.join(" ")
+                    "Start from: {} •{term_string}",
+                    path_mapper(&c.path)
                 ));
-                for reduce_rule in reduce_rules.iter().copied() {
-                    let rule = &dfa_builder.rules[reduce_rule].0;
-                    let mut path = shortest_path.clone();
-                    for _ in 0..rule.rule.len() {
-                        path.pop();
+
+                notes.push("Possible paths:".to_string());
+                let mut reduce_bfs = Vec::new();
+                reduce_bfs.push((false, c));
+
+                // to avoid duplicate labels
+                let mut shift_added_to_labels = HashSet::new();
+                let mut reduce_added_to_labels = HashSet::new();
+
+                while !reduce_bfs.is_empty() {
+                    let mut pong = Vec::new();
+                    for (invisible_resolved_path, c) in reduce_bfs.into_iter() {
+                        // check if this has both of shift and reduce,
+                        // and ReduceType is set to %left or %right
+                        let has_both = c.shift.is_some() && !c.reduces.is_empty();
+
+                        if let Some(shift) = c.shift {
+                            let path_string = path_mapper(&c.path);
+                            if invisible_resolved_path
+                                || (has_both
+                                    && reduce_type == Some(rusty_lr_core::ReduceType::Left))
+                            {
+                                // shift is resolved and ignored
+                                notes.push(format!(
+                                    "\t(removed) Shift with: {path_string} •{term_string}",
+                                ));
+                            } else {
+                                notes.push(format!("\tShift with: {path_string} •{term_string}",));
+                            }
+
+                            for rule in shift.rules.iter() {
+                                if shift_added_to_labels.insert(rule.rule) {
+                                    Self::extend_rule_source_label(
+                                        &mut labels,
+                                        file_id,
+                                        rule.rule,
+                                        &grammar,
+                                        "(Shift) ",
+                                        "(Shift) ",
+                                    );
+                                }
+
+                                // displaying shifted rules
+                                // let rule = ShiftedRule {
+                                //     rule: dfa_builder.rules[rule.rule]
+                                //         .0
+                                //         .clone()
+                                //         .map(&term_mapper, &nonterm_mapper),
+                                //     shifted: rule.shifted,
+                                // };
+                                // notes.push(format!("\tShift with: {}", rule));
+                            }
+                        }
+
+                        for reduce in c.reduces {
+                            let is_reduce_ignored = invisible_resolved_path
+                                || (has_both
+                                    && reduce_type == Some(rusty_lr_core::ReduceType::Right));
+                            pong.push((is_reduce_ignored, reduce.chain));
+
+                            if reduce_added_to_labels.insert(reduce.rule) {
+                                Self::extend_rule_source_label(
+                                    &mut labels,
+                                    file_id,
+                                    reduce.rule,
+                                    &grammar,
+                                    "(Reduce) ",
+                                    "(Reduce) ",
+                                );
+                            }
+                            // displaying reduce rules
+                            // let rule = dfa_builder.rules[reduce.rule]
+                            //     .0
+                            //     .clone()
+                            //     .map(&term_mapper, &nonterm_mapper);
+                            // notes.push(format!("\tReduce with: {}", rule));
+                        }
                     }
-                    let nonterm = nonterm_mapper(rule.name);
-                    path.push(nonterm);
-                    notes.push(format!("(Reduce): {} •<lookahead>", path.join(" "),));
+                    reduce_bfs = pong;
                 }
 
-                let diag = Diagnostic::error()
-                    .with_message("Reduce/Reduce conflict")
-                    .with_labels(labels)
-                    .with_notes(notes);
-                conflict_diags.push(diag);
-            }
-            for (&term, reduce_rules, shift_rules) in state.conflict_sr(|idx| &dfa.states[idx]) {
-                let mut message = "Shift/Reduce conflict:\nShift rules:".to_string();
-                for shifted_rule in shift_rules.iter() {
-                    let shifted_rule = ShiftedRule {
-                        rule: dfa_builder.rules[shifted_rule.rule]
-                            .0
-                            .clone()
-                            .map(&term_mapper, &nonterm_mapper),
-                        shifted: shifted_rule.shifted,
-                    };
-                    message.push_str(format!("\n\t>>> {}", shifted_rule).as_str());
-                }
-
-                let mut labels = Vec::new();
-                for (idx, reduce_rule) in reduce_rules.into_iter().copied().enumerate() {
-                    let prefix = if reduce_rules.len() == 1 {
-                        "(Reduce) ".to_string()
-                    } else {
-                        format!("(Reduce{}) ", idx + 1)
-                    };
-                    Self::extend_rule_source_label(
-                        &mut labels,
-                        file_id,
-                        reduce_rule,
-                        &grammar,
-                        &prefix,
-                        &prefix,
+                if is_conflict {
+                    conflict_diags.push(
+                        Diagnostic::error()
+                            .with_message(message)
+                            .with_labels(labels)
+                            .with_notes(notes),
+                    );
+                } else {
+                    conflict_diags_resolved.push(
+                        Diagnostic::note()
+                            .with_message(message)
+                            .with_labels(labels)
+                            .with_notes(notes),
                     );
                 }
-
-                for (idx, shiftid) in shift_rules.iter().enumerate() {
-                    let prefix = if reduce_rules.len() == 1 {
-                        "(Shift) ".to_string()
-                    } else {
-                        format!("(Shift{}) ", idx + 1)
-                    };
-
-                    Self::extend_rule_source_label(
-                        &mut labels,
-                        file_id,
-                        shiftid.rule,
-                        &grammar,
-                        &prefix,
-                        &prefix,
-                    );
-                }
-                let term = grammar.terminals[term].name.to_string();
-
-                let shortest_path: Vec<_> = state
-                    .shortest_path
-                    .iter()
-                    .map(|token| match token {
-                        rusty_lr_core::Token::Term(term) => {
-                            format!("{} ", grammar.terminals[*term].name)
-                        }
-                        rusty_lr_core::Token::NonTerm(nonterm) => {
-                            format!("{} ", grammar.nonterminals[*nonterm].pretty_name)
-                        }
-                    })
-                    .collect();
-                let shift_note = format!("(Shift) : {} •{}", shortest_path.join(" "), term);
-
-                let mut notes = vec![
-                    format!("Trying to feed terminal: {}", term),
-                    format!("Try to rearrange the rules or resolve conflict by set reduce type"),
-                    format!(">>> %left {}", term),
-                    format!(">>> %right {}", term),
-                    "Possible paths:".to_string(),
-                    shift_note,
-                ];
-                for &reduce_rule in reduce_rules.iter() {
-                    let rule = &dfa_builder.rules[reduce_rule].0;
-                    let mut path = shortest_path.clone();
-                    for _ in 0..rule.rule.len() {
-                        path.pop();
-                    }
-                    let nonterm = nonterm_mapper(rule.name);
-                    notes.push(format!(
-                        "(Reduce): {} {} •{}",
-                        path.join(" "),
-                        nonterm,
-                        term
-                    ));
-                }
-
-                let diag = Diagnostic::error()
-                    .with_message(message)
-                    .with_labels(labels)
-                    .with_notes(notes);
-                conflict_diags.push(diag);
             }
         }
 
@@ -763,93 +788,11 @@ impl Builder {
 
         // print note about shift/reduce conflict resolved with `%left` or `%right`
         if self.verbose_conflicts_resolving {
-            let mut diags = Vec::new();
-            for state in dfa.states.iter() {
-                for (&term, (reduce_type, reduce_rules, shift_rules)) in state.sr_resolved.iter() {
-                    let mut message = "Shift/Reduce conflict:\nShift rules:".to_string();
-                    for shifted_rule in shift_rules.iter() {
-                        let shifted_rule = ShiftedRule {
-                            rule: dfa_builder.rules[shifted_rule.rule]
-                                .0
-                                .clone()
-                                .map(&term_mapper, &nonterm_mapper),
-                            shifted: shifted_rule.shifted,
-                        };
-                        message.push_str(format!("\n\t>>> {}", shifted_rule).as_str());
-                    }
-
-                    let mut labels = Vec::new();
-                    for (idx, reduce_rule) in reduce_rules.into_iter().copied().enumerate() {
-                        let prefix = if reduce_rules.len() == 1 {
-                            "(Reduce) ".to_string()
-                        } else {
-                            format!("(Reduce{}) ", idx + 1)
-                        };
-                        Self::extend_rule_source_label(
-                            &mut labels,
-                            file_id,
-                            reduce_rule,
-                            &grammar,
-                            &prefix,
-                            &prefix,
-                        );
-                    }
-
-                    for (idx, shiftid) in shift_rules.iter().enumerate() {
-                        let prefix = if reduce_rules.len() == 1 {
-                            "(Shift) ".to_string()
-                        } else {
-                            format!("(Shift{}) ", idx + 1)
-                        };
-
-                        Self::extend_rule_source_label(
-                            &mut labels,
-                            file_id,
-                            shiftid.rule,
-                            &grammar,
-                            &prefix,
-                            &prefix,
-                        );
-                    }
-                    let term_info = &grammar.terminals[term];
-                    if let Some(reduce_type_origin) = &term_info.reduce_type {
-                        let reduce_type = reduce_type_origin.reduce_type;
-                        let type_string = match reduce_type {
-                            rusty_lr_core::ReduceType::Left => "%left",
-                            rusty_lr_core::ReduceType::Right => "%right",
-                        };
-                        for (first, last) in reduce_type_origin.sources.iter() {
-                            let range = first.byte_range().start..last.byte_range().end;
-                            labels.push(Label::primary(file_id, range).with_message(format!(
-                                "Reduce type was set as {} here",
-                                type_string
-                            )));
-                        }
-                    }
-
-                    let term = grammar.terminals[term].name.to_string();
-                    let mut notes = vec![format!("Trying to feed terminal: {}", term)];
-                    match *reduce_type {
-                        rusty_lr_core::ReduceType::Left => {
-                            notes.push("Shift rule will be ignored".to_string());
-                        }
-                        rusty_lr_core::ReduceType::Right => {
-                            notes.push("Reduce rule will be ignored".to_string());
-                        }
-                    }
-                    let diag = Diagnostic::note()
-                        .with_message(message)
-                        .with_labels(labels)
-                        .with_notes(notes);
-                    diags.push(diag);
-                }
-            }
-
-            for diag in diags.into_iter() {
+            for diag in conflict_diags_resolved.into_iter() {
                 let writer = self.verbose_stream();
                 let config = codespan_reporting::term::Config::default();
                 term::emit(&mut writer.lock(), &config, &files, &diag)
-                    .expect("Failed to write to stderr");
+                    .expect("Failed to write to verbose stream");
             }
         }
 

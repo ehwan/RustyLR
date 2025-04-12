@@ -1,5 +1,4 @@
 use crate::rule::LookaheadRuleRefSet;
-use crate::ReduceType;
 use crate::ShiftedRuleRef;
 use crate::Token;
 
@@ -17,13 +16,13 @@ pub struct State<Term, NonTerm> {
     /// what token is used to reach this state
     pub token: Option<Token<Term, NonTerm>>,
     /// shortest sequence of tokens to reach this state
-    pub shortest_path: Vec<Token<Term, NonTerm>>,
-
-    /// resolved shift-reduce conflicts from `ReduceType` setting
-    pub sr_resolved: BTreeMap<Term, (ReduceType, Vec<usize>, Vec<ShiftedRuleRef>)>,
+    pub shortest_path: Vec<(Token<Term, NonTerm>, usize)>,
 }
 impl<Term, NonTerm> State<Term, NonTerm> {
-    pub fn new(token: Option<Token<Term, NonTerm>>, path: Vec<Token<Term, NonTerm>>) -> Self {
+    pub fn new(
+        token: Option<Token<Term, NonTerm>>,
+        path: Vec<(Token<Term, NonTerm>, usize)>,
+    ) -> Self {
         State {
             shift_goto_map_term: Default::default(),
             shift_goto_map_nonterm: Default::default(),
@@ -31,7 +30,6 @@ impl<Term, NonTerm> State<Term, NonTerm> {
             ruleset: LookaheadRuleRefSet::new(),
             token,
             shortest_path: path,
-            sr_resolved: Default::default(),
         }
     }
 
@@ -80,17 +78,9 @@ impl<Term, NonTerm> State<Term, NonTerm> {
             shortest_path: self
                 .shortest_path
                 .into_iter()
-                .map(|token| match token {
-                    Token::Term(term) => Token::Term(term_map(term)),
-                    Token::NonTerm(nonterm) => Token::NonTerm(nonterm_map(nonterm)),
-                })
-                .collect(),
-
-            sr_resolved: self
-                .sr_resolved
-                .into_iter()
-                .map(|(term, (reduce_type, reduce_rule, shift_ruleset))| {
-                    (term_map(term), (reduce_type, reduce_rule, shift_ruleset))
+                .map(|(token, state)| match token {
+                    Token::Term(term) => (Token::Term(term_map(term)), state),
+                    Token::NonTerm(nonterm) => (Token::NonTerm(nonterm_map(nonterm)), state),
                 })
                 .collect(),
         }
