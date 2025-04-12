@@ -603,8 +603,8 @@ impl Builder {
             |rule_id| dfa_builder.rules[rule_id].0.name,
         ) {
             for (&term, c) in c {
-                if c.reduces.len() == 1 && c.shift.is_none()
-                    || c.reduces.len() == 0 && c.shift.is_some()
+                if (c.reduces.len() == 1 && c.shift.is_none())
+                    || (c.reduces.len() == 0 && c.shift.is_some())
                 {
                     continue;
                 }
@@ -663,83 +663,98 @@ impl Builder {
                 ));
 
                 notes.push("Possible paths:".to_string());
-                let mut reduce_bfs = Vec::new();
-                reduce_bfs.push((false, c));
+                let mut reduce_dfs = Vec::new();
+                reduce_dfs.push((
+                    false, // is invisible resolved path?
+                    rusty_lr_core::builder::dfa::ReduceSimulated {
+                        rule: usize::MAX,
+                        state: usize::MAX,
+                        chain: c,
+                    }, // chain to display
+                    0,     // level
+                ));
 
                 // to avoid duplicate labels
                 let mut shift_added_to_labels = HashSet::new();
                 let mut reduce_added_to_labels = HashSet::new();
 
-                while !reduce_bfs.is_empty() {
-                    let mut pong = Vec::new();
-                    for (invisible_resolved_path, c) in reduce_bfs.into_iter() {
-                        // check if this has both of shift and reduce,
-                        // and ReduceType is set to %left or %right
-                        let has_both = c.shift.is_some() && !c.reduces.is_empty();
+                while !reduce_dfs.is_empty() {
+                    let (invisible_resolved_path, reduce, level) = reduce_dfs.pop().unwrap();
+                    // check if this has both of shift and reduce,
+                    // and ReduceType is set to %left or %right
+                    let c = reduce.chain;
+                    let has_both = c.shift.is_some() && !c.reduces.is_empty();
 
-                        if let Some(shift) = c.shift {
-                            let path_string = path_mapper(&c.path);
-                            if invisible_resolved_path
-                                || (has_both
-                                    && reduce_type == Some(rusty_lr_core::ReduceType::Left))
-                            {
-                                // shift is resolved and ignored
-                                notes.push(format!(
-                                    "\t(removed) Shift with: {path_string} •{term_string}",
-                                ));
-                            } else {
-                                notes.push(format!("\tShift with: {path_string} •{term_string}",));
-                            }
+                    // displaying reduce rules in DFS order
+                    if reduce.rule != usize::MAX {
+                        let prefix_str = "  ".repeat(level - 1);
+                        let rule = dfa_builder.rules[reduce.rule]
+                            .0
+                            .clone()
+                            .map(&term_mapper, &nonterm_mapper);
+                        if invisible_resolved_path {
+                            // shift is resolved and ignored
+                            notes.push(format!(
+                                "\t{}- (removed) Reduce with: {rule} •{term_string}",
+                                prefix_str
+                            ));
+                        } else {
+                            notes.push(format!(
+                                "\t{}- Reduce with: {rule} •{term_string}",
+                                prefix_str
+                            ));
+                        }
+                    }
 
-                            for rule in shift.rules.iter() {
-                                if shift_added_to_labels.insert(rule.rule) {
-                                    Self::extend_rule_source_label(
-                                        &mut labels,
-                                        file_id,
-                                        rule.rule,
-                                        &grammar,
-                                        "(Shift) ",
-                                        "(Shift) ",
-                                    );
-                                }
-
-                                // displaying shifted rules
-                                // let rule = ShiftedRule {
-                                //     rule: dfa_builder.rules[rule.rule]
-                                //         .0
-                                //         .clone()
-                                //         .map(&term_mapper, &nonterm_mapper),
-                                //     shifted: rule.shifted,
-                                // };
-                                // notes.push(format!("\tShift with: {}", rule));
-                            }
+                    if let Some(shift) = c.shift {
+                        let path_string = path_mapper(&c.path);
+                        let prefix_str = "  ".repeat(level);
+                        if invisible_resolved_path
+                            || (has_both && reduce_type == Some(rusty_lr_core::ReduceType::Left))
+                        {
+                            // shift is resolved and ignored
+                            notes.push(format!(
+                                "\t{}- (removed) Shift with: {path_string} •{term_string}",
+                                prefix_str
+                            ));
+                        } else {
+                            notes.push(format!(
+                                "\t{}- Shift with: {path_string} •{term_string}",
+                                prefix_str
+                            ));
                         }
 
-                        for reduce in c.reduces {
-                            let is_reduce_ignored = invisible_resolved_path
-                                || (has_both
-                                    && reduce_type == Some(rusty_lr_core::ReduceType::Right));
-                            pong.push((is_reduce_ignored, reduce.chain));
-
-                            if reduce_added_to_labels.insert(reduce.rule) {
+                        for rule in shift.rules.iter() {
+                            if shift_added_to_labels.insert(rule.rule) {
                                 Self::extend_rule_source_label(
                                     &mut labels,
                                     file_id,
-                                    reduce.rule,
+                                    rule.rule,
                                     &grammar,
-                                    "(Reduce) ",
-                                    "(Reduce) ",
+                                    "(Shift) ",
+                                    "(Shift) ",
                                 );
                             }
-                            // displaying reduce rules
-                            // let rule = dfa_builder.rules[reduce.rule]
-                            //     .0
-                            //     .clone()
-                            //     .map(&term_mapper, &nonterm_mapper);
-                            // notes.push(format!("\tReduce with: {}", rule));
                         }
                     }
-                    reduce_bfs = pong;
+
+                    for reduce in c.reduces {
+                        let is_reduce_ignored = invisible_resolved_path
+                            || (has_both && reduce_type == Some(rusty_lr_core::ReduceType::Right));
+
+                        if reduce_added_to_labels.insert(reduce.rule) {
+                            Self::extend_rule_source_label(
+                                &mut labels,
+                                file_id,
+                                reduce.rule,
+                                &grammar,
+                                "(Reduce) ",
+                                "(Reduce) ",
+                            );
+                        }
+
+                        reduce_dfs.push((is_reduce_ignored, reduce, level + 1));
+                    }
                 }
 
                 if is_conflict {
@@ -757,6 +772,16 @@ impl Builder {
                             .with_notes(notes),
                     );
                 }
+            }
+        }
+
+        // print note about shift/reduce conflict resolved with `%left` or `%right`
+        if self.verbose_conflicts_resolving {
+            for diag in conflict_diags_resolved.into_iter() {
+                let writer = self.verbose_stream();
+                let config = codespan_reporting::term::Config::default();
+                term::emit(&mut writer.lock(), &config, &files, &diag)
+                    .expect("Failed to write to verbose stream");
             }
         }
 
@@ -783,16 +808,6 @@ impl Builder {
                 let config = codespan_reporting::term::Config::default();
                 term::emit(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
-            }
-        }
-
-        // print note about shift/reduce conflict resolved with `%left` or `%right`
-        if self.verbose_conflicts_resolving {
-            for diag in conflict_diags_resolved.into_iter() {
-                let writer = self.verbose_stream();
-                let config = codespan_reporting::term::Config::default();
-                term::emit(&mut writer.lock(), &config, &files, &diag)
-                    .expect("Failed to write to verbose stream");
             }
         }
 

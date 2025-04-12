@@ -1,4 +1,4 @@
-use std::{collections::HashSet, vec::Vec};
+use std::vec::Vec;
 
 use crate::{ShiftedRuleRef, Token};
 
@@ -39,7 +39,6 @@ impl<Term, NonTerm> DFA<Term, NonTerm> {
         states: &'a [State<Term, NonTerm>],
         rule_len: impl Fn(usize) -> usize + Copy,
         rule_nonterm: impl Fn(usize) -> NonTerm + Copy,
-        visited: &mut HashSet<usize>,
     ) -> Option<ConflictSimulated<Term, NonTerm>>
     where
         Term: Clone + Ord,
@@ -68,10 +67,6 @@ impl<Term, NonTerm> DFA<Term, NonTerm> {
                         .shift_goto_map_nonterm
                         .get(&rule_nonterm(reduce_rule))
                         .unwrap();
-                    if visited.contains(&new_state) {
-                        return None;
-                    }
-                    visited.insert(new_state);
 
                     let mut token_stack = token_stack.to_vec();
                     token_stack.truncate(token_stack.len() - len);
@@ -85,7 +80,6 @@ impl<Term, NonTerm> DFA<Term, NonTerm> {
                         states,
                         rule_len,
                         rule_nonterm,
-                        visited,
                     ) {
                         Some(ReduceSimulated {
                             rule: reduce_rule,
@@ -134,8 +128,6 @@ impl<Term, NonTerm> DFA<Term, NonTerm> {
                 .reduce_map
                 .keys()
                 .filter_map(|term| {
-                    let mut visited = HashSet::new();
-                    visited.insert(i);
                     Self::conflict_simulate_recursive(
                         term,
                         i,
@@ -144,7 +136,6 @@ impl<Term, NonTerm> DFA<Term, NonTerm> {
                         &self.states,
                         &rule_len,
                         &rule_nonterm,
-                        &mut visited,
                     )
                     .map(|chain| (term, chain))
                 })

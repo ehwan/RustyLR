@@ -2,7 +2,7 @@
 [![crates.io](https://img.shields.io/crates/v/rusty_lr.svg)](https://crates.io/crates/rusty_lr)
 [![docs.rs](https://docs.rs/rusty_lr/badge.svg)](https://docs.rs/rusty_lr)
 
-GLR, LR(1) and LALR(1) parser generator for Rust.
+GLR, LR(1) and LALR(1) parser code generator for Rust.
 
 Please refer to [docs.rs](https://docs.rs/rusty_lr) for detailed example and documentation.
 
@@ -102,6 +102,8 @@ println!("userdata: {}", userdata);
 ```
 
 ## Readable error messages (with [codespan](https://github.com/brendanzab/codespan))
+It is highly recommended to use buildscipt tools or executable instead of procedural macros, to generate readable error messages.
+Please refer to [docs.rs](https://docs.rs/rusty_lr) for detailed example and documentation.
 #### -Reduce/Reduce conflicts
 ![images/error1.png](images/error1.png)
 #### - Shift/Reduce conflicts
