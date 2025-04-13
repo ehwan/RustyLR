@@ -17,11 +17,16 @@
  - [`%lalr`](#lalr-parser-generation)
 
 
----
+## Overview
+RustyLR's grammar syntax is inspired by parser generators like Yacc and Bison.
+Grammars are defined using a combination of directives, token definitions, and production rules.
+
+In procedural macros, the grammar is defined using the `lr1!` or `lalr1!` macro.
+In build script files, the grammar section is separated from Rust code using `%%`. Everything before `%%` is treated as regular Rust code and is copied as-is to the generated output.
 
 
 ## Production rules
-Every production rules have the base form:
+Each production rule defines how a non-terminal symbol can be derived from a sequence of patterns.
 ```
 NonTerminalName
     : Pattern1 Pattern2 ... PatternN { ReduceAction }
@@ -29,21 +34,24 @@ NonTerminalName
    ...
     ;
 ```
+ - **NonTerminalName:** The name of the non-terminal symbol being defined.​
+ - **PatternX:** A terminal or non-terminal symbol, or a pattern as defined below.​
+ - **ReduceAction:** Optional Rust code executed when the rule is reduced.​
 
-Each `Pattern` follows the syntax:
+## Patterns
+Patterns define the structure of the input that matches a production rule.
+
  - `name` : Non-terminal or terminal symbol `name` defined in the grammar.
  - `[term1 term_start-term_last]`, `[^term1 term_start-term_last]` : Set of terminal symbols. [`eof`](#eof-symbol-must-defined) will be automatically removed from the terminal set.
  - `P*` : Zero or more repetition of `P`.
  - `P+` : One or more repetition of `P`.
  - `P?` : Zero or one repetition of `P`.
  - `(P1 P2 P3)` : Grouping of patterns.
- - `P / term`, `P / [term1 term_start-term_last]`, `P / [^term1 term_start-term_last]` :
- Lookaheads; `P` followed by one of given terminal set. Lookaheads are not consumed.
 
-### Notes
-When using range pattern `[first-last]`,
-the range is constructed by the order of the [`%token`](#token-definition-must-defined) directives,
-not by the actual value of the token.
+Note: When using range patterns like [first-last],
+the range is determined by the order of %token directives,
+not by the actual values of the tokens.
+
 If you define tokens in the following order:
 ```
 %token one '1';
@@ -57,87 +65,62 @@ The range `[zero-nine]` will be `['0', '9']`, not `['0'-'9']`.
 
 
 ## RuleType <sub><sup>(optional)</sup></sub>
-You can assign a value for each non-terminal symbol.
-In [reduce action](#reduceaction-optional),
-you can access the value of each pattern holds,
-and can assign new value to current non-terminal symbol.
-Please refer to the [ReduceAction](#reduceaction-optional) and [Accessing token data in ReduceAction](#accessing-token-data-in-reduceaction) section below.
-At the end of parsing, the value of the start symbol will be the result of the parsing.
-By default, terminal symbols hold the value of [`%tokentype`](#token-type-must-defined) passed by `feed()` function.
+Assigning a type to a non-terminal allows the parser to carry semantic information.
+```
+E(MyType): ... ;
+```
+- `MyType`: The Rust type associated with the non-terminal E.
 
-```rust
-struct MyType<T> {
-    ...
-}
-```
-```
-E(MyType<i32>) : ... Patterns ... { <This will be new value of E> } ;
-```
-
+The actual value of E is evaluated by the result of the ReduceAction.
 
 
 ## ReduceAction <sub><sup>(optional)</sup></sub>
-Reduce action can be written in Rust code. It is executed when the rule is matched and reduced.
+A ReduceAction is Rust code executed when a production rule is reduced.​
 
-- If [`RuleType`](#ruletype-optional) is defined for current non-terminal symbol, `ReduceAction` itself must be the value of [`RuleType`](#ruletype-optional) (i.e. no semicolon at the end of the statement).
-
-- `ReduceAction` can be omitted if:
-  - [`RuleType`](#ruletype-optional) is not defined.
-  - Only one token is holding value in the production rule.
-
-- `Result<(),Error>` can be returned from `ReduceAction`.
-  - Returned `Error` will be delivered to the caller of `feed()` function.
-  - `ErrorType` can be defined by [`%err`](#error-type-optional) or [`%error`](#error-type-optional) directive.
-
+- If a `RuleType` is defined, the ReduceAction must evaluate to that type.​
+- If no `RuleType` is defined and only one token holds a value, the ReduceAction can be omitted.​
+- Reduce action can return Result<(), ErrorType> to handle errors during parsing.
+- Reduce action can be written in Rust code. It is executed when the rule is matched and reduced.
 
 ```rust
-NoRuleType: ... ;
-
-RuleTypeI32(i32): ... { 0 } ;
-
-// RuleTypeI32 will be chosen
-E(i32): NoRuleType NoRuleType RuleTypeI32 NoRuleType;
-```
-
-```rust
-// set Err variant type to String
 %err String;
-
-%token div '/';
 
 E(i32): A div a2=A {
     if a2 == 0 {
         return Err("Division by zero".to_string());
     }
-
-    A / a2
+    A / a2 // new value of E
 };
-
-A(i32): ... ;
 ```
 
-
 ## Accessing token data in ReduceAction
+Within a ReduceAction, you can access the data associated with tokens and non-terminals:
 
-**predefined variables** can be used in `ReduceAction`:
- - `data` ( `&mut UserData` ) : userdata passed to the `feed()` function.
- - `lookahead` ( `&Term` ) : lookahead token that caused the reduce action.
- - `shift` ( `&mut bool` ) : revoke the shift action if set to `false`. See [Resolving Ambiguities](#resolving-ambiguities) section.
-
-To access the data of each token, you can directly use the name of the token as a variable.
- - For non-terminal symbols, the type of variable is `RuleType`.
- - For terminal symbols, the type of variable is [`%tokentype`](#token-type-must-defined).
- - If multiple variables are defined with the same name, the variable on the front-most will be used.
- - You can remap the variable name by using `=` operator.
-
+- **Named Patterns:** Assign names to patterns to access their values.
 ```rust
-E(i32) : A plus a2=A {
-    println!("Value of A: {:?}", A);
-    println!("Value of plus: {:?}", plus);
-    println!("Value of a2: {:?}", a2);
-
-    A + a2 // new value of E
+E(i32): left=A plus right=A { left + right };
+```
+- Or using their default names if obvious.
+```rust
+E(i32): A plus right=A { A + right }; // use A directly
+```
+- **User Data:** Access mutable user-defined data passed to the parser.
+```rust
+E(i32): A plus right=A { 
+    *data += 1; // data: &mut UserData
+    A + right 
 };
+```
+- **Lookahead Token:** Inspect the next token without consuming it.
+```rust
+match *lookahead { // lookahead: &TerminalType
+    '+' => { /* ... */ },
+    _ => { /* ... */ },
+}
+```
+- Shift Control: Control whether to perform a shift operation. (for GLR parser)
+```rust
+*shift = false; // Prevent shift action
 ```
 
 For some regex pattern, the type of variable will be modified as follows:
@@ -183,8 +166,6 @@ For group `(P1 P2 P3)`:
 
  ```
 
-
-
 ## Exclamation mark `!`
 An exclamation mark `!` can be used right after the token to ignore the value of the token.
 The token will be treated as if it is not holding any value.
@@ -195,7 +176,6 @@ A(i32) : ... ;
 // A in the middle will be chosen, since other A's are ignored
 E(i32) : A! A A!;
 ```
-
 
 
 ## Token type <sub><sup>(must defined)</sup></sub>

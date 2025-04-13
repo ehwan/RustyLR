@@ -123,6 +123,30 @@ fn main() {
 include!(concat!(env!("OUT_DIR"), "/parser.rs"));
 ```
 
+**4. Use the parser in your code:**
+```rust
+let mut parser = parser::EParser::new(); // create <StartSymbol>Parser class
+let mut context = parser::EContext::new(); // create <StartSymbol>Context class
+let mut userdata: i32 = 0;
+for b in input.chars() {
+    match context.feed(&parser, b, &mut userdata) {
+        Ok(_) => {}
+        Err(e) => {
+            eprintln!("error: {}", e);
+            return;
+        }
+    }
+}
+println!("{:?}", context);
+context.feed(&parser, 0 as char, &mut userdata).unwrap(); // feed EOF
+
+let result:i32 = context.accept(); // get value of start 'E'
+```
+
+## GLR Parsing
+RustyLR offers built-in support for Generalized LR (GLR) parsing, enabling it to handle ambiguous or nondeterministic grammars that traditional LR(1) or LALR(1) parsers cannot process.
+See [GLR.md](GLR.md) for details.
+
 ## Examples
  - [Calculator](examples/calculator_u8/src/parser.rs): A calculator using `u8` as token type.
  - [lua 5.4 syntax parser](https://github.com/ehwan/lua_rust/blob/main/parser/src/parser.rs)
@@ -134,17 +158,8 @@ include!(concat!(env!("OUT_DIR"), "/parser.rs"));
  - `tree`: Enable automatic syntax tree construction (For debugging purposes).
  - `error`: Enable detailed parsing error messages (For debugging purposes).
 
-
-## Cargo Features
- - `build` : Enable buildscript tools.
- - `fxhash` : In parser table, replace `std::collections::HashMap` with `FxHashMap` from [`rustc-hash`](https://github.com/rust-lang/rustc-hash).
- - `tree` : Enable automatic syntax tree construction.
-    This feature should be used on debug purpose only, since it will consume much more memory and time.
- - `error` : Enable detailed parsing error messages, for `Display` and `Debug` trait.
-    This feature should be used on debug purpose only, since it will consume much more memory and time.
-
 ## Syntax
-RustyLR's grammar syntax is inspired by traditional Yacc/Bison formats. Here's a quick overview:​
+RustyLR's grammar syntax is inspired by traditional Yacc/Bison formats.
 See [SYNTAX.md](SYNTAX.md) for details of grammar-definition syntax.
 
 ## Contribution
