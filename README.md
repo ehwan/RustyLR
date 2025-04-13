@@ -2,25 +2,39 @@
 [![crates.io](https://img.shields.io/crates/v/rusty_lr.svg)](https://crates.io/crates/rusty_lr)
 [![docs.rs](https://docs.rs/rusty_lr/badge.svg)](https://docs.rs/rusty_lr)
 
-GLR, LR(1) and LALR(1) parser code generator for Rust.
+***A Yacc-like, procedural macro-based parser generator for Rust supporting LR(1), LALR(1), and GLR parsing strategies.***
+
+RustyLR enables you to define context-free grammars (CFGs) directly in Rust using macros or build scripts. It constructs deterministic finite automata (DFA) at compile time, ensuring efficient and reliable parsing.​
 
 Please refer to [docs.rs](https://docs.rs/rusty_lr) for detailed example and documentation.
 
 ## Features
- - GLR, LR(1) and LALR(1) parser generator
- - Can handle every possible paths with GLR parser
- - Procedural macros and buildscript tools
- - Customizable reduce action
- - Readable error messages, both for parsing and building grammar
+ - **Multiple Parsing Strategies:** Supports LR(1), LALR(1), and GLR parsers.
+ - **Procedural Macros:** Define grammars using lr1! and lalr1! macros for compile-time parser generation.
+ - **Build Script Integration:** Generate parsers via build scripts for complex grammars with detailed error messages.​
+ - **Custom Reduce Actions:** Define custom actions during reductions to build ASTs or perform computations.​
+ - **Grammar Conflict Detection:** Automatically detects shift/reduce and reduce/reduce conflicts during parser generation, providing informative diagnostics to help resolve ambiguities.
 
-## Examples
-#### Projects
- - [Simple Calculator](examples/calculator_u8/src/parser.rs)
- - [lua 5.4 syntax parser](https://github.com/ehwan/lua_rust/blob/main/parser/src/parser.rs)
- - [Bootstrap](rusty_lr_parser/src/parser/parser.rs): rusty_lr syntax parser is written in rusty_lr itself.
+ ## Installation
+ Add RustyLR to your `Cargo.toml`:
+ ```toml
+ [dependencies]
+ rusty_lr = "..."
+ ```
+ To use buildscript tools:
+ ```toml
+ [build-dependencies]
+ rusty_lr = { version = "...", features = ["build"] }
+ ```
+ Or you want to use executable version (optional):
+ ```sh
+ cargo install rustylr
+ ```
 
-#### Quick Example
-```rust
+ ## Quick Start
+ ### Using Procedural Macros
+ Define your grammar using the `lr1!` or `lalr1!` macro:
+ ```rust
 // this define `EParser` struct
 // where `E` is the start symbol
 lr1! {
@@ -42,14 +56,10 @@ lr1! {
 
     // ================= Production rules =================
     Digit(char): [zero-nine];           // character set '0' to '9'
-    //    ^^^^---------------------------- `Digit` holds `char` value
 
     Number(i32)                         // production rule `Number` holds `i32` value
         : space* Digit+ space*          // `Number` is one or more `Digit` surrounded by zero or more spaces
-    //           ^^^^^-------------------- `Digit+` holds `Vec<char>`
-        { Digit.into_iter().collect::<String>().parse().unwrap() };
-    //   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    //    this will be the value of `Number` (i32) by this production rule
+        { Digit.into_iter().collect::<String>().parse().unwrap() }; // this will be the value of `Number` (i32) by this production rule
 
     A(f32)
         : A plus a2=A {
@@ -67,55 +77,63 @@ lr1! {
     E(f32) : A ; // start symbol
 }
 ```
+This defines a simple arithmetic expression parser.
+### Using Build Script
+For complex grammars, you can use a build script to generate the parser. This will provide more detailed error messages when conflicts occur.
+**1. Create a grammar file** (e.g., `src/parser.rs`) with the following content:
 ```rust
-let parser = EParser::new();         // generate `EParser`, this holds the parser table
-let mut context = EContext::new();   // create context, this holds current state of parser
-let mut userdata: i32 = 0;           // define userdata
 
-let input_sequence = "1 + 2 * 3 + 4"; // input sequence
+// Rust code of `use` and type definitions
 
-// start feeding tokens
-for token in input_sequence.chars() {
-    match context.feed(&parser, token, &mut userdata) {
-        //                              ^^^^^^^^^^^^ userdata passed here as `&mut i32`
-        //                      ^^^^^--------------- feed token
-        Ok(_) => {}
-        Err(e) => {
-            match e {
-                EParseError::InvalidTerminal(invalid_terminal) => {
-                    ...
-                }
-                EParseError::ReduceAction(error_from_reduce_action) => {
-                    ...
-                }
-            }
-            println!("{}", e);
-            return;
-        }
-    }
-}
-context.feed(&parser, '\0', &mut userdata).unwrap();    // feed `eof` token
 
-let res = context.accept();   // get the value of start symbol `E(f32)`
-println!("{}", res);
-println!("userdata: {}", userdata);
+%% // start of grammar definition
+
+%tokentype u8;
+%start E;
+%eof b'\0';
+
+%token a b'a';
+%token lparen b'(';
+%token rparen b')';
+
+E: lparen E rparen
+ | a;
+
+ ...
+
 ```
 
-## Readable error messages (with [codespan](https://github.com/brendanzab/codespan))
-It is highly recommended to use buildscipt tools or executable instead of procedural macros, to generate readable error messages.
-Please refer to [docs.rs](https://docs.rs/rusty_lr) for detailed example and documentation.
-#### -Reduce/Reduce conflicts
-![images/error1.png](images/error1.png)
-#### - Shift/Reduce conflicts
-![images/error2.png](images/error2.png)
+**2. Setup `build.rs`**:
+```rust
+// build.rs
+use rusty_lr::build;
 
-## Visualized syntax tree
-![images/tree.png](images/tree.png)
- With `tree` feature enabled.
+fn main() {
+    println!("cargo::rerun-if-changed=src/parser.rs");
 
-## detailed `ParseError` message
-![images/parse_error.png](images/parse_error.png)
- With `error` feature enabled.
+    let output = format!("{}/parser.rs", std::env::var("OUT_DIR").unwrap());
+    build::Builder::new()
+        .file("src/parser.rs") // path to the input file
+        .build(&output);       // path to the output file
+}
+```
+
+**3. Include the generated source code:**
+```rust
+include!(concat!(env!("OUT_DIR"), "/parser.rs"));
+```
+
+## Examples
+ - [Calculator](examples/calculator_u8/src/parser.rs): A calculator using `u8` as token type.
+ - [lua 5.4 syntax parser](https://github.com/ehwan/lua_rust/blob/main/parser/src/parser.rs)
+ - [Bootstrap](rusty_lr_parser/src/parser/parser.rs): rusty_lr syntax parser is written in rusty_lr itself.
+
+## Cargo Features
+ - `build`: Enable build script tools.
+ - `fxhash`: Use FXHashMap instead of `std::collections::HashMap` for parser tables.
+ - `tree`: Enable automatic syntax tree construction (For debugging purposes).
+ - `error`: Enable detailed parsing error messages (For debugging purposes).
+
 
 ## Cargo Features
  - `build` : Enable buildscript tools.
@@ -126,10 +144,8 @@ Please refer to [docs.rs](https://docs.rs/rusty_lr) for detailed example and doc
     This feature should be used on debug purpose only, since it will consume much more memory and time.
 
 ## Syntax
+RustyLR's grammar syntax is inspired by traditional Yacc/Bison formats. Here's a quick overview:​
 See [SYNTAX.md](SYNTAX.md) for details of grammar-definition syntax.
-
- - [Bootstrap](rusty_lr_parser/src/parser/parser.rs): rusty_lr syntax is written in rusty_lr itself.
-
 
 ## Contribution
  - Any contribution is welcome.
@@ -139,3 +155,10 @@ See [SYNTAX.md](SYNTAX.md) for details of grammar-definition syntax.
 Either of
  - MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
  - Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+
+### Images
+It is highly recommended to use buildscipt tools or executable instead of procedural macros, to generate readable error messages.
+#### -Reduce/Reduce conflicts
+![images/error1.png](images/error1.png)
+#### - Shift/Reduce conflicts
+![images/error2.png](images/error2.png)
