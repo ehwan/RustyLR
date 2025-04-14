@@ -43,6 +43,9 @@ pub struct Grammar {
     /// ident -> index map for terminals
     pub terminals_index: HashMap<Ident, usize>,
 
+    /// single literal character -> terminal index map
+    pub literal_index: HashMap<char, usize>,
+
     /// rule definitions
     pub nonterminals: Vec<NonTerminalInfo>,
     /// ident - index map for non-terminals
@@ -66,6 +69,34 @@ impl Grammar {
             ruleid -= nonterm.rules.len();
         }
         None
+    }
+
+    pub(crate) fn add_or_get_literal_character(
+        &mut self,
+        literal: syn::Lit,
+        reduce_type: Option<ReduceTypeInfo>,
+    ) -> usize {
+        let value = match &literal {
+            syn::Lit::Char(lit) => lit.value(),
+            syn::Lit::Byte(lit) => lit.value() as char,
+            _ => unreachable!("only char and byte literal are supported"),
+        };
+        if let Some(idx) = self.literal_index.get(&value).copied() {
+            return idx;
+        } else {
+            let new_idx = self.terminals.len();
+            let name = Ident::new(&format!("_Literal{}", new_idx), Span::call_site());
+            let info = TerminalInfo {
+                name: name.clone(),
+                reduce_type,
+                body: quote! { #literal },
+            };
+            self.terminals.push(info);
+            self.terminals_index.insert(name, new_idx);
+            self.literal_index.insert(value, new_idx);
+
+            new_idx
+        }
     }
 
     pub fn parse_args(input: TokenStream) -> Result<GrammarArgs, ParseArgError> {
@@ -182,6 +213,7 @@ impl Grammar {
 
             terminals: Default::default(),
             terminals_index: Default::default(),
+            literal_index: Default::default(),
 
             nonterminals: Default::default(),
             nonterminals_index: Default::default(),

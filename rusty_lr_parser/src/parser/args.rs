@@ -108,6 +108,9 @@ impl std::fmt::Display for PatternArgs {
                         .join(", ")
                 )
             }
+            PatternArgs::Literal(literal) => {
+                write!(f, "{}", literal)
+            }
         }
     }
 }
@@ -220,6 +223,10 @@ impl PatternArgs {
                 (base.span_pair().0, terminal_set.span_pair().1)
             }
             PatternArgs::Group(_, open, close) => (*open, *close),
+            PatternArgs::Literal(literal) => {
+                let span = literal.span();
+                (span, span)
+            }
         }
     }
 }

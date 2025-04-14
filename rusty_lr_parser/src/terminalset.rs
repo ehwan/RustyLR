@@ -21,6 +21,8 @@ impl std::fmt::Display for TerminalSetItem {
         match self {
             TerminalSetItem::Terminal(ident) => write!(f, "{}", ident),
             TerminalSetItem::Range(first, last) => write!(f, "{}-{}", first, last),
+            TerminalSetItem::Literal(literal) => write!(f, "{}", literal),
+            TerminalSetItem::LiteralRange(first, last) => write!(f, "{}-{}", first, last),
         }
     }
 }
