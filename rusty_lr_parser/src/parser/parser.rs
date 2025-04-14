@@ -11,6 +11,7 @@ use proc_macro2::Group;
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
+use proc_macro2::Literal;
 use proc_macro2::Punct;
 use proc_macro2::Spacing;
 use quote::ToTokens;
@@ -51,7 +52,7 @@ macro_rules! punct(
 %token slash Lexed::Slash(punct!('/'));
 %token otherpunct Lexed::OtherPunct(punct!('.'));
 
-%token literal Lexed::Literal(None);
+%token literal Lexed::Literal(Literal::usize_suffixed(0));
 
 %token parengroup Lexed::ParenGroup(None);
 %token bracegroup Lexed::BraceGroup(None);
