@@ -1,4 +1,5 @@
 use proc_macro2::Ident;
+use proc_macro2::Literal;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
@@ -79,6 +80,9 @@ pub enum PatternArgs {
     /// ( Pattern+ )
     /// span of '(' and ')'
     Group(Vec<PatternArgs>, Span, Span),
+
+    /// 'a', b'a', "abc", b"abc"
+    Literal(Literal),
 }
 
 impl std::fmt::Display for PatternArgs {

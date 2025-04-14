@@ -1,4 +1,5 @@
 use proc_macro2::Ident;
+use proc_macro2::Literal;
 use proc_macro2::Span;
 
 use std::collections::BTreeSet;
@@ -11,6 +12,8 @@ use crate::utils;
 pub enum TerminalSetItem {
     Terminal(Ident),
     Range(Ident, Ident),
+    Literal(Literal),
+    LiteralRange(Literal, Literal),
 }
 
 impl std::fmt::Display for TerminalSetItem {

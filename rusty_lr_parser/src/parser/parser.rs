@@ -173,6 +173,21 @@ TerminalSetItem(TerminalSetItem): ident {
 
     TerminalSetItem::Range( first, last )
 }
+| literal {
+    let Lexed::Literal(literal) = literal else {
+        unreachable!( "TerminalSetItem-Literal" );
+    };
+    TerminalSetItem::Literal(literal)
+}
+| first=literal minus last=literal {
+    let Lexed::Literal(first) = first else {
+        unreachable!( "TerminalSetItem-Range1" );
+    };
+    let Lexed::Literal(last) = last else {
+        unreachable!( "TerminalSetItem-Range3" );
+    };
+    TerminalSetItem::LiteralRange( first, last )
+}
 ;
 
 TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
@@ -248,6 +263,12 @@ Pattern(PatternArgs): ident {
         unreachable!( "Pattern-Group-Close" );
     };
     PatternArgs::Group(Pattern, open, close)
+}
+| literal {
+    let Lexed::Literal(literal) = literal else {
+        unreachable!( "Pattern-Literal" );
+    };
+    PatternArgs::Literal(literal)
 }
 ;
 
