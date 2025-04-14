@@ -21,7 +21,7 @@
 RustyLR's grammar syntax is inspired by parser generators like Yacc and Bison.
 Grammars are defined using a combination of directives, token definitions, and production rules.
 
-In procedural macros, the grammar is defined using the `lr1!` or `lalr1!` macro.
+In procedural macros, the grammar is defined using the `lr1!` macro.
 In build script files, the grammar section is separated from Rust code using `%%`. Everything before `%%` is treated as regular Rust code and is copied as-is to the generated output.
 
 
@@ -344,7 +344,7 @@ match parser.feed( ... ) {
 ```
 %lalr;
 ```
-Switch to LALR parser generation.
+Switch generated parser table to LALR parser.
 
 
 

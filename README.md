@@ -10,7 +10,7 @@ Please refer to [docs.rs](https://docs.rs/rusty_lr) for detailed example and doc
 
 ## Features
  - **Multiple Parsing Strategies:** Supports LR(1), LALR(1), and GLR parsers.
- - **Procedural Macros:** Define grammars using lr1! and lalr1! macros for compile-time parser generation.
+ - **Procedural Macros:** Define grammars using lr1! macro for compile-time parser generation.
  - **Build Script Integration:** Generate parsers via build scripts for complex grammars with detailed error messages.​
  - **Custom Reduce Actions:** Define custom actions during reductions to build ASTs or perform computations.​
  - **Grammar Conflict Detection:** Automatically detects shift/reduce and reduce/reduce conflicts during parser generation, providing informative diagnostics to help resolve ambiguities.
@@ -33,7 +33,7 @@ Please refer to [docs.rs](https://docs.rs/rusty_lr) for detailed example and doc
 
  ## Quick Start
  ### Using Procedural Macros
- Define your grammar using the `lr1!` or `lalr1!` macro:
+ Define your grammar using the `lr1!` macro:
  ```rust
 // this define `EParser` struct
 // where `E` is the start symbol
