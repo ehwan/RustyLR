@@ -3,7 +3,7 @@ use crate::parser::args::GrammarArgs;
 use crate::parser::args::RuleDefArgs;
 use crate::parser::args::RuleLineArgs;
 use crate::parser::lexer::Lexed;
-use crate::parser::args::TerminalSetOrIdent;
+use crate::parser::args::TerminalOrTerminalSet;
 use crate::terminalset::TerminalSet;
 use crate::terminalset::TerminalSetItem;
 
@@ -248,8 +248,8 @@ Pattern(PatternArgs): ident {
 | TerminalSet {
     PatternArgs::TerminalSet( TerminalSet )
 }
-| Pattern slash TerminalSetOrIdent {
-    PatternArgs::Lookaheads( Box::new(Pattern), TerminalSetOrIdent )
+| Pattern slash TerminalOrTerminalSet {
+    PatternArgs::Lookaheads( Box::new(Pattern), TerminalOrTerminalSet )
 }
 | lparen Pattern+ rparen {
     let open = if let Lexed::LParen(lparen) = lparen {
@@ -316,13 +316,19 @@ TokenTypeDef((Span,TokenStream)): tokentype RustCode semicolon { (tokentype.span
 UserDataDef((Span,TokenStream)): userdata RustCode semicolon { (userdata.span(),RustCode) }
 ;
 
-TerminalSetOrIdent(TerminalSetOrIdent): TerminalSet { TerminalSetOrIdent::TerminalSet( TerminalSet ) }
+TerminalOrTerminalSet(TerminalOrTerminalSet): TerminalSet { TerminalOrTerminalSet::TerminalSet( TerminalSet ) }
 | ident {
     if let Lexed::Ident(ident) = ident {
-        TerminalSetOrIdent::Ident( ident )
+        TerminalOrTerminalSet::Ident( ident )
     }else {
-        unreachable!( "TerminalSetOrIdent-Ident" );
+        unreachable!( "TerminalOrTerminalSet-Ident" );
     }
+}
+| literal {
+    let Lexed::Literal(literal) = literal else {
+        unreachable!( "TerminalOrTerminalSet-Literal" );
+    };
+    TerminalOrTerminalSet::Literal( literal )
 }
 ;
 
@@ -330,8 +336,8 @@ ReduceType(ReduceType): left { ReduceType::Left }
 | right { ReduceType::Right }
 ;
 
-ReduceDef((TerminalSetOrIdent, ReduceType)): reducetype=ReduceType TerminalSetOrIdent semicolon {
-    ( TerminalSetOrIdent, reducetype )
+ReduceDef((TerminalOrTerminalSet, ReduceType)): reducetype=ReduceType TerminalOrTerminalSet semicolon {
+    ( TerminalOrTerminalSet, reducetype )
 }
 ;
 

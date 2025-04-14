@@ -15,45 +15,46 @@ use crate::terminalset::TerminalSet;
 use crate::utils;
 
 /// parsed arguments for reduce type def
-pub enum TerminalSetOrIdent {
+pub enum TerminalOrTerminalSet {
     Ident(Ident),
+    Literal(Literal),
     TerminalSet(TerminalSet),
 }
 
-impl TerminalSetOrIdent {
+impl TerminalOrTerminalSet {
     pub fn to_terminal_set(
         &self,
         grammar: &Grammar,
         include_eof: bool,
     ) -> Result<BTreeSet<usize>, ParseError> {
         match self {
-            TerminalSetOrIdent::Ident(ident) => {
+            TerminalOrTerminalSet::Ident(ident) => {
                 if let Some(idx) = grammar.terminals_index.get(ident) {
                     Ok(BTreeSet::from([*idx]))
                 } else {
                     Err(ParseError::TerminalNotDefined(ident.clone()))
                 }
             }
-            TerminalSetOrIdent::TerminalSet(terminal_set) => {
+            TerminalOrTerminalSet::TerminalSet(terminal_set) => {
                 terminal_set.to_terminal_set(grammar, include_eof)
             }
         }
     }
     pub fn span_pair(&self) -> (Span, Span) {
         match self {
-            TerminalSetOrIdent::Ident(ident) => (ident.span(), ident.span()),
-            TerminalSetOrIdent::TerminalSet(terminal_set) => {
+            TerminalOrTerminalSet::Ident(ident) => (ident.span(), ident.span()),
+            TerminalOrTerminalSet::TerminalSet(terminal_set) => {
                 (terminal_set.open_span, terminal_set.close_span)
             }
         }
     }
 }
 
-impl std::fmt::Display for TerminalSetOrIdent {
+impl std::fmt::Display for TerminalOrTerminalSet {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            TerminalSetOrIdent::Ident(ident) => write!(f, "{}", ident),
-            TerminalSetOrIdent::TerminalSet(terminal_set) => write!(f, "{}", terminal_set),
+            TerminalOrTerminalSet::Ident(ident) => write!(f, "{}", ident),
+            TerminalOrTerminalSet::TerminalSet(terminal_set) => write!(f, "{}", terminal_set),
         }
     }
 }
@@ -75,7 +76,7 @@ pub enum PatternArgs {
     /// force lookahead tokens for this pattern.
     /// lookaheads will not be consumed.
     /// span of the rightmost of this pattern
-    Lookaheads(Box<PatternArgs>, TerminalSetOrIdent),
+    Lookaheads(Box<PatternArgs>, TerminalOrTerminalSet),
 
     /// ( Pattern+ )
     /// span of '(' and ')'
@@ -259,7 +260,7 @@ pub struct GrammarArgs {
     pub eof: Vec<(Span, TokenStream)>,
     pub error_typename: Vec<(Span, TokenStream)>,
     pub terminals: Vec<(Ident, TokenStream)>,
-    pub reduce_types: Vec<(TerminalSetOrIdent, ReduceType)>,
+    pub reduce_types: Vec<(TerminalOrTerminalSet, ReduceType)>,
     pub rules: Vec<RuleDefArgs>,
     pub lalr: bool,
     pub glr: bool,
