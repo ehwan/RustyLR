@@ -103,6 +103,9 @@ pub enum ParseError {
 
     /// not supported literal type
     UnsupportedLiteralType(Literal),
+
+    /// range in literal terminal set is not valid
+    InvalidLiteralRange(Literal, Literal),
 }
 #[allow(unused)]
 impl ArgError {
@@ -236,6 +239,8 @@ impl ParseError {
             ParseError::OnlySingleLiteral(literal) => literal.span(),
 
             ParseError::UnsupportedLiteralType(literal) => literal.span(),
+
+            ParseError::InvalidLiteralRange(first, last) => first.span(),
         }
     }
 
@@ -293,6 +298,13 @@ impl ParseError {
 
             ParseError::UnsupportedLiteralType(literal) => {
                 format!("Not supported literal type: {}", literal)
+            }
+
+            ParseError::InvalidLiteralRange(first, last) => {
+                format!(
+                    "Range in literal terminal set is not valid: [{} - {}]",
+                    first, last
+                )
             }
         }
     }

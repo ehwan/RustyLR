@@ -94,7 +94,12 @@ impl TerminalSetItem {
                     syn::Lit::Byte(lit) => lit.value() as char,
                     _ => unreachable!(),
                 };
-                // TODO check if first_ch > last_ch
+                if first_ch > last_ch {
+                    return Err(ParseError::InvalidLiteralRange(
+                        first_l.clone(),
+                        last_l.clone(),
+                    ));
+                }
 
                 Ok((first_ch..=last_ch)
                     .map(|ch| {
