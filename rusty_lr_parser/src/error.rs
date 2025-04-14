@@ -100,6 +100,9 @@ pub enum ParseError {
 
     /// only char, byte is allowed here
     OnlySingleLiteral(Literal),
+
+    /// not supported literal type
+    UnsupportedLiteralType(Literal),
 }
 #[allow(unused)]
 impl ArgError {
@@ -231,6 +234,8 @@ impl ParseError {
             ParseError::LiteralParse(err) => err.span(),
 
             ParseError::OnlySingleLiteral(literal) => literal.span(),
+
+            ParseError::UnsupportedLiteralType(literal) => literal.span(),
         }
     }
 
@@ -284,6 +289,10 @@ impl ParseError {
 
             ParseError::OnlySingleLiteral(literal) => {
                 format!("Only char, byte is allowed here: {}", literal)
+            }
+
+            ParseError::UnsupportedLiteralType(literal) => {
+                format!("Not supported literal type: {}", literal)
             }
         }
     }

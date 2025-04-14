@@ -217,7 +217,29 @@ impl PatternArgs {
                     pretty_name,
                 })
             }
-            PatternArgs::Literal(literal) => {}
+            PatternArgs::Literal(literal) => {
+                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
+                    .map_err(ParseError::LiteralParse)?;
+                if !matches!(
+                    &lit,
+                    syn::Lit::Char(_) | syn::Lit::Byte(_) | syn::Lit::Str(_) | syn::Lit::ByteStr(_)
+                ) {
+                    return Err(ParseError::OnlySingleLiteral(literal.clone()));
+                }
+
+                let pattern = Pattern {
+                    pattern_type: PatternType::Literal(lit),
+                    pretty_name: pretty_name.clone(),
+                };
+                if put_exclamation {
+                    Ok(Pattern {
+                        pattern_type: PatternType::Exclamation(Box::new(pattern)),
+                        pretty_name,
+                    })
+                } else {
+                    Ok(pattern)
+                }
+            }
         }
     }
     pub fn span_pair(&self) -> (Span, Span) {
