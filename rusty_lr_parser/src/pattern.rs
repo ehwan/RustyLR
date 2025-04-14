@@ -712,7 +712,7 @@ impl Pattern {
                     Ok(PatternResult {
                         name: info.name.clone(),
                         token: Token::Term(idx),
-                        ruletype_map: None,
+                        ruletype_map: Some((grammar.token_typename.clone(), info.name.clone())),
                     })
                 }
                 syn::Lit::Byte(_) => {
@@ -724,7 +724,7 @@ impl Pattern {
                     Ok(PatternResult {
                         name: info.name.clone(),
                         token: Token::Term(idx),
-                        ruletype_map: None,
+                        ruletype_map: Some((grammar.token_typename.clone(), info.name.clone())),
                     })
                 }
                 syn::Lit::Str(s) => {
@@ -772,9 +772,9 @@ impl Pattern {
                         .insert(newrule_name.clone(), newrule_idx);
 
                     let res = PatternResult {
-                        name: newrule_name,
+                        name: newrule_name.clone(),
                         token: Token::NonTerm(newrule_idx),
-                        ruletype_map: None,
+                        ruletype_map: Some((quote! { &'static str }, newrule_name)),
                     };
                     pattern_map.insert(self.clone(), res.clone());
                     Ok(res)
@@ -824,9 +824,9 @@ impl Pattern {
                         .insert(newrule_name.clone(), newrule_idx);
 
                     let res = PatternResult {
-                        name: newrule_name,
+                        name: newrule_name.clone(),
                         token: Token::NonTerm(newrule_idx),
-                        ruletype_map: None,
+                        ruletype_map: Some((quote! { &'static [u8] }, newrule_name)),
                     };
                     pattern_map.insert(self.clone(), res.clone());
                     Ok(res)
