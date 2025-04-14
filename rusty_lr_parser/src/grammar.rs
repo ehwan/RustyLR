@@ -71,18 +71,19 @@ impl Grammar {
         None
     }
 
+    /// returns None if literal is not supported
     pub(crate) fn add_or_get_literal_character(
         &mut self,
         literal: syn::Lit,
         reduce_type: Option<ReduceTypeInfo>,
-    ) -> usize {
+    ) -> Option<usize> {
         let value = match &literal {
             syn::Lit::Char(lit) => lit.value(),
             syn::Lit::Byte(lit) => lit.value() as char,
-            _ => unreachable!("only char and byte literal are supported"),
+            _ => return None,
         };
         if let Some(idx) = self.literal_index.get(&value).copied() {
-            return idx;
+            return Some(idx);
         } else {
             let new_idx = self.terminals.len();
             let name = Ident::new(&format!("_Literal{}", new_idx), Span::call_site());
@@ -95,7 +96,7 @@ impl Grammar {
             self.terminals_index.insert(name, new_idx);
             self.literal_index.insert(value, new_idx);
 
-            new_idx
+            Some(new_idx)
         }
     }
 
@@ -257,7 +258,7 @@ impl Grammar {
         // reduce types
         for (terminals, reduce_type) in grammar_args.reduce_types.into_iter() {
             let new_span = terminals.span_pair();
-            for term_idx in terminals.to_terminal_set(&grammar, false)?.into_iter() {
+            for term_idx in terminals.to_terminal_set(&mut grammar, false)?.into_iter() {
                 let terminal_name = grammar.terminals[term_idx].name.clone();
                 if let Some(old) = &mut grammar.terminals[term_idx].reduce_type {
                     if old.reduce_type != reduce_type {
@@ -315,7 +316,7 @@ impl Grammar {
                 let mut tokens = Vec::with_capacity(rule.tokens.len());
                 for (mapto, pattern) in rule.tokens.into_iter() {
                     let (begin_span, end_span) = pattern.span_pair();
-                    let pattern = pattern.into_pattern(&grammar, false)?;
+                    let pattern = pattern.into_pattern(&mut grammar, false)?;
                     let pattern_rule =
                         pattern.to_rule(&mut grammar, &mut pattern_map, (begin_span, end_span))?;
 

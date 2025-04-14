@@ -1,4 +1,5 @@
 use proc_macro2::Ident;
+use proc_macro2::Literal;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
@@ -93,6 +94,12 @@ pub enum ParseError {
     EofDefined(Ident),
     /// 'Augmented' is reserved name
     AugmentedDefined(Ident),
+
+    /// syn::parse2() failed
+    LiteralParse(syn::Error),
+
+    /// only char, byte is allowed here
+    OnlySingleLiteral(Literal),
 }
 #[allow(unused)]
 impl ArgError {
@@ -220,6 +227,10 @@ impl ParseError {
 
             ParseError::EofDefined(ident) => ident.span(),
             ParseError::AugmentedDefined(ident) => ident.span(),
+
+            ParseError::LiteralParse(err) => err.span(),
+
+            ParseError::OnlySingleLiteral(literal) => literal.span(),
         }
     }
 
@@ -265,6 +276,14 @@ impl ParseError {
             }
             ParseError::AugmentedDefined(ident) => {
                 format!("'{}' is reserved name", utils::AUGMENTED_NAME)
+            }
+
+            ParseError::LiteralParse(err) => {
+                format!("syn::parse2() failed: {}", err)
+            }
+
+            ParseError::OnlySingleLiteral(literal) => {
+                format!("Only char, byte is allowed here: {}", literal)
             }
         }
     }

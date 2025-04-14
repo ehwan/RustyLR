@@ -2,6 +2,7 @@ use proc_macro2::Ident;
 use proc_macro2::Literal;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
+use quote::ToTokens;
 
 use std::collections::BTreeSet;
 
@@ -24,7 +25,7 @@ pub enum TerminalOrTerminalSet {
 impl TerminalOrTerminalSet {
     pub fn to_terminal_set(
         &self,
-        grammar: &Grammar,
+        grammar: &mut Grammar,
         include_eof: bool,
     ) -> Result<BTreeSet<usize>, ParseError> {
         match self {
@@ -35,6 +36,15 @@ impl TerminalOrTerminalSet {
                     Err(ParseError::TerminalNotDefined(ident.clone()))
                 }
             }
+            TerminalOrTerminalSet::Literal(literal) => {
+                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
+                    .map_err(ParseError::LiteralParse)?;
+                if !matches!(&lit, syn::Lit::Char(_) | syn::Lit::Byte(_)) {
+                    return Err(ParseError::OnlySingleLiteral(literal.clone()));
+                }
+                let idx = grammar.add_or_get_literal_character(lit, None).unwrap();
+                Ok(BTreeSet::from([idx]))
+            }
             TerminalOrTerminalSet::TerminalSet(terminal_set) => {
                 terminal_set.to_terminal_set(grammar, include_eof)
             }
@@ -43,6 +53,7 @@ impl TerminalOrTerminalSet {
     pub fn span_pair(&self) -> (Span, Span) {
         match self {
             TerminalOrTerminalSet::Ident(ident) => (ident.span(), ident.span()),
+            TerminalOrTerminalSet::Literal(literal) => (literal.span(), literal.span()),
             TerminalOrTerminalSet::TerminalSet(terminal_set) => {
                 (terminal_set.open_span, terminal_set.close_span)
             }
@@ -54,6 +65,7 @@ impl std::fmt::Display for TerminalOrTerminalSet {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             TerminalOrTerminalSet::Ident(ident) => write!(f, "{}", ident),
+            TerminalOrTerminalSet::Literal(literal) => write!(f, "{}", literal),
             TerminalOrTerminalSet::TerminalSet(terminal_set) => write!(f, "{}", terminal_set),
         }
     }
@@ -123,7 +135,7 @@ impl PatternArgs {
     /// it is more efficient to put the exclamation mark inside the pattern.
     pub fn into_pattern(
         self,
-        grammar: &Grammar,
+        grammar: &mut Grammar,
         put_exclamation: bool,
     ) -> Result<Pattern, ParseError> {
         let pretty_name = format!("{}", self);
@@ -205,6 +217,7 @@ impl PatternArgs {
                     pretty_name,
                 })
             }
+            PatternArgs::Literal(literal) => {}
         }
     }
     pub fn span_pair(&self) -> (Span, Span) {
