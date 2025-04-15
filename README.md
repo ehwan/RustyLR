@@ -6,8 +6,6 @@
 
 RustyLR enables you to define context-free grammars (CFGs) directly in Rust using macros or build scripts. It constructs deterministic finite automata (DFA) at compile time, ensuring efficient and reliable parsing.​
 
-Please refer to [docs.rs](https://docs.rs/rusty_lr) for detailed example and documentation.
-
 ## Features
  - **Multiple Parsing Strategies:** Supports LR(1), LALR(1), and GLR parsers.
  - **Procedural Macros:** Define grammars using lr1! macro for compile-time parser generation.
@@ -30,6 +28,10 @@ Please refer to [docs.rs](https://docs.rs/rusty_lr) for detailed example and doc
  ```sh
  cargo install rustylr
  ```
+
+ `rusty_lr` is designed for use with auto-generated code,
+ either through `lr1!` macro (default), a build script (with `build` feature), or the `rustylr` executable.
+ When using a buildscript or executable, you can get beautiful and detailed messages generated from your grammar.
 
  ## Quick Start
  ### Using Procedural Macros
@@ -80,6 +82,7 @@ lr1! {
 This defines a simple arithmetic expression parser.
 ### Using Build Script
 For complex grammars, you can use a build script to generate the parser. This will provide more detailed error messages when conflicts occur.
+
 **1. Create a grammar file** (e.g., `src/parser.rs`) with the following content:
 ```rust
 
@@ -142,6 +145,15 @@ context.feed(&parser, 0 as char, &mut userdata).unwrap(); // feed EOF
 
 let result:i32 = context.accept(); // get value of start 'E'
 ```
+
+The generated code will include several structs and enums:
+ - `<Start>Parser`: A struct that holds the parser table.
+ - `<Start>Context`: A struct that maintains the current state and the values associated with each symbol.
+ - `<Start>State`: A type representing a single parser state and its associated table.
+ - `<Start>Rule`: A type representing a single production rule.
+ - `<Start>NonTerminals`: A enum representing all non-terminal symbols in the grammar (and its data).
+
+Note that the actual definitions are bit different if you are building GLR parser.
 
 ## GLR Parsing
 RustyLR offers built-in support for Generalized LR (GLR) parsing, enabling it to handle ambiguous or nondeterministic grammars that traditional LR(1) or LALR(1) parsers cannot process.
