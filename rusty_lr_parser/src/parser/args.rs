@@ -1,6 +1,8 @@
 use proc_macro2::Ident;
+use proc_macro2::Literal;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
+use quote::ToTokens;
 
 use std::collections::BTreeSet;
 
@@ -14,45 +16,67 @@ use crate::terminalset::TerminalSet;
 use crate::utils;
 
 /// parsed arguments for reduce type def
-pub enum TerminalSetOrIdent {
+pub enum TerminalOrTerminalSet {
     Ident(Ident),
+    Literal(Literal),
     TerminalSet(TerminalSet),
 }
 
-impl TerminalSetOrIdent {
+impl TerminalOrTerminalSet {
     pub fn to_terminal_set(
         &self,
-        grammar: &Grammar,
+        grammar: &mut Grammar,
         include_eof: bool,
     ) -> Result<BTreeSet<usize>, ParseError> {
         match self {
-            TerminalSetOrIdent::Ident(ident) => {
+            TerminalOrTerminalSet::Ident(ident) => {
                 if let Some(idx) = grammar.terminals_index.get(ident) {
                     Ok(BTreeSet::from([*idx]))
                 } else {
                     Err(ParseError::TerminalNotDefined(ident.clone()))
                 }
             }
-            TerminalSetOrIdent::TerminalSet(terminal_set) => {
+            TerminalOrTerminalSet::Literal(literal) => {
+                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
+                    .expect("failed on syn::parse2::<syn::Lit>");
+
+                if grammar.is_char {
+                    if !matches!(&lit, syn::Lit::Char(_)) {
+                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                    }
+                } else if grammar.is_u8 {
+                    if !matches!(&lit, syn::Lit::Byte(_)) {
+                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                    }
+                } else {
+                    return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                }
+
+                let idx = grammar.add_or_get_literal_character(lit, None).unwrap();
+                Ok(BTreeSet::from([idx]))
+            }
+            TerminalOrTerminalSet::TerminalSet(terminal_set) => {
                 terminal_set.to_terminal_set(grammar, include_eof)
             }
         }
     }
     pub fn span_pair(&self) -> (Span, Span) {
         match self {
-            TerminalSetOrIdent::Ident(ident) => (ident.span(), ident.span()),
-            TerminalSetOrIdent::TerminalSet(terminal_set) => {
+            TerminalOrTerminalSet::Ident(ident) => (ident.span(), ident.span()),
+            TerminalOrTerminalSet::Literal(literal) => (literal.span(), literal.span()),
+            TerminalOrTerminalSet::TerminalSet(terminal_set) => {
                 (terminal_set.open_span, terminal_set.close_span)
             }
         }
     }
 }
 
-impl std::fmt::Display for TerminalSetOrIdent {
+impl std::fmt::Display for TerminalOrTerminalSet {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            TerminalSetOrIdent::Ident(ident) => write!(f, "{}", ident),
-            TerminalSetOrIdent::TerminalSet(terminal_set) => write!(f, "{}", terminal_set),
+            TerminalOrTerminalSet::Ident(ident) => write!(f, "{}", ident),
+            TerminalOrTerminalSet::Literal(literal) => write!(f, "{}", literal),
+            TerminalOrTerminalSet::TerminalSet(terminal_set) => write!(f, "{}", terminal_set),
         }
     }
 }
@@ -74,11 +98,14 @@ pub enum PatternArgs {
     /// force lookahead tokens for this pattern.
     /// lookaheads will not be consumed.
     /// span of the rightmost of this pattern
-    Lookaheads(Box<PatternArgs>, TerminalSetOrIdent),
+    Lookaheads(Box<PatternArgs>, TerminalOrTerminalSet),
 
     /// ( Pattern+ )
     /// span of '(' and ')'
     Group(Vec<PatternArgs>, Span, Span),
+
+    /// 'a', b'a', "abc", b"abc"
+    Literal(Literal),
 }
 
 impl std::fmt::Display for PatternArgs {
@@ -104,6 +131,9 @@ impl std::fmt::Display for PatternArgs {
                         .join(", ")
                 )
             }
+            PatternArgs::Literal(literal) => {
+                write!(f, "{}", literal)
+            }
         }
     }
 }
@@ -115,7 +145,7 @@ impl PatternArgs {
     /// it is more efficient to put the exclamation mark inside the pattern.
     pub fn into_pattern(
         self,
-        grammar: &Grammar,
+        grammar: &mut Grammar,
         put_exclamation: bool,
     ) -> Result<Pattern, ParseError> {
         let pretty_name = format!("{}", self);
@@ -197,6 +227,40 @@ impl PatternArgs {
                     pretty_name,
                 })
             }
+            PatternArgs::Literal(literal) => {
+                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
+                    .expect("failed on syn::parse2::<syn::Lit>");
+                if grammar.is_char {
+                    if !matches!(&lit, syn::Lit::Char(_) | syn::Lit::Str(_)) {
+                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                    }
+                } else if grammar.is_u8 {
+                    if !matches!(&lit, syn::Lit::Byte(_) | syn::Lit::ByteStr(_)) {
+                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                    }
+                } else {
+                    return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                }
+                if !matches!(
+                    &lit,
+                    syn::Lit::Char(_) | syn::Lit::Byte(_) | syn::Lit::Str(_) | syn::Lit::ByteStr(_)
+                ) {
+                    return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                }
+
+                let pattern = Pattern {
+                    pattern_type: PatternType::Literal(lit),
+                    pretty_name: pretty_name.clone(),
+                };
+                if put_exclamation {
+                    Ok(Pattern {
+                        pattern_type: PatternType::Exclamation(Box::new(pattern)),
+                        pretty_name,
+                    })
+                } else {
+                    Ok(pattern)
+                }
+            }
         }
     }
     pub fn span_pair(&self) -> (Span, Span) {
@@ -216,6 +280,10 @@ impl PatternArgs {
                 (base.span_pair().0, terminal_set.span_pair().1)
             }
             PatternArgs::Group(_, open, close) => (*open, *close),
+            PatternArgs::Literal(literal) => {
+                let span = literal.span();
+                (span, span)
+            }
         }
     }
 }
@@ -248,7 +316,7 @@ pub struct GrammarArgs {
     pub eof: Vec<(Span, TokenStream)>,
     pub error_typename: Vec<(Span, TokenStream)>,
     pub terminals: Vec<(Ident, TokenStream)>,
-    pub reduce_types: Vec<(TerminalSetOrIdent, ReduceType)>,
+    pub reduce_types: Vec<(TerminalOrTerminalSet, ReduceType)>,
     pub rules: Vec<RuleDefArgs>,
     pub lalr: bool,
     pub glr: bool,

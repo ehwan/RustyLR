@@ -3,7 +3,7 @@ use crate::parser::args::GrammarArgs;
 use crate::parser::args::RuleDefArgs;
 use crate::parser::args::RuleLineArgs;
 use crate::parser::lexer::Lexed;
-use crate::parser::args::TerminalSetOrIdent;
+use crate::parser::args::TerminalOrTerminalSet;
 use crate::terminalset::TerminalSet;
 use crate::terminalset::TerminalSetItem;
 
@@ -11,6 +11,7 @@ use proc_macro2::Group;
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
+use proc_macro2::Literal;
 use proc_macro2::Punct;
 use proc_macro2::Spacing;
 use quote::ToTokens;
@@ -51,7 +52,7 @@ macro_rules! punct(
 %token slash Lexed::Slash(punct!('/'));
 %token otherpunct Lexed::OtherPunct(punct!('.'));
 
-%token literal Lexed::Literal(None);
+%token literal Lexed::Literal(Literal::usize_suffixed(0));
 
 %token parengroup Lexed::ParenGroup(None);
 %token bracegroup Lexed::BraceGroup(None);
@@ -172,6 +173,21 @@ TerminalSetItem(TerminalSetItem): ident {
 
     TerminalSetItem::Range( first, last )
 }
+| literal {
+    let Lexed::Literal(literal) = literal else {
+        unreachable!( "TerminalSetItem-Literal" );
+    };
+    TerminalSetItem::Literal(literal)
+}
+| first=literal minus last=literal {
+    let Lexed::Literal(first) = first else {
+        unreachable!( "TerminalSetItem-Range1" );
+    };
+    let Lexed::Literal(last) = last else {
+        unreachable!( "TerminalSetItem-Range3" );
+    };
+    TerminalSetItem::LiteralRange( first, last )
+}
 ;
 
 TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
@@ -232,8 +248,8 @@ Pattern(PatternArgs): ident {
 | TerminalSet {
     PatternArgs::TerminalSet( TerminalSet )
 }
-| Pattern slash TerminalSetOrIdent {
-    PatternArgs::Lookaheads( Box::new(Pattern), TerminalSetOrIdent )
+| Pattern slash TerminalOrTerminalSet {
+    PatternArgs::Lookaheads( Box::new(Pattern), TerminalOrTerminalSet )
 }
 | lparen Pattern+ rparen {
     let open = if let Lexed::LParen(lparen) = lparen {
@@ -247,6 +263,12 @@ Pattern(PatternArgs): ident {
         unreachable!( "Pattern-Group-Close" );
     };
     PatternArgs::Group(Pattern, open, close)
+}
+| literal {
+    let Lexed::Literal(literal) = literal else {
+        unreachable!( "Pattern-Literal" );
+    };
+    PatternArgs::Literal(literal)
 }
 ;
 
@@ -294,13 +316,19 @@ TokenTypeDef((Span,TokenStream)): tokentype RustCode semicolon { (tokentype.span
 UserDataDef((Span,TokenStream)): userdata RustCode semicolon { (userdata.span(),RustCode) }
 ;
 
-TerminalSetOrIdent(TerminalSetOrIdent): TerminalSet { TerminalSetOrIdent::TerminalSet( TerminalSet ) }
+TerminalOrTerminalSet(TerminalOrTerminalSet): TerminalSet { TerminalOrTerminalSet::TerminalSet( TerminalSet ) }
 | ident {
     if let Lexed::Ident(ident) = ident {
-        TerminalSetOrIdent::Ident( ident )
+        TerminalOrTerminalSet::Ident( ident )
     }else {
-        unreachable!( "TerminalSetOrIdent-Ident" );
+        unreachable!( "TerminalOrTerminalSet-Ident" );
     }
+}
+| literal {
+    let Lexed::Literal(literal) = literal else {
+        unreachable!( "TerminalOrTerminalSet-Literal" );
+    };
+    TerminalOrTerminalSet::Literal( literal )
 }
 ;
 
@@ -308,8 +336,8 @@ ReduceType(ReduceType): left { ReduceType::Left }
 | right { ReduceType::Right }
 ;
 
-ReduceDef((TerminalSetOrIdent, ReduceType)): reducetype=ReduceType TerminalSetOrIdent semicolon {
-    ( TerminalSetOrIdent, reducetype )
+ReduceDef((TerminalOrTerminalSet, ReduceType)): reducetype=ReduceType TerminalOrTerminalSet semicolon {
+    ( TerminalOrTerminalSet, reducetype )
 }
 ;
 

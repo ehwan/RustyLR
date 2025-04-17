@@ -1,4 +1,5 @@
 use proc_macro2::Ident;
+use proc_macro2::Literal;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
@@ -93,6 +94,18 @@ pub enum ParseError {
     EofDefined(Ident),
     /// 'Augmented' is reserved name
     AugmentedDefined(Ident),
+
+    /// not supported literal type
+    UnsupportedLiteralType(Literal),
+
+    /// range in literal terminal set is not valid
+    InvalidLiteralRange(Literal, Literal),
+
+    /// negation in terminal in Literal mode is not supported
+    NegateInLiteralMode(Span, Span),
+
+    /// TokenType in Literal mode is not supported
+    TokenInLiteralMode(Span),
 }
 #[allow(unused)]
 impl ArgError {
@@ -220,6 +233,14 @@ impl ParseError {
 
             ParseError::EofDefined(ident) => ident.span(),
             ParseError::AugmentedDefined(ident) => ident.span(),
+
+            ParseError::UnsupportedLiteralType(literal) => literal.span(),
+
+            ParseError::InvalidLiteralRange(first, last) => first.span(),
+
+            ParseError::NegateInLiteralMode(open_span, close_span) => *open_span,
+
+            ParseError::TokenInLiteralMode(open_span) => *open_span,
         }
     }
 
@@ -265,6 +286,25 @@ impl ParseError {
             }
             ParseError::AugmentedDefined(ident) => {
                 format!("'{}' is reserved name", utils::AUGMENTED_NAME)
+            }
+
+            ParseError::UnsupportedLiteralType(literal) => {
+                format!("Not supported literal type: {}", literal)
+            }
+
+            ParseError::InvalidLiteralRange(first, last) => {
+                format!(
+                    "Range in literal terminal set is not valid: [{} - {}]",
+                    first, last
+                )
+            }
+
+            ParseError::NegateInLiteralMode(_, _) => {
+                format!("Negation with %tokentype `char` or `u8` is not supported")
+            }
+
+            ParseError::TokenInLiteralMode(_) => {
+                format!("%token with %tokentype `char` or `u8` is not supported. Use 'a' or b'a' instead")
             }
         }
     }

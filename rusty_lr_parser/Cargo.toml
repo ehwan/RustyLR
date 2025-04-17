@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_parser"
-version = "3.28.0"
+version = "3.29.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "macro line parser for rusty_lr"
@@ -15,6 +15,7 @@ quote = "1.0"
 rusty_lr_core = { version = "3.7.0", path = "../rusty_lr_core", features = [
   "builder",
 ] }
+syn = { version = "2.0", features = ["extra-traits"] }
 
 [features]
 default = []

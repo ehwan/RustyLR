@@ -25,6 +25,7 @@ pub enum PatternType {
     TerminalSet(BTreeSet<usize>),
     Lookaheads(Box<Pattern>, BTreeSet<usize>),
     Group(Vec<Pattern>),
+    Literal(syn::Lit),
 }
 
 #[derive(Debug, Clone)]
@@ -700,6 +701,138 @@ impl Pattern {
                     }
                 }
             }
+
+            PatternType::Literal(literal) => match literal {
+                syn::Lit::Char(_) => {
+                    let idx = grammar
+                        .add_or_get_literal_character(literal.clone(), None)
+                        .unwrap();
+                    let info = &grammar.terminals[idx];
+
+                    Ok(PatternResult {
+                        name: info.name.clone(),
+                        token: Token::Term(idx),
+                        ruletype_map: Some((grammar.token_typename.clone(), info.name.clone())),
+                    })
+                }
+                syn::Lit::Byte(_) => {
+                    let idx = grammar
+                        .add_or_get_literal_character(literal.clone(), None)
+                        .unwrap();
+                    let info = &grammar.terminals[idx];
+
+                    Ok(PatternResult {
+                        name: info.name.clone(),
+                        token: Token::Term(idx),
+                        ruletype_map: Some((grammar.token_typename.clone(), info.name.clone())),
+                    })
+                }
+                syn::Lit::Str(s) => {
+                    let newrule_idx = grammar.nonterminals.len();
+                    let str_span = s.span();
+                    let newrule_name =
+                        Ident::new(&format!("_LiteralString{}", newrule_idx), str_span);
+
+                    let rule = Rule {
+                        tokens: s
+                            .value()
+                            .chars()
+                            .map(|ch| {
+                                let term_id = grammar
+                                    .add_or_get_literal_character(
+                                        syn::Lit::Char(syn::LitChar::new(ch, str_span)),
+                                        None,
+                                    )
+                                    .unwrap();
+
+                                TokenMapped {
+                                    token: Token::Term(term_id),
+                                    mapto: None,
+                                    begin_span: str_span,
+                                    end_span: str_span,
+                                }
+                            })
+                            .collect(),
+                        reduce_action: None,
+                        separator_span: Span::call_site(),
+                        lookaheads: None,
+                        id: 0,
+                    };
+
+                    let nonterm_info = NonTerminalInfo {
+                        name: newrule_name.clone(),
+                        pretty_name: s.value(),
+                        ruletype: None,
+                        rules: vec![rule],
+                        regex_span: Some((str_span, str_span)),
+                    };
+                    grammar.nonterminals.push(nonterm_info);
+                    grammar
+                        .nonterminals_index
+                        .insert(newrule_name.clone(), newrule_idx);
+
+                    let res = PatternResult {
+                        name: newrule_name.clone(),
+                        token: Token::NonTerm(newrule_idx),
+                        ruletype_map: Some((quote! { &'static str }, newrule_name)),
+                    };
+                    pattern_map.insert(self.clone(), res.clone());
+                    Ok(res)
+                }
+                syn::Lit::ByteStr(s) => {
+                    let newrule_idx = grammar.nonterminals.len();
+                    let str_span = s.span();
+                    let newrule_name =
+                        Ident::new(&format!("_LiteralString{}", newrule_idx), str_span);
+                    let vec = s.value();
+
+                    let rule = Rule {
+                        tokens: vec
+                            .iter()
+                            .map(|ch| {
+                                let term_id = grammar
+                                    .add_or_get_literal_character(
+                                        syn::Lit::Byte(syn::LitByte::new(*ch, str_span)),
+                                        None,
+                                    )
+                                    .unwrap();
+
+                                TokenMapped {
+                                    token: Token::Term(term_id),
+                                    mapto: None,
+                                    begin_span: str_span,
+                                    end_span: str_span,
+                                }
+                            })
+                            .collect(),
+                        reduce_action: None,
+                        separator_span: Span::call_site(),
+                        lookaheads: None,
+                        id: 0,
+                    };
+
+                    let nonterm_info = NonTerminalInfo {
+                        name: newrule_name.clone(),
+                        pretty_name: String::from_utf8(vec).unwrap(),
+                        ruletype: None,
+                        rules: vec![rule],
+                        regex_span: Some((str_span, str_span)),
+                    };
+                    grammar.nonterminals.push(nonterm_info);
+                    grammar
+                        .nonterminals_index
+                        .insert(newrule_name.clone(), newrule_idx);
+
+                    let res = PatternResult {
+                        name: newrule_name.clone(),
+                        token: Token::NonTerm(newrule_idx),
+                        ruletype_map: Some((quote! { &'static [u8] }, newrule_name)),
+                    };
+                    pattern_map.insert(self.clone(), res.clone());
+                    Ok(res)
+                }
+                _ => unreachable!("Only char, byte, str and bytes are supported"),
+            },
         }
     }
 }

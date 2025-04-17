@@ -31,7 +31,7 @@ pub enum Lexed {
     Slash(Punct),
     OtherPunct(Punct),
 
-    Literal(Option<Literal>),
+    Literal(Literal),
 
     ParenGroup(Option<Group>),
     BraceGroup(Option<Group>),
@@ -75,7 +75,7 @@ impl Lexed {
             Lexed::Slash(punct) => stream.append(punct),
             Lexed::OtherPunct(punct) => stream.append(punct),
 
-            Lexed::Literal(lit) => stream.append(lit.unwrap()),
+            Lexed::Literal(lit) => stream.append(lit),
 
             Lexed::ParenGroup(group) => stream.append(group.unwrap()),
             Lexed::BraceGroup(group) => stream.append(group.unwrap()),
@@ -155,7 +155,7 @@ impl Lexed {
             Lexed::Slash(punct) => punct.span(),
             Lexed::OtherPunct(punct) => punct.span(),
 
-            Lexed::Literal(lit) => lit.as_ref().unwrap().span(),
+            Lexed::Literal(lit) => lit.span(),
 
             Lexed::ParenGroup(group) => group.as_ref().unwrap().span(),
             Lexed::BraceGroup(group) => group.as_ref().unwrap().span(),
@@ -387,7 +387,7 @@ pub fn feed_recursive(
                 }
             },
             TokenTree::Literal(literal) => {
-                context.feed(parser, Lexed::Literal(Some(literal)), grammar_args)?
+                context.feed(parser, Lexed::Literal(literal), grammar_args)?
             }
         };
     }

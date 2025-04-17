@@ -1,5 +1,7 @@
 use proc_macro2::Ident;
+use proc_macro2::Literal;
 use proc_macro2::Span;
+use quote::ToTokens;
 
 use std::collections::BTreeSet;
 
@@ -11,6 +13,8 @@ use crate::utils;
 pub enum TerminalSetItem {
     Terminal(Ident),
     Range(Ident, Ident),
+    Literal(Literal),
+    LiteralRange(Literal, Literal),
 }
 
 impl std::fmt::Display for TerminalSetItem {
@@ -18,12 +22,14 @@ impl std::fmt::Display for TerminalSetItem {
         match self {
             TerminalSetItem::Terminal(ident) => write!(f, "{}", ident),
             TerminalSetItem::Range(first, last) => write!(f, "{}-{}", first, last),
+            TerminalSetItem::Literal(literal) => write!(f, "{}", literal),
+            TerminalSetItem::LiteralRange(first, last) => write!(f, "{}-{}", first, last),
         }
     }
 }
 
 impl TerminalSetItem {
-    pub fn to_terminal_set(&self, grammar: &Grammar) -> Result<BTreeSet<usize>, ParseError> {
+    pub fn to_terminal_set(&self, grammar: &mut Grammar) -> Result<BTreeSet<usize>, ParseError> {
         match self {
             TerminalSetItem::Terminal(terminal) => {
                 if let Some(idx) = grammar.terminals_index.get(terminal) {
@@ -57,6 +63,76 @@ impl TerminalSetItem {
                 }
                 Ok((*first_index..=*last_index).collect())
             }
+            TerminalSetItem::Literal(literal) => {
+                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
+                    .expect("failed on syn::parse2");
+                if grammar.is_char {
+                    if !matches!(&lit, syn::Lit::Char(_)) {
+                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                    }
+                } else if grammar.is_u8 {
+                    if !matches!(&lit, syn::Lit::Byte(_)) {
+                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                    }
+                } else {
+                    return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                }
+                let idx = grammar.add_or_get_literal_character(lit, None).unwrap();
+                Ok(BTreeSet::from([idx]))
+            }
+            TerminalSetItem::LiteralRange(first_l, last_l) => {
+                let first = syn::parse2::<syn::Lit>(first_l.to_token_stream())
+                    .expect("failed on syn::parse2");
+                if grammar.is_char {
+                    if !matches!(&first, syn::Lit::Char(_)) {
+                        return Err(ParseError::UnsupportedLiteralType(first_l.clone()));
+                    }
+                } else if grammar.is_u8 {
+                    if !matches!(&first, syn::Lit::Byte(_)) {
+                        return Err(ParseError::UnsupportedLiteralType(first_l.clone()));
+                    }
+                } else {
+                    return Err(ParseError::UnsupportedLiteralType(first_l.clone()));
+                }
+                let first_ch = match &first {
+                    syn::Lit::Char(lit) => lit.value(),
+                    syn::Lit::Byte(lit) => lit.value() as char,
+                    _ => unreachable!(),
+                };
+
+                let last = syn::parse2::<syn::Lit>(last_l.to_token_stream())
+                    .expect("failed on syn::parse2");
+                if grammar.is_char {
+                    if !matches!(&last, syn::Lit::Char(_)) {
+                        return Err(ParseError::UnsupportedLiteralType(last_l.clone()));
+                    }
+                } else if grammar.is_u8 {
+                    if !matches!(&last, syn::Lit::Byte(_)) {
+                        return Err(ParseError::UnsupportedLiteralType(last_l.clone()));
+                    }
+                } else {
+                    return Err(ParseError::UnsupportedLiteralType(last_l.clone()));
+                }
+                let last_ch = match &last {
+                    syn::Lit::Char(lit) => lit.value(),
+                    syn::Lit::Byte(lit) => lit.value() as char,
+                    _ => unreachable!(),
+                };
+                if first_ch > last_ch {
+                    return Err(ParseError::InvalidLiteralRange(
+                        first_l.clone(),
+                        last_l.clone(),
+                    ));
+                }
+
+                Ok((first_ch..=last_ch)
+                    .map(|ch| {
+                        let lit = syn::Lit::Char(syn::LitChar::new(ch, Span::call_site()));
+                        let idx = grammar.add_or_get_literal_character(lit, None).unwrap();
+                        idx
+                    })
+                    .collect())
+            }
         }
     }
 }
@@ -73,7 +149,7 @@ pub struct TerminalSet {
 impl TerminalSet {
     pub fn to_terminal_set(
         &self,
-        grammar: &Grammar,
+        grammar: &mut Grammar,
         include_eof: bool,
     ) -> Result<BTreeSet<usize>, ParseError> {
         let mut terminal_set = BTreeSet::new();
@@ -82,6 +158,14 @@ impl TerminalSet {
             terminal_set.append(&mut item_set);
         }
         if self.negate {
+            // cannot use negation in str mode
+            // because we have to cover all characters in `char` or `u8`
+            if matches!(grammar.token_typename.to_string().as_str(), "char" | "u8") {
+                return Err(ParseError::NegateInLiteralMode(
+                    self.open_span,
+                    self.close_span,
+                ));
+            }
             let full_terminals: BTreeSet<usize> = (0..grammar.terminals.len()).collect();
             terminal_set = full_terminals.difference(&terminal_set).cloned().collect();
         }

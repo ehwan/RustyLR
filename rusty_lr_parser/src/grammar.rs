@@ -43,6 +43,9 @@ pub struct Grammar {
     /// ident -> index map for terminals
     pub terminals_index: HashMap<Ident, usize>,
 
+    /// single literal character -> terminal index map
+    pub literal_index: HashMap<char, usize>,
+
     /// rule definitions
     pub nonterminals: Vec<NonTerminalInfo>,
     /// ident - index map for non-terminals
@@ -53,6 +56,10 @@ pub struct Grammar {
 
     /// whether to generate GLR parser
     pub glr: bool,
+
+    /// if %tokentype is `char` or `u8`
+    pub(crate) is_char: bool,
+    pub(crate) is_u8: bool,
 }
 
 impl Grammar {
@@ -66,6 +73,35 @@ impl Grammar {
             ruleid -= nonterm.rules.len();
         }
         None
+    }
+
+    /// returns None if literal is not supported
+    pub(crate) fn add_or_get_literal_character(
+        &mut self,
+        literal: syn::Lit,
+        reduce_type: Option<ReduceTypeInfo>,
+    ) -> Option<usize> {
+        let value = match &literal {
+            syn::Lit::Char(lit) => lit.value(),
+            syn::Lit::Byte(lit) => lit.value() as char,
+            _ => return None,
+        };
+        if let Some(idx) = self.literal_index.get(&value).copied() {
+            return Some(idx);
+        } else {
+            let new_idx = self.terminals.len();
+            let name = Ident::new(&format!("_Literal{}", new_idx), Span::call_site());
+            let info = TerminalInfo {
+                name: name.clone(),
+                reduce_type,
+                body: quote! { #literal },
+            };
+            self.terminals.push(info);
+            self.terminals_index.insert(name, new_idx);
+            self.literal_index.insert(value, new_idx);
+
+            Some(new_idx)
+        }
     }
 
     pub fn parse_args(input: TokenStream) -> Result<GrammarArgs, ParseArgError> {
@@ -182,16 +218,27 @@ impl Grammar {
 
             terminals: Default::default(),
             terminals_index: Default::default(),
+            literal_index: Default::default(),
 
             nonterminals: Default::default(),
             nonterminals_index: Default::default(),
 
             lalr: grammar_args.lalr,
             glr: grammar_args.glr,
+
+            is_char: false,
+            is_u8: false,
         };
+        grammar.is_char = grammar.token_typename.to_string() == "char";
+        grammar.is_u8 = grammar.token_typename.to_string() == "u8";
 
         // add terminals
         for (index, (ident, token_expr)) in grammar_args.terminals.into_iter().enumerate() {
+            // check if %tokentype is `char` or `u8`
+            if grammar.is_char || grammar.is_u8 {
+                return Err(ParseError::TokenInLiteralMode(ident.span()));
+            }
+
             // check reserved name
             utils::check_reserved_name(&ident)?;
 
@@ -225,7 +272,7 @@ impl Grammar {
         // reduce types
         for (terminals, reduce_type) in grammar_args.reduce_types.into_iter() {
             let new_span = terminals.span_pair();
-            for term_idx in terminals.to_terminal_set(&grammar, false)?.into_iter() {
+            for term_idx in terminals.to_terminal_set(&mut grammar, false)?.into_iter() {
                 let terminal_name = grammar.terminals[term_idx].name.clone();
                 if let Some(old) = &mut grammar.terminals[term_idx].reduce_type {
                     if old.reduce_type != reduce_type {
@@ -283,7 +330,7 @@ impl Grammar {
                 let mut tokens = Vec::with_capacity(rule.tokens.len());
                 for (mapto, pattern) in rule.tokens.into_iter() {
                     let (begin_span, end_span) = pattern.span_pair();
-                    let pattern = pattern.into_pattern(&grammar, false)?;
+                    let pattern = pattern.into_pattern(&mut grammar, false)?;
                     let pattern_rule =
                         pattern.to_rule(&mut grammar, &mut pattern_map, (begin_span, end_span))?;
 

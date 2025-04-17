@@ -541,6 +541,53 @@ impl Builder {
                             .with_labels(vec![Label::primary(file_id, range)
                                 .with_message("This name is reserved")])
                     }
+                    ParseError::UnsupportedLiteralType(literal) => {
+                        let range = literal.span().byte_range();
+
+                        Diagnostic::error()
+                            .with_message("Unsupported literal type")
+                            .with_labels(vec![Label::primary(file_id, range)
+                                .with_message("This literal type is not supported")])
+                            .with_notes(vec![
+                                "If %tokentype is `char`, only `char` or `&str` are supported"
+                                    .to_string(),
+                                "If %tokentype is `u8`, only `u8` or `&[u8]` are supported"
+                                    .to_string(),
+                            ])
+                    }
+                    ParseError::InvalidLiteralRange(first, last) => {
+                        let first_range = first.span().byte_range();
+                        let last_range = last.span().byte_range();
+                        let range = first_range.start..last_range.end;
+
+                        Diagnostic::error()
+                            .with_message("Invalid literal range")
+                            .with_labels(vec![
+                                Label::primary(file_id, range).with_message("Invalid range here"),
+                            ])
+                            .with_notes(vec![
+                                "First terminal symbol has to be less than or equal to the last terminal symbol".to_string()
+                            ])
+                    }
+                    ParseError::NegateInLiteralMode(open, close) => {
+                        let range = open.byte_range().start..close.byte_range().end;
+                        Diagnostic::error()
+                            .with_message("Negation with %tokentype `char` or `u8` is not supported")
+                            .with_labels(vec![
+                                Label::primary(file_id, range).with_message("Invalid range here"),
+                            ])
+                            .with_notes(vec![
+                                "Because we have to cover all `char` or `u8`, negation is not supported".to_string(),
+                            ])
+                    }
+                    ParseError::TokenInLiteralMode(span) => {
+                        let range = span.byte_range();
+                        Diagnostic::error()
+                            .with_message("%token with %tokentype `char` or `u8` is not supported")
+                            .with_labels(vec![Label::primary(file_id, range)
+                                .with_message("use the literal value directly")])
+                    }
+
                     _ => {
                         let message = e.short_message();
                         let span = e.span().byte_range();
