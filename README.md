@@ -4,7 +4,7 @@
 
 ***A Yacc-like, procedural macro-based parser generator for Rust supporting LR(1), LALR(1), and GLR parsing strategies.***
 
-RustyLR enables you to define context-free grammars (CFGs) directly in Rust using macros or build scripts. It constructs deterministic finite automata (DFA) at compile time, ensuring efficient and reliable parsing.​
+RustyLR enables you to define context-free grammars (CFGs) directly in Rust using macros or build scripts. It constructs finite state automata at compile time, ensuring efficient and reliable parsing.​
 
 ## Features
  - **Multiple Parsing Strategies:** Supports LR(1), LALR(1), and GLR parsers.

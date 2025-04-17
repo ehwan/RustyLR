@@ -21,13 +21,11 @@ If you are using executable `rustylr`, you can use `--verbose` option to see any
 %start E;
 %eof '\0';
 
-%token plus '+';
-%token star '*';
-%token digit '0'..='9';
+Digit(char): ['0'-'9'] ;
 
-E(i32): E plus E { E + E }
-      | E star E { E * E }
-      | digit { digit.to_digit(10).unwrap() as i32 };
+E(i32): E '+' E { E + E }
+      | E '*' E { E * E }
+      | Digit { Digit.to_digit(10).unwrap() as i32 };
 ```
 
 In this grammar, the expression 1 + 2 * 3 + 4 has multiple valid parse trees due to the ambiguity in operator precedence and associativity.
@@ -47,7 +45,7 @@ By inspecting the lookahead token or other context, you can decide whether to pr
 For example, to enforce operator precedence (e.g., * has higher precedence than +), you can modify the reduce actions as follows:
 
 ```rust
-E : E plus E {
+E : E '+' E {
       match *lookahead {
           '*' => {
               // no reduce if the next token is '*'
