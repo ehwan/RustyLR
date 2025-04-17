@@ -45,34 +45,26 @@ lr1! {
     %start E;                // start symbol; this is the final value of parser
     %eof '\0';               // eof token; this token is used to finish parsing
 
-    // ================= Token definitions =================
-    %token zero '0';
-    %token one '1';
-    ...
-    %token nine '9';
-    %token plus '+';
-    %token star '*';
-    %token space ' ';
-
-    %left [plus star];                  // reduce-first for token 'plus', 'star'
+    %left '+';
+    %left '*';
 
     // ================= Production rules =================
-    Digit(char): [zero-nine];           // character set '0' to '9'
+    Digit(char): ['0'-'9'];           // character set '0' to '9'
 
-    Number(i32)                         // production rule `Number` holds `i32` value
-        : space* Digit+ space*          // `Number` is one or more `Digit` surrounded by zero or more spaces
+    Number(i32)                       // production rule `Number` holds `i32` value
+        : ' '* Digit+ ' '*            // `Number` is one or more `Digit` surrounded by zero or more spaces
         { Digit.into_iter().collect::<String>().parse().unwrap() }; // this will be the value of `Number` (i32) by this production rule
 
     A(f32)
-        : A plus a2=A {
+        : A '+' a2=A {
             *data += 1;                                 // access userdata by `data`
-            println!( "{:?} {:?} {:?}", A, plus, a2 );  // any Rust code can be written here
+            println!( "{:?} {:?}", A, a2 );  // any Rust code can be written here
             A + a2                                      // this will be the value of `A` (f32) by this production rule
         }
         | M
         ;
 
-    M(f32): M star m2=M { M * m2 }
+    M(f32): M '*' m2=M { M * m2 }
         | Number { Number as f32 } // Number is `i32`, so cast to `f32`
         ;
 
@@ -95,11 +87,7 @@ For complex grammars, you can use a build script to generate the parser. This wi
 %start E;
 %eof b'\0';
 
-%token a b'a';
-%token lparen b'(';
-%token rparen b')';
-
-E: lparen E rparen
+E: b'(' E b')' 
  | a;
 
  ...

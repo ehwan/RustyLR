@@ -47,6 +47,8 @@ Patterns define the structure of the input that matches a production rule.
  - `P+` : One or more repetition of `P`.
  - `P?` : Zero or one repetition of `P`.
  - `(P1 P2 P3)` : Grouping of patterns.
+ - `'a'` or `b'a'`: Single character literal or byte literal. This is only supported if the `%tokentype` is `char` or `u8`.
+ - `"abcd"` or `b"abcd"`: String literal or byte string literal. This is only supported if the `%tokentype` is `char` or `u8`.
 
 Note: When using range patterns like [first-last],
 the range is determined by the order of %token directives,
@@ -98,15 +100,15 @@ Within a ReduceAction, you can access the data associated with tokens and non-te
 
 - **Named Patterns:** Assign names to patterns to access their values.
 ```rust
-E(i32): left=A plus right=A { left + right };
+E(i32): left=A '+' right=A { left + right };
 ```
 - Or using their default names if obvious.
 ```rust
-E(i32): A plus right=A { A + right }; // use A directly
+E(i32): A '+' right=A { A + right }; // use A directly
 ```
 - **User Data:** Access mutable user-defined data passed to the parser.
 ```rust
-E(i32): A plus right=A { 
+E(i32): A '+' right=A { 
     *data += 1; // data: &mut UserData
     A + right 
 };
@@ -208,17 +210,17 @@ Map terminal symbol `name` to the actual value `<RustExpr>`.
 `<RustExpr>` must be accessible at the point where the macro is called.
 
 ```rust
-%tokentype u8;
+%tokentype MyToken;
 
-%token zero b'0';
-%token one b'1';
+%token zero MyToken::Zero;
+%token one MyToken::One;
 
 ...
 
 // 'zero' and 'one' will be replaced by b'0' and b'1' respectively
 E: zero one;
 ```
-
+Note: If `%tokentype` is either `char` or `u8`, you can't use this directive. You must use literal value in the grammar directly.
 
 ## Start symbol <sub><sup>(must defined)</sup></sub>
 ```
@@ -290,16 +292,11 @@ Set the shift/reduce precedence for terminal symbols.
 `%left` can be abbreviated as `%reduce` or `%l`, and `%right` can be abbreviated as `%shift` or `%r`.
 
 ```rust
-// define tokens
-%token plus '+';
-%token hat '^';
-
-
 // reduce first for token 'plus'
-%left plus;
+%left '+';
 
 // shift first for token 'hat'
-%right hat;
+%right '^';
 ```
 
 
