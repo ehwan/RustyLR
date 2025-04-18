@@ -40,8 +40,8 @@ where
     context.current_nodes.clear();
     // here, nodes_pong2 is newlly created by `Default`, and we will assign it from `reduce_nodes` later
     context.nodes_pong.clear();
-
     context.reduce_errors.clear();
+    context.fallback_nodes.clear();
 
     // BFS reduce
     while !reduce_nodes.is_empty() {
@@ -75,6 +75,10 @@ where
                             userdata,
                         );
                         if shift_for_this_node {
+                            // some shift action was performed; remove fallback_nodes immediately
+                            // to avoid cloned Rc nodes
+                            context.fallback_nodes.clear();
+
                             let next_node = Node {
                                 parent: Some(node),
                                 state: next_term_shift_state,
@@ -103,6 +107,10 @@ where
                 }
             } else if let Some(next_term_shift_state) = next_term_shift_state {
                 for node in nodes.into_iter() {
+                    // some shift action was performed; remove fallback_nodes immediately
+                    // to avoid cloned Rc nodes
+                    context.fallback_nodes.clear();
+
                     let next_node = Node {
                         parent: Some(node),
                         state: next_term_shift_state,
@@ -118,13 +126,19 @@ where
                         .push(Rc::new(next_node));
                 }
             } else {
-                context.fallback_nodes.insert(state, nodes);
+                // no reduce, no shift
+                // add to fallback_nodes to restore if any shift action was performed
+                if context.current_nodes.is_empty() {
+                    context.fallback_nodes.insert(state, nodes);
+                }
             }
         }
         std::mem::swap(&mut reduce_nodes, &mut context.nodes_pong);
     }
     context.nodes_pong2 = reduce_nodes;
 
+    // no shift possible; invalid terminal was given
+    // restore nodes to original state from fallback_nodes
     if context.current_nodes.is_empty() {
         std::mem::swap(&mut context.current_nodes, &mut context.fallback_nodes);
         context.fallback_nodes.clear();
