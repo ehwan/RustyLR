@@ -160,7 +160,7 @@ impl TerminalSet {
         if self.negate {
             // cannot use negation in str mode
             // because we have to cover all characters in `char` or `u8`
-            if matches!(grammar.token_typename.to_string().as_str(), "char" | "u8") {
+            if grammar.is_char || grammar.is_u8 {
                 return Err(ParseError::NegateInLiteralMode(
                     self.open_span,
                     self.close_span,
