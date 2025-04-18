@@ -97,7 +97,7 @@ impl Grammar {
 
             let display_str = &nonterm.pretty_name;
             case_display.extend(quote! {
-                #enum_typename::#name=> write!(f, #display_str),
+                #enum_typename::#name=>write!(f, "{}", #display_str),
             });
         }
 
