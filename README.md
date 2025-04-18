@@ -149,6 +149,7 @@ See [GLR.md](GLR.md) for details.
 
 ## Examples
  - [Calculator](examples/calculator_u8/src/parser.rs): A calculator using `u8` as token type.
+ - [Json Validator](examples/json/src/parser.rs): A JSON validator
  - [lua 5.4 syntax parser](https://github.com/ehwan/lua_rust/blob/main/parser/src/parser.rs)
  - [Bootstrap](rusty_lr_parser/src/parser/parser.rs): rusty_lr syntax parser is written in rusty_lr itself.
 
