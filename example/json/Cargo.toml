@@ -1,0 +1,10 @@
+[package]
+name = "json"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rusty_lr = { path = "../../rusty_lr", features = ["fxhash", "tree", "error"] }
+
+[build-dependencies]
+rusty_lr = { path = "../../rusty_lr", features = ["build"] }
