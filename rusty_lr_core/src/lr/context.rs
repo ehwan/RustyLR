@@ -139,7 +139,6 @@ impl<S: Stack> Context<S> {
             .is_some()
     }
 
-    #[cfg(feature = "error")]
     /// Get backtrace information for current state.
     /// What current state is trying to parse, and where it comes from.
     pub fn backtrace<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(

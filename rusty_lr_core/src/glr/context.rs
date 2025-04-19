@@ -224,7 +224,6 @@ impl<Data: NodeData> Context<Data> {
     }
 
     /// Get backtrace infos for all paths.
-    #[cfg(feature = "error")]
     pub fn backtraces<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &'a self,
         parser: &'a P,

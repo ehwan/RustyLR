@@ -39,9 +39,7 @@ pub use rule::ShiftedRuleRef;
 pub use rule::ReduceType;
 pub use token::Token;
 
-#[cfg(feature = "error")]
 pub(crate) mod backtrace;
-#[cfg(feature = "error")]
 pub use backtrace::Backtrace;
 
 /// Default error type for reduce action
