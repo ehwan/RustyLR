@@ -15,6 +15,7 @@ pub use node::NodeRefIterator;
 pub use parser::Parser;
 pub use state::State;
 
+use crate::HashMap;
 #[cfg(feature = "tree")]
 use crate::Tree;
 
@@ -23,7 +24,7 @@ use std::rc::Rc;
 
 /// feed one terminal to parser, and update state stack.
 /// For GLR parsing, this function will create multiple path if needed.
-pub fn feed<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
+pub(crate) fn feed<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
     parser: &P,
     context: &mut Context<Data>,
     term: P::Term,
@@ -172,6 +173,167 @@ where
     }
 }
 
+pub(crate) fn feed_multiple<
+    P: Parser,
+    Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone,
+>(
+    parser: &P,
+    context: &mut Context<Data>,
+    terms: impl Iterator<Item = P::Term>,
+    userdata: &mut Data::UserData,
+) -> Result<(), Vec<InvalidTerminalError<P::Term, P::NonTerm, Data::ReduceActionError>>>
+where
+    P::Term: Hash + Eq + Clone,
+    P::NonTerm: Hash + Eq + Clone,
+{
+    // current_nodes <-> nodes_pong <-> nodes_pong2
+    // cycle for no unnecessary heap allocation
+    let mut reduce_nodes = std::mem::take(&mut context.current_nodes);
+    std::mem::swap(&mut context.current_nodes, &mut context.nodes_pong2);
+    context.current_nodes.clear();
+    // here, nodes_pong2 is newlly created by `Default`, and we will assign it from `reduce_nodes` later
+    context.nodes_pong.clear();
+    context.fallback_nodes.clear();
+
+    let mut reduce_errors: HashMap<P::Term, _> = HashMap::default();
+
+    for term in terms {
+        let mut reduce_nodes = reduce_nodes.clone();
+
+        context.reduce_errors.clear();
+
+        // BFS reduce
+        while !reduce_nodes.is_empty() {
+            for (state, nodes) in reduce_nodes.drain() {
+                let next_term_shift_state = parser.get_states()[state].shift_goto_term(&term);
+                if let Some(reduce_rules) = parser.get_states()[state].reduce(&term) {
+                    for node in nodes.into_iter() {
+                        let mut shift_for_this_node = false;
+
+                        // In reduce action, we call `Rc::try_unwrap` to avoid `clone()` data if possible.
+                        // So we need to avoid `Rc::clone()` if possible.
+                        for reduce_rule in reduce_rules.iter().skip(1).copied() {
+                            shift_for_this_node |= reduce(
+                                parser,
+                                reduce_rule,
+                                Rc::clone(&node),
+                                context,
+                                &term,
+                                next_term_shift_state.is_some(),
+                                userdata,
+                            );
+                        }
+                        if let Some(next_term_shift_state) = next_term_shift_state {
+                            shift_for_this_node |= reduce(
+                                parser,
+                                reduce_rules[0],
+                                Rc::clone(&node),
+                                context,
+                                &term,
+                                true,
+                                userdata,
+                            );
+                            if shift_for_this_node {
+                                let next_node = Node {
+                                    parent: Some(node),
+                                    state: next_term_shift_state,
+                                    data: Some(Data::new_term(term.clone())),
+                                    #[cfg(feature = "tree")]
+                                    tree: Some(Tree::new_terminal(term.clone())),
+                                };
+
+                                context
+                                    .current_nodes
+                                    .entry(next_term_shift_state)
+                                    .or_default()
+                                    .push(Rc::new(next_node));
+                            }
+                        } else {
+                            reduce(
+                                parser,
+                                reduce_rules[0],
+                                node,
+                                context,
+                                &term,
+                                false,
+                                userdata,
+                            );
+                        }
+                    }
+                } else if let Some(next_term_shift_state) = next_term_shift_state {
+                    for node in nodes.into_iter() {
+                        let next_node = Node {
+                            parent: Some(node),
+                            state: next_term_shift_state,
+                            data: Some(Data::new_term(term.clone())),
+                            #[cfg(feature = "tree")]
+                            tree: Some(Tree::new_terminal(term.clone())),
+                        };
+
+                        context
+                            .current_nodes
+                            .entry(next_term_shift_state)
+                            .or_default()
+                            .push(Rc::new(next_node));
+                    }
+                } else {
+                }
+            }
+            std::mem::swap(&mut reduce_nodes, &mut context.nodes_pong);
+        }
+
+        if context.current_nodes.is_empty() {
+            reduce_errors.insert(term, std::mem::take(&mut context.reduce_errors));
+        }
+    }
+
+    // no shift possible; invalid terminal was given
+    // restore nodes to original state
+    if context.current_nodes.is_empty() {
+        std::mem::swap(&mut context.current_nodes, &mut reduce_nodes);
+        // restore nodes_pong2 to avoid unnecessary heap allocation
+        reduce_nodes.clear();
+        context.nodes_pong2 = reduce_nodes;
+
+        #[cfg(feature = "error")]
+        let expected = context.expected(parser).cloned().collect::<Vec<_>>();
+        #[cfg(feature = "error")]
+        let expected_nonterm = context
+            .expected_nonterm(parser)
+            .cloned()
+            .collect::<Vec<_>>();
+        #[cfg(feature = "error")]
+        let backtraces = context.backtraces(parser).collect::<Vec<_>>();
+
+        let errors = reduce_errors
+            .into_iter()
+            .map(|(term, errors)| {
+                let error = InvalidTerminalError {
+                    term,
+                    reduce_errors: errors,
+                    #[cfg(feature = "error")]
+                    expected: expected.clone(),
+                    #[cfg(feature = "error")]
+                    expected_nonterm: expected_nonterm.clone(),
+                    #[cfg(feature = "error")]
+                    backtraces: backtraces.clone(),
+
+                    #[cfg(not(feature = "error"))]
+                    _phantom: std::marker::PhantomData,
+                };
+                error
+            })
+            .collect();
+
+        Err(errors)
+    } else {
+        // restore nodes_pong2 to avoid unnecessary heap allocation
+        reduce_nodes.clear();
+        context.nodes_pong2 = reduce_nodes;
+        Ok(())
+    }
+}
+
 #[cfg(feature = "tree")]
 type ReduceArgs<Data> = (
     Rc<Node<Data>>,
@@ -293,7 +455,9 @@ where
             }
         }
         Err(err) => {
-            context.reduce_errors.push(err);
+            if context.current_nodes.is_empty() {
+                context.reduce_errors.push(err);
+            }
         }
     }
     do_shift

@@ -261,6 +261,22 @@ impl<Data: NodeData> Context<Data> {
         super::feed(parser, self, term, userdata)
     }
 
+    /// feed multiple terminal symbols to the context.
+    /// This tries to feed all symbols at the same time, to the same state.
+    pub fn feed_multiple<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &mut self,
+        parser: &P,
+        terms: impl Iterator<Item = P::Term>,
+        userdata: &mut Data::UserData,
+    ) -> Result<(), Vec<InvalidTerminalError<Data::Term, Data::NonTerm, Data::ReduceActionError>>>
+    where
+        Data: Clone,
+        P::Term: Hash + Eq + Clone,
+        P::NonTerm: Hash + Eq + Clone,
+    {
+        super::feed_multiple(parser, self, terms, userdata)
+    }
+
     /// Check if `term` can be feeded to current state.
     /// This does not check for reduce action error.
     ///
