@@ -16,14 +16,14 @@ pub use tree::TreeList;
 #[cfg(feature = "tree")]
 pub use tree::TreeNonTerminal;
 
-/// module for build DFA tables from CFG
+/// module for building parser tables from CFG
 #[cfg(feature = "builder")]
 pub mod builder;
 
-/// module for LR(1), LALR(1) parser
+/// module for single-path, deterministic LR(1), LALR(1) parser
 pub mod lr;
 
-/// module for GLR parser
+/// module for multi-path, GLR parser
 pub mod glr;
 
 pub use hashmap::HashMap;

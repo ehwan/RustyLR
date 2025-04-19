@@ -12,8 +12,8 @@ use crate::HashSet;
 #[cfg(feature = "tree")]
 use crate::TreeList;
 
-/// Context trait for GLR parser.
-/// This handles the divergence and merging of the parser.
+/// Context for GLR parser.
+/// This handles the divergence and merging of the parser efficiently.
 pub struct Context<Data: NodeData> {
     /// each element represents an end-point of diverged paths.
     pub(crate) current_nodes: HashMap<usize, Vec<Rc<Node<Data>>>>,

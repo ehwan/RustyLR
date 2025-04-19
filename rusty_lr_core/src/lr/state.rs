@@ -4,7 +4,8 @@ use std::hash::Hash;
 use crate::HashMap;
 use crate::ShiftedRuleRef;
 
-/// state in DFA
+/// A struct representing a single parser state and its associated table.
+/// This accepts single-path, deterministic table for LR parser.
 #[derive(Debug, Clone)]
 pub struct State<Term, NonTerm> {
     pub shift_goto_map_term: HashMap<Term, usize>,

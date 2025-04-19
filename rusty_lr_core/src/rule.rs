@@ -23,9 +23,7 @@ impl Display for ReduceType {
     }
 }
 
-/// Production rule.
-///
-/// name -> Token0 Token1 Token2 ...
+/// A struct for production rule representing `name -> Token0 Token1 Token2 ...`
 #[derive(Clone, Default)]
 pub struct ProductionRule<Term, NonTerm> {
     pub name: NonTerm,
@@ -82,8 +80,6 @@ impl<Term, NonTerm> ProductionRule<Term, NonTerm> {
 ///
 /// name -> Token1 Token2 . Token3
 ///
-///         ^^^^^^^^^^^^^ shifted = 2
-///
 /// This struct has index of the Rule in Grammar::rules
 /// and it will be used for Eq, Ord, Hash
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy, Default)]
@@ -94,6 +90,10 @@ pub struct ShiftedRuleRef {
     pub shifted: usize,
 }
 
+/// A struct for single shifted production rule.
+///
+/// name -> Token1 Token2 . Token3
+///
 #[derive(Clone, Default)]
 pub struct ShiftedRule<Term, NonTerm> {
     pub rule: ProductionRule<Term, NonTerm>,

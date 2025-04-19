@@ -39,38 +39,38 @@ impl Grammar {
             let node_enum_name = format_ident!("{}NodeEnum", start_rule_name);
 
             quote! {
-                /// type alias for `Context`
+                /// type alias for `rusty_lr::glr::Context`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #context_struct_name = #module_prefix::glr::Context<#node_enum_name>;
-                /// type alias for CFG production rule
+                /// type alias for `rusty_lr::ProductionRule`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #rule_typename = #module_prefix::ProductionRule<#token_typename, #enum_name>;
-                /// type alias for DFA state
+                /// type alias for `rusty_lr::glr::State`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #state_typename = #module_prefix::glr::State<#token_typename, #enum_name>;
-                /// type alias for `InvalidTerminalError`
+                /// type alias for `rusty_lr::glr::InvalidTerminalError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #invalid_terminal_error = #module_prefix::glr::InvalidTerminalError<#token_typename, #enum_name, #reduce_error_typename>;
-                /// type alias for `MultiplePathError`
+                /// type alias for `rusty_lr::glr::MultiplePathError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #multiple_path_error = #module_prefix::glr::MultiplePathError<#token_typename, #enum_name>;
             }
         } else {
             let stack_struct_name = format_ident!("{}Stack", start_rule_name);
             quote! {
-                /// type alias for `Context`
+                /// type alias for `rusty_lr::lr::Context`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #context_struct_name = #module_prefix::lr::Context<#stack_struct_name>;
-                /// type alias for CFG production rule
+                /// type alias for `rusty_lr::ProductionRule`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #rule_typename = #module_prefix::ProductionRule<#token_typename, #enum_name>;
-                /// type alias for DFA state
+                /// type alias for `rusty_lr::lr::State`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #state_typename = #module_prefix::lr::State<#token_typename, #enum_name>;
-                /// type alias for `ParseError`
+                /// type alias for `rusty_lr::lr::ParseError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #parse_error_typename = #module_prefix::lr::ParseError<#token_typename, #enum_name, #reduce_error_typename>;
-                /// type alias for `InvalidTerminalError`
+                /// type alias for `rusty_lr::lr::InvalidTerminalError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #invalid_terminal_error = #module_prefix::lr::InvalidTerminalError<#token_typename, #enum_name>;
             }

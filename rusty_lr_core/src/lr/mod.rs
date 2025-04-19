@@ -71,7 +71,7 @@ where
             #[cfg(feature = "error")]
             let backtrace = context.backtrace(parser);
 
-            // this should not happen, if the DFA is built correctly
+            // this should not happen, if the parser was built correctly
             let error = InvalidTerminalError {
                 term,
                 #[cfg(feature = "error")]

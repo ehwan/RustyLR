@@ -5,7 +5,7 @@ use crate::Token;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
-/// state in DFA building
+/// state in state machine building
 #[derive(Debug, Clone)]
 pub struct State<Term, NonTerm> {
     pub shift_goto_map_term: BTreeMap<Term, usize>,

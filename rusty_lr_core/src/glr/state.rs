@@ -3,9 +3,8 @@ use std::hash::Hash;
 use crate::HashMap;
 use crate::ShiftedRuleRef;
 
-/// State in DFA.
-/// This accepts multiple reduce for single terminal.
-/// For GLR parser.
+/// A struct representing a single parser state and its associated table.
+/// This accepts multiple reduce for single terminal for GLR parser.
 #[derive(Debug, Clone)]
 pub struct State<Term, NonTerm> {
     pub shift_goto_map_term: HashMap<Term, usize>,

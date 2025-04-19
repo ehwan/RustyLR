@@ -5,9 +5,7 @@
 
 use proc_macro::TokenStream;
 
-/// Build a LR(1) Deterministic Finite Automaton (DFA) parser.
-///
-/// This macro will generate a `Parser` and `Context` structs.
+/// Generate new structs for LR(1) or LALR(1) parser.
 #[proc_macro]
 pub fn lr1(input: TokenStream) -> TokenStream {
     let input = proc_macro2::TokenStream::from(input);
