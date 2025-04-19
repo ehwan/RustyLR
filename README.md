@@ -143,6 +143,10 @@ The generated code will include several structs and enums:
 
 Note that the actual definitions are bit different if you are building GLR parser.
 
+Every action can be called through the `Context` struct. Please refer to the documentation for more details.
+ - LR Parser: https://docs.rs/rusty_lr/latest/rusty_lr/lr/index.html
+ - GLR Parser: https://docs.rs/rusty_lr/latest/rusty_lr/glr/index.html
+
 ## GLR Parsing
 RustyLR offers built-in support for Generalized LR (GLR) parsing, enabling it to handle ambiguous or nondeterministic grammars that traditional LR(1) or LALR(1) parsers cannot process.
 See [GLR.md](GLR.md) for details.
