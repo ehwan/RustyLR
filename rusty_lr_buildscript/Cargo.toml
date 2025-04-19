@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_buildscript"
-version = "0.26.0"
+version = "0.27.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "buildscipt tools for rusty_lr"
@@ -11,8 +11,8 @@ categories = ["parsing"]
 
 
 [dependencies]
-rusty_lr_parser = { version = "3.29.0", path = "../rusty_lr_parser" }
-rusty_lr_core = { version = "3.7.1", path = "../rusty_lr_core", features = [
+rusty_lr_parser = { version = "3.30.0", path = "../rusty_lr_parser" }
+rusty_lr_core = { version = "3.8.0", path = "../rusty_lr_core", features = [
   "builder",
 ] }
 codespan-reporting = "0.12"
