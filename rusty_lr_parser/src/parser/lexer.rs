@@ -55,6 +55,8 @@ pub enum Lexed {
     ModulePrefix(Punct, Ident), // %moduleprefix
     Lalr(Punct, Ident),         // %lalr
     Glr(Punct, Ident),          // %glr
+    Prec(Punct, Ident),         // %prec
+    Precedence(Punct, Ident),   // %precedence
     Eof,
 }
 impl Lexed {
@@ -133,6 +135,14 @@ impl Lexed {
                 stream.append(punct);
                 stream.append(ident);
             }
+            Lexed::Prec(punct, ident) => {
+                stream.append(punct);
+                stream.append(ident);
+            }
+            Lexed::Precedence(punct, ident) => {
+                stream.append(punct);
+                stream.append(ident);
+            }
 
             Lexed::Eof => unreachable!("Eof::stream()"),
         }
@@ -179,6 +189,8 @@ impl Lexed {
             Lexed::ModulePrefix(punct, ident) => ident.span(),
             Lexed::Lalr(punct, ident) => ident.span(),
             Lexed::Glr(punct, ident) => ident.span(),
+            Lexed::Prec(punct, ident) => ident.span(),
+            Lexed::Precedence(punct, ident) => ident.span(),
 
             Lexed::Eof => Span::call_site(),
         }
@@ -225,6 +237,8 @@ impl std::fmt::Display for Lexed {
             Lexed::ModulePrefix(_, _) => write!(f, "%moduleprefix"),
             Lexed::Lalr(_, _) => write!(f, "%lalr"),
             Lexed::Glr(_, _) => write!(f, "%glr"),
+            Lexed::Prec(_, _) => write!(f, "%prec"),
+            Lexed::Precedence(_, _) => write!(f, "%precedence"),
 
             Lexed::Eof => write!(f, "<eof>"),
         }
@@ -255,6 +269,8 @@ fn ident_to_keyword(percent: Punct, ident: Ident) -> Option<Lexed> {
         "moduleprefix" => Some(Lexed::ModulePrefix(percent, ident)),
         "lalr" => Some(Lexed::Lalr(percent, ident)),
         "glr" => Some(Lexed::Glr(percent, ident)),
+        "prec" => Some(Lexed::Prec(percent, ident)),
+        "precedence" => Some(Lexed::Precedence(percent, ident)),
         _ => None,
     }
 }

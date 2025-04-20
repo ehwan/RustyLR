@@ -8,6 +8,7 @@ use quote::quote_spanned;
 use rusty_lr_core::ProductionRule;
 use rusty_lr_core::ShiftedRule;
 
+use crate::parser::args::IdentOrLiteral;
 use crate::utils;
 
 /// failed to feed() the token
@@ -68,8 +69,8 @@ pub enum ParseError {
     /// different reduce type applied to the same terminal symbol
     MultipleReduceDefinition {
         terminal: Ident,
-        old: (Span, Span, rusty_lr_core::ReduceType),
-        new: (Span, Span, rusty_lr_core::ReduceType),
+        old: (Span, rusty_lr_core::ReduceType),
+        new: (Span, rusty_lr_core::ReduceType),
     },
 
     /// multiple %token definition
@@ -106,6 +107,11 @@ pub enum ParseError {
 
     /// TokenType in Literal mode is not supported
     TokenInLiteralMode(Span),
+
+    MultiplePrecedenceOrderDefinition {
+        cur: IdentOrLiteral,
+        old: Span,
+    },
 }
 #[allow(unused)]
 impl ArgError {
@@ -241,6 +247,8 @@ impl ParseError {
             ParseError::NegateInLiteralMode(open_span, close_span) => *open_span,
 
             ParseError::TokenInLiteralMode(open_span) => *open_span,
+
+            ParseError::MultiplePrecedenceOrderDefinition { cur, old } => cur.span(),
         }
     }
 
@@ -305,6 +313,10 @@ impl ParseError {
 
             ParseError::TokenInLiteralMode(_) => {
                 format!("%token with %tokentype `char` or `u8` is not supported. Use 'a' or b'a' instead")
+            }
+
+            ParseError::MultiplePrecedenceOrderDefinition { cur, old } => {
+                format!("Conflicts with precedence definition: {}", cur)
             }
         }
     }

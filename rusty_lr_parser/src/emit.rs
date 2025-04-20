@@ -150,7 +150,13 @@ impl Grammar {
         // check for SR/RR conflicts if it's not GLR
         if !self.glr {
             // to map production rule to its pretty name abbreviation
-            let term_mapper = |term_idx: usize| self.terminals[term_idx].name.to_string();
+            let term_mapper = |term_idx: usize| {
+                if self.is_char || self.is_u8 {
+                    self.terminals[term_idx].body.to_string()
+                } else {
+                    self.terminals[term_idx].name.to_string()
+                }
+            };
             let nonterm_mapper =
                 |nonterm_idx: usize| self.nonterminals[nonterm_idx].pretty_name.clone();
             // rr conflicts
@@ -167,14 +173,14 @@ impl Grammar {
                         rule1: (
                             rule1,
                             grammar.rules[rule1]
-                                .0
+                                .rule
                                 .clone()
                                 .map(&term_mapper, &nonterm_mapper),
                         ),
                         rule2: (
                             rule2,
                             grammar.rules[rule2]
-                                .0
+                                .rule
                                 .clone()
                                 .map(&term_mapper, &nonterm_mapper),
                         ),
@@ -192,7 +198,7 @@ impl Grammar {
                         .into_iter()
                         .map(|rule| {
                             let prod_rule = grammar.rules[rule.rule]
-                                .0
+                                .rule
                                 .clone()
                                 .map(&term_mapper, &nonterm_mapper);
                             (
@@ -209,7 +215,7 @@ impl Grammar {
                         reduce_rule: (
                             reduce,
                             grammar.rules[reduce]
-                                .0
+                                .rule
                                 .clone()
                                 .map(term_mapper, nonterm_mapper),
                         ),
@@ -242,7 +248,7 @@ impl Grammar {
             let rules: Vec<_> = grammar
                 .rules
                 .into_iter()
-                .map(|(r, _)| r.map(term_mapper, nonterm_mapper))
+                .map(|r| r.rule.map(term_mapper, nonterm_mapper))
                 .collect();
             let states: Vec<_> = dfa
                 .states

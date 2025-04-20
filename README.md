@@ -45,8 +45,10 @@ lr1! {
     %start E;                // start symbol; this is the final value of parser
     %eof '\0';               // eof token; this token is used to finish parsing
 
+    // left reduction for '+' and '*'
     %left '+';
     %left '*';
+    // operator precedence '*' > '+'
 
     // ================= Production rules =================
     Digit(char): ['0'-'9'];           // character set '0' to '9'
@@ -55,20 +57,14 @@ lr1! {
         : ' '* Digit+ ' '*            // `Number` is one or more `Digit` surrounded by zero or more spaces
         { Digit.into_iter().collect::<String>().parse().unwrap() }; // this will be the value of `Number` (i32) by this production rule
 
-    A(f32)
-        : A '+' a2=A {
-            *data += 1;                                 // access userdata by `data`
-            println!( "{:?} {:?}", A, a2 );  // any Rust code can be written here
-            A + a2                                      // this will be the value of `A` (f32) by this production rule
-        }
-        | M
-        ;
-
-    M(f32): M '*' m2=M { M * m2 }
-        | Number { Number as f32 } // Number is `i32`, so cast to `f32`
-        ;
-
-    E(f32) : A ; // start symbol
+    E(f32): E '*' e2=E { E * e2 }
+          | E '+' e2=E {
+              *data += 1;                       // access userdata by `data`
+              println!( "{:?} {:?}", E, e2 );   // any Rust code can be written here
+              E + e2                            // this will be the value of `E` (f32) by this production rule
+          }
+          | Number { Number as f32 } // Number is `i32`, so cast to `f32`
+          ;
 }
 ```
 This defines a simple arithmetic expression parser.
@@ -139,7 +135,7 @@ The generated code will include several structs and enums:
  - `<Start>Context`: A struct that maintains the current state and the values associated with each symbol.
  - `<Start>State`: A type representing a single parser state and its associated table.
  - `<Start>Rule`: A type representing a single production rule.
- - `<Start>NonTerminals`: A enum representing all non-terminal symbols in the grammar (and its data).
+ - `<Start>NonTerminals`: A enum representing all non-terminal symbols in the grammar.
 
 Note that the actual definitions are bit different if you are building GLR parser.
 
@@ -174,7 +170,5 @@ Either of
 
 ### Images
 It is highly recommended to use buildscipt tools or executable instead of procedural macros, to generate readable error messages.
-#### -Reduce/Reduce conflicts
 ![images/error1.png](images/error1.png)
-#### - Shift/Reduce conflicts
 ![images/error2.png](images/error2.png)

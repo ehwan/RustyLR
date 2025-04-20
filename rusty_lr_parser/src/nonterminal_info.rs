@@ -1,5 +1,7 @@
 use std::collections::BTreeSet;
 
+use crate::parser::args::IdentOrLiteral;
+
 use super::token::TokenMapped;
 use proc_macro2::Ident;
 use proc_macro2::Span;
@@ -14,6 +16,8 @@ pub struct Rule {
     pub lookaheads: Option<BTreeSet<usize>>,
     /// user assigned id for this rule line, currently not in use
     pub id: usize,
+    /// %prec definition
+    pub prec: Option<(rusty_lr_core::builder::Operator<usize>, IdentOrLiteral)>,
 }
 
 impl Rule {

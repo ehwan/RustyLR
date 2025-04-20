@@ -4,6 +4,7 @@ use crate::parser::args::RuleDefArgs;
 use crate::parser::args::RuleLineArgs;
 use crate::parser::lexer::Lexed;
 use crate::parser::args::TerminalOrTerminalSet;
+use crate::parser::args::IdentOrLiteral;
 use crate::terminalset::TerminalSet;
 use crate::terminalset::TerminalSetItem;
 
@@ -77,6 +78,8 @@ macro_rules! punct(
 %token moduleprefix Lexed::ModulePrefix(punct!('%'),Ident::new("id", Span::call_site()));
 %token lalr Lexed::Lalr(punct!('%'),Ident::new("id", Span::call_site()));
 %token glr Lexed::Glr(punct!('%'),Ident::new("id", Span::call_site()));
+%token prec Lexed::Prec(punct!('%'),Ident::new("id", Span::call_site()));
+%token precedence Lexed::Precedence(punct!('%'),Ident::new("id", Span::call_site()));
 
 %eof Lexed::Eof;
 
@@ -128,16 +131,19 @@ RuleLines(Vec<RuleLineArgs>): RuleLines pipe RuleLine {
 }
 ;
 
-RuleLine(RuleLineArgs): TokenMapped* Action
+RuleLine(RuleLineArgs): TokenMapped* PrecDef? Action
 {
     RuleLineArgs {
         tokens: TokenMapped,
         reduce_action: Action.map(|action| action.to_token_stream()),
         separator_span: Span::call_site(),
         id: 0,
+        precedence: PrecDef,
     }
 }
 ;
+
+PrecDef(IdentOrLiteral): prec! IdentOrLiteral;
 
 TokenMapped((Option<Ident>, PatternArgs)): Pattern {
     ( None, Pattern )
@@ -293,7 +299,7 @@ TokenDef((Ident, TokenStream)): token ident RustCode semicolon
 }
 ;
 
-RustCode(TokenStream): t=[^semicolon lparen-glr]+ {
+RustCode(TokenStream): t=[^semicolon lparen-precedence]+ {
     let mut tokens = TokenStream::new();
     for token in t.into_iter() {
         token.append_to_stream(&mut tokens);
@@ -332,12 +338,25 @@ TerminalOrTerminalSet(TerminalOrTerminalSet): TerminalSet { TerminalOrTerminalSe
 }
 ;
 
+IdentOrLiteral(IdentOrLiteral): ident {
+    let Lexed::Ident(ident) = ident else {
+        unreachable!( "IdentOrLiteral-Ident" );
+    };
+    IdentOrLiteral::Ident( ident )
+}
+| literal {
+    let Lexed::Literal(literal) = literal else {
+        unreachable!( "IdentOrLiteral-Literal" );
+    };
+    IdentOrLiteral::Literal( literal )
+};
+
 ReduceType(ReduceType): left { ReduceType::Left }
 | right { ReduceType::Right }
 ;
 
-ReduceDef((TerminalOrTerminalSet, ReduceType)): reducetype=ReduceType TerminalOrTerminalSet semicolon {
-    ( TerminalOrTerminalSet, reducetype )
+ReduceDef((ReduceType, Vec<IdentOrLiteral>)): reducetype=ReduceType IdentOrLiteral+ semicolon {
+    ( reducetype, IdentOrLiteral )
 }
 ;
 
@@ -350,17 +369,23 @@ Glr: glr semicolon;
 
 Lalr: lalr semicolon;
 
+Precedence(Vec<IdentOrLiteral>): precedence IdentOrLiteral+ semicolon {
+    IdentOrLiteral
+}
+;
+
 GrammarLine : Rule { data.rules.push(Rule); }
 | TokenDef  { data.terminals.push(TokenDef); }
 | StartDef  { data.start_rule_name.push(StartDef); }
 | EofDef    { data.eof.push(EofDef); }
 | TokenTypeDef  { data.token_typename.push(TokenTypeDef); }
 | UserDataDef  { data.userdata_typename.push(UserDataDef); }
-| ReduceDef  { data.reduce_types.push(ReduceDef); }
+| ReduceDef  { data.precedences.push(ReduceDef.1.clone()); data.reduce_types.push(ReduceDef); }
 | ErrorDef   { data.error_typename.push(ErrorDef); }
 | ModulePrefixDef { data.module_prefix.push(ModulePrefixDef); }
 | Lalr { data.lalr = true; }
 | Glr { data.glr = true; }
+| Precedence { data.precedences.push(Precedence); }
 ;
 
 Grammar: GrammarLine+;

@@ -7,8 +7,8 @@ use rusty_lr_core::ReduceType;
 pub struct ReduceTypeInfo {
     pub reduce_type: ReduceType,
 
-    // the (begin, end) span pair of this reduce type definition
-    pub sources: Vec<(Span, Span)>,
+    // the span of this reduce type definition
+    pub source: Span,
 }
 pub struct TerminalInfo {
     pub name: Ident,

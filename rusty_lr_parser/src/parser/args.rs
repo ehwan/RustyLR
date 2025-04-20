@@ -81,6 +81,66 @@ impl std::fmt::Display for TerminalOrTerminalSet {
     }
 }
 
+#[derive(Debug, Clone)]
+pub enum IdentOrLiteral {
+    Ident(Ident),
+    Literal(Literal),
+}
+impl IdentOrLiteral {
+    pub fn span(&self) -> Span {
+        match self {
+            IdentOrLiteral::Ident(ident) => ident.span(),
+            IdentOrLiteral::Literal(literal) => literal.span(),
+        }
+    }
+    pub fn to_terminal(
+        &self,
+        grammar: &mut Grammar,
+    ) -> Result<rusty_lr_core::builder::Operator<usize>, ParseError> {
+        match self {
+            Self::Ident(ident) => {
+                if let Some(&idx) = grammar.terminals_index.get(ident) {
+                    return Ok(rusty_lr_core::builder::Operator::Term(idx));
+                } else {
+                    // check %prec definitions
+                    if let Some(idx) = grammar.find_prec_definition(ident) {
+                        return Ok(rusty_lr_core::builder::Operator::Prec(idx));
+                    }
+
+                    // unknown ident
+                    return Err(ParseError::TerminalNotDefined(ident.clone()));
+                }
+            }
+            Self::Literal(literal) => {
+                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
+                    .expect("failed on syn::parse2::<syn::Lit>");
+
+                if grammar.is_char {
+                    if !matches!(&lit, syn::Lit::Char(_)) {
+                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                    }
+                } else if grammar.is_u8 {
+                    if !matches!(&lit, syn::Lit::Byte(_)) {
+                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                    }
+                } else {
+                    return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                }
+                let idx = grammar.add_or_get_literal_character(lit, None).unwrap();
+                return Ok(rusty_lr_core::builder::Operator::Term(idx));
+            }
+        }
+    }
+}
+impl std::fmt::Display for IdentOrLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            IdentOrLiteral::Ident(ident) => write!(f, "{}", ident),
+            IdentOrLiteral::Literal(literal) => write!(f, "{}", literal),
+        }
+    }
+}
+
 /// parsed arguments for pattern
 pub enum PatternArgs {
     Ident(Ident),
@@ -297,6 +357,8 @@ pub struct RuleLineArgs {
     pub separator_span: Span,
     /// user assigned id for this rule line, currently not in use
     pub id: usize,
+    /// %prec definition
+    pub precedence: Option<IdentOrLiteral>,
 }
 
 /// parsed arguments for multiple lines of a rule
@@ -316,7 +378,8 @@ pub struct GrammarArgs {
     pub eof: Vec<(Span, TokenStream)>,
     pub error_typename: Vec<(Span, TokenStream)>,
     pub terminals: Vec<(Ident, TokenStream)>,
-    pub reduce_types: Vec<(TerminalOrTerminalSet, ReduceType)>,
+    pub reduce_types: Vec<(ReduceType, Vec<IdentOrLiteral>)>,
+    pub precedences: Vec<Vec<IdentOrLiteral>>,
     pub rules: Vec<RuleDefArgs>,
     pub lalr: bool,
     pub glr: bool,

@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::fmt::Debug;
@@ -13,32 +14,46 @@ use crate::token::Token;
 
 /// struct that holding pre-calculated information for `expand()` function.
 #[derive(Debug, Clone)]
-pub struct ExpandCache<Term> {
+struct ExpandCache<Term> {
     rule: usize,
     lookaheads: BTreeSet<Term>,
     include_origin_lookaheads: bool,
 }
 
-type ProductionRuleWithLookaheads<Term, NonTerm> =
-    (ProductionRule<Term, NonTerm>, Option<BTreeSet<Term>>);
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Operator<Term> {
+    /// defined as normal terminal symbol
+    Term(Term),
+    /// defined as %prec
+    Prec(Term),
+}
+
+#[derive(Debug, Clone)]
+pub struct Rule<Term, NonTerm> {
+    pub rule: ProductionRule<Term, NonTerm>,
+    pub lookaheads: Option<BTreeSet<Term>>,
+    pub operator: Option<Operator<Term>>,
+}
 
 /// A struct for Context Free Grammar and DFA construction
 #[derive(Debug, Clone)]
 pub struct Grammar<Term, NonTerm> {
     /// set of production rules
-    pub rules: Vec<ProductionRuleWithLookaheads<Term, NonTerm>>,
+    pub rules: Vec<Rule<Term, NonTerm>>,
 
     /// first terminal tokens for each nonterminals
     /// true if it can be empty
     firsts: HashMap<NonTerm, (BTreeSet<Term>, bool)>,
 
     /// reduce type for each terminal symbols for resolving shift/reduce conflict
-    pub reduce_types: HashMap<Term, ReduceType>,
+    pub reduce_types: HashMap<Operator<Term>, ReduceType>,
 
     /// rules for each nonterminals
     rules_map: HashMap<NonTerm, Vec<usize>>,
 
     expand_cache: HashMap<NonTerm, Vec<ExpandCache<Term>>>,
+
+    precedence_map: HashMap<Operator<Term>, usize>,
 }
 
 impl<Term, NonTerm> Grammar<Term, NonTerm> {
@@ -49,42 +64,68 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             reduce_types: Default::default(),
             rules_map: Default::default(),
             expand_cache: Default::default(),
+            precedence_map: Default::default(),
         }
     }
 
     /// add new production rule for given nonterminal 'name'
-    pub fn add_rule(&mut self, name: NonTerm, rule: Vec<Token<Term, NonTerm>>) -> usize
-    where
-        NonTerm: Copy + Hash + Eq,
-    {
-        let index = self.rules.len();
-        self.rules_map.entry(name).or_default().push(index);
-        let rule = ProductionRule { name, rule };
-        self.rules.push((rule, None));
-        index
-    }
-    pub fn add_rule_with_lookaheads(
+    pub fn add_rule(
         &mut self,
         name: NonTerm,
         rule: Vec<Token<Term, NonTerm>>,
-        lookaheads: BTreeSet<Term>,
+        lookaheads: Option<BTreeSet<Term>>,
+        operator: Option<Operator<Term>>,
     ) -> usize
     where
         NonTerm: Copy + Hash + Eq,
     {
         let index = self.rules.len();
         self.rules_map.entry(name).or_default().push(index);
-        let rule = ProductionRule { name, rule };
-        self.rules.push((rule, Some(lookaheads)));
+        let rule = Rule {
+            rule: ProductionRule { name, rule },
+            lookaheads,
+            operator,
+        };
+        self.rules.push(rule);
         index
     }
 
-    /// error if different reduce type is assigned to same terminal symbol
-    pub fn set_reduce_type(&mut self, term: Term, reduce_type: ReduceType) -> bool
+    pub fn compare_precedence(&self, rule: usize, term: Term) -> Option<Ordering>
     where
         Term: Hash + Eq,
     {
-        if let Some(old) = self.reduce_types.insert(term, reduce_type) {
+        let Some(&shift_order) = self.precedence_map.get(&Operator::Term(term)) else {
+            return None;
+        };
+        if let Some(op) = &self.rules[rule].operator {
+            match self.precedence_map.get(op) {
+                Some(&reduce_order) => Some(reduce_order.cmp(&shift_order)),
+                None => None,
+            }
+        } else {
+            None
+        }
+    }
+
+    /// false if precedence already exists and different
+    pub fn add_precedence(&mut self, term: Operator<Term>, precedence: usize) -> bool
+    where
+        Term: Hash + Eq,
+    {
+        if let Some(old) = self.precedence_map.insert(term, precedence) {
+            if old != precedence {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// error if different reduce type is assigned to same terminal symbol
+    pub fn add_reduce_type(&mut self, op: Operator<Term>, reduce_type: ReduceType) -> bool
+    where
+        Term: Hash + Eq,
+    {
+        if let Some(old) = self.reduce_types.insert(op, reduce_type) {
             if old != reduce_type {
                 return false;
             }
@@ -101,9 +142,9 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         Term: Copy + Ord + Hash,
         NonTerm: Copy + Hash + Ord,
     {
-        let mut dfa = self.build_without_resolving(augmented_name)?;
-        self.resolve_reduce_type(&mut dfa);
-        Ok(dfa)
+        let mut table = self.build_without_resolving(augmented_name)?;
+        self.resolve_precedence(&mut table);
+        Ok(table)
     }
 
     /// build LR(1) parser table from given grammar
@@ -166,9 +207,9 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         Term: Copy + Ord + Hash,
         NonTerm: Copy + Hash + Ord,
     {
-        let mut dfa = self.build_lalr_without_resolving(augmented_name)?;
-        self.resolve_reduce_type(&mut dfa);
-        Ok(dfa)
+        let mut table = self.build_lalr_without_resolving(augmented_name)?;
+        self.resolve_precedence(&mut table);
+        Ok(table)
     }
 
     /// build LALR(1) parser table from given grammar
@@ -241,7 +282,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     {
         loop {
             let mut changed = false;
-            for (rule, _) in self.rules.iter() {
+            for rule in self.rules.iter() {
+                let rule = &rule.rule;
                 let (mut firsts, mut canbe_empty) = self
                     .firsts
                     .entry(rule.name)
@@ -324,7 +366,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             loop {
                 pong.clear();
                 for (_, cur) in rules.iter() {
-                    let rule = &self.rules[cur.rule].0;
+                    let rule = &self.rules[cur.rule].rule;
                     if let Some(Token::NonTerm(nonterm_name)) = rule.rule.first() {
                         // calculate lookaheads
                         let (lookaheads, canbe_empty) =
@@ -417,7 +459,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     {
         let mut new_rules = Vec::new();
         for (rule_ref, lookaheads) in rules.rules.iter() {
-            let (rule, _) = &self.rules[rule_ref.rule];
+            let rule = &self.rules[rule_ref.rule].rule;
             if let Some(Token::NonTerm(nonterm_name)) = rule.rule.get(rule_ref.shifted) {
                 let lookaheads = self
                     .lookahead(&rule.rule[rule_ref.shifted + 1..], lookaheads)?
@@ -429,11 +471,12 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                         c.lookaheads.clone()
                     };
                     // check for force lookahead
-                    let lookaheads = if let Some(force_lookaheads) = self.rules[c.rule].1.as_ref() {
-                        lookaheads.intersection(force_lookaheads).copied().collect()
-                    } else {
-                        lookaheads
-                    };
+                    let lookaheads =
+                        if let Some(force_lookaheads) = self.rules[c.rule].lookaheads.as_ref() {
+                            lookaheads.intersection(force_lookaheads).copied().collect()
+                        } else {
+                            lookaheads
+                        };
 
                     new_rules.push((
                         ShiftedRuleRef {
@@ -451,11 +494,13 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         Ok(())
     }
 
-    fn resolve_reduce_type(&self, dfa: &mut DFA<Term, NonTerm>)
+    pub fn resolve_precedence(&self, dfa: &mut DFA<Term, NonTerm>)
     where
         Term: Copy + Ord + Hash,
+        NonTerm: PartialEq,
     {
-        // reduce_type conflict resolving
+        // resolve shift/reduce conflicts for operator precedence
+        let mut remove_reduces = Vec::new();
         for state in dfa.states.iter_mut() {
             let mut both_in_reduce_shift = Vec::new();
             for term in state.reduce_map.keys().copied() {
@@ -464,17 +509,90 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 }
             }
 
-            for term in both_in_reduce_shift.into_iter() {
-                match self.reduce_types.get(&term) {
-                    Some(ReduceType::Left) => {
-                        // remove shift action
-                        state.shift_goto_map_term.remove(&term);
+            for shift_term in both_in_reduce_shift.into_iter() {
+                let Some(shift_prec) = self
+                    .precedence_map
+                    .get(&Operator::Term(shift_term))
+                    .copied()
+                else {
+                    continue;
+                };
+                let reduce_rules = state.reduce_map.get(&shift_term).unwrap();
+
+                remove_reduces.clear();
+                let mut remove_shift = true;
+                // if all operators in reduce rules have greater precedence than shift_term,
+                // remove shift action
+                //
+                // if all operators in reduce rules have less or equal precedence than shift_term,
+                // remove reduce rules which has less precedence than shift_term
+                //
+                // otherwise, do nothing
+                for &reduce_rule in reduce_rules {
+                    let Some(reduce_op) = self.rules[reduce_rule].operator else {
+                        remove_shift = false;
+                        continue;
+                    };
+                    let Some(reduce_prec) = self.precedence_map.get(&reduce_op).copied() else {
+                        remove_shift = false;
+                        continue;
+                    };
+
+                    match reduce_prec.cmp(&shift_prec) {
+                        Ordering::Less => {
+                            remove_shift = false;
+                            remove_reduces.push(reduce_rule);
+                            // reduce < shift => remove reduce rule
+                        }
+                        Ordering::Greater => {}
+                        Ordering::Equal => {
+                            let reduce_type = self.reduce_types.get(&reduce_op).copied();
+                            match reduce_type {
+                                Some(ReduceType::Left) => {
+                                    // reduce == shift => remove shift action
+                                }
+                                Some(ReduceType::Right) => {
+                                    remove_reduces.push(reduce_rule);
+                                }
+                                None => {
+                                    remove_shift = false;
+                                    // reduce == shift => remove shift action
+                                }
+                            }
+                        }
                     }
-                    Some(ReduceType::Right) => {
-                        // remove reduce action
-                        state.reduce_map.remove(&term);
-                    }
-                    None => {}
+                }
+
+                if remove_shift {
+                    // remove shift action with this term
+                    state.shift_goto_map_term.remove(&shift_term);
+
+                    // remove rules from ruleset starting with this term
+                    let rules = std::mem::take(&mut state.ruleset.rules);
+                    let rules = rules
+                        .into_iter()
+                        .filter_map(|(shifted_rule, lookaheads)| {
+                            if self.rules[shifted_rule.rule]
+                                .rule
+                                .rule
+                                .get(shifted_rule.shifted)
+                                == Some(&Token::Term(shift_term))
+                            {
+                                None
+                            } else {
+                                Some((shifted_rule, lookaheads))
+                            }
+                        })
+                        .collect();
+                    state.ruleset.rules = rules;
+                }
+
+                let reduce_map = state.reduce_map.get_mut(&shift_term).unwrap();
+                for reduce_rule in remove_reduces.iter() {
+                    reduce_map.remove(reduce_rule);
+                }
+                if reduce_map.is_empty() {
+                    state.reduce_map.remove(&shift_term);
                 }
             }
         }
@@ -514,7 +632,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         let mut next_rules_nonterm = BTreeMap::new();
         let mut reduce_map: BTreeMap<Term, BTreeSet<usize>> = BTreeMap::new();
         for (mut rule_ref, lookaheads) in rules.rules.into_iter() {
-            let (rule, _) = &self.rules[rule_ref.rule];
+            let rule = &self.rules[rule_ref.rule].rule;
             match rule.rule.get(rule_ref.shifted) {
                 Some(Token::Term(term)) => {
                     rule_ref.shifted += 1;
@@ -636,7 +754,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             .into_iter()
             .zip(states[state_id].ruleset.rules.iter_mut())
         {
-            let (rule, _) = &self.rules[rule_ref.rule];
+            let rule = &self.rules[rule_ref.rule].rule;
             let lookaheads_diff: BTreeSet<_> =
                 lookaheads_src.difference(lookaheads_dst).copied().collect();
             lookaheads_empty &= lookaheads_diff.is_empty();

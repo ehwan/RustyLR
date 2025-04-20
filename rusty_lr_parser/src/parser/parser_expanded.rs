@@ -4,6 +4,7 @@
 // Output file: out.tab.rs
 // ================================User Codes Begin================================
 use crate::parser::args::GrammarArgs;
+use crate::parser::args::IdentOrLiteral;
 use crate::parser::args::PatternArgs;
 use crate::parser::args::RuleDefArgs;
 use crate::parser::args::RuleLineArgs;
@@ -30,7 +31,8 @@ RuleType -> parengroup
 RuleType ->
 RuleLines -> RuleLines pipe RuleLine
 RuleLines -> RuleLine
-RuleLine -> TokenMapped* Action
+RuleLine -> TokenMapped* PrecDef? Action
+PrecDef -> prec IdentOrLiteral
 TokenMapped -> Pattern
 TokenMapped -> ident equal Pattern
 TerminalSetItem -> ident
@@ -50,7 +52,7 @@ Pattern -> literal
 Action -> bracegroup
 Action ->
 TokenDef -> token ident RustCode semicolon
-RustCode -> [^semicolon, lparen-glr]+
+RustCode -> [^semicolon, lparen-precedence]+
 StartDef -> start ident semicolon
 EofDef -> eofdef RustCode semicolon
 TokenTypeDef -> tokentype RustCode semicolon
@@ -58,13 +60,16 @@ UserDataDef -> userdata RustCode semicolon
 TerminalOrTerminalSet -> TerminalSet
 TerminalOrTerminalSet -> ident
 TerminalOrTerminalSet -> literal
+IdentOrLiteral -> ident
+IdentOrLiteral -> literal
 ReduceType -> left
 ReduceType -> right
-ReduceDef -> ReduceType TerminalOrTerminalSet semicolon
+ReduceDef -> ReduceType IdentOrLiteral+ semicolon
 ErrorDef -> errortype RustCode semicolon
 ModulePrefixDef -> moduleprefix RustCode semicolon
 Glr -> glr semicolon
 Lalr -> lalr semicolon
+Precedence -> precedence IdentOrLiteral+ semicolon
 GrammarLine -> Rule
 GrammarLine -> TokenDef
 GrammarLine -> StartDef
@@ -76,11 +81,14 @@ GrammarLine -> ErrorDef
 GrammarLine -> ModulePrefixDef
 GrammarLine -> Lalr
 GrammarLine -> Glr
+GrammarLine -> Precedence
 Grammar -> GrammarLine+
 TokenMapped+ -> TokenMapped
 TokenMapped+ -> TokenMapped+ TokenMapped
 TokenMapped* -> TokenMapped+
 TokenMapped* ->
+PrecDef? -> PrecDef
+PrecDef? ->
 caret? -> caret
 caret? ->
 TerminalSetItem+ -> TerminalSetItem
@@ -89,26 +97,28 @@ TerminalSetItem* -> TerminalSetItem+
 TerminalSetItem* ->
 Pattern+ -> Pattern
 Pattern+ -> Pattern+ Pattern
-[^semicolon, lparen-glr] -> ident
-[^semicolon, lparen-glr] -> colon
-[^semicolon, lparen-glr] -> pipe
-[^semicolon, lparen-glr] -> percent
-[^semicolon, lparen-glr] -> equal
-[^semicolon, lparen-glr] -> plus
-[^semicolon, lparen-glr] -> star
-[^semicolon, lparen-glr] -> question
-[^semicolon, lparen-glr] -> caret
-[^semicolon, lparen-glr] -> minus
-[^semicolon, lparen-glr] -> exclamation
-[^semicolon, lparen-glr] -> slash
-[^semicolon, lparen-glr] -> otherpunct
-[^semicolon, lparen-glr] -> literal
-[^semicolon, lparen-glr] -> parengroup
-[^semicolon, lparen-glr] -> bracegroup
-[^semicolon, lparen-glr] -> bracketgroup
-[^semicolon, lparen-glr] -> nonegroup
-[^semicolon, lparen-glr]+ -> [^semicolon, lparen-glr]
-[^semicolon, lparen-glr]+ -> [^semicolon, lparen-glr]+ [^semicolon, lparen-glr]
+[^semicolon, lparen-precedence] -> ident
+[^semicolon, lparen-precedence] -> colon
+[^semicolon, lparen-precedence] -> pipe
+[^semicolon, lparen-precedence] -> percent
+[^semicolon, lparen-precedence] -> equal
+[^semicolon, lparen-precedence] -> plus
+[^semicolon, lparen-precedence] -> star
+[^semicolon, lparen-precedence] -> question
+[^semicolon, lparen-precedence] -> caret
+[^semicolon, lparen-precedence] -> minus
+[^semicolon, lparen-precedence] -> exclamation
+[^semicolon, lparen-precedence] -> slash
+[^semicolon, lparen-precedence] -> otherpunct
+[^semicolon, lparen-precedence] -> literal
+[^semicolon, lparen-precedence] -> parengroup
+[^semicolon, lparen-precedence] -> bracegroup
+[^semicolon, lparen-precedence] -> bracketgroup
+[^semicolon, lparen-precedence] -> nonegroup
+[^semicolon, lparen-precedence]+ -> [^semicolon, lparen-precedence]
+[^semicolon, lparen-precedence]+ -> [^semicolon, lparen-precedence]+ [^semicolon, lparen-precedence]
+IdentOrLiteral+ -> IdentOrLiteral
+IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
 GrammarLine+ -> GrammarLine
 GrammarLine+ -> GrammarLine GrammarLine+
 Augmented -> Grammar eof
@@ -151,6 +161,7 @@ pub enum GrammarNonTerminals {
     RuleType,
     RuleLines,
     RuleLine,
+    PrecDef,
     TokenMapped,
     TerminalSetItem,
     TerminalSet,
@@ -163,23 +174,27 @@ pub enum GrammarNonTerminals {
     TokenTypeDef,
     UserDataDef,
     TerminalOrTerminalSet,
+    IdentOrLiteral,
     ReduceType,
     ReduceDef,
     ErrorDef,
     ModulePrefixDef,
     Glr,
     Lalr,
+    Precedence,
     GrammarLine,
     Grammar,
-    _TokenMapped_Plus24,
-    _TokenMapped_Star25,
-    _caret_Question26,
-    _TerminalSetItem_Plus27,
-    _TerminalSetItem_Star28,
-    _Pattern_Plus29,
-    _TerminalSet30,
-    __TerminalSet30_Plus31,
-    _GrammarLine_Plus32,
+    _TokenMapped_Plus27,
+    _TokenMapped_Star28,
+    _PrecDef_Question29,
+    _caret_Question30,
+    _TerminalSetItem_Plus31,
+    _TerminalSetItem_Star32,
+    _Pattern_Plus33,
+    _TerminalSet34,
+    __TerminalSet34_Plus35,
+    _IdentOrLiteral_Plus36,
+    _GrammarLine_Plus37,
     Augmented,
 }
 impl std::fmt::Display for GrammarNonTerminals {
@@ -189,6 +204,7 @@ impl std::fmt::Display for GrammarNonTerminals {
             GrammarNonTerminals::RuleType => write!(f, "RuleType"),
             GrammarNonTerminals::RuleLines => write!(f, "RuleLines"),
             GrammarNonTerminals::RuleLine => write!(f, "RuleLine"),
+            GrammarNonTerminals::PrecDef => write!(f, "PrecDef"),
             GrammarNonTerminals::TokenMapped => write!(f, "TokenMapped"),
             GrammarNonTerminals::TerminalSetItem => write!(f, "TerminalSetItem"),
             GrammarNonTerminals::TerminalSet => write!(f, "TerminalSet"),
@@ -201,23 +217,29 @@ impl std::fmt::Display for GrammarNonTerminals {
             GrammarNonTerminals::TokenTypeDef => write!(f, "TokenTypeDef"),
             GrammarNonTerminals::UserDataDef => write!(f, "UserDataDef"),
             GrammarNonTerminals::TerminalOrTerminalSet => write!(f, "TerminalOrTerminalSet"),
+            GrammarNonTerminals::IdentOrLiteral => write!(f, "IdentOrLiteral"),
             GrammarNonTerminals::ReduceType => write!(f, "ReduceType"),
             GrammarNonTerminals::ReduceDef => write!(f, "ReduceDef"),
             GrammarNonTerminals::ErrorDef => write!(f, "ErrorDef"),
             GrammarNonTerminals::ModulePrefixDef => write!(f, "ModulePrefixDef"),
             GrammarNonTerminals::Glr => write!(f, "Glr"),
             GrammarNonTerminals::Lalr => write!(f, "Lalr"),
+            GrammarNonTerminals::Precedence => write!(f, "Precedence"),
             GrammarNonTerminals::GrammarLine => write!(f, "GrammarLine"),
             GrammarNonTerminals::Grammar => write!(f, "Grammar"),
-            GrammarNonTerminals::_TokenMapped_Plus24 => write!(f, "TokenMapped+"),
-            GrammarNonTerminals::_TokenMapped_Star25 => write!(f, "TokenMapped*"),
-            GrammarNonTerminals::_caret_Question26 => write!(f, "caret?"),
-            GrammarNonTerminals::_TerminalSetItem_Plus27 => write!(f, "TerminalSetItem+"),
-            GrammarNonTerminals::_TerminalSetItem_Star28 => write!(f, "TerminalSetItem*"),
-            GrammarNonTerminals::_Pattern_Plus29 => write!(f, "Pattern+"),
-            GrammarNonTerminals::_TerminalSet30 => write!(f, "[^semicolon, lparen-glr]"),
-            GrammarNonTerminals::__TerminalSet30_Plus31 => write!(f, "[^semicolon, lparen-glr]+"),
-            GrammarNonTerminals::_GrammarLine_Plus32 => write!(f, "GrammarLine+"),
+            GrammarNonTerminals::_TokenMapped_Plus27 => write!(f, "TokenMapped+"),
+            GrammarNonTerminals::_TokenMapped_Star28 => write!(f, "TokenMapped*"),
+            GrammarNonTerminals::_PrecDef_Question29 => write!(f, "PrecDef?"),
+            GrammarNonTerminals::_caret_Question30 => write!(f, "caret?"),
+            GrammarNonTerminals::_TerminalSetItem_Plus31 => write!(f, "TerminalSetItem+"),
+            GrammarNonTerminals::_TerminalSetItem_Star32 => write!(f, "TerminalSetItem*"),
+            GrammarNonTerminals::_Pattern_Plus33 => write!(f, "Pattern+"),
+            GrammarNonTerminals::_TerminalSet34 => write!(f, "[^semicolon, lparen-precedence]"),
+            GrammarNonTerminals::__TerminalSet34_Plus35 => {
+                write!(f, "[^semicolon, lparen-precedence]+")
+            }
+            GrammarNonTerminals::_IdentOrLiteral_Plus36 => write!(f, "IdentOrLiteral+"),
+            GrammarNonTerminals::_GrammarLine_Plus37 => write!(f, "GrammarLine+"),
             GrammarNonTerminals::Augmented => write!(f, "Augmented"),
         }
     }
@@ -229,6 +251,7 @@ impl std::fmt::Debug for GrammarNonTerminals {
             GrammarNonTerminals::RuleType => write!(f, "RuleType"),
             GrammarNonTerminals::RuleLines => write!(f, "RuleLines"),
             GrammarNonTerminals::RuleLine => write!(f, "RuleLine"),
+            GrammarNonTerminals::PrecDef => write!(f, "PrecDef"),
             GrammarNonTerminals::TokenMapped => write!(f, "TokenMapped"),
             GrammarNonTerminals::TerminalSetItem => write!(f, "TerminalSetItem"),
             GrammarNonTerminals::TerminalSet => write!(f, "TerminalSet"),
@@ -241,23 +264,29 @@ impl std::fmt::Debug for GrammarNonTerminals {
             GrammarNonTerminals::TokenTypeDef => write!(f, "TokenTypeDef"),
             GrammarNonTerminals::UserDataDef => write!(f, "UserDataDef"),
             GrammarNonTerminals::TerminalOrTerminalSet => write!(f, "TerminalOrTerminalSet"),
+            GrammarNonTerminals::IdentOrLiteral => write!(f, "IdentOrLiteral"),
             GrammarNonTerminals::ReduceType => write!(f, "ReduceType"),
             GrammarNonTerminals::ReduceDef => write!(f, "ReduceDef"),
             GrammarNonTerminals::ErrorDef => write!(f, "ErrorDef"),
             GrammarNonTerminals::ModulePrefixDef => write!(f, "ModulePrefixDef"),
             GrammarNonTerminals::Glr => write!(f, "Glr"),
             GrammarNonTerminals::Lalr => write!(f, "Lalr"),
+            GrammarNonTerminals::Precedence => write!(f, "Precedence"),
             GrammarNonTerminals::GrammarLine => write!(f, "GrammarLine"),
             GrammarNonTerminals::Grammar => write!(f, "Grammar"),
-            GrammarNonTerminals::_TokenMapped_Plus24 => write!(f, "TokenMapped+"),
-            GrammarNonTerminals::_TokenMapped_Star25 => write!(f, "TokenMapped*"),
-            GrammarNonTerminals::_caret_Question26 => write!(f, "caret?"),
-            GrammarNonTerminals::_TerminalSetItem_Plus27 => write!(f, "TerminalSetItem+"),
-            GrammarNonTerminals::_TerminalSetItem_Star28 => write!(f, "TerminalSetItem*"),
-            GrammarNonTerminals::_Pattern_Plus29 => write!(f, "Pattern+"),
-            GrammarNonTerminals::_TerminalSet30 => write!(f, "[^semicolon, lparen-glr]"),
-            GrammarNonTerminals::__TerminalSet30_Plus31 => write!(f, "[^semicolon, lparen-glr]+"),
-            GrammarNonTerminals::_GrammarLine_Plus32 => write!(f, "GrammarLine+"),
+            GrammarNonTerminals::_TokenMapped_Plus27 => write!(f, "TokenMapped+"),
+            GrammarNonTerminals::_TokenMapped_Star28 => write!(f, "TokenMapped*"),
+            GrammarNonTerminals::_PrecDef_Question29 => write!(f, "PrecDef?"),
+            GrammarNonTerminals::_caret_Question30 => write!(f, "caret?"),
+            GrammarNonTerminals::_TerminalSetItem_Plus31 => write!(f, "TerminalSetItem+"),
+            GrammarNonTerminals::_TerminalSetItem_Star32 => write!(f, "TerminalSetItem*"),
+            GrammarNonTerminals::_Pattern_Plus33 => write!(f, "Pattern+"),
+            GrammarNonTerminals::_TerminalSet34 => write!(f, "[^semicolon, lparen-precedence]"),
+            GrammarNonTerminals::__TerminalSet34_Plus35 => {
+                write!(f, "[^semicolon, lparen-precedence]+")
+            }
+            GrammarNonTerminals::_IdentOrLiteral_Plus36 => write!(f, "IdentOrLiteral+"),
+            GrammarNonTerminals::_GrammarLine_Plus37 => write!(f, "GrammarLine+"),
             GrammarNonTerminals::Augmented => write!(f, "Augmented"),
         }
     }
@@ -279,22 +308,25 @@ pub struct GrammarStack {
     __rustylr_generated_stack_2: Vec<Option<Group>>,
     __rustylr_generated_stack_3: Vec<Vec<RuleLineArgs>>,
     __rustylr_generated_stack_4: Vec<RuleLineArgs>,
-    __rustylr_generated_stack_5: Vec<(Option<Ident>, PatternArgs)>,
-    __rustylr_generated_stack_6: Vec<TerminalSetItem>,
-    __rustylr_generated_stack_7: Vec<TerminalSet>,
-    __rustylr_generated_stack_8: Vec<PatternArgs>,
-    __rustylr_generated_stack_9: Vec<(Ident, TokenStream)>,
-    __rustylr_generated_stack_10: Vec<TokenStream>,
-    __rustylr_generated_stack_11: Vec<Ident>,
-    __rustylr_generated_stack_12: Vec<(Span, TokenStream)>,
-    __rustylr_generated_stack_13: Vec<TerminalOrTerminalSet>,
-    __rustylr_generated_stack_14: Vec<ReduceType>,
-    __rustylr_generated_stack_15: Vec<(TerminalOrTerminalSet, ReduceType)>,
-    __rustylr_generated_stack_16: Vec<Vec<(Option<Ident>, PatternArgs)>>,
-    __rustylr_generated_stack_17: Vec<Option<Lexed>>,
-    __rustylr_generated_stack_18: Vec<Vec<TerminalSetItem>>,
-    __rustylr_generated_stack_19: Vec<Vec<PatternArgs>>,
-    __rustylr_generated_stack_20: Vec<Vec<Lexed>>,
+    __rustylr_generated_stack_5: Vec<IdentOrLiteral>,
+    __rustylr_generated_stack_6: Vec<(Option<Ident>, PatternArgs)>,
+    __rustylr_generated_stack_7: Vec<TerminalSetItem>,
+    __rustylr_generated_stack_8: Vec<TerminalSet>,
+    __rustylr_generated_stack_9: Vec<PatternArgs>,
+    __rustylr_generated_stack_10: Vec<(Ident, TokenStream)>,
+    __rustylr_generated_stack_11: Vec<TokenStream>,
+    __rustylr_generated_stack_12: Vec<Ident>,
+    __rustylr_generated_stack_13: Vec<(Span, TokenStream)>,
+    __rustylr_generated_stack_14: Vec<TerminalOrTerminalSet>,
+    __rustylr_generated_stack_15: Vec<ReduceType>,
+    __rustylr_generated_stack_16: Vec<(ReduceType, Vec<IdentOrLiteral>)>,
+    __rustylr_generated_stack_17: Vec<Vec<IdentOrLiteral>>,
+    __rustylr_generated_stack_18: Vec<Vec<(Option<Ident>, PatternArgs)>>,
+    __rustylr_generated_stack_19: Vec<Option<IdentOrLiteral>>,
+    __rustylr_generated_stack_20: Vec<Option<Lexed>>,
+    __rustylr_generated_stack_21: Vec<Vec<TerminalSetItem>>,
+    __rustylr_generated_stack_22: Vec<Vec<PatternArgs>>,
+    __rustylr_generated_stack_23: Vec<Vec<Lexed>>,
 }
 #[allow(
     unused_braces,
@@ -393,15 +425,27 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut Action = self.__rustylr_generated_stack_2.pop().unwrap();
-        let mut TokenMapped = self.__rustylr_generated_stack_16.pop().unwrap();
+        let mut PrecDef = self.__rustylr_generated_stack_19.pop().unwrap();
+        let mut TokenMapped = self.__rustylr_generated_stack_18.pop().unwrap();
         self.__rustylr_generated_stack_4.push({
             RuleLineArgs {
                 tokens: TokenMapped,
                 reduce_action: Action.map(|action| action.to_token_stream()),
                 separator_span: Span::call_site(),
                 id: 0,
+                precedence: PrecDef,
             }
         });
+        Ok(())
+    }
+    fn reduce_PrecDef_0(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut IdentOrLiteral = self.__rustylr_generated_stack_5.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.pop();
+        self.__rustylr_generated_stack_5.push(IdentOrLiteral);
         Ok(())
     }
     fn reduce_TokenMapped_0(
@@ -409,8 +453,8 @@ impl GrammarStack {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut Pattern = self.__rustylr_generated_stack_8.pop().unwrap();
-        self.__rustylr_generated_stack_5.push({ (None, Pattern) });
+        let mut Pattern = self.__rustylr_generated_stack_9.pop().unwrap();
+        self.__rustylr_generated_stack_6.push({ (None, Pattern) });
         Ok(())
     }
     fn reduce_TokenMapped_1(
@@ -418,10 +462,10 @@ impl GrammarStack {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut Pattern = self.__rustylr_generated_stack_8.pop().unwrap();
+        let mut Pattern = self.__rustylr_generated_stack_9.pop().unwrap();
         let mut equal = self.__rustylr_generated_terminal_stack.pop().unwrap();
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_5.push({
+        self.__rustylr_generated_stack_6.push({
             if let Lexed::Ident(ident) = ident {
                 (Some(ident), Pattern)
             } else {
@@ -436,7 +480,7 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_6.push({
+        self.__rustylr_generated_stack_7.push({
             let ident = if let Lexed::Ident(ident) = ident {
                 ident
             } else {
@@ -454,7 +498,7 @@ impl GrammarStack {
         let mut last = self.__rustylr_generated_terminal_stack.pop().unwrap();
         let mut minus = self.__rustylr_generated_terminal_stack.pop().unwrap();
         let mut first = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_6.push({
+        self.__rustylr_generated_stack_7.push({
             let first = if let Lexed::Ident(first) = first {
                 first
             } else {
@@ -475,7 +519,7 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut literal = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_6.push({
+        self.__rustylr_generated_stack_7.push({
             let Lexed::Literal(literal) = literal else {
                 unreachable!("TerminalSetItem-Literal");
             };
@@ -491,7 +535,7 @@ impl GrammarStack {
         let mut last = self.__rustylr_generated_terminal_stack.pop().unwrap();
         let mut minus = self.__rustylr_generated_terminal_stack.pop().unwrap();
         let mut first = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_6.push({
+        self.__rustylr_generated_stack_7.push({
             let Lexed::Literal(first) = first else {
                 unreachable!("TerminalSetItem-Range1");
             };
@@ -508,10 +552,10 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut rbracket = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut TerminalSetItem = self.__rustylr_generated_stack_18.pop().unwrap();
-        let mut caret = self.__rustylr_generated_stack_17.pop().unwrap();
+        let mut TerminalSetItem = self.__rustylr_generated_stack_21.pop().unwrap();
+        let mut caret = self.__rustylr_generated_stack_20.pop().unwrap();
         let mut lbracket = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_7.push({
+        self.__rustylr_generated_stack_8.push({
             let open_span = if let Lexed::LBracket(lbracket) = lbracket {
                 lbracket
             } else {
@@ -537,7 +581,7 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_8.push({
+        self.__rustylr_generated_stack_9.push({
             if let Lexed::Ident(ident) = ident {
                 PatternArgs::Ident(ident)
             } else {
@@ -552,8 +596,8 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut plus = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self.__rustylr_generated_stack_8.pop().unwrap();
-        self.__rustylr_generated_stack_8.push({
+        let mut Pattern = self.__rustylr_generated_stack_9.pop().unwrap();
+        self.__rustylr_generated_stack_9.push({
             if let Lexed::Plus(plus) = plus {
                 PatternArgs::Plus(Box::new(Pattern), plus.span())
             } else {
@@ -568,8 +612,8 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut star = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self.__rustylr_generated_stack_8.pop().unwrap();
-        self.__rustylr_generated_stack_8.push({
+        let mut Pattern = self.__rustylr_generated_stack_9.pop().unwrap();
+        self.__rustylr_generated_stack_9.push({
             if let Lexed::Star(star) = star {
                 PatternArgs::Star(Box::new(Pattern), star.span())
             } else {
@@ -584,8 +628,8 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut question = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self.__rustylr_generated_stack_8.pop().unwrap();
-        self.__rustylr_generated_stack_8.push({
+        let mut Pattern = self.__rustylr_generated_stack_9.pop().unwrap();
+        self.__rustylr_generated_stack_9.push({
             if let Lexed::Question(question) = question {
                 PatternArgs::Question(Box::new(Pattern), question.span())
             } else {
@@ -600,8 +644,8 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut exclamation = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self.__rustylr_generated_stack_8.pop().unwrap();
-        self.__rustylr_generated_stack_8.push({
+        let mut Pattern = self.__rustylr_generated_stack_9.pop().unwrap();
+        self.__rustylr_generated_stack_9.push({
             if let Lexed::Exclamation(exclamation) = exclamation {
                 PatternArgs::Exclamation(Box::new(Pattern), exclamation.span())
             } else {
@@ -615,8 +659,8 @@ impl GrammarStack {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut TerminalSet = self.__rustylr_generated_stack_7.pop().unwrap();
-        self.__rustylr_generated_stack_8
+        let mut TerminalSet = self.__rustylr_generated_stack_8.pop().unwrap();
+        self.__rustylr_generated_stack_9
             .push({ PatternArgs::TerminalSet(TerminalSet) });
         Ok(())
     }
@@ -625,10 +669,10 @@ impl GrammarStack {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut TerminalOrTerminalSet = self.__rustylr_generated_stack_13.pop().unwrap();
+        let mut TerminalOrTerminalSet = self.__rustylr_generated_stack_14.pop().unwrap();
         let mut slash = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self.__rustylr_generated_stack_8.pop().unwrap();
-        self.__rustylr_generated_stack_8
+        let mut Pattern = self.__rustylr_generated_stack_9.pop().unwrap();
+        self.__rustylr_generated_stack_9
             .push({ PatternArgs::Lookaheads(Box::new(Pattern), TerminalOrTerminalSet) });
         Ok(())
     }
@@ -638,9 +682,9 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut rparen = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self.__rustylr_generated_stack_19.pop().unwrap();
+        let mut Pattern = self.__rustylr_generated_stack_22.pop().unwrap();
         let mut lparen = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_8.push({
+        self.__rustylr_generated_stack_9.push({
             let open = if let Lexed::LParen(lparen) = lparen {
                 lparen
             } else {
@@ -661,7 +705,7 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut literal = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_8.push({
+        self.__rustylr_generated_stack_9.push({
             let Lexed::Literal(literal) = literal else {
                 unreachable!("Pattern-Literal");
             };
@@ -698,10 +742,10 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self.__rustylr_generated_stack_10.pop().unwrap();
+        let mut RustCode = self.__rustylr_generated_stack_11.pop().unwrap();
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
         let mut token = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_9.push({
+        self.__rustylr_generated_stack_10.push({
             if let Lexed::Ident(ident) = ident {
                 (ident, RustCode)
             } else {
@@ -715,8 +759,8 @@ impl GrammarStack {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut t = self.__rustylr_generated_stack_20.pop().unwrap();
-        self.__rustylr_generated_stack_10.push({
+        let mut t = self.__rustylr_generated_stack_23.pop().unwrap();
+        self.__rustylr_generated_stack_11.push({
             let mut tokens = TokenStream::new();
             for token in t.into_iter() {
                 token.append_to_stream(&mut tokens);
@@ -733,7 +777,7 @@ impl GrammarStack {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
         let mut start = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_11.push({
+        self.__rustylr_generated_stack_12.push({
             if let Lexed::Ident(ident) = ident {
                 ident
             } else {
@@ -748,9 +792,9 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self.__rustylr_generated_stack_10.pop().unwrap();
+        let mut RustCode = self.__rustylr_generated_stack_11.pop().unwrap();
         let mut eofdef = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_12
+        self.__rustylr_generated_stack_13
             .push({ (eofdef.span(), RustCode) });
         Ok(())
     }
@@ -760,9 +804,9 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self.__rustylr_generated_stack_10.pop().unwrap();
+        let mut RustCode = self.__rustylr_generated_stack_11.pop().unwrap();
         let mut tokentype = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_12
+        self.__rustylr_generated_stack_13
             .push({ (tokentype.span(), RustCode) });
         Ok(())
     }
@@ -772,9 +816,9 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self.__rustylr_generated_stack_10.pop().unwrap();
+        let mut RustCode = self.__rustylr_generated_stack_11.pop().unwrap();
         let mut userdata = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_12
+        self.__rustylr_generated_stack_13
             .push({ (userdata.span(), RustCode) });
         Ok(())
     }
@@ -783,8 +827,8 @@ impl GrammarStack {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut TerminalSet = self.__rustylr_generated_stack_7.pop().unwrap();
-        self.__rustylr_generated_stack_13
+        let mut TerminalSet = self.__rustylr_generated_stack_8.pop().unwrap();
+        self.__rustylr_generated_stack_14
             .push({ TerminalOrTerminalSet::TerminalSet(TerminalSet) });
         Ok(())
     }
@@ -794,7 +838,7 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_13.push({
+        self.__rustylr_generated_stack_14.push({
             if let Lexed::Ident(ident) = ident {
                 TerminalOrTerminalSet::Ident(ident)
             } else {
@@ -809,11 +853,39 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut literal = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_13.push({
+        self.__rustylr_generated_stack_14.push({
             let Lexed::Literal(literal) = literal else {
                 unreachable!("TerminalOrTerminalSet-Literal");
             };
             TerminalOrTerminalSet::Literal(literal)
+        });
+        Ok(())
+    }
+    fn reduce_IdentOrLiteral_0(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_stack_5.push({
+            let Lexed::Ident(ident) = ident else {
+                unreachable!("IdentOrLiteral-Ident");
+            };
+            IdentOrLiteral::Ident(ident)
+        });
+        Ok(())
+    }
+    fn reduce_IdentOrLiteral_1(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut literal = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_stack_5.push({
+            let Lexed::Literal(literal) = literal else {
+                unreachable!("IdentOrLiteral-Literal");
+            };
+            IdentOrLiteral::Literal(literal)
         });
         Ok(())
     }
@@ -823,7 +895,7 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut left = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_14.push({ ReduceType::Left });
+        self.__rustylr_generated_stack_15.push({ ReduceType::Left });
         Ok(())
     }
     fn reduce_ReduceType_1(
@@ -832,7 +904,7 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut right = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_14
+        self.__rustylr_generated_stack_15
             .push({ ReduceType::Right });
         Ok(())
     }
@@ -842,10 +914,10 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut TerminalOrTerminalSet = self.__rustylr_generated_stack_13.pop().unwrap();
-        let mut reducetype = self.__rustylr_generated_stack_14.pop().unwrap();
-        self.__rustylr_generated_stack_15
-            .push({ (TerminalOrTerminalSet, reducetype) });
+        let mut IdentOrLiteral = self.__rustylr_generated_stack_17.pop().unwrap();
+        let mut reducetype = self.__rustylr_generated_stack_15.pop().unwrap();
+        self.__rustylr_generated_stack_16
+            .push({ (reducetype, IdentOrLiteral) });
         Ok(())
     }
     fn reduce_ErrorDef_0(
@@ -854,9 +926,9 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self.__rustylr_generated_stack_10.pop().unwrap();
+        let mut RustCode = self.__rustylr_generated_stack_11.pop().unwrap();
         let mut errortype = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_12
+        self.__rustylr_generated_stack_13
             .push({ (errortype.span(), RustCode) });
         Ok(())
     }
@@ -866,9 +938,9 @@ impl GrammarStack {
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self.__rustylr_generated_stack_10.pop().unwrap();
+        let mut RustCode = self.__rustylr_generated_stack_11.pop().unwrap();
         let mut moduleprefix = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_12
+        self.__rustylr_generated_stack_13
             .push({ (moduleprefix.span(), RustCode) });
         Ok(())
     }
@@ -890,6 +962,17 @@ impl GrammarStack {
         let mut lalr = self.__rustylr_generated_terminal_stack.pop().unwrap();
         Ok(())
     }
+    fn reduce_Precedence_0(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        let mut IdentOrLiteral = self.__rustylr_generated_stack_17.pop().unwrap();
+        let mut precedence = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_stack_17.push({ IdentOrLiteral });
+        Ok(())
+    }
     fn reduce_GrammarLine_0(
         &mut self,
         lookahead: &Lexed,
@@ -906,7 +989,7 @@ impl GrammarStack {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut TokenDef = self.__rustylr_generated_stack_9.pop().unwrap();
+        let mut TokenDef = self.__rustylr_generated_stack_10.pop().unwrap();
         {
             data.terminals.push(TokenDef);
         }
@@ -917,7 +1000,7 @@ impl GrammarStack {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut StartDef = self.__rustylr_generated_stack_11.pop().unwrap();
+        let mut StartDef = self.__rustylr_generated_stack_12.pop().unwrap();
         {
             data.start_rule_name.push(StartDef);
         }
@@ -928,7 +1011,7 @@ impl GrammarStack {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut EofDef = self.__rustylr_generated_stack_12.pop().unwrap();
+        let mut EofDef = self.__rustylr_generated_stack_13.pop().unwrap();
         {
             data.eof.push(EofDef);
         }
@@ -939,7 +1022,7 @@ impl GrammarStack {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut TokenTypeDef = self.__rustylr_generated_stack_12.pop().unwrap();
+        let mut TokenTypeDef = self.__rustylr_generated_stack_13.pop().unwrap();
         {
             data.token_typename.push(TokenTypeDef);
         }
@@ -950,7 +1033,7 @@ impl GrammarStack {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut UserDataDef = self.__rustylr_generated_stack_12.pop().unwrap();
+        let mut UserDataDef = self.__rustylr_generated_stack_13.pop().unwrap();
         {
             data.userdata_typename.push(UserDataDef);
         }
@@ -961,8 +1044,9 @@ impl GrammarStack {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut ReduceDef = self.__rustylr_generated_stack_15.pop().unwrap();
+        let mut ReduceDef = self.__rustylr_generated_stack_16.pop().unwrap();
         {
+            data.precedences.push(ReduceDef.1.clone());
             data.reduce_types.push(ReduceDef);
         }
         Ok(())
@@ -972,7 +1056,7 @@ impl GrammarStack {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut ErrorDef = self.__rustylr_generated_stack_12.pop().unwrap();
+        let mut ErrorDef = self.__rustylr_generated_stack_13.pop().unwrap();
         {
             data.error_typename.push(ErrorDef);
         }
@@ -983,7 +1067,7 @@ impl GrammarStack {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut ModulePrefixDef = self.__rustylr_generated_stack_12.pop().unwrap();
+        let mut ModulePrefixDef = self.__rustylr_generated_stack_13.pop().unwrap();
         {
             data.module_prefix.push(ModulePrefixDef);
         }
@@ -1009,6 +1093,17 @@ impl GrammarStack {
         }
         Ok(())
     }
+    fn reduce_GrammarLine_11(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut Precedence = self.__rustylr_generated_stack_17.pop().unwrap();
+        {
+            data.precedences.push(Precedence);
+        }
+        Ok(())
+    }
     fn reduce_Grammar_0(
         &mut self,
         lookahead: &Lexed,
@@ -1016,63 +1111,7 @@ impl GrammarStack {
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         Ok(())
     }
-    fn reduce__TokenMapped_Plus24_0(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_stack_5.pop().unwrap();
-        self.__rustylr_generated_stack_16.push({ vec![A] });
-        Ok(())
-    }
-    fn reduce__TokenMapped_Plus24_1(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_stack_5.pop().unwrap();
-        let mut Ap = self.__rustylr_generated_stack_16.pop().unwrap();
-        self.__rustylr_generated_stack_16.push({
-            Ap.push(A);
-            Ap
-        });
-        Ok(())
-    }
-    fn reduce__TokenMapped_Star25_0(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut Ap = self.__rustylr_generated_stack_16.pop().unwrap();
-        self.__rustylr_generated_stack_16.push({ Ap });
-        Ok(())
-    }
-    fn reduce__TokenMapped_Star25_1(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        self.__rustylr_generated_stack_16.push({ vec![] });
-        Ok(())
-    }
-    fn reduce__caret_Question26_0(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_17.push({ Some(A) });
-        Ok(())
-    }
-    fn reduce__caret_Question26_1(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        self.__rustylr_generated_stack_17.push({ None });
-        Ok(())
-    }
-    fn reduce__TerminalSetItem_Plus27_0(
+    fn reduce__TokenMapped_Plus27_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1081,7 +1120,7 @@ impl GrammarStack {
         self.__rustylr_generated_stack_18.push({ vec![A] });
         Ok(())
     }
-    fn reduce__TerminalSetItem_Plus27_1(
+    fn reduce__TokenMapped_Plus27_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1094,7 +1133,7 @@ impl GrammarStack {
         });
         Ok(())
     }
-    fn reduce__TerminalSetItem_Star28_0(
+    fn reduce__TokenMapped_Star28_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1103,7 +1142,7 @@ impl GrammarStack {
         self.__rustylr_generated_stack_18.push({ Ap });
         Ok(())
     }
-    fn reduce__TerminalSetItem_Star28_1(
+    fn reduce__TokenMapped_Star28_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1111,220 +1150,315 @@ impl GrammarStack {
         self.__rustylr_generated_stack_18.push({ vec![] });
         Ok(())
     }
-    fn reduce__Pattern_Plus29_0(
+    fn reduce__PrecDef_Question29_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_stack_8.pop().unwrap();
-        self.__rustylr_generated_stack_19.push({ vec![A] });
+        let mut A = self.__rustylr_generated_stack_5.pop().unwrap();
+        self.__rustylr_generated_stack_19.push({ Some(A) });
         Ok(())
     }
-    fn reduce__Pattern_Plus29_1(
+    fn reduce__PrecDef_Question29_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_stack_8.pop().unwrap();
-        let mut Ap = self.__rustylr_generated_stack_19.pop().unwrap();
-        self.__rustylr_generated_stack_19.push({
-            Ap.push(A);
-            Ap
-        });
+        self.__rustylr_generated_stack_19.push({ None });
         Ok(())
     }
-    fn reduce__TerminalSet30_0(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_1(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_2(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_3(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_4(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_5(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_6(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_7(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_8(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_9(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_10(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_11(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_12(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_13(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_14(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_15(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_16(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce__TerminalSet30_17(
-        &mut self,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
-    }
-    fn reduce___TerminalSet30_Plus31_0(
+    fn reduce__caret_Question30_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         let mut A = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_20.push({ vec![A] });
+        self.__rustylr_generated_stack_20.push({ Some(A) });
         Ok(())
     }
-    fn reduce___TerminalSet30_Plus31_1(
+    fn reduce__caret_Question30_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Ap = self.__rustylr_generated_stack_20.pop().unwrap();
-        self.__rustylr_generated_stack_20.push({
+        self.__rustylr_generated_stack_20.push({ None });
+        Ok(())
+    }
+    fn reduce__TerminalSetItem_Plus31_0(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut A = self.__rustylr_generated_stack_7.pop().unwrap();
+        self.__rustylr_generated_stack_21.push({ vec![A] });
+        Ok(())
+    }
+    fn reduce__TerminalSetItem_Plus31_1(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut A = self.__rustylr_generated_stack_7.pop().unwrap();
+        let mut Ap = self.__rustylr_generated_stack_21.pop().unwrap();
+        self.__rustylr_generated_stack_21.push({
             Ap.push(A);
             Ap
         });
         Ok(())
     }
-    fn reduce__GrammarLine_Plus32_0(
+    fn reduce__TerminalSetItem_Star32_0(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut Ap = self.__rustylr_generated_stack_21.pop().unwrap();
+        self.__rustylr_generated_stack_21.push({ Ap });
+        Ok(())
+    }
+    fn reduce__TerminalSetItem_Star32_1(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        self.__rustylr_generated_stack_21.push({ vec![] });
+        Ok(())
+    }
+    fn reduce__Pattern_Plus33_0(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut A = self.__rustylr_generated_stack_9.pop().unwrap();
+        self.__rustylr_generated_stack_22.push({ vec![A] });
+        Ok(())
+    }
+    fn reduce__Pattern_Plus33_1(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut A = self.__rustylr_generated_stack_9.pop().unwrap();
+        let mut Ap = self.__rustylr_generated_stack_22.pop().unwrap();
+        self.__rustylr_generated_stack_22.push({
+            Ap.push(A);
+            Ap
+        });
+        Ok(())
+    }
+    fn reduce__TerminalSet34_0(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_1(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_2(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_3(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_4(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_5(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_6(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_7(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_8(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_9(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_10(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_11(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_12(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_13(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_14(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_15(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_16(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet34_17(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce___TerminalSet34_Plus35_0(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut A = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_stack_23.push({ vec![A] });
+        Ok(())
+    }
+    fn reduce___TerminalSet34_Plus35_1(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut A = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        let mut Ap = self.__rustylr_generated_stack_23.pop().unwrap();
+        self.__rustylr_generated_stack_23.push({
+            Ap.push(A);
+            Ap
+        });
+        Ok(())
+    }
+    fn reduce__IdentOrLiteral_Plus36_0(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut A = self.__rustylr_generated_stack_5.pop().unwrap();
+        self.__rustylr_generated_stack_17.push({ vec![A] });
+        Ok(())
+    }
+    fn reduce__IdentOrLiteral_Plus36_1(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut A = self.__rustylr_generated_stack_5.pop().unwrap();
+        let mut Ap = self.__rustylr_generated_stack_17.pop().unwrap();
+        self.__rustylr_generated_stack_17.push({
+            Ap.push(A);
+            Ap
+        });
+        Ok(())
+    }
+    fn reduce__GrammarLine_Plus37_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         Ok(())
     }
-    fn reduce__GrammarLine_Plus32_1(
+    fn reduce__GrammarLine_Plus37_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1378,6 +1512,9 @@ impl ::rusty_lr_core::lr::Stack for GrammarStack {
             __rustylr_generated_stack_18: Vec::new(),
             __rustylr_generated_stack_19: Vec::new(),
             __rustylr_generated_stack_20: Vec::new(),
+            __rustylr_generated_stack_21: Vec::new(),
+            __rustylr_generated_stack_22: Vec::new(),
+            __rustylr_generated_stack_23: Vec::new(),
         }
     }
     fn push(&mut self, term: Self::Term) {
@@ -1396,87 +1533,96 @@ impl ::rusty_lr_core::lr::Stack for GrammarStack {
             3usize => self.reduce_RuleLines_0(lookahead, user_data),
             4usize => self.reduce_RuleLines_1(lookahead, user_data),
             5usize => self.reduce_RuleLine_0(lookahead, user_data),
-            6usize => self.reduce_TokenMapped_0(lookahead, user_data),
-            7usize => self.reduce_TokenMapped_1(lookahead, user_data),
-            8usize => self.reduce_TerminalSetItem_0(lookahead, user_data),
-            9usize => self.reduce_TerminalSetItem_1(lookahead, user_data),
-            10usize => self.reduce_TerminalSetItem_2(lookahead, user_data),
-            11usize => self.reduce_TerminalSetItem_3(lookahead, user_data),
-            12usize => self.reduce_TerminalSet_0(lookahead, user_data),
-            13usize => self.reduce_Pattern_0(lookahead, user_data),
-            14usize => self.reduce_Pattern_1(lookahead, user_data),
-            15usize => self.reduce_Pattern_2(lookahead, user_data),
-            16usize => self.reduce_Pattern_3(lookahead, user_data),
-            17usize => self.reduce_Pattern_4(lookahead, user_data),
-            18usize => self.reduce_Pattern_5(lookahead, user_data),
-            19usize => self.reduce_Pattern_6(lookahead, user_data),
-            20usize => self.reduce_Pattern_7(lookahead, user_data),
-            21usize => self.reduce_Pattern_8(lookahead, user_data),
-            22usize => self.reduce_Action_0(lookahead, user_data),
-            23usize => self.reduce_Action_1(lookahead, user_data),
-            24usize => self.reduce_TokenDef_0(lookahead, user_data),
-            25usize => self.reduce_RustCode_0(lookahead, user_data),
-            26usize => self.reduce_StartDef_0(lookahead, user_data),
-            27usize => self.reduce_EofDef_0(lookahead, user_data),
-            28usize => self.reduce_TokenTypeDef_0(lookahead, user_data),
-            29usize => self.reduce_UserDataDef_0(lookahead, user_data),
-            30usize => self.reduce_TerminalOrTerminalSet_0(lookahead, user_data),
-            31usize => self.reduce_TerminalOrTerminalSet_1(lookahead, user_data),
-            32usize => self.reduce_TerminalOrTerminalSet_2(lookahead, user_data),
-            33usize => self.reduce_ReduceType_0(lookahead, user_data),
-            34usize => self.reduce_ReduceType_1(lookahead, user_data),
-            35usize => self.reduce_ReduceDef_0(lookahead, user_data),
-            36usize => self.reduce_ErrorDef_0(lookahead, user_data),
-            37usize => self.reduce_ModulePrefixDef_0(lookahead, user_data),
-            38usize => self.reduce_Glr_0(lookahead, user_data),
-            39usize => self.reduce_Lalr_0(lookahead, user_data),
-            40usize => self.reduce_GrammarLine_0(lookahead, user_data),
-            41usize => self.reduce_GrammarLine_1(lookahead, user_data),
-            42usize => self.reduce_GrammarLine_2(lookahead, user_data),
-            43usize => self.reduce_GrammarLine_3(lookahead, user_data),
-            44usize => self.reduce_GrammarLine_4(lookahead, user_data),
-            45usize => self.reduce_GrammarLine_5(lookahead, user_data),
-            46usize => self.reduce_GrammarLine_6(lookahead, user_data),
-            47usize => self.reduce_GrammarLine_7(lookahead, user_data),
-            48usize => self.reduce_GrammarLine_8(lookahead, user_data),
-            49usize => self.reduce_GrammarLine_9(lookahead, user_data),
-            50usize => self.reduce_GrammarLine_10(lookahead, user_data),
-            51usize => self.reduce_Grammar_0(lookahead, user_data),
-            52usize => self.reduce__TokenMapped_Plus24_0(lookahead, user_data),
-            53usize => self.reduce__TokenMapped_Plus24_1(lookahead, user_data),
-            54usize => self.reduce__TokenMapped_Star25_0(lookahead, user_data),
-            55usize => self.reduce__TokenMapped_Star25_1(lookahead, user_data),
-            56usize => self.reduce__caret_Question26_0(lookahead, user_data),
-            57usize => self.reduce__caret_Question26_1(lookahead, user_data),
-            58usize => self.reduce__TerminalSetItem_Plus27_0(lookahead, user_data),
-            59usize => self.reduce__TerminalSetItem_Plus27_1(lookahead, user_data),
-            60usize => self.reduce__TerminalSetItem_Star28_0(lookahead, user_data),
-            61usize => self.reduce__TerminalSetItem_Star28_1(lookahead, user_data),
-            62usize => self.reduce__Pattern_Plus29_0(lookahead, user_data),
-            63usize => self.reduce__Pattern_Plus29_1(lookahead, user_data),
-            64usize => self.reduce__TerminalSet30_0(lookahead, user_data),
-            65usize => self.reduce__TerminalSet30_1(lookahead, user_data),
-            66usize => self.reduce__TerminalSet30_2(lookahead, user_data),
-            67usize => self.reduce__TerminalSet30_3(lookahead, user_data),
-            68usize => self.reduce__TerminalSet30_4(lookahead, user_data),
-            69usize => self.reduce__TerminalSet30_5(lookahead, user_data),
-            70usize => self.reduce__TerminalSet30_6(lookahead, user_data),
-            71usize => self.reduce__TerminalSet30_7(lookahead, user_data),
-            72usize => self.reduce__TerminalSet30_8(lookahead, user_data),
-            73usize => self.reduce__TerminalSet30_9(lookahead, user_data),
-            74usize => self.reduce__TerminalSet30_10(lookahead, user_data),
-            75usize => self.reduce__TerminalSet30_11(lookahead, user_data),
-            76usize => self.reduce__TerminalSet30_12(lookahead, user_data),
-            77usize => self.reduce__TerminalSet30_13(lookahead, user_data),
-            78usize => self.reduce__TerminalSet30_14(lookahead, user_data),
-            79usize => self.reduce__TerminalSet30_15(lookahead, user_data),
-            80usize => self.reduce__TerminalSet30_16(lookahead, user_data),
-            81usize => self.reduce__TerminalSet30_17(lookahead, user_data),
-            82usize => self.reduce___TerminalSet30_Plus31_0(lookahead, user_data),
-            83usize => self.reduce___TerminalSet30_Plus31_1(lookahead, user_data),
-            84usize => self.reduce__GrammarLine_Plus32_0(lookahead, user_data),
-            85usize => self.reduce__GrammarLine_Plus32_1(lookahead, user_data),
-            86usize => self.reduce_Augmented_0(lookahead, user_data),
+            6usize => self.reduce_PrecDef_0(lookahead, user_data),
+            7usize => self.reduce_TokenMapped_0(lookahead, user_data),
+            8usize => self.reduce_TokenMapped_1(lookahead, user_data),
+            9usize => self.reduce_TerminalSetItem_0(lookahead, user_data),
+            10usize => self.reduce_TerminalSetItem_1(lookahead, user_data),
+            11usize => self.reduce_TerminalSetItem_2(lookahead, user_data),
+            12usize => self.reduce_TerminalSetItem_3(lookahead, user_data),
+            13usize => self.reduce_TerminalSet_0(lookahead, user_data),
+            14usize => self.reduce_Pattern_0(lookahead, user_data),
+            15usize => self.reduce_Pattern_1(lookahead, user_data),
+            16usize => self.reduce_Pattern_2(lookahead, user_data),
+            17usize => self.reduce_Pattern_3(lookahead, user_data),
+            18usize => self.reduce_Pattern_4(lookahead, user_data),
+            19usize => self.reduce_Pattern_5(lookahead, user_data),
+            20usize => self.reduce_Pattern_6(lookahead, user_data),
+            21usize => self.reduce_Pattern_7(lookahead, user_data),
+            22usize => self.reduce_Pattern_8(lookahead, user_data),
+            23usize => self.reduce_Action_0(lookahead, user_data),
+            24usize => self.reduce_Action_1(lookahead, user_data),
+            25usize => self.reduce_TokenDef_0(lookahead, user_data),
+            26usize => self.reduce_RustCode_0(lookahead, user_data),
+            27usize => self.reduce_StartDef_0(lookahead, user_data),
+            28usize => self.reduce_EofDef_0(lookahead, user_data),
+            29usize => self.reduce_TokenTypeDef_0(lookahead, user_data),
+            30usize => self.reduce_UserDataDef_0(lookahead, user_data),
+            31usize => self.reduce_TerminalOrTerminalSet_0(lookahead, user_data),
+            32usize => self.reduce_TerminalOrTerminalSet_1(lookahead, user_data),
+            33usize => self.reduce_TerminalOrTerminalSet_2(lookahead, user_data),
+            34usize => self.reduce_IdentOrLiteral_0(lookahead, user_data),
+            35usize => self.reduce_IdentOrLiteral_1(lookahead, user_data),
+            36usize => self.reduce_ReduceType_0(lookahead, user_data),
+            37usize => self.reduce_ReduceType_1(lookahead, user_data),
+            38usize => self.reduce_ReduceDef_0(lookahead, user_data),
+            39usize => self.reduce_ErrorDef_0(lookahead, user_data),
+            40usize => self.reduce_ModulePrefixDef_0(lookahead, user_data),
+            41usize => self.reduce_Glr_0(lookahead, user_data),
+            42usize => self.reduce_Lalr_0(lookahead, user_data),
+            43usize => self.reduce_Precedence_0(lookahead, user_data),
+            44usize => self.reduce_GrammarLine_0(lookahead, user_data),
+            45usize => self.reduce_GrammarLine_1(lookahead, user_data),
+            46usize => self.reduce_GrammarLine_2(lookahead, user_data),
+            47usize => self.reduce_GrammarLine_3(lookahead, user_data),
+            48usize => self.reduce_GrammarLine_4(lookahead, user_data),
+            49usize => self.reduce_GrammarLine_5(lookahead, user_data),
+            50usize => self.reduce_GrammarLine_6(lookahead, user_data),
+            51usize => self.reduce_GrammarLine_7(lookahead, user_data),
+            52usize => self.reduce_GrammarLine_8(lookahead, user_data),
+            53usize => self.reduce_GrammarLine_9(lookahead, user_data),
+            54usize => self.reduce_GrammarLine_10(lookahead, user_data),
+            55usize => self.reduce_GrammarLine_11(lookahead, user_data),
+            56usize => self.reduce_Grammar_0(lookahead, user_data),
+            57usize => self.reduce__TokenMapped_Plus27_0(lookahead, user_data),
+            58usize => self.reduce__TokenMapped_Plus27_1(lookahead, user_data),
+            59usize => self.reduce__TokenMapped_Star28_0(lookahead, user_data),
+            60usize => self.reduce__TokenMapped_Star28_1(lookahead, user_data),
+            61usize => self.reduce__PrecDef_Question29_0(lookahead, user_data),
+            62usize => self.reduce__PrecDef_Question29_1(lookahead, user_data),
+            63usize => self.reduce__caret_Question30_0(lookahead, user_data),
+            64usize => self.reduce__caret_Question30_1(lookahead, user_data),
+            65usize => self.reduce__TerminalSetItem_Plus31_0(lookahead, user_data),
+            66usize => self.reduce__TerminalSetItem_Plus31_1(lookahead, user_data),
+            67usize => self.reduce__TerminalSetItem_Star32_0(lookahead, user_data),
+            68usize => self.reduce__TerminalSetItem_Star32_1(lookahead, user_data),
+            69usize => self.reduce__Pattern_Plus33_0(lookahead, user_data),
+            70usize => self.reduce__Pattern_Plus33_1(lookahead, user_data),
+            71usize => self.reduce__TerminalSet34_0(lookahead, user_data),
+            72usize => self.reduce__TerminalSet34_1(lookahead, user_data),
+            73usize => self.reduce__TerminalSet34_2(lookahead, user_data),
+            74usize => self.reduce__TerminalSet34_3(lookahead, user_data),
+            75usize => self.reduce__TerminalSet34_4(lookahead, user_data),
+            76usize => self.reduce__TerminalSet34_5(lookahead, user_data),
+            77usize => self.reduce__TerminalSet34_6(lookahead, user_data),
+            78usize => self.reduce__TerminalSet34_7(lookahead, user_data),
+            79usize => self.reduce__TerminalSet34_8(lookahead, user_data),
+            80usize => self.reduce__TerminalSet34_9(lookahead, user_data),
+            81usize => self.reduce__TerminalSet34_10(lookahead, user_data),
+            82usize => self.reduce__TerminalSet34_11(lookahead, user_data),
+            83usize => self.reduce__TerminalSet34_12(lookahead, user_data),
+            84usize => self.reduce__TerminalSet34_13(lookahead, user_data),
+            85usize => self.reduce__TerminalSet34_14(lookahead, user_data),
+            86usize => self.reduce__TerminalSet34_15(lookahead, user_data),
+            87usize => self.reduce__TerminalSet34_16(lookahead, user_data),
+            88usize => self.reduce__TerminalSet34_17(lookahead, user_data),
+            89usize => self.reduce___TerminalSet34_Plus35_0(lookahead, user_data),
+            90usize => self.reduce___TerminalSet34_Plus35_1(lookahead, user_data),
+            91usize => self.reduce__IdentOrLiteral_Plus36_0(lookahead, user_data),
+            92usize => self.reduce__IdentOrLiteral_Plus36_1(lookahead, user_data),
+            93usize => self.reduce__GrammarLine_Plus37_0(lookahead, user_data),
+            94usize => self.reduce__GrammarLine_Plus37_1(lookahead, user_data),
+            95usize => self.reduce_Augmented_0(lookahead, user_data),
             _ => {
                 unreachable!("Invalid Rule: {}", rustylr_macro_generated_ruleid__);
             }
@@ -1562,6 +1708,8 @@ impl GrammarParser {
             Lexed::ModulePrefix(punct!('%'), Ident::new("id", Span::call_site())),
             Lexed::Lalr(punct!('%'), Ident::new("id", Span::call_site())),
             Lexed::Glr(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::Prec(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::Precedence(punct!('%'), Ident::new("id", Span::call_site())),
             Lexed::Eof,
         ];
         const RUSTYLR_RULES_TOKENS: &[&[::rusty_lr_core::Token<u8, GrammarNonTerminals>]] = &[
@@ -1583,8 +1731,13 @@ impl GrammarParser {
                 GrammarNonTerminals::RuleLine,
             )],
             &[
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMapped_Star25),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMapped_Star28),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDef_Question29),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Action),
+            ],
+            &[
+                ::rusty_lr_core::Token::Term(36),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::IdentOrLiteral),
             ],
             &[::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::Pattern,
@@ -1608,8 +1761,8 @@ impl GrammarParser {
             ],
             &[
                 ::rusty_lr_core::Token::Term(23),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_caret_Question26),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItem_Star28),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_caret_Question30),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItem_Star32),
                 ::rusty_lr_core::Token::Term(24),
             ],
             &[::rusty_lr_core::Token::Term(0)],
@@ -1639,7 +1792,7 @@ impl GrammarParser {
             ],
             &[
                 ::rusty_lr_core::Token::Term(19),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_Pattern_Plus29),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_Pattern_Plus33),
                 ::rusty_lr_core::Token::Term(20),
             ],
             &[::rusty_lr_core::Token::Term(14)],
@@ -1652,7 +1805,7 @@ impl GrammarParser {
                 ::rusty_lr_core::Token::Term(2),
             ],
             &[::rusty_lr_core::Token::NonTerm(
-                GrammarNonTerminals::__TerminalSet30_Plus31,
+                GrammarNonTerminals::__TerminalSet34_Plus35,
             )],
             &[
                 ::rusty_lr_core::Token::Term(28),
@@ -1679,11 +1832,13 @@ impl GrammarParser {
             )],
             &[::rusty_lr_core::Token::Term(0)],
             &[::rusty_lr_core::Token::Term(14)],
+            &[::rusty_lr_core::Token::Term(0)],
+            &[::rusty_lr_core::Token::Term(14)],
             &[::rusty_lr_core::Token::Term(25)],
             &[::rusty_lr_core::Token::Term(26)],
             &[
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::ReduceType),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalOrTerminalSet),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteral_Plus36),
                 ::rusty_lr_core::Token::Term(2),
             ],
             &[
@@ -1702,6 +1857,11 @@ impl GrammarParser {
             ],
             &[
                 ::rusty_lr_core::Token::Term(34),
+                ::rusty_lr_core::Token::Term(2),
+            ],
+            &[
+                ::rusty_lr_core::Token::Term(37),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteral_Plus36),
                 ::rusty_lr_core::Token::Term(2),
             ],
             &[::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Rule)],
@@ -1730,17 +1890,24 @@ impl GrammarParser {
             &[::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Lalr)],
             &[::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Glr)],
             &[::rusty_lr_core::Token::NonTerm(
-                GrammarNonTerminals::_GrammarLine_Plus32,
+                GrammarNonTerminals::Precedence,
+            )],
+            &[::rusty_lr_core::Token::NonTerm(
+                GrammarNonTerminals::_GrammarLine_Plus37,
             )],
             &[::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::TokenMapped,
             )],
             &[
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMapped_Plus24),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMapped_Plus27),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TokenMapped),
             ],
             &[::rusty_lr_core::Token::NonTerm(
-                GrammarNonTerminals::_TokenMapped_Plus24,
+                GrammarNonTerminals::_TokenMapped_Plus27,
+            )],
+            &[],
+            &[::rusty_lr_core::Token::NonTerm(
+                GrammarNonTerminals::PrecDef,
             )],
             &[],
             &[::rusty_lr_core::Token::Term(9)],
@@ -1749,18 +1916,18 @@ impl GrammarParser {
                 GrammarNonTerminals::TerminalSetItem,
             )],
             &[
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItem_Plus27),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItem_Plus31),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalSetItem),
             ],
             &[::rusty_lr_core::Token::NonTerm(
-                GrammarNonTerminals::_TerminalSetItem_Plus27,
+                GrammarNonTerminals::_TerminalSetItem_Plus31,
             )],
             &[],
             &[::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::Pattern,
             )],
             &[
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_Pattern_Plus29),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_Pattern_Plus33),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
             ],
             &[::rusty_lr_core::Token::Term(0)],
@@ -1782,22 +1949,29 @@ impl GrammarParser {
             &[::rusty_lr_core::Token::Term(17)],
             &[::rusty_lr_core::Token::Term(18)],
             &[::rusty_lr_core::Token::NonTerm(
-                GrammarNonTerminals::_TerminalSet30,
+                GrammarNonTerminals::_TerminalSet34,
             )],
             &[
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TerminalSet30_Plus31),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSet30),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TerminalSet34_Plus35),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSet34),
+            ],
+            &[::rusty_lr_core::Token::NonTerm(
+                GrammarNonTerminals::IdentOrLiteral,
+            )],
+            &[
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteral_Plus36),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::IdentOrLiteral),
             ],
             &[::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::GrammarLine,
             )],
             &[
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::GrammarLine),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_GrammarLine_Plus32),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_GrammarLine_Plus37),
             ],
             &[
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
-                ::rusty_lr_core::Token::Term(36),
+                ::rusty_lr_core::Token::Term(38),
             ],
         ];
         const RUSTYLR_RULES_NAME: &[GrammarNonTerminals] = &[
@@ -1807,6 +1981,7 @@ impl GrammarParser {
             GrammarNonTerminals::RuleLines,
             GrammarNonTerminals::RuleLines,
             GrammarNonTerminals::RuleLine,
+            GrammarNonTerminals::PrecDef,
             GrammarNonTerminals::TokenMapped,
             GrammarNonTerminals::TokenMapped,
             GrammarNonTerminals::TerminalSetItem,
@@ -1834,6 +2009,8 @@ impl GrammarParser {
             GrammarNonTerminals::TerminalOrTerminalSet,
             GrammarNonTerminals::TerminalOrTerminalSet,
             GrammarNonTerminals::TerminalOrTerminalSet,
+            GrammarNonTerminals::IdentOrLiteral,
+            GrammarNonTerminals::IdentOrLiteral,
             GrammarNonTerminals::ReduceType,
             GrammarNonTerminals::ReduceType,
             GrammarNonTerminals::ReduceDef,
@@ -1841,6 +2018,8 @@ impl GrammarParser {
             GrammarNonTerminals::ModulePrefixDef,
             GrammarNonTerminals::Glr,
             GrammarNonTerminals::Lalr,
+            GrammarNonTerminals::Precedence,
+            GrammarNonTerminals::GrammarLine,
             GrammarNonTerminals::GrammarLine,
             GrammarNonTerminals::GrammarLine,
             GrammarNonTerminals::GrammarLine,
@@ -1853,40 +2032,44 @@ impl GrammarParser {
             GrammarNonTerminals::GrammarLine,
             GrammarNonTerminals::GrammarLine,
             GrammarNonTerminals::Grammar,
-            GrammarNonTerminals::_TokenMapped_Plus24,
-            GrammarNonTerminals::_TokenMapped_Plus24,
-            GrammarNonTerminals::_TokenMapped_Star25,
-            GrammarNonTerminals::_TokenMapped_Star25,
-            GrammarNonTerminals::_caret_Question26,
-            GrammarNonTerminals::_caret_Question26,
-            GrammarNonTerminals::_TerminalSetItem_Plus27,
-            GrammarNonTerminals::_TerminalSetItem_Plus27,
-            GrammarNonTerminals::_TerminalSetItem_Star28,
-            GrammarNonTerminals::_TerminalSetItem_Star28,
-            GrammarNonTerminals::_Pattern_Plus29,
-            GrammarNonTerminals::_Pattern_Plus29,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::_TerminalSet30,
-            GrammarNonTerminals::__TerminalSet30_Plus31,
-            GrammarNonTerminals::__TerminalSet30_Plus31,
-            GrammarNonTerminals::_GrammarLine_Plus32,
-            GrammarNonTerminals::_GrammarLine_Plus32,
+            GrammarNonTerminals::_TokenMapped_Plus27,
+            GrammarNonTerminals::_TokenMapped_Plus27,
+            GrammarNonTerminals::_TokenMapped_Star28,
+            GrammarNonTerminals::_TokenMapped_Star28,
+            GrammarNonTerminals::_PrecDef_Question29,
+            GrammarNonTerminals::_PrecDef_Question29,
+            GrammarNonTerminals::_caret_Question30,
+            GrammarNonTerminals::_caret_Question30,
+            GrammarNonTerminals::_TerminalSetItem_Plus31,
+            GrammarNonTerminals::_TerminalSetItem_Plus31,
+            GrammarNonTerminals::_TerminalSetItem_Star32,
+            GrammarNonTerminals::_TerminalSetItem_Star32,
+            GrammarNonTerminals::_Pattern_Plus33,
+            GrammarNonTerminals::_Pattern_Plus33,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::_TerminalSet34,
+            GrammarNonTerminals::__TerminalSet34_Plus35,
+            GrammarNonTerminals::__TerminalSet34_Plus35,
+            GrammarNonTerminals::_IdentOrLiteral_Plus36,
+            GrammarNonTerminals::_IdentOrLiteral_Plus36,
+            GrammarNonTerminals::_GrammarLine_Plus37,
+            GrammarNonTerminals::_GrammarLine_Plus37,
             GrammarNonTerminals::Augmented,
         ];
         let rules: Vec<GrammarRule> = RUSTYLR_RULES_NAME
@@ -1909,68 +2092,74 @@ impl GrammarParser {
             .collect();
         const RUSTYLR_REDUCE_TERMINALS_CACHE: &[&[u8]] = &[
             &[1],
-            &[2, 3, 16],
-            &[0, 2, 3, 6, 7, 8, 11, 12, 14, 16, 19, 23],
+            &[2, 3, 16, 36],
+            &[0, 2, 3, 6, 7, 8, 11, 12, 14, 16, 19, 23, 36],
             &[0, 6, 7, 8, 11, 12, 14, 19, 20, 23],
             &[0, 14, 24],
             &[24],
             &[0, 14, 19, 20, 23],
-            &[0, 2, 3, 14, 16, 19, 23],
-            &[0, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
+            &[0, 2, 3, 14, 16, 19, 23, 36],
+            &[0, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38],
             &[2, 3],
-            &[0, 14, 23],
+            &[2, 3, 16],
+            &[0, 14],
             &[
                 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
             ],
             &[2],
-            &[36],
+            &[0, 2, 14],
+            &[38],
         ];
         const RUSTYLR_RULESET_SHIFTED0_CACHE: &[&[u8]] = &[
             &[
-                0, 24, 26, 27, 28, 29, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
-                48, 49, 50, 51, 84, 85, 86,
+                0, 25, 27, 28, 29, 30, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
+                51, 52, 53, 54, 55, 56, 93, 94, 95,
             ],
             &[1, 2],
             &[],
             &[
-                3, 4, 5, 6, 7, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 52, 53, 54, 55,
+                3, 4, 5, 7, 8, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 57, 58, 59, 60,
             ],
-            &[12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
-            &[12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 62, 63],
-            &[56, 57],
-            &[8, 9, 10, 11, 58, 59, 60, 61],
-            &[8, 9, 10, 11],
-            &[12, 30, 31, 32],
+            &[13, 14, 15, 16, 17, 18, 19, 20, 21, 22],
+            &[13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 69, 70],
+            &[63, 64],
+            &[9, 10, 11, 12, 65, 66, 67, 68],
+            &[9, 10, 11, 12],
+            &[13, 31, 32, 33],
             &[
-                5, 6, 7, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 52, 53, 54, 55,
+                5, 7, 8, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 57, 58, 59, 60,
             ],
-            &[6, 7, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
-            &[22, 23],
+            &[7, 8, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22],
+            &[6, 61, 62],
+            &[34, 35],
+            &[23, 24],
             &[
-                25, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83,
+                26, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
             ],
             &[
-                64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81,
+                71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88,
             ],
+            &[34, 35, 91, 92],
             &[
-                0, 24, 26, 27, 28, 29, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
-                48, 49, 50, 84, 85,
+                0, 25, 27, 28, 29, 30, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
+                51, 52, 53, 54, 55, 93, 94,
             ],
         ];
         const RUSTYLR_SHIFT_TERM_MAP: &[&[(u8, u8)]] = &[
             &[
                 (0, 1),
-                (25, 70),
-                (26, 71),
-                (27, 72),
-                (28, 97),
-                (29, 100),
-                (30, 103),
-                (31, 106),
-                (32, 109),
-                (33, 112),
-                (34, 115),
-                (35, 117),
+                (25, 76),
+                (26, 77),
+                (27, 78),
+                (28, 103),
+                (29, 106),
+                (30, 109),
+                (31, 112),
+                (32, 115),
+                (33, 118),
+                (34, 121),
+                (35, 123),
+                (37, 125),
             ],
             &[(15, 2)],
             &[],
@@ -2037,32 +2226,38 @@ impl GrammarParser {
             &[(6, 49), (7, 50), (8, 51), (11, 52), (12, 53)],
             &[(0, 5), (14, 8), (19, 9), (23, 43)],
             &[],
-            &[(16, 67)],
+            &[(36, 67)],
+            &[(0, 68), (14, 69)],
+            &[],
+            &[],
+            &[],
+            &[],
+            &[(16, 73)],
             &[],
             &[],
             &[],
             &[],
             &[],
-            &[(0, 73)],
+            &[(0, 79)],
             &[
-                (0, 74),
-                (1, 75),
-                (3, 76),
-                (4, 77),
-                (5, 78),
-                (6, 79),
-                (7, 80),
-                (8, 81),
-                (9, 82),
-                (10, 83),
-                (11, 84),
-                (12, 85),
-                (13, 86),
-                (14, 87),
-                (15, 88),
-                (16, 89),
-                (17, 90),
-                (18, 91),
+                (0, 80),
+                (1, 81),
+                (3, 82),
+                (4, 83),
+                (5, 84),
+                (6, 85),
+                (7, 86),
+                (8, 87),
+                (9, 88),
+                (10, 89),
+                (11, 90),
+                (12, 91),
+                (13, 92),
+                (14, 93),
+                (15, 94),
+                (16, 95),
+                (17, 96),
+                (18, 97),
             ],
             &[],
             &[],
@@ -2082,146 +2277,152 @@ impl GrammarParser {
             &[],
             &[],
             &[],
-            &[(2, 93)],
-            &[],
-            &[],
-            &[
-                (0, 74),
-                (1, 75),
-                (3, 76),
-                (4, 77),
-                (5, 78),
-                (6, 79),
-                (7, 80),
-                (8, 81),
-                (9, 82),
-                (10, 83),
-                (11, 84),
-                (12, 85),
-                (13, 86),
-                (14, 87),
-                (15, 88),
-                (16, 89),
-                (17, 90),
-                (18, 91),
-            ],
-            &[],
-            &[(0, 98)],
             &[(2, 99)],
             &[],
-            &[
-                (0, 74),
-                (1, 75),
-                (3, 76),
-                (4, 77),
-                (5, 78),
-                (6, 79),
-                (7, 80),
-                (8, 81),
-                (9, 82),
-                (10, 83),
-                (11, 84),
-                (12, 85),
-                (13, 86),
-                (14, 87),
-                (15, 88),
-                (16, 89),
-                (17, 90),
-                (18, 91),
-            ],
-            &[(2, 102)],
             &[],
             &[
-                (0, 74),
-                (1, 75),
-                (3, 76),
-                (4, 77),
-                (5, 78),
-                (6, 79),
-                (7, 80),
-                (8, 81),
-                (9, 82),
-                (10, 83),
-                (11, 84),
-                (12, 85),
-                (13, 86),
-                (14, 87),
-                (15, 88),
-                (16, 89),
-                (17, 90),
-                (18, 91),
+                (0, 80),
+                (1, 81),
+                (3, 82),
+                (4, 83),
+                (5, 84),
+                (6, 85),
+                (7, 86),
+                (8, 87),
+                (9, 88),
+                (10, 89),
+                (11, 90),
+                (12, 91),
+                (13, 92),
+                (14, 93),
+                (15, 94),
+                (16, 95),
+                (17, 96),
+                (18, 97),
             ],
+            &[],
+            &[(0, 104)],
             &[(2, 105)],
             &[],
             &[
-                (0, 74),
-                (1, 75),
-                (3, 76),
-                (4, 77),
-                (5, 78),
-                (6, 79),
-                (7, 80),
-                (8, 81),
-                (9, 82),
-                (10, 83),
-                (11, 84),
-                (12, 85),
-                (13, 86),
-                (14, 87),
-                (15, 88),
-                (16, 89),
-                (17, 90),
-                (18, 91),
+                (0, 80),
+                (1, 81),
+                (3, 82),
+                (4, 83),
+                (5, 84),
+                (6, 85),
+                (7, 86),
+                (8, 87),
+                (9, 88),
+                (10, 89),
+                (11, 90),
+                (12, 91),
+                (13, 92),
+                (14, 93),
+                (15, 94),
+                (16, 95),
+                (17, 96),
+                (18, 97),
             ],
             &[(2, 108)],
             &[],
             &[
-                (0, 74),
-                (1, 75),
-                (3, 76),
-                (4, 77),
-                (5, 78),
-                (6, 79),
-                (7, 80),
-                (8, 81),
-                (9, 82),
-                (10, 83),
-                (11, 84),
-                (12, 85),
-                (13, 86),
-                (14, 87),
-                (15, 88),
-                (16, 89),
-                (17, 90),
-                (18, 91),
+                (0, 80),
+                (1, 81),
+                (3, 82),
+                (4, 83),
+                (5, 84),
+                (6, 85),
+                (7, 86),
+                (8, 87),
+                (9, 88),
+                (10, 89),
+                (11, 90),
+                (12, 91),
+                (13, 92),
+                (14, 93),
+                (15, 94),
+                (16, 95),
+                (17, 96),
+                (18, 97),
             ],
             &[(2, 111)],
             &[],
             &[
-                (0, 74),
-                (1, 75),
-                (3, 76),
-                (4, 77),
-                (5, 78),
-                (6, 79),
-                (7, 80),
-                (8, 81),
-                (9, 82),
-                (10, 83),
-                (11, 84),
-                (12, 85),
-                (13, 86),
-                (14, 87),
-                (15, 88),
-                (16, 89),
-                (17, 90),
-                (18, 91),
+                (0, 80),
+                (1, 81),
+                (3, 82),
+                (4, 83),
+                (5, 84),
+                (6, 85),
+                (7, 86),
+                (8, 87),
+                (9, 88),
+                (10, 89),
+                (11, 90),
+                (12, 91),
+                (13, 92),
+                (14, 93),
+                (15, 94),
+                (16, 95),
+                (17, 96),
+                (18, 97),
             ],
             &[(2, 114)],
             &[],
-            &[(2, 116)],
+            &[
+                (0, 80),
+                (1, 81),
+                (3, 82),
+                (4, 83),
+                (5, 84),
+                (6, 85),
+                (7, 86),
+                (8, 87),
+                (9, 88),
+                (10, 89),
+                (11, 90),
+                (12, 91),
+                (13, 92),
+                (14, 93),
+                (15, 94),
+                (16, 95),
+                (17, 96),
+                (18, 97),
+            ],
+            &[(2, 117)],
             &[],
-            &[(2, 118)],
+            &[
+                (0, 80),
+                (1, 81),
+                (3, 82),
+                (4, 83),
+                (5, 84),
+                (6, 85),
+                (7, 86),
+                (8, 87),
+                (9, 88),
+                (10, 89),
+                (11, 90),
+                (12, 91),
+                (13, 92),
+                (14, 93),
+                (15, 94),
+                (16, 95),
+                (17, 96),
+                (18, 97),
+            ],
+            &[(2, 120)],
+            &[],
+            &[(2, 122)],
+            &[],
+            &[(2, 124)],
+            &[],
+            &[(0, 126), (14, 127)],
+            &[],
+            &[],
+            &[],
+            &[(0, 126), (2, 130), (14, 127)],
             &[],
             &[],
             &[],
@@ -2229,15 +2430,10 @@ impl GrammarParser {
             &[],
             &[],
             &[],
-            &[(0, 126), (14, 127), (23, 128)],
             &[],
+            &[(0, 126), (14, 127)],
+            &[(0, 126), (2, 140), (14, 127)],
             &[],
-            &[(9, 14)],
-            &[(0, 16), (14, 19)],
-            &[(24, 131)],
-            &[],
-            &[],
-            &[(2, 134)],
             &[],
             &[],
             &[],
@@ -2246,52 +2442,54 @@ impl GrammarParser {
             &[],
             &[
                 (0, 1),
-                (25, 70),
-                (26, 71),
-                (27, 72),
-                (28, 97),
-                (29, 100),
-                (30, 103),
-                (31, 106),
-                (32, 109),
-                (33, 112),
-                (34, 115),
-                (35, 117),
+                (25, 76),
+                (26, 77),
+                (27, 78),
+                (28, 103),
+                (29, 106),
+                (30, 109),
+                (31, 112),
+                (32, 115),
+                (33, 118),
+                (34, 121),
+                (35, 123),
+                (37, 125),
             ],
             &[],
-            &[(36, 143)],
+            &[(38, 150)],
             &[],
             &[],
         ];
         const RUSTYLR_SHIFT_NONTERM_MAP: &[&[(GrammarNonTerminals, u8)]] = &[
             &[
-                (GrammarNonTerminals::EofDef, 122),
-                (GrammarNonTerminals::ErrorDef, 136),
-                (GrammarNonTerminals::Glr, 138),
-                (GrammarNonTerminals::Grammar, 142),
-                (GrammarNonTerminals::GrammarLine, 140),
-                (GrammarNonTerminals::Lalr, 139),
-                (GrammarNonTerminals::ModulePrefixDef, 137),
-                (GrammarNonTerminals::ReduceDef, 135),
-                (GrammarNonTerminals::ReduceType, 125),
-                (GrammarNonTerminals::Rule, 119),
-                (GrammarNonTerminals::StartDef, 121),
-                (GrammarNonTerminals::TokenDef, 120),
-                (GrammarNonTerminals::TokenTypeDef, 123),
-                (GrammarNonTerminals::UserDataDef, 124),
-                (GrammarNonTerminals::_GrammarLine_Plus32, 144),
+                (GrammarNonTerminals::EofDef, 135),
+                (GrammarNonTerminals::ErrorDef, 142),
+                (GrammarNonTerminals::Glr, 144),
+                (GrammarNonTerminals::Grammar, 149),
+                (GrammarNonTerminals::GrammarLine, 147),
+                (GrammarNonTerminals::Lalr, 145),
+                (GrammarNonTerminals::ModulePrefixDef, 143),
+                (GrammarNonTerminals::Precedence, 146),
+                (GrammarNonTerminals::ReduceDef, 141),
+                (GrammarNonTerminals::ReduceType, 138),
+                (GrammarNonTerminals::Rule, 132),
+                (GrammarNonTerminals::StartDef, 134),
+                (GrammarNonTerminals::TokenDef, 133),
+                (GrammarNonTerminals::TokenTypeDef, 136),
+                (GrammarNonTerminals::UserDataDef, 137),
+                (GrammarNonTerminals::_GrammarLine_Plus37, 151),
             ],
             &[(GrammarNonTerminals::RuleType, 3)],
             &[],
             &[],
             &[
                 (GrammarNonTerminals::Pattern, 63),
-                (GrammarNonTerminals::RuleLine, 69),
+                (GrammarNonTerminals::RuleLine, 75),
                 (GrammarNonTerminals::RuleLines, 58),
                 (GrammarNonTerminals::TerminalSet, 47),
                 (GrammarNonTerminals::TokenMapped, 62),
-                (GrammarNonTerminals::_TokenMapped_Plus24, 64),
-                (GrammarNonTerminals::_TokenMapped_Star25, 66),
+                (GrammarNonTerminals::_TokenMapped_Plus27, 64),
+                (GrammarNonTerminals::_TokenMapped_Star28, 66),
             ],
             &[],
             &[
@@ -2303,21 +2501,21 @@ impl GrammarParser {
             &[
                 (GrammarNonTerminals::Pattern, 28),
                 (GrammarNonTerminals::TerminalSet, 27),
-                (GrammarNonTerminals::_Pattern_Plus29, 41),
+                (GrammarNonTerminals::_Pattern_Plus33, 41),
             ],
             &[],
             &[],
             &[
                 (GrammarNonTerminals::Pattern, 28),
                 (GrammarNonTerminals::TerminalSet, 27),
-                (GrammarNonTerminals::_Pattern_Plus29, 38),
+                (GrammarNonTerminals::_Pattern_Plus33, 38),
             ],
-            &[(GrammarNonTerminals::_caret_Question26, 15)],
+            &[(GrammarNonTerminals::_caret_Question30, 15)],
             &[],
             &[
                 (GrammarNonTerminals::TerminalSetItem, 22),
-                (GrammarNonTerminals::_TerminalSetItem_Plus27, 23),
-                (GrammarNonTerminals::_TerminalSetItem_Star28, 25),
+                (GrammarNonTerminals::_TerminalSetItem_Plus31, 23),
+                (GrammarNonTerminals::_TerminalSetItem_Star32, 25),
             ],
             &[],
             &[],
@@ -2355,11 +2553,11 @@ impl GrammarParser {
                 (GrammarNonTerminals::TerminalSet, 27),
             ],
             &[],
-            &[(GrammarNonTerminals::_caret_Question26, 44)],
+            &[(GrammarNonTerminals::_caret_Question30, 44)],
             &[
                 (GrammarNonTerminals::TerminalSetItem, 22),
-                (GrammarNonTerminals::_TerminalSetItem_Plus27, 23),
-                (GrammarNonTerminals::_TerminalSetItem_Star28, 45),
+                (GrammarNonTerminals::_TerminalSetItem_Plus31, 23),
+                (GrammarNonTerminals::_TerminalSetItem_Star32, 45),
             ],
             &[],
             &[],
@@ -2384,8 +2582,8 @@ impl GrammarParser {
                 (GrammarNonTerminals::RuleLine, 61),
                 (GrammarNonTerminals::TerminalSet, 47),
                 (GrammarNonTerminals::TokenMapped, 62),
-                (GrammarNonTerminals::_TokenMapped_Plus24, 64),
-                (GrammarNonTerminals::_TokenMapped_Star25, 66),
+                (GrammarNonTerminals::_TokenMapped_Plus27, 64),
+                (GrammarNonTerminals::_TokenMapped_Star28, 66),
             ],
             &[],
             &[],
@@ -2396,7 +2594,16 @@ impl GrammarParser {
                 (GrammarNonTerminals::TokenMapped, 65),
             ],
             &[],
-            &[(GrammarNonTerminals::Action, 68)],
+            &[
+                (GrammarNonTerminals::PrecDef, 71),
+                (GrammarNonTerminals::_PrecDef_Question29, 72),
+            ],
+            &[(GrammarNonTerminals::IdentOrLiteral, 70)],
+            &[],
+            &[],
+            &[],
+            &[],
+            &[(GrammarNonTerminals::Action, 74)],
             &[],
             &[],
             &[],
@@ -2404,9 +2611,9 @@ impl GrammarParser {
             &[],
             &[],
             &[
-                (GrammarNonTerminals::RustCode, 92),
-                (GrammarNonTerminals::_TerminalSet30, 94),
-                (GrammarNonTerminals::__TerminalSet30_Plus31, 95),
+                (GrammarNonTerminals::RustCode, 98),
+                (GrammarNonTerminals::_TerminalSet34, 100),
+                (GrammarNonTerminals::__TerminalSet34_Plus35, 101),
             ],
             &[],
             &[],
@@ -2429,48 +2636,58 @@ impl GrammarParser {
             &[],
             &[],
             &[],
-            &[(GrammarNonTerminals::_TerminalSet30, 96)],
+            &[(GrammarNonTerminals::_TerminalSet34, 102)],
             &[],
             &[],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::RustCode, 101),
-                (GrammarNonTerminals::_TerminalSet30, 94),
-                (GrammarNonTerminals::__TerminalSet30_Plus31, 95),
-            ],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::RustCode, 104),
-                (GrammarNonTerminals::_TerminalSet30, 94),
-                (GrammarNonTerminals::__TerminalSet30_Plus31, 95),
-            ],
             &[],
             &[],
             &[
                 (GrammarNonTerminals::RustCode, 107),
-                (GrammarNonTerminals::_TerminalSet30, 94),
-                (GrammarNonTerminals::__TerminalSet30_Plus31, 95),
+                (GrammarNonTerminals::_TerminalSet34, 100),
+                (GrammarNonTerminals::__TerminalSet34_Plus35, 101),
             ],
             &[],
             &[],
             &[
                 (GrammarNonTerminals::RustCode, 110),
-                (GrammarNonTerminals::_TerminalSet30, 94),
-                (GrammarNonTerminals::__TerminalSet30_Plus31, 95),
+                (GrammarNonTerminals::_TerminalSet34, 100),
+                (GrammarNonTerminals::__TerminalSet34_Plus35, 101),
             ],
             &[],
             &[],
             &[
                 (GrammarNonTerminals::RustCode, 113),
-                (GrammarNonTerminals::_TerminalSet30, 94),
-                (GrammarNonTerminals::__TerminalSet30_Plus31, 95),
+                (GrammarNonTerminals::_TerminalSet34, 100),
+                (GrammarNonTerminals::__TerminalSet34_Plus35, 101),
+            ],
+            &[],
+            &[],
+            &[
+                (GrammarNonTerminals::RustCode, 116),
+                (GrammarNonTerminals::_TerminalSet34, 100),
+                (GrammarNonTerminals::__TerminalSet34_Plus35, 101),
+            ],
+            &[],
+            &[],
+            &[
+                (GrammarNonTerminals::RustCode, 119),
+                (GrammarNonTerminals::_TerminalSet34, 100),
+                (GrammarNonTerminals::__TerminalSet34_Plus35, 101),
             ],
             &[],
             &[],
             &[],
             &[],
+            &[],
+            &[],
+            &[
+                (GrammarNonTerminals::IdentOrLiteral, 128),
+                (GrammarNonTerminals::_IdentOrLiteral_Plus36, 129),
+            ],
+            &[],
+            &[],
+            &[],
+            &[(GrammarNonTerminals::IdentOrLiteral, 131)],
             &[],
             &[],
             &[],
@@ -2480,20 +2697,10 @@ impl GrammarParser {
             &[],
             &[],
             &[
-                (GrammarNonTerminals::TerminalOrTerminalSet, 133),
-                (GrammarNonTerminals::TerminalSet, 132),
+                (GrammarNonTerminals::IdentOrLiteral, 128),
+                (GrammarNonTerminals::_IdentOrLiteral_Plus36, 139),
             ],
-            &[],
-            &[],
-            &[(GrammarNonTerminals::_caret_Question26, 129)],
-            &[
-                (GrammarNonTerminals::TerminalSetItem, 22),
-                (GrammarNonTerminals::_TerminalSetItem_Plus27, 23),
-                (GrammarNonTerminals::_TerminalSetItem_Star28, 130),
-            ],
-            &[],
-            &[],
-            &[],
+            &[(GrammarNonTerminals::IdentOrLiteral, 131)],
             &[],
             &[],
             &[],
@@ -2502,20 +2709,21 @@ impl GrammarParser {
             &[],
             &[],
             &[
-                (GrammarNonTerminals::EofDef, 122),
-                (GrammarNonTerminals::ErrorDef, 136),
-                (GrammarNonTerminals::Glr, 138),
-                (GrammarNonTerminals::GrammarLine, 140),
-                (GrammarNonTerminals::Lalr, 139),
-                (GrammarNonTerminals::ModulePrefixDef, 137),
-                (GrammarNonTerminals::ReduceDef, 135),
-                (GrammarNonTerminals::ReduceType, 125),
-                (GrammarNonTerminals::Rule, 119),
-                (GrammarNonTerminals::StartDef, 121),
-                (GrammarNonTerminals::TokenDef, 120),
-                (GrammarNonTerminals::TokenTypeDef, 123),
-                (GrammarNonTerminals::UserDataDef, 124),
-                (GrammarNonTerminals::_GrammarLine_Plus32, 141),
+                (GrammarNonTerminals::EofDef, 135),
+                (GrammarNonTerminals::ErrorDef, 142),
+                (GrammarNonTerminals::Glr, 144),
+                (GrammarNonTerminals::GrammarLine, 147),
+                (GrammarNonTerminals::Lalr, 145),
+                (GrammarNonTerminals::ModulePrefixDef, 143),
+                (GrammarNonTerminals::Precedence, 146),
+                (GrammarNonTerminals::ReduceDef, 141),
+                (GrammarNonTerminals::ReduceType, 138),
+                (GrammarNonTerminals::Rule, 132),
+                (GrammarNonTerminals::StartDef, 134),
+                (GrammarNonTerminals::TokenDef, 133),
+                (GrammarNonTerminals::TokenTypeDef, 136),
+                (GrammarNonTerminals::UserDataDef, 137),
+                (GrammarNonTerminals::_GrammarLine_Plus37, 148),
             ],
             &[],
             &[],
@@ -2527,102 +2735,105 @@ impl GrammarParser {
             &[(0, 2)],
             &[(0, 1)],
             &[],
-            &[(1, 55)],
-            &[(2, 13)],
+            &[(1, 60)],
+            &[(2, 14)],
             &[],
-            &[(2, 13)],
-            &[(2, 21)],
+            &[(2, 14)],
+            &[(2, 22)],
+            &[],
+            &[(3, 14)],
+            &[(3, 22)],
+            &[],
+            &[(4, 64)],
+            &[(4, 63)],
+            &[(5, 68)],
+            &[(4, 9)],
+            &[],
+            &[(4, 10)],
+            &[(4, 11)],
+            &[],
+            &[(4, 12)],
+            &[(4, 65)],
+            &[(5, 67)],
+            &[(4, 66)],
             &[],
             &[(3, 13)],
-            &[(3, 21)],
-            &[],
-            &[(4, 57)],
-            &[(4, 56)],
-            &[(5, 61)],
-            &[(4, 8)],
-            &[],
-            &[(4, 9)],
-            &[(4, 10)],
-            &[],
-            &[(4, 11)],
-            &[(4, 58)],
-            &[(5, 60)],
-            &[(4, 59)],
-            &[],
-            &[(3, 12)],
-            &[(3, 18)],
-            &[(6, 62)],
-            &[(3, 14)],
+            &[(3, 19)],
+            &[(6, 69)],
             &[(3, 15)],
             &[(3, 16)],
             &[(3, 17)],
+            &[(3, 18)],
             &[],
-            &[(3, 31)],
             &[(3, 32)],
-            &[(3, 30)],
-            &[(3, 19)],
-            &[],
+            &[(3, 33)],
+            &[(3, 31)],
             &[(3, 20)],
-            &[(6, 63)],
             &[],
-            &[(2, 20)],
-            &[(4, 57)],
-            &[(5, 61)],
+            &[(3, 21)],
+            &[(6, 70)],
             &[],
-            &[(2, 12)],
-            &[(2, 18)],
-            &[(7, 7)],
-            &[(2, 14)],
+            &[(2, 21)],
+            &[(4, 64)],
+            &[(5, 68)],
+            &[],
+            &[(2, 13)],
+            &[(2, 19)],
+            &[(7, 8)],
             &[(2, 15)],
             &[(2, 16)],
             &[(2, 17)],
+            &[(2, 18)],
             &[],
-            &[(2, 31)],
             &[(2, 32)],
-            &[(2, 30)],
-            &[(2, 19)],
+            &[(2, 33)],
+            &[(2, 31)],
+            &[(2, 20)],
             &[],
             &[(8, 0)],
-            &[(1, 55)],
+            &[(1, 60)],
             &[(9, 3)],
-            &[(7, 52)],
-            &[(7, 6)],
-            &[(1, 54)],
-            &[(7, 53)],
+            &[(7, 57)],
+            &[(7, 7)],
+            &[(1, 59)],
+            &[(7, 58)],
+            &[(10, 62)],
+            &[],
+            &[(10, 34)],
+            &[(10, 35)],
+            &[(10, 6)],
+            &[(10, 61)],
+            &[(9, 24)],
             &[(9, 23)],
-            &[(9, 22)],
             &[(9, 5)],
             &[(9, 4)],
-            &[(10, 33)],
-            &[(10, 34)],
+            &[(11, 36)],
+            &[(11, 37)],
             &[],
             &[],
-            &[(11, 64)],
-            &[(11, 65)],
-            &[(11, 66)],
-            &[(11, 67)],
-            &[(11, 68)],
-            &[(11, 69)],
-            &[(11, 70)],
-            &[(11, 71)],
-            &[(11, 72)],
-            &[(11, 73)],
-            &[(11, 74)],
-            &[(11, 75)],
-            &[(11, 76)],
-            &[(11, 77)],
-            &[(11, 78)],
-            &[(11, 79)],
-            &[(11, 80)],
-            &[(11, 81)],
+            &[(12, 71)],
+            &[(12, 72)],
+            &[(12, 73)],
+            &[(12, 74)],
+            &[(12, 75)],
+            &[(12, 76)],
+            &[(12, 77)],
+            &[(12, 78)],
+            &[(12, 79)],
+            &[(12, 80)],
+            &[(12, 81)],
+            &[(12, 82)],
+            &[(12, 83)],
+            &[(12, 84)],
+            &[(12, 85)],
+            &[(12, 86)],
+            &[(12, 87)],
+            &[(12, 88)],
             &[],
-            &[(8, 24)],
-            &[(11, 82)],
-            &[(12, 25)],
-            &[(11, 83)],
-            &[],
-            &[],
-            &[(8, 26)],
+            &[(8, 25)],
+            &[(12, 89)],
+            &[(13, 26)],
+            &[(12, 90)],
             &[],
             &[],
             &[(8, 27)],
@@ -2634,40 +2845,44 @@ impl GrammarParser {
             &[(8, 29)],
             &[],
             &[],
-            &[(8, 36)],
+            &[(8, 30)],
             &[],
-            &[],
-            &[(8, 37)],
             &[],
             &[(8, 39)],
             &[],
-            &[(8, 38)],
+            &[],
             &[(8, 40)],
-            &[(8, 41)],
+            &[],
             &[(8, 42)],
+            &[],
+            &[(8, 41)],
+            &[],
+            &[(14, 34)],
+            &[(14, 35)],
+            &[(14, 91)],
+            &[],
             &[(8, 43)],
+            &[(14, 92)],
             &[(8, 44)],
             &[(8, 45)],
-            &[],
-            &[(12, 31)],
-            &[(12, 32)],
-            &[(4, 57)],
-            &[(5, 61)],
-            &[],
-            &[(12, 12)],
-            &[(12, 30)],
-            &[],
-            &[(8, 35)],
             &[(8, 46)],
             &[(8, 47)],
             &[(8, 48)],
-            &[(8, 50)],
             &[(8, 49)],
-            &[(13, 84)],
-            &[(13, 85)],
             &[],
             &[],
-            &[(13, 51)],
+            &[(8, 38)],
+            &[(8, 50)],
+            &[(8, 51)],
+            &[(8, 52)],
+            &[(8, 54)],
+            &[(8, 53)],
+            &[(8, 55)],
+            &[(15, 93)],
+            &[(15, 94)],
+            &[],
+            &[],
+            &[(15, 56)],
         ];
         const RUSTYLR_RULESET_MAP: &[&[(u8, u8)]] = &[
             &[],
@@ -2675,82 +2890,81 @@ impl GrammarParser {
             &[(1, 1)],
             &[(0, 2)],
             &[(0, 3)],
-            &[(7, 1), (13, 1)],
-            &[(7, 2)],
-            &[(13, 1)],
+            &[(8, 1), (14, 1)],
+            &[(8, 2)],
+            &[(14, 1)],
+            &[(22, 1)],
             &[(21, 1)],
-            &[(20, 1)],
-            &[(13, 1)],
+            &[(14, 1)],
+            &[(22, 1)],
             &[(21, 1)],
-            &[(20, 1)],
-            &[(12, 1)],
-            &[(56, 1)],
+            &[(13, 1)],
+            &[(63, 1)],
+            &[(13, 2)],
+            &[(9, 1), (10, 1)],
+            &[(10, 2)],
+            &[(10, 3)],
+            &[(11, 1), (12, 1)],
             &[(12, 2)],
-            &[(8, 1), (9, 1)],
-            &[(9, 2)],
-            &[(9, 3)],
-            &[(10, 1), (11, 1)],
-            &[(11, 2)],
-            &[(11, 3)],
-            &[(58, 1)],
-            &[(59, 1), (60, 1)],
-            &[(59, 2)],
             &[(12, 3)],
-            &[(12, 4)],
-            &[(18, 1)],
-            &[(14, 1), (15, 1), (16, 1), (17, 1), (19, 1), (62, 1)],
-            &[(14, 2)],
+            &[(65, 1)],
+            &[(66, 1), (67, 1)],
+            &[(66, 2)],
+            &[(13, 3)],
+            &[(13, 4)],
+            &[(19, 1)],
+            &[(15, 1), (16, 1), (17, 1), (18, 1), (20, 1), (69, 1)],
             &[(15, 2)],
             &[(16, 2)],
             &[(17, 2)],
-            &[(19, 2)],
-            &[(31, 1)],
+            &[(18, 2)],
+            &[(20, 2)],
             &[(32, 1)],
-            &[(30, 1)],
-            &[(19, 3)],
-            &[(20, 2), (63, 1)],
+            &[(33, 1)],
+            &[(31, 1)],
             &[(20, 3)],
-            &[(14, 1), (15, 1), (16, 1), (17, 1), (19, 1), (63, 2)],
-            &[(20, 2), (63, 1)],
-            &[(20, 3)],
-            &[(12, 1)],
-            &[(12, 2)],
-            &[(12, 3)],
-            &[(12, 4)],
-            &[(18, 1)],
-            &[(7, 3), (14, 1), (15, 1), (16, 1), (17, 1), (19, 1)],
-            &[(14, 2)],
+            &[(21, 2), (70, 1)],
+            &[(21, 3)],
+            &[(15, 1), (16, 1), (17, 1), (18, 1), (20, 1), (70, 2)],
+            &[(21, 2), (70, 1)],
+            &[(21, 3)],
+            &[(13, 1)],
+            &[(13, 2)],
+            &[(13, 3)],
+            &[(13, 4)],
+            &[(19, 1)],
+            &[(8, 3), (15, 1), (16, 1), (17, 1), (18, 1), (20, 1)],
             &[(15, 2)],
             &[(16, 2)],
             &[(17, 2)],
-            &[(19, 2)],
-            &[(31, 1)],
+            &[(18, 2)],
+            &[(20, 2)],
             &[(32, 1)],
-            &[(30, 1)],
-            &[(19, 3)],
+            &[(33, 1)],
+            &[(31, 1)],
+            &[(20, 3)],
             &[(0, 4), (3, 1)],
             &[(0, 5)],
             &[(3, 2)],
             &[(3, 3)],
-            &[(52, 1)],
-            &[(6, 1), (14, 1), (15, 1), (16, 1), (17, 1), (19, 1)],
-            &[(53, 1), (54, 1)],
-            &[(53, 2)],
+            &[(57, 1)],
+            &[(7, 1), (15, 1), (16, 1), (17, 1), (18, 1), (20, 1)],
+            &[(58, 1), (59, 1)],
+            &[(58, 2)],
             &[(5, 1)],
-            &[(22, 1)],
-            &[(5, 2)],
-            &[(4, 1)],
-            &[(33, 1)],
+            &[(6, 1)],
             &[(34, 1)],
-            &[(24, 1)],
-            &[(24, 2)],
-            &[(64, 1)],
-            &[(65, 1)],
-            &[(66, 1)],
-            &[(67, 1)],
-            &[(68, 1)],
-            &[(69, 1)],
-            &[(70, 1)],
+            &[(35, 1)],
+            &[(6, 2)],
+            &[(61, 1)],
+            &[(5, 2)],
+            &[(23, 1)],
+            &[(5, 3)],
+            &[(4, 1)],
+            &[(36, 1)],
+            &[(37, 1)],
+            &[(25, 1)],
+            &[(25, 2)],
             &[(71, 1)],
             &[(72, 1)],
             &[(73, 1)],
@@ -2762,14 +2976,18 @@ impl GrammarParser {
             &[(79, 1)],
             &[(80, 1)],
             &[(81, 1)],
-            &[(24, 3)],
-            &[(24, 4)],
             &[(82, 1)],
-            &[(25, 1), (83, 1)],
-            &[(83, 2)],
-            &[(26, 1)],
-            &[(26, 2)],
-            &[(26, 3)],
+            &[(83, 1)],
+            &[(84, 1)],
+            &[(85, 1)],
+            &[(86, 1)],
+            &[(87, 1)],
+            &[(88, 1)],
+            &[(25, 3)],
+            &[(25, 4)],
+            &[(89, 1)],
+            &[(26, 1), (90, 1)],
+            &[(90, 2)],
             &[(27, 1)],
             &[(27, 2)],
             &[(27, 3)],
@@ -2779,50 +2997,54 @@ impl GrammarParser {
             &[(29, 1)],
             &[(29, 2)],
             &[(29, 3)],
-            &[(36, 1)],
-            &[(36, 2)],
-            &[(36, 3)],
-            &[(37, 1)],
-            &[(37, 2)],
-            &[(37, 3)],
+            &[(30, 1)],
+            &[(30, 2)],
+            &[(30, 3)],
             &[(39, 1)],
             &[(39, 2)],
-            &[(38, 1)],
-            &[(38, 2)],
+            &[(39, 3)],
             &[(40, 1)],
-            &[(41, 1)],
+            &[(40, 2)],
+            &[(40, 3)],
             &[(42, 1)],
+            &[(42, 2)],
+            &[(41, 1)],
+            &[(41, 2)],
             &[(43, 1)],
+            &[(34, 1)],
+            &[(35, 1)],
+            &[(91, 1)],
+            &[(43, 2), (92, 1)],
+            &[(43, 3)],
+            &[(92, 2)],
             &[(44, 1)],
             &[(45, 1)],
-            &[(35, 1)],
-            &[(31, 1)],
-            &[(32, 1)],
-            &[(12, 1)],
-            &[(12, 2)],
-            &[(12, 3)],
-            &[(12, 4)],
-            &[(30, 1)],
-            &[(35, 2)],
-            &[(35, 3)],
             &[(46, 1)],
             &[(47, 1)],
             &[(48, 1)],
-            &[(50, 1)],
             &[(49, 1)],
-            &[(84, 1), (85, 1)],
-            &[(85, 2)],
-            &[(86, 1)],
-            &[(86, 2)],
+            &[(38, 1)],
+            &[(38, 2), (92, 1)],
+            &[(38, 3)],
+            &[(50, 1)],
             &[(51, 1)],
+            &[(52, 1)],
+            &[(54, 1)],
+            &[(53, 1)],
+            &[(55, 1)],
+            &[(93, 1), (94, 1)],
+            &[(94, 2)],
+            &[(95, 1)],
+            &[(95, 2)],
+            &[(56, 1)],
         ];
         const RUSTYLR_RULESET_SHIFTED0_MAP: &[u8] = &[
             0, 1, 2, 2, 3, 2, 4, 2, 2, 5, 2, 2, 5, 6, 2, 7, 2, 2, 2, 2, 2, 2, 2, 8, 2, 2, 2, 2, 2,
             2, 2, 2, 2, 9, 2, 2, 2, 2, 4, 2, 2, 4, 2, 6, 7, 2, 2, 2, 2, 2, 2, 2, 2, 9, 2, 2, 2, 2,
-            2, 2, 10, 2, 2, 2, 11, 2, 12, 2, 2, 2, 2, 2, 2, 13, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 14, 2, 2, 2, 2, 13, 2, 2, 13, 2, 2, 13, 2, 2, 13, 2, 2, 13,
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 9, 2, 2, 6, 7, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 15, 2,
-            2, 2, 2,
+            2, 2, 10, 2, 2, 2, 11, 2, 12, 13, 2, 2, 2, 2, 14, 2, 2, 2, 2, 2, 2, 15, 2, 2, 2, 2, 2,
+            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 16, 2, 2, 2, 2, 15, 2, 2, 15, 2, 2, 15,
+            2, 2, 15, 2, 2, 15, 2, 2, 2, 2, 2, 2, 17, 2, 2, 2, 13, 2, 2, 2, 2, 2, 2, 2, 2, 17, 13,
+            2, 2, 2, 2, 2, 2, 2, 18, 2, 2, 2, 2,
         ];
         let states: Vec<GrammarState> = RUSTYLR_SHIFT_TERM_MAP
             .iter()

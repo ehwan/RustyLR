@@ -11,7 +11,7 @@
  - [`%start`](#start-symbol-must-defined)
  - [`%eof`](#eof-symbol-must-defined)
  - [`%userdata`](#userdata-type-optional)
- - [`%left`, `%right`](#reduce-type-optional)
+ - [`%left`, `%right`, `%precedence`](#reduce-type-optional)
  - [`%err`, `%error`](#error-type-optional)
  - [`%glr`](#glr-parser-generation)
  - [`%lalr`](#lalr-parser-generation)
@@ -29,7 +29,7 @@ In build script files, the grammar section is separated from Rust code using `%%
 Each production rule defines how a non-terminal symbol can be derived from a sequence of patterns.
 ```
 NonTerminalName
-    : Pattern1 Pattern2 ... PatternN { ReduceAction }
+    : Pattern1 Pattern2 ... PatternN %prec OpName { ReduceAction }
     | Pattern1 Pattern2 ... PatternN { ReduceAction }
    ...
     ;
@@ -37,6 +37,7 @@ NonTerminalName
  - **NonTerminalName:** The name of the non-terminal symbol being defined.​
  - **PatternX:** A terminal or non-terminal symbol, or a pattern as defined below.​
  - **ReduceAction:** Optional Rust code executed when the rule is reduced.​
+ - **OpName:** Use this symbol as an operator for this production rule. `OpName` could be defined `%token` or literal, or any unique identifier just for this rule. See [ReduceType](#reduce-type-optional) for more details.
 
 ## Patterns
 Patterns define the structure of the input that matches a production rule.
@@ -281,24 +282,37 @@ fn main() {
 ## Reduce type <sub><sup>(optional)</sup></sub>
 ```
 // reduce first
-%left term1 ;
-%left [term1 term_start-term_last] ;
+%left term1 term2 term3 ...;
 
 // shift first
 %right term1 ;
-%right [term1 term_start-term_last] ;
+%right term1 term2 term3 ... ;
+
+// only precedence
+%precedence term1 term2 term3 ... ;
 ```
-Set the shift/reduce precedence for terminal symbols.
-`%left` can be abbreviated as `%reduce` or `%l`, and `%right` can be abbreviated as `%shift` or `%r`.
+%left can be abbreviated as %reduce or %l, and %right as %shift or %r.
+These directives define the associativity and precedence of operators.
+As in `yacc` and `bison`, the order of precedence is determined by the order in which %left, %right, or %precedence directives appear.
 
 ```rust
-// reduce first for token 'plus'
+// left reduction for binary operator '+'
 %left '+';
 
-// shift first for token 'hat'
+// right reduction for binary operator '^'
 %right '^';
 ```
 
+```rust
+%left '+';
+%left '*';
+%left UnaryMinus; // << highest priority
+
+E: E '+' E { E + E }
+ | E '*' E { E * E }
+ | '-' E %prec UnaryMinus { -E } // make operator for this production rule `UnaryMinus`
+ ;
+```
 
 
 ## Error type <sub><sup>(optional)</sup></sub>
