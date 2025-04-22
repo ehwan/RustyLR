@@ -6,8 +6,8 @@ pub trait Parser {
     type Term;
     type NonTerm;
 
-    /// get list of production rules
+    /// Get list of production rules
     fn get_rules(&self) -> &[ProductionRule<Self::Term, Self::NonTerm>];
-    /// get list of states
+    /// Get list of states
     fn get_states(&self) -> &[State<Self::Term, Self::NonTerm>];
 }

@@ -223,6 +223,30 @@ impl<Data: NodeData> Context<Data> {
         self.expected(parser)
     }
 
+    /// Get set of non-terminal symbols that current context is trying to parse.
+    ///
+    /// The order of the returned set does not mean anything.
+    /// If the current context is attempting to recognize following grammar:
+    ///
+    /// Chunk -> Statement -> IfStatement -> ReturnStatement -> ...
+    ///
+    /// Then the returned set will be:
+    /// [`Chunk`, `Statement`, `IfStatement`, `ReturnStatement`]
+    pub fn on_parsing<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &P,
+    ) -> crate::HashSet<Data::NonTerm>
+    where
+        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::NonTerminal<Data::Term>,
+    {
+        let mut ret: crate::HashSet<Data::NonTerm> = Default::default();
+        for node in self.nodes() {
+            let set = node.on_parsing(parser);
+            ret.extend(set.into_iter());
+        }
+        ret
+    }
+
     /// Get backtrace infos for all paths.
     pub fn backtraces<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &'a self,

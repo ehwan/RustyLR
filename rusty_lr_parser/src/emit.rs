@@ -127,7 +127,7 @@ impl Grammar {
     }
 
     // build grammar at compile time
-    fn emit_grammar_compiletime(&self) -> Result<TokenStream, Box<EmitError>> {
+    fn emit_grammar_compiletime(&self) -> Result<(TokenStream, TokenStream), Box<EmitError>> {
         let mut grammar: rusty_lr_core::builder::Grammar<usize, usize> = self.create_grammar();
 
         // build
@@ -483,85 +483,168 @@ impl Grammar {
 
         let token_typename = &self.token_typename;
 
-        Ok(quote! {
-            let __rustylr_terminals:Vec<#token_typename> = vec![#comma_separated_terminals];
-            const RUSTYLR_RULES_TOKENS: &[&[#module_prefix::Token<#terminal_index_typename, #nonterminals_enum_name>]] = &[#tokens_initializer];
-            const RUSTYLR_RULES_NAME: &[#nonterminals_enum_name] = &[#rule_names_initializer];
+        // impl NonTerminal trait
+        let mut nonterm_trait_is_augmented_case = TokenStream::new();
+        let mut nonterm_trait_is_generated_case = TokenStream::new();
+        let mut nonterm_trait_is_nullable_case = TokenStream::new();
+        let mut nonterm_trait_firsts_case = TokenStream::new();
+        let mut nonterm_trait_lasts_case = TokenStream::new();
+        for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
+            let name = &nonterm.name;
+            let (is_augmented, is_generated) = if name == utils::AUGMENTED_NAME {
+                (true, true)
+            } else {
+                // non-term is auto-generated if nonterm.regex_span.is_some()
+                (false, nonterm.regex_span.is_some())
+            };
 
-            let rules: Vec<#rule_typename> = RUSTYLR_RULES_NAME.iter().zip(
-                RUSTYLR_RULES_TOKENS.iter()
-            ).map(
-                | (name, tokens) | {
-                    #rule_typename {
-                        name: *name,
-                        rule: tokens.iter().map(
-                            | token | {
-                                match token {
-                                    #module_prefix::Token::Term(term) => #module_prefix::Token::Term(__rustylr_terminals[*term as usize].clone()),
-                                    #module_prefix::Token::NonTerm(nonterm) => #module_prefix::Token::NonTerm(*nonterm),
-                                }
-                            }
-                        ).collect(),
+            let mut firsts_init_comma_separated = TokenStream::new();
+            let mut lasts_init_comma_separated = TokenStream::new();
+            for &term in &grammar.firsts.get(&nonterm_idx).unwrap().0 {
+                let body = &self.terminals[term].body;
+                firsts_init_comma_separated.extend(quote! {
+                    #body,
+                });
+            }
+            for &term in &grammar.lasts.get(&nonterm_idx).unwrap().0 {
+                let body = &self.terminals[term].body;
+                lasts_init_comma_separated.extend(quote! {
+                    #body,
+                });
+            }
+
+            nonterm_trait_firsts_case.extend(quote! {
+                #nonterminals_enum_name::#name => {
+                    vec![#firsts_init_comma_separated]
+                }
+            });
+            nonterm_trait_lasts_case.extend(quote! {
+                #nonterminals_enum_name::#name => {
+                    vec![#lasts_init_comma_separated]
+                }
+            });
+            nonterm_trait_is_augmented_case.extend(quote! {
+                #nonterminals_enum_name::#name => #is_augmented,
+            });
+            nonterm_trait_is_generated_case.extend(quote! {
+                #nonterminals_enum_name::#name => #is_generated,
+            });
+            nonterm_trait_is_nullable_case.extend(quote! {
+                #nonterminals_enum_name::#name => false,
+            });
+        }
+        let nonterm_trait_impl = quote! {
+            impl #module_prefix::NonTerminal<#token_typename> for #nonterminals_enum_name {
+                fn is_auto_generated(&self) -> bool {
+                    match self {
+                        #nonterm_trait_is_generated_case
                     }
                 }
-            ).collect();
+                fn firsts(&self) -> Vec<#token_typename> {
+                    match self {
+                        #nonterm_trait_firsts_case
+                    }
+                }
+                fn lasts(&self) -> Vec<#token_typename> {
+                    match self {
+                        #nonterm_trait_lasts_case
+                    }
+                }
+                fn nullable(&self) -> bool {
+                    match self {
+                        #nonterm_trait_is_nullable_case
+                    }
+                }
+                fn is_augmented(&self) -> bool {
+                    match self {
+                        #nonterm_trait_is_augmented_case
+                    }
+                }
+            }
+        };
 
-            const RUSTYLR_REDUCE_TERMINALS_CACHE: &[&[#terminal_index_typename]] = &[#reduce_terminals_cache_initializer];
-            const RUSTYLR_RULESET_SHIFTED0_CACHE: &[&[#rule_index_typename]] = &[#ruleset_shifted0_cache_initializer];
-            const RUSTYLR_SHIFT_TERM_MAP: &[&[(#terminal_index_typename, #state_index_typename)]] = &[#shift_term_initializer];
-            const RUSTYLR_SHIFT_NONTERM_MAP: &[&[(#nonterminals_enum_name, #state_index_typename)]] = &[#shift_nonterm_initializer];
-            const RUSTYLR_REDUCE_MAP: &[&[(#terminal_index_typename, #reduce_terminals_cache_typename)]] = &[#reduce_initializer];
-            const RUSTYLR_RULESET_MAP: &[&[(#rule_index_typename,#shift_typename)]] = &[#ruleset_initializer];
-            const RUSTYLR_RULESET_SHIFTED0_MAP: &[#ruleset0_cache_typename] = &[#ruleset_shifted0_initialiezr];
+        Ok((
+            quote! {
+                let __rustylr_terminals:Vec<#token_typename> = vec![#comma_separated_terminals];
+                const RUSTYLR_RULES_TOKENS: &[&[#module_prefix::Token<#terminal_index_typename, #nonterminals_enum_name>]] = &[#tokens_initializer];
+                const RUSTYLR_RULES_NAME: &[#nonterminals_enum_name] = &[#rule_names_initializer];
 
-            let states:Vec<#state_typename> = RUSTYLR_SHIFT_TERM_MAP.iter().zip(
-                RUSTYLR_SHIFT_NONTERM_MAP.iter().zip(
-                    RUSTYLR_REDUCE_MAP.iter().zip(
-                        RUSTYLR_RULESET_MAP.iter().zip(
-                            RUSTYLR_RULESET_SHIFTED0_MAP.iter()
+                let rules: Vec<#rule_typename> = RUSTYLR_RULES_NAME.iter().zip(
+                    RUSTYLR_RULES_TOKENS.iter()
+                ).map(
+                    | (name, tokens) | {
+                        #rule_typename {
+                            name: *name,
+                            rule: tokens.iter().map(
+                                | token | {
+                                    match token {
+                                        #module_prefix::Token::Term(term) => #module_prefix::Token::Term(__rustylr_terminals[*term as usize].clone()),
+                                        #module_prefix::Token::NonTerm(nonterm) => #module_prefix::Token::NonTerm(*nonterm),
+                                    }
+                                }
+                            ).collect(),
+                        }
+                    }
+                ).collect();
+
+                const RUSTYLR_REDUCE_TERMINALS_CACHE: &[&[#terminal_index_typename]] = &[#reduce_terminals_cache_initializer];
+                const RUSTYLR_RULESET_SHIFTED0_CACHE: &[&[#rule_index_typename]] = &[#ruleset_shifted0_cache_initializer];
+                const RUSTYLR_SHIFT_TERM_MAP: &[&[(#terminal_index_typename, #state_index_typename)]] = &[#shift_term_initializer];
+                const RUSTYLR_SHIFT_NONTERM_MAP: &[&[(#nonterminals_enum_name, #state_index_typename)]] = &[#shift_nonterm_initializer];
+                const RUSTYLR_REDUCE_MAP: &[&[(#terminal_index_typename, #reduce_terminals_cache_typename)]] = &[#reduce_initializer];
+                const RUSTYLR_RULESET_MAP: &[&[(#rule_index_typename,#shift_typename)]] = &[#ruleset_initializer];
+                const RUSTYLR_RULESET_SHIFTED0_MAP: &[#ruleset0_cache_typename] = &[#ruleset_shifted0_initialiezr];
+
+                let states:Vec<#state_typename> = RUSTYLR_SHIFT_TERM_MAP.iter().zip(
+                    RUSTYLR_SHIFT_NONTERM_MAP.iter().zip(
+                        RUSTYLR_REDUCE_MAP.iter().zip(
+                            RUSTYLR_RULESET_MAP.iter().zip(
+                                RUSTYLR_RULESET_SHIFTED0_MAP.iter()
+                            )
                         )
                     )
-                )
-            ).map(
-                | (shift_goto_map_term, (shift_goto_map_nonterm, (reduce_map_, (ruleset,ruleset0_id)))) | {
-                    #init_reduce_map
+                ).map(
+                    | (shift_goto_map_term, (shift_goto_map_nonterm, (reduce_map_, (ruleset,ruleset0_id)))) | {
+                        #init_reduce_map
 
 
-                    let mut ruleset: Vec<#module_prefix::ShiftedRuleRef> = ruleset.iter().map(
-                        | (ruleid, shifted) | {
-                            #module_prefix::ShiftedRuleRef {
-                                rule: *ruleid as usize,
-                                shifted: *shifted as usize,
+                        let mut ruleset: Vec<#module_prefix::ShiftedRuleRef> = ruleset.iter().map(
+                            | (ruleid, shifted) | {
+                                #module_prefix::ShiftedRuleRef {
+                                    rule: *ruleid as usize,
+                                    shifted: *shifted as usize,
+                                }
                             }
+                        ).collect();
+                        ruleset.extend(RUSTYLR_RULESET_SHIFTED0_CACHE[*ruleset0_id as usize].iter().map(
+                            | ruleid |
+                            {
+                                #module_prefix::ShiftedRuleRef {
+                                    rule: *ruleid as usize,
+                                    shifted: 0,
+                                }
+                            }
+                        ));
+
+
+                        #state_typename {
+                            shift_goto_map_term: shift_goto_map_term.iter().map(
+                                | (term_idx, goto) | {
+                                    (__rustylr_terminals[*term_idx as usize].clone(), *goto as usize)
+                                }
+                            ).collect(),
+                            shift_goto_map_nonterm: shift_goto_map_nonterm
+                                .iter()
+                                .map(|(nonterm, goto)| (*nonterm, *goto as usize))
+                                .collect(),
+                            reduce_map,
+                            ruleset,
                         }
-                    ).collect();
-                    ruleset.extend(RUSTYLR_RULESET_SHIFTED0_CACHE[*ruleset0_id as usize].iter().map(
-                        | ruleid |
-                        {
-                            #module_prefix::ShiftedRuleRef {
-                                rule: *ruleid as usize,
-                                shifted: 0,
-                            }
-                        }
-                    ));
-
-
-                    #state_typename {
-                        shift_goto_map_term: shift_goto_map_term.iter().map(
-                            | (term_idx, goto) | {
-                                (__rustylr_terminals[*term_idx as usize].clone(), *goto as usize)
-                            }
-                        ).collect(),
-                        shift_goto_map_nonterm: shift_goto_map_nonterm
-                            .iter()
-                            .map(|(nonterm, goto)| (*nonterm, *goto as usize))
-                            .collect(),
-                        reduce_map,
-                        ruleset,
                     }
-                }
-            ).collect();
-        })
+                ).collect();
+            },
+            nonterm_trait_impl,
+        ))
     }
 
     fn emit_parser(&self, grammar_emit: TokenStream) -> Result<TokenStream, Box<EmitError>> {
@@ -1194,7 +1277,7 @@ impl Grammar {
     pub fn emit_compiletime(&self) -> Result<TokenStream, Box<EmitError>> {
         let type_alias_emit = self.emit_type_alises();
         let enum_emit = self.emit_nonterm_enum();
-        let grammar_emit = self.emit_grammar_compiletime()?;
+        let (grammar_emit, nonterm_trait_impl) = self.emit_grammar_compiletime()?;
         let parser_emit = if self.glr {
             self.emit_parser_glr(grammar_emit)?
         } else {
@@ -1204,6 +1287,7 @@ impl Grammar {
         Ok(quote! {
             #type_alias_emit
             #enum_emit
+            #nonterm_trait_impl
             #parser_emit
         })
     }

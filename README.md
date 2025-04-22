@@ -137,6 +137,36 @@ The generated code will include several structs and enums:
  - `<Start>Rule`: A type representing a single production rule.
  - `<Start>NonTerminals`: A enum representing all non-terminal symbols in the grammar.
 
+
+You can get useful information from `<Start>NonTerminals` enum.
+ ```rust
+ let non_terminal: <Start>NonTerminals = ...;
+ let info = non_terminal.info();
+
+ info.firsts(); // first terminal symbols of this non-terminal
+ info.lasts(); // last terminal symbols of this non-terminal
+ info.nullable(); // true if this non-terminal can be reduced to empty
+ info.is_auto_generated(); // true if this non-terminal is auto-generated
+ ```
+
+You can also get contextual information from `<Start>Context` struct.
+```rust
+let mut context = <Start>Context::new();
+
+// ... parsing ...
+
+context.expected();         // get expected terminal symbols
+context.expected_nonterm(); // get expected non-terminal symbols
+context.can_feed( term );   // check if a terminal symbol can be fed
+context.on_parsing();       // get all non-terminal symbols that are currently being parsed
+```
+
+The generated code will also include a `feed` method that takes a token and a mutable reference to the user data. This method will return an `Ok(())` if the token was successfully parsed, or an `Err` if there was an error.
+
+```
+context.feed( term, &mut userdata ); // feed a terminal symbol and update the state machine
+```
+
 Note that the actual definitions are bit different if you are building GLR parser.
 
 ## GLR Parsing

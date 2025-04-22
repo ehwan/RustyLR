@@ -43,7 +43,8 @@ pub struct Grammar<Term, NonTerm> {
 
     /// first terminal tokens for each nonterminals
     /// true if it can be empty
-    firsts: HashMap<NonTerm, (BTreeSet<Term>, bool)>,
+    pub firsts: HashMap<NonTerm, (BTreeSet<Term>, bool)>,
+    pub lasts: HashMap<NonTerm, (BTreeSet<Term>, bool)>,
 
     /// reduce type for each terminal symbols for resolving shift/reduce conflict
     pub reduce_types: HashMap<Operator<Term>, ReduceType>,
@@ -61,6 +62,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         Grammar {
             rules: Vec::new(),
             firsts: Default::default(),
+            lasts: Default::default(),
             reduce_types: Default::default(),
             rules_map: Default::default(),
             expand_cache: Default::default(),
@@ -332,6 +334,65 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 if this_nonterm_changed {
                     changed = true;
                     self.firsts.insert(rule.name, (firsts, canbe_empty));
+                }
+            }
+            if !changed {
+                break;
+            }
+        }
+
+        // lasts
+        loop {
+            let mut changed = false;
+            for rule in self.rules.iter() {
+                let rule = &rule.rule;
+                let (mut lasts, mut canbe_empty) = self
+                    .lasts
+                    .entry(rule.name)
+                    .or_insert_with(|| {
+                        changed = true;
+                        (BTreeSet::new(), false)
+                    })
+                    .clone();
+
+                let mut this_nonterm_changed = false;
+                let mut this_rule_canbe_empty = true;
+                for token in rule.rule.iter().rev() {
+                    match token {
+                        Token::Term(term) => {
+                            let insert_result = lasts.insert(*term);
+                            if insert_result {
+                                this_nonterm_changed = true;
+                            }
+                            this_rule_canbe_empty = false;
+                            break;
+                        }
+                        Token::NonTerm(nonterm) => {
+                            if let Some((child_lasts, child_canbe_empty)) = self.lasts.get(nonterm)
+                            {
+                                let old_len = lasts.len();
+                                lasts.extend(child_lasts.iter().copied());
+                                if old_len != lasts.len() {
+                                    this_nonterm_changed = true;
+                                }
+                                if !child_canbe_empty {
+                                    this_rule_canbe_empty = false;
+                                    break;
+                                }
+                            } else {
+                                this_rule_canbe_empty = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if this_rule_canbe_empty && !canbe_empty {
+                    canbe_empty = true;
+                    this_nonterm_changed = true;
+                }
+                if this_nonterm_changed {
+                    changed = true;
+                    self.lasts.insert(rule.name, (lasts, canbe_empty));
                 }
             }
             if !changed {

@@ -1,3 +1,4 @@
+use std::collections::BTreeSet;
 use std::hash::Hash;
 
 use super::ParseError;
@@ -137,6 +138,107 @@ impl<S: Stack> Context<S> {
         parser.get_states()[*state_stack.last().unwrap()]
             .shift_goto_term(term)
             .is_some()
+    }
+
+    /// Get set of non-terminal symbols that current context is trying to parse.
+    ///
+    /// The order of the returned set does not mean anything.
+    /// If the current context is attempting to recognize following grammar:
+    ///
+    /// Chunk -> Statement -> IfStatement -> ReturnStatement -> ...
+    ///
+    /// Then the returned set will be:
+    /// [`Chunk`, `Statement`, `IfStatement`, `ReturnStatement`]
+    pub fn on_parsing<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+        &self,
+        parser: &P,
+    ) -> crate::HashSet<S::NonTerm>
+    where
+        S::NonTerm: Copy + Eq + Hash + crate::NonTerminal<S::Term>,
+    {
+        use crate::token::Token;
+        use crate::HashSet;
+        use crate::NonTerminal;
+
+        let rules = parser.get_rules();
+        let states = parser.get_states();
+
+        let mut zero_shifted_rules = BTreeSet::new();
+        let mut non_zero_shifted_rules = BTreeSet::new();
+        {
+            let last_state = &states[*self.state_stack.last().unwrap()];
+            for rule in last_state.ruleset.iter() {
+                if rule.shifted == 0 {
+                    zero_shifted_rules.insert(rule.rule);
+                } else {
+                    non_zero_shifted_rules.insert((rule.rule, rule.shifted));
+                }
+            }
+        }
+
+        let mut ret: HashSet<S::NonTerm> = Default::default();
+
+        for &state_idx in self.state_stack.iter().rev() {
+            let state = &states[state_idx];
+            let ruleset = &state.ruleset;
+
+            // insert new shifted rule that brings zero_shifted rules in this state
+            let mut new_zero_shifted_rules = Vec::new();
+            loop {
+                let zero_len0 = zero_shifted_rules.len();
+                let nonzero_len0 = non_zero_shifted_rules.len();
+
+                new_zero_shifted_rules.clear();
+
+                for &zero_rule in zero_shifted_rules.iter() {
+                    let nonterm0 = rules[zero_rule].name;
+                    for rule in ruleset.iter() {
+                        let prod_rule = &rules[rule.rule];
+                        if let Some(Token::NonTerm(nonterm)) = prod_rule.rule.get(rule.shifted) {
+                            if &nonterm0 == nonterm {
+                                if rule.shifted == 0 {
+                                    new_zero_shifted_rules.push(rule.rule);
+                                } else {
+                                    // insert new shifted rule
+                                    non_zero_shifted_rules.insert((rule.rule, rule.shifted));
+                                }
+                            }
+                        }
+                    }
+                }
+                zero_shifted_rules.extend(new_zero_shifted_rules.iter().copied());
+
+                if zero_len0 == zero_shifted_rules.len()
+                    && nonzero_len0 == non_zero_shifted_rules.len()
+                {
+                    break;
+                }
+            }
+
+            // push nonterminal of zero-shifted-rules into backtrace vector
+            for &zero_rule in zero_shifted_rules.iter() {
+                let nonterm0 = rules[zero_rule].name;
+                // do not insert auto-generated nonterminals
+                // since user don't need to know about them
+                if !nonterm0.is_auto_generated() && !nonterm0.is_augmented() {
+                    ret.insert(nonterm0);
+                }
+            }
+
+            // shift to next state
+            zero_shifted_rules.clear();
+            let mut new_non_zero_shifted_rules = BTreeSet::new();
+            for (rule, shifted) in non_zero_shifted_rules.into_iter() {
+                if shifted == 1 {
+                    zero_shifted_rules.insert(rule);
+                } else {
+                    new_non_zero_shifted_rules.insert((rule, shifted - 1));
+                }
+            }
+            non_zero_shifted_rules = new_non_zero_shifted_rules;
+        }
+
+        ret
     }
 
     /// Get backtrace information for current state.

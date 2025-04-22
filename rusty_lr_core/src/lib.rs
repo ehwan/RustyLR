@@ -26,6 +26,9 @@ pub mod lr;
 /// module for GLR parser
 pub mod glr;
 
+mod nonterminal;
+pub use nonterminal::NonTerminal;
+
 pub use hashmap::HashMap;
 pub use hashmap::HashSet;
 
