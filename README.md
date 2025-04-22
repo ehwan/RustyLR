@@ -131,22 +131,21 @@ let result:i32 = context.accept(); // get value of start 'E'
 ```
 
 The generated code will include several structs and enums:
- - `<Start>Parser`: A struct that holds the parser table.
- - `<Start>Context`: A struct that maintains the current state and the values associated with each symbol.
- - `<Start>State`: A type representing a single parser state and its associated table.
- - `<Start>Rule`: A type representing a single production rule.
- - `<Start>NonTerminals`: A enum representing all non-terminal symbols in the grammar.
+ - `<Start>Parser`: A struct that holds the parser table. [(docs-LR)](https://docs.rs/rusty_lr/latest/rusty_lr/lr/trait.Parser.html) [(docs-GLR)](https://docs.rs/rusty_lr/latest/rusty_lr/glr/trait.Parser.html)
+ - `<Start>Context`: A struct that maintains the current state and the values associated with each symbol. [(docs-LR)](https://docs.rs/rusty_lr/latest/rusty_lr/lr/struct.Context.html)  [(docs-GLR)](https://docs.rs/rusty_lr/latest/rusty_lr/glr/struct.Context.html)
+ - `<Start>State`: A type representing a single parser state and its associated table. 
+ - `<Start>Rule`: A type representing a single production rule. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/struct.ProductionRule.html)
+ - `<Start>NonTerminals`: A enum representing all non-terminal symbols in the grammar. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/trait.NonTerminal.html)
 
 
 You can get useful information from `<Start>NonTerminals` enum.
  ```rust
  let non_terminal: <Start>NonTerminals = ...;
- let info = non_terminal.info();
 
- info.firsts(); // first terminal symbols of this non-terminal
- info.lasts(); // last terminal symbols of this non-terminal
- info.nullable(); // true if this non-terminal can be reduced to empty
- info.is_auto_generated(); // true if this non-terminal is auto-generated
+ non_terminal.firsts(); // first terminal symbols of this non-terminal
+ non_terminal.lasts(); // last terminal symbols of this non-terminal
+ non_terminal.nullable(); // true if this non-terminal can be reduced to empty
+ non_terminal.is_auto_generated(); // true if this non-terminal is auto-generated
  ```
 
 You can also get contextual information from `<Start>Context` struct.
@@ -163,8 +162,8 @@ context.on_parsing();       // get all non-terminal symbols that are currently b
 
 The generated code will also include a `feed` method that takes a token and a mutable reference to the user data. This method will return an `Ok(())` if the token was successfully parsed, or an `Err` if there was an error.
 
-```
-context.feed( term, &mut userdata ); // feed a terminal symbol and update the state machine
+```rust
+context.feed( &parser, term, &mut userdata ); // feed a terminal symbol and update the state machine
 ```
 
 Note that the actual definitions are bit different if you are building GLR parser.
@@ -183,7 +182,7 @@ See [GLR.md](GLR.md) for details.
  - `build`: Enable build script tools.
  - `fxhash`: Use FXHashMap instead of `std::collections::HashMap` for parser tables.
  - `tree`: Enable automatic syntax tree construction (For debugging purposes).
- - `error`: Enable detailed parsing error messages (For debugging purposes).
+ - `error`: Enable detailed parsing error messages with backtrace (For debugging purposes).
 
 ## Syntax
 RustyLR's grammar syntax is inspired by traditional Yacc/Bison formats.
