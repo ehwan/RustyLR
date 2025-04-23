@@ -8,8 +8,7 @@ use super::Stack;
 #[cfg(feature = "tree")]
 use crate::TreeList;
 
-/// Context for LR parser.
-/// This hadles actual data stack for reduce action.
+/// A struct that maintains the current state and the values associated with each symbol.
 pub struct Context<S: Stack> {
     /// state stack
     pub state_stack: Vec<usize>,

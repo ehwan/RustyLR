@@ -12,7 +12,7 @@ use crate::HashSet;
 #[cfg(feature = "tree")]
 use crate::TreeList;
 
-/// Context trait for GLR parser.
+/// A struct that maintains the current state and the values associated with each symbol.
 /// This handles the divergence and merging of the parser.
 pub struct Context<Data: NodeData> {
     /// each element represents an end-point of diverged paths.
@@ -52,8 +52,8 @@ impl<Data: NodeData> Context<Data> {
     }
 
     /// Get index of states in parser for every diverged paths.
-    pub fn states(&self) -> impl Iterator<Item = &usize> {
-        self.current_nodes.keys()
+    pub fn states(&self) -> impl Iterator<Item = usize> + '_ {
+        self.current_nodes.keys().copied()
     }
 
     /// Get every nodes in current diverged paths.
@@ -85,16 +85,9 @@ impl<Data: NodeData> Context<Data> {
             // Root <- Start <- EOF
             //                  ^^^ here, current_node
 
-            let rc_eof_node = self
-                .current_nodes
-                .into_iter()
-                .next()
-                .unwrap()
-                .1
-                .into_iter()
-                .next()
-                .unwrap();
+            let rc_eof_node = self.into_nodes().next().unwrap();
             let rc_data_node = Rc::clone(rc_eof_node.parent.as_ref().unwrap());
+            drop(rc_eof_node);
             let data_node = match Rc::try_unwrap(rc_data_node) {
                 Ok(data_node) => data_node.data.unwrap(),
                 Err(rc_data_node) => rc_data_node.data.as_ref().unwrap().clone(),
@@ -120,17 +113,15 @@ impl<Data: NodeData> Context<Data> {
         // since `eof` is feeded, the node graph should be like this:
         // Root <- Start <- EOF
         //                  ^^^ here, current_node
-        self.current_nodes.into_iter().flat_map(|(_, nodes)| {
-            nodes.into_iter().map(|rc_eof_node| {
-                let rc_data_node = Rc::clone(rc_eof_node.parent.as_ref().unwrap());
-                drop(rc_eof_node);
+        self.into_nodes().map(|rc_eof_node| {
+            let rc_data_node = Rc::clone(rc_eof_node.parent.as_ref().unwrap());
+            drop(rc_eof_node);
 
-                let data_node = match Rc::try_unwrap(rc_data_node) {
-                    Ok(data_node) => data_node.data.unwrap(),
-                    Err(rc_data_node) => rc_data_node.data.as_ref().unwrap().clone(),
-                };
-                data_node.into_start()
-            })
+            let data_node = match Rc::try_unwrap(rc_data_node) {
+                Ok(data_node) => data_node.data.unwrap(),
+                Err(rc_data_node) => rc_data_node.data.as_ref().unwrap().clone(),
+            };
+            data_node.into_start()
         })
     }
 

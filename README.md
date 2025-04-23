@@ -131,7 +131,7 @@ let result:i32 = context.accept(); // get value of start 'E'
 ```
 
 The generated code will include several structs and enums:
- - `<Start>Parser`: A struct that holds the parser table. [(docs-LR)](https://docs.rs/rusty_lr/latest/rusty_lr/lr/trait.Parser.html) [(docs-GLR)](https://docs.rs/rusty_lr/latest/rusty_lr/glr/trait.Parser.html)
+ - `<Start>Parser`: A struct that holds the whole parser table. [(docs-LR)](https://docs.rs/rusty_lr/latest/rusty_lr/lr/trait.Parser.html) [(docs-GLR)](https://docs.rs/rusty_lr/latest/rusty_lr/glr/trait.Parser.html)
  - `<Start>Context`: A struct that maintains the current state and the values associated with each symbol. [(docs-LR)](https://docs.rs/rusty_lr/latest/rusty_lr/lr/struct.Context.html)  [(docs-GLR)](https://docs.rs/rusty_lr/latest/rusty_lr/glr/struct.Context.html)
  - `<Start>State`: A type representing a single parser state and its associated table. 
  - `<Start>Rule`: A type representing a single production rule. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/struct.ProductionRule.html)

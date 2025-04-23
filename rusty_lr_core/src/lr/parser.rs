@@ -1,7 +1,7 @@
 use super::State;
 use crate::ProductionRule;
 
-/// Parser trait for LR parser
+/// A trait for Parser that holds the entire parser table.
 pub trait Parser {
     type Term;
     type NonTerm;

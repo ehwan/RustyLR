@@ -1,7 +1,7 @@
 use crate::glr::State;
 use crate::ProductionRule;
 
-/// Parser trait for GLR parser
+/// A trait for Parser that holds the entire parser table.
 pub trait Parser {
     type Term;
     type NonTerm;

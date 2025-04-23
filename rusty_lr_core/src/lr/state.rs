@@ -4,12 +4,16 @@ use std::hash::Hash;
 use crate::HashMap;
 use crate::ShiftedRuleRef;
 
-/// state in DFA
+/// A type representing a single parser state and its associated table.
 #[derive(Debug, Clone)]
 pub struct State<Term, NonTerm> {
+    /// terminal symbol -> next state
     pub shift_goto_map_term: HashMap<Term, usize>,
+    /// non-terminal symbol -> next state
     pub shift_goto_map_nonterm: HashMap<NonTerm, usize>,
+    /// terminal symbol -> reduce rule index
     pub reduce_map: HashMap<Term, usize>,
+    /// set of rules that this state is trying to parse
     pub ruleset: Vec<ShiftedRuleRef>,
 }
 impl<Term, NonTerm> State<Term, NonTerm> {

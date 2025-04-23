@@ -2,9 +2,7 @@ use std::vec::Vec;
 
 use super::state::State;
 
-/// struct for Deterministic Finite Automaton (DFA).
-///
-/// It contains Vec of production rules and states.
+/// struct for output of parser building.
 pub struct DFA<Term, NonTerm> {
     pub states: Vec<State<Term, NonTerm>>,
 }
