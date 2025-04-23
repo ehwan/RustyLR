@@ -529,8 +529,9 @@ impl Grammar {
             nonterm_trait_is_generated_case.extend(quote! {
                 #nonterminals_enum_name::#name => #is_generated,
             });
+            let nullable = grammar.firsts.get(&nonterm_idx).unwrap().1;
             nonterm_trait_is_nullable_case.extend(quote! {
-                #nonterminals_enum_name::#name => false,
+                #nonterminals_enum_name::#name => #nullable,
             });
         }
         let nonterm_trait_impl = quote! {
@@ -904,7 +905,7 @@ impl Grammar {
             }
         }
 
-        /// struct that holds parser data, DFA tables
+        /// A struct that holds the entire parser table and production rules.
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
         pub struct #parser_struct_name {
             /// production rules
@@ -1236,7 +1237,7 @@ impl Grammar {
         }
 
 
-        /// struct that holds parser data, DFA tables
+        /// A struct that holds the entire parser table and production rules.
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
         pub struct #parser_struct_name {
             /// production rules
