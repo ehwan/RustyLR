@@ -10,12 +10,11 @@ use proc_macro2::TokenStream;
 pub struct Rule {
     pub tokens: Vec<TokenMapped>,
     pub reduce_action: Option<TokenStream>,
+    pub reduce_action_generated: bool,
     /// span of '|' or ':' before this production rule
     pub separator_span: Span,
     /// force lookahead tokens for this pattern.
     pub lookaheads: Option<BTreeSet<usize>>,
-    /// user assigned id for this rule line, currently not in use
-    pub id: usize,
     /// %prec definition
     pub prec: Option<(rusty_lr_core::builder::Operator<usize>, IdentOrLiteral)>,
 }

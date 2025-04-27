@@ -70,7 +70,9 @@ impl<S: Stack> Context<S> {
         S::Term: 'a,
         S::NonTerm: 'a,
     {
-        parser.get_states()[*self.state_stack.last().unwrap()].expected()
+        parser.get_states()[*self.state_stack.last().unwrap()]
+            .expected()
+            .flat_map(|&class| parser.get_terminals(class).unwrap())
     }
     /// Get expected non-terminal tokens for next `feed()` call.
     pub fn expected_nonterm<'a, P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
@@ -111,15 +113,17 @@ impl<S: Stack> Context<S> {
         S::Term: Hash + Eq,
         S::NonTerm: Hash + Eq,
     {
+        let class = parser.to_terminal_class(term);
         if parser.get_states()[*self.state_stack.last().unwrap()]
-            .shift_goto_term(term)
+            .shift_goto_term(&class)
             .is_some()
         {
             return true;
         }
 
         let mut state_stack = self.state_stack.clone();
-        while let Some(reduce_rule) = parser.get_states()[*state_stack.last().unwrap()].reduce(term)
+        while let Some(reduce_rule) =
+            parser.get_states()[*state_stack.last().unwrap()].reduce(&class)
         {
             let rule = &parser.get_rules()[reduce_rule];
             let new_len = state_stack.len() - rule.rule.len();
@@ -135,7 +139,7 @@ impl<S: Stack> Context<S> {
         }
 
         parser.get_states()[*state_stack.last().unwrap()]
-            .shift_goto_term(term)
+            .shift_goto_term(&class)
             .is_some()
     }
 
@@ -245,7 +249,7 @@ impl<S: Stack> Context<S> {
     pub fn backtrace<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
         &self,
         parser: &P,
-    ) -> crate::Backtrace<S::Term, S::NonTerm>
+    ) -> crate::Backtrace<usize, S::NonTerm>
     where
         S::Term: Clone,
         S::NonTerm: Hash + Eq + Clone,

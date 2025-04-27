@@ -33,4 +33,8 @@ pub struct Args {
     /// verbose output for the conflict resolution process, by '%left' or '%right' directive.
     #[arg(short = 'r', long, default_value = "false")]
     pub verbose_conflict_resolve: bool,
+
+    /// verbose output for the terminal class optimization process
+    #[arg(short = 'r', long, default_value = "false")]
+    pub verbose_optimization: bool,
 }

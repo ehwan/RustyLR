@@ -52,7 +52,7 @@ Pattern -> literal
 Action -> bracegroup
 Action ->
 TokenDef -> token ident RustCode semicolon
-RustCode -> [^semicolon, lparen-precedence]+
+RustCode -> [^semicolon]+
 StartDef -> start ident semicolon
 EofDef -> eofdef RustCode semicolon
 TokenTypeDef -> tokentype RustCode semicolon
@@ -70,6 +70,7 @@ ModulePrefixDef -> moduleprefix RustCode semicolon
 Glr -> glr semicolon
 Lalr -> lalr semicolon
 Precedence -> precedence IdentOrLiteral+ semicolon
+NoOptim -> nooptim semicolon
 GrammarLine -> Rule
 GrammarLine -> TokenDef
 GrammarLine -> StartDef
@@ -82,6 +83,7 @@ GrammarLine -> ModulePrefixDef
 GrammarLine -> Lalr
 GrammarLine -> Glr
 GrammarLine -> Precedence
+GrammarLine -> NoOptim
 Grammar -> GrammarLine+
 TokenMapped+ -> TokenMapped
 TokenMapped+ -> TokenMapped+ TokenMapped
@@ -97,26 +99,41 @@ TerminalSetItem* -> TerminalSetItem+
 TerminalSetItem* ->
 Pattern+ -> Pattern
 Pattern+ -> Pattern+ Pattern
-[^semicolon, lparen-precedence] -> ident
-[^semicolon, lparen-precedence] -> colon
-[^semicolon, lparen-precedence] -> pipe
-[^semicolon, lparen-precedence] -> percent
-[^semicolon, lparen-precedence] -> equal
-[^semicolon, lparen-precedence] -> plus
-[^semicolon, lparen-precedence] -> star
-[^semicolon, lparen-precedence] -> question
-[^semicolon, lparen-precedence] -> caret
-[^semicolon, lparen-precedence] -> minus
-[^semicolon, lparen-precedence] -> exclamation
-[^semicolon, lparen-precedence] -> slash
-[^semicolon, lparen-precedence] -> otherpunct
-[^semicolon, lparen-precedence] -> literal
-[^semicolon, lparen-precedence] -> parengroup
-[^semicolon, lparen-precedence] -> bracegroup
-[^semicolon, lparen-precedence] -> bracketgroup
-[^semicolon, lparen-precedence] -> nonegroup
-[^semicolon, lparen-precedence]+ -> [^semicolon, lparen-precedence]
-[^semicolon, lparen-precedence]+ -> [^semicolon, lparen-precedence]+ [^semicolon, lparen-precedence]
+[^semicolon] -> ident
+[^semicolon] -> colon
+[^semicolon] -> pipe
+[^semicolon] -> [percent, <Others>]
+[^semicolon] -> equal
+[^semicolon] -> plus
+[^semicolon] -> star
+[^semicolon] -> question
+[^semicolon] -> caret
+[^semicolon] -> minus
+[^semicolon] -> exclamation
+[^semicolon] -> slash
+[^semicolon] -> literal
+[^semicolon] -> parengroup
+[^semicolon] -> bracegroup
+[^semicolon] -> lparen
+[^semicolon] -> rparen
+[^semicolon] -> lbracket
+[^semicolon] -> rbracket
+[^semicolon] -> left
+[^semicolon] -> right
+[^semicolon] -> token
+[^semicolon] -> start
+[^semicolon] -> eofdef
+[^semicolon] -> tokentype
+[^semicolon] -> userdata
+[^semicolon] -> errortype
+[^semicolon] -> moduleprefix
+[^semicolon] -> lalr
+[^semicolon] -> glr
+[^semicolon] -> prec
+[^semicolon] -> precedence
+[^semicolon] -> nooptim
+[^semicolon]+ -> [^semicolon]
+[^semicolon]+ -> [^semicolon]+ [^semicolon]
 IdentOrLiteral+ -> IdentOrLiteral
 IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
 GrammarLine+ -> GrammarLine
@@ -130,10 +147,10 @@ Augmented -> Grammar eof
 pub type GrammarContext = ::rusty_lr_core::lr::Context<GrammarStack>;
 #[doc = r" type alias for CFG production rule"]
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarRule = ::rusty_lr_core::ProductionRule<Lexed, GrammarNonTerminals>;
+pub type GrammarRule = ::rusty_lr_core::ProductionRule<usize, GrammarNonTerminals>;
 #[doc = r" type alias for DFA state"]
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarState = ::rusty_lr_core::lr::State<Lexed, GrammarNonTerminals>;
+pub type GrammarState = ::rusty_lr_core::lr::State<usize, GrammarNonTerminals>;
 #[doc = r" type alias for `ParseError`"]
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarParseError = ::rusty_lr_core::lr::ParseError<
@@ -182,19 +199,20 @@ pub enum GrammarNonTerminals {
     Glr,
     Lalr,
     Precedence,
+    NoOptim,
     GrammarLine,
     Grammar,
-    _TokenMapped_Plus27,
-    _TokenMapped_Star28,
-    _PrecDef_Question29,
-    _caret_Question30,
-    _TerminalSetItem_Plus31,
-    _TerminalSetItem_Star32,
-    _Pattern_Plus33,
-    _TerminalSet34,
-    __TerminalSet34_Plus35,
-    _IdentOrLiteral_Plus36,
-    _GrammarLine_Plus37,
+    _TokenMapped_Plus28,
+    _TokenMapped_Star29,
+    _PrecDef_Question30,
+    _caret_Question31,
+    _TerminalSetItem_Plus32,
+    _TerminalSetItem_Star33,
+    _Pattern_Plus34,
+    _TerminalSet35,
+    __TerminalSet35_Plus36,
+    _IdentOrLiteral_Plus37,
+    _GrammarLine_Plus38,
     Augmented,
 }
 impl std::fmt::Display for GrammarNonTerminals {
@@ -225,23 +243,20 @@ impl std::fmt::Display for GrammarNonTerminals {
             GrammarNonTerminals::Glr => write!(f, "{}", "Glr"),
             GrammarNonTerminals::Lalr => write!(f, "{}", "Lalr"),
             GrammarNonTerminals::Precedence => write!(f, "{}", "Precedence"),
+            GrammarNonTerminals::NoOptim => write!(f, "{}", "NoOptim"),
             GrammarNonTerminals::GrammarLine => write!(f, "{}", "GrammarLine"),
             GrammarNonTerminals::Grammar => write!(f, "{}", "Grammar"),
-            GrammarNonTerminals::_TokenMapped_Plus27 => write!(f, "{}", "TokenMapped+"),
-            GrammarNonTerminals::_TokenMapped_Star28 => write!(f, "{}", "TokenMapped*"),
-            GrammarNonTerminals::_PrecDef_Question29 => write!(f, "{}", "PrecDef?"),
-            GrammarNonTerminals::_caret_Question30 => write!(f, "{}", "caret?"),
-            GrammarNonTerminals::_TerminalSetItem_Plus31 => write!(f, "{}", "TerminalSetItem+"),
-            GrammarNonTerminals::_TerminalSetItem_Star32 => write!(f, "{}", "TerminalSetItem*"),
-            GrammarNonTerminals::_Pattern_Plus33 => write!(f, "{}", "Pattern+"),
-            GrammarNonTerminals::_TerminalSet34 => {
-                write!(f, "{}", "[^semicolon, lparen-precedence]")
-            }
-            GrammarNonTerminals::__TerminalSet34_Plus35 => {
-                write!(f, "{}", "[^semicolon, lparen-precedence]+")
-            }
-            GrammarNonTerminals::_IdentOrLiteral_Plus36 => write!(f, "{}", "IdentOrLiteral+"),
-            GrammarNonTerminals::_GrammarLine_Plus37 => write!(f, "{}", "GrammarLine+"),
+            GrammarNonTerminals::_TokenMapped_Plus28 => write!(f, "{}", "TokenMapped+"),
+            GrammarNonTerminals::_TokenMapped_Star29 => write!(f, "{}", "TokenMapped*"),
+            GrammarNonTerminals::_PrecDef_Question30 => write!(f, "{}", "PrecDef?"),
+            GrammarNonTerminals::_caret_Question31 => write!(f, "{}", "caret?"),
+            GrammarNonTerminals::_TerminalSetItem_Plus32 => write!(f, "{}", "TerminalSetItem+"),
+            GrammarNonTerminals::_TerminalSetItem_Star33 => write!(f, "{}", "TerminalSetItem*"),
+            GrammarNonTerminals::_Pattern_Plus34 => write!(f, "{}", "Pattern+"),
+            GrammarNonTerminals::_TerminalSet35 => write!(f, "{}", "[^semicolon]"),
+            GrammarNonTerminals::__TerminalSet35_Plus36 => write!(f, "{}", "[^semicolon]+"),
+            GrammarNonTerminals::_IdentOrLiteral_Plus37 => write!(f, "{}", "IdentOrLiteral+"),
+            GrammarNonTerminals::_GrammarLine_Plus38 => write!(f, "{}", "GrammarLine+"),
             GrammarNonTerminals::Augmented => write!(f, "{}", "Augmented"),
         }
     }
@@ -274,23 +289,20 @@ impl std::fmt::Debug for GrammarNonTerminals {
             GrammarNonTerminals::Glr => write!(f, "{}", "Glr"),
             GrammarNonTerminals::Lalr => write!(f, "{}", "Lalr"),
             GrammarNonTerminals::Precedence => write!(f, "{}", "Precedence"),
+            GrammarNonTerminals::NoOptim => write!(f, "{}", "NoOptim"),
             GrammarNonTerminals::GrammarLine => write!(f, "{}", "GrammarLine"),
             GrammarNonTerminals::Grammar => write!(f, "{}", "Grammar"),
-            GrammarNonTerminals::_TokenMapped_Plus27 => write!(f, "{}", "TokenMapped+"),
-            GrammarNonTerminals::_TokenMapped_Star28 => write!(f, "{}", "TokenMapped*"),
-            GrammarNonTerminals::_PrecDef_Question29 => write!(f, "{}", "PrecDef?"),
-            GrammarNonTerminals::_caret_Question30 => write!(f, "{}", "caret?"),
-            GrammarNonTerminals::_TerminalSetItem_Plus31 => write!(f, "{}", "TerminalSetItem+"),
-            GrammarNonTerminals::_TerminalSetItem_Star32 => write!(f, "{}", "TerminalSetItem*"),
-            GrammarNonTerminals::_Pattern_Plus33 => write!(f, "{}", "Pattern+"),
-            GrammarNonTerminals::_TerminalSet34 => {
-                write!(f, "{}", "[^semicolon, lparen-precedence]")
-            }
-            GrammarNonTerminals::__TerminalSet34_Plus35 => {
-                write!(f, "{}", "[^semicolon, lparen-precedence]+")
-            }
-            GrammarNonTerminals::_IdentOrLiteral_Plus36 => write!(f, "{}", "IdentOrLiteral+"),
-            GrammarNonTerminals::_GrammarLine_Plus37 => write!(f, "{}", "GrammarLine+"),
+            GrammarNonTerminals::_TokenMapped_Plus28 => write!(f, "{}", "TokenMapped+"),
+            GrammarNonTerminals::_TokenMapped_Star29 => write!(f, "{}", "TokenMapped*"),
+            GrammarNonTerminals::_PrecDef_Question30 => write!(f, "{}", "PrecDef?"),
+            GrammarNonTerminals::_caret_Question31 => write!(f, "{}", "caret?"),
+            GrammarNonTerminals::_TerminalSetItem_Plus32 => write!(f, "{}", "TerminalSetItem+"),
+            GrammarNonTerminals::_TerminalSetItem_Star33 => write!(f, "{}", "TerminalSetItem*"),
+            GrammarNonTerminals::_Pattern_Plus34 => write!(f, "{}", "Pattern+"),
+            GrammarNonTerminals::_TerminalSet35 => write!(f, "{}", "[^semicolon]"),
+            GrammarNonTerminals::__TerminalSet35_Plus36 => write!(f, "{}", "[^semicolon]+"),
+            GrammarNonTerminals::_IdentOrLiteral_Plus37 => write!(f, "{}", "IdentOrLiteral+"),
+            GrammarNonTerminals::_GrammarLine_Plus38 => write!(f, "{}", "GrammarLine+"),
             GrammarNonTerminals::Augmented => write!(f, "{}", "Augmented"),
         }
     }
@@ -323,667 +335,21 @@ impl ::rusty_lr_core::NonTerminal<Lexed> for GrammarNonTerminals {
             GrammarNonTerminals::Glr => false,
             GrammarNonTerminals::Lalr => false,
             GrammarNonTerminals::Precedence => false,
+            GrammarNonTerminals::NoOptim => false,
             GrammarNonTerminals::GrammarLine => false,
             GrammarNonTerminals::Grammar => false,
-            GrammarNonTerminals::_TokenMapped_Plus27 => true,
-            GrammarNonTerminals::_TokenMapped_Star28 => true,
-            GrammarNonTerminals::_PrecDef_Question29 => true,
-            GrammarNonTerminals::_caret_Question30 => true,
-            GrammarNonTerminals::_TerminalSetItem_Plus31 => true,
-            GrammarNonTerminals::_TerminalSetItem_Star32 => true,
-            GrammarNonTerminals::_Pattern_Plus33 => true,
-            GrammarNonTerminals::_TerminalSet34 => true,
-            GrammarNonTerminals::__TerminalSet34_Plus35 => true,
-            GrammarNonTerminals::_IdentOrLiteral_Plus36 => true,
-            GrammarNonTerminals::_GrammarLine_Plus37 => true,
+            GrammarNonTerminals::_TokenMapped_Plus28 => true,
+            GrammarNonTerminals::_TokenMapped_Star29 => true,
+            GrammarNonTerminals::_PrecDef_Question30 => true,
+            GrammarNonTerminals::_caret_Question31 => true,
+            GrammarNonTerminals::_TerminalSetItem_Plus32 => true,
+            GrammarNonTerminals::_TerminalSetItem_Star33 => true,
+            GrammarNonTerminals::_Pattern_Plus34 => true,
+            GrammarNonTerminals::_TerminalSet35 => true,
+            GrammarNonTerminals::__TerminalSet35_Plus36 => true,
+            GrammarNonTerminals::_IdentOrLiteral_Plus37 => true,
+            GrammarNonTerminals::_GrammarLine_Plus38 => true,
             GrammarNonTerminals::Augmented => true,
-        }
-    }
-    fn firsts(&self) -> Vec<Lexed> {
-        match self {
-            GrammarNonTerminals::Rule => {
-                vec![Lexed::Ident(Ident::new("id", Span::call_site()))]
-            }
-            GrammarNonTerminals::RuleType => {
-                vec![Lexed::ParenGroup(None)]
-            }
-            GrammarNonTerminals::RuleLines => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Pipe(punct!('|')),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::BraceGroup(None),
-                    Lexed::LParen(Span::call_site()),
-                    Lexed::LBracket(Span::call_site()),
-                    Lexed::Prec(punct!('%'), Ident::new("id", Span::call_site())),
-                ]
-            }
-            GrammarNonTerminals::RuleLine => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::BraceGroup(None),
-                    Lexed::LParen(Span::call_site()),
-                    Lexed::LBracket(Span::call_site()),
-                    Lexed::Prec(punct!('%'), Ident::new("id", Span::call_site())),
-                ]
-            }
-            GrammarNonTerminals::PrecDef => {
-                vec![Lexed::Prec(
-                    punct!('%'),
-                    Ident::new("id", Span::call_site()),
-                )]
-            }
-            GrammarNonTerminals::TokenMapped => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::LParen(Span::call_site()),
-                    Lexed::LBracket(Span::call_site()),
-                ]
-            }
-            GrammarNonTerminals::TerminalSetItem => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                ]
-            }
-            GrammarNonTerminals::TerminalSet => {
-                vec![Lexed::LBracket(Span::call_site())]
-            }
-            GrammarNonTerminals::Pattern => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::LParen(Span::call_site()),
-                    Lexed::LBracket(Span::call_site()),
-                ]
-            }
-            GrammarNonTerminals::Action => {
-                vec![Lexed::BraceGroup(None)]
-            }
-            GrammarNonTerminals::TokenDef => {
-                vec![Lexed::Token(
-                    punct!('%'),
-                    Ident::new("id", Span::call_site()),
-                )]
-            }
-            GrammarNonTerminals::RustCode => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Colon(punct!(':')),
-                    Lexed::Pipe(punct!('|')),
-                    Lexed::Percent(punct!('%')),
-                    Lexed::Equal(punct!('=')),
-                    Lexed::Plus(punct!('+')),
-                    Lexed::Star(punct!('*')),
-                    Lexed::Question(punct!('?')),
-                    Lexed::Caret(punct!('^')),
-                    Lexed::Minus(punct!('-')),
-                    Lexed::Exclamation(punct!('!')),
-                    Lexed::Slash(punct!('/')),
-                    Lexed::OtherPunct(punct!('.')),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::ParenGroup(None),
-                    Lexed::BraceGroup(None),
-                    Lexed::BracketGroup(None),
-                    Lexed::NoneGroup(None),
-                ]
-            }
-            GrammarNonTerminals::StartDef => {
-                vec![Lexed::Start(
-                    punct!('%'),
-                    Ident::new("id", Span::call_site()),
-                )]
-            }
-            GrammarNonTerminals::EofDef => {
-                vec![Lexed::EofDef(
-                    punct!('%'),
-                    Ident::new("id", Span::call_site()),
-                )]
-            }
-            GrammarNonTerminals::TokenTypeDef => {
-                vec![Lexed::TokenType(
-                    punct!('%'),
-                    Ident::new("id", Span::call_site()),
-                )]
-            }
-            GrammarNonTerminals::UserDataDef => {
-                vec![Lexed::UserData(
-                    punct!('%'),
-                    Ident::new("id", Span::call_site()),
-                )]
-            }
-            GrammarNonTerminals::TerminalOrTerminalSet => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::LBracket(Span::call_site()),
-                ]
-            }
-            GrammarNonTerminals::IdentOrLiteral => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                ]
-            }
-            GrammarNonTerminals::ReduceType => {
-                vec![
-                    Lexed::Left(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Right(punct!('%'), Ident::new("id", Span::call_site())),
-                ]
-            }
-            GrammarNonTerminals::ReduceDef => {
-                vec![
-                    Lexed::Left(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Right(punct!('%'), Ident::new("id", Span::call_site())),
-                ]
-            }
-            GrammarNonTerminals::ErrorDef => {
-                vec![Lexed::ErrorType(
-                    punct!('%'),
-                    Ident::new("id", Span::call_site()),
-                )]
-            }
-            GrammarNonTerminals::ModulePrefixDef => {
-                vec![Lexed::ModulePrefix(
-                    punct!('%'),
-                    Ident::new("id", Span::call_site()),
-                )]
-            }
-            GrammarNonTerminals::Glr => {
-                vec![Lexed::Glr(punct!('%'), Ident::new("id", Span::call_site()))]
-            }
-            GrammarNonTerminals::Lalr => {
-                vec![Lexed::Lalr(
-                    punct!('%'),
-                    Ident::new("id", Span::call_site()),
-                )]
-            }
-            GrammarNonTerminals::Precedence => {
-                vec![Lexed::Precedence(
-                    punct!('%'),
-                    Ident::new("id", Span::call_site()),
-                )]
-            }
-            GrammarNonTerminals::GrammarLine => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Left(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Right(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Token(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Start(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::EofDef(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::TokenType(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::UserData(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::ErrorType(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::ModulePrefix(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Lalr(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Glr(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Precedence(punct!('%'), Ident::new("id", Span::call_site())),
-                ]
-            }
-            GrammarNonTerminals::Grammar => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Left(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Right(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Token(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Start(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::EofDef(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::TokenType(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::UserData(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::ErrorType(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::ModulePrefix(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Lalr(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Glr(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Precedence(punct!('%'), Ident::new("id", Span::call_site())),
-                ]
-            }
-            GrammarNonTerminals::_TokenMapped_Plus27 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::LParen(Span::call_site()),
-                    Lexed::LBracket(Span::call_site()),
-                ]
-            }
-            GrammarNonTerminals::_TokenMapped_Star28 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::LParen(Span::call_site()),
-                    Lexed::LBracket(Span::call_site()),
-                ]
-            }
-            GrammarNonTerminals::_PrecDef_Question29 => {
-                vec![Lexed::Prec(
-                    punct!('%'),
-                    Ident::new("id", Span::call_site()),
-                )]
-            }
-            GrammarNonTerminals::_caret_Question30 => {
-                vec![Lexed::Caret(punct!('^'))]
-            }
-            GrammarNonTerminals::_TerminalSetItem_Plus31 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                ]
-            }
-            GrammarNonTerminals::_TerminalSetItem_Star32 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                ]
-            }
-            GrammarNonTerminals::_Pattern_Plus33 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::LParen(Span::call_site()),
-                    Lexed::LBracket(Span::call_site()),
-                ]
-            }
-            GrammarNonTerminals::_TerminalSet34 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Colon(punct!(':')),
-                    Lexed::Pipe(punct!('|')),
-                    Lexed::Percent(punct!('%')),
-                    Lexed::Equal(punct!('=')),
-                    Lexed::Plus(punct!('+')),
-                    Lexed::Star(punct!('*')),
-                    Lexed::Question(punct!('?')),
-                    Lexed::Caret(punct!('^')),
-                    Lexed::Minus(punct!('-')),
-                    Lexed::Exclamation(punct!('!')),
-                    Lexed::Slash(punct!('/')),
-                    Lexed::OtherPunct(punct!('.')),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::ParenGroup(None),
-                    Lexed::BraceGroup(None),
-                    Lexed::BracketGroup(None),
-                    Lexed::NoneGroup(None),
-                ]
-            }
-            GrammarNonTerminals::__TerminalSet34_Plus35 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Colon(punct!(':')),
-                    Lexed::Pipe(punct!('|')),
-                    Lexed::Percent(punct!('%')),
-                    Lexed::Equal(punct!('=')),
-                    Lexed::Plus(punct!('+')),
-                    Lexed::Star(punct!('*')),
-                    Lexed::Question(punct!('?')),
-                    Lexed::Caret(punct!('^')),
-                    Lexed::Minus(punct!('-')),
-                    Lexed::Exclamation(punct!('!')),
-                    Lexed::Slash(punct!('/')),
-                    Lexed::OtherPunct(punct!('.')),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::ParenGroup(None),
-                    Lexed::BraceGroup(None),
-                    Lexed::BracketGroup(None),
-                    Lexed::NoneGroup(None),
-                ]
-            }
-            GrammarNonTerminals::_IdentOrLiteral_Plus36 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                ]
-            }
-            GrammarNonTerminals::_GrammarLine_Plus37 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Left(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Right(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Token(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Start(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::EofDef(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::TokenType(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::UserData(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::ErrorType(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::ModulePrefix(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Lalr(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Glr(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Precedence(punct!('%'), Ident::new("id", Span::call_site())),
-                ]
-            }
-            GrammarNonTerminals::Augmented => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Left(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Right(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Token(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Start(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::EofDef(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::TokenType(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::UserData(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::ErrorType(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::ModulePrefix(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Lalr(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Glr(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Precedence(punct!('%'), Ident::new("id", Span::call_site())),
-                ]
-            }
-        }
-    }
-    fn lasts(&self) -> Vec<Lexed> {
-        match self {
-            GrammarNonTerminals::Rule => {
-                vec![Lexed::Semicolon(punct!(';'))]
-            }
-            GrammarNonTerminals::RuleType => {
-                vec![Lexed::ParenGroup(None)]
-            }
-            GrammarNonTerminals::RuleLines => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Pipe(punct!('|')),
-                    Lexed::Plus(punct!('+')),
-                    Lexed::Star(punct!('*')),
-                    Lexed::Question(punct!('?')),
-                    Lexed::Exclamation(punct!('!')),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::BraceGroup(None),
-                    Lexed::RParen(Span::call_site()),
-                    Lexed::RBracket(Span::call_site()),
-                ]
-            }
-            GrammarNonTerminals::RuleLine => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Plus(punct!('+')),
-                    Lexed::Star(punct!('*')),
-                    Lexed::Question(punct!('?')),
-                    Lexed::Exclamation(punct!('!')),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::BraceGroup(None),
-                    Lexed::RParen(Span::call_site()),
-                    Lexed::RBracket(Span::call_site()),
-                ]
-            }
-            GrammarNonTerminals::PrecDef => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                ]
-            }
-            GrammarNonTerminals::TokenMapped => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Plus(punct!('+')),
-                    Lexed::Star(punct!('*')),
-                    Lexed::Question(punct!('?')),
-                    Lexed::Exclamation(punct!('!')),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::RParen(Span::call_site()),
-                    Lexed::RBracket(Span::call_site()),
-                ]
-            }
-            GrammarNonTerminals::TerminalSetItem => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                ]
-            }
-            GrammarNonTerminals::TerminalSet => {
-                vec![Lexed::RBracket(Span::call_site())]
-            }
-            GrammarNonTerminals::Pattern => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Plus(punct!('+')),
-                    Lexed::Star(punct!('*')),
-                    Lexed::Question(punct!('?')),
-                    Lexed::Exclamation(punct!('!')),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::RParen(Span::call_site()),
-                    Lexed::RBracket(Span::call_site()),
-                ]
-            }
-            GrammarNonTerminals::Action => {
-                vec![Lexed::BraceGroup(None)]
-            }
-            GrammarNonTerminals::TokenDef => {
-                vec![Lexed::Semicolon(punct!(';'))]
-            }
-            GrammarNonTerminals::RustCode => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Colon(punct!(':')),
-                    Lexed::Pipe(punct!('|')),
-                    Lexed::Percent(punct!('%')),
-                    Lexed::Equal(punct!('=')),
-                    Lexed::Plus(punct!('+')),
-                    Lexed::Star(punct!('*')),
-                    Lexed::Question(punct!('?')),
-                    Lexed::Caret(punct!('^')),
-                    Lexed::Minus(punct!('-')),
-                    Lexed::Exclamation(punct!('!')),
-                    Lexed::Slash(punct!('/')),
-                    Lexed::OtherPunct(punct!('.')),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::ParenGroup(None),
-                    Lexed::BraceGroup(None),
-                    Lexed::BracketGroup(None),
-                    Lexed::NoneGroup(None),
-                ]
-            }
-            GrammarNonTerminals::StartDef => {
-                vec![Lexed::Semicolon(punct!(';'))]
-            }
-            GrammarNonTerminals::EofDef => {
-                vec![Lexed::Semicolon(punct!(';'))]
-            }
-            GrammarNonTerminals::TokenTypeDef => {
-                vec![Lexed::Semicolon(punct!(';'))]
-            }
-            GrammarNonTerminals::UserDataDef => {
-                vec![Lexed::Semicolon(punct!(';'))]
-            }
-            GrammarNonTerminals::TerminalOrTerminalSet => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::RBracket(Span::call_site()),
-                ]
-            }
-            GrammarNonTerminals::IdentOrLiteral => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                ]
-            }
-            GrammarNonTerminals::ReduceType => {
-                vec![
-                    Lexed::Left(punct!('%'), Ident::new("id", Span::call_site())),
-                    Lexed::Right(punct!('%'), Ident::new("id", Span::call_site())),
-                ]
-            }
-            GrammarNonTerminals::ReduceDef => {
-                vec![Lexed::Semicolon(punct!(';'))]
-            }
-            GrammarNonTerminals::ErrorDef => {
-                vec![Lexed::Semicolon(punct!(';'))]
-            }
-            GrammarNonTerminals::ModulePrefixDef => {
-                vec![Lexed::Semicolon(punct!(';'))]
-            }
-            GrammarNonTerminals::Glr => {
-                vec![Lexed::Semicolon(punct!(';'))]
-            }
-            GrammarNonTerminals::Lalr => {
-                vec![Lexed::Semicolon(punct!(';'))]
-            }
-            GrammarNonTerminals::Precedence => {
-                vec![Lexed::Semicolon(punct!(';'))]
-            }
-            GrammarNonTerminals::GrammarLine => {
-                vec![Lexed::Semicolon(punct!(';'))]
-            }
-            GrammarNonTerminals::Grammar => {
-                vec![Lexed::Semicolon(punct!(';'))]
-            }
-            GrammarNonTerminals::_TokenMapped_Plus27 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Plus(punct!('+')),
-                    Lexed::Star(punct!('*')),
-                    Lexed::Question(punct!('?')),
-                    Lexed::Exclamation(punct!('!')),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::RParen(Span::call_site()),
-                    Lexed::RBracket(Span::call_site()),
-                ]
-            }
-            GrammarNonTerminals::_TokenMapped_Star28 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Plus(punct!('+')),
-                    Lexed::Star(punct!('*')),
-                    Lexed::Question(punct!('?')),
-                    Lexed::Exclamation(punct!('!')),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::RParen(Span::call_site()),
-                    Lexed::RBracket(Span::call_site()),
-                ]
-            }
-            GrammarNonTerminals::_PrecDef_Question29 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                ]
-            }
-            GrammarNonTerminals::_caret_Question30 => {
-                vec![Lexed::Caret(punct!('^'))]
-            }
-            GrammarNonTerminals::_TerminalSetItem_Plus31 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                ]
-            }
-            GrammarNonTerminals::_TerminalSetItem_Star32 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                ]
-            }
-            GrammarNonTerminals::_Pattern_Plus33 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Plus(punct!('+')),
-                    Lexed::Star(punct!('*')),
-                    Lexed::Question(punct!('?')),
-                    Lexed::Exclamation(punct!('!')),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::RParen(Span::call_site()),
-                    Lexed::RBracket(Span::call_site()),
-                ]
-            }
-            GrammarNonTerminals::_TerminalSet34 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Colon(punct!(':')),
-                    Lexed::Pipe(punct!('|')),
-                    Lexed::Percent(punct!('%')),
-                    Lexed::Equal(punct!('=')),
-                    Lexed::Plus(punct!('+')),
-                    Lexed::Star(punct!('*')),
-                    Lexed::Question(punct!('?')),
-                    Lexed::Caret(punct!('^')),
-                    Lexed::Minus(punct!('-')),
-                    Lexed::Exclamation(punct!('!')),
-                    Lexed::Slash(punct!('/')),
-                    Lexed::OtherPunct(punct!('.')),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::ParenGroup(None),
-                    Lexed::BraceGroup(None),
-                    Lexed::BracketGroup(None),
-                    Lexed::NoneGroup(None),
-                ]
-            }
-            GrammarNonTerminals::__TerminalSet34_Plus35 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Colon(punct!(':')),
-                    Lexed::Pipe(punct!('|')),
-                    Lexed::Percent(punct!('%')),
-                    Lexed::Equal(punct!('=')),
-                    Lexed::Plus(punct!('+')),
-                    Lexed::Star(punct!('*')),
-                    Lexed::Question(punct!('?')),
-                    Lexed::Caret(punct!('^')),
-                    Lexed::Minus(punct!('-')),
-                    Lexed::Exclamation(punct!('!')),
-                    Lexed::Slash(punct!('/')),
-                    Lexed::OtherPunct(punct!('.')),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                    Lexed::ParenGroup(None),
-                    Lexed::BraceGroup(None),
-                    Lexed::BracketGroup(None),
-                    Lexed::NoneGroup(None),
-                ]
-            }
-            GrammarNonTerminals::_IdentOrLiteral_Plus36 => {
-                vec![
-                    Lexed::Ident(Ident::new("id", Span::call_site())),
-                    Lexed::Literal(Literal::usize_suffixed(0)),
-                ]
-            }
-            GrammarNonTerminals::_GrammarLine_Plus37 => {
-                vec![Lexed::Semicolon(punct!(';'))]
-            }
-            GrammarNonTerminals::Augmented => {
-                vec![Lexed::Eof]
-            }
-        }
-    }
-    fn nullable(&self) -> bool {
-        match self {
-            GrammarNonTerminals::Rule => false,
-            GrammarNonTerminals::RuleType => false,
-            GrammarNonTerminals::RuleLines => false,
-            GrammarNonTerminals::RuleLine => false,
-            GrammarNonTerminals::PrecDef => false,
-            GrammarNonTerminals::TokenMapped => false,
-            GrammarNonTerminals::TerminalSetItem => false,
-            GrammarNonTerminals::TerminalSet => false,
-            GrammarNonTerminals::Pattern => false,
-            GrammarNonTerminals::Action => false,
-            GrammarNonTerminals::TokenDef => false,
-            GrammarNonTerminals::RustCode => false,
-            GrammarNonTerminals::StartDef => false,
-            GrammarNonTerminals::EofDef => false,
-            GrammarNonTerminals::TokenTypeDef => false,
-            GrammarNonTerminals::UserDataDef => false,
-            GrammarNonTerminals::TerminalOrTerminalSet => false,
-            GrammarNonTerminals::IdentOrLiteral => false,
-            GrammarNonTerminals::ReduceType => false,
-            GrammarNonTerminals::ReduceDef => false,
-            GrammarNonTerminals::ErrorDef => false,
-            GrammarNonTerminals::ModulePrefixDef => false,
-            GrammarNonTerminals::Glr => false,
-            GrammarNonTerminals::Lalr => false,
-            GrammarNonTerminals::Precedence => false,
-            GrammarNonTerminals::GrammarLine => false,
-            GrammarNonTerminals::Grammar => false,
-            GrammarNonTerminals::_TokenMapped_Plus27 => false,
-            GrammarNonTerminals::_TokenMapped_Star28 => false,
-            GrammarNonTerminals::_PrecDef_Question29 => false,
-            GrammarNonTerminals::_caret_Question30 => false,
-            GrammarNonTerminals::_TerminalSetItem_Plus31 => false,
-            GrammarNonTerminals::_TerminalSetItem_Star32 => false,
-            GrammarNonTerminals::_Pattern_Plus33 => false,
-            GrammarNonTerminals::_TerminalSet34 => false,
-            GrammarNonTerminals::__TerminalSet34_Plus35 => false,
-            GrammarNonTerminals::_IdentOrLiteral_Plus36 => false,
-            GrammarNonTerminals::_GrammarLine_Plus37 => false,
-            GrammarNonTerminals::Augmented => false,
         }
     }
     fn is_augmented(&self) -> bool {
@@ -1013,19 +379,20 @@ impl ::rusty_lr_core::NonTerminal<Lexed> for GrammarNonTerminals {
             GrammarNonTerminals::Glr => false,
             GrammarNonTerminals::Lalr => false,
             GrammarNonTerminals::Precedence => false,
+            GrammarNonTerminals::NoOptim => false,
             GrammarNonTerminals::GrammarLine => false,
             GrammarNonTerminals::Grammar => false,
-            GrammarNonTerminals::_TokenMapped_Plus27 => false,
-            GrammarNonTerminals::_TokenMapped_Star28 => false,
-            GrammarNonTerminals::_PrecDef_Question29 => false,
-            GrammarNonTerminals::_caret_Question30 => false,
-            GrammarNonTerminals::_TerminalSetItem_Plus31 => false,
-            GrammarNonTerminals::_TerminalSetItem_Star32 => false,
-            GrammarNonTerminals::_Pattern_Plus33 => false,
-            GrammarNonTerminals::_TerminalSet34 => false,
-            GrammarNonTerminals::__TerminalSet34_Plus35 => false,
-            GrammarNonTerminals::_IdentOrLiteral_Plus36 => false,
-            GrammarNonTerminals::_GrammarLine_Plus37 => false,
+            GrammarNonTerminals::_TokenMapped_Plus28 => false,
+            GrammarNonTerminals::_TokenMapped_Star29 => false,
+            GrammarNonTerminals::_PrecDef_Question30 => false,
+            GrammarNonTerminals::_caret_Question31 => false,
+            GrammarNonTerminals::_TerminalSetItem_Plus32 => false,
+            GrammarNonTerminals::_TerminalSetItem_Star33 => false,
+            GrammarNonTerminals::_Pattern_Plus34 => false,
+            GrammarNonTerminals::_TerminalSet35 => false,
+            GrammarNonTerminals::__TerminalSet35_Plus36 => false,
+            GrammarNonTerminals::_IdentOrLiteral_Plus37 => false,
+            GrammarNonTerminals::_GrammarLine_Plus38 => false,
             GrammarNonTerminals::Augmented => true,
         }
     }
@@ -1171,7 +538,6 @@ impl GrammarStack {
                 tokens: TokenMapped,
                 reduce_action: Action.map(|action| action.to_token_stream()),
                 separator_span: Span::call_site(),
-                id: 0,
                 precedence: PrecDef,
             }
         });
@@ -1712,6 +1078,15 @@ impl GrammarStack {
         self.__rustylr_generated_stack_17.push({ IdentOrLiteral });
         Ok(())
     }
+    fn reduce_NoOptim_0(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        let mut nooptim = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        Ok(())
+    }
     fn reduce_GrammarLine_0(
         &mut self,
         lookahead: &Lexed,
@@ -1843,6 +1218,16 @@ impl GrammarStack {
         }
         Ok(())
     }
+    fn reduce_GrammarLine_12(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        {
+            data.no_optim = true;
+        }
+        Ok(())
+    }
     fn reduce_Grammar_0(
         &mut self,
         lookahead: &Lexed,
@@ -1850,7 +1235,7 @@ impl GrammarStack {
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         Ok(())
     }
-    fn reduce__TokenMapped_Plus27_0(
+    fn reduce__TokenMapped_Plus28_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1859,7 +1244,7 @@ impl GrammarStack {
         self.__rustylr_generated_stack_18.push({ vec![A] });
         Ok(())
     }
-    fn reduce__TokenMapped_Plus27_1(
+    fn reduce__TokenMapped_Plus28_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1872,7 +1257,7 @@ impl GrammarStack {
         });
         Ok(())
     }
-    fn reduce__TokenMapped_Star28_0(
+    fn reduce__TokenMapped_Star29_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1881,7 +1266,7 @@ impl GrammarStack {
         self.__rustylr_generated_stack_18.push({ Ap });
         Ok(())
     }
-    fn reduce__TokenMapped_Star28_1(
+    fn reduce__TokenMapped_Star29_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1889,7 +1274,7 @@ impl GrammarStack {
         self.__rustylr_generated_stack_18.push({ vec![] });
         Ok(())
     }
-    fn reduce__PrecDef_Question29_0(
+    fn reduce__PrecDef_Question30_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1898,7 +1283,7 @@ impl GrammarStack {
         self.__rustylr_generated_stack_19.push({ Some(A) });
         Ok(())
     }
-    fn reduce__PrecDef_Question29_1(
+    fn reduce__PrecDef_Question30_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1906,7 +1291,7 @@ impl GrammarStack {
         self.__rustylr_generated_stack_19.push({ None });
         Ok(())
     }
-    fn reduce__caret_Question30_0(
+    fn reduce__caret_Question31_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1915,7 +1300,7 @@ impl GrammarStack {
         self.__rustylr_generated_stack_20.push({ Some(A) });
         Ok(())
     }
-    fn reduce__caret_Question30_1(
+    fn reduce__caret_Question31_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1923,7 +1308,7 @@ impl GrammarStack {
         self.__rustylr_generated_stack_20.push({ None });
         Ok(())
     }
-    fn reduce__TerminalSetItem_Plus31_0(
+    fn reduce__TerminalSetItem_Plus32_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1932,7 +1317,7 @@ impl GrammarStack {
         self.__rustylr_generated_stack_21.push({ vec![A] });
         Ok(())
     }
-    fn reduce__TerminalSetItem_Plus31_1(
+    fn reduce__TerminalSetItem_Plus32_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1945,7 +1330,7 @@ impl GrammarStack {
         });
         Ok(())
     }
-    fn reduce__TerminalSetItem_Star32_0(
+    fn reduce__TerminalSetItem_Star33_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1954,7 +1339,7 @@ impl GrammarStack {
         self.__rustylr_generated_stack_21.push({ Ap });
         Ok(())
     }
-    fn reduce__TerminalSetItem_Star32_1(
+    fn reduce__TerminalSetItem_Star33_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1962,7 +1347,7 @@ impl GrammarStack {
         self.__rustylr_generated_stack_21.push({ vec![] });
         Ok(())
     }
-    fn reduce__Pattern_Plus33_0(
+    fn reduce__Pattern_Plus34_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1971,7 +1356,7 @@ impl GrammarStack {
         self.__rustylr_generated_stack_22.push({ vec![A] });
         Ok(())
     }
-    fn reduce__Pattern_Plus33_1(
+    fn reduce__Pattern_Plus34_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1984,7 +1369,7 @@ impl GrammarStack {
         });
         Ok(())
     }
-    fn reduce__TerminalSet34_0(
+    fn reduce__TerminalSet35_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1993,7 +1378,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_1(
+    fn reduce__TerminalSet35_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2002,7 +1387,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_2(
+    fn reduce__TerminalSet35_2(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2011,7 +1396,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_3(
+    fn reduce__TerminalSet35_3(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2020,7 +1405,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_4(
+    fn reduce__TerminalSet35_4(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2029,7 +1414,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_5(
+    fn reduce__TerminalSet35_5(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2038,7 +1423,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_6(
+    fn reduce__TerminalSet35_6(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2047,7 +1432,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_7(
+    fn reduce__TerminalSet35_7(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2056,7 +1441,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_8(
+    fn reduce__TerminalSet35_8(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2065,7 +1450,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_9(
+    fn reduce__TerminalSet35_9(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2074,7 +1459,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_10(
+    fn reduce__TerminalSet35_10(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2083,7 +1468,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_11(
+    fn reduce__TerminalSet35_11(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2092,7 +1477,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_12(
+    fn reduce__TerminalSet35_12(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2101,7 +1486,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_13(
+    fn reduce__TerminalSet35_13(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2110,7 +1495,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_14(
+    fn reduce__TerminalSet35_14(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2119,7 +1504,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_15(
+    fn reduce__TerminalSet35_15(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2128,7 +1513,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_16(
+    fn reduce__TerminalSet35_16(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2137,7 +1522,7 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce__TerminalSet34_17(
+    fn reduce__TerminalSet35_17(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2146,7 +1531,142 @@ impl GrammarStack {
         self.__rustylr_generated_terminal_stack.push(term);
         Ok(())
     }
-    fn reduce___TerminalSet34_Plus35_0(
+    fn reduce__TerminalSet35_18(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet35_19(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet35_20(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet35_21(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet35_22(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet35_23(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet35_24(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet35_25(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet35_26(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet35_27(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet35_28(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet35_29(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet35_30(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet35_31(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce__TerminalSet35_32(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        self.__rustylr_generated_terminal_stack.push(term);
+        Ok(())
+    }
+    fn reduce___TerminalSet35_Plus36_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2155,7 +1675,7 @@ impl GrammarStack {
         self.__rustylr_generated_stack_23.push({ vec![A] });
         Ok(())
     }
-    fn reduce___TerminalSet34_Plus35_1(
+    fn reduce___TerminalSet35_Plus36_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2168,7 +1688,7 @@ impl GrammarStack {
         });
         Ok(())
     }
-    fn reduce__IdentOrLiteral_Plus36_0(
+    fn reduce__IdentOrLiteral_Plus37_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2177,7 +1697,7 @@ impl GrammarStack {
         self.__rustylr_generated_stack_17.push({ vec![A] });
         Ok(())
     }
-    fn reduce__IdentOrLiteral_Plus36_1(
+    fn reduce__IdentOrLiteral_Plus37_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2190,14 +1710,14 @@ impl GrammarStack {
         });
         Ok(())
     }
-    fn reduce__GrammarLine_Plus37_0(
+    fn reduce__GrammarLine_Plus38_0(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         Ok(())
     }
-    fn reduce__GrammarLine_Plus37_1(
+    fn reduce__GrammarLine_Plus38_1(
         &mut self,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2310,58 +1830,75 @@ impl ::rusty_lr_core::lr::Stack for GrammarStack {
             41usize => self.reduce_Glr_0(lookahead, user_data),
             42usize => self.reduce_Lalr_0(lookahead, user_data),
             43usize => self.reduce_Precedence_0(lookahead, user_data),
-            44usize => self.reduce_GrammarLine_0(lookahead, user_data),
-            45usize => self.reduce_GrammarLine_1(lookahead, user_data),
-            46usize => self.reduce_GrammarLine_2(lookahead, user_data),
-            47usize => self.reduce_GrammarLine_3(lookahead, user_data),
-            48usize => self.reduce_GrammarLine_4(lookahead, user_data),
-            49usize => self.reduce_GrammarLine_5(lookahead, user_data),
-            50usize => self.reduce_GrammarLine_6(lookahead, user_data),
-            51usize => self.reduce_GrammarLine_7(lookahead, user_data),
-            52usize => self.reduce_GrammarLine_8(lookahead, user_data),
-            53usize => self.reduce_GrammarLine_9(lookahead, user_data),
-            54usize => self.reduce_GrammarLine_10(lookahead, user_data),
-            55usize => self.reduce_GrammarLine_11(lookahead, user_data),
-            56usize => self.reduce_Grammar_0(lookahead, user_data),
-            57usize => self.reduce__TokenMapped_Plus27_0(lookahead, user_data),
-            58usize => self.reduce__TokenMapped_Plus27_1(lookahead, user_data),
-            59usize => self.reduce__TokenMapped_Star28_0(lookahead, user_data),
-            60usize => self.reduce__TokenMapped_Star28_1(lookahead, user_data),
-            61usize => self.reduce__PrecDef_Question29_0(lookahead, user_data),
-            62usize => self.reduce__PrecDef_Question29_1(lookahead, user_data),
-            63usize => self.reduce__caret_Question30_0(lookahead, user_data),
-            64usize => self.reduce__caret_Question30_1(lookahead, user_data),
-            65usize => self.reduce__TerminalSetItem_Plus31_0(lookahead, user_data),
-            66usize => self.reduce__TerminalSetItem_Plus31_1(lookahead, user_data),
-            67usize => self.reduce__TerminalSetItem_Star32_0(lookahead, user_data),
-            68usize => self.reduce__TerminalSetItem_Star32_1(lookahead, user_data),
-            69usize => self.reduce__Pattern_Plus33_0(lookahead, user_data),
-            70usize => self.reduce__Pattern_Plus33_1(lookahead, user_data),
-            71usize => self.reduce__TerminalSet34_0(lookahead, user_data),
-            72usize => self.reduce__TerminalSet34_1(lookahead, user_data),
-            73usize => self.reduce__TerminalSet34_2(lookahead, user_data),
-            74usize => self.reduce__TerminalSet34_3(lookahead, user_data),
-            75usize => self.reduce__TerminalSet34_4(lookahead, user_data),
-            76usize => self.reduce__TerminalSet34_5(lookahead, user_data),
-            77usize => self.reduce__TerminalSet34_6(lookahead, user_data),
-            78usize => self.reduce__TerminalSet34_7(lookahead, user_data),
-            79usize => self.reduce__TerminalSet34_8(lookahead, user_data),
-            80usize => self.reduce__TerminalSet34_9(lookahead, user_data),
-            81usize => self.reduce__TerminalSet34_10(lookahead, user_data),
-            82usize => self.reduce__TerminalSet34_11(lookahead, user_data),
-            83usize => self.reduce__TerminalSet34_12(lookahead, user_data),
-            84usize => self.reduce__TerminalSet34_13(lookahead, user_data),
-            85usize => self.reduce__TerminalSet34_14(lookahead, user_data),
-            86usize => self.reduce__TerminalSet34_15(lookahead, user_data),
-            87usize => self.reduce__TerminalSet34_16(lookahead, user_data),
-            88usize => self.reduce__TerminalSet34_17(lookahead, user_data),
-            89usize => self.reduce___TerminalSet34_Plus35_0(lookahead, user_data),
-            90usize => self.reduce___TerminalSet34_Plus35_1(lookahead, user_data),
-            91usize => self.reduce__IdentOrLiteral_Plus36_0(lookahead, user_data),
-            92usize => self.reduce__IdentOrLiteral_Plus36_1(lookahead, user_data),
-            93usize => self.reduce__GrammarLine_Plus37_0(lookahead, user_data),
-            94usize => self.reduce__GrammarLine_Plus37_1(lookahead, user_data),
-            95usize => self.reduce_Augmented_0(lookahead, user_data),
+            44usize => self.reduce_NoOptim_0(lookahead, user_data),
+            45usize => self.reduce_GrammarLine_0(lookahead, user_data),
+            46usize => self.reduce_GrammarLine_1(lookahead, user_data),
+            47usize => self.reduce_GrammarLine_2(lookahead, user_data),
+            48usize => self.reduce_GrammarLine_3(lookahead, user_data),
+            49usize => self.reduce_GrammarLine_4(lookahead, user_data),
+            50usize => self.reduce_GrammarLine_5(lookahead, user_data),
+            51usize => self.reduce_GrammarLine_6(lookahead, user_data),
+            52usize => self.reduce_GrammarLine_7(lookahead, user_data),
+            53usize => self.reduce_GrammarLine_8(lookahead, user_data),
+            54usize => self.reduce_GrammarLine_9(lookahead, user_data),
+            55usize => self.reduce_GrammarLine_10(lookahead, user_data),
+            56usize => self.reduce_GrammarLine_11(lookahead, user_data),
+            57usize => self.reduce_GrammarLine_12(lookahead, user_data),
+            58usize => self.reduce_Grammar_0(lookahead, user_data),
+            59usize => self.reduce__TokenMapped_Plus28_0(lookahead, user_data),
+            60usize => self.reduce__TokenMapped_Plus28_1(lookahead, user_data),
+            61usize => self.reduce__TokenMapped_Star29_0(lookahead, user_data),
+            62usize => self.reduce__TokenMapped_Star29_1(lookahead, user_data),
+            63usize => self.reduce__PrecDef_Question30_0(lookahead, user_data),
+            64usize => self.reduce__PrecDef_Question30_1(lookahead, user_data),
+            65usize => self.reduce__caret_Question31_0(lookahead, user_data),
+            66usize => self.reduce__caret_Question31_1(lookahead, user_data),
+            67usize => self.reduce__TerminalSetItem_Plus32_0(lookahead, user_data),
+            68usize => self.reduce__TerminalSetItem_Plus32_1(lookahead, user_data),
+            69usize => self.reduce__TerminalSetItem_Star33_0(lookahead, user_data),
+            70usize => self.reduce__TerminalSetItem_Star33_1(lookahead, user_data),
+            71usize => self.reduce__Pattern_Plus34_0(lookahead, user_data),
+            72usize => self.reduce__Pattern_Plus34_1(lookahead, user_data),
+            73usize => self.reduce__TerminalSet35_0(lookahead, user_data),
+            74usize => self.reduce__TerminalSet35_1(lookahead, user_data),
+            75usize => self.reduce__TerminalSet35_2(lookahead, user_data),
+            76usize => self.reduce__TerminalSet35_3(lookahead, user_data),
+            77usize => self.reduce__TerminalSet35_4(lookahead, user_data),
+            78usize => self.reduce__TerminalSet35_5(lookahead, user_data),
+            79usize => self.reduce__TerminalSet35_6(lookahead, user_data),
+            80usize => self.reduce__TerminalSet35_7(lookahead, user_data),
+            81usize => self.reduce__TerminalSet35_8(lookahead, user_data),
+            82usize => self.reduce__TerminalSet35_9(lookahead, user_data),
+            83usize => self.reduce__TerminalSet35_10(lookahead, user_data),
+            84usize => self.reduce__TerminalSet35_11(lookahead, user_data),
+            85usize => self.reduce__TerminalSet35_12(lookahead, user_data),
+            86usize => self.reduce__TerminalSet35_13(lookahead, user_data),
+            87usize => self.reduce__TerminalSet35_14(lookahead, user_data),
+            88usize => self.reduce__TerminalSet35_15(lookahead, user_data),
+            89usize => self.reduce__TerminalSet35_16(lookahead, user_data),
+            90usize => self.reduce__TerminalSet35_17(lookahead, user_data),
+            91usize => self.reduce__TerminalSet35_18(lookahead, user_data),
+            92usize => self.reduce__TerminalSet35_19(lookahead, user_data),
+            93usize => self.reduce__TerminalSet35_20(lookahead, user_data),
+            94usize => self.reduce__TerminalSet35_21(lookahead, user_data),
+            95usize => self.reduce__TerminalSet35_22(lookahead, user_data),
+            96usize => self.reduce__TerminalSet35_23(lookahead, user_data),
+            97usize => self.reduce__TerminalSet35_24(lookahead, user_data),
+            98usize => self.reduce__TerminalSet35_25(lookahead, user_data),
+            99usize => self.reduce__TerminalSet35_26(lookahead, user_data),
+            100usize => self.reduce__TerminalSet35_27(lookahead, user_data),
+            101usize => self.reduce__TerminalSet35_28(lookahead, user_data),
+            102usize => self.reduce__TerminalSet35_29(lookahead, user_data),
+            103usize => self.reduce__TerminalSet35_30(lookahead, user_data),
+            104usize => self.reduce__TerminalSet35_31(lookahead, user_data),
+            105usize => self.reduce__TerminalSet35_32(lookahead, user_data),
+            106usize => self.reduce___TerminalSet35_Plus36_0(lookahead, user_data),
+            107usize => self.reduce___TerminalSet35_Plus36_1(lookahead, user_data),
+            108usize => self.reduce__IdentOrLiteral_Plus37_0(lookahead, user_data),
+            109usize => self.reduce__IdentOrLiteral_Plus37_1(lookahead, user_data),
+            110usize => self.reduce__GrammarLine_Plus38_0(lookahead, user_data),
+            111usize => self.reduce__GrammarLine_Plus38_1(lookahead, user_data),
+            112usize => self.reduce_Augmented_0(lookahead, user_data),
             _ => {
                 unreachable!("Invalid Rule: {}", rustylr_macro_generated_ruleid__);
             }
@@ -2372,7 +1909,7 @@ impl ::rusty_lr_core::lr::Stack for GrammarStack {
         ()
     }
 }
-#[doc = r" struct that holds parser data, DFA tables"]
+#[doc = r" A struct that holds the entire parser table and production rules."]
 #[allow(
     unused_braces,
     unused_parens,
@@ -2386,6 +1923,12 @@ pub struct GrammarParser {
     pub rules: Vec<GrammarRule>,
     #[doc = r" states"]
     pub states: Vec<GrammarState>,
+    #[doc = r" terminal classes"]
+    pub classes: Vec<Vec<Lexed>>,
+    #[doc = r" term to class map"]
+    pub term_class_map: ::rusty_lr_core::HashMap<Lexed, usize>,
+    #[doc = r" class id for terminal not matched with any in grammar"]
+    pub other_class_id: usize,
 }
 impl ::rusty_lr_core::lr::Parser for GrammarParser {
     type Term = Lexed;
@@ -2395,6 +1938,16 @@ impl ::rusty_lr_core::lr::Parser for GrammarParser {
     }
     fn get_states(&self) -> &[GrammarState] {
         &self.states
+    }
+    fn get_terminals(&self, i: usize) -> Option<impl Iterator<Item = &Self::Term>> {
+        self.classes.get(i).map(|class| class.iter())
+    }
+    fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
+        if let Some(class) = self.term_class_map.get(terminal) {
+            *class
+        } else {
+            self.other_class_id
+        }
     }
 }
 #[allow(
@@ -2406,1450 +1959,1001 @@ impl ::rusty_lr_core::lr::Parser for GrammarParser {
     dead_code
 )]
 impl GrammarParser {
-    #[doc = r" Create new parser instance."]
-    #[doc = r" Parser can be reused with different context, for multiple parsing."]
+    #[doc = r" Calculates the states and parser tables from the grammar."]
     #[allow(clippy::clone_on_copy)]
     pub fn new() -> Self {
-        let __rustylr_terminals: Vec<Lexed> = vec![
-            Lexed::Ident(Ident::new("id", Span::call_site())),
-            Lexed::Colon(punct!(':')),
-            Lexed::Semicolon(punct!(';')),
-            Lexed::Pipe(punct!('|')),
-            Lexed::Percent(punct!('%')),
-            Lexed::Equal(punct!('=')),
-            Lexed::Plus(punct!('+')),
-            Lexed::Star(punct!('*')),
-            Lexed::Question(punct!('?')),
-            Lexed::Caret(punct!('^')),
-            Lexed::Minus(punct!('-')),
-            Lexed::Exclamation(punct!('!')),
-            Lexed::Slash(punct!('/')),
-            Lexed::OtherPunct(punct!('.')),
-            Lexed::Literal(Literal::usize_suffixed(0)),
-            Lexed::ParenGroup(None),
-            Lexed::BraceGroup(None),
-            Lexed::BracketGroup(None),
-            Lexed::NoneGroup(None),
-            Lexed::LParen(Span::call_site()),
-            Lexed::RParen(Span::call_site()),
-            Lexed::LBrace(Span::call_site()),
-            Lexed::RBrace(Span::call_site()),
-            Lexed::LBracket(Span::call_site()),
-            Lexed::RBracket(Span::call_site()),
-            Lexed::Left(punct!('%'), Ident::new("id", Span::call_site())),
-            Lexed::Right(punct!('%'), Ident::new("id", Span::call_site())),
-            Lexed::Token(punct!('%'), Ident::new("id", Span::call_site())),
-            Lexed::Start(punct!('%'), Ident::new("id", Span::call_site())),
-            Lexed::EofDef(punct!('%'), Ident::new("id", Span::call_site())),
-            Lexed::TokenType(punct!('%'), Ident::new("id", Span::call_site())),
-            Lexed::UserData(punct!('%'), Ident::new("id", Span::call_site())),
-            Lexed::ErrorType(punct!('%'), Ident::new("id", Span::call_site())),
-            Lexed::ModulePrefix(punct!('%'), Ident::new("id", Span::call_site())),
-            Lexed::Lalr(punct!('%'), Ident::new("id", Span::call_site())),
-            Lexed::Glr(punct!('%'), Ident::new("id", Span::call_site())),
-            Lexed::Prec(punct!('%'), Ident::new("id", Span::call_site())),
-            Lexed::Precedence(punct!('%'), Ident::new("id", Span::call_site())),
-            Lexed::Eof,
-        ];
-        const RUSTYLR_RULES_TOKENS: &[&[::rusty_lr_core::Token<u8, GrammarNonTerminals>]] = &[
-            &[
-                ::rusty_lr_core::Token::Term(0),
+        let mut builder = ::rusty_lr_core::builder::Grammar::new();
+        builder.add_rule(
+            GrammarNonTerminals::Rule,
+            vec![
+                ::rusty_lr_core::Token::Term(0usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleType),
-                ::rusty_lr_core::Token::Term(1),
+                ::rusty_lr_core::Token::Term(28usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLines),
-                ::rusty_lr_core::Token::Term(2),
+                ::rusty_lr_core::Token::Term(33usize),
             ],
-            &[::rusty_lr_core::Token::Term(15)],
-            &[],
-            &[
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(33usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::RuleType,
+            vec![::rusty_lr_core::Token::Term(32usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(32usize)),
+        );
+        builder.add_rule(GrammarNonTerminals::RuleType, vec![], None, None);
+        builder.add_rule(
+            GrammarNonTerminals::RuleLines,
+            vec![
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLines),
-                ::rusty_lr_core::Token::Term(3),
+                ::rusty_lr_core::Token::Term(5usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLine),
             ],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(5usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::RuleLines,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::RuleLine,
             )],
-            &[
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMapped_Star28),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDef_Question29),
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::RuleLine,
+            vec![
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMapped_Star29),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDef_Question30),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Action),
             ],
-            &[
-                ::rusty_lr_core::Token::Term(36),
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::PrecDef,
+            vec![
+                ::rusty_lr_core::Token::Term(7usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::IdentOrLiteral),
             ],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(7usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::TokenMapped,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::Pattern,
             )],
-            &[
-                ::rusty_lr_core::Token::Term(0),
-                ::rusty_lr_core::Token::Term(5),
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::TokenMapped,
+            vec![
+                ::rusty_lr_core::Token::Term(0usize),
+                ::rusty_lr_core::Token::Term(29usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
             ],
-            &[::rusty_lr_core::Token::Term(0)],
-            &[
-                ::rusty_lr_core::Token::Term(0),
-                ::rusty_lr_core::Token::Term(10),
-                ::rusty_lr_core::Token::Term(0),
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(29usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::TerminalSetItem,
+            vec![::rusty_lr_core::Token::Term(0usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(0usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::TerminalSetItem,
+            vec![
+                ::rusty_lr_core::Token::Term(0usize),
+                ::rusty_lr_core::Token::Term(31usize),
+                ::rusty_lr_core::Token::Term(0usize),
             ],
-            &[::rusty_lr_core::Token::Term(14)],
-            &[
-                ::rusty_lr_core::Token::Term(14),
-                ::rusty_lr_core::Token::Term(10),
-                ::rusty_lr_core::Token::Term(14),
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(0usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::TerminalSetItem,
+            vec![::rusty_lr_core::Token::Term(2usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(2usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::TerminalSetItem,
+            vec![
+                ::rusty_lr_core::Token::Term(2usize),
+                ::rusty_lr_core::Token::Term(31usize),
+                ::rusty_lr_core::Token::Term(2usize),
             ],
-            &[
-                ::rusty_lr_core::Token::Term(23),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_caret_Question30),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItem_Star32),
-                ::rusty_lr_core::Token::Term(24),
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(2usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::TerminalSet,
+            vec![
+                ::rusty_lr_core::Token::Term(3usize),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_caret_Question31),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItem_Star33),
+                ::rusty_lr_core::Token::Term(14usize),
             ],
-            &[::rusty_lr_core::Token::Term(0)],
-            &[
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(14usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Pattern,
+            vec![::rusty_lr_core::Token::Term(0usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(0usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Pattern,
+            vec![
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                ::rusty_lr_core::Token::Term(6),
+                ::rusty_lr_core::Token::Term(8usize),
             ],
-            &[
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(8usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Pattern,
+            vec![
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                ::rusty_lr_core::Token::Term(7),
+                ::rusty_lr_core::Token::Term(9usize),
             ],
-            &[
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(9usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Pattern,
+            vec![
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                ::rusty_lr_core::Token::Term(8),
+                ::rusty_lr_core::Token::Term(10usize),
             ],
-            &[
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(10usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Pattern,
+            vec![
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                ::rusty_lr_core::Token::Term(11),
+                ::rusty_lr_core::Token::Term(11usize),
             ],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(11usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Pattern,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::TerminalSet,
             )],
-            &[
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Pattern,
+            vec![
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                ::rusty_lr_core::Token::Term(12),
+                ::rusty_lr_core::Token::Term(12usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalOrTerminalSet),
             ],
-            &[
-                ::rusty_lr_core::Token::Term(19),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_Pattern_Plus33),
-                ::rusty_lr_core::Token::Term(20),
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(12usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Pattern,
+            vec![
+                ::rusty_lr_core::Token::Term(4usize),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_Pattern_Plus34),
+                ::rusty_lr_core::Token::Term(13usize),
             ],
-            &[::rusty_lr_core::Token::Term(14)],
-            &[::rusty_lr_core::Token::Term(16)],
-            &[],
-            &[
-                ::rusty_lr_core::Token::Term(27),
-                ::rusty_lr_core::Token::Term(0),
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(13usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Pattern,
+            vec![::rusty_lr_core::Token::Term(2usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(2usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Action,
+            vec![::rusty_lr_core::Token::Term(6usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(6usize)),
+        );
+        builder.add_rule(GrammarNonTerminals::Action, vec![], None, None);
+        builder.add_rule(
+            GrammarNonTerminals::TokenDef,
+            vec![
+                ::rusty_lr_core::Token::Term(17usize),
+                ::rusty_lr_core::Token::Term(0usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                ::rusty_lr_core::Token::Term(2),
+                ::rusty_lr_core::Token::Term(33usize),
             ],
-            &[::rusty_lr_core::Token::NonTerm(
-                GrammarNonTerminals::__TerminalSet34_Plus35,
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(33usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::RustCode,
+            vec![::rusty_lr_core::Token::NonTerm(
+                GrammarNonTerminals::__TerminalSet35_Plus36,
             )],
-            &[
-                ::rusty_lr_core::Token::Term(28),
-                ::rusty_lr_core::Token::Term(0),
-                ::rusty_lr_core::Token::Term(2),
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::StartDef,
+            vec![
+                ::rusty_lr_core::Token::Term(18usize),
+                ::rusty_lr_core::Token::Term(0usize),
+                ::rusty_lr_core::Token::Term(33usize),
             ],
-            &[
-                ::rusty_lr_core::Token::Term(29),
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(33usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::EofDef,
+            vec![
+                ::rusty_lr_core::Token::Term(19usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                ::rusty_lr_core::Token::Term(2),
+                ::rusty_lr_core::Token::Term(33usize),
             ],
-            &[
-                ::rusty_lr_core::Token::Term(30),
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(33usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::TokenTypeDef,
+            vec![
+                ::rusty_lr_core::Token::Term(20usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                ::rusty_lr_core::Token::Term(2),
+                ::rusty_lr_core::Token::Term(33usize),
             ],
-            &[
-                ::rusty_lr_core::Token::Term(31),
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(33usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::UserDataDef,
+            vec![
+                ::rusty_lr_core::Token::Term(21usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                ::rusty_lr_core::Token::Term(2),
+                ::rusty_lr_core::Token::Term(33usize),
             ],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(33usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::TerminalOrTerminalSet,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::TerminalSet,
             )],
-            &[::rusty_lr_core::Token::Term(0)],
-            &[::rusty_lr_core::Token::Term(14)],
-            &[::rusty_lr_core::Token::Term(0)],
-            &[::rusty_lr_core::Token::Term(14)],
-            &[::rusty_lr_core::Token::Term(25)],
-            &[::rusty_lr_core::Token::Term(26)],
-            &[
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::TerminalOrTerminalSet,
+            vec![::rusty_lr_core::Token::Term(0usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(0usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::TerminalOrTerminalSet,
+            vec![::rusty_lr_core::Token::Term(2usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(2usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::IdentOrLiteral,
+            vec![::rusty_lr_core::Token::Term(0usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(0usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::IdentOrLiteral,
+            vec![::rusty_lr_core::Token::Term(2usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(2usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::ReduceType,
+            vec![::rusty_lr_core::Token::Term(15usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(15usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::ReduceType,
+            vec![::rusty_lr_core::Token::Term(16usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(16usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::ReduceDef,
+            vec![
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::ReduceType),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteral_Plus36),
-                ::rusty_lr_core::Token::Term(2),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteral_Plus37),
+                ::rusty_lr_core::Token::Term(33usize),
             ],
-            &[
-                ::rusty_lr_core::Token::Term(32),
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(33usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::ErrorDef,
+            vec![
+                ::rusty_lr_core::Token::Term(22usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                ::rusty_lr_core::Token::Term(2),
+                ::rusty_lr_core::Token::Term(33usize),
             ],
-            &[
-                ::rusty_lr_core::Token::Term(33),
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(33usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::ModulePrefixDef,
+            vec![
+                ::rusty_lr_core::Token::Term(23usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                ::rusty_lr_core::Token::Term(2),
+                ::rusty_lr_core::Token::Term(33usize),
             ],
-            &[
-                ::rusty_lr_core::Token::Term(35),
-                ::rusty_lr_core::Token::Term(2),
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(33usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Glr,
+            vec![
+                ::rusty_lr_core::Token::Term(26usize),
+                ::rusty_lr_core::Token::Term(33usize),
             ],
-            &[
-                ::rusty_lr_core::Token::Term(34),
-                ::rusty_lr_core::Token::Term(2),
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(33usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Lalr,
+            vec![
+                ::rusty_lr_core::Token::Term(25usize),
+                ::rusty_lr_core::Token::Term(33usize),
             ],
-            &[
-                ::rusty_lr_core::Token::Term(37),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteral_Plus36),
-                ::rusty_lr_core::Token::Term(2),
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(33usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Precedence,
+            vec![
+                ::rusty_lr_core::Token::Term(24usize),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteral_Plus37),
+                ::rusty_lr_core::Token::Term(33usize),
             ],
-            &[::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Rule)],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(33usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::NoOptim,
+            vec![
+                ::rusty_lr_core::Token::Term(27usize),
+                ::rusty_lr_core::Token::Term(33usize),
+            ],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(33usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::GrammarLine,
+            vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Rule)],
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::GrammarLine,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::TokenDef,
             )],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::GrammarLine,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::StartDef,
             )],
-            &[::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::EofDef)],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::GrammarLine,
+            vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::EofDef)],
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::GrammarLine,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::TokenTypeDef,
             )],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::GrammarLine,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::UserDataDef,
             )],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::GrammarLine,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::ReduceDef,
             )],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::GrammarLine,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::ErrorDef,
             )],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::GrammarLine,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::ModulePrefixDef,
             )],
-            &[::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Lalr)],
-            &[::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Glr)],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::GrammarLine,
+            vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Lalr)],
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::GrammarLine,
+            vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Glr)],
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::GrammarLine,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::Precedence,
             )],
-            &[::rusty_lr_core::Token::NonTerm(
-                GrammarNonTerminals::_GrammarLine_Plus37,
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::GrammarLine,
+            vec![::rusty_lr_core::Token::NonTerm(
+                GrammarNonTerminals::NoOptim,
             )],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Grammar,
+            vec![::rusty_lr_core::Token::NonTerm(
+                GrammarNonTerminals::_GrammarLine_Plus38,
+            )],
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TokenMapped_Plus28,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::TokenMapped,
             )],
-            &[
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMapped_Plus27),
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TokenMapped_Plus28,
+            vec![
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMapped_Plus28),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TokenMapped),
             ],
-            &[::rusty_lr_core::Token::NonTerm(
-                GrammarNonTerminals::_TokenMapped_Plus27,
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TokenMapped_Star29,
+            vec![::rusty_lr_core::Token::NonTerm(
+                GrammarNonTerminals::_TokenMapped_Plus28,
             )],
-            &[],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            None,
+        );
+        builder.add_rule(GrammarNonTerminals::_TokenMapped_Star29, vec![], None, None);
+        builder.add_rule(
+            GrammarNonTerminals::_PrecDef_Question30,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::PrecDef,
             )],
-            &[],
-            &[::rusty_lr_core::Token::Term(9)],
-            &[],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            None,
+        );
+        builder.add_rule(GrammarNonTerminals::_PrecDef_Question30, vec![], None, None);
+        builder.add_rule(
+            GrammarNonTerminals::_caret_Question31,
+            vec![::rusty_lr_core::Token::Term(30usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(30usize)),
+        );
+        builder.add_rule(GrammarNonTerminals::_caret_Question31, vec![], None, None);
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSetItem_Plus32,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::TerminalSetItem,
             )],
-            &[
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItem_Plus31),
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSetItem_Plus32,
+            vec![
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItem_Plus32),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalSetItem),
             ],
-            &[::rusty_lr_core::Token::NonTerm(
-                GrammarNonTerminals::_TerminalSetItem_Plus31,
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSetItem_Star33,
+            vec![::rusty_lr_core::Token::NonTerm(
+                GrammarNonTerminals::_TerminalSetItem_Plus32,
             )],
-            &[],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSetItem_Star33,
+            vec![],
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_Pattern_Plus34,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::Pattern,
             )],
-            &[
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_Pattern_Plus33),
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_Pattern_Plus34,
+            vec![
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_Pattern_Plus34),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
             ],
-            &[::rusty_lr_core::Token::Term(0)],
-            &[::rusty_lr_core::Token::Term(1)],
-            &[::rusty_lr_core::Token::Term(3)],
-            &[::rusty_lr_core::Token::Term(4)],
-            &[::rusty_lr_core::Token::Term(5)],
-            &[::rusty_lr_core::Token::Term(6)],
-            &[::rusty_lr_core::Token::Term(7)],
-            &[::rusty_lr_core::Token::Term(8)],
-            &[::rusty_lr_core::Token::Term(9)],
-            &[::rusty_lr_core::Token::Term(10)],
-            &[::rusty_lr_core::Token::Term(11)],
-            &[::rusty_lr_core::Token::Term(12)],
-            &[::rusty_lr_core::Token::Term(13)],
-            &[::rusty_lr_core::Token::Term(14)],
-            &[::rusty_lr_core::Token::Term(15)],
-            &[::rusty_lr_core::Token::Term(16)],
-            &[::rusty_lr_core::Token::Term(17)],
-            &[::rusty_lr_core::Token::Term(18)],
-            &[::rusty_lr_core::Token::NonTerm(
-                GrammarNonTerminals::_TerminalSet34,
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(0usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(0usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(28usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(28usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(5usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(5usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(1usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(1usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(29usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(29usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(8usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(8usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(9usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(9usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(10usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(10usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(30usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(30usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(31usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(31usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(11usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(11usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(12usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(12usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(2usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(2usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(32usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(32usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(6usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(6usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(4usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(4usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(13usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(13usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(3usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(3usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(14usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(14usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(15usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(15usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(16usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(16usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(17usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(17usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(18usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(18usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(19usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(19usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(20usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(20usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(21usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(21usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(22usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(22usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(23usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(23usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(25usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(25usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(26usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(26usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(7usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(7usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(24usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(24usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TerminalSet35,
+            vec![::rusty_lr_core::Token::Term(27usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(27usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::__TerminalSet35_Plus36,
+            vec![::rusty_lr_core::Token::NonTerm(
+                GrammarNonTerminals::_TerminalSet35,
             )],
-            &[
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TerminalSet34_Plus35),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSet34),
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::__TerminalSet35_Plus36,
+            vec![
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TerminalSet35_Plus36),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSet35),
             ],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_IdentOrLiteral_Plus37,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::IdentOrLiteral,
             )],
-            &[
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteral_Plus36),
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_IdentOrLiteral_Plus37,
+            vec![
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteral_Plus37),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::IdentOrLiteral),
             ],
-            &[::rusty_lr_core::Token::NonTerm(
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_GrammarLine_Plus38,
+            vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::GrammarLine,
             )],
-            &[
+            None,
+            None,
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_GrammarLine_Plus38,
+            vec![
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::GrammarLine),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_GrammarLine_Plus37),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_GrammarLine_Plus38),
             ],
-            &[
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
-                ::rusty_lr_core::Token::Term(38),
-            ],
-        ];
-        const RUSTYLR_RULES_NAME: &[GrammarNonTerminals] = &[
-            GrammarNonTerminals::Rule,
-            GrammarNonTerminals::RuleType,
-            GrammarNonTerminals::RuleType,
-            GrammarNonTerminals::RuleLines,
-            GrammarNonTerminals::RuleLines,
-            GrammarNonTerminals::RuleLine,
-            GrammarNonTerminals::PrecDef,
-            GrammarNonTerminals::TokenMapped,
-            GrammarNonTerminals::TokenMapped,
-            GrammarNonTerminals::TerminalSetItem,
-            GrammarNonTerminals::TerminalSetItem,
-            GrammarNonTerminals::TerminalSetItem,
-            GrammarNonTerminals::TerminalSetItem,
-            GrammarNonTerminals::TerminalSet,
-            GrammarNonTerminals::Pattern,
-            GrammarNonTerminals::Pattern,
-            GrammarNonTerminals::Pattern,
-            GrammarNonTerminals::Pattern,
-            GrammarNonTerminals::Pattern,
-            GrammarNonTerminals::Pattern,
-            GrammarNonTerminals::Pattern,
-            GrammarNonTerminals::Pattern,
-            GrammarNonTerminals::Pattern,
-            GrammarNonTerminals::Action,
-            GrammarNonTerminals::Action,
-            GrammarNonTerminals::TokenDef,
-            GrammarNonTerminals::RustCode,
-            GrammarNonTerminals::StartDef,
-            GrammarNonTerminals::EofDef,
-            GrammarNonTerminals::TokenTypeDef,
-            GrammarNonTerminals::UserDataDef,
-            GrammarNonTerminals::TerminalOrTerminalSet,
-            GrammarNonTerminals::TerminalOrTerminalSet,
-            GrammarNonTerminals::TerminalOrTerminalSet,
-            GrammarNonTerminals::IdentOrLiteral,
-            GrammarNonTerminals::IdentOrLiteral,
-            GrammarNonTerminals::ReduceType,
-            GrammarNonTerminals::ReduceType,
-            GrammarNonTerminals::ReduceDef,
-            GrammarNonTerminals::ErrorDef,
-            GrammarNonTerminals::ModulePrefixDef,
-            GrammarNonTerminals::Glr,
-            GrammarNonTerminals::Lalr,
-            GrammarNonTerminals::Precedence,
-            GrammarNonTerminals::GrammarLine,
-            GrammarNonTerminals::GrammarLine,
-            GrammarNonTerminals::GrammarLine,
-            GrammarNonTerminals::GrammarLine,
-            GrammarNonTerminals::GrammarLine,
-            GrammarNonTerminals::GrammarLine,
-            GrammarNonTerminals::GrammarLine,
-            GrammarNonTerminals::GrammarLine,
-            GrammarNonTerminals::GrammarLine,
-            GrammarNonTerminals::GrammarLine,
-            GrammarNonTerminals::GrammarLine,
-            GrammarNonTerminals::GrammarLine,
-            GrammarNonTerminals::Grammar,
-            GrammarNonTerminals::_TokenMapped_Plus27,
-            GrammarNonTerminals::_TokenMapped_Plus27,
-            GrammarNonTerminals::_TokenMapped_Star28,
-            GrammarNonTerminals::_TokenMapped_Star28,
-            GrammarNonTerminals::_PrecDef_Question29,
-            GrammarNonTerminals::_PrecDef_Question29,
-            GrammarNonTerminals::_caret_Question30,
-            GrammarNonTerminals::_caret_Question30,
-            GrammarNonTerminals::_TerminalSetItem_Plus31,
-            GrammarNonTerminals::_TerminalSetItem_Plus31,
-            GrammarNonTerminals::_TerminalSetItem_Star32,
-            GrammarNonTerminals::_TerminalSetItem_Star32,
-            GrammarNonTerminals::_Pattern_Plus33,
-            GrammarNonTerminals::_Pattern_Plus33,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::_TerminalSet34,
-            GrammarNonTerminals::__TerminalSet34_Plus35,
-            GrammarNonTerminals::__TerminalSet34_Plus35,
-            GrammarNonTerminals::_IdentOrLiteral_Plus36,
-            GrammarNonTerminals::_IdentOrLiteral_Plus36,
-            GrammarNonTerminals::_GrammarLine_Plus37,
-            GrammarNonTerminals::_GrammarLine_Plus37,
+            None,
+            None,
+        );
+        builder.add_rule(
             GrammarNonTerminals::Augmented,
+            vec![
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
+                ::rusty_lr_core::Token::Term(34usize),
+            ],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(34usize)),
+        );
+        let Ok(states) = builder.build(GrammarNonTerminals::Augmented) else {
+            unreachable!("Failed to build LR parser")
+        };
+        let states = states.states;
+        let terminal_classes = vec![
+            vec![Lexed::Ident(Ident::new("id", Span::call_site()))],
+            vec![],
+            vec![Lexed::Literal(Literal::usize_suffixed(0))],
+            vec![Lexed::LBracket(Span::call_site())],
+            vec![Lexed::LParen(Span::call_site())],
+            vec![Lexed::Pipe(punct!('|'))],
+            vec![Lexed::BraceGroup(None)],
+            vec![Lexed::Prec(
+                punct!('%'),
+                Ident::new("id", Span::call_site()),
+            )],
+            vec![Lexed::Plus(punct!('+'))],
+            vec![Lexed::Star(punct!('*'))],
+            vec![Lexed::Question(punct!('?'))],
+            vec![Lexed::Exclamation(punct!('!'))],
+            vec![Lexed::Slash(punct!('/'))],
+            vec![Lexed::RParen(Span::call_site())],
+            vec![Lexed::RBracket(Span::call_site())],
+            vec![Lexed::Left(
+                punct!('%'),
+                Ident::new("id", Span::call_site()),
+            )],
+            vec![Lexed::Right(
+                punct!('%'),
+                Ident::new("id", Span::call_site()),
+            )],
+            vec![Lexed::Token(
+                punct!('%'),
+                Ident::new("id", Span::call_site()),
+            )],
+            vec![Lexed::Start(
+                punct!('%'),
+                Ident::new("id", Span::call_site()),
+            )],
+            vec![Lexed::EofDef(
+                punct!('%'),
+                Ident::new("id", Span::call_site()),
+            )],
+            vec![Lexed::TokenType(
+                punct!('%'),
+                Ident::new("id", Span::call_site()),
+            )],
+            vec![Lexed::UserData(
+                punct!('%'),
+                Ident::new("id", Span::call_site()),
+            )],
+            vec![Lexed::ErrorType(
+                punct!('%'),
+                Ident::new("id", Span::call_site()),
+            )],
+            vec![Lexed::ModulePrefix(
+                punct!('%'),
+                Ident::new("id", Span::call_site()),
+            )],
+            vec![Lexed::Precedence(
+                punct!('%'),
+                Ident::new("id", Span::call_site()),
+            )],
+            vec![Lexed::Lalr(
+                punct!('%'),
+                Ident::new("id", Span::call_site()),
+            )],
+            vec![Lexed::Glr(punct!('%'), Ident::new("id", Span::call_site()))],
+            vec![Lexed::NoOptim(
+                punct!('%'),
+                Ident::new("id", Span::call_site()),
+            )],
+            vec![Lexed::Colon(punct!(':'))],
+            vec![Lexed::Equal(punct!('='))],
+            vec![Lexed::Caret(punct!('^'))],
+            vec![Lexed::Minus(punct!('-'))],
+            vec![Lexed::ParenGroup(None)],
+            vec![Lexed::Semicolon(punct!(';'))],
+            vec![Lexed::Eof],
         ];
-        let rules: Vec<GrammarRule> = RUSTYLR_RULES_NAME
-            .iter()
-            .zip(RUSTYLR_RULES_TOKENS.iter())
-            .map(|(name, tokens)| GrammarRule {
-                name: *name,
-                rule: tokens
-                    .iter()
-                    .map(|token| match token {
-                        ::rusty_lr_core::Token::Term(term) => ::rusty_lr_core::Token::Term(
-                            __rustylr_terminals[*term as usize].clone(),
-                        ),
-                        ::rusty_lr_core::Token::NonTerm(nonterm) => {
-                            ::rusty_lr_core::Token::NonTerm(*nonterm)
-                        }
-                    })
-                    .collect(),
-            })
+        let mut terminals_class_map: ::rusty_lr_core::HashMap<Lexed, usize> = Default::default();
+        terminals_class_map.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 0usize);
+        terminals_class_map.insert(Lexed::Colon(punct!(':')), 28usize);
+        terminals_class_map.insert(Lexed::Semicolon(punct!(';')), 33usize);
+        terminals_class_map.insert(Lexed::Pipe(punct!('|')), 5usize);
+        terminals_class_map.insert(Lexed::Equal(punct!('=')), 29usize);
+        terminals_class_map.insert(Lexed::Plus(punct!('+')), 8usize);
+        terminals_class_map.insert(Lexed::Star(punct!('*')), 9usize);
+        terminals_class_map.insert(Lexed::Question(punct!('?')), 10usize);
+        terminals_class_map.insert(Lexed::Caret(punct!('^')), 30usize);
+        terminals_class_map.insert(Lexed::Minus(punct!('-')), 31usize);
+        terminals_class_map.insert(Lexed::Exclamation(punct!('!')), 11usize);
+        terminals_class_map.insert(Lexed::Slash(punct!('/')), 12usize);
+        terminals_class_map.insert(Lexed::Literal(Literal::usize_suffixed(0)), 2usize);
+        terminals_class_map.insert(Lexed::ParenGroup(None), 32usize);
+        terminals_class_map.insert(Lexed::BraceGroup(None), 6usize);
+        terminals_class_map.insert(Lexed::LParen(Span::call_site()), 4usize);
+        terminals_class_map.insert(Lexed::RParen(Span::call_site()), 13usize);
+        terminals_class_map.insert(Lexed::LBracket(Span::call_site()), 3usize);
+        terminals_class_map.insert(Lexed::RBracket(Span::call_site()), 14usize);
+        terminals_class_map.insert(
+            Lexed::Left(punct!('%'), Ident::new("id", Span::call_site())),
+            15usize,
+        );
+        terminals_class_map.insert(
+            Lexed::Right(punct!('%'), Ident::new("id", Span::call_site())),
+            16usize,
+        );
+        terminals_class_map.insert(
+            Lexed::Token(punct!('%'), Ident::new("id", Span::call_site())),
+            17usize,
+        );
+        terminals_class_map.insert(
+            Lexed::Start(punct!('%'), Ident::new("id", Span::call_site())),
+            18usize,
+        );
+        terminals_class_map.insert(
+            Lexed::EofDef(punct!('%'), Ident::new("id", Span::call_site())),
+            19usize,
+        );
+        terminals_class_map.insert(
+            Lexed::TokenType(punct!('%'), Ident::new("id", Span::call_site())),
+            20usize,
+        );
+        terminals_class_map.insert(
+            Lexed::UserData(punct!('%'), Ident::new("id", Span::call_site())),
+            21usize,
+        );
+        terminals_class_map.insert(
+            Lexed::ErrorType(punct!('%'), Ident::new("id", Span::call_site())),
+            22usize,
+        );
+        terminals_class_map.insert(
+            Lexed::ModulePrefix(punct!('%'), Ident::new("id", Span::call_site())),
+            23usize,
+        );
+        terminals_class_map.insert(
+            Lexed::Lalr(punct!('%'), Ident::new("id", Span::call_site())),
+            25usize,
+        );
+        terminals_class_map.insert(
+            Lexed::Glr(punct!('%'), Ident::new("id", Span::call_site())),
+            26usize,
+        );
+        terminals_class_map.insert(
+            Lexed::Prec(punct!('%'), Ident::new("id", Span::call_site())),
+            7usize,
+        );
+        terminals_class_map.insert(
+            Lexed::Precedence(punct!('%'), Ident::new("id", Span::call_site())),
+            24usize,
+        );
+        terminals_class_map.insert(
+            Lexed::NoOptim(punct!('%'), Ident::new("id", Span::call_site())),
+            27usize,
+        );
+        terminals_class_map.insert(Lexed::Eof, 34usize);
+        let rules = builder.rules.into_iter().map(|rule| rule.rule).collect();
+        let states = states
+            .into_iter()
+            .map(|state| state.into_lr_state(|x| x, |x| x))
             .collect();
-        const RUSTYLR_REDUCE_TERMINALS_CACHE: &[&[u8]] = &[
-            &[1],
-            &[2, 3, 16, 36],
-            &[0, 2, 3, 6, 7, 8, 11, 12, 14, 16, 19, 23, 36],
-            &[0, 6, 7, 8, 11, 12, 14, 19, 20, 23],
-            &[0, 14, 24],
-            &[24],
-            &[0, 14, 19, 20, 23],
-            &[0, 2, 3, 14, 16, 19, 23, 36],
-            &[0, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38],
-            &[2, 3],
-            &[2, 3, 16],
-            &[0, 14],
-            &[
-                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
-            ],
-            &[2],
-            &[0, 2, 14],
-            &[38],
-        ];
-        const RUSTYLR_RULESET_SHIFTED0_CACHE: &[&[u8]] = &[
-            &[
-                0, 25, 27, 28, 29, 30, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
-                51, 52, 53, 54, 55, 56, 93, 94, 95,
-            ],
-            &[1, 2],
-            &[],
-            &[
-                3, 4, 5, 7, 8, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 57, 58, 59, 60,
-            ],
-            &[13, 14, 15, 16, 17, 18, 19, 20, 21, 22],
-            &[13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 69, 70],
-            &[63, 64],
-            &[9, 10, 11, 12, 65, 66, 67, 68],
-            &[9, 10, 11, 12],
-            &[13, 31, 32, 33],
-            &[
-                5, 7, 8, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 57, 58, 59, 60,
-            ],
-            &[7, 8, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22],
-            &[6, 61, 62],
-            &[34, 35],
-            &[23, 24],
-            &[
-                26, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
-            ],
-            &[
-                71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88,
-            ],
-            &[34, 35, 91, 92],
-            &[
-                0, 25, 27, 28, 29, 30, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
-                51, 52, 53, 54, 55, 93, 94,
-            ],
-        ];
-        const RUSTYLR_SHIFT_TERM_MAP: &[&[(u8, u8)]] = &[
-            &[
-                (0, 1),
-                (25, 76),
-                (26, 77),
-                (27, 78),
-                (28, 103),
-                (29, 106),
-                (30, 109),
-                (31, 112),
-                (32, 115),
-                (33, 118),
-                (34, 121),
-                (35, 123),
-                (37, 125),
-            ],
-            &[(15, 2)],
-            &[],
-            &[(1, 4)],
-            &[(0, 5), (14, 8), (19, 9), (23, 43)],
-            &[(5, 6)],
-            &[(0, 7), (14, 8), (19, 9), (23, 43)],
-            &[],
-            &[],
-            &[(0, 10), (14, 11), (19, 12), (23, 13)],
-            &[],
-            &[],
-            &[(0, 10), (14, 11), (19, 12), (23, 13)],
-            &[(9, 14)],
-            &[],
-            &[(0, 16), (14, 19)],
-            &[(10, 17)],
-            &[(0, 18)],
-            &[],
-            &[(10, 20)],
-            &[(14, 21)],
-            &[],
-            &[],
-            &[(0, 16), (14, 19)],
-            &[],
-            &[(24, 26)],
-            &[],
-            &[],
-            &[(6, 29), (7, 30), (8, 31), (11, 32), (12, 33)],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[(0, 34), (14, 35), (23, 13)],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[(0, 10), (14, 11), (19, 12), (20, 39), (23, 13)],
-            &[],
-            &[(6, 29), (7, 30), (8, 31), (11, 32), (12, 33)],
-            &[(0, 10), (14, 11), (19, 12), (20, 42), (23, 13)],
-            &[],
-            &[(9, 14)],
-            &[(0, 16), (14, 19)],
-            &[(24, 46)],
-            &[],
-            &[],
-            &[(6, 49), (7, 50), (8, 51), (11, 52), (12, 53)],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[(0, 54), (14, 55), (23, 43)],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[(2, 59), (3, 60)],
-            &[],
-            &[(0, 5), (14, 8), (19, 9), (23, 43)],
-            &[],
-            &[],
-            &[(6, 49), (7, 50), (8, 51), (11, 52), (12, 53)],
-            &[(0, 5), (14, 8), (19, 9), (23, 43)],
-            &[],
-            &[(36, 67)],
-            &[(0, 68), (14, 69)],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[(16, 73)],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[(0, 79)],
-            &[
-                (0, 80),
-                (1, 81),
-                (3, 82),
-                (4, 83),
-                (5, 84),
-                (6, 85),
-                (7, 86),
-                (8, 87),
-                (9, 88),
-                (10, 89),
-                (11, 90),
-                (12, 91),
-                (13, 92),
-                (14, 93),
-                (15, 94),
-                (16, 95),
-                (17, 96),
-                (18, 97),
-            ],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[(2, 99)],
-            &[],
-            &[],
-            &[
-                (0, 80),
-                (1, 81),
-                (3, 82),
-                (4, 83),
-                (5, 84),
-                (6, 85),
-                (7, 86),
-                (8, 87),
-                (9, 88),
-                (10, 89),
-                (11, 90),
-                (12, 91),
-                (13, 92),
-                (14, 93),
-                (15, 94),
-                (16, 95),
-                (17, 96),
-                (18, 97),
-            ],
-            &[],
-            &[(0, 104)],
-            &[(2, 105)],
-            &[],
-            &[
-                (0, 80),
-                (1, 81),
-                (3, 82),
-                (4, 83),
-                (5, 84),
-                (6, 85),
-                (7, 86),
-                (8, 87),
-                (9, 88),
-                (10, 89),
-                (11, 90),
-                (12, 91),
-                (13, 92),
-                (14, 93),
-                (15, 94),
-                (16, 95),
-                (17, 96),
-                (18, 97),
-            ],
-            &[(2, 108)],
-            &[],
-            &[
-                (0, 80),
-                (1, 81),
-                (3, 82),
-                (4, 83),
-                (5, 84),
-                (6, 85),
-                (7, 86),
-                (8, 87),
-                (9, 88),
-                (10, 89),
-                (11, 90),
-                (12, 91),
-                (13, 92),
-                (14, 93),
-                (15, 94),
-                (16, 95),
-                (17, 96),
-                (18, 97),
-            ],
-            &[(2, 111)],
-            &[],
-            &[
-                (0, 80),
-                (1, 81),
-                (3, 82),
-                (4, 83),
-                (5, 84),
-                (6, 85),
-                (7, 86),
-                (8, 87),
-                (9, 88),
-                (10, 89),
-                (11, 90),
-                (12, 91),
-                (13, 92),
-                (14, 93),
-                (15, 94),
-                (16, 95),
-                (17, 96),
-                (18, 97),
-            ],
-            &[(2, 114)],
-            &[],
-            &[
-                (0, 80),
-                (1, 81),
-                (3, 82),
-                (4, 83),
-                (5, 84),
-                (6, 85),
-                (7, 86),
-                (8, 87),
-                (9, 88),
-                (10, 89),
-                (11, 90),
-                (12, 91),
-                (13, 92),
-                (14, 93),
-                (15, 94),
-                (16, 95),
-                (17, 96),
-                (18, 97),
-            ],
-            &[(2, 117)],
-            &[],
-            &[
-                (0, 80),
-                (1, 81),
-                (3, 82),
-                (4, 83),
-                (5, 84),
-                (6, 85),
-                (7, 86),
-                (8, 87),
-                (9, 88),
-                (10, 89),
-                (11, 90),
-                (12, 91),
-                (13, 92),
-                (14, 93),
-                (15, 94),
-                (16, 95),
-                (17, 96),
-                (18, 97),
-            ],
-            &[(2, 120)],
-            &[],
-            &[(2, 122)],
-            &[],
-            &[(2, 124)],
-            &[],
-            &[(0, 126), (14, 127)],
-            &[],
-            &[],
-            &[],
-            &[(0, 126), (2, 130), (14, 127)],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[(0, 126), (14, 127)],
-            &[(0, 126), (2, 140), (14, 127)],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[
-                (0, 1),
-                (25, 76),
-                (26, 77),
-                (27, 78),
-                (28, 103),
-                (29, 106),
-                (30, 109),
-                (31, 112),
-                (32, 115),
-                (33, 118),
-                (34, 121),
-                (35, 123),
-                (37, 125),
-            ],
-            &[],
-            &[(38, 150)],
-            &[],
-            &[],
-        ];
-        const RUSTYLR_SHIFT_NONTERM_MAP: &[&[(GrammarNonTerminals, u8)]] = &[
-            &[
-                (GrammarNonTerminals::EofDef, 135),
-                (GrammarNonTerminals::ErrorDef, 142),
-                (GrammarNonTerminals::Glr, 144),
-                (GrammarNonTerminals::Grammar, 149),
-                (GrammarNonTerminals::GrammarLine, 147),
-                (GrammarNonTerminals::Lalr, 145),
-                (GrammarNonTerminals::ModulePrefixDef, 143),
-                (GrammarNonTerminals::Precedence, 146),
-                (GrammarNonTerminals::ReduceDef, 141),
-                (GrammarNonTerminals::ReduceType, 138),
-                (GrammarNonTerminals::Rule, 132),
-                (GrammarNonTerminals::StartDef, 134),
-                (GrammarNonTerminals::TokenDef, 133),
-                (GrammarNonTerminals::TokenTypeDef, 136),
-                (GrammarNonTerminals::UserDataDef, 137),
-                (GrammarNonTerminals::_GrammarLine_Plus37, 151),
-            ],
-            &[(GrammarNonTerminals::RuleType, 3)],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::Pattern, 63),
-                (GrammarNonTerminals::RuleLine, 75),
-                (GrammarNonTerminals::RuleLines, 58),
-                (GrammarNonTerminals::TerminalSet, 47),
-                (GrammarNonTerminals::TokenMapped, 62),
-                (GrammarNonTerminals::_TokenMapped_Plus27, 64),
-                (GrammarNonTerminals::_TokenMapped_Star28, 66),
-            ],
-            &[],
-            &[
-                (GrammarNonTerminals::Pattern, 48),
-                (GrammarNonTerminals::TerminalSet, 47),
-            ],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::Pattern, 28),
-                (GrammarNonTerminals::TerminalSet, 27),
-                (GrammarNonTerminals::_Pattern_Plus33, 41),
-            ],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::Pattern, 28),
-                (GrammarNonTerminals::TerminalSet, 27),
-                (GrammarNonTerminals::_Pattern_Plus33, 38),
-            ],
-            &[(GrammarNonTerminals::_caret_Question30, 15)],
-            &[],
-            &[
-                (GrammarNonTerminals::TerminalSetItem, 22),
-                (GrammarNonTerminals::_TerminalSetItem_Plus31, 23),
-                (GrammarNonTerminals::_TerminalSetItem_Star32, 25),
-            ],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[(GrammarNonTerminals::TerminalSetItem, 24)],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::TerminalOrTerminalSet, 37),
-                (GrammarNonTerminals::TerminalSet, 36),
-            ],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::Pattern, 40),
-                (GrammarNonTerminals::TerminalSet, 27),
-            ],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::Pattern, 40),
-                (GrammarNonTerminals::TerminalSet, 27),
-            ],
-            &[],
-            &[(GrammarNonTerminals::_caret_Question30, 44)],
-            &[
-                (GrammarNonTerminals::TerminalSetItem, 22),
-                (GrammarNonTerminals::_TerminalSetItem_Plus31, 23),
-                (GrammarNonTerminals::_TerminalSetItem_Star32, 45),
-            ],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::TerminalOrTerminalSet, 57),
-                (GrammarNonTerminals::TerminalSet, 56),
-            ],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::Pattern, 63),
-                (GrammarNonTerminals::RuleLine, 61),
-                (GrammarNonTerminals::TerminalSet, 47),
-                (GrammarNonTerminals::TokenMapped, 62),
-                (GrammarNonTerminals::_TokenMapped_Plus27, 64),
-                (GrammarNonTerminals::_TokenMapped_Star28, 66),
-            ],
-            &[],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::Pattern, 63),
-                (GrammarNonTerminals::TerminalSet, 47),
-                (GrammarNonTerminals::TokenMapped, 65),
-            ],
-            &[],
-            &[
-                (GrammarNonTerminals::PrecDef, 71),
-                (GrammarNonTerminals::_PrecDef_Question29, 72),
-            ],
-            &[(GrammarNonTerminals::IdentOrLiteral, 70)],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[(GrammarNonTerminals::Action, 74)],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::RustCode, 98),
-                (GrammarNonTerminals::_TerminalSet34, 100),
-                (GrammarNonTerminals::__TerminalSet34_Plus35, 101),
-            ],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[(GrammarNonTerminals::_TerminalSet34, 102)],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::RustCode, 107),
-                (GrammarNonTerminals::_TerminalSet34, 100),
-                (GrammarNonTerminals::__TerminalSet34_Plus35, 101),
-            ],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::RustCode, 110),
-                (GrammarNonTerminals::_TerminalSet34, 100),
-                (GrammarNonTerminals::__TerminalSet34_Plus35, 101),
-            ],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::RustCode, 113),
-                (GrammarNonTerminals::_TerminalSet34, 100),
-                (GrammarNonTerminals::__TerminalSet34_Plus35, 101),
-            ],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::RustCode, 116),
-                (GrammarNonTerminals::_TerminalSet34, 100),
-                (GrammarNonTerminals::__TerminalSet34_Plus35, 101),
-            ],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::RustCode, 119),
-                (GrammarNonTerminals::_TerminalSet34, 100),
-                (GrammarNonTerminals::__TerminalSet34_Plus35, 101),
-            ],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::IdentOrLiteral, 128),
-                (GrammarNonTerminals::_IdentOrLiteral_Plus36, 129),
-            ],
-            &[],
-            &[],
-            &[],
-            &[(GrammarNonTerminals::IdentOrLiteral, 131)],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::IdentOrLiteral, 128),
-                (GrammarNonTerminals::_IdentOrLiteral_Plus36, 139),
-            ],
-            &[(GrammarNonTerminals::IdentOrLiteral, 131)],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[],
-            &[
-                (GrammarNonTerminals::EofDef, 135),
-                (GrammarNonTerminals::ErrorDef, 142),
-                (GrammarNonTerminals::Glr, 144),
-                (GrammarNonTerminals::GrammarLine, 147),
-                (GrammarNonTerminals::Lalr, 145),
-                (GrammarNonTerminals::ModulePrefixDef, 143),
-                (GrammarNonTerminals::Precedence, 146),
-                (GrammarNonTerminals::ReduceDef, 141),
-                (GrammarNonTerminals::ReduceType, 138),
-                (GrammarNonTerminals::Rule, 132),
-                (GrammarNonTerminals::StartDef, 134),
-                (GrammarNonTerminals::TokenDef, 133),
-                (GrammarNonTerminals::TokenTypeDef, 136),
-                (GrammarNonTerminals::UserDataDef, 137),
-                (GrammarNonTerminals::_GrammarLine_Plus37, 148),
-            ],
-            &[],
-            &[],
-            &[],
-            &[],
-        ];
-        const RUSTYLR_REDUCE_MAP: &[&[(u8, u8)]] = &[
-            &[],
-            &[(0, 2)],
-            &[(0, 1)],
-            &[],
-            &[(1, 60)],
-            &[(2, 14)],
-            &[],
-            &[(2, 14)],
-            &[(2, 22)],
-            &[],
-            &[(3, 14)],
-            &[(3, 22)],
-            &[],
-            &[(4, 64)],
-            &[(4, 63)],
-            &[(5, 68)],
-            &[(4, 9)],
-            &[],
-            &[(4, 10)],
-            &[(4, 11)],
-            &[],
-            &[(4, 12)],
-            &[(4, 65)],
-            &[(5, 67)],
-            &[(4, 66)],
-            &[],
-            &[(3, 13)],
-            &[(3, 19)],
-            &[(6, 69)],
-            &[(3, 15)],
-            &[(3, 16)],
-            &[(3, 17)],
-            &[(3, 18)],
-            &[],
-            &[(3, 32)],
-            &[(3, 33)],
-            &[(3, 31)],
-            &[(3, 20)],
-            &[],
-            &[(3, 21)],
-            &[(6, 70)],
-            &[],
-            &[(2, 21)],
-            &[(4, 64)],
-            &[(5, 68)],
-            &[],
-            &[(2, 13)],
-            &[(2, 19)],
-            &[(7, 8)],
-            &[(2, 15)],
-            &[(2, 16)],
-            &[(2, 17)],
-            &[(2, 18)],
-            &[],
-            &[(2, 32)],
-            &[(2, 33)],
-            &[(2, 31)],
-            &[(2, 20)],
-            &[],
-            &[(8, 0)],
-            &[(1, 60)],
-            &[(9, 3)],
-            &[(7, 57)],
-            &[(7, 7)],
-            &[(1, 59)],
-            &[(7, 58)],
-            &[(10, 62)],
-            &[],
-            &[(10, 34)],
-            &[(10, 35)],
-            &[(10, 6)],
-            &[(10, 61)],
-            &[(9, 24)],
-            &[(9, 23)],
-            &[(9, 5)],
-            &[(9, 4)],
-            &[(11, 36)],
-            &[(11, 37)],
-            &[],
-            &[],
-            &[(12, 71)],
-            &[(12, 72)],
-            &[(12, 73)],
-            &[(12, 74)],
-            &[(12, 75)],
-            &[(12, 76)],
-            &[(12, 77)],
-            &[(12, 78)],
-            &[(12, 79)],
-            &[(12, 80)],
-            &[(12, 81)],
-            &[(12, 82)],
-            &[(12, 83)],
-            &[(12, 84)],
-            &[(12, 85)],
-            &[(12, 86)],
-            &[(12, 87)],
-            &[(12, 88)],
-            &[],
-            &[(8, 25)],
-            &[(12, 89)],
-            &[(13, 26)],
-            &[(12, 90)],
-            &[],
-            &[],
-            &[(8, 27)],
-            &[],
-            &[],
-            &[(8, 28)],
-            &[],
-            &[],
-            &[(8, 29)],
-            &[],
-            &[],
-            &[(8, 30)],
-            &[],
-            &[],
-            &[(8, 39)],
-            &[],
-            &[],
-            &[(8, 40)],
-            &[],
-            &[(8, 42)],
-            &[],
-            &[(8, 41)],
-            &[],
-            &[(14, 34)],
-            &[(14, 35)],
-            &[(14, 91)],
-            &[],
-            &[(8, 43)],
-            &[(14, 92)],
-            &[(8, 44)],
-            &[(8, 45)],
-            &[(8, 46)],
-            &[(8, 47)],
-            &[(8, 48)],
-            &[(8, 49)],
-            &[],
-            &[],
-            &[(8, 38)],
-            &[(8, 50)],
-            &[(8, 51)],
-            &[(8, 52)],
-            &[(8, 54)],
-            &[(8, 53)],
-            &[(8, 55)],
-            &[(15, 93)],
-            &[(15, 94)],
-            &[],
-            &[],
-            &[(15, 56)],
-        ];
-        const RUSTYLR_RULESET_MAP: &[&[(u8, u8)]] = &[
-            &[],
-            &[(0, 1)],
-            &[(1, 1)],
-            &[(0, 2)],
-            &[(0, 3)],
-            &[(8, 1), (14, 1)],
-            &[(8, 2)],
-            &[(14, 1)],
-            &[(22, 1)],
-            &[(21, 1)],
-            &[(14, 1)],
-            &[(22, 1)],
-            &[(21, 1)],
-            &[(13, 1)],
-            &[(63, 1)],
-            &[(13, 2)],
-            &[(9, 1), (10, 1)],
-            &[(10, 2)],
-            &[(10, 3)],
-            &[(11, 1), (12, 1)],
-            &[(12, 2)],
-            &[(12, 3)],
-            &[(65, 1)],
-            &[(66, 1), (67, 1)],
-            &[(66, 2)],
-            &[(13, 3)],
-            &[(13, 4)],
-            &[(19, 1)],
-            &[(15, 1), (16, 1), (17, 1), (18, 1), (20, 1), (69, 1)],
-            &[(15, 2)],
-            &[(16, 2)],
-            &[(17, 2)],
-            &[(18, 2)],
-            &[(20, 2)],
-            &[(32, 1)],
-            &[(33, 1)],
-            &[(31, 1)],
-            &[(20, 3)],
-            &[(21, 2), (70, 1)],
-            &[(21, 3)],
-            &[(15, 1), (16, 1), (17, 1), (18, 1), (20, 1), (70, 2)],
-            &[(21, 2), (70, 1)],
-            &[(21, 3)],
-            &[(13, 1)],
-            &[(13, 2)],
-            &[(13, 3)],
-            &[(13, 4)],
-            &[(19, 1)],
-            &[(8, 3), (15, 1), (16, 1), (17, 1), (18, 1), (20, 1)],
-            &[(15, 2)],
-            &[(16, 2)],
-            &[(17, 2)],
-            &[(18, 2)],
-            &[(20, 2)],
-            &[(32, 1)],
-            &[(33, 1)],
-            &[(31, 1)],
-            &[(20, 3)],
-            &[(0, 4), (3, 1)],
-            &[(0, 5)],
-            &[(3, 2)],
-            &[(3, 3)],
-            &[(57, 1)],
-            &[(7, 1), (15, 1), (16, 1), (17, 1), (18, 1), (20, 1)],
-            &[(58, 1), (59, 1)],
-            &[(58, 2)],
-            &[(5, 1)],
-            &[(6, 1)],
-            &[(34, 1)],
-            &[(35, 1)],
-            &[(6, 2)],
-            &[(61, 1)],
-            &[(5, 2)],
-            &[(23, 1)],
-            &[(5, 3)],
-            &[(4, 1)],
-            &[(36, 1)],
-            &[(37, 1)],
-            &[(25, 1)],
-            &[(25, 2)],
-            &[(71, 1)],
-            &[(72, 1)],
-            &[(73, 1)],
-            &[(74, 1)],
-            &[(75, 1)],
-            &[(76, 1)],
-            &[(77, 1)],
-            &[(78, 1)],
-            &[(79, 1)],
-            &[(80, 1)],
-            &[(81, 1)],
-            &[(82, 1)],
-            &[(83, 1)],
-            &[(84, 1)],
-            &[(85, 1)],
-            &[(86, 1)],
-            &[(87, 1)],
-            &[(88, 1)],
-            &[(25, 3)],
-            &[(25, 4)],
-            &[(89, 1)],
-            &[(26, 1), (90, 1)],
-            &[(90, 2)],
-            &[(27, 1)],
-            &[(27, 2)],
-            &[(27, 3)],
-            &[(28, 1)],
-            &[(28, 2)],
-            &[(28, 3)],
-            &[(29, 1)],
-            &[(29, 2)],
-            &[(29, 3)],
-            &[(30, 1)],
-            &[(30, 2)],
-            &[(30, 3)],
-            &[(39, 1)],
-            &[(39, 2)],
-            &[(39, 3)],
-            &[(40, 1)],
-            &[(40, 2)],
-            &[(40, 3)],
-            &[(42, 1)],
-            &[(42, 2)],
-            &[(41, 1)],
-            &[(41, 2)],
-            &[(43, 1)],
-            &[(34, 1)],
-            &[(35, 1)],
-            &[(91, 1)],
-            &[(43, 2), (92, 1)],
-            &[(43, 3)],
-            &[(92, 2)],
-            &[(44, 1)],
-            &[(45, 1)],
-            &[(46, 1)],
-            &[(47, 1)],
-            &[(48, 1)],
-            &[(49, 1)],
-            &[(38, 1)],
-            &[(38, 2), (92, 1)],
-            &[(38, 3)],
-            &[(50, 1)],
-            &[(51, 1)],
-            &[(52, 1)],
-            &[(54, 1)],
-            &[(53, 1)],
-            &[(55, 1)],
-            &[(93, 1), (94, 1)],
-            &[(94, 2)],
-            &[(95, 1)],
-            &[(95, 2)],
-            &[(56, 1)],
-        ];
-        const RUSTYLR_RULESET_SHIFTED0_MAP: &[u8] = &[
-            0, 1, 2, 2, 3, 2, 4, 2, 2, 5, 2, 2, 5, 6, 2, 7, 2, 2, 2, 2, 2, 2, 2, 8, 2, 2, 2, 2, 2,
-            2, 2, 2, 2, 9, 2, 2, 2, 2, 4, 2, 2, 4, 2, 6, 7, 2, 2, 2, 2, 2, 2, 2, 2, 9, 2, 2, 2, 2,
-            2, 2, 10, 2, 2, 2, 11, 2, 12, 13, 2, 2, 2, 2, 14, 2, 2, 2, 2, 2, 2, 15, 2, 2, 2, 2, 2,
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 16, 2, 2, 2, 2, 15, 2, 2, 15, 2, 2, 15,
-            2, 2, 15, 2, 2, 15, 2, 2, 2, 2, 2, 2, 17, 2, 2, 2, 13, 2, 2, 2, 2, 2, 2, 2, 2, 17, 13,
-            2, 2, 2, 2, 2, 2, 2, 18, 2, 2, 2, 2,
-        ];
-        let states: Vec<GrammarState> = RUSTYLR_SHIFT_TERM_MAP
-            .iter()
-            .zip(
-                RUSTYLR_SHIFT_NONTERM_MAP.iter().zip(
-                    RUSTYLR_REDUCE_MAP.iter().zip(
-                        RUSTYLR_RULESET_MAP
-                            .iter()
-                            .zip(RUSTYLR_RULESET_SHIFTED0_MAP.iter()),
-                    ),
-                ),
-            )
-            .map(
-                |(
-                    shift_goto_map_term,
-                    (shift_goto_map_nonterm, (reduce_map_, (ruleset, ruleset0_id))),
-                )| {
-                    let mut reduce_map = ::rusty_lr_core::HashMap::default();
-                    for (terminal_set_id, ruleid) in reduce_map_.iter() {
-                        reduce_map.extend(
-                            RUSTYLR_REDUCE_TERMINALS_CACHE[*terminal_set_id as usize]
-                                .iter()
-                                .map(|term_idx| {
-                                    (
-                                        __rustylr_terminals[*term_idx as usize].clone(),
-                                        *ruleid as usize,
-                                    )
-                                }),
-                        );
-                    }
-                    let mut ruleset: Vec<::rusty_lr_core::ShiftedRuleRef> = ruleset
-                        .iter()
-                        .map(|(ruleid, shifted)| ::rusty_lr_core::ShiftedRuleRef {
-                            rule: *ruleid as usize,
-                            shifted: *shifted as usize,
-                        })
-                        .collect();
-                    ruleset.extend(
-                        RUSTYLR_RULESET_SHIFTED0_CACHE[*ruleset0_id as usize]
-                            .iter()
-                            .map(|ruleid| ::rusty_lr_core::ShiftedRuleRef {
-                                rule: *ruleid as usize,
-                                shifted: 0,
-                            }),
-                    );
-                    GrammarState {
-                        shift_goto_map_term: shift_goto_map_term
-                            .iter()
-                            .map(|(term_idx, goto)| {
-                                (
-                                    __rustylr_terminals[*term_idx as usize].clone(),
-                                    *goto as usize,
-                                )
-                            })
-                            .collect(),
-                        shift_goto_map_nonterm: shift_goto_map_nonterm
-                            .iter()
-                            .map(|(nonterm, goto)| (*nonterm, *goto as usize))
-                            .collect(),
-                        reduce_map,
-                        ruleset,
-                    }
-                },
-            )
-            .collect();
-        Self { rules, states }
+        Self {
+            rules,
+            states,
+            classes: terminal_classes,
+            term_class_map: terminals_class_map,
+            other_class_id: 1usize,
+        }
     }
 }
 // ==============================Generated Codes End===============================

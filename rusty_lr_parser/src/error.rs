@@ -43,10 +43,7 @@ pub enum ArgError {
 
 #[non_exhaustive]
 #[derive(Debug)]
-pub enum EmitError {
-    /// ReduceAction must be defined but not defined
-    RuleTypeDefinedButActionNotDefined { name: Ident, rule_local_id: usize },
-
+pub enum ConflictError {
     /// error building given CFG
     ShiftReduceConflict {
         term: Ident,
@@ -102,15 +99,18 @@ pub enum ParseError {
     /// range in literal terminal set is not valid
     InvalidLiteralRange(Literal, Literal),
 
-    /// negation in terminal in Literal mode is not supported
-    NegateInLiteralMode(Span, Span),
-
     /// TokenType in Literal mode is not supported
     TokenInLiteralMode(Span),
 
     MultiplePrecedenceOrderDefinition {
         cur: IdentOrLiteral,
         old: Span,
+    },
+
+    /// ReduceAction must be defined but not defined
+    RuleTypeDefinedButActionNotDefined {
+        name: Ident,
+        span: (Span, Span),
     },
 }
 #[allow(unused)]
@@ -244,11 +244,11 @@ impl ParseError {
 
             ParseError::InvalidLiteralRange(first, last) => first.span(),
 
-            ParseError::NegateInLiteralMode(open_span, close_span) => *open_span,
-
             ParseError::TokenInLiteralMode(open_span) => *open_span,
 
             ParseError::MultiplePrecedenceOrderDefinition { cur, old } => cur.span(),
+
+            ParseError::RuleTypeDefinedButActionNotDefined { name, span } => span.0,
         }
     }
 
@@ -307,10 +307,6 @@ impl ParseError {
                 )
             }
 
-            ParseError::NegateInLiteralMode(_, _) => {
-                format!("Negation with %tokentype `char` or `u8` is not supported")
-            }
-
             ParseError::TokenInLiteralMode(_) => {
                 format!("%token with %tokentype `char` or `u8` is not supported. Use 'a' or b'a' instead")
             }
@@ -318,12 +314,16 @@ impl ParseError {
             ParseError::MultiplePrecedenceOrderDefinition { cur, old } => {
                 format!("Conflicts with precedence definition: {}", cur)
             }
+
+            ParseError::RuleTypeDefinedButActionNotDefined { name, span } => {
+                "ReduceAction must be defined for this rule".into()
+            }
         }
     }
 }
 
 #[allow(unused)]
-impl EmitError {
+impl ConflictError {
     pub fn to_compile_error(&self) -> TokenStream {
         let span = self.span();
         let message = self.short_message();
@@ -335,17 +335,12 @@ impl EmitError {
 
     pub fn span(&self) -> Span {
         match self {
-            EmitError::RuleTypeDefinedButActionNotDefined {
-                name,
-                rule_local_id,
-            } => name.span(),
-
-            EmitError::ShiftReduceConflict {
+            ConflictError::ShiftReduceConflict {
                 term,
                 reduce_rule: (ruleid, rule),
                 shift_rules,
             } => term.span(),
-            EmitError::ReduceReduceConflict {
+            ConflictError::ReduceReduceConflict {
                 lookahead,
                 rule1: (ruleid1, rule1),
                 rule2: (ruleid2, rule2),
@@ -355,12 +350,7 @@ impl EmitError {
 
     pub fn short_message(&self) -> String {
         match self {
-            EmitError::RuleTypeDefinedButActionNotDefined {
-                name,
-                rule_local_id,
-            } => "ReduceAction must be defined for this rule".into(),
-
-            EmitError::ShiftReduceConflict {
+            ConflictError::ShiftReduceConflict {
                 term,
                 reduce_rule: (ruleid, rule),
                 shift_rules,
@@ -376,7 +366,7 @@ impl EmitError {
                         .join("\n>>>")
                 )
             }
-            EmitError::ReduceReduceConflict {
+            ConflictError::ReduceReduceConflict {
                 lookahead,
                 rule1: (ruleid1, rule1),
                 rule2: (ruleid2, rule2),

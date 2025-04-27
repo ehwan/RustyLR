@@ -27,9 +27,10 @@ where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
+    let class = parser.to_terminal_class(&term);
     // check if there is any reduce action with given terminal
     while let Some(reduce_rule) =
-        parser.get_states()[*context.state_stack.last().unwrap()].reduce(&term)
+        parser.get_states()[*context.state_stack.last().unwrap()].reduce(&class)
     {
         let rule = &parser.get_rules()[reduce_rule];
         {
@@ -90,7 +91,7 @@ where
     let state = &parser.get_states()[*context.state_stack.last().unwrap()];
 
     // shift with terminal
-    if let Some(next_state_id) = state.shift_goto_term(&term) {
+    if let Some(next_state_id) = state.shift_goto_term(&class) {
         context.state_stack.push(next_state_id);
 
         #[cfg(feature = "tree")]

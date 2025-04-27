@@ -16,31 +16,36 @@ use rusty_lr_core::Token;
 
 /// Some regex pattern
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
-pub enum PatternType {
+pub enum PatternInternal {
     Ident(Ident),
     Plus(Box<Pattern>),
     Star(Box<Pattern>),
     Question(Box<Pattern>),
     Exclamation(Box<Pattern>),
-    TerminalSet(BTreeSet<usize>),
-    Lookaheads(Box<Pattern>, BTreeSet<usize>),
+    TerminalSet(bool, BTreeSet<usize>),
+    Lookaheads(Box<Pattern>, bool, BTreeSet<usize>),
     Group(Vec<Pattern>),
     Literal(syn::Lit),
 }
 
 #[derive(Debug, Clone)]
 pub struct Pattern {
-    pub pattern_type: PatternType,
+    pub internal: PatternInternal,
+    /// for debug and generating pretty message
+    /// A_Star -> A*
+    /// A_Exclamation -> A!
+    /// A_Question -> A?
+    /// ...
     pub pretty_name: String,
 }
 impl std::hash::Hash for Pattern {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.pattern_type.hash(state);
+        self.internal.hash(state);
     }
 }
 impl std::cmp::PartialEq for Pattern {
     fn eq(&self, other: &Self) -> bool {
-        self.pattern_type == other.pattern_type
+        self.internal == other.internal
     }
 }
 impl std::cmp::Eq for Pattern {}
@@ -64,14 +69,14 @@ impl Pattern {
     pub(crate) fn to_rule(
         &self,
         grammar: &mut Grammar,
-        pattern_map: &mut HashMap<Pattern, PatternResult>,
+        pattern_cache: &mut HashMap<Pattern, PatternResult>,
         root_span_pair: (Span, Span),
     ) -> Result<PatternResult, ParseError> {
-        if let Some(existing) = pattern_map.get(self) {
+        if let Some(existing) = pattern_cache.get(self) {
             return Ok(existing.clone());
         }
-        match &self.pattern_type {
-            PatternType::Ident(ident) => {
+        match &self.internal {
+            PatternInternal::Ident(ident) => {
                 if let Some(term_idx) = grammar.terminals_index.get(ident) {
                     Ok(PatternResult {
                         name: ident.clone(),
@@ -92,8 +97,8 @@ impl Pattern {
                     Err(ParseError::TerminalNotDefined(ident.clone()))
                 }
             }
-            PatternType::Plus(pattern) => {
-                let base_rule = pattern.to_rule(grammar, pattern_map, root_span_pair)?;
+            PatternInternal::Plus(pattern) => {
+                let base_rule = pattern.to_rule(grammar, pattern_cache, root_span_pair)?;
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
                     &format!("_{}_Plus{}", base_rule.name, newrule_idx),
@@ -114,9 +119,9 @@ impl Pattern {
                         reduce_action: Some(quote! {
                             { vec![A] }
                         }),
+                        reduce_action_generated: true,
                         separator_span: Span::call_site(),
                         lookaheads: None,
-                        id: 0,
                         prec: None,
                     };
                     let line2 = Rule {
@@ -137,9 +142,9 @@ impl Pattern {
                         reduce_action: Some(quote! {
                             { Ap.push(A); Ap }
                         }),
+                        reduce_action_generated: true,
                         separator_span: Span::call_site(),
                         lookaheads: None,
-                        id: 0,
                         prec: None,
                     };
 
@@ -160,7 +165,7 @@ impl Pattern {
                         token: Token::NonTerm(newrule_idx),
                         ruletype_map: Some((quote! { Vec<#base_typename> }, base_mapto.clone())),
                     };
-                    pattern_map.insert(self.clone(), res.clone());
+                    pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
                 } else {
                     // typename not exist, make new rule with typename ()
@@ -174,9 +179,9 @@ impl Pattern {
                             end_span: Span::call_site(),
                         }],
                         reduce_action: None,
+                        reduce_action_generated: false,
                         separator_span: Span::call_site(),
                         lookaheads: None,
-                        id: 0,
                         prec: None,
                     };
                     let line2 = Rule {
@@ -195,9 +200,9 @@ impl Pattern {
                             },
                         ],
                         reduce_action: None,
+                        reduce_action_generated: false,
                         separator_span: Span::call_site(),
                         lookaheads: None,
-                        id: 0,
                         prec: None,
                     };
 
@@ -218,18 +223,18 @@ impl Pattern {
                         token: Token::NonTerm(newrule_idx),
                         ruletype_map: None,
                     };
-                    pattern_map.insert(self.clone(), res.clone());
+                    pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
                 }
             }
-            PatternType::Star(pattern) => {
+            PatternInternal::Star(pattern) => {
                 let plus_rule = Pattern {
-                    pattern_type: PatternType::Plus(pattern.clone()),
+                    internal: PatternInternal::Plus(pattern.clone()),
                     pretty_name: format!("{}+", pattern.pretty_name),
                 }
-                .to_rule(grammar, pattern_map, root_span_pair)?;
+                .to_rule(grammar, pattern_cache, root_span_pair)?;
 
-                let base_rule = pattern.to_rule(grammar, pattern_map, root_span_pair)?;
+                let base_rule = pattern.to_rule(grammar, pattern_cache, root_span_pair)?;
 
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
@@ -251,9 +256,9 @@ impl Pattern {
                         reduce_action: Some(quote! {
                             { Ap }
                         }),
+                        reduce_action_generated: true,
                         separator_span: Span::call_site(),
                         lookaheads: None,
-                        id: 0,
                         prec: None,
                     };
                     let line2 = Rule {
@@ -261,9 +266,9 @@ impl Pattern {
                         reduce_action: Some(quote! {
                             { vec![] }
                         }),
+                        reduce_action_generated: true,
                         separator_span: Span::call_site(),
                         lookaheads: None,
-                        id: 0,
                         prec: None,
                     };
 
@@ -284,7 +289,7 @@ impl Pattern {
                         token: Token::NonTerm(newrule_idx),
                         ruletype_map: Some((quote! { Vec<#base_typename> }, base_mapto.clone())),
                     };
-                    pattern_map.insert(self.clone(), res.clone());
+                    pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
                 } else {
                     // typename not exist, make new rule with typename ()
@@ -298,17 +303,17 @@ impl Pattern {
                             end_span: Span::call_site(),
                         }],
                         reduce_action: None,
+                        reduce_action_generated: false,
                         separator_span: Span::call_site(),
                         lookaheads: None,
-                        id: 0,
                         prec: None,
                     };
                     let line2 = Rule {
                         tokens: vec![],
                         reduce_action: None,
+                        reduce_action_generated: false,
                         separator_span: Span::call_site(),
                         lookaheads: None,
-                        id: 0,
                         prec: None,
                     };
                     let nonterm_info = NonTerminalInfo {
@@ -328,12 +333,12 @@ impl Pattern {
                         token: Token::NonTerm(newrule_idx),
                         ruletype_map: None,
                     };
-                    pattern_map.insert(self.clone(), res.clone());
+                    pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
                 }
             }
-            PatternType::Question(pattern) => {
-                let base_rule = pattern.to_rule(grammar, pattern_map, root_span_pair)?;
+            PatternInternal::Question(pattern) => {
+                let base_rule = pattern.to_rule(grammar, pattern_cache, root_span_pair)?;
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
                     &format!("_{}_Question{}", base_rule.name, newrule_idx),
@@ -354,9 +359,9 @@ impl Pattern {
                         reduce_action: Some(quote! {
                             { Some(A) }
                         }),
+                        reduce_action_generated: true,
                         separator_span: Span::call_site(),
                         lookaheads: None,
-                        id: 0,
                         prec: None,
                     };
                     let line2 = Rule {
@@ -364,9 +369,9 @@ impl Pattern {
                         reduce_action: Some(quote! {
                             { None }
                         }),
+                        reduce_action_generated: true,
                         separator_span: Span::call_site(),
                         lookaheads: None,
-                        id: 0,
                         prec: None,
                     };
 
@@ -387,7 +392,7 @@ impl Pattern {
                         token: Token::NonTerm(newrule_idx),
                         ruletype_map: Some((quote! {Option<#base_typename>}, base_mapto.clone())),
                     };
-                    pattern_map.insert(self.clone(), res.clone());
+                    pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
                 } else {
                     // typename not exist, make new rule with typename ()
@@ -401,17 +406,17 @@ impl Pattern {
                             end_span: Span::call_site(),
                         }],
                         reduce_action: None,
+                        reduce_action_generated: false,
                         separator_span: Span::call_site(),
                         lookaheads: None,
-                        id: 0,
                         prec: None,
                     };
                     let line2 = Rule {
                         tokens: vec![],
                         reduce_action: None,
+                        reduce_action_generated: false,
                         separator_span: Span::call_site(),
                         lookaheads: None,
-                        id: 0,
                         prec: None,
                     };
 
@@ -432,26 +437,39 @@ impl Pattern {
                         token: Token::NonTerm(newrule_idx),
                         ruletype_map: None,
                     };
-                    pattern_map.insert(self.clone(), res.clone());
+                    pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
                 }
             }
 
-            PatternType::Exclamation(pattern) => {
-                let mut base_rule = pattern.to_rule(grammar, pattern_map, root_span_pair)?;
+            PatternInternal::Exclamation(pattern) => {
+                let mut base_rule = pattern.to_rule(grammar, pattern_cache, root_span_pair)?;
                 base_rule.ruletype_map = None;
                 Ok(base_rule)
             }
-            PatternType::TerminalSet(terminal_set) => {
+            PatternInternal::TerminalSet(negate, terminal_set) => {
+                let terminals = grammar.calculate_terminal_set(*negate, terminal_set);
+                if terminals.len() == 1 {
+                    let terminal = terminals[0];
+                    let term_info = &grammar.terminals[terminal];
+                    return Ok(PatternResult {
+                        name: term_info.name.clone(),
+                        token: Token::Term(terminal),
+                        ruletype_map: Some((
+                            grammar.token_typename.clone(),
+                            Ident::new("__rustylr_terminal", Span::call_site()),
+                        )),
+                    });
+                }
+
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name =
                     Ident::new(&format!("_TerminalSet{}", newrule_idx), root_span_pair.0);
-
                 let mut rules = Vec::with_capacity(terminal_set.len());
-                for terminal in terminal_set.iter() {
+                for terminal in terminals {
                     let rule = Rule {
                         tokens: vec![TokenMapped {
-                            token: Token::Term(*terminal),
+                            token: Token::Term(terminal),
                             mapto: Some(Ident::new("term", Span::call_site())),
                             begin_span: Span::call_site(),
                             end_span: Span::call_site(),
@@ -459,9 +477,9 @@ impl Pattern {
                         reduce_action: Some(quote! {
                             term
                         }),
+                        reduce_action_generated: true,
                         separator_span: Span::call_site(),
                         lookaheads: None,
-                        id: 0,
                         prec: None,
                     };
                     rules.push(rule);
@@ -486,11 +504,16 @@ impl Pattern {
                         Ident::new("__rustylr_terminal", Span::call_site()),
                     )),
                 };
-                pattern_map.insert(self.clone(), res.clone());
+                pattern_cache.insert(self.clone(), res.clone());
                 Ok(res)
             }
-            PatternType::Lookaheads(pattern, lookaheads) => {
-                let base_rule = pattern.to_rule(grammar, pattern_map, root_span_pair)?;
+            PatternInternal::Lookaheads(pattern, negate, lookaheads) => {
+                let lookaheads = grammar
+                    .calculate_terminal_set(*negate, lookaheads)
+                    .into_iter()
+                    .collect();
+
+                let base_rule = pattern.to_rule(grammar, pattern_cache, root_span_pair)?;
 
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
@@ -509,9 +532,9 @@ impl Pattern {
                         reduce_action: Some(quote! {
                             A
                         }),
+                        reduce_action_generated: true,
                         separator_span: Span::call_site(),
-                        lookaheads: Some(lookaheads.clone()),
-                        id: 0,
+                        lookaheads: Some(lookaheads),
                         prec: None,
                     };
 
@@ -532,7 +555,7 @@ impl Pattern {
                         token: Token::NonTerm(newrule_idx),
                         ruletype_map: Some((base_typename.clone(), base_mapto.clone())),
                     };
-                    pattern_map.insert(self.clone(), res.clone());
+                    pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
                 } else {
                     let rule = Rule {
@@ -543,9 +566,9 @@ impl Pattern {
                             end_span: Span::call_site(),
                         }],
                         reduce_action: None,
+                        reduce_action_generated: false,
                         separator_span: Span::call_site(),
-                        lookaheads: Some(lookaheads.clone()),
-                        id: 0,
+                        lookaheads: Some(lookaheads),
                         prec: None,
                     };
 
@@ -566,12 +589,12 @@ impl Pattern {
                         token: Token::NonTerm(newrule_idx),
                         ruletype_map: None,
                     };
-                    pattern_map.insert(self.clone(), res.clone());
+                    pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
                 }
             }
 
-            PatternType::Group(group) => {
+            PatternInternal::Group(group) => {
                 // Consider parenthesis-ed group of patterns
                 // ( A B C D ... )
                 // if there are no pattern holding a value, then the RuleType of the group is None
@@ -580,7 +603,7 @@ impl Pattern {
 
                 let mut elements = Vec::with_capacity(group.len());
                 for (child_idx, child) in group.iter().enumerate() {
-                    let mut child_rule = child.to_rule(grammar, pattern_map, root_span_pair)?;
+                    let mut child_rule = child.to_rule(grammar, pattern_cache, root_span_pair)?;
                     if let Some((_, mapto)) = &mut child_rule.ruletype_map {
                         *mapto = Ident::new(
                             format!("__rustylr_group_elem{}", child_idx).as_str(),
@@ -615,9 +638,9 @@ impl Pattern {
                         let rule = Rule {
                             tokens,
                             reduce_action: None,
+                            reduce_action_generated: false,
                             separator_span: Span::call_site(),
                             lookaheads: None,
-                            id: 0,
                             prec: None,
                         };
                         let nonterm_info = NonTerminalInfo {
@@ -637,7 +660,7 @@ impl Pattern {
                             token: Token::NonTerm(newrule_idx),
                             ruletype_map: None,
                         };
-                        pattern_map.insert(self.clone(), res.clone());
+                        pattern_cache.insert(self.clone(), res.clone());
                         Ok(res)
                     }
 
@@ -648,9 +671,9 @@ impl Pattern {
                         let rule = Rule {
                             tokens,
                             reduce_action: Some(quote! { #mapto }),
+                            reduce_action_generated: false,
                             separator_span: Span::call_site(),
                             lookaheads: None,
-                            id: 0,
                             prec: None,
                         };
                         let nonterm_info = NonTerminalInfo {
@@ -670,7 +693,7 @@ impl Pattern {
                             token: Token::NonTerm(newrule_idx),
                             ruletype_map: Some((typename.clone(), mapto.clone())),
                         };
-                        pattern_map.insert(self.clone(), res.clone());
+                        pattern_cache.insert(self.clone(), res.clone());
                         Ok(res)
                     }
 
@@ -689,9 +712,9 @@ impl Pattern {
                         let rule = Rule {
                             tokens,
                             reduce_action: Some(initializer),
+                            reduce_action_generated: true,
                             separator_span: Span::call_site(),
                             lookaheads: None,
-                            id: 0,
                             prec: None,
                         };
                         let nonterm_info = NonTerminalInfo {
@@ -714,13 +737,13 @@ impl Pattern {
                                 Ident::new("__rustylr_group", Span::call_site()),
                             )),
                         };
-                        pattern_map.insert(self.clone(), res.clone());
+                        pattern_cache.insert(self.clone(), res.clone());
                         Ok(res)
                     }
                 }
             }
 
-            PatternType::Literal(literal) => match literal {
+            PatternInternal::Literal(literal) => match literal {
                 syn::Lit::Char(_) => {
                     let idx = grammar
                         .add_or_get_literal_character(literal.clone(), None)
@@ -772,9 +795,9 @@ impl Pattern {
                             })
                             .collect(),
                         reduce_action: None,
+                        reduce_action_generated: false,
                         separator_span: Span::call_site(),
                         lookaheads: None,
-                        id: 0,
                         prec: None,
                     };
 
@@ -795,7 +818,7 @@ impl Pattern {
                         token: Token::NonTerm(newrule_idx),
                         ruletype_map: Some((quote! { &'static str }, newrule_name)),
                     };
-                    pattern_map.insert(self.clone(), res.clone());
+                    pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
                 }
                 syn::Lit::ByteStr(s) => {
@@ -825,9 +848,9 @@ impl Pattern {
                             })
                             .collect(),
                         reduce_action: None,
+                        reduce_action_generated: false,
                         separator_span: Span::call_site(),
                         lookaheads: None,
-                        id: 0,
                         prec: None,
                     };
 
@@ -848,7 +871,7 @@ impl Pattern {
                         token: Token::NonTerm(newrule_idx),
                         ruletype_map: Some((quote! { &'static [u8] }, newrule_name)),
                     };
-                    pattern_map.insert(self.clone(), res.clone());
+                    pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
                 }
                 _ => unreachable!("Only char, byte, str and bytes are supported"),

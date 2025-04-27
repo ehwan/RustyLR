@@ -14,6 +14,7 @@ use super::parser_expanded::GrammarContext;
 use super::parser_expanded::GrammarParseError;
 use super::parser_expanded::GrammarParser;
 
+#[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub enum Lexed {
     Ident(Ident),
@@ -57,6 +58,7 @@ pub enum Lexed {
     Glr(Punct, Ident),          // %glr
     Prec(Punct, Ident),         // %prec
     Precedence(Punct, Ident),   // %precedence
+    NoOptim(Punct, Ident),      // %nooptim
     Eof,
 }
 impl Lexed {
@@ -143,6 +145,10 @@ impl Lexed {
                 stream.append(punct);
                 stream.append(ident);
             }
+            Lexed::NoOptim(punct, ident) => {
+                stream.append(punct);
+                stream.append(ident);
+            }
 
             Lexed::Eof => unreachable!("Eof::stream()"),
         }
@@ -191,6 +197,7 @@ impl Lexed {
             Lexed::Glr(punct, ident) => ident.span(),
             Lexed::Prec(punct, ident) => ident.span(),
             Lexed::Precedence(punct, ident) => ident.span(),
+            Lexed::NoOptim(punct, ident) => ident.span(),
 
             Lexed::Eof => Span::call_site(),
         }
@@ -239,6 +246,7 @@ impl std::fmt::Display for Lexed {
             Lexed::Glr(_, _) => write!(f, "%glr"),
             Lexed::Prec(_, _) => write!(f, "%prec"),
             Lexed::Precedence(_, _) => write!(f, "%precedence"),
+            Lexed::NoOptim(_, _) => write!(f, "%nooptim"),
 
             Lexed::Eof => write!(f, "<eof>"),
         }
@@ -271,6 +279,7 @@ fn ident_to_keyword(percent: Punct, ident: Ident) -> Option<Lexed> {
         "glr" => Some(Lexed::Glr(percent, ident)),
         "prec" => Some(Lexed::Prec(percent, ident)),
         "precedence" => Some(Lexed::Precedence(percent, ident)),
+        "nooptim" => Some(Lexed::NoOptim(percent, ident)),
         _ => None,
     }
 }

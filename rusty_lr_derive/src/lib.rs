@@ -10,16 +10,25 @@ use proc_macro::TokenStream;
 /// This macro will generate a `Parser` and `Context` structs.
 #[proc_macro]
 pub fn lr1(input: TokenStream) -> TokenStream {
-    let input = proc_macro2::TokenStream::from(input);
-    let g = match rusty_lr_parser::grammar::Grammar::parse(input) {
-        Ok(grammar) => grammar,
-        Err(e) => {
-            return e.into();
-        }
+    let input = input.into();
+    use rusty_lr_parser::grammar::Grammar;
+    let grammar_args = match Grammar::parse_args(input) {
+        Ok(grammar_args) => grammar_args,
+        Err(e) => return e.to_compile_error().into(),
     };
-
-    match g.emit_compiletime() {
-        Ok(parser) => parser.into(),
-        Err(e) => e.to_compile_error().into(),
+    match Grammar::arg_check_error(&grammar_args) {
+        Ok(_) => {}
+        Err(e) => return e.to_compile_error().into(),
     }
+    let mut grammar = match Grammar::from_grammar_args(grammar_args) {
+        Ok(grammar) => grammar,
+        Err(e) => return e.to_compile_error().into(),
+    };
+    if let Err(e) = grammar.conflict() {
+        return e.to_compile_error().into();
+    }
+    if grammar.optimize {
+        grammar.replace_with_terminal_class();
+    }
+    grammar.emit_compiletime().into()
 }

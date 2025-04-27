@@ -8,6 +8,7 @@ pub mod error;
 pub mod grammar;
 pub(crate) mod nonterminal_info;
 pub(crate) mod parser;
+pub mod partition;
 pub(crate) mod pattern;
 pub mod terminal_info;
 pub(crate) mod terminalset;

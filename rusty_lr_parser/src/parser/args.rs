@@ -11,7 +11,7 @@ use rusty_lr_core::ReduceType;
 use crate::error::ParseError;
 use crate::grammar::Grammar;
 use crate::pattern::Pattern;
-use crate::pattern::PatternType;
+use crate::pattern::PatternInternal;
 use crate::terminalset::TerminalSet;
 use crate::utils;
 
@@ -23,15 +23,16 @@ pub enum TerminalOrTerminalSet {
 }
 
 impl TerminalOrTerminalSet {
+    /// in case of negation, `include_eof` is true if the final terminal set contains eof
     pub fn to_terminal_set(
         &self,
         grammar: &mut Grammar,
         include_eof: bool,
-    ) -> Result<BTreeSet<usize>, ParseError> {
+    ) -> Result<(bool, BTreeSet<usize>), ParseError> {
         match self {
             TerminalOrTerminalSet::Ident(ident) => {
                 if let Some(idx) = grammar.terminals_index.get(ident) {
-                    Ok(BTreeSet::from([*idx]))
+                    Ok((false, BTreeSet::from([*idx])))
                 } else {
                     Err(ParseError::TerminalNotDefined(ident.clone()))
                 }
@@ -53,7 +54,7 @@ impl TerminalOrTerminalSet {
                 }
 
                 let idx = grammar.add_or_get_literal_character(lit, None).unwrap();
-                Ok(BTreeSet::from([idx]))
+                Ok((false, BTreeSet::from([idx])))
             }
             TerminalOrTerminalSet::TerminalSet(terminal_set) => {
                 terminal_set.to_terminal_set(grammar, include_eof)
@@ -213,12 +214,12 @@ impl PatternArgs {
             PatternArgs::Ident(ident) => {
                 utils::check_reserved_name(&ident)?;
                 let pattern = Pattern {
-                    pattern_type: PatternType::Ident(ident),
+                    internal: PatternInternal::Ident(ident),
                     pretty_name: pretty_name.clone(),
                 };
                 if put_exclamation {
                     Ok(Pattern {
-                        pattern_type: PatternType::Exclamation(Box::new(pattern)),
+                        internal: PatternInternal::Exclamation(Box::new(pattern)),
                         pretty_name,
                     })
                 } else {
@@ -226,33 +227,33 @@ impl PatternArgs {
                 }
             }
             PatternArgs::Plus(pattern, _) => Ok(Pattern {
-                pattern_type: PatternType::Plus(Box::new(
+                internal: PatternInternal::Plus(Box::new(
                     pattern.into_pattern(grammar, put_exclamation)?,
                 )),
                 pretty_name,
             }),
             PatternArgs::Star(pattern, _) => Ok(Pattern {
-                pattern_type: PatternType::Star(Box::new(
+                internal: PatternInternal::Star(Box::new(
                     pattern.into_pattern(grammar, put_exclamation)?,
                 )),
                 pretty_name,
             }),
             PatternArgs::Question(pattern, _) => Ok(Pattern {
-                pattern_type: PatternType::Question(Box::new(
+                internal: PatternInternal::Question(Box::new(
                     pattern.into_pattern(grammar, put_exclamation)?,
                 )),
                 pretty_name,
             }),
             PatternArgs::Exclamation(pattern, _) => pattern.into_pattern(grammar, true),
             PatternArgs::TerminalSet(terminal_set) => {
-                let terminal_set = terminal_set.to_terminal_set(grammar, false)?;
+                let (negate, terminal_set) = terminal_set.to_terminal_set(grammar, false)?;
                 let pattern = Pattern {
-                    pattern_type: PatternType::TerminalSet(terminal_set),
+                    internal: PatternInternal::TerminalSet(negate, terminal_set),
                     pretty_name: pretty_name.clone(),
                 };
                 if put_exclamation {
                     Ok(Pattern {
-                        pattern_type: PatternType::Exclamation(Box::new(pattern)),
+                        internal: PatternInternal::Exclamation(Box::new(pattern)),
                         pretty_name,
                     })
                 } else {
@@ -260,10 +261,11 @@ impl PatternArgs {
                 }
             }
             PatternArgs::Lookaheads(pattern, terminalset) => {
-                let terminal_set = terminalset.to_terminal_set(grammar, true)?;
+                let (negate, terminal_set) = terminalset.to_terminal_set(grammar, true)?;
                 let pattern = Pattern {
-                    pattern_type: PatternType::Lookaheads(
+                    internal: PatternInternal::Lookaheads(
                         Box::new(pattern.into_pattern(grammar, put_exclamation)?),
+                        negate,
                         terminal_set,
                     ),
                     pretty_name,
@@ -283,7 +285,7 @@ impl PatternArgs {
                     patterns.push(pattern.into_pattern(grammar, put_exclamation)?);
                 }
                 Ok(Pattern {
-                    pattern_type: PatternType::Group(patterns),
+                    internal: PatternInternal::Group(patterns),
                     pretty_name,
                 })
             }
@@ -309,12 +311,12 @@ impl PatternArgs {
                 }
 
                 let pattern = Pattern {
-                    pattern_type: PatternType::Literal(lit),
+                    internal: PatternInternal::Literal(lit),
                     pretty_name: pretty_name.clone(),
                 };
                 if put_exclamation {
                     Ok(Pattern {
-                        pattern_type: PatternType::Exclamation(Box::new(pattern)),
+                        internal: PatternInternal::Exclamation(Box::new(pattern)),
                         pretty_name,
                     })
                 } else {
@@ -355,8 +357,6 @@ pub struct RuleLineArgs {
     pub reduce_action: Option<TokenStream>,
     /// span of ':' or '|' in front of this rule line
     pub separator_span: Span,
-    /// user assigned id for this rule line, currently not in use
-    pub id: usize,
     /// %prec definition
     pub precedence: Option<IdentOrLiteral>,
 }
@@ -383,4 +383,5 @@ pub struct GrammarArgs {
     pub rules: Vec<RuleDefArgs>,
     pub lalr: bool,
     pub glr: bool,
+    pub no_optim: bool,
 }

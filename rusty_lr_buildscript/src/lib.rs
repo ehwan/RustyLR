@@ -26,13 +26,10 @@ use codespan_reporting::term;
 use codespan_reporting::term::termcolor::ColorChoice;
 use codespan_reporting::term::termcolor::StandardStream;
 
-use proc_macro2::Ident;
-use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
 use quote::quote;
 use rusty_lr_parser::error::ArgError;
-use rusty_lr_parser::error::EmitError;
 use rusty_lr_parser::error::ParseArgError;
 use rusty_lr_parser::error::ParseError;
 
@@ -53,6 +50,9 @@ pub struct Builder {
     /// conflicts resolving process by `%left` or `%right` for any shift/reduce, reduce/reduce conflicts.
     verbose_conflicts_resolving: bool,
 
+    /// print debug information about terminal class optimization
+    verbose_optimization: bool,
+
     /// print verbose information to stderr
     verbose_on_stderr: bool,
 }
@@ -64,6 +64,7 @@ impl Builder {
             verbose_conflicts: false,
             verbose_conflicts_resolving: false,
             verbose_on_stderr: false,
+            verbose_optimization: false,
         }
     }
 
@@ -77,6 +78,7 @@ impl Builder {
     pub fn verbose(&mut self) -> &mut Self {
         self.verbose_conflicts();
         self.verbose_conflicts_resolving();
+        self.verbose_optimization();
         self
     }
 
@@ -91,6 +93,11 @@ impl Builder {
     /// conflicts resolving process by `%left` or `%right` for any shift/reduce, reduce/reduce conflicts.
     pub fn verbose_conflicts_resolving(&mut self) -> &mut Self {
         self.verbose_conflicts_resolving = true;
+        self
+    }
+
+    pub fn verbose_optimization(&mut self) -> &mut Self {
+        self.verbose_optimization = true;
         self
     }
 
@@ -119,8 +126,8 @@ impl Builder {
                     #stream2
                 }
             }
-            Err(_) => {
-                panic!("build failed");
+            Err(msg) => {
+                panic!("{}", msg)
             }
         };
 
@@ -402,7 +409,7 @@ impl Builder {
         }
 
         // parse lines
-        let grammar = match rusty_lr_parser::grammar::Grammar::from_grammar_args(grammar_args) {
+        let mut grammar = match rusty_lr_parser::grammar::Grammar::from_grammar_args(grammar_args) {
             Ok(grammar) => grammar,
             Err(e) => {
                 let diag = match e {
@@ -568,17 +575,6 @@ impl Builder {
                                 "First terminal symbol has to be less than or equal to the last terminal symbol".to_string()
                             ])
                     }
-                    ParseError::NegateInLiteralMode(open, close) => {
-                        let range = open.byte_range().start..close.byte_range().end;
-                        Diagnostic::error()
-                            .with_message("Negation with %tokentype `char` or `u8` is not supported")
-                            .with_labels(vec![
-                                Label::primary(file_id, range).with_message("Invalid range here"),
-                            ])
-                            .with_notes(vec![
-                                "Because we have to cover all `char` or `u8`, negation is not supported".to_string(),
-                            ])
-                    }
                     ParseError::TokenInLiteralMode(span) => {
                         let range = span.byte_range();
                         Diagnostic::error()
@@ -596,6 +592,20 @@ impl Builder {
                                     .with_message("first defined here"),
                             ])
                             .with_notes(vec!["%prec name must be unique".to_string()])
+                    }
+                    ParseError::RuleTypeDefinedButActionNotDefined { name, span } => {
+                        // `name` must not be generated rule,
+                        // since it is programmically generated, it must have a proper reduce action
+                        let span = span.0.byte_range().start..span.1.byte_range().end;
+                        Diagnostic::error()
+                            .with_message("Reduce action not defined")
+                            .with_labels(vec![
+                                Label::secondary(file_id, name.span().byte_range())
+                                    .with_message("This rule has a type definition"),
+                                Label::primary(file_id, span)
+                                    .with_message("This rule line has no reduce action"),
+                            ])
+                            .with_notes(vec!["".to_string()])
                     }
 
                     _ => {
@@ -618,50 +628,93 @@ impl Builder {
             }
         };
 
-        // check conflicts
-        let mut dfa_builder = grammar.create_grammar();
-        let augmented_rule_id = *grammar
-            .nonterminals_index
-            .get(&Ident::new(
-                rusty_lr_parser::utils::AUGMENTED_NAME,
-                Span::call_site(),
-            ))
-            .unwrap();
-        let dfa = if grammar.lalr {
-            dfa_builder.build_lalr_without_resolving(augmented_rule_id)
-        } else {
-            dfa_builder.build_without_resolving(augmented_rule_id)
-        };
-        let mut dfa = match dfa {
-            Ok(dfa) => dfa,
-            Err(_err) => {
-                unreachable!("Grammar building failed");
+        // diagnostics for optimization
+        if grammar.optimize {
+            use rusty_lr_parser::grammar::OptimizeRemove;
+            let optimized = grammar.replace_with_terminal_class();
+
+            if self.verbose_optimization {
+                // terminals merged into terminal class
+                let mut class_message = Vec::new();
+                for (class_idx, class_def) in grammar.terminal_classes.iter().enumerate() {
+                    if class_def.terminals.len() == 1 {
+                        continue;
+                    }
+                    let msg = format!(
+                        "TerminalClass{}: {}",
+                        class_def.multiterm_counter,
+                        grammar.class_pretty_name_list(class_idx)
+                    );
+                    class_message.push(msg);
+                }
+                if !class_message.is_empty() {
+                    let diag = Diagnostic::note()
+                        .with_message("These terminals are merged into terminal class".to_string())
+                        .with_notes(class_message);
+
+                    let writer = StandardStream::stdout(ColorChoice::Auto);
+                    let config = codespan_reporting::term::Config::default();
+                    term::emit(&mut writer.lock(), &config, &files, &diag)
+                        .expect("Failed to write to stdout");
+                }
+
+                for o in optimized.removed {
+                    match o {
+                        OptimizeRemove::TerminalClassRuleMerge(_, rule) => {
+                            let message = "Production Rule deleted";
+                            let (b, e) = rule.span_pair();
+                            let range = b.byte_range().start..e.byte_range().end;
+                            let mut labels = Vec::new();
+                            labels
+                                .push(Label::primary(file_id, range).with_message("defined here"));
+                            let mut notes = Vec::new();
+                            notes.push("Will be merged into rule using terminal class".to_string());
+                            let diag = Diagnostic::note()
+                                .with_message(message)
+                                .with_labels(labels)
+                                .with_notes(notes);
+
+                            let writer = self.verbose_stream();
+                            let config = codespan_reporting::term::Config::default();
+                            term::emit(&mut writer.lock(), &config, &files, &diag)
+                                .expect("Failed to write to verbose stream");
+                        }
+                    }
+                }
+
+                // if other terminals were not used, print warning about removing them
+                let other_terminal_class =
+                    &grammar.terminal_classes[grammar.other_terminal_class_id];
+                if !optimized.other_used && other_terminal_class.terminals.len() > 1 {
+                    let class_name =
+                        grammar.class_pretty_name_abbr(grammar.other_terminal_class_id);
+                    let terms = grammar.class_pretty_name_list(grammar.other_terminal_class_id);
+                    let mut notes = Vec::new();
+                    notes.push(format!("{class_name}: {terms}"));
+
+                    let diag = Diagnostic::warning()
+                        .with_message(
+                            "These terminals are not used in the grammar, consider removing them",
+                        )
+                        .with_notes(notes);
+
+                    let writer = self.verbose_stream();
+                    let config = codespan_reporting::term::Config::default();
+                    term::emit(&mut writer.lock(), &config, &files, &diag)
+                        .expect("Failed to write to verbose stream");
+                }
             }
-        };
+        }
+
+        grammar.build_grammar_without_resolve();
 
         let mut conflict_diags = Vec::new();
         let mut conflict_diags_resolved = Vec::new();
-        // to map production rule to its pretty name abbreviation
-        let term_mapper = |term_idx: usize| {
-            if grammar.is_char || grammar.is_u8 {
-                grammar.terminals[term_idx].body.to_string()
-            } else {
-                grammar.terminals[term_idx].name.to_string()
-            }
-        };
-        let nonterm_mapper = |nonterm: usize| grammar.nonterminals[nonterm].pretty_name.clone();
-        // let path_mapper = |path: &[rusty_lr_core::Token<usize, usize>]| {
-        //     path.iter()
-        //         .map(|token| match token {
-        //             rusty_lr_core::Token::Term(term) => term_mapper(*term),
-        //             rusty_lr_core::Token::NonTerm(nonterm) => nonterm_mapper(*nonterm),
-        //         })
-        //         .collect::<Vec<_>>()
-        //         .join(" ")
-        // };
+
+        let class_mapper = |class| grammar.class_pretty_name_list(class);
 
         // calculate conflicts
-        for state in &dfa.states {
+        for state in &grammar.states {
             use rusty_lr_core::builder::Operator;
 
             let mut both_in_reduce_shift = Vec::new();
@@ -681,7 +734,7 @@ impl Builder {
 
                 let message = format!(
                     "Conflict resolved with terminal: {}",
-                    term_mapper(shift_term)
+                    class_mapper(shift_term)
                 );
 
                 let reduce_rules = state.reduce_map.get(&shift_term).unwrap();
@@ -859,7 +912,7 @@ impl Builder {
 
                     // remove shift
                     let next_state = *state.shift_goto_map_term.get(&shift_term).unwrap();
-                    for shift_rule in dfa.states[next_state].unshifted_ruleset() {
+                    for shift_rule in grammar.states[next_state].unshifted_ruleset() {
                         Self::extend_rule_source_label(
                             &mut labels,
                             file_id,
@@ -878,7 +931,7 @@ impl Builder {
 
                     // remove shift
                     let next_state = *state.shift_goto_map_term.get(&shift_term).unwrap();
-                    for shift_rule in dfa.states[next_state].unshifted_ruleset() {
+                    for shift_rule in grammar.states[next_state].unshifted_ruleset() {
                         Self::extend_rule_source_label(
                             &mut labels,
                             file_id,
@@ -941,19 +994,22 @@ impl Builder {
                 );
             }
         }
-        dfa_builder.resolve_precedence(&mut dfa);
+        grammar.resolve_precedence();
 
-        for state in &dfa.states {
+        let nonterm_mapper = |nonterm| grammar.nonterm_pretty_name(nonterm);
+        let class_mapper = |class| grammar.class_pretty_name_list(class);
+
+        for state in &grammar.states {
             for (&reduce_term, reduce_rules) in state.reduce_map.iter() {
                 if let Some(&next_state) = state.shift_goto_map_term.get(&reduce_term) {
                     let message = format!(
                         "Conflict detected with terminal: {}",
-                        term_mapper(reduce_term)
+                        class_mapper(reduce_term)
                     );
                     let mut labels = Vec::new();
                     let notes = Vec::new();
 
-                    for shift_rule in dfa.states[next_state].unshifted_ruleset() {
+                    for shift_rule in grammar.states[next_state].unshifted_ruleset() {
                         Self::extend_rule_source_label(
                             &mut labels,
                             file_id,
@@ -983,7 +1039,7 @@ impl Builder {
                 } else if reduce_rules.len() > 1 {
                     let message = format!(
                         "Conflict detected with terminal: {}",
-                        term_mapper(reduce_term)
+                        class_mapper(reduce_term)
                     );
                     let mut labels = Vec::new();
                     let notes = Vec::new();
@@ -1046,67 +1102,19 @@ impl Builder {
         }
 
         // expand macro
-        let expanded_stream = match grammar.emit_compiletime() {
-            Ok(expanded_stream) => expanded_stream,
-            Err(e) => {
-                let diag = match e.as_ref() {
-                    EmitError::RuleTypeDefinedButActionNotDefined {
-                        name,
-                        rule_local_id,
-                    } => {
-                        // `name` must not be generated rule,
-                        // since it is programmically generated, it must have a proper reduce action
-
-                        let rule_id = *grammar.nonterminals_index.get(name).unwrap();
-                        let rule_line = &grammar.nonterminals[rule_id].rules[*rule_local_id];
-                        let rule_line_range = if rule_line.tokens.is_empty() {
-                            rule_line.separator_span.byte_range()
-                        } else {
-                            let first = rule_line.separator_span.byte_range().start;
-                            let last = rule_line.tokens.last().unwrap().end_span.byte_range().end;
-                            first..last
-                        };
-                        Diagnostic::error()
-                            .with_message("Reduce action not defined")
-                            .with_labels(vec![
-                                Label::secondary(file_id, name.span().byte_range())
-                                    .with_message("This rule has a type definition"),
-                                Label::primary(file_id, rule_line_range)
-                                    .with_message("This rule line has no reduce action"),
-                            ])
-                            .with_notes(vec!["".to_string()])
-                    }
-
-                    _ => {
-                        let message = e.short_message();
-                        let span = e.span().byte_range();
-                        Diagnostic::error()
-                            .with_message(message)
-                            .with_labels(vec![
-                                Label::primary(file_id, span).with_message("occured here")
-                            ])
-                    }
-                };
-
-                let writer = StandardStream::stderr(ColorChoice::Auto);
-                let config = codespan_reporting::term::Config::default();
-                term::emit(&mut writer.lock(), &config, &files, &diag)
-                    .expect("Failed to write to stderr");
-
-                return Err(diag.message);
-            }
-        };
+        let expanded_stream = grammar.emit_compiletime();
 
         // this comments will be printed to the output file
         // build again here whether it was built before
         // since many informations are removed in the rusty_lr_parser output
-        let rules_comments = dfa_builder
+        let rules_comments = grammar
+            .builder
             .rules
             .iter()
             .map(|rule| {
                 rule.rule
                     .clone()
-                    .map(&term_mapper, &nonterm_mapper)
+                    .map(&class_mapper, &nonterm_mapper)
                     .to_string()
             })
             .collect::<Vec<_>>()

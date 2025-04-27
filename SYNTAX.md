@@ -15,6 +15,7 @@
  - [`%err`, `%error`](#error-type-optional)
  - [`%glr`](#glr-parser-generation)
  - [`%lalr`](#lalr-parser-generation)
+ - [`%nooptim`](#no-optimization)
 
 
 ## Overview
@@ -369,3 +370,9 @@ If you want to generate GLR parser, add `%glr;` directive in the grammar.
 With this directive, any Shift/Reduce, Reduce/Reduce conflicts will not be treated as errors.
 
 See [GLR Parser](#glr-parser) section for more details.
+
+## No optimization
+```
+%nooptim;
+```
+Disable grammar optimization.

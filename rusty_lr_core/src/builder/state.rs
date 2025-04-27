@@ -3,6 +3,7 @@ use crate::ShiftedRuleRef;
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
+use std::hash::Hash;
 
 /// state in DFA building
 #[derive(Debug, Clone)]
@@ -86,6 +87,64 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                     (term, reduces, next_rules)
                 })
             })
+    }
+
+    pub fn into_lr_state<NewTerm, NewNonTerm>(
+        self,
+        term_map: impl Fn(Term) -> NewTerm,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+    ) -> crate::lr::State<NewTerm, NewNonTerm>
+    where
+        NewTerm: Hash + Eq,
+        NewNonTerm: Hash + Eq,
+    {
+        crate::lr::State {
+            shift_goto_map_term: self
+                .shift_goto_map_term
+                .into_iter()
+                .map(|(term, state)| (term_map(term), state))
+                .collect(),
+            shift_goto_map_nonterm: self
+                .shift_goto_map_nonterm
+                .into_iter()
+                .map(|(nonterm, state)| (nonterm_map(nonterm), state))
+                .collect(),
+            reduce_map: self
+                .reduce_map
+                .into_iter()
+                .map(|(term, rule)| (term_map(term), rule.into_iter().next().unwrap()))
+                .collect(),
+            ruleset: self.ruleset.rules.into_keys().collect(),
+        }
+    }
+
+    pub fn into_glr_state<NewTerm, NewNonTerm>(
+        self,
+        term_map: impl Fn(Term) -> NewTerm,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+    ) -> crate::glr::State<NewTerm, NewNonTerm>
+    where
+        NewTerm: Hash + Eq,
+        NewNonTerm: Hash + Eq,
+    {
+        crate::glr::State {
+            shift_goto_map_term: self
+                .shift_goto_map_term
+                .into_iter()
+                .map(|(term, state)| (term_map(term), state))
+                .collect(),
+            shift_goto_map_nonterm: self
+                .shift_goto_map_nonterm
+                .into_iter()
+                .map(|(nonterm, state)| (nonterm_map(nonterm), state))
+                .collect(),
+            reduce_map: self
+                .reduce_map
+                .into_iter()
+                .map(|(term, rule)| (term_map(term), rule.into_iter().collect()))
+                .collect(),
+            ruleset: self.ruleset.rules.into_keys().collect(),
+        }
     }
 }
 

@@ -51,19 +51,19 @@ macro_rules! punct(
 %token minus Lexed::Minus(punct!('-'));
 %token exclamation Lexed::Exclamation(punct!('!'));
 %token slash Lexed::Slash(punct!('/'));
-%token otherpunct Lexed::OtherPunct(punct!('.'));
+// %token otherpunct Lexed::OtherPunct(punct!('.'));
 
 %token literal Lexed::Literal(Literal::usize_suffixed(0));
 
 %token parengroup Lexed::ParenGroup(None);
 %token bracegroup Lexed::BraceGroup(None);
-%token bracketgroup Lexed::BracketGroup(None);
-%token nonegroup Lexed::NoneGroup(None);
+// %token bracketgroup Lexed::BracketGroup(None);
+// %token nonegroup Lexed::NoneGroup(None);
 
 %token lparen Lexed::LParen(Span::call_site());
 %token rparen Lexed::RParen(Span::call_site());
-%token lbrace Lexed::LBrace(Span::call_site());
-%token rbrace Lexed::RBrace(Span::call_site());
+// %token lbrace Lexed::LBrace(Span::call_site());
+// %token rbrace Lexed::RBrace(Span::call_site());
 %token lbracket Lexed::LBracket(Span::call_site());
 %token rbracket Lexed::RBracket(Span::call_site());
 
@@ -80,6 +80,7 @@ macro_rules! punct(
 %token glr Lexed::Glr(punct!('%'),Ident::new("id", Span::call_site()));
 %token prec Lexed::Prec(punct!('%'),Ident::new("id", Span::call_site()));
 %token precedence Lexed::Precedence(punct!('%'),Ident::new("id", Span::call_site()));
+%token nooptim Lexed::NoOptim(punct!('%'),Ident::new("id", Span::call_site()));
 
 %eof Lexed::Eof;
 
@@ -137,7 +138,6 @@ RuleLine(RuleLineArgs): TokenMapped* PrecDef? Action
         tokens: TokenMapped,
         reduce_action: Action.map(|action| action.to_token_stream()),
         separator_span: Span::call_site(),
-        id: 0,
         precedence: PrecDef,
     }
 }
@@ -299,7 +299,7 @@ TokenDef((Ident, TokenStream)): token ident RustCode semicolon
 }
 ;
 
-RustCode(TokenStream): t=[^semicolon lparen-precedence]+ {
+RustCode(TokenStream): t=[^semicolon]+ {
     let mut tokens = TokenStream::new();
     for token in t.into_iter() {
         token.append_to_stream(&mut tokens);
@@ -374,6 +374,8 @@ Precedence(Vec<IdentOrLiteral>): precedence IdentOrLiteral+ semicolon {
 }
 ;
 
+NoOptim: nooptim semicolon;
+
 GrammarLine : Rule { data.rules.push(Rule); }
 | TokenDef  { data.terminals.push(TokenDef); }
 | StartDef  { data.start_rule_name.push(StartDef); }
@@ -386,6 +388,7 @@ GrammarLine : Rule { data.rules.push(Rule); }
 | Lalr { data.lalr = true; }
 | Glr { data.glr = true; }
 | Precedence { data.precedences.push(Precedence); }
+| NoOptim { data.no_optim = true; }
 ;
 
 Grammar: GrammarLine+;

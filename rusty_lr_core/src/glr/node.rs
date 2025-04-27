@@ -254,7 +254,7 @@ impl<Data: NodeData> Node<Data> {
     pub fn backtrace<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> crate::Backtrace<Data::Term, Data::NonTerm>
+    ) -> crate::Backtrace<usize, Data::NonTerm>
     where
         Data::Term: Clone,
         Data::NonTerm: std::hash::Hash + Eq + Clone,
@@ -397,7 +397,9 @@ impl<Data: NodeData> Node<Data> {
         P::Term: 'a,
         P::NonTerm: 'a,
     {
-        parser.get_states()[self.state].expected()
+        parser.get_states()[self.state]
+            .expected()
+            .flat_map(|class| parser.get_terminals(*class).unwrap())
     }
     /// get expected non-terminals for current state.
     pub fn expected_nonterm<'a, P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(

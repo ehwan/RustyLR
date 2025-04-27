@@ -147,38 +147,37 @@ pub struct TerminalSet {
     pub close_span: Span,
 }
 impl TerminalSet {
+    // in case of negation, `include_eof` is true if the final terminal set contains eof
     pub fn to_terminal_set(
         &self,
         grammar: &mut Grammar,
         include_eof: bool,
-    ) -> Result<BTreeSet<usize>, ParseError> {
+    ) -> Result<(bool, BTreeSet<usize>), ParseError> {
         let mut terminal_set = BTreeSet::new();
         for item in &self.items {
             let mut item_set = item.to_terminal_set(grammar)?;
             terminal_set.append(&mut item_set);
         }
-        if self.negate {
-            // cannot use negation in str mode
-            // because we have to cover all characters in `char` or `u8`
-            if grammar.is_char || grammar.is_u8 {
-                return Err(ParseError::NegateInLiteralMode(
-                    self.open_span,
-                    self.close_span,
-                ));
-            }
-            let full_terminals: BTreeSet<usize> = (0..grammar.terminals.len()).collect();
-            terminal_set = full_terminals.difference(&terminal_set).cloned().collect();
-        }
 
-        if !include_eof {
-            // include eof when TerminalSet is used in a lookahead set
-            let eof_idx = grammar
-                .terminals_index
-                .get(&Ident::new(utils::EOF_NAME, Span::call_site()))
-                .unwrap();
-            terminal_set.remove(eof_idx);
+        // include eof when TerminalSet is used in a lookahead set
+        let eof_idx = *grammar
+            .terminals_index
+            .get(&Ident::new(utils::EOF_NAME, Span::call_site()))
+            .unwrap();
+        if include_eof {
+            if self.negate {
+                terminal_set.remove(&eof_idx);
+            } else {
+                terminal_set.insert(eof_idx);
+            }
+        } else {
+            if self.negate {
+                terminal_set.insert(eof_idx);
+            } else {
+                terminal_set.remove(&eof_idx);
+            }
         }
-        Ok(terminal_set)
+        Ok((self.negate, terminal_set))
     }
 }
 

@@ -242,7 +242,7 @@ impl<Data: NodeData> Context<Data> {
     pub fn backtraces<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &'a self,
         parser: &'a P,
-    ) -> impl Iterator<Item = crate::Backtrace<P::Term, P::NonTerm>> + 'a
+    ) -> impl Iterator<Item = crate::Backtrace<usize, P::NonTerm>> + 'a
     where
         Data::Term: Clone,
         Data::NonTerm: Clone + Hash + Eq,
@@ -306,6 +306,7 @@ impl<Data: NodeData> Context<Data> {
     {
         let mut nodes = self.current_nodes.clone();
         let mut nodes_pong: HashMap<usize, Vec<Rc<Node<Data>>>> = HashMap::default();
+        let term = parser.to_terminal_class(term);
 
         loop {
             if nodes.is_empty() {
@@ -315,11 +316,11 @@ impl<Data: NodeData> Context<Data> {
             nodes_pong.clear();
             for (state, nodes) in nodes.drain() {
                 let state = &parser.get_states()[state];
-                if state.shift_goto_term(term).is_some() {
+                if state.shift_goto_term(&term).is_some() {
                     return true;
                 }
 
-                if let Some(reduce_rules) = state.reduce(term) {
+                if let Some(reduce_rules) = state.reduce(&term) {
                     for reduce_rule in reduce_rules {
                         let reduce_rule = &parser.get_rules()[*reduce_rule];
                         let reduce_len = reduce_rule.rule.len();
@@ -333,7 +334,7 @@ impl<Data: NodeData> Context<Data> {
                                 .shift_goto_nonterm(&reduce_rule.name)
                             {
                                 if parser.get_states()[nonterm_shift_state]
-                                    .shift_goto_term(term)
+                                    .shift_goto_term(&term)
                                     .is_some()
                                 {
                                     return true;

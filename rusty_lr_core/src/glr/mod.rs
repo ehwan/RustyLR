@@ -44,11 +44,13 @@ where
     context.reduce_errors.clear();
     context.fallback_nodes.clear();
 
+    let class = parser.to_terminal_class(&term);
+
     // BFS reduce
     while !reduce_nodes.is_empty() {
         for (state, nodes) in reduce_nodes.drain() {
-            let next_term_shift_state = parser.get_states()[state].shift_goto_term(&term);
-            if let Some(reduce_rules) = parser.get_states()[state].reduce(&term) {
+            let next_term_shift_state = parser.get_states()[state].shift_goto_term(&class);
+            if let Some(reduce_rules) = parser.get_states()[state].reduce(&class) {
                 for node in nodes.into_iter() {
                     let mut shift_for_this_node = false;
 
@@ -198,6 +200,7 @@ where
     let mut reduce_errors: HashMap<P::Term, _> = HashMap::default();
 
     for term in terms {
+        let class = parser.to_terminal_class(&term);
         let mut reduce_nodes = reduce_nodes.clone();
 
         context.reduce_errors.clear();
@@ -205,8 +208,8 @@ where
         // BFS reduce
         while !reduce_nodes.is_empty() {
             for (state, nodes) in reduce_nodes.drain() {
-                let next_term_shift_state = parser.get_states()[state].shift_goto_term(&term);
-                if let Some(reduce_rules) = parser.get_states()[state].reduce(&term) {
+                let next_term_shift_state = parser.get_states()[state].shift_goto_term(&class);
+                if let Some(reduce_rules) = parser.get_states()[state].reduce(&class) {
                     for node in nodes.into_iter() {
                         let mut shift_for_this_node = false;
 

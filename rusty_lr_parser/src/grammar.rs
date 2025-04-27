@@ -1,3 +1,6 @@
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
+
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
@@ -5,6 +8,7 @@ use quote::quote;
 use rusty_lr_core::Token;
 
 use crate::error::ArgError;
+use crate::error::ConflictError;
 use crate::error::ParseArgError;
 use crate::error::ParseError;
 use crate::nonterminal_info::NonTerminalInfo;
@@ -27,6 +31,23 @@ use rusty_lr_core::HashMap;
 pub struct PrecDefinition {
     pub ident: Ident,
     pub reduce_type: Option<ReduceTypeInfo>,
+}
+
+pub struct TerminalClassDefinintion {
+    pub terminals: Vec<usize>,
+    /// counter for only terminal clasas (have more than 1 terminal)
+    /// dummy if it is single-terminal class
+    pub multiterm_counter: usize,
+}
+
+pub enum OptimizeRemove {
+    TerminalClassRuleMerge(usize, Rule),
+}
+pub struct OptimizeDiag {
+    /// if `__rustylr_other_terminals` is used
+    pub other_used: bool,
+    /// deleted rules
+    pub removed: Vec<OptimizeRemove>,
 }
 
 pub struct Grammar {
@@ -72,6 +93,18 @@ pub struct Grammar {
     /// if %tokentype is `char` or `u8`
     pub is_char: bool,
     pub is_u8: bool,
+
+    /// do terminal classificate optimization
+    pub optimize: bool,
+    pub builder: rusty_lr_core::builder::Grammar<usize, usize>,
+    pub states: Vec<rusty_lr_core::builder::State<usize, usize>>,
+
+    /// set of terminals for each terminal class
+    pub terminal_classes: Vec<TerminalClassDefinintion>,
+    /// id of teminal class for each terminal
+    pub terminal_class_id: Vec<usize>,
+    /// class id for terminal that does not belong to any class
+    pub other_terminal_class_id: usize,
 }
 
 impl Grammar {
@@ -122,6 +155,25 @@ impl Grammar {
             self.literal_index.insert(value, new_idx);
 
             Some(new_idx)
+        }
+    }
+
+    pub(crate) fn calculate_terminal_set(
+        &self,
+        negate: bool,
+        terminalset: &BTreeSet<usize>,
+    ) -> Vec<usize> {
+        if negate {
+            let mut ret = Vec::new();
+            for i in 0..self.terminals.len() {
+                if terminalset.contains(&i) {
+                    continue;
+                }
+                ret.push(i);
+            }
+            ret
+        } else {
+            terminalset.iter().copied().collect()
         }
     }
 
@@ -251,11 +303,19 @@ impl Grammar {
 
             is_char: false,
             is_u8: false,
+            optimize: !grammar_args.no_optim,
+
+            builder: rusty_lr_core::builder::Grammar::new(),
+            states: Vec::new(),
+
+            terminal_class_id: Vec::new(),
+            terminal_classes: Vec::new(),
+            other_terminal_class_id: 0,
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";
 
-        // add terminals
+        // add %token terminals
         for (index, (ident, token_expr)) in grammar_args.terminals.into_iter().enumerate() {
             // check if %tokentype is `char` or `u8`
             if grammar.is_char || grammar.is_u8 {
@@ -277,6 +337,32 @@ impl Grammar {
             };
             grammar.terminals.push(terminal_info);
             grammar.terminals_index.insert(ident, index);
+        }
+        // add other_terminals
+        {
+            let ident = Ident::new(utils::OTHERS_TERMINAL_NAME, Span::call_site());
+
+            let terminal_info = TerminalInfo {
+                name: ident.clone(),
+                reduce_type: None,
+                body: quote! { #ident },
+            };
+            let idx = grammar.terminals.len();
+            grammar.terminals.push(terminal_info);
+            grammar.terminals_index.insert(ident, idx);
+        }
+        // add eof
+        {
+            let eof_ident = Ident::new(utils::EOF_NAME, Span::call_site());
+
+            let terminal_info = TerminalInfo {
+                name: eof_ident.clone(),
+                reduce_type: None,
+                body: grammar_args.eof.into_iter().next().unwrap().1,
+            };
+            let idx = grammar.terminals.len();
+            grammar.terminals.push(terminal_info);
+            grammar.terminals_index.insert(eof_ident, idx);
         }
         // add terminals from %prec definition in each rule
         for rules_arg in grammar_args.rules.iter() {
@@ -300,20 +386,6 @@ impl Grammar {
                     }
                 }
             }
-        }
-
-        // add eof
-        {
-            let eof_ident = Ident::new(utils::EOF_NAME, Span::call_site());
-
-            let terminal_info = TerminalInfo {
-                name: eof_ident.clone(),
-                reduce_type: None,
-                body: grammar_args.eof.into_iter().next().unwrap().1,
-            };
-            let idx = grammar.terminals.len();
-            grammar.terminals.push(terminal_info);
-            grammar.terminals_index.insert(eof_ident, idx);
         }
 
         // reduce types
@@ -446,9 +518,9 @@ impl Grammar {
                 rule_lines.push(Rule {
                     tokens,
                     reduce_action: rule.reduce_action,
+                    reduce_action_generated: false,
                     separator_span: rule.separator_span,
                     lookaheads: None,
-                    id: rule.id,
                     prec,
                 });
             }
@@ -495,9 +567,9 @@ impl Grammar {
                     },
                 ],
                 reduce_action: None,
+                reduce_action_generated: false,
                 separator_span: Span::call_site(),
                 lookaheads: None,
-                id: 0,
                 prec: None,
             };
             let nonterminal_info = NonTerminalInfo {
@@ -515,23 +587,441 @@ impl Grammar {
                 .insert(augmented_ident, augmented_idx);
         }
 
+        // check reduce action
+        for nonterm in &mut grammar.nonterminals {
+            if nonterm.ruletype.is_some() {
+                // typename is defined, reduce action must be defined
+                for rule in nonterm.rules.iter_mut() {
+                    if rule.reduce_action.is_none() {
+                        // action is not defined,
+
+                        // check for special case:
+                        // only one token in this rule have <RuleType> defined (include terminal)
+                        // the unique value will be pushed to stack
+                        let mut unique_mapto = None;
+                        for token in rule.tokens.iter() {
+                            if token.mapto.is_some() {
+                                if unique_mapto.is_some() {
+                                    unique_mapto = None;
+                                    break;
+                                } else {
+                                    unique_mapto = token.mapto.as_ref();
+                                }
+                            }
+                        }
+                        if let Some(unique_mapto) = unique_mapto {
+                            let action = quote! { #unique_mapto };
+                            rule.reduce_action = Some(action);
+                            rule.reduce_action_generated = true;
+                        } else {
+                            let span = if rule.tokens.is_empty() {
+                                (rule.separator_span, rule.separator_span)
+                            } else {
+                                let first = rule.separator_span;
+                                let last = rule.tokens.last().unwrap().end_span;
+                                (first, last)
+                            };
+
+                            return Err(ParseError::RuleTypeDefinedButActionNotDefined {
+                                name: nonterm.name.clone(),
+                                span,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        // create the builder and try building it
+        grammar.builder = grammar.create_grammar();
+        grammar.build_grammar_without_resolve();
+        grammar.resolve_precedence();
+
+        // terminal class optimization
+        if grammar.optimize {
+            let mut term_sets = BTreeSet::new();
+            term_sets.insert((0..grammar.terminals.len()).collect());
+            // collect precedence orders
+            // all terminals in one class must have same precedence order
+            let mut precedence_sets: HashMap<_, Vec<usize>> = Default::default();
+            for (&op, &level) in &grammar.precedences {
+                if let rusty_lr_core::builder::Operator::Term(term_idx) = op {
+                    let level = level.1;
+                    precedence_sets
+                        .entry(level)
+                        .or_insert_with(Vec::new)
+                        .push(term_idx);
+                }
+            }
+            for (_, mut terms) in precedence_sets {
+                terms.sort();
+                term_sets.insert(terms);
+            }
+
+            for state in &grammar.states {
+                let mut same_reduce = BTreeMap::new();
+                for (term, reduces) in &state.reduce_map {
+                    same_reduce
+                        .entry(reduces)
+                        .or_insert_with(Vec::new)
+                        .push(*term);
+                }
+                term_sets.extend(same_reduce.into_values());
+
+                let mut same_ruleset = BTreeMap::new();
+                for (&term, &next_state) in &state.shift_goto_map_term {
+                    let ruleset = grammar.states[next_state]
+                        .unshifted_ruleset()
+                        .collect::<Vec<_>>();
+
+                    let mut no_reduceaction_sets = Vec::new();
+                    for rule in ruleset {
+                        let (nonterm, local_id) = grammar.get_rule_by_id(rule.rule).unwrap();
+                        let r = &nonterm.rules[local_id];
+
+                        // if this rule has reduce action, and it is not auto-generated,
+                        // this terminal should be completely distinct from others
+                        // so put this terminal into separate class
+                        if r.reduce_action.is_some() && !r.reduce_action_generated {
+                            term_sets.insert(vec![term]);
+                            continue;
+                        }
+
+                        let lookahead = &r.lookaheads;
+                        let mut presuffix: Vec<Token<_, _>> =
+                            r.tokens.iter().map(|token| token.token).collect();
+                        presuffix.remove(rule.shifted);
+                        // add rule name to the end of the presuffix
+                        let nonterm_id = *grammar.nonterminals_index.get(&nonterm.name).unwrap();
+                        presuffix.push(Token::NonTerm(nonterm_id));
+
+                        no_reduceaction_sets.push((presuffix, lookahead));
+                    }
+
+                    same_ruleset
+                        .entry(no_reduceaction_sets)
+                        .or_insert_with(Vec::new)
+                        .push(term);
+                }
+                term_sets.extend(same_ruleset.into_values());
+            }
+
+            let term_partition = crate::partition::minimal_partition(
+                term_sets.into_iter().map(|terms| terms.into_iter()),
+            );
+
+            grammar.terminal_class_id.resize(grammar.terminals.len(), 0);
+            let mut multiterm_counter = 0;
+            for (class_id, (_setids, terms)) in term_partition.into_iter().enumerate() {
+                for &term in terms.iter() {
+                    grammar.terminal_class_id[term] = class_id;
+                }
+                if terms.len() > 1 {
+                    multiterm_counter += 1;
+                }
+                let class_def = TerminalClassDefinintion {
+                    terminals: terms,
+                    multiterm_counter,
+                };
+                grammar.terminal_classes.push(class_def);
+            }
+            grammar.other_terminal_class_id = grammar.terminal_class_id[*grammar
+                .terminals_index
+                .get(&Ident::new(utils::OTHERS_TERMINAL_NAME, Span::call_site()))
+                .unwrap()];
+        } else {
+            grammar.terminal_class_id.reserve(grammar.terminals.len());
+            grammar.terminal_classes.reserve(grammar.terminals.len());
+
+            for i in 0..grammar.terminals.len() {
+                grammar.terminal_class_id.push(i);
+                grammar.terminal_classes.push(TerminalClassDefinintion {
+                    terminals: vec![i],
+                    multiterm_counter: 0,
+                });
+            }
+            grammar.other_terminal_class_id = grammar.terminal_class_id[*grammar
+                .terminals_index
+                .get(&Ident::new(utils::OTHERS_TERMINAL_NAME, Span::call_site()))
+                .unwrap()];
+        }
+
         Ok(grammar)
     }
 
-    /// for backward compatibility
-    pub fn parse(input: TokenStream) -> Result<Self, TokenStream> {
-        let grammar_args = match Grammar::parse_args(input) {
-            Ok(grammar_args) => grammar_args,
-            Err(e) => return Err(e.to_compile_error()),
-        };
-        match Grammar::arg_check_error(&grammar_args) {
-            Ok(_) => {}
-            Err(e) => return Err(e.to_compile_error()),
+    /// replace `builder` with optimized terminal class
+    pub fn replace_with_terminal_class(&mut self) -> OptimizeDiag {
+        if !self.optimize {
+            return OptimizeDiag {
+                other_used: true,
+                removed: Vec::new(),
+            };
         }
-        match Grammar::from_grammar_args(grammar_args) {
-            Ok(grammar) => Ok(grammar),
-            Err(e) => Err(e.to_compile_error()),
+        let rules = std::mem::take(&mut self.builder.rules);
+        let reduce_types: BTreeMap<_, _> = std::mem::take(&mut self.builder.reduce_types)
+            .into_iter()
+            .collect();
+        let precedences: BTreeMap<_, _> = std::mem::take(&mut self.builder.precedence_map)
+            .into_iter()
+            .collect();
+        self.builder = rusty_lr_core::builder::Grammar::new();
+
+        let mut removed_rules_diag = Vec::new();
+
+        // convert all terminals using terminal class
+        // Keep only the rules related with first terminal
+        // and remove the rest
+
+        let mut is_first_term_in_class = Vec::new();
+        is_first_term_in_class.resize(self.terminals.len(), false);
+        for class_def in &self.terminal_classes {
+            let first = class_def.terminals[0];
+            is_first_term_in_class[first] = true;
         }
+        use rusty_lr_core::builder::Operator;
+        use rusty_lr_core::Token;
+
+        // rules
+        let mut remove_rules = Vec::new();
+        let mut other_class_used = false;
+        for (rule_id, rule) in rules.into_iter().enumerate() {
+            let tokens: Result<Vec<_>, _> = rule
+                .rule
+                .rule
+                .into_iter()
+                .map(|token| match token {
+                    Token::Term(term) => {
+                        if is_first_term_in_class[term] {
+                            let class_id = self.terminal_class_id[term];
+                            Ok(Token::Term(class_id))
+                        } else {
+                            Err(0)
+                        }
+                    }
+                    Token::NonTerm(nonterm) => Ok(Token::NonTerm(nonterm)),
+                })
+                .collect();
+            let tokens = match tokens {
+                Ok(tokens) => {
+                    for token in &tokens {
+                        if token == &Token::Term(self.other_terminal_class_id) {
+                            other_class_used = true
+                        }
+                    }
+                    tokens
+                }
+                Err(_) => {
+                    remove_rules.push(rule_id);
+                    continue;
+                }
+            };
+            let name = rule.rule.name;
+            let lookaheads = rule.lookaheads.map(|lookaheads| {
+                lookaheads
+                    .into_iter()
+                    .map(|term| self.terminal_class_id[term])
+                    .collect()
+            });
+
+            let operator = match rule.operator {
+                None => None,
+                Some(Operator::Prec(op)) => Some(Operator::Prec(op)),
+                Some(Operator::Term(term)) => {
+                    let class_id = self.terminal_class_id[term];
+                    Some(Operator::Term(class_id))
+                }
+            };
+
+            self.builder.add_rule(name, tokens, lookaheads, operator);
+        }
+        {
+            let mut rule_id = 0;
+            for nonterm in &mut self.nonterminals {
+                let rules = std::mem::take(&mut nonterm.rules);
+                for rule in rules {
+                    if !remove_rules.contains(&rule_id) {
+                        nonterm.rules.push(rule);
+                    } else {
+                        // add to diags only if it was not auto-generated
+                        if nonterm.regex_span.is_none() {
+                            removed_rules_diag
+                                .push(OptimizeRemove::TerminalClassRuleMerge(rule_id, rule));
+                        }
+                    }
+                    rule_id += 1;
+                }
+            }
+        }
+
+        // precedences
+        for (&op, &level) in &precedences {
+            match op {
+                Operator::Term(term) => {
+                    if is_first_term_in_class[term] {
+                        let class_id = self.terminal_class_id[term];
+                        self.builder.add_precedence(Operator::Term(class_id), level);
+                    }
+                }
+                Operator::Prec(prec) => {
+                    self.builder.add_precedence(Operator::Prec(prec), level);
+                }
+            }
+        }
+
+        // reduce types
+        for (op, reduce_type) in reduce_types {
+            match op {
+                Operator::Term(term) => {
+                    if is_first_term_in_class[term] {
+                        let class_id = self.terminal_class_id[term];
+                        self.builder
+                            .add_reduce_type(Operator::Term(class_id), reduce_type);
+                    }
+                }
+                Operator::Prec(prec) => {
+                    self.builder
+                        .add_reduce_type(Operator::Prec(prec), reduce_type);
+                }
+            }
+        }
+        self.states.clear();
+
+        OptimizeDiag {
+            other_used: other_class_used,
+            removed: removed_rules_diag,
+        }
+    }
+
+    pub fn term_pretty_name(&self, term_idx: usize) -> String {
+        if self.is_char || self.is_u8 {
+            self.terminals[term_idx].body.to_string()
+        } else {
+            let name = &self.terminals[term_idx].name;
+            if name == utils::OTHERS_TERMINAL_NAME {
+                "<Others>".to_string()
+            } else {
+                name.to_string()
+            }
+        }
+    }
+    /// returns either 'term' or 'TerminalClassX'
+    pub fn class_pretty_name_abbr(&self, class_idx: usize) -> String {
+        let class = &self.terminal_classes[class_idx];
+        if class.terminals.len() == 1 {
+            self.term_pretty_name(class.terminals[0])
+        } else {
+            format!("TerminalClass{}", class.multiterm_counter)
+            // let f = self.terminal_classes[class_idx]
+            //     .terminals
+            //     .iter()
+            //     .map(|&term| self.term_pretty_name(term))
+            //     .collect::<Vec<_>>()
+            //     .join(", ");
+            // format!("[{f}]")
+        }
+    }
+    /// returns either 'term' or '[term1, term2, ...]'
+    pub fn class_pretty_name_list(&self, class_idx: usize) -> String {
+        let class = &self.terminal_classes[class_idx];
+        if class.terminals.len() == 1 {
+            self.term_pretty_name(class.terminals[0])
+        } else if class.terminals.len() < 5 {
+            let f = self.terminal_classes[class_idx]
+                .terminals
+                .iter()
+                .map(|&term| self.term_pretty_name(term))
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("[{f}]")
+        } else {
+            let class = &self.terminal_classes[class_idx];
+            let len = class.terminals.len();
+            let first = class.terminals[0];
+            let second = class.terminals[1];
+            let last = *class.terminals.last().unwrap();
+
+            let first = self.term_pretty_name(first);
+            let second = self.term_pretty_name(second);
+            let last = self.term_pretty_name(last);
+            format!("[{first}, {second}, ..., {last}] ({len} terms)")
+        }
+    }
+    pub fn nonterm_pretty_name(&self, nonterm_idx: usize) -> String {
+        self.nonterminals[nonterm_idx].pretty_name.clone()
+    }
+
+    pub fn conflict(&self) -> Result<(), Box<ConflictError>> {
+        // check for SR/RR conflicts if it's not GLR
+        if !self.glr {
+            let term_mapper = |class| self.term_pretty_name(class);
+            let nonterm_mapper = |nonterm| self.nonterm_pretty_name(nonterm);
+
+            // rr conflicts
+            for state in self.states.iter() {
+                if let Some((rules, lookaheads)) = state.conflict_rr().next() {
+                    let lookahead = *lookaheads.into_iter().next().unwrap();
+                    let (rule1, rule2) = {
+                        let mut iter = rules.iter();
+                        let r1 = *iter.next().unwrap();
+                        (r1, *iter.next().unwrap())
+                    };
+                    return Err(Box::new(ConflictError::ReduceReduceConflict {
+                        lookahead: self.terminals[lookahead].name.clone(),
+                        rule1: (
+                            rule1,
+                            self.builder.rules[rule1]
+                                .rule
+                                .clone()
+                                .map(&term_mapper, &nonterm_mapper),
+                        ),
+                        rule2: (
+                            rule2,
+                            self.builder.rules[rule2]
+                                .rule
+                                .clone()
+                                .map(&term_mapper, &nonterm_mapper),
+                        ),
+                    }));
+                }
+            }
+
+            // sr conflicts
+            for state in self.states.iter() {
+                if let Some((&term, reduces, shift_rules)) =
+                    state.conflict_sr(|idx| &self.states[idx]).next()
+                {
+                    let reduce = *reduces.iter().next().unwrap();
+                    let shift_rules = shift_rules
+                        .into_iter()
+                        .map(|rule| {
+                            let prod_rule = self.builder.rules[rule.rule]
+                                .rule
+                                .clone()
+                                .map(&term_mapper, &nonterm_mapper);
+                            (
+                                rule.rule,
+                                rusty_lr_core::ShiftedRule {
+                                    rule: prod_rule,
+                                    shifted: rule.shifted,
+                                },
+                            )
+                        })
+                        .collect();
+                    return Err(Box::new(ConflictError::ShiftReduceConflict {
+                        term: self.terminals[term].name.clone(),
+                        reduce_rule: (
+                            reduce,
+                            self.builder.rules[reduce]
+                                .rule
+                                .clone()
+                                .map(term_mapper, nonterm_mapper),
+                        ),
+                        shift_rules,
+                    }));
+                }
+            }
+        }
+        Ok(())
     }
 
     /// create the rusty_lr_core::Grammar from the parsed CFGs
@@ -586,5 +1076,28 @@ impl Grammar {
         }
 
         grammar
+    }
+
+    pub fn build_grammar_without_resolve(&mut self) {
+        let augmented_idx = *self
+            .nonterminals_index
+            .get(&Ident::new(utils::AUGMENTED_NAME, Span::call_site()))
+            .unwrap();
+        let states = if self.lalr {
+            self.builder.build_lalr_without_resolving(augmented_idx)
+        } else {
+            self.builder.build_without_resolving(augmented_idx)
+        };
+        let Ok(states) = states else {
+            unreachable!("grammar build error");
+        };
+        self.states = states.states;
+    }
+    pub fn resolve_precedence(&mut self) {
+        let mut dfa = rusty_lr_core::builder::DFA {
+            states: std::mem::take(&mut self.states),
+        };
+        self.builder.resolve_precedence(&mut dfa);
+        self.states = dfa.states;
     }
 }

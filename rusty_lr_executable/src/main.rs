@@ -25,6 +25,9 @@ fn main() {
     if args.verbose_conflict_resolve {
         builder.verbose_conflicts_resolving();
     }
+    if args.verbose_optimization {
+        builder.verbose_optimization();
+    }
 
     let out = match builder.build_impl() {
         Ok(out) => out,

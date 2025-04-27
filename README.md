@@ -4,9 +4,12 @@
 
 ***A Yacc-like, procedural macro-based parser generator for Rust supporting LR(1), LALR(1), and GLR parsing strategies.***
 
-RustyLR enables you to define context-free grammars (CFGs) directly in Rust using macros or build scripts. It constructs finite state automata at compile time, ensuring efficient and reliable parsing.​
+RustyLR enables you to define context-free grammars (CFGs) directly in Rust using macros or build scripts. It constructs optimized finite state automata at compile time, ensuring efficient and reliable parsing.​
+
+![images/optimize.png](images/optimize.png)
 
 ## Features
+ - **Automatic Optimization:**: Reduces parser table size and improves performance by grouping terminals with identical behavior across parser states.
  - **Multiple Parsing Strategies:** Supports LR(1), LALR(1), and GLR parsers.
  - **Procedural Macros:** Define grammars using lr1! macro for compile-time parser generation.
  - **Build Script Integration:** Generate parsers via build scripts for complex grammars with detailed error messages.​
@@ -142,9 +145,6 @@ You can get useful information from `<Start>NonTerminals` enum.
  ```rust
  let non_terminal: <Start>NonTerminals = ...;
 
- non_terminal.firsts(); // first terminal symbols of this non-terminal
- non_terminal.lasts(); // last terminal symbols of this non-terminal
- non_terminal.nullable(); // true if this non-terminal can be reduced to empty
  non_terminal.is_auto_generated(); // true if this non-terminal is auto-generated
  ```
 
@@ -196,8 +196,3 @@ See [SYNTAX.md](SYNTAX.md) for details of grammar-definition syntax.
 Either of
  - MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
  - Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-
-### Images
-It is highly recommended to use buildscipt tools or executable instead of procedural macros, to generate readable error messages.
-![images/error1.png](images/error1.png)
-![images/error2.png](images/error2.png)
