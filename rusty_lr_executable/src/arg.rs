@@ -35,6 +35,6 @@ pub struct Args {
     pub verbose_conflict_resolve: bool,
 
     /// verbose output for the terminal class optimization process
-    #[arg(short = 'r', long, default_value = "false")]
+    #[arg(short = 'o', long, default_value = "false")]
     pub verbose_optimization: bool,
 }
