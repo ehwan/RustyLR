@@ -101,7 +101,7 @@ impl Grammar {
         stream.extend(
     quote! {
             /// An enum that represents non-terminal symbols
-            #[allow(non_camel_case_types)]
+            #[allow(non_camel_case_types, dead_code)]
             #[derive(Clone, Copy, std::hash::Hash, std::cmp::PartialEq, std::cmp::Eq, std::cmp::PartialOrd, std::cmp::Ord)]
             pub enum #enum_typename {
                 #comma_separated_variants

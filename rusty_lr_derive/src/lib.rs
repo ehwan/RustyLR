@@ -24,11 +24,14 @@ pub fn lr1(input: TokenStream) -> TokenStream {
         Ok(grammar) => grammar,
         Err(e) => return e.to_compile_error().into(),
     };
+    if grammar.optimize {
+        grammar.optimize(5);
+    }
+    grammar.builder = grammar.create_builder();
+    grammar.build_grammar_without_resolve();
+    grammar.resolve_precedence();
     if let Err(e) = grammar.conflict() {
         return e.to_compile_error().into();
-    }
-    if grammar.optimize {
-        grammar.replace_with_terminal_class();
     }
     grammar.emit_compiletime().into()
 }

@@ -631,7 +631,7 @@ impl Builder {
         // diagnostics for optimization
         if grammar.optimize {
             use rusty_lr_parser::grammar::OptimizeRemove;
-            let optimized = grammar.replace_with_terminal_class();
+            let optimized = grammar.optimize(10);
 
             if self.verbose_optimization {
                 // terminals merged into terminal class
@@ -643,7 +643,7 @@ impl Builder {
                     let msg = format!(
                         "TerminalClass{}: {}",
                         class_def.multiterm_counter,
-                        grammar.class_pretty_name_list(class_idx)
+                        grammar.class_pretty_name_list(class_idx, 10)
                     );
                     class_message.push(msg);
                 }
@@ -660,7 +660,7 @@ impl Builder {
 
                 for o in optimized.removed {
                     match o {
-                        OptimizeRemove::TerminalClassRuleMerge(_, rule) => {
+                        OptimizeRemove::TerminalClassRuleMerge(rule) => {
                             let message = "Production Rule deleted";
                             let (b, e) = rule.span_pair();
                             let range = b.byte_range().start..e.byte_range().end;
@@ -669,6 +669,35 @@ impl Builder {
                                 .push(Label::primary(file_id, range).with_message("defined here"));
                             let mut notes = Vec::new();
                             notes.push("Will be merged into rule using terminal class".to_string());
+                            let diag = Diagnostic::note()
+                                .with_message(message)
+                                .with_labels(labels)
+                                .with_notes(notes);
+
+                            let writer = self.verbose_stream();
+                            let config = codespan_reporting::term::Config::default();
+                            term::emit(&mut writer.lock(), &config, &files, &diag)
+                                .expect("Failed to write to verbose stream");
+                        }
+                        OptimizeRemove::SingleNonTerminalRule(rule, nonterm_span) => {
+                            let message = "NonTerminal deleted";
+                            let mut labels = Vec::new();
+                            let mut notes = Vec::new();
+                            notes.push(
+                                "This non-terminal will be replaced by terminal class".to_string(),
+                            );
+
+                            labels.push(
+                                Label::primary(file_id, nonterm_span.byte_range())
+                                    .with_message("non-terminal defined here"),
+                            );
+
+                            let (b, e) = rule.span_pair();
+                            let rule_range = b.byte_range().start..e.byte_range().end;
+                            labels.push(
+                                Label::secondary(file_id, rule_range)
+                                    .with_message("this rule only has one terminal class"),
+                            );
                             let diag = Diagnostic::note()
                                 .with_message(message)
                                 .with_labels(labels)
@@ -688,7 +717,7 @@ impl Builder {
                 if !optimized.other_used && other_terminal_class.terminals.len() > 1 {
                     let class_name =
                         grammar.class_pretty_name_abbr(grammar.other_terminal_class_id);
-                    let terms = grammar.class_pretty_name_list(grammar.other_terminal_class_id);
+                    let terms = grammar.class_pretty_name_list(grammar.other_terminal_class_id, 10);
                     let mut notes = Vec::new();
                     notes.push(format!("{class_name}: {terms}"));
 
@@ -706,12 +735,13 @@ impl Builder {
             }
         }
 
+        grammar.builder = grammar.create_builder();
         grammar.build_grammar_without_resolve();
 
         let mut conflict_diags = Vec::new();
         let mut conflict_diags_resolved = Vec::new();
 
-        let class_mapper = |class| grammar.class_pretty_name_list(class);
+        let class_mapper = |class| grammar.class_pretty_name_list(class, 5);
 
         // calculate conflicts
         for state in &grammar.states {
@@ -755,7 +785,7 @@ impl Builder {
                     let (ruleinfo, localid) = grammar.get_rule_by_id(reduce_rule).unwrap();
                     let (reduce_op, op_origin) =
                         if let Some((reduce_op, prec_def)) = &ruleinfo.rules[localid].prec {
-                            (*reduce_op, prec_def.span().byte_range())
+                            (*reduce_op, prec_def.byte_range())
                         } else {
                             let mut ret = None;
                             for token in ruleinfo.rules[localid].tokens.iter().rev() {
@@ -997,7 +1027,7 @@ impl Builder {
         grammar.resolve_precedence();
 
         let nonterm_mapper = |nonterm| grammar.nonterm_pretty_name(nonterm);
-        let class_mapper = |class| grammar.class_pretty_name_list(class);
+        let class_mapper = |class| grammar.class_pretty_name_list(class, 5);
 
         for state in &grammar.states {
             for (&reduce_term, reduce_rules) in state.reduce_map.iter() {

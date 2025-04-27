@@ -1,7 +1,5 @@
 use std::collections::BTreeSet;
 
-use crate::parser::args::IdentOrLiteral;
-
 use super::token::TokenMapped;
 use proc_macro2::Ident;
 use proc_macro2::Span;
@@ -16,7 +14,7 @@ pub struct Rule {
     /// force lookahead tokens for this pattern.
     pub lookaheads: Option<BTreeSet<usize>>,
     /// %prec definition
-    pub prec: Option<(rusty_lr_core::builder::Operator<usize>, IdentOrLiteral)>,
+    pub prec: Option<(rusty_lr_core::builder::Operator<usize>, Span)>,
 }
 
 impl Rule {
