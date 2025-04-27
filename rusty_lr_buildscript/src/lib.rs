@@ -744,108 +744,87 @@ impl Builder {
         let class_mapper = |class| grammar.class_pretty_name_list(class, 5);
 
         // calculate conflicts
-        for state in &grammar.states {
-            use rusty_lr_core::builder::Operator;
+        {
+            use std::collections::BTreeSet;
+            let mut shift_reduce_conflict_set = BTreeSet::new();
 
-            let mut both_in_reduce_shift = Vec::new();
-            for term in state.reduce_map.keys().copied() {
-                if state.shift_goto_map_term.contains_key(&term) {
-                    both_in_reduce_shift.push(term);
+            for state in &grammar.states {
+                use rusty_lr_core::builder::Operator;
+
+                let mut both_in_reduce_shift = Vec::new();
+                for term in state.reduce_map.keys().copied() {
+                    if state.shift_goto_map_term.contains_key(&term) {
+                        both_in_reduce_shift.push(term);
+                    }
                 }
-            }
 
-            for shift_term in both_in_reduce_shift.into_iter() {
-                let mut labels = Vec::new();
-                let Some(&(shift_prec_span, shift_level)) =
-                    grammar.precedences.get(&Operator::Term(shift_term))
-                else {
-                    continue;
-                };
+                for shift_term in both_in_reduce_shift.into_iter() {
+                    let reduce_rules = state.reduce_map.get(&shift_term).unwrap();
 
-                let message = format!(
-                    "Conflict resolved with terminal: {}",
-                    class_mapper(shift_term)
-                );
+                    if !shift_reduce_conflict_set.insert((reduce_rules.clone(), shift_term)) {
+                        continue;
+                    }
 
-                let reduce_rules = state.reduce_map.get(&shift_term).unwrap();
-
-                let mut remove_shift = true;
-                let mut remove_reduces = Vec::new();
-                // if all operators in reduce rules have greater precedence than shift_term,
-                // remove shift action
-                //
-                // if all operators in reduce rules have less or equal precedence than shift_term,
-                // remove reduce rules which has less precedence than shift_term
-                //
-                // otherwise, do nothing
-                for &reduce_rule in reduce_rules {
-                    use rusty_lr_core::Token;
-                    use std::cmp::Ordering;
-
-                    let (ruleinfo, localid) = grammar.get_rule_by_id(reduce_rule).unwrap();
-                    let (reduce_op, op_origin) =
-                        if let Some((reduce_op, prec_def)) = &ruleinfo.rules[localid].prec {
-                            (*reduce_op, prec_def.byte_range())
-                        } else {
-                            let mut ret = None;
-                            for token in ruleinfo.rules[localid].tokens.iter().rev() {
-                                if let Token::Term(term) = token.token {
-                                    let s0 = token.begin_span.byte_range().start;
-                                    let s1 = token.end_span.byte_range().end;
-                                    ret = Some((Operator::Term(term), s0..s1));
-                                    break;
-                                }
-                            }
-                            if let Some(ret) = ret {
-                                ret
-                            } else {
-                                // no operator found
-                                Self::extend_rule_source_label(
-                                    &mut labels,
-                                    file_id,
-                                    reduce_rule,
-                                    &grammar,
-                                    "(Reduce) ",
-                                    "(Reduce) ",
-                                );
-                                remove_shift = false;
-                                continue;
-                            }
-                        };
-
-                    let Some(&(precedence_defined_origin, reduce_level)) =
-                        grammar.precedences.get(&reduce_op)
+                    let mut labels = Vec::new();
+                    let Some(&(shift_prec_span, shift_level)) =
+                        grammar.precedences.get(&Operator::Term(shift_term))
                     else {
-                        // precedence not defined
-                        Self::extend_rule_source_label(
-                            &mut labels,
-                            file_id,
-                            reduce_rule,
-                            &grammar,
-                            "(Reduce) ",
-                            "(Reduce) ",
-                        );
-                        labels.push(
-                            Label::secondary(file_id, op_origin)
-                                .with_message(format!("(Reduce) operator for reduce rule")),
-                        );
-                        remove_shift = false;
                         continue;
                     };
-                    match reduce_level.cmp(&shift_level) {
-                        Ordering::Less => {
-                            remove_shift = false;
-                            remove_reduces.push((
-                                reduce_rule,
-                                precedence_defined_origin,
-                                reduce_level,
-                                op_origin,
-                                None,
-                            ));
-                            // reduce < shift => remove reduce rule
-                        }
-                        Ordering::Greater => {
-                            // reduce > shift => remove shift
+
+                    let message = format!(
+                        "Conflict resolved with terminal: {}",
+                        class_mapper(shift_term)
+                    );
+
+                    let mut remove_shift = true;
+                    let mut remove_reduces = Vec::new();
+                    // if all operators in reduce rules have greater precedence than shift_term,
+                    // remove shift action
+                    //
+                    // if all operators in reduce rules have less or equal precedence than shift_term,
+                    // remove reduce rules which has less precedence than shift_term
+                    //
+                    // otherwise, do nothing
+                    for &reduce_rule in reduce_rules {
+                        use rusty_lr_core::Token;
+                        use std::cmp::Ordering;
+
+                        let (ruleinfo, localid) = grammar.get_rule_by_id(reduce_rule).unwrap();
+                        let (reduce_op, op_origin) =
+                            if let Some((reduce_op, prec_def)) = &ruleinfo.rules[localid].prec {
+                                (*reduce_op, prec_def.byte_range())
+                            } else {
+                                let mut ret = None;
+                                for token in ruleinfo.rules[localid].tokens.iter().rev() {
+                                    if let Token::Term(term) = token.token {
+                                        let s0 = token.begin_span.byte_range().start;
+                                        let s1 = token.end_span.byte_range().end;
+                                        ret = Some((Operator::Term(term), s0..s1));
+                                        break;
+                                    }
+                                }
+                                if let Some(ret) = ret {
+                                    ret
+                                } else {
+                                    // no operator found
+                                    Self::extend_rule_source_label(
+                                        &mut labels,
+                                        file_id,
+                                        reduce_rule,
+                                        &grammar,
+                                        "(Reduce) ",
+                                        "(Reduce) ",
+                                    );
+                                    remove_shift = false;
+                                    continue;
+                                }
+                            };
+
+                        let Some(&(precedence_defined_origin, reduce_level)) =
+                            grammar.precedences.get(&reduce_op)
+                        else {
+                            // precedence not defined
                             Self::extend_rule_source_label(
                                 &mut labels,
                                 file_id,
@@ -858,170 +837,206 @@ impl Builder {
                                 Label::secondary(file_id, op_origin)
                                     .with_message(format!("(Reduce) operator for reduce rule")),
                             );
-                            labels.push(
-                                Label::secondary(file_id, precedence_defined_origin.byte_range())
+                            remove_shift = false;
+                            continue;
+                        };
+                        match reduce_level.cmp(&shift_level) {
+                            Ordering::Less => {
+                                remove_shift = false;
+                                remove_reduces.push((
+                                    reduce_rule,
+                                    precedence_defined_origin,
+                                    reduce_level,
+                                    op_origin,
+                                    None,
+                                ));
+                                // reduce < shift => remove reduce rule
+                            }
+                            Ordering::Greater => {
+                                // reduce > shift => remove shift
+                                Self::extend_rule_source_label(
+                                    &mut labels,
+                                    file_id,
+                                    reduce_rule,
+                                    &grammar,
+                                    "(Reduce) ",
+                                    "(Reduce) ",
+                                );
+                                labels
+                                    .push(Label::secondary(file_id, op_origin).with_message(
+                                        format!("(Reduce) operator for reduce rule"),
+                                    ));
+                                labels.push(
+                                    Label::secondary(
+                                        file_id,
+                                        precedence_defined_origin.byte_range(),
+                                    )
                                     .with_message(format!(
                                         "(Reduce) Precedence was set as {reduce_level} here"
                                     )),
-                            );
-                        }
-                        Ordering::Equal => {
-                            let reduce_info = match reduce_op {
-                                Operator::Term(term) => {
-                                    let term_info = &grammar.terminals[term];
-                                    term_info.reduce_type.as_ref()
-                                }
-                                Operator::Prec(prec) => {
-                                    let prec_info = &grammar.prec_defeinitions[prec];
-                                    prec_info.reduce_type.as_ref()
-                                }
-                            };
-                            if let Some(reduce_info) = reduce_info {
-                                match reduce_info.reduce_type {
-                                    rusty_lr_core::ReduceType::Left => {
-                                        // reduce == shift => remove shift
+                                );
+                            }
+                            Ordering::Equal => {
+                                let reduce_info = match reduce_op {
+                                    Operator::Term(term) => {
+                                        let term_info = &grammar.terminals[term];
+                                        term_info.reduce_type.as_ref()
+                                    }
+                                    Operator::Prec(prec) => {
+                                        let prec_info = &grammar.prec_defeinitions[prec];
+                                        prec_info.reduce_type.as_ref()
+                                    }
+                                };
+                                if let Some(reduce_info) = reduce_info {
+                                    match reduce_info.reduce_type {
+                                        rusty_lr_core::ReduceType::Left => {
+                                            // reduce == shift => remove shift
 
-                                        Self::extend_rule_source_label(
-                                            &mut labels,
-                                            file_id,
-                                            reduce_rule,
-                                            &grammar,
-                                            "(Reduce) ",
-                                            "(Reduce) ",
-                                        );
-                                        labels.push(
-                                            Label::secondary(file_id, op_origin).with_message(
-                                                format!("(Reduce) operator for reduce rule"),
-                                            ),
-                                        );
-                                        labels.push(
-                                            Label::secondary(
+                                            Self::extend_rule_source_label(
+                                                &mut labels,
                                                 file_id,
-                                                precedence_defined_origin.byte_range(),
-                                            )
-                                            .with_message(format!(
+                                                reduce_rule,
+                                                &grammar,
+                                                "(Reduce) ",
+                                                "(Reduce) ",
+                                            );
+                                            labels.push(
+                                                Label::secondary(file_id, op_origin).with_message(
+                                                    format!("(Reduce) operator for reduce rule"),
+                                                ),
+                                            );
+                                            labels.push(
+                                                Label::secondary(
+                                                    file_id,
+                                                    precedence_defined_origin.byte_range(),
+                                                )
+                                                .with_message(format!(
                                         "(Reduce) Precedence was set as {reduce_level} here"
                                     )),
-                                        );
+                                            );
 
-                                        labels.push(
-                                            Label::secondary(
-                                                file_id,
-                                                reduce_info.source.byte_range(),
-                                            )
-                                            .with_message(format!(
-                                                "(Reduce) Reduce type was set as %left here"
-                                            )),
-                                        );
+                                            labels.push(
+                                                Label::secondary(
+                                                    file_id,
+                                                    reduce_info.source.byte_range(),
+                                                )
+                                                .with_message(format!(
+                                                    "(Reduce) Reduce type was set as %left here"
+                                                )),
+                                            );
+                                        }
+                                        rusty_lr_core::ReduceType::Right => {
+                                            // reduce == shift => remove reduce
+                                            remove_shift = false;
+                                            remove_reduces.push((
+                                                reduce_rule,
+                                                precedence_defined_origin,
+                                                reduce_level,
+                                                op_origin,
+                                                Some((reduce_info.reduce_type, reduce_info.source)),
+                                            ));
+                                        }
                                     }
-                                    rusty_lr_core::ReduceType::Right => {
-                                        // reduce == shift => remove reduce
-                                        remove_shift = false;
-                                        remove_reduces.push((
-                                            reduce_rule,
-                                            precedence_defined_origin,
-                                            reduce_level,
-                                            op_origin,
-                                            Some((reduce_info.reduce_type, reduce_info.source)),
-                                        ));
-                                    }
+                                } else {
+                                    remove_shift = false;
                                 }
-                            } else {
-                                remove_shift = false;
                             }
                         }
                     }
-                }
 
-                if remove_shift {
-                    labels.push(
-                        Label::primary(file_id, shift_prec_span.byte_range()).with_message(
-                            format!("[Removed] (Shift) precedence was set as {shift_level} here"),
-                        ),
-                    );
-
-                    // remove shift
-                    let next_state = *state.shift_goto_map_term.get(&shift_term).unwrap();
-                    for shift_rule in grammar.states[next_state].unshifted_ruleset() {
-                        Self::extend_rule_source_label(
-                            &mut labels,
-                            file_id,
-                            shift_rule.rule,
-                            &grammar,
-                            "[Removed] (Shift) ",
-                            "[Removed] (Shift) ",
+                    if remove_shift {
+                        labels.push(
+                            Label::primary(file_id, shift_prec_span.byte_range()).with_message(
+                                format!(
+                                    "[Removed] (Shift) precedence was set as {shift_level} here"
+                                ),
+                            ),
                         );
-                    }
-                } else {
-                    labels.push(
-                        Label::primary(file_id, shift_prec_span.byte_range()).with_message(
-                            format!("(Shift) precedence was set as {shift_level} here"),
-                        ),
-                    );
 
-                    // remove shift
-                    let next_state = *state.shift_goto_map_term.get(&shift_term).unwrap();
-                    for shift_rule in grammar.states[next_state].unshifted_ruleset() {
-                        Self::extend_rule_source_label(
-                            &mut labels,
-                            file_id,
-                            shift_rule.rule,
-                            &grammar,
-                            "(Shift) ",
-                            "(Shift) ",
+                        // remove shift
+                        let next_state = *state.shift_goto_map_term.get(&shift_term).unwrap();
+                        for shift_rule in grammar.states[next_state].unshifted_ruleset() {
+                            Self::extend_rule_source_label(
+                                &mut labels,
+                                file_id,
+                                shift_rule.rule,
+                                &grammar,
+                                "[Removed] (Shift) ",
+                                "[Removed] (Shift) ",
+                            );
+                        }
+                    } else {
+                        labels.push(
+                            Label::primary(file_id, shift_prec_span.byte_range()).with_message(
+                                format!("(Shift) precedence was set as {shift_level} here"),
+                            ),
                         );
-                    }
-                }
 
-                for (
-                    reduce_rule,
-                    precedence_defined_op_origin,
-                    reduce_level,
-                    op_origin,
-                    reduce_type,
-                ) in remove_reduces
-                {
-                    // remove reduce rule
-                    Self::extend_rule_source_label(
-                        &mut labels,
-                        file_id,
+                        // remove shift
+                        let next_state = *state.shift_goto_map_term.get(&shift_term).unwrap();
+                        for shift_rule in grammar.states[next_state].unshifted_ruleset() {
+                            Self::extend_rule_source_label(
+                                &mut labels,
+                                file_id,
+                                shift_rule.rule,
+                                &grammar,
+                                "(Shift) ",
+                                "(Shift) ",
+                            );
+                        }
+                    }
+
+                    for (
                         reduce_rule,
-                        &grammar,
-                        "[Removed] (Reduce) ",
-                        "[Removed] (Reduce) ",
-                    );
+                        precedence_defined_op_origin,
+                        reduce_level,
+                        op_origin,
+                        reduce_type,
+                    ) in remove_reduces
+                    {
+                        // remove reduce rule
+                        Self::extend_rule_source_label(
+                            &mut labels,
+                            file_id,
+                            reduce_rule,
+                            &grammar,
+                            "[Removed] (Reduce) ",
+                            "[Removed] (Reduce) ",
+                        );
 
-                    labels.push(
-                        Label::secondary(file_id, op_origin)
-                            .with_message(format!("[Removed] (Reduce) operator for reduce rule")),
-                    );
-                    labels.push(
-                        Label::secondary(file_id, precedence_defined_op_origin.byte_range())
-                            .with_message(format!(
-                                "[Removed] (Reduce) Precedence was set as {reduce_level} here"
+                        labels.push(
+                            Label::secondary(file_id, op_origin).with_message(format!(
+                                "[Removed] (Reduce) operator for reduce rule"
                             )),
-                    );
+                        );
+                        labels.push(
+                            Label::secondary(file_id, precedence_defined_op_origin.byte_range())
+                                .with_message(format!(
+                                    "[Removed] (Reduce) Precedence was set as {reduce_level} here"
+                                )),
+                        );
 
-                    if let Some((reduce_type, span)) = reduce_type {
-                        let reduce_type_str = match reduce_type {
-                            rusty_lr_core::ReduceType::Left => "%left",
-                            rusty_lr_core::ReduceType::Right => "%right",
-                        };
-                        labels.push(Label::secondary(file_id, span.byte_range()).with_message(
-                            format!(
+                        if let Some((reduce_type, span)) = reduce_type {
+                            let reduce_type_str = match reduce_type {
+                                rusty_lr_core::ReduceType::Left => "%left",
+                                rusty_lr_core::ReduceType::Right => "%right",
+                            };
+                            labels.push(Label::secondary(file_id, span.byte_range()).with_message(
+                                format!(
                                 "[Removed] (Reduce) Reduce type was set as {reduce_type_str} here"
                             ),
-                        ));
+                            ));
+                        }
                     }
-                }
 
-                let notes = Vec::new();
-                conflict_diags_resolved.push(
-                    Diagnostic::note()
-                        .with_message(message)
-                        .with_labels(labels)
-                        .with_notes(notes),
-                );
+                    let notes = Vec::new();
+                    conflict_diags_resolved.push(
+                        Diagnostic::note()
+                            .with_message(message)
+                            .with_labels(labels)
+                            .with_notes(notes),
+                    );
+                }
             }
         }
         grammar.resolve_precedence();
@@ -1029,68 +1044,89 @@ impl Builder {
         let nonterm_mapper = |nonterm| grammar.nonterm_pretty_name(nonterm);
         let class_mapper = |class| grammar.class_pretty_name_list(class, 5);
 
-        for state in &grammar.states {
-            for (&reduce_term, reduce_rules) in state.reduce_map.iter() {
-                if let Some(&next_state) = state.shift_goto_map_term.get(&reduce_term) {
-                    let message = format!(
-                        "Conflict detected with terminal: {}",
-                        class_mapper(reduce_term)
-                    );
-                    let mut labels = Vec::new();
-                    let notes = Vec::new();
+        {
+            use std::collections::BTreeSet;
+            let mut shift_reduce_conflict_set = BTreeSet::new();
+            let mut reduce_reduce_conflict_set = BTreeSet::new();
 
-                    for shift_rule in grammar.states[next_state].unshifted_ruleset() {
-                        Self::extend_rule_source_label(
-                            &mut labels,
-                            file_id,
-                            shift_rule.rule,
-                            &grammar,
-                            "(Shift) ",
-                            "(Shift) ",
+            for state in &grammar.states {
+                for (&reduce_term, reduce_rules) in state.reduce_map.iter() {
+                    if let Some(&next_state) = state.shift_goto_map_term.get(&reduce_term) {
+                        let shifted_rules: Vec<_> =
+                            grammar.states[next_state].unshifted_ruleset().collect();
+
+                        if !shift_reduce_conflict_set.insert((
+                            shifted_rules.clone(),
+                            reduce_rules.clone(),
+                            reduce_term,
+                        )) {
+                            continue;
+                        }
+
+                        let message = format!(
+                            "Conflict detected with terminal: {}",
+                            class_mapper(reduce_term)
+                        );
+                        let mut labels = Vec::new();
+                        let notes = Vec::new();
+
+                        for shift_rule in shifted_rules {
+                            Self::extend_rule_source_label(
+                                &mut labels,
+                                file_id,
+                                shift_rule.rule,
+                                &grammar,
+                                "(Shift) ",
+                                "(Shift) ",
+                            );
+                        }
+                        for &reduce_rule in reduce_rules {
+                            Self::extend_rule_source_label(
+                                &mut labels,
+                                file_id,
+                                reduce_rule,
+                                &grammar,
+                                "(Reduce) ",
+                                "(Reduce) ",
+                            );
+                        }
+
+                        conflict_diags.push(
+                            Diagnostic::error()
+                                .with_message(message)
+                                .with_labels(labels)
+                                .with_notes(notes),
+                        );
+                    } else if reduce_rules.len() > 1 {
+                        if !reduce_reduce_conflict_set.insert((reduce_rules.clone(), reduce_term)) {
+                            continue;
+                        }
+
+                        let message = format!(
+                            "Conflict detected with terminal: {}",
+                            class_mapper(reduce_term)
+                        );
+                        let mut labels = Vec::new();
+                        let notes = Vec::new();
+
+                        for &reduce_rule in reduce_rules {
+                            Self::extend_rule_source_label(
+                                &mut labels,
+                                file_id,
+                                reduce_rule,
+                                &grammar,
+                                "(Reduce) ",
+                                "(Reduce) ",
+                            );
+                        }
+
+                        conflict_diags.push(
+                            Diagnostic::error()
+                                .with_message(message)
+                                .with_labels(labels)
+                                .with_notes(notes),
                         );
                     }
-                    for &reduce_rule in reduce_rules {
-                        Self::extend_rule_source_label(
-                            &mut labels,
-                            file_id,
-                            reduce_rule,
-                            &grammar,
-                            "(Reduce) ",
-                            "(Reduce) ",
-                        );
-                    }
-
-                    conflict_diags.push(
-                        Diagnostic::error()
-                            .with_message(message)
-                            .with_labels(labels)
-                            .with_notes(notes),
-                    );
-                } else if reduce_rules.len() > 1 {
-                    let message = format!(
-                        "Conflict detected with terminal: {}",
-                        class_mapper(reduce_term)
-                    );
-                    let mut labels = Vec::new();
-                    let notes = Vec::new();
-
-                    for &reduce_rule in reduce_rules {
-                        Self::extend_rule_source_label(
-                            &mut labels,
-                            file_id,
-                            reduce_rule,
-                            &grammar,
-                            "(Reduce) ",
-                            "(Reduce) ",
-                        );
-                    }
-
-                    conflict_diags.push(
-                        Diagnostic::error()
-                            .with_message(message)
-                            .with_labels(labels)
-                            .with_notes(notes),
-                    );
                 }
             }
         }
