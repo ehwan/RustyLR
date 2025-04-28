@@ -1006,7 +1006,7 @@ impl Grammar {
                         (r1, *iter.next().unwrap())
                     };
                     return Err(Box::new(ConflictError::ReduceReduceConflict {
-                        lookahead: self.terminals[lookahead].name.clone(),
+                        lookahead: term_mapper(lookahead),
                         rule1: (
                             rule1,
                             self.builder.rules[rule1]
@@ -1048,7 +1048,7 @@ impl Grammar {
                         })
                         .collect();
                     return Err(Box::new(ConflictError::ShiftReduceConflict {
-                        term: self.terminals[term].name.clone(),
+                        term: term_mapper(term),
                         reduce_rule: (
                             reduce,
                             self.builder.rules[reduce]

@@ -46,13 +46,13 @@ pub enum ArgError {
 pub enum ConflictError {
     /// error building given CFG
     ShiftReduceConflict {
-        term: Ident,
+        term: String,
         reduce_rule: (usize, ProductionRule<String, String>),
         shift_rules: Vec<(usize, ShiftedRule<String, String>)>,
     },
     /// error building given CFG
     ReduceReduceConflict {
-        lookahead: Ident,
+        lookahead: String,
         rule1: (usize, ProductionRule<String, String>),
         rule2: (usize, ProductionRule<String, String>),
     },
@@ -339,7 +339,7 @@ impl ConflictError {
                 term,
                 reduce_rule: (ruleid, rule),
                 shift_rules,
-            } => term.span(),
+            } => Span::call_site(),
             ConflictError::ReduceReduceConflict {
                 lookahead,
                 rule1: (ruleid1, rule1),
