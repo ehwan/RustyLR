@@ -39,6 +39,9 @@ pub struct TerminalClassDefinintion {
     /// counter for only terminal clasas (have more than 1 terminal)
     /// dummy if it is single-terminal class
     pub multiterm_counter: usize,
+
+    /// compressed ranges, only if %tokentype is char or u8
+    pub ranges: Vec<(u32, u32)>,
 }
 
 pub enum OptimizeRemove {
@@ -46,8 +49,6 @@ pub enum OptimizeRemove {
     SingleNonTerminalRule(Rule, Span),
 }
 pub struct OptimizeDiag {
-    /// if `__rustylr_other_terminals` is used
-    pub other_used: bool,
     /// deleted rules
     pub removed: Vec<OptimizeRemove>,
 }
@@ -104,6 +105,7 @@ pub struct Grammar {
     pub terminal_class_id: Vec<usize>,
     /// class id for terminal that does not belong to any class
     pub other_terminal_class_id: usize,
+    pub other_used: bool,
 
     /// terminal index of eof
     pub eof_index: usize,
@@ -312,6 +314,7 @@ impl Grammar {
             terminal_class_id: Vec::new(),
             terminal_classes: Vec::new(),
             other_terminal_class_id: 0,
+            other_used: false,
 
             eof_index: 0,
             other_terminal_index: 0,
@@ -363,13 +366,41 @@ impl Grammar {
         }
         // add eof
         {
-            let eof_ident = Ident::new(utils::EOF_NAME, Span::call_site());
-            let name: TerminalName = eof_ident.into();
+            let eof_body = grammar_args.eof.into_iter().next().unwrap().1;
+            let name: TerminalName = if grammar.is_char || grammar.is_u8 {
+                let eof_parsed = syn::parse2::<syn::Lit>(eof_body.clone());
+                if let Ok(lit) = eof_parsed {
+                    match lit {
+                        syn::Lit::Char(lit) => {
+                            if grammar.is_char {
+                                TerminalName::Char(lit.value())
+                            } else {
+                                return Err(ParseError::TokenInLiteralMode(lit.span()));
+                            }
+                        }
+                        syn::Lit::Byte(lit) => {
+                            if grammar.is_u8 {
+                                TerminalName::Char(lit.value() as char)
+                            } else {
+                                return Err(ParseError::TokenInLiteralMode(lit.span()));
+                            }
+                        }
+                        _ => {
+                            return Err(ParseError::UnsupportedLiteralType(eof_body));
+                        }
+                    }
+                } else {
+                    return Err(ParseError::UnsupportedLiteralType(eof_body));
+                }
+            } else {
+                let eof_ident = Ident::new(utils::EOF_NAME, Span::call_site());
+                eof_ident.into()
+            };
 
             let terminal_info = TerminalInfo {
                 name: name.clone(),
                 reduce_type: None,
-                body: grammar_args.eof.into_iter().next().unwrap().1,
+                body: eof_body,
             };
             let idx = grammar.terminals.len();
             grammar.eof_index = idx;
@@ -666,11 +697,86 @@ impl Grammar {
             grammar.terminal_classes.push(TerminalClassDefinintion {
                 terminals: vec![i],
                 multiterm_counter: 0,
+                ranges: Vec::new(),
             });
         }
         grammar.other_terminal_class_id = grammar.terminal_class_id[grammar.other_terminal_index];
 
+        for nonterm in &grammar.nonterminals {
+            if grammar.other_used {
+                break;
+            }
+            for rule in &nonterm.rules {
+                if grammar.other_used {
+                    break;
+                }
+                if let Some(lookaheads) = &rule.lookaheads {
+                    if lookaheads.contains(&grammar.other_terminal_index) {
+                        grammar.other_used = true;
+                        break;
+                    }
+                }
+                for token in &rule.tokens {
+                    if token.token == Token::Term(grammar.other_terminal_index) {
+                        grammar.other_used = true;
+                        break;
+                    }
+                }
+            }
+        }
+
         Ok(grammar)
+    }
+
+    /// calculate range-based terminal-class_id map
+    /// only works if %tokentype is char or u8
+    /// do not apply this optimization if |RangeCompressed| > |Terminals|/2
+    pub fn calculate_range_terminal_class_map(&self) -> Option<Vec<(u32, u32, usize)>> {
+        let compressed_len_sum = self
+            .terminal_classes
+            .iter()
+            .enumerate()
+            .map(|(class_id, class)| {
+                if class_id == self.other_terminal_class_id {
+                    0
+                } else {
+                    class.ranges.len()
+                }
+            })
+            .sum();
+        let noncompressed_len_sum: usize = self
+            .terminal_classes
+            .iter()
+            .enumerate()
+            .map(|(class_id, class)| {
+                if class_id == self.other_terminal_class_id {
+                    0
+                } else {
+                    class.terminals.len()
+                }
+            })
+            .sum();
+        // println!("compressed: {}", compressed_len_sum);
+        // println!("noncompressed: {}", noncompressed_len_sum);
+        if compressed_len_sum * 2 <= noncompressed_len_sum {
+            let mut ranges_class_map = Vec::with_capacity(compressed_len_sum);
+            for (class_id, class) in self.terminal_classes.iter().enumerate() {
+                if class_id == self.other_terminal_class_id {
+                    continue;
+                }
+                ranges_class_map.extend(
+                    class
+                        .ranges
+                        .iter()
+                        .map(|(start, last)| (*start, *last, class_id)),
+                );
+            }
+            ranges_class_map.sort();
+            // println!("{:?}", ranges_class_map);
+            Some(ranges_class_map)
+        } else {
+            None
+        }
     }
 
     /// optimize grammar
@@ -798,6 +904,7 @@ impl Grammar {
             let class_def = TerminalClassDefinintion {
                 terminals: terms,
                 multiterm_counter,
+                ranges: Vec::new(),
             };
             new_class_defs.push(class_def);
         }
@@ -845,6 +952,29 @@ impl Grammar {
                             other_was_used = true;
                         }
                         token.token = Token::Term(new_class);
+                    }
+                }
+                if let Some(lookaheads) = &mut rule.lookaheads {
+                    let new_lookaheads = std::mem::take(lookaheads)
+                        .into_iter()
+                        .map(|old_class| {
+                            let new_class = old_class_to_new_class[old_class];
+                            if new_class == self.other_terminal_class_id {
+                                other_was_used = true;
+                            }
+                            new_class
+                        })
+                        .collect();
+                    *lookaheads = new_lookaheads;
+                }
+                if let Some((prec, span)) = rule.prec {
+                    use rusty_lr_core::builder::Operator;
+                    if let Operator::Term(old_class) = prec {
+                        let new_class = old_class_to_new_class[old_class];
+                        if new_class == self.other_terminal_class_id {
+                            other_was_used = true;
+                        }
+                        rule.prec = Some((Operator::Term(new_class), span));
                     }
                 }
                 new_rules.push(rule);
@@ -915,26 +1045,57 @@ impl Grammar {
                 break;
             }
         }
+        self.other_used = other_was_used;
 
         return Some(OptimizeDiag {
-            other_used: other_was_used,
             removed: removed_rules_diag,
         });
     }
 
     pub fn optimize(&mut self, max_iter: usize) -> OptimizeDiag {
         let mut diag = OptimizeDiag {
-            other_used: false,
             removed: Vec::new(),
         };
         for _ in 0..max_iter {
             let ret = self.optimize_iterate();
             match ret {
                 Some(new_diag) => {
-                    diag.other_used |= new_diag.other_used;
                     diag.removed.extend(new_diag.removed.into_iter());
                 }
                 None => break,
+            }
+        }
+
+        if self.is_char || self.is_u8 {
+            // calculate ranges
+            for class in self.terminal_classes.iter_mut() {
+                let mut chars = class
+                    .terminals
+                    .iter()
+                    .filter_map(|&term_idx| {
+                        if term_idx == self.other_terminal_index {
+                            None
+                        } else {
+                            Some(self.terminals[term_idx].name.char().unwrap())
+                        }
+                    })
+                    .collect::<Vec<_>>();
+                chars.sort();
+
+                let mut ranges: Vec<(u32, u32)> = Vec::new();
+                for ch in chars {
+                    let ch = ch as u32;
+                    if let Some((_, last)) = ranges.last_mut() {
+                        if *last + 1 == ch {
+                            *last = ch as u32;
+                        } else {
+                            ranges.push((ch, ch));
+                        }
+                    } else {
+                        ranges.push((ch, ch));
+                    }
+                }
+                class.ranges = ranges;
             }
         }
 

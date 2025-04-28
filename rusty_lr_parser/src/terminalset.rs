@@ -77,14 +77,20 @@ impl TerminalSetItem {
                     .expect("failed on syn::parse2");
                 if grammar.is_char {
                     if !matches!(&lit, syn::Lit::Char(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                        return Err(ParseError::UnsupportedLiteralType(
+                            literal.to_token_stream(),
+                        ));
                     }
                 } else if grammar.is_u8 {
                     if !matches!(&lit, syn::Lit::Byte(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                        return Err(ParseError::UnsupportedLiteralType(
+                            literal.to_token_stream(),
+                        ));
                     }
                 } else {
-                    return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                    return Err(ParseError::UnsupportedLiteralType(
+                        literal.to_token_stream(),
+                    ));
                 }
                 let idx = grammar.add_or_get_literal_character(lit, None).unwrap();
                 Ok(BTreeSet::from([idx]))
@@ -94,14 +100,20 @@ impl TerminalSetItem {
                     .expect("failed on syn::parse2");
                 if grammar.is_char {
                     if !matches!(&first, syn::Lit::Char(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(first_l.clone()));
+                        return Err(ParseError::UnsupportedLiteralType(
+                            first_l.to_token_stream(),
+                        ));
                     }
                 } else if grammar.is_u8 {
                     if !matches!(&first, syn::Lit::Byte(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(first_l.clone()));
+                        return Err(ParseError::UnsupportedLiteralType(
+                            first_l.to_token_stream(),
+                        ));
                     }
                 } else {
-                    return Err(ParseError::UnsupportedLiteralType(first_l.clone()));
+                    return Err(ParseError::UnsupportedLiteralType(
+                        first_l.to_token_stream(),
+                    ));
                 }
                 let first_ch = match &first {
                     syn::Lit::Char(lit) => lit.value(),
@@ -113,14 +125,14 @@ impl TerminalSetItem {
                     .expect("failed on syn::parse2");
                 if grammar.is_char {
                     if !matches!(&last, syn::Lit::Char(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(last_l.clone()));
+                        return Err(ParseError::UnsupportedLiteralType(last_l.to_token_stream()));
                     }
                 } else if grammar.is_u8 {
                     if !matches!(&last, syn::Lit::Byte(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(last_l.clone()));
+                        return Err(ParseError::UnsupportedLiteralType(last_l.to_token_stream()));
                     }
                 } else {
-                    return Err(ParseError::UnsupportedLiteralType(last_l.clone()));
+                    return Err(ParseError::UnsupportedLiteralType(last_l.to_token_stream()));
                 }
                 let last_ch = match &last {
                     syn::Lit::Char(lit) => lit.value(),

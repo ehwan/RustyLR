@@ -545,7 +545,7 @@ impl Builder {
                                 .with_message("This name is reserved")])
                     }
                     ParseError::UnsupportedLiteralType(literal) => {
-                        let range = literal.span().byte_range();
+                        let range = literal.into_iter().next().unwrap().span().byte_range();
 
                         Diagnostic::error()
                             .with_message("Unsupported literal type")
@@ -711,7 +711,7 @@ impl Builder {
                 // if other terminals were not used, print warning about removing them
                 let other_terminal_class =
                     &grammar.terminal_classes[grammar.other_terminal_class_id];
-                if !optimized.other_used && other_terminal_class.terminals.len() > 1 {
+                if !grammar.other_used && other_terminal_class.terminals.len() > 1 {
                     let class_name =
                         grammar.class_pretty_name_abbr(grammar.other_terminal_class_id);
                     let terms = grammar.class_pretty_name_list(grammar.other_terminal_class_id, 10);

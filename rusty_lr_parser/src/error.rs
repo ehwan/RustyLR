@@ -94,7 +94,7 @@ pub enum ParseError {
     AugmentedDefined(Ident),
 
     /// not supported literal type
-    UnsupportedLiteralType(Literal),
+    UnsupportedLiteralType(TokenStream),
 
     /// range in literal terminal set is not valid
     InvalidLiteralRange(Literal, Literal),
@@ -240,7 +240,9 @@ impl ParseError {
             ParseError::EofDefined(ident) => ident.span(),
             ParseError::AugmentedDefined(ident) => ident.span(),
 
-            ParseError::UnsupportedLiteralType(literal) => literal.span(),
+            ParseError::UnsupportedLiteralType(stream) => {
+                stream.clone().into_iter().next().unwrap().span()
+            }
 
             ParseError::InvalidLiteralRange(first, last) => first.span(),
 

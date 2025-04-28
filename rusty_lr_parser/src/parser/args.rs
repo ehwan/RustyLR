@@ -47,14 +47,20 @@ impl TerminalOrTerminalSet {
 
                 if grammar.is_char {
                     if !matches!(&lit, syn::Lit::Char(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                        return Err(ParseError::UnsupportedLiteralType(
+                            literal.to_token_stream(),
+                        ));
                     }
                 } else if grammar.is_u8 {
                     if !matches!(&lit, syn::Lit::Byte(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                        return Err(ParseError::UnsupportedLiteralType(
+                            literal.to_token_stream(),
+                        ));
                     }
                 } else {
-                    return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                    return Err(ParseError::UnsupportedLiteralType(
+                        literal.to_token_stream(),
+                    ));
                 }
 
                 let idx = grammar.add_or_get_literal_character(lit, None).unwrap();
@@ -125,14 +131,20 @@ impl IdentOrLiteral {
 
                 if grammar.is_char {
                     if !matches!(&lit, syn::Lit::Char(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                        return Err(ParseError::UnsupportedLiteralType(
+                            literal.to_token_stream(),
+                        ));
                     }
                 } else if grammar.is_u8 {
                     if !matches!(&lit, syn::Lit::Byte(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                        return Err(ParseError::UnsupportedLiteralType(
+                            literal.to_token_stream(),
+                        ));
                     }
                 } else {
-                    return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                    return Err(ParseError::UnsupportedLiteralType(
+                        literal.to_token_stream(),
+                    ));
                 }
                 let idx = grammar.add_or_get_literal_character(lit, None).unwrap();
                 return Ok(rusty_lr_core::builder::Operator::Term(idx));
@@ -301,20 +313,28 @@ impl PatternArgs {
                     .expect("failed on syn::parse2::<syn::Lit>");
                 if grammar.is_char {
                     if !matches!(&lit, syn::Lit::Char(_) | syn::Lit::Str(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                        return Err(ParseError::UnsupportedLiteralType(
+                            literal.to_token_stream(),
+                        ));
                     }
                 } else if grammar.is_u8 {
                     if !matches!(&lit, syn::Lit::Byte(_) | syn::Lit::ByteStr(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                        return Err(ParseError::UnsupportedLiteralType(
+                            literal.to_token_stream(),
+                        ));
                     }
                 } else {
-                    return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                    return Err(ParseError::UnsupportedLiteralType(
+                        literal.to_token_stream(),
+                    ));
                 }
                 if !matches!(
                     &lit,
                     syn::Lit::Char(_) | syn::Lit::Byte(_) | syn::Lit::Str(_) | syn::Lit::ByteStr(_)
                 ) {
-                    return Err(ParseError::UnsupportedLiteralType(literal.clone()));
+                    return Err(ParseError::UnsupportedLiteralType(
+                        literal.to_token_stream(),
+                    ));
                 }
 
                 let pattern = Pattern {

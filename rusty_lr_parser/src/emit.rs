@@ -391,86 +391,6 @@ impl Grammar {
         }
         });
     }
-    fn emit_parser_lr(&self, stream: &mut TokenStream) {
-        let module_prefix = &self.module_prefix;
-        let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
-        let rule_typename = format_ident!("{}Rule", self.start_rule_name);
-        let state_typename = format_ident!("{}State", self.start_rule_name);
-        let parser_struct_name = format_ident!("{}Parser", self.start_rule_name);
-        let token_typename = &self.token_typename;
-
-        let mut build_stream = TokenStream::new();
-        self.emit_write_grammar_and_build(&mut build_stream);
-
-        let other_class_id = self.other_terminal_class_id;
-
-        stream.extend(quote! {
-        /// A struct that holds the entire parser table and production rules.
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
-        pub struct #parser_struct_name {
-            /// production rules
-            pub rules: Vec<#rule_typename>,
-            /// states
-            pub states: Vec<#state_typename>,
-            /// terminal classes
-            pub classes: Vec<Vec<#token_typename>>,
-            /// term to class map
-            pub term_class_map: #module_prefix::HashMap<#token_typename,usize>,
-            /// class id for terminal not matched with any in grammar
-            pub other_class_id: usize,
-        }
-        impl #module_prefix::lr::Parser for #parser_struct_name {
-            type Term = #token_typename;
-            type NonTerm = #nonterminals_enum_name;
-
-            fn get_rules(&self) -> &[#rule_typename] {
-                &self.rules
-            }
-            fn get_states(&self) -> &[#state_typename] {
-                &self.states
-            }
-            fn get_terminals(&self, i: usize) -> Option<impl Iterator<Item = &Self::Term>> {
-                self.classes.get(i).map(
-                    |class| class.iter()
-                )
-            }
-            fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
-                if let Some(class) = self.term_class_map.get(terminal) {
-                    *class
-                } else {
-                    self.other_class_id
-                }
-            }
-        }
-
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
-        impl #parser_struct_name {
-            /// Calculates the states and parser tables from the grammar.
-            #[allow(clippy::clone_on_copy)]
-            pub fn new() -> Self {
-                #build_stream
-                let rules = builder.rules.into_iter().map(
-                    |rule| {
-                        rule.rule
-                    }
-                ).collect();
-                let states = states.into_iter().map(
-                    |state| {
-                        state.into_lr_state(|x| x, |x| x)
-                    },
-                ).collect();
-
-                Self {
-                    rules,
-                    states,
-                    classes: terminal_classes,
-                    term_class_map: terminals_class_map,
-                    other_class_id: #other_class_id,
-                }
-            }
-        }
-        });
-    }
 
     fn emit_context_glr(&self, stream: &mut TokenStream) {
         let module_prefix = &self.module_prefix;
@@ -723,94 +643,26 @@ impl Grammar {
         }
         });
     }
-    fn emit_parser_glr(&self, stream: &mut TokenStream) {
+    fn emit_parser(&self, stream: &mut TokenStream) {
         let module_prefix = &self.module_prefix;
         let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
         let rule_typename = format_ident!("{}Rule", self.start_rule_name);
         let state_typename = format_ident!("{}State", self.start_rule_name);
         let parser_struct_name = format_ident!("{}Parser", self.start_rule_name);
         let token_typename = &self.token_typename;
-
-        let mut build_stream = TokenStream::new();
-        self.emit_write_grammar_and_build(&mut build_stream);
-
-        let other_class_id = self.other_terminal_class_id;
-
-        stream.extend(quote! {
-        /// A struct that holds the entire parser table and production rules.
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-        pub struct #parser_struct_name {
-            /// production rules
-            pub rules: Vec<#rule_typename>,
-            /// states
-            pub states: Vec<#state_typename>,
-            /// terminal classes
-            pub classes: Vec<Vec<#token_typename>>,
-            /// term to class map
-            pub term_class_map: #module_prefix::HashMap<#token_typename,usize>,
-            /// class id for terminal not matched with any in grammar
-            pub other_class_id: usize,
-        }
-        impl #module_prefix::glr::Parser for #parser_struct_name {
-            type Term = #token_typename;
-            type NonTerm = #nonterminals_enum_name;
-
-            fn get_rules(&self) -> &[#rule_typename] {
-                &self.rules
+        let parser_trait_name = if self.glr {
+            quote! {
+            #module_prefix::glr::Parser
             }
-            fn get_states(&self) -> &[#state_typename] {
-                &self.states
+        } else {
+            quote! {
+            #module_prefix::lr::Parser
             }
-            fn get_terminals(&self, i: usize) -> Option<impl Iterator<Item = &Self::Term>> {
-                self.classes.get(i).map(
-                    |class| class.iter()
-                )
-            }
-            fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
-                if let Some(class) = self.term_class_map.get(terminal) {
-                    *class
-                } else {
-                    self.other_class_id
-                }
-            }
-        }
+        };
 
-        /// A struct that holds the whole parser table.
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-        impl #parser_struct_name {
-            /// Calculates the states and parser tables from the grammar.
-            #[allow(clippy::clone_on_copy)]
-            pub fn new() -> Self {
-                #build_stream
-                let rules = builder.rules.into_iter().map(
-                    |rule| {
-                        rule.rule
-                    }
-                ).collect();
-                let states = states.into_iter().map(
-                    |state| {
-                        state.into_glr_state(|x| x, |x| x)
-                    },
-                ).collect();
-
-                Self {
-                    rules,
-                    states,
-                    classes: terminal_classes,
-                    term_class_map: terminals_class_map,
-                    other_class_id: #other_class_id,
-                }
-            }
-        }
-
-        });
-    }
-
-    fn emit_write_grammar_and_build(&self, stream: &mut TokenStream) {
-        let module_prefix = &self.module_prefix;
-        let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
-        let token_typename = &self.token_typename;
-
+        // ======================
+        // building grammar
+        // ======================
         use rusty_lr_core::builder::Operator;
         use rusty_lr_core::ReduceType;
         use rusty_lr_core::Token;
@@ -828,7 +680,7 @@ impl Grammar {
             }
         };
 
-        // reduce types
+        // adding reduce types
         let mut add_reduce_type_stream = TokenStream::new();
         for (&op, &reduce_type) in self.builder.reduce_types.iter() {
             let reduce_type_stream = reduce_type_to_stream(reduce_type);
@@ -838,7 +690,7 @@ impl Grammar {
             });
         }
 
-        // precedence orders
+        // adding precedence orders
         let mut add_precedence_stream = TokenStream::new();
         for (&op, &level) in self.builder.precedence_map.iter() {
             let op_stream = operator_to_stream(op);
@@ -869,7 +721,7 @@ impl Grammar {
             }
         };
 
-        // production rules
+        // adding production rules
         let mut add_rules_stream = TokenStream::new();
         for rule in &self.builder.rules {
             let mut tokens_vec_body_stream = TokenStream::new();
@@ -937,43 +789,25 @@ impl Grammar {
             }
         };
 
-        // terminal classes
-        let mut classes_body = TokenStream::new();
-        for (class_idx, class_def) in self.terminal_classes.iter().enumerate() {
-            // do not add other_class into map
-            if class_idx == self.other_terminal_class_id {
-                classes_body.extend(quote! {
-                    vec![],
-                });
-                continue;
+        let state_convert_stream = if self.glr {
+            quote! {
+                let states:Vec<_> = states.into_iter().map(
+                    |state| {
+                        state.into_glr_state(|x| x, |x| x)
+                    },
+                ).collect();
             }
-            let mut terminals_body = TokenStream::new();
-            for &term in &class_def.terminals {
-                let term_stream = &self.terminals[term].body;
-                terminals_body.extend(quote! {
-                    #term_stream,
-                });
+        } else {
+            quote! {
+                let states:Vec<_> = states.into_iter().map(
+                    |state| {
+                        state.into_lr_state(|x| x, |x| x)
+                    },
+                ).collect();
             }
-
-            classes_body.extend(quote! {
-                vec![ #terminals_body ],
-            });
-        }
-
-        let mut terminal_class_map_stream = quote! {
-            let mut terminals_class_map:#module_prefix::HashMap<#token_typename,usize> = Default::default();
         };
-        for (term, &class) in self.terminal_class_id.iter().enumerate() {
-            let term_stream = &self.terminals[term].body;
-            // do not add other_class into map
-            if class != self.other_terminal_class_id {
-                terminal_class_map_stream.extend(quote! {
-                    terminals_class_map.insert(#term_stream, #class);
-                });
-            }
-        }
 
-        stream.extend(quote! {
+        let grammar_build_stream = quote! {
             // create grammar builder
             let mut builder = #module_prefix::builder::Grammar::new();
 
@@ -988,9 +822,233 @@ impl Grammar {
 
             #build_stream
 
-            let terminal_classes = vec![ #classes_body ];
-            #terminal_class_map_stream
-        });
+            let rules = builder.rules.into_iter().map(
+                |rule| {
+                    rule.rule
+                }
+            ).collect();
+            #state_convert_stream
+        };
+        drop(add_reduce_type_stream);
+        drop(add_precedence_stream);
+        drop(add_rules_stream);
+        drop(build_stream);
+
+        let use_range_based_optimization = if self.is_char || self.is_u8 {
+            self.calculate_range_terminal_class_map()
+        } else {
+            None
+        };
+
+        let other_class_id = self.other_terminal_class_id;
+
+        // building terminal-class_id map
+        if let Some(range_based_optimization) = use_range_based_optimization {
+            // range-compressed Vec based terminal-class_id map
+
+            let mut classes_body = TokenStream::new();
+            for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
+                let mut terminals_body = TokenStream::new();
+                // no need to store all characters for 'other' class, if it was not used in the grammar
+                if class_id != self.other_terminal_class_id || self.other_used {
+                    for &(start, last) in &class_def.ranges {
+                        for ch in start..=last {
+                            if self.is_char {
+                                let ch = unsafe { char::from_u32_unchecked(ch) };
+                                terminals_body.extend(quote! {
+                                    #ch,
+                                });
+                            } else if self.is_u8 {
+                                let ch = ch as u8;
+                                terminals_body.extend(quote! {
+                                    #ch,
+                                });
+                            }
+                        }
+                    }
+                }
+
+                classes_body.extend(quote! {
+                    vec![ #terminals_body ],
+                });
+            }
+
+            let len = range_based_optimization.len();
+            let mut terminal_class_map_stream = quote! {
+                let mut terminal_class_ranges: Vec<(u32,u32)> = Vec::with_capacity(#len);
+                let mut terminal_class_values: Vec<usize> = Vec::with_capacity(#len);
+            };
+            for &(start, last, class) in range_based_optimization.iter() {
+                if class == self.other_terminal_class_id {
+                    continue;
+                }
+                terminal_class_map_stream.extend(quote! {
+                    terminal_class_ranges.push((#start, #last));
+                    terminal_class_values.push(#class);
+                });
+            }
+
+            stream.extend(quote! {
+            /// A struct that holds the entire parser table and production rules.
+            #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
+            pub struct #parser_struct_name {
+                /// production rules
+                pub rules: Vec<#rule_typename>,
+                /// states
+                pub states: Vec<#state_typename>,
+                /// terminal classes
+                pub classes: Vec<Vec<#token_typename>>,
+                /// term to class map
+                pub term_class_map: #module_prefix::RangeMap,
+                /// class id for terminal not matched with any in grammar
+                pub other_class_id: usize,
+            }
+            impl #parser_trait_name for #parser_struct_name {
+                type Term = #token_typename;
+                type NonTerm = #nonterminals_enum_name;
+
+                fn get_rules(&self) -> &[#rule_typename] {
+                    &self.rules
+                }
+                fn get_states(&self) -> &[#state_typename] {
+                    &self.states
+                }
+                fn get_terminals(&self, i: usize) -> Option<impl Iterator<Item = &Self::Term>> {
+                    self.classes.get(i).map(
+                        |class| class.iter()
+                    )
+                }
+                fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
+                    // Self::Term is char or u8 here
+                    self.term_class_map.get(*terminal as u32).unwrap_or(
+                        self.other_class_id
+                    )
+                }
+            }
+
+            /// A struct that holds the whole parser table.
+            #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
+            impl #parser_struct_name {
+                /// Calculates the states and parser tables from the grammar.
+                #[allow(clippy::clone_on_copy)]
+                pub fn new() -> Self {
+                    #grammar_build_stream
+                    #terminal_class_map_stream
+                    let terminal_classes = vec![
+                        #classes_body
+                    ];
+
+                    Self {
+                        rules,
+                        states,
+                        classes: terminal_classes,
+                        term_class_map: #module_prefix::RangeMap::new(
+                            terminal_class_ranges,
+                            terminal_class_values,
+                        ),
+                        other_class_id: #other_class_id,
+                    }
+                }
+            }
+
+            });
+        } else {
+            // HashMap based terminal-class_id map
+
+            let mut classes_body = TokenStream::new();
+            for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
+                let mut terminals_body = TokenStream::new();
+                // no need to store all characters for 'other' class, if it was not used in the grammar
+                if class_id != self.other_terminal_class_id || self.other_used {
+                    for &term in &class_def.terminals {
+                        // do not add other_class into map
+                        if term == self.other_terminal_index {
+                            continue;
+                        }
+                        let term_stream = &self.terminals[term].body;
+                        terminals_body.extend(quote! {
+                            #term_stream,
+                        });
+                    }
+                }
+
+                classes_body.extend(quote! {
+                    vec![ #terminals_body ],
+                });
+            }
+
+            let mut terminal_class_map_stream = quote! {
+                let mut terminals_class_map:#module_prefix::HashMap<#token_typename,usize> = Default::default();
+            };
+            for (term, &class) in self.terminal_class_id.iter().enumerate() {
+                let term_stream = &self.terminals[term].body;
+                // do not add other_class into map
+                if class != self.other_terminal_class_id {
+                    terminal_class_map_stream.extend(quote! {
+                        terminals_class_map.insert(#term_stream, #class);
+                    });
+                }
+            }
+
+            stream.extend(quote! {
+            /// A struct that holds the entire parser table and production rules.
+            #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
+            pub struct #parser_struct_name {
+                /// production rules
+                pub rules: Vec<#rule_typename>,
+                /// states
+                pub states: Vec<#state_typename>,
+                /// terminal classes
+                pub classes: Vec<Vec<#token_typename>>,
+                /// term to class map
+                pub term_class_map: #module_prefix::HashMap<#token_typename,usize>,
+                /// class id for terminal not matched with any in grammar
+                pub other_class_id: usize,
+            }
+            impl #parser_trait_name for #parser_struct_name {
+                type Term = #token_typename;
+                type NonTerm = #nonterminals_enum_name;
+
+                fn get_rules(&self) -> &[#rule_typename] {
+                    &self.rules
+                }
+                fn get_states(&self) -> &[#state_typename] {
+                    &self.states
+                }
+                fn get_terminals(&self, i: usize) -> Option<impl Iterator<Item = &Self::Term>> {
+                    self.classes.get(i).map(
+                        |class| class.iter()
+                    )
+                }
+                fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
+                    self.term_class_map.get(terminal).copied().unwrap_or(self.other_class_id)
+                }
+            }
+
+            /// A struct that holds the whole parser table.
+            #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
+            impl #parser_struct_name {
+                /// Calculates the states and parser tables from the grammar.
+                #[allow(clippy::clone_on_copy)]
+                pub fn new() -> Self {
+                    #grammar_build_stream
+                    #terminal_class_map_stream
+                    let terminal_classes = vec![
+                        #classes_body
+                    ];
+
+                    Self {
+                        rules,
+                        states,
+                        classes: terminal_classes,
+                        term_class_map: terminals_class_map,
+                        other_class_id: #other_class_id,
+                    }
+                }
+            }
+
+            });
+        }
     }
 
     pub fn emit_compiletime(&self) -> TokenStream {
@@ -1000,10 +1058,10 @@ impl Grammar {
         self.emit_nonterm_trait(&mut stream);
         if self.glr {
             self.emit_context_glr(&mut stream);
-            self.emit_parser_glr(&mut stream);
+            self.emit_parser(&mut stream);
         } else {
             self.emit_context_lr(&mut stream);
-            self.emit_parser_lr(&mut stream);
+            self.emit_parser(&mut stream);
         };
 
         stream
