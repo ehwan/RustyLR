@@ -439,14 +439,11 @@ impl Builder {
                         };
 
                         Diagnostic::error()
-                            .with_message("Multiple reduce definition")
+                            .with_message(format!("Multiple reduce definition: {}", terminal))
                             .with_labels(vec![
-                                Label::primary(file_id, terminal.span().byte_range()).with_message(
-                                    "This terminal symbol is defined as both of %left and %right",
-                                ),
-                                Label::secondary(file_id, old_range)
+                                Label::primary(file_id, old_range)
                                     .with_message(format!("was set as {} here", old_string)),
-                                Label::secondary(file_id, new_range)
+                                Label::primary(file_id, new_range)
                                     .with_message(format!("was set as {} here", new_string)),
                             ])
                             .with_notes(vec![

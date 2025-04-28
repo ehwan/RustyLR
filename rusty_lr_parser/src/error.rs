@@ -65,7 +65,7 @@ pub enum ParseError {
 
     /// different reduce type applied to the same terminal symbol
     MultipleReduceDefinition {
-        terminal: Ident,
+        terminal: String,
         old: (Span, rusty_lr_core::ReduceType),
         new: (Span, rusty_lr_core::ReduceType),
     },
@@ -219,7 +219,7 @@ impl ParseError {
         match self {
             ParseError::MultipleRuleDefinition(old, new) => new.span(),
 
-            ParseError::MultipleReduceDefinition { terminal, old, new } => terminal.span(),
+            ParseError::MultipleReduceDefinition { terminal, old, new } => new.0,
 
             ParseError::TermNonTermConflict {
                 name,

@@ -1,3 +1,5 @@
+use crate::terminal_info::TerminalName;
+
 use super::error::ParseError;
 use super::grammar::Grammar;
 use super::nonterminal_info::{NonTerminalInfo, Rule};
@@ -77,7 +79,10 @@ impl Pattern {
         }
         match &self.internal {
             PatternInternal::Ident(ident) => {
-                if let Some(term_idx) = grammar.terminals_index.get(ident) {
+                if let Some(term_idx) = grammar
+                    .terminals_index
+                    .get(&TerminalName::Ident(ident.clone()))
+                {
                     Ok(PatternResult {
                         name: ident.clone(),
                         token: Token::Term(*term_idx),
@@ -101,7 +106,7 @@ impl Pattern {
                 let base_rule = pattern.to_rule(grammar, pattern_cache, root_span_pair)?;
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
-                    &format!("_{}_Plus{}", base_rule.name, newrule_idx),
+                    &format!("_{}Plus{}", base_rule.name, newrule_idx),
                     root_span_pair.0,
                 );
 
@@ -238,7 +243,7 @@ impl Pattern {
 
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
-                    &format!("_{}_Star{}", base_rule.name, newrule_idx),
+                    &format!("_{}Star{}", base_rule.name, newrule_idx),
                     root_span_pair.0,
                 );
 
@@ -341,7 +346,7 @@ impl Pattern {
                 let base_rule = pattern.to_rule(grammar, pattern_cache, root_span_pair)?;
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
-                    &format!("_{}_Question{}", base_rule.name, newrule_idx),
+                    &format!("_{}Question{}", base_rule.name, newrule_idx),
                     root_span_pair.0,
                 );
 
@@ -453,7 +458,7 @@ impl Pattern {
                     let terminal = terminals[0];
                     let term_info = &grammar.terminals[terminal];
                     return Ok(PatternResult {
-                        name: term_info.name.clone(),
+                        name: term_info.name.clone().name(),
                         token: Token::Term(terminal),
                         ruletype_map: Some((
                             grammar.token_typename.clone(),
@@ -464,7 +469,7 @@ impl Pattern {
 
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name =
-                    Ident::new(&format!("_TerminalSet{}", newrule_idx), root_span_pair.0);
+                    Ident::new(&format!("_TermSet{}", newrule_idx), root_span_pair.0);
                 let mut rules = Vec::with_capacity(terminal_set.len());
                 for terminal in terminals {
                     let rule = Rule {
@@ -517,7 +522,7 @@ impl Pattern {
 
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
-                    &format!("_{}_Lookaheads{}", base_rule.name, newrule_idx),
+                    &format!("_{}LH{}", base_rule.name, newrule_idx),
                     root_span_pair.0,
                 );
 
@@ -751,9 +756,12 @@ impl Pattern {
                     let info = &grammar.terminals[idx];
 
                     Ok(PatternResult {
-                        name: info.name.clone(),
+                        name: info.name.clone().name(),
                         token: Token::Term(idx),
-                        ruletype_map: Some((grammar.token_typename.clone(), info.name.clone())),
+                        ruletype_map: Some((
+                            grammar.token_typename.clone(),
+                            info.name.clone().name(),
+                        )),
                     })
                 }
                 syn::Lit::Byte(_) => {
@@ -763,9 +771,12 @@ impl Pattern {
                     let info = &grammar.terminals[idx];
 
                     Ok(PatternResult {
-                        name: info.name.clone(),
+                        name: info.name.clone().name(),
                         token: Token::Term(idx),
-                        ruletype_map: Some((grammar.token_typename.clone(), info.name.clone())),
+                        ruletype_map: Some((
+                            grammar.token_typename.clone(),
+                            info.name.clone().name(),
+                        )),
                     })
                 }
                 syn::Lit::Str(s) => {

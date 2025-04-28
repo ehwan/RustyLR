@@ -12,6 +12,7 @@ use crate::error::ParseError;
 use crate::grammar::Grammar;
 use crate::pattern::Pattern;
 use crate::pattern::PatternInternal;
+use crate::terminal_info::TerminalName;
 use crate::terminalset::TerminalSet;
 use crate::utils;
 
@@ -31,7 +32,10 @@ impl TerminalOrTerminalSet {
     ) -> Result<(bool, BTreeSet<usize>), ParseError> {
         match self {
             TerminalOrTerminalSet::Ident(ident) => {
-                if let Some(idx) = grammar.terminals_index.get(ident) {
+                if let Some(idx) = grammar
+                    .terminals_index
+                    .get(&TerminalName::Ident(ident.clone()))
+                {
                     Ok((false, BTreeSet::from([*idx])))
                 } else {
                     Err(ParseError::TerminalNotDefined(ident.clone()))
@@ -100,7 +104,10 @@ impl IdentOrLiteral {
     ) -> Result<rusty_lr_core::builder::Operator<usize>, ParseError> {
         match self {
             Self::Ident(ident) => {
-                if let Some(&idx) = grammar.terminals_index.get(ident) {
+                if let Some(&idx) = grammar
+                    .terminals_index
+                    .get(&TerminalName::Ident(ident.clone()))
+                {
                     return Ok(rusty_lr_core::builder::Operator::Term(idx));
                 } else {
                     // check %prec definitions

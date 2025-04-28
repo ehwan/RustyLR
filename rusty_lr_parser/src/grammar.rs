@@ -23,6 +23,7 @@ use crate::pattern::Pattern;
 use crate::pattern::PatternResult;
 use crate::terminal_info::ReduceTypeInfo;
 use crate::terminal_info::TerminalInfo;
+use crate::terminal_info::TerminalName;
 use crate::token::TokenMapped;
 use crate::utils;
 
@@ -69,10 +70,7 @@ pub struct Grammar {
 
     pub terminals: Vec<TerminalInfo>,
     /// ident -> index map for terminals
-    pub terminals_index: HashMap<Ident, usize>,
-
-    /// single literal character -> terminal index map
-    pub literal_index: HashMap<char, usize>,
+    pub terminals_index: HashMap<TerminalName, usize>,
 
     /// precedence orders
     pub precedences: HashMap<rusty_lr_core::builder::Operator<usize>, (Span, usize)>,
@@ -106,6 +104,11 @@ pub struct Grammar {
     pub terminal_class_id: Vec<usize>,
     /// class id for terminal that does not belong to any class
     pub other_terminal_class_id: usize,
+
+    /// terminal index of eof
+    pub eof_index: usize,
+    /// terminal index of other_terminals
+    pub other_terminal_index: usize,
 }
 
 impl Grammar {
@@ -137,23 +140,21 @@ impl Grammar {
         reduce_type: Option<ReduceTypeInfo>,
     ) -> Option<usize> {
         let value = match &literal {
-            syn::Lit::Char(lit) => lit.value(),
-            syn::Lit::Byte(lit) => lit.value() as char,
+            syn::Lit::Char(lit) => TerminalName::Char(lit.value()),
+            syn::Lit::Byte(lit) => TerminalName::Char(lit.value() as char),
             _ => return None,
         };
-        if let Some(idx) = self.literal_index.get(&value).copied() {
+        if let Some(&idx) = self.terminals_index.get(&value) {
             return Some(idx);
         } else {
             let new_idx = self.terminals.len();
-            let name = Ident::new(&format!("_Literal{}", new_idx), Span::call_site());
             let info = TerminalInfo {
-                name: name.clone(),
+                name: value.clone(),
                 reduce_type,
                 body: quote! { #literal },
             };
             self.terminals.push(info);
-            self.terminals_index.insert(name, new_idx);
-            self.literal_index.insert(value, new_idx);
+            self.terminals_index.insert(value, new_idx);
 
             Some(new_idx)
         }
@@ -292,7 +293,6 @@ impl Grammar {
 
             terminals: Default::default(),
             terminals_index: Default::default(),
-            literal_index: Default::default(),
             precedences: Default::default(),
             prec_defeinitions: Default::default(),
 
@@ -312,6 +312,9 @@ impl Grammar {
             terminal_class_id: Vec::new(),
             terminal_classes: Vec::new(),
             other_terminal_class_id: 0,
+
+            eof_index: 0,
+            other_terminal_index: 0,
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";
@@ -325,45 +328,53 @@ impl Grammar {
 
             // check reserved name
             utils::check_reserved_name(&ident)?;
+            let name = ident.into();
 
             // check duplicate
-            if let Some((k, _)) = grammar.terminals_index.get_key_value(&ident) {
-                return Err(ParseError::MultipleTokenDefinition(k.clone(), ident));
+            if let Some((k, _)) = grammar.terminals_index.get_key_value(&name) {
+                return Err(ParseError::MultipleTokenDefinition(
+                    k.ident().unwrap().clone(),
+                    name.into_ident().unwrap(),
+                ));
             }
 
             let terminal_info = TerminalInfo {
-                name: ident.clone(),
+                name: name.clone(),
                 reduce_type: None,
                 body: token_expr,
             };
             grammar.terminals.push(terminal_info);
-            grammar.terminals_index.insert(ident, index);
+            grammar.terminals_index.insert(name, index);
         }
         // add other_terminals
         {
             let ident = Ident::new(utils::OTHERS_TERMINAL_NAME, Span::call_site());
+            let name: TerminalName = ident.into();
 
             let terminal_info = TerminalInfo {
-                name: ident.clone(),
+                name: name.clone(),
                 reduce_type: None,
-                body: quote! { #ident },
+                body: TokenStream::new(),
             };
             let idx = grammar.terminals.len();
+            grammar.other_terminal_index = idx;
             grammar.terminals.push(terminal_info);
-            grammar.terminals_index.insert(ident, idx);
+            grammar.terminals_index.insert(name, idx);
         }
         // add eof
         {
             let eof_ident = Ident::new(utils::EOF_NAME, Span::call_site());
+            let name: TerminalName = eof_ident.into();
 
             let terminal_info = TerminalInfo {
-                name: eof_ident.clone(),
+                name: name.clone(),
                 reduce_type: None,
                 body: grammar_args.eof.into_iter().next().unwrap().1,
             };
             let idx = grammar.terminals.len();
+            grammar.eof_index = idx;
             grammar.terminals.push(terminal_info);
-            grammar.terminals_index.insert(eof_ident, idx);
+            grammar.terminals_index.insert(name, idx);
         }
         // add terminals from %prec definition in each rule
         for rules_arg in grammar_args.rules.iter() {
@@ -401,7 +412,8 @@ impl Grammar {
                         if let Some(old) = &mut grammar.terminals[term_idx].reduce_type {
                             if old.reduce_type != reduce_type {
                                 return Err(ParseError::MultipleReduceDefinition {
-                                    terminal: terminal_name,
+                                    terminal: terminal_name
+                                        .pretty_name(grammar.is_char, grammar.is_u8),
                                     old: (old.source, old.reduce_type),
                                     new: (span, reduce_type),
                                 });
@@ -420,7 +432,7 @@ impl Grammar {
                         if let Some(old) = &mut grammar.prec_defeinitions[prec].reduce_type {
                             if old.reduce_type != reduce_type {
                                 return Err(ParseError::MultipleReduceDefinition {
-                                    terminal: prec_ident,
+                                    terminal: prec_ident.to_string(),
                                     old: (old.source, old.reduce_type),
                                     new: (span, reduce_type),
                                 });
@@ -548,10 +560,6 @@ impl Grammar {
                 .nonterminals_index
                 .get(&grammar.start_rule_name)
                 .unwrap();
-            let eof_idx = grammar
-                .terminals_index
-                .get(&Ident::new(utils::EOF_NAME, Span::call_site()))
-                .unwrap();
             let augmented_rule = Rule {
                 tokens: vec![
                     TokenMapped {
@@ -561,7 +569,7 @@ impl Grammar {
                         end_span: Span::call_site(),
                     },
                     TokenMapped {
-                        token: Token::Term(*eof_idx),
+                        token: Token::Term(grammar.eof_index),
                         mapto: None,
                         begin_span: Span::call_site(),
                         end_span: Span::call_site(),
@@ -660,10 +668,7 @@ impl Grammar {
                 multiterm_counter: 0,
             });
         }
-        grammar.other_terminal_class_id = grammar.terminal_class_id[*grammar
-            .terminals_index
-            .get(&Ident::new(utils::OTHERS_TERMINAL_NAME, Span::call_site()))
-            .unwrap()];
+        grammar.other_terminal_class_id = grammar.terminal_class_id[grammar.other_terminal_index];
 
         Ok(grammar)
     }
@@ -799,10 +804,7 @@ impl Grammar {
 
         self.terminal_class_id = new_term_class_id;
         self.terminal_classes = new_class_defs;
-        self.other_terminal_class_id = self.terminal_class_id[*self
-            .terminals_index
-            .get(&Ident::new(utils::OTHERS_TERMINAL_NAME, Span::call_site()))
-            .unwrap()];
+        self.other_terminal_class_id = self.terminal_class_id[self.other_terminal_index];
 
         let mut removed_rules_diag = Vec::new();
 
@@ -943,11 +945,12 @@ impl Grammar {
         if self.is_char || self.is_u8 {
             self.terminals[term_idx].body.to_string()
         } else {
-            let name = &self.terminals[term_idx].name;
-            if name == utils::OTHERS_TERMINAL_NAME {
+            if term_idx == self.other_terminal_index {
                 "<Others>".to_string()
             } else {
-                name.to_string()
+                self.terminals[term_idx]
+                    .name
+                    .pretty_name(self.is_char, self.is_u8)
             }
         }
     }

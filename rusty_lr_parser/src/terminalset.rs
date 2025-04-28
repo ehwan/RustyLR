@@ -7,7 +7,7 @@ use std::collections::BTreeSet;
 
 use crate::error::ParseError;
 use crate::grammar::Grammar;
-use crate::utils;
+use crate::terminal_info::TerminalName;
 
 #[derive(Debug, Clone)]
 pub enum TerminalSetItem {
@@ -32,18 +32,27 @@ impl TerminalSetItem {
     pub fn to_terminal_set(&self, grammar: &mut Grammar) -> Result<BTreeSet<usize>, ParseError> {
         match self {
             TerminalSetItem::Terminal(terminal) => {
-                if let Some(idx) = grammar.terminals_index.get(terminal) {
+                if let Some(idx) = grammar
+                    .terminals_index
+                    .get(&TerminalName::Ident(terminal.clone()))
+                {
                     Ok(BTreeSet::from([*idx]))
                 } else {
                     Err(ParseError::TerminalNotDefined(terminal.clone()))
                 }
             }
             TerminalSetItem::Range(first, last) => {
-                let first_index = match grammar.terminals_index.get(first) {
+                let first_index = match grammar
+                    .terminals_index
+                    .get(&TerminalName::Ident(first.clone()))
+                {
                     Some(f) => f,
                     None => return Err(ParseError::TerminalNotDefined(first.clone())),
                 };
-                let last_index = match grammar.terminals_index.get(last) {
+                let last_index = match grammar
+                    .terminals_index
+                    .get(&TerminalName::Ident(last.clone()))
+                {
                     Some(l) => l,
                     None => return Err(ParseError::TerminalNotDefined(last.clone())),
                 };
@@ -160,10 +169,7 @@ impl TerminalSet {
         }
 
         // include eof when TerminalSet is used in a lookahead set
-        let eof_idx = *grammar
-            .terminals_index
-            .get(&Ident::new(utils::EOF_NAME, Span::call_site()))
-            .unwrap();
+        let eof_idx = grammar.eof_index;
         if include_eof {
             if self.negate {
                 terminal_set.remove(&eof_idx);
