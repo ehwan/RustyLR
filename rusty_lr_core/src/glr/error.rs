@@ -10,10 +10,6 @@ pub struct InvalidTerminalError<Term, NonTerm, ReduceActionError> {
     pub reduce_errors: Vec<ReduceActionError>,
 
     #[cfg(feature = "error")]
-    pub(crate) expected: Vec<Term>,
-    #[cfg(feature = "error")]
-    pub(crate) expected_nonterm: Vec<NonTerm>,
-    #[cfg(feature = "error")]
     pub(crate) backtraces: Vec<crate::Backtrace<usize, NonTerm>>,
 
     #[cfg(not(feature = "error"))]
@@ -32,27 +28,6 @@ impl<Term: Display, NonTerm: Display, ReduceActionError: Display> Display
 
         #[cfg(feature = "error")]
         {
-            use std::collections::BTreeSet;
-            let expected = self
-                .expected
-                .iter()
-                .map(|term| term.to_string())
-                .collect::<BTreeSet<_>>() // sort and dedup first
-                .into_iter()
-                .collect::<Vec<_>>()
-                .join(", "); // and join
-            write!(f, "\nExpected: {}", expected)?;
-
-            let expected = self
-                .expected_nonterm
-                .iter()
-                .map(|nonterm| nonterm.to_string())
-                .collect::<BTreeSet<_>>() // sort and dedup first
-                .into_iter()
-                .collect::<Vec<_>>()
-                .join(", "); // and join
-            write!(f, "\nExpected(NonTerminals): {}", expected)?;
-
             for (idx, backtrace) in self.backtraces.iter().enumerate() {
                 write!(f, "\nBacktrace for path {}: ", idx)?;
                 write!(f, "\n{}", backtrace)?;
@@ -74,27 +49,6 @@ impl<Term: Debug, NonTerm: Debug, ReduceActionError: Debug> Debug
 
         #[cfg(feature = "error")]
         {
-            use std::collections::BTreeSet;
-            let expected = self
-                .expected
-                .iter()
-                .map(|term| format!("{:?}", term))
-                .collect::<BTreeSet<_>>() // sort and dedup first
-                .into_iter()
-                .collect::<Vec<_>>()
-                .join(", "); // and join
-            write!(f, "\nExpected: {}", expected)?;
-
-            let expected = self
-                .expected_nonterm
-                .iter()
-                .map(|nonterm| format!("{:?}", nonterm))
-                .collect::<BTreeSet<_>>() // sort and dedup first
-                .into_iter()
-                .collect::<Vec<_>>()
-                .join(", "); // and join
-            write!(f, "\nExpected(NonTerminals): {}", expected)?;
-
             for (idx, backtrace) in self.backtraces.iter().enumerate() {
                 write!(f, "\nBacktrace for path {}: ", idx)?;
                 write!(f, "\n{:?}", backtrace)?;

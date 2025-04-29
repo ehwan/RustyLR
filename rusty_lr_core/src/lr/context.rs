@@ -65,7 +65,7 @@ impl<S: Stack> Context<S> {
     pub fn expected<'a, P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
         &self,
         parser: &'a P,
-    ) -> impl Iterator<Item = &'a S::Term>
+    ) -> impl Iterator<Item = P::TermRet<'a>> + 'a
     where
         S::Term: 'a,
         S::NonTerm: 'a,

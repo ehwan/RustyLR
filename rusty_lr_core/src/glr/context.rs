@@ -7,7 +7,6 @@ use super::Parser;
 use super::{MultiplePathError, NodeData};
 
 use crate::HashMap;
-use crate::HashSet;
 
 #[cfg(feature = "tree")]
 use crate::TreeList;
@@ -170,48 +169,20 @@ impl<Data: NodeData> Context<Data> {
     }
 
     /// Get expected tokens for next `feed()` call.
+    /// This could contain duplicate tokens.
     pub fn expected<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &'a self,
         parser: &'a P,
-    ) -> impl Iterator<Item = &'a Data::Term>
-    where
-        Data::Term: 'a + std::hash::Hash + Eq,
-        Data::NonTerm: 'a,
-    {
-        let dedupped: HashSet<&'a Data::Term> = self
-            .nodes()
-            .flat_map(|node| node.expected(parser))
-            .collect();
-
-        dedupped.into_iter()
+    ) -> impl Iterator<Item = P::TermRet<'a>> + 'a {
+        self.nodes().flat_map(|node| node.expected(parser))
     }
     /// Get expected non-terminal tokens for next `feed()` call.
+    /// This could contain duplicate tokens.
     pub fn expected_nonterm<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &'a self,
         parser: &'a P,
-    ) -> impl Iterator<Item = &'a Data::NonTerm>
-    where
-        Data::Term: 'a,
-        Data::NonTerm: 'a + std::hash::Hash + Eq,
-    {
-        let dedupped: HashSet<&'a Data::NonTerm> = self
-            .nodes()
-            .flat_map(|node| node.expected_nonterm(parser))
-            .collect();
-
-        dedupped.into_iter()
-    }
-
-    /// This does the same thing as `expected`, for backward compatibility.
-    pub fn expected_on_error<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &'a self,
-        parser: &'a P,
-    ) -> impl Iterator<Item = &'a Data::Term>
-    where
-        Data::Term: 'a + std::hash::Hash + Eq,
-        Data::NonTerm: 'a,
-    {
-        self.expected(parser)
+    ) -> impl Iterator<Item = &'a Data::NonTerm> {
+        self.nodes().flat_map(|node| node.expected_nonterm(parser))
     }
 
     /// Get set of non-terminal symbols that current context is trying to parse.

@@ -392,7 +392,7 @@ impl<Data: NodeData> Node<Data> {
     pub fn expected<'a, P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &'a P,
-    ) -> impl Iterator<Item = &'a Data::Term>
+    ) -> impl Iterator<Item = P::TermRet<'a>> + 'a
     where
         P::Term: 'a,
         P::NonTerm: 'a,

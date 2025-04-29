@@ -71,6 +71,7 @@ lr1! {
 }
 ```
 This defines a simple arithmetic expression parser.
+
 ### Using Build Script
 For complex grammars, you can use a build script to generate the parser. This will provide more detailed error messages when conflicts occur.
 
@@ -132,6 +133,14 @@ context.feed(&parser, 0 as char, &mut userdata).unwrap(); // feed EOF
 
 let result:i32 = context.accept(); // get value of start 'E'
 ```
+
+### Using `rustylr` Executable
+```
+cargo install rustylr
+
+rustylr parser.rs output.rs
+```
+See [Executable](rusty_lr_executable/README.md) for more details.
 
 The generated code will include several structs and enums:
  - `<Start>Parser`: A struct that holds the whole parser table. [(docs-LR)](https://docs.rs/rusty_lr/latest/rusty_lr/lr/trait.Parser.html) [(docs-GLR)](https://docs.rs/rusty_lr/latest/rusty_lr/glr/trait.Parser.html)

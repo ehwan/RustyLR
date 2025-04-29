@@ -147,22 +147,11 @@ where
         context.fallback_nodes.clear();
 
         #[cfg(feature = "error")]
-        let expected = context.expected(parser).cloned().collect::<Vec<_>>();
-        #[cfg(feature = "error")]
-        let expected_nonterm = context
-            .expected_nonterm(parser)
-            .cloned()
-            .collect::<Vec<_>>();
-        #[cfg(feature = "error")]
         let backtraces = context.backtraces(parser).collect::<Vec<_>>();
 
         Err(InvalidTerminalError {
             term,
             reduce_errors: std::mem::take(&mut context.reduce_errors),
-            #[cfg(feature = "error")]
-            expected,
-            #[cfg(feature = "error")]
-            expected_nonterm,
             #[cfg(feature = "error")]
             backtraces,
 
@@ -299,13 +288,6 @@ where
         context.nodes_pong2 = reduce_nodes;
 
         #[cfg(feature = "error")]
-        let expected = context.expected(parser).cloned().collect::<Vec<_>>();
-        #[cfg(feature = "error")]
-        let expected_nonterm = context
-            .expected_nonterm(parser)
-            .cloned()
-            .collect::<Vec<_>>();
-        #[cfg(feature = "error")]
         let backtraces = context.backtraces(parser).collect::<Vec<_>>();
 
         let errors = reduce_errors
@@ -314,10 +296,6 @@ where
                 let error = InvalidTerminalError {
                     term,
                     reduce_errors: errors,
-                    #[cfg(feature = "error")]
-                    expected: expected.clone(),
-                    #[cfg(feature = "error")]
-                    expected_nonterm: expected_nonterm.clone(),
                     #[cfg(feature = "error")]
                     backtraces: backtraces.clone(),
 

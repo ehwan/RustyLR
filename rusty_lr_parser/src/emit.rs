@@ -850,20 +850,20 @@ impl Grammar {
             for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
                 let mut terminals_body = TokenStream::new();
                 // no need to store all characters for 'other' class, if it was not used in the grammar
-                if class_id != self.other_terminal_class_id || self.other_used {
+                if class_id != self.other_terminal_class_id {
                     for &(start, last) in &class_def.ranges {
-                        for ch in start..=last {
-                            if self.is_char {
-                                let ch = unsafe { char::from_u32_unchecked(ch) };
-                                terminals_body.extend(quote! {
-                                    #ch,
-                                });
-                            } else if self.is_u8 {
-                                let ch = ch as u8;
-                                terminals_body.extend(quote! {
-                                    #ch,
-                                });
-                            }
+                        if self.is_char {
+                            let start = unsafe { char::from_u32_unchecked(start) };
+                            let last = unsafe { char::from_u32_unchecked(last) };
+                            terminals_body.extend(quote! {
+                                (#start,#last),
+                            });
+                        } else if self.is_u8 {
+                            let start = start as u8;
+                            let last = last as u8;
+                            terminals_body.extend(quote! {
+                                (#start,#last),
+                            });
                         }
                     }
                 }
@@ -897,7 +897,7 @@ impl Grammar {
                 /// states
                 pub states: Vec<#state_typename>,
                 /// terminal classes
-                pub classes: Vec<Vec<#token_typename>>,
+                pub classes: Vec<Vec<(#token_typename,#token_typename)>>,
                 /// term to class map
                 pub term_class_map: #module_prefix::RangeMap,
                 /// class id for terminal not matched with any in grammar
@@ -906,6 +906,7 @@ impl Grammar {
             impl #parser_trait_name for #parser_struct_name {
                 type Term = #token_typename;
                 type NonTerm = #nonterminals_enum_name;
+                type TermRet<'a> = #token_typename;
 
                 fn get_rules(&self) -> &[#rule_typename] {
                     &self.rules
@@ -913,9 +914,11 @@ impl Grammar {
                 fn get_states(&self) -> &[#state_typename] {
                     &self.states
                 }
-                fn get_terminals(&self, i: usize) -> Option<impl Iterator<Item = &Self::Term>> {
+                fn get_terminals<'a>(&'a self, i: usize) -> Option<impl IntoIterator<Item = Self::TermRet<'a>> + 'a> {
                     self.classes.get(i).map(
-                        |class| class.iter()
+                        |class| class.iter().flat_map( |&(start,last)| {
+                            (start..=last).into_iter()
+                        })
                     )
                 }
                 fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
@@ -959,12 +962,8 @@ impl Grammar {
             for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
                 let mut terminals_body = TokenStream::new();
                 // no need to store all characters for 'other' class, if it was not used in the grammar
-                if class_id != self.other_terminal_class_id || self.other_used {
+                if class_id != self.other_terminal_class_id {
                     for &term in &class_def.terminals {
-                        // do not add other_class into map
-                        if term == self.other_terminal_index {
-                            continue;
-                        }
                         let term_stream = &self.terminals[term].body;
                         terminals_body.extend(quote! {
                             #term_stream,
@@ -1008,6 +1007,7 @@ impl Grammar {
             impl #parser_trait_name for #parser_struct_name {
                 type Term = #token_typename;
                 type NonTerm = #nonterminals_enum_name;
+                type TermRet<'a> = &'a #token_typename;
 
                 fn get_rules(&self) -> &[#rule_typename] {
                     &self.rules
@@ -1015,10 +1015,8 @@ impl Grammar {
                 fn get_states(&self) -> &[#state_typename] {
                     &self.states
                 }
-                fn get_terminals(&self, i: usize) -> Option<impl Iterator<Item = &Self::Term>> {
-                    self.classes.get(i).map(
-                        |class| class.iter()
-                    )
+                fn get_terminals<'a>(&'a self, i: usize) -> Option<impl IntoIterator<Item = Self::TermRet<'a>> + 'a> {
+                    self.classes.get(i)
                 }
                 fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
                     self.term_class_map.get(terminal).copied().unwrap_or(self.other_class_id)
