@@ -231,6 +231,8 @@ E: zero one;
 ```
 Note: If `%tokentype` is either `char` or `u8`, you can't use this directive. You must use literal value in the grammar directly.
 
+Note: This directive is not for defining the *Whole Token Space*. Any token not defined here could also be captured by [^ term1 ...]-like negation pattern.
+
 ## Start symbol <sub><sup>(must defined)</sup></sub>
 ```
 %start NonTerminalName ;

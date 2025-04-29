@@ -112,6 +112,8 @@ pub struct Grammar {
     /// terminal index of eof
     pub eof_index: usize,
     /// terminal index of other_terminals
+    /// `other_terminal` can be only used by [^ term ...] pattern,
+    /// to indicate *other terminals* not defined in this grammar.
     pub other_terminal_index: usize,
 
     pub range_resolver: RangeResolver,
@@ -139,23 +141,10 @@ impl Grammar {
         None
     }
 
-    pub(crate) fn calculate_terminal_set(
-        &self,
-        negate: bool,
-        terminalset: &BTreeSet<usize>,
-    ) -> Vec<usize> {
-        if negate {
-            let mut ret = Vec::new();
-            for i in 0..self.terminals.len() {
-                if terminalset.contains(&i) {
-                    continue;
-                }
-                ret.push(i);
-            }
-            ret
-        } else {
-            terminalset.iter().copied().collect()
-        }
+    pub(crate) fn negate_terminal_set(&self, terminalset: &BTreeSet<usize>) -> BTreeSet<usize> {
+        (0..self.terminals.len())
+            .filter(|&i| !terminalset.contains(&i))
+            .collect()
     }
 
     pub fn parse_args(input: TokenStream) -> Result<GrammarArgs, ParseArgError> {
@@ -243,7 +232,7 @@ impl Grammar {
         Ok(())
     }
 
-    pub fn get_char_value(&self, lit: &syn::Lit) -> Result<u32, ParseError> {
+    pub(crate) fn get_char_value(&self, lit: &syn::Lit) -> Result<u32, ParseError> {
         if self.is_char {
             if let syn::Lit::Char(lit) = lit {
                 Ok(lit.value() as u32)
@@ -260,7 +249,7 @@ impl Grammar {
             Err(ParseError::UnsupportedLiteralType(lit.to_token_stream()))
         }
     }
-    pub fn get_terminal_indices_from_char_range(
+    pub(crate) fn get_terminal_indices_from_char_range(
         &self,
         start: u32,
         last: u32,
@@ -345,6 +334,11 @@ impl Grammar {
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";
 
         // add char ranges to resolver
+        // iterate over all rules, reduce_type or precedence definitions,
+        // checks for what *character ranges* like [a-z] were used.
+        // We need to support the whole unicode range (1 ~ 0x10FFFF),
+        // but we can't assign every single character to a self.terminals.
+        // Rather, we assign a range of characters to a single self.terminals
         if grammar.is_char || grammar.is_u8 {
             // add eof
             let eof_val = {
@@ -751,12 +745,25 @@ impl Grammar {
         // initialize terminal classes with one-terminal-one-class
         grammar.terminal_class_id.reserve(grammar.terminals.len());
         grammar.terminal_classes.reserve(grammar.terminals.len());
+        let mut multiterm_counter = 0;
         for i in 0..grammar.terminals.len() {
+            let len = grammar.terminals[i].name.count();
+            if len > 1 {
+                multiterm_counter += 1;
+            }
             grammar.terminal_class_id.push(i);
+
+            let mut ranges = Vec::new();
+            if grammar.is_char || grammar.is_u8 {
+                // check if this terminal is a range
+                if let TerminalName::CharRange(start, last) = &grammar.terminals[i].name {
+                    ranges.push((*start as u32, *last as u32));
+                }
+            }
             grammar.terminal_classes.push(TerminalClassDefinintion {
                 terminals: vec![i],
-                multiterm_counter: 0,
-                ranges: Vec::new(),
+                multiterm_counter,
+                ranges,
             });
         }
         grammar.other_terminal_class_id = grammar.terminal_class_id[grammar.other_terminal_index];

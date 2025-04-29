@@ -188,6 +188,13 @@ See [GLR.md](GLR.md) for details.
  - [lua 5.4 syntax parser](https://github.com/ehwan/lua_rust/blob/main/parser/src/parser.rs)
  - [Bootstrap](rusty_lr_parser/src/parser/parser.rs): rusty_lr syntax parser is written in rusty_lr itself.
 
+## Lexer Capabilities
+While RustyLR is primarily a parser generator, it also functions effectively as a lexer.
+Its design allows for efficient tokenization of input streams,
+addressing challenges like the "too-many-characters" problem.
+By constructing optimized state automata, it ensures rapid and memory-efficient lexing,
+making it suitable for processing large or complex inputs.
+
 ## Cargo Features
  - `build`: Enable build script tools.
  - `fxhash`: Use FXHashMap instead of `std::collections::HashMap` for parser tables.

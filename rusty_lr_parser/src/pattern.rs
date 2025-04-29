@@ -453,9 +453,13 @@ impl Pattern {
                 Ok(base_rule)
             }
             PatternInternal::TerminalSet(negate, terminal_set) => {
-                let terminals = grammar.calculate_terminal_set(*negate, terminal_set);
+                let terminals = if *negate {
+                    grammar.negate_terminal_set(terminal_set)
+                } else {
+                    terminal_set.clone()
+                };
                 if terminals.len() == 1 {
-                    let terminal = terminals[0];
+                    let terminal = terminals.into_iter().next().unwrap();
                     let term_info = &grammar.terminals[terminal];
                     return Ok(PatternResult {
                         name: term_info.name.clone().name(),
@@ -513,11 +517,11 @@ impl Pattern {
                 Ok(res)
             }
             PatternInternal::Lookaheads(pattern, negate, lookaheads) => {
-                let lookaheads = grammar
-                    .calculate_terminal_set(*negate, lookaheads)
-                    .into_iter()
-                    .collect();
-
+                let lookaheads = if *negate {
+                    grammar.negate_terminal_set(lookaheads)
+                } else {
+                    lookaheads.clone()
+                };
                 let base_rule = pattern.to_rule(grammar, pattern_cache, root_span_pair)?;
 
                 let newrule_idx = grammar.nonterminals.len();
