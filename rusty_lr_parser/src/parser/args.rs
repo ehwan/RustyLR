@@ -44,26 +44,9 @@ impl TerminalOrTerminalSet {
             TerminalOrTerminalSet::Literal(literal) => {
                 let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
                     .expect("failed on syn::parse2::<syn::Lit>");
-
-                if grammar.is_char {
-                    if !matches!(&lit, syn::Lit::Char(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(
-                            literal.to_token_stream(),
-                        ));
-                    }
-                } else if grammar.is_u8 {
-                    if !matches!(&lit, syn::Lit::Byte(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(
-                            literal.to_token_stream(),
-                        ));
-                    }
-                } else {
-                    return Err(ParseError::UnsupportedLiteralType(
-                        literal.to_token_stream(),
-                    ));
-                }
-
-                let idx = grammar.add_or_get_literal_character(lit, None).unwrap();
+                let val = grammar.get_char_value(&lit)?;
+                let name: TerminalName = (val, val).into();
+                let idx = *grammar.terminals_index.get(&name).unwrap();
                 Ok((false, BTreeSet::from([idx])))
             }
             TerminalOrTerminalSet::TerminalSet(terminal_set) => {
@@ -130,28 +113,24 @@ impl IdentOrLiteral {
             Self::Literal(literal) => {
                 let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
                     .expect("failed on syn::parse2::<syn::Lit>");
-
-                if grammar.is_char {
-                    if !matches!(&lit, syn::Lit::Char(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(
-                            literal.to_token_stream(),
-                        ));
-                    }
-                } else if grammar.is_u8 {
-                    if !matches!(&lit, syn::Lit::Byte(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(
-                            literal.to_token_stream(),
-                        ));
-                    }
-                } else {
-                    return Err(ParseError::UnsupportedLiteralType(
-                        literal.to_token_stream(),
-                    ));
-                }
-                let idx = grammar.add_or_get_literal_character(lit, None).unwrap();
-                return Ok(rusty_lr_core::builder::Operator::Term(idx));
+                let val = grammar.get_char_value(&lit)?;
+                let name: TerminalName = (val, val).into();
+                let idx = *grammar.terminals_index.get(&name).unwrap();
+                Ok(rusty_lr_core::builder::Operator::Term(idx))
             }
         }
+    }
+    pub fn range_resolve(&self, grammar: &mut Grammar) -> Result<(), ParseError> {
+        match self {
+            IdentOrLiteral::Ident(_) => {}
+            IdentOrLiteral::Literal(literal) => {
+                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
+                    .expect("failed on syn::parse2::<syn::Lit>");
+                let val = grammar.get_char_value(&lit)?;
+                grammar.range_resolver.insert(val, val);
+            }
+        }
+        Ok(())
     }
 }
 impl std::fmt::Display for IdentOrLiteral {
@@ -456,6 +435,68 @@ impl PatternArgs {
             }
             PatternArgs::Minus(base, terminal_set) => {
                 (base.span_pair().0, terminal_set.span_pair().1)
+            }
+        }
+    }
+
+    pub fn range_resolve(&self, grammar: &mut Grammar) -> Result<(), ParseError> {
+        match self {
+            PatternArgs::Ident(_) => Ok(()),
+            PatternArgs::Plus(base, _) => base.range_resolve(grammar),
+            PatternArgs::Star(base, _) => base.range_resolve(grammar),
+            PatternArgs::Question(base, _) => base.range_resolve(grammar),
+            PatternArgs::Exclamation(base, _) => base.range_resolve(grammar),
+            PatternArgs::TerminalSet(terminal_set) => terminal_set.range_resolve(grammar),
+            PatternArgs::Lookaheads(base, terminal_set) => {
+                base.range_resolve(grammar)?;
+                terminal_set.range_resolve(grammar)?;
+                Ok(())
+            }
+            PatternArgs::Group(groups, _, _) => {
+                for group in groups {
+                    group.range_resolve(grammar)?;
+                }
+                Ok(())
+            }
+            PatternArgs::Literal(literal) => {
+                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
+                    .expect("failed on syn::parse2::<syn::Lit>");
+                match lit {
+                    syn::Lit::Char(lit) => {
+                        let val = lit.value() as u32;
+                        grammar.range_resolver.insert(val, val);
+                        Ok(())
+                    }
+                    syn::Lit::Byte(lit) => {
+                        let val = lit.value() as u32;
+                        grammar.range_resolver.insert(val, val);
+                        Ok(())
+                    }
+                    syn::Lit::Str(s) => {
+                        for ch in s.value().chars() {
+                            let val = ch as u32;
+                            grammar.range_resolver.insert(val, val);
+                        }
+                        Ok(())
+                    }
+                    syn::Lit::ByteStr(s) => {
+                        for ch in s.value() {
+                            let val = ch as u32;
+                            grammar.range_resolver.insert(val, val);
+                        }
+                        Ok(())
+                    }
+                    _ => {
+                        return Err(ParseError::UnsupportedLiteralType(
+                            literal.to_token_stream(),
+                        ));
+                    }
+                }
+            }
+            PatternArgs::Minus(base, terminal_set) => {
+                base.range_resolve(grammar)?;
+                terminal_set.range_resolve(grammar)?;
+                Ok(())
             }
         }
     }

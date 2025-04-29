@@ -18,31 +18,41 @@ pub enum TerminalName {
     Ident(Ident),
 
     /// defined as literal anywhere in the grammar
-    Char(char),
+    CharRange(char, char),
 }
 impl TerminalName {
+    pub fn count(&self) -> usize {
+        match self {
+            TerminalName::Ident(_) => 1,
+            TerminalName::CharRange(s, l) => {
+                let s = *s as usize;
+                let l = *l as usize;
+                l + 1 - s
+            }
+        }
+    }
     pub fn ident(&self) -> Option<&Ident> {
         match self {
             TerminalName::Ident(ident) => Some(ident),
-            TerminalName::Char(_) => None,
+            TerminalName::CharRange(_, _) => None,
         }
     }
     pub fn into_ident(self) -> Option<Ident> {
         match self {
             TerminalName::Ident(ident) => Some(ident),
-            TerminalName::Char(_) => None,
+            TerminalName::CharRange(_, _) => None,
         }
     }
-    pub fn char(&self) -> Option<char> {
-        match self {
-            TerminalName::Ident(_) => None,
-            TerminalName::Char(c) => Some(*c),
-        }
-    }
+    // pub fn char(&self) -> Option<char> {
+    //     match self {
+    //         TerminalName::Ident(_) => None,
+    //         TerminalName::Char(c) => Some(*c),
+    //     }
+    // }
     pub fn name(self) -> Ident {
         match self {
             TerminalName::Ident(name) => name,
-            TerminalName::Char(c) => {
+            TerminalName::CharRange(c, _) => {
                 let s = format!("_Terminal{}", c as u32);
                 Ident::new(&s, Span::call_site())
             }
@@ -51,19 +61,27 @@ impl TerminalName {
     pub fn pretty_name(&self, is_char: bool, is_u8: bool) -> String {
         match self {
             TerminalName::Ident(ident) => ident.to_string(),
-            TerminalName::Char(c) => {
+            TerminalName::CharRange(start, last) => {
                 if is_char {
-                    format!("'{}'", c)
+                    let start_tok = syn::LitChar::new(*start, Span::call_site()).to_token_stream();
+                    let last_tok = syn::LitChar::new(*last, Span::call_site()).to_token_stream();
+                    if start == last {
+                        format!("{start_tok}")
+                    } else {
+                        format!("{start_tok}-{last_tok}")
+                    }
                 } else if is_u8 {
-                    format!(
-                        "{}",
-                        syn::LitByte::new(*c as u8, Span::call_site()).to_token_stream()
-                    )
+                    let start_tok =
+                        syn::LitByte::new(*start as u8, Span::call_site()).to_token_stream();
+                    let last_tok =
+                        syn::LitByte::new(*last as u8, Span::call_site()).to_token_stream();
+                    if start == last {
+                        format!("{start_tok}")
+                    } else {
+                        format!("{start_tok}-{last_tok}")
+                    }
                 } else {
-                    format!(
-                        "{}",
-                        syn::LitChar::new(*c, Span::call_site()).to_token_stream()
-                    )
+                    unreachable!("unexpected char type")
                 }
             }
         }
@@ -74,9 +92,16 @@ impl From<Ident> for TerminalName {
         TerminalName::Ident(ident)
     }
 }
-impl From<char> for TerminalName {
-    fn from(c: char) -> Self {
-        TerminalName::Char(c)
+impl From<(char, char)> for TerminalName {
+    fn from(c: (char, char)) -> Self {
+        TerminalName::CharRange(c.0, c.1)
+    }
+}
+impl From<(u32, u32)> for TerminalName {
+    fn from(c: (u32, u32)) -> Self {
+        let s = unsafe { char::from_u32_unchecked(c.0) };
+        let l = unsafe { char::from_u32_unchecked(c.1) };
+        TerminalName::CharRange(s, l)
     }
 }
 

@@ -9,6 +9,7 @@ use rusty_lr_core::HashMap;
 use rusty_lr_core::Token;
 
 use crate::grammar::Grammar;
+use crate::terminal_info::TerminalName;
 use crate::utils;
 
 /// emit Rust code for the parser
@@ -964,10 +965,31 @@ impl Grammar {
                 // no need to store all characters for 'other' class, if it was not used in the grammar
                 if class_id != self.other_terminal_class_id {
                     for &term in &class_def.terminals {
-                        let term_stream = &self.terminals[term].body;
-                        terminals_body.extend(quote! {
-                            #term_stream,
-                        });
+                        // check if this term is range-based character
+                        if let TerminalName::CharRange(s, l) = &self.terminals[term].name {
+                            if self.is_char {
+                                for ch in *s..=*l {
+                                    terminals_body.extend(quote! {
+                                        #ch,
+                                    });
+                                }
+                            } else if self.is_u8 {
+                                let s = *s as u8;
+                                let l = *l as u8;
+                                for ch in s..=l {
+                                    terminals_body.extend(quote! {
+                                        #ch,
+                                    });
+                                }
+                            } else {
+                                unreachable!("unexpected char type")
+                            }
+                        } else {
+                            let term_stream = &self.terminals[term].body;
+                            terminals_body.extend(quote! {
+                                #term_stream,
+                            });
+                        }
                     }
                 }
 
@@ -980,12 +1002,33 @@ impl Grammar {
                 let mut terminals_class_map:#module_prefix::HashMap<#token_typename,usize> = Default::default();
             };
             for (term, &class) in self.terminal_class_id.iter().enumerate() {
-                let term_stream = &self.terminals[term].body;
-                // do not add other_class into map
-                if class != self.other_terminal_class_id {
-                    terminal_class_map_stream.extend(quote! {
-                        terminals_class_map.insert(#term_stream, #class);
-                    });
+                // check if this term is range-based character
+                if let TerminalName::CharRange(s, l) = &self.terminals[term].name {
+                    if self.is_char {
+                        for ch in *s..=*l {
+                            terminal_class_map_stream.extend(quote! {
+                                terminals_class_map.insert(#ch, #class);
+                            });
+                        }
+                    } else if self.is_u8 {
+                        let s = *s as u8;
+                        let l = *l as u8;
+                        for ch in s..=l {
+                            terminal_class_map_stream.extend(quote! {
+                                terminals_class_map.insert(#ch, #class);
+                            });
+                        }
+                    } else {
+                        unreachable!("unexpected char type")
+                    }
+                } else {
+                    let term_stream = &self.terminals[term].body;
+                    // do not add other_class into map
+                    if class != self.other_terminal_class_id {
+                        terminal_class_map_stream.extend(quote! {
+                            terminals_class_map.insert(#term_stream, #class);
+                        });
+                    }
                 }
             }
 

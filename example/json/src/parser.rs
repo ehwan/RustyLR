@@ -43,7 +43,7 @@ Characters: Character*;
 // WIP
 Character:
           '\\' Escape
-        | ['\u{0020}'-'\u{FF}'] - '"' - '\\'
+        | ['\u{0020}'-'\u{10FFFF}'] - '"' - '\\'
         ;
 
 Escape: '"'

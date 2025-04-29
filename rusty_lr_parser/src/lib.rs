@@ -10,6 +10,7 @@ pub(crate) mod nonterminal_info;
 pub(crate) mod parser;
 pub mod partition;
 pub(crate) mod pattern;
+pub mod rangeresolver;
 pub mod terminal_info;
 pub(crate) mod terminalset;
 pub(crate) mod token;

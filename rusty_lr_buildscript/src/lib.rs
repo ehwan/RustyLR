@@ -643,7 +643,12 @@ impl Builder {
                 // terminals merged into terminal class
                 let mut class_message = Vec::new();
                 for (class_idx, class_def) in grammar.terminal_classes.iter().enumerate() {
-                    if class_def.terminals.len() == 1 {
+                    let len: usize = class_def
+                        .terminals
+                        .iter()
+                        .map(|term| grammar.terminals[*term].name.count())
+                        .sum();
+                    if len == 1 {
                         continue;
                     }
                     let msg = format!(

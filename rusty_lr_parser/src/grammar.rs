@@ -5,6 +5,7 @@ use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
+use quote::ToTokens;
 use rusty_lr_core::Token;
 
 use crate::error::ArgError;
@@ -21,6 +22,7 @@ use crate::parser::parser_expanded::GrammarParseError;
 use crate::parser::parser_expanded::GrammarParser;
 use crate::pattern::Pattern;
 use crate::pattern::PatternResult;
+use crate::rangeresolver::RangeResolver;
 use crate::terminal_info::ReduceTypeInfo;
 use crate::terminal_info::TerminalInfo;
 use crate::terminal_info::TerminalName;
@@ -111,6 +113,8 @@ pub struct Grammar {
     pub eof_index: usize,
     /// terminal index of other_terminals
     pub other_terminal_index: usize,
+
+    pub range_resolver: RangeResolver,
 }
 
 impl Grammar {
@@ -133,33 +137,6 @@ impl Grammar {
             }
         }
         None
-    }
-
-    /// returns None if literal is not supported
-    pub(crate) fn add_or_get_literal_character(
-        &mut self,
-        literal: syn::Lit,
-        reduce_type: Option<ReduceTypeInfo>,
-    ) -> Option<usize> {
-        let value = match &literal {
-            syn::Lit::Char(lit) => TerminalName::Char(lit.value()),
-            syn::Lit::Byte(lit) => TerminalName::Char(lit.value() as char),
-            _ => return None,
-        };
-        if let Some(&idx) = self.terminals_index.get(&value) {
-            return Some(idx);
-        } else {
-            let new_idx = self.terminals.len();
-            let info = TerminalInfo {
-                name: value.clone(),
-                reduce_type,
-                body: quote! { #literal },
-            };
-            self.terminals.push(info);
-            self.terminals_index.insert(value, new_idx);
-
-            Some(new_idx)
-        }
     }
 
     pub(crate) fn calculate_terminal_set(
@@ -266,6 +243,50 @@ impl Grammar {
         Ok(())
     }
 
+    pub fn get_char_value(&self, lit: &syn::Lit) -> Result<u32, ParseError> {
+        if self.is_char {
+            if let syn::Lit::Char(lit) = lit {
+                Ok(lit.value() as u32)
+            } else {
+                Err(ParseError::UnsupportedLiteralType(lit.to_token_stream()))
+            }
+        } else if self.is_u8 {
+            if let syn::Lit::Byte(lit) = lit {
+                Ok(lit.value() as u32)
+            } else {
+                Err(ParseError::UnsupportedLiteralType(lit.to_token_stream()))
+            }
+        } else {
+            Err(ParseError::UnsupportedLiteralType(lit.to_token_stream()))
+        }
+    }
+    pub fn get_terminal_indices_from_char_range(
+        &self,
+        start: u32,
+        last: u32,
+    ) -> impl Iterator<Item = usize> + '_ {
+        let start = unsafe { char::from_u32_unchecked(start) };
+        let last = unsafe { char::from_u32_unchecked(last) };
+        self.terminals
+            .iter()
+            .enumerate()
+            .filter_map(move |(idx, terminal)| {
+                if let TerminalName::CharRange(start_, last_) = &terminal.name {
+                    if *last_ < start || *start_ > last {
+                        None
+                    } else {
+                        Some(idx)
+                    }
+                } else {
+                    None
+                }
+            })
+    }
+    pub fn get_terminal_index_from_char(&self, ch: char) -> usize {
+        let name: TerminalName = (ch, ch).into();
+        *self.terminals_index.get(&name).unwrap()
+    }
+
     /// parse the input TokenStream and return a parsed Grammar
     pub fn from_grammar_args(grammar_args: GrammarArgs) -> Result<Self, ParseError> {
         let module_prefix =
@@ -318,37 +339,120 @@ impl Grammar {
 
             eof_index: 0,
             other_terminal_index: 0,
+            range_resolver: RangeResolver::new(),
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";
 
-        // add %token terminals
-        for (index, (ident, token_expr)) in grammar_args.terminals.into_iter().enumerate() {
-            // check if %tokentype is `char` or `u8`
-            if grammar.is_char || grammar.is_u8 {
+        // add char ranges to resolver
+        if grammar.is_char || grammar.is_u8 {
+            // add eof
+            let eof_val = {
+                let eof_body = grammar_args.eof.iter().next().unwrap().1.clone();
+                let eof_parsed = syn::parse2::<syn::Lit>(eof_body.clone());
+                if let Ok(lit) = eof_parsed {
+                    let val = grammar.get_char_value(&lit)?;
+                    grammar.range_resolver.insert(val, val);
+                    val
+                } else {
+                    return Err(ParseError::UnsupportedLiteralType(eof_body));
+                }
+            };
+            // add terminals from %prec definition in each rule
+            for rules_arg in grammar_args.rules.iter() {
+                for rule in rules_arg.rule_lines.iter() {
+                    if let Some(ref prec_ident) = rule.precedence {
+                        prec_ident.range_resolve(&mut grammar)?;
+                    }
+                }
+            }
+
+            // reduce types
+            for (_, terminals_arg) in grammar_args.reduce_types.iter() {
+                for terminal_arg in terminals_arg {
+                    terminal_arg.range_resolve(&mut grammar)?;
+                }
+            }
+
+            // precedence orders
+            for orders in grammar_args.precedences.iter() {
+                for term_arg in orders {
+                    term_arg.range_resolve(&mut grammar)?;
+                }
+            }
+
+            // production rule definition
+            for rules_arg in grammar_args.rules.iter() {
+                for rule in &rules_arg.rule_lines {
+                    if let Some(ref prec_ident) = rule.precedence {
+                        prec_ident.range_resolve(&mut grammar)?;
+                    }
+                    for (_, pattern) in &rule.tokens {
+                        pattern.range_resolve(&mut grammar)?;
+                    }
+                }
+            }
+
+            // add TerminalInfo based on ranges
+            for range in grammar.range_resolver.iter() {
+                let start = unsafe { char::from_u32_unchecked(range.0) };
+                let last = unsafe { char::from_u32_unchecked(range.1) };
+                let name = TerminalName::CharRange(start, last);
+                let terminal_info = TerminalInfo {
+                    name: name.clone(),
+                    reduce_type: None,
+                    body: quote! { range_term },
+                };
+                let index = grammar.terminals.len();
+                if range.0 == eof_val {
+                    grammar.eof_index = index;
+                }
+                grammar.terminals.push(terminal_info);
+                grammar.terminals_index.insert(name, index);
+            }
+            for (ident, _) in grammar_args.terminals.iter() {
+                // check if %tokentype is `char` or `u8`
                 return Err(ParseError::TokenInLiteralMode(ident.span()));
             }
+        } else {
+            // add %token terminals
+            for (index, (ident, token_expr)) in grammar_args.terminals.into_iter().enumerate() {
+                // check reserved name
+                utils::check_reserved_name(&ident)?;
+                let name = ident.into();
 
-            // check reserved name
-            utils::check_reserved_name(&ident)?;
-            let name = ident.into();
+                // check duplicate
+                if let Some((k, _)) = grammar.terminals_index.get_key_value(&name) {
+                    return Err(ParseError::MultipleTokenDefinition(
+                        k.ident().unwrap().clone(),
+                        name.into_ident().unwrap(),
+                    ));
+                }
 
-            // check duplicate
-            if let Some((k, _)) = grammar.terminals_index.get_key_value(&name) {
-                return Err(ParseError::MultipleTokenDefinition(
-                    k.ident().unwrap().clone(),
-                    name.into_ident().unwrap(),
-                ));
+                let terminal_info = TerminalInfo {
+                    name: name.clone(),
+                    reduce_type: None,
+                    body: token_expr,
+                };
+                grammar.terminals.push(terminal_info);
+                grammar.terminals_index.insert(name, index);
             }
+            // add eof
+            let eof_body = grammar_args.eof.into_iter().next().unwrap().1;
+            let eof_ident = Ident::new(utils::EOF_NAME, Span::call_site());
+            let name: TerminalName = eof_ident.into();
 
             let terminal_info = TerminalInfo {
                 name: name.clone(),
                 reduce_type: None,
-                body: token_expr,
+                body: eof_body,
             };
+            let idx = grammar.terminals.len();
+            grammar.eof_index = idx;
             grammar.terminals.push(terminal_info);
-            grammar.terminals_index.insert(name, index);
+            grammar.terminals_index.insert(name, idx);
         }
+
         // add other_terminals
         {
             let ident = Ident::new(utils::OTHERS_TERMINAL_NAME, Span::call_site());
@@ -364,59 +468,14 @@ impl Grammar {
             grammar.terminals.push(terminal_info);
             grammar.terminals_index.insert(name, idx);
         }
-        // add eof
-        {
-            let eof_body = grammar_args.eof.into_iter().next().unwrap().1;
-            let name: TerminalName = if grammar.is_char || grammar.is_u8 {
-                let eof_parsed = syn::parse2::<syn::Lit>(eof_body.clone());
-                if let Ok(lit) = eof_parsed {
-                    match lit {
-                        syn::Lit::Char(lit) => {
-                            if grammar.is_char {
-                                TerminalName::Char(lit.value())
-                            } else {
-                                return Err(ParseError::TokenInLiteralMode(lit.span()));
-                            }
-                        }
-                        syn::Lit::Byte(lit) => {
-                            if grammar.is_u8 {
-                                TerminalName::Char(lit.value() as char)
-                            } else {
-                                return Err(ParseError::TokenInLiteralMode(lit.span()));
-                            }
-                        }
-                        _ => {
-                            return Err(ParseError::UnsupportedLiteralType(eof_body));
-                        }
-                    }
-                } else {
-                    return Err(ParseError::UnsupportedLiteralType(eof_body));
-                }
-            } else {
-                let eof_ident = Ident::new(utils::EOF_NAME, Span::call_site());
-                eof_ident.into()
-            };
 
-            let terminal_info = TerminalInfo {
-                name: name.clone(),
-                reduce_type: None,
-                body: eof_body,
-            };
-            let idx = grammar.terminals.len();
-            grammar.eof_index = idx;
-            grammar.terminals.push(terminal_info);
-            grammar.terminals_index.insert(name, idx);
-        }
-        // add terminals from %prec definition in each rule
+        // add precedence identifier from %prec definition in each rule
         for rules_arg in grammar_args.rules.iter() {
             for rule in rules_arg.rule_lines.iter() {
                 if let Some(ref prec_ident) = rule.precedence {
-                    if prec_ident.to_terminal(&mut grammar).is_err() {
-                        // no terminal is defined;
-                        // define new terminal just for operator
-
-                        // is_err() is true if Literal is invalid
-                        if let IdentOrLiteral::Ident(prec_ident) = prec_ident {
+                    if let IdentOrLiteral::Ident(prec_ident) = prec_ident {
+                        let term_name = TerminalName::Ident(prec_ident.clone());
+                        if !grammar.terminals_index.contains_key(&term_name) {
                             // check reserved name
                             utils::check_reserved_name(prec_ident)?;
 
@@ -752,7 +811,13 @@ impl Grammar {
                 if class_id == self.other_terminal_class_id {
                     0
                 } else {
-                    class.terminals.len()
+                    let sum: usize = class
+                        .terminals
+                        .iter()
+                        .map(|term_idx| self.terminals[*term_idx].name.count())
+                        .sum();
+
+                    sum
                 }
             })
             .sum();
@@ -890,15 +955,20 @@ impl Grammar {
         let mut multiterm_counter = 0;
         for (new_class_id, (_setids, old_classes)) in term_partition.into_iter().enumerate() {
             let mut terms = Vec::new();
+            // terms.len() != len because single terminal could be range-based optimized into multiple characters
+            let mut len = 0;
             for &old_class in old_classes.iter() {
                 for &term in &self.terminal_classes[old_class].terminals {
                     new_term_class_id[term] = new_class_id;
                     terms.push(term);
+
+                    let name = &self.terminals[term].name;
+                    len += name.count();
                 }
                 old_class_to_new_class[old_class] = new_class_id;
             }
             is_first_oldclass_in_newclass[old_classes[0]] = true;
-            if terms.len() > 1 {
+            if len > 1 {
                 multiterm_counter += 1;
             }
             let class_def = TerminalClassDefinintion {
@@ -1069,30 +1139,34 @@ impl Grammar {
         if self.is_char || self.is_u8 {
             // calculate ranges
             for class in self.terminal_classes.iter_mut() {
-                let mut chars = class
+                let mut ranges0 = class
                     .terminals
                     .iter()
                     .filter_map(|&term_idx| {
                         if term_idx == self.other_terminal_index {
                             None
                         } else {
-                            Some(self.terminals[term_idx].name.char().unwrap())
+                            let name = &self.terminals[term_idx].name;
+                            if let TerminalName::CharRange(start, last) = name {
+                                Some((*start as u32, *last as u32))
+                            } else {
+                                unreachable!("terminal name should be char range");
+                            }
                         }
                     })
                     .collect::<Vec<_>>();
-                chars.sort();
+                ranges0.sort();
 
                 let mut ranges: Vec<(u32, u32)> = Vec::new();
-                for ch in chars {
-                    let ch = ch as u32;
+                for (s, l) in ranges0 {
                     if let Some((_, last)) = ranges.last_mut() {
-                        if *last + 1 == ch {
-                            *last = ch as u32;
+                        if *last + 1 == s {
+                            *last = l;
                         } else {
-                            ranges.push((ch, ch));
+                            ranges.push((s, l));
                         }
                     } else {
-                        ranges.push((ch, ch));
+                        ranges.push((s, l));
                     }
                 }
                 class.ranges = ranges;
@@ -1102,23 +1176,25 @@ impl Grammar {
         diag
     }
 
-    pub fn term_pretty_name(&self, term_idx: usize) -> String {
-        if self.is_char || self.is_u8 {
-            self.terminals[term_idx].body.to_string()
+    fn term_pretty_name(&self, term_idx: usize) -> String {
+        if term_idx == self.other_terminal_index {
+            "<Others>".to_string()
         } else {
-            if term_idx == self.other_terminal_index {
-                "<Others>".to_string()
-            } else {
-                self.terminals[term_idx]
-                    .name
-                    .pretty_name(self.is_char, self.is_u8)
-            }
+            self.terminals[term_idx]
+                .name
+                .pretty_name(self.is_char, self.is_u8)
         }
     }
+
     /// returns either 'term' or 'TerminalClassX'
     pub fn class_pretty_name_abbr(&self, class_idx: usize) -> String {
         let class = &self.terminal_classes[class_idx];
-        if class.terminals.len() == 1 {
+        let len: usize = class
+            .terminals
+            .iter()
+            .map(|term| self.terminals[*term].name.count())
+            .sum();
+        if len == 1 {
             self.term_pretty_name(class.terminals[0])
         } else {
             format!("TerminalClass{}", class.multiterm_counter)
@@ -1127,7 +1203,12 @@ impl Grammar {
     /// returns either 'term' or '[term1, term2, ...]'
     pub fn class_pretty_name_list(&self, class_idx: usize, max_len: usize) -> String {
         let class = &self.terminal_classes[class_idx];
-        if class.terminals.len() == 1 {
+        let len: usize = class
+            .terminals
+            .iter()
+            .map(|term| self.terminals[*term].name.count())
+            .sum();
+        if len == 1 {
             self.term_pretty_name(class.terminals[0])
         } else if class.terminals.len() < max_len {
             let f = self.terminal_classes[class_idx]
@@ -1136,10 +1217,9 @@ impl Grammar {
                 .map(|&term| self.term_pretty_name(term))
                 .collect::<Vec<_>>()
                 .join(", ");
-            format!("[{f}]")
+            format!("[{f}] ({len} terms)")
         } else {
             let class = &self.terminal_classes[class_idx];
-            let len = class.terminals.len();
             let first = class.terminals[0];
             let second = class.terminals[1];
             let last = *class.terminals.last().unwrap();

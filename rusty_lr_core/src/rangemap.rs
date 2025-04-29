@@ -1,6 +1,7 @@
 pub struct RangeMap {
     /// A sorted list of ranges, where each range is represented as a tuple (start, end)
-    pub ranges: Vec<(u32, u32)>,
+    pub range_starts: Vec<u32>,
+    pub range_lasts: Vec<u32>,
 
     /// A list of values corresponding to each range
     pub values: Vec<usize>,
@@ -8,30 +9,41 @@ pub struct RangeMap {
 
 impl RangeMap {
     pub fn new(ranges: Vec<(u32, u32)>, values: Vec<usize>) -> Self {
-        RangeMap { ranges, values }
+        let mut starts = Vec::with_capacity(ranges.len());
+        let mut lasts = Vec::with_capacity(ranges.len());
+        for (start, last) in &ranges {
+            starts.push(*start);
+            lasts.push(*last);
+        }
+        RangeMap {
+            range_starts: starts,
+            range_lasts: lasts,
+            values,
+        }
     }
 
     /// Searches the ranges that contain the key, and returns the corresponding value.
     pub fn get(&self, key: u32) -> Option<usize> {
-        if self.ranges.is_empty() {
-            return None;
-        }
-        let mut low = 0;
-        let mut high = self.ranges.len() - 1;
-        while high - low > 1 {
-            let mid = (low + high) / 2;
-            if self.ranges[mid].0 <= key {
-                low = mid;
-            } else {
-                high = mid - 1;
+        match self.range_starts.binary_search(&key) {
+            Ok(idx) => {
+                // range start key found
+                if self.range_lasts[idx] >= key {
+                    Some(self.values[idx])
+                } else {
+                    None
+                }
             }
-        }
-        if self.ranges[high].0 <= key && key <= self.ranges[high].1 {
-            Some(self.values[high])
-        } else if self.ranges[low].0 <= key && key <= self.ranges[low].1 {
-            Some(self.values[low])
-        } else {
-            None
+            Err(idx) => {
+                // starts[idx] > key
+                // starts[idx] < key
+                if idx == 0 {
+                    None
+                } else if self.range_lasts[idx - 1] >= key {
+                    Some(self.values[idx - 1])
+                } else {
+                    None
+                }
+            }
         }
     }
 }

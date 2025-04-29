@@ -749,10 +749,8 @@ impl Pattern {
             }
 
             PatternInternal::Literal(literal) => match literal {
-                syn::Lit::Char(_) => {
-                    let idx = grammar
-                        .add_or_get_literal_character(literal.clone(), None)
-                        .unwrap();
+                syn::Lit::Char(ch) => {
+                    let idx = grammar.get_terminal_index_from_char(ch.value());
                     let info = &grammar.terminals[idx];
 
                     Ok(PatternResult {
@@ -764,10 +762,8 @@ impl Pattern {
                         )),
                     })
                 }
-                syn::Lit::Byte(_) => {
-                    let idx = grammar
-                        .add_or_get_literal_character(literal.clone(), None)
-                        .unwrap();
+                syn::Lit::Byte(ch) => {
+                    let idx = grammar.get_terminal_index_from_char(ch.value() as char);
                     let info = &grammar.terminals[idx];
 
                     Ok(PatternResult {
@@ -790,13 +786,7 @@ impl Pattern {
                             .value()
                             .chars()
                             .map(|ch| {
-                                let term_id = grammar
-                                    .add_or_get_literal_character(
-                                        syn::Lit::Char(syn::LitChar::new(ch, str_span)),
-                                        None,
-                                    )
-                                    .unwrap();
-
+                                let term_id = grammar.get_terminal_index_from_char(ch);
                                 TokenMapped {
                                     token: Token::Term(term_id),
                                     mapto: None,
@@ -843,13 +833,7 @@ impl Pattern {
                         tokens: vec
                             .iter()
                             .map(|ch| {
-                                let term_id = grammar
-                                    .add_or_get_literal_character(
-                                        syn::Lit::Byte(syn::LitByte::new(*ch, str_span)),
-                                        None,
-                                    )
-                                    .unwrap();
-
+                                let term_id = grammar.get_terminal_index_from_char(*ch as char);
                                 TokenMapped {
                                     token: Token::Term(term_id),
                                     mapto: None,
