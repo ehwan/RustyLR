@@ -6,7 +6,8 @@
 
 RustyLR enables you to define context-free grammars (CFGs) directly in Rust using macros or build scripts. It constructs optimized finite state automata at compile time, ensuring efficient and reliable parsing.​
 
-![images/optimize.png](images/optimize.png)
+#### Number of terminal symbols reduced to 32 (from 0x10FFFF!) by optimization
+![images/optimize.png](images/title.png)
 
 ## Features
  - **Automatic Optimization:**: Reduces parser table size and improves performance by grouping terminals with identical behavior across parser states.

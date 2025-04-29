@@ -40,8 +40,13 @@ const TEST_JSON: &'static str = r#"
 }
 "#;
 
+use rusty_lr::lr::Parser;
+
 fn main() {
     let parser = parser::JsonParser::new();
+    println!("#rules: {}", parser.get_rules().len());
+    println!("#states: {}", parser.get_states().len());
+    println!("#terminals: {}", parser.classes.len());
 
     // success
     {
