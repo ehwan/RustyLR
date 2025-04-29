@@ -43,6 +43,17 @@ const TEST_JSON: &'static str = r#"
 fn main() {
     let parser = parser::JsonParser::new();
 
+    // success
+    {
+        let mut context = parser::JsonContext::new();
+        for ch in TEST_JSON.chars().chain(['\0']) {
+            context
+                .feed(&parser, ch, &mut ())
+                .expect("Error parsing character");
+        }
+        println!("Parsed successfully");
+    }
+
     // error
     {
         let mut context = parser::JsonContext::new();
@@ -53,19 +64,6 @@ fn main() {
         }
         context
             .feed(&parser, 'a', &mut ())
-            .expect("Error finalizing parsing");
-    }
-
-    // success
-    {
-        let mut context = parser::JsonContext::new();
-        for ch in TEST_JSON.chars() {
-            context
-                .feed(&parser, ch, &mut ())
-                .expect("Error parsing character");
-        }
-        context
-            .feed(&parser, '\0', &mut ())
             .expect("Error finalizing parsing");
     }
 }

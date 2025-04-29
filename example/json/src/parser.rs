@@ -43,9 +43,7 @@ Characters: Character*;
 // WIP
 Character:
           '\\' Escape
-        | ['\u{0020}'-'\u{0021}'] 
-        | ['\u{0023}'-'\u{005B}']
-        | ['\u{005D}'-'\u{007F}'] // all ascii values execpt '"' and '\'
+        | ['\u{0020}'-'\u{FF}'] - '"' - '\\'
         ;
 
 Escape: '"'

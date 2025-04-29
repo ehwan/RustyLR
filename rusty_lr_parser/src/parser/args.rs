@@ -71,6 +71,7 @@ impl TerminalOrTerminalSet {
             }
         }
     }
+    /*
     pub fn span_pair(&self) -> (Span, Span) {
         match self {
             TerminalOrTerminalSet::Ident(ident) => (ident.span(), ident.span()),
@@ -80,6 +81,7 @@ impl TerminalOrTerminalSet {
             }
         }
     }
+    */
 }
 
 impl std::fmt::Display for TerminalOrTerminalSet {
@@ -178,7 +180,7 @@ pub enum PatternArgs {
     /// force lookahead tokens for this pattern.
     /// lookaheads will not be consumed.
     /// span of the rightmost of this pattern
-    Lookaheads(Box<PatternArgs>, TerminalOrTerminalSet),
+    Lookaheads(Box<PatternArgs>, Box<PatternArgs>),
 
     /// ( Pattern+ )
     /// span of '(' and ')'
@@ -186,6 +188,9 @@ pub enum PatternArgs {
 
     /// 'a', b'a', "abc", b"abc"
     Literal(Literal),
+
+    /// Pattern - Terminals exclusion
+    Minus(Box<PatternArgs>, Box<PatternArgs>),
 }
 
 impl std::fmt::Display for PatternArgs {
@@ -213,6 +218,9 @@ impl std::fmt::Display for PatternArgs {
             }
             PatternArgs::Literal(literal) => {
                 write!(f, "{}", literal)
+            }
+            PatternArgs::Minus(base, terminal_set) => {
+                write!(f, "{}-{}", base, terminal_set)
             }
         }
     }
@@ -279,8 +287,8 @@ impl PatternArgs {
                     Ok(pattern)
                 }
             }
-            PatternArgs::Lookaheads(pattern, terminalset) => {
-                let (negate, terminal_set) = terminalset.to_terminal_set(grammar, true)?;
+            PatternArgs::Lookaheads(pattern, lookaheads) => {
+                let (negate, terminal_set) = lookaheads.to_terminal_set(grammar)?;
                 let pattern = Pattern {
                     internal: PatternInternal::Lookaheads(
                         Box::new(pattern.into_pattern(grammar, put_exclamation)?),
@@ -350,6 +358,79 @@ impl PatternArgs {
                     Ok(pattern)
                 }
             }
+            PatternArgs::Minus(_, _) => {
+                let (negate, terminal_set) = self.to_terminal_set(grammar)?;
+                let pattern = Pattern {
+                    internal: PatternInternal::TerminalSet(negate, terminal_set),
+                    pretty_name: pretty_name.clone(),
+                };
+                if put_exclamation {
+                    Ok(Pattern {
+                        internal: PatternInternal::Exclamation(Box::new(pattern)),
+                        pretty_name,
+                    })
+                } else {
+                    Ok(pattern)
+                }
+            }
+        }
+    }
+
+    /// if this pattern consists of single-length terminals, returns the set of terminals
+    pub fn to_terminal_set(
+        &self,
+        grammar: &mut Grammar,
+    ) -> Result<(bool, BTreeSet<usize>), ParseError> {
+        match self {
+            PatternArgs::TerminalSet(terminal_set) => terminal_set.to_terminal_set(grammar, false),
+            PatternArgs::Ident(ident) => {
+                TerminalOrTerminalSet::Ident(ident.clone()).to_terminal_set(grammar, false)
+            }
+            PatternArgs::Plus(base, span) => {
+                Err(ParseError::OnlyTerminalSet(base.span_pair().0, *span))
+            }
+            PatternArgs::Star(base, span) => {
+                Err(ParseError::OnlyTerminalSet(base.span_pair().0, *span))
+            }
+            PatternArgs::Question(base, span) => {
+                Err(ParseError::OnlyTerminalSet(base.span_pair().0, *span))
+            }
+            PatternArgs::Exclamation(base, _) => base.to_terminal_set(grammar),
+            PatternArgs::Lookaheads(base, _) => {
+                let (span_begin, span_end) = base.span_pair();
+                Err(ParseError::OnlyTerminalSet(span_begin, span_end))
+            }
+            PatternArgs::Group(group, span_begin, span_end) => {
+                if group.len() == 1 {
+                    group[0].to_terminal_set(grammar)
+                } else {
+                    Err(ParseError::OnlyTerminalSet(*span_begin, *span_end))
+                }
+            }
+            PatternArgs::Literal(lit) => {
+                TerminalOrTerminalSet::Literal(lit.clone()).to_terminal_set(grammar, false)
+            }
+            PatternArgs::Minus(base, exclude) => {
+                let (negate_lhs, mut lhs_set) = base.to_terminal_set(grammar)?;
+                let (negate_rhs, mut rhs_set) = exclude.to_terminal_set(grammar)?;
+
+                // A - B = A and B^c
+
+                match (negate_lhs, negate_rhs) {
+                    // L and R^c
+                    (false, false) => Ok((false, lhs_set.difference(&rhs_set).copied().collect())),
+                    // L^c and R^c = (L or R)^c
+                    (true, false) => {
+                        lhs_set.append(&mut rhs_set);
+                        Ok((true, lhs_set))
+                    }
+                    // L and R
+                    (false, true) => Ok((true, lhs_set.intersection(&rhs_set).copied().collect())),
+
+                    // L^c and R
+                    (true, true) => Ok((false, rhs_set.difference(&lhs_set).copied().collect())),
+                }
+            }
         }
     }
     pub fn span_pair(&self) -> (Span, Span) {
@@ -372,6 +453,9 @@ impl PatternArgs {
             PatternArgs::Literal(literal) => {
                 let span = literal.span();
                 (span, span)
+            }
+            PatternArgs::Minus(base, terminal_set) => {
+                (base.span_pair().0, terminal_set.span_pair().1)
             }
         }
     }

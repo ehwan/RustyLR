@@ -112,6 +112,8 @@ pub enum ParseError {
         name: Ident,
         span: (Span, Span),
     },
+
+    OnlyTerminalSet(Span, Span),
 }
 #[allow(unused)]
 impl ArgError {
@@ -251,6 +253,7 @@ impl ParseError {
             ParseError::MultiplePrecedenceOrderDefinition { cur, old } => cur.span(),
 
             ParseError::RuleTypeDefinedButActionNotDefined { name, span } => span.0,
+            ParseError::OnlyTerminalSet(span_begin, span_end) => *span_begin,
         }
     }
 
@@ -320,6 +323,7 @@ impl ParseError {
             ParseError::RuleTypeDefinedButActionNotDefined { name, span } => {
                 "ReduceAction must be defined for this rule".into()
             }
+            ParseError::OnlyTerminalSet(_, _) => "Only terminal or terminal set is allowed".into(),
         }
     }
 }

@@ -605,6 +605,15 @@ impl Builder {
                             .with_notes(vec!["".to_string()])
                     }
 
+                    ParseError::OnlyTerminalSet(span_begin, span_end) => {
+                        let range = span_begin.byte_range().start..span_end.byte_range().end;
+                        Diagnostic::error()
+                            .with_message("Only terminal or terminal set is allowed")
+                            .with_labels(vec![Label::primary(file_id, range)
+                                .with_message("This pattern is not terminal")])
+                            .with_notes(vec!["".to_string()])
+                    }
+
                     _ => {
                         let message = e.short_message();
                         let span = e.span().byte_range();

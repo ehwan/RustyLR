@@ -216,6 +216,10 @@ TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
 }
 ;
 
+%left minus;
+%left slash;
+%left star plus question exclamation;
+
 Pattern(PatternArgs): ident {
     if let Lexed::Ident(ident) = ident {
         PatternArgs::Ident( ident )
@@ -254,8 +258,8 @@ Pattern(PatternArgs): ident {
 | TerminalSet {
     PatternArgs::TerminalSet( TerminalSet )
 }
-| Pattern slash TerminalOrTerminalSet {
-    PatternArgs::Lookaheads( Box::new(Pattern), TerminalOrTerminalSet )
+| p1=Pattern slash lh=Pattern {
+    PatternArgs::Lookaheads( Box::new(p1), Box::new(lh) )
 }
 | lparen Pattern+ rparen {
     let open = if let Lexed::LParen(lparen) = lparen {
@@ -275,6 +279,9 @@ Pattern(PatternArgs): ident {
         unreachable!( "Pattern-Literal" );
     };
     PatternArgs::Literal(literal)
+}
+| p1=Pattern minus p2=Pattern {
+    PatternArgs::Minus( Box::new(p1), Box::new(p2) )
 }
 ;
 

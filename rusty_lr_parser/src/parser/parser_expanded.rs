@@ -46,9 +46,10 @@ Pattern -> Pattern star
 Pattern -> Pattern question
 Pattern -> Pattern exclamation
 Pattern -> TerminalSet
-Pattern -> Pattern slash TerminalOrTerminalSet
+Pattern -> Pattern slash Pattern
 Pattern -> lparen Pattern+ rparen
 Pattern -> literal
+Pattern -> Pattern minus Pattern
 Action -> bracegroup
 Action ->
 TokenDef -> token ident RustCode semicolon
@@ -774,11 +775,11 @@ impl GrammarStack {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut TerminalOrTerminalSet = self.__rustylr_generated_stack_14.pop().unwrap();
+        let mut lh = self.__rustylr_generated_stack_9.pop().unwrap();
         let mut slash = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self.__rustylr_generated_stack_9.pop().unwrap();
+        let mut p1 = self.__rustylr_generated_stack_9.pop().unwrap();
         self.__rustylr_generated_stack_9
-            .push({ PatternArgs::Lookaheads(Box::new(Pattern), TerminalOrTerminalSet) });
+            .push({ PatternArgs::Lookaheads(Box::new(p1), Box::new(lh)) });
         Ok(())
     }
     fn reduce_Pattern_7(
@@ -816,6 +817,18 @@ impl GrammarStack {
             };
             PatternArgs::Literal(literal)
         });
+        Ok(())
+    }
+    fn reduce_Pattern_9(
+        &mut self,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        let mut p2 = self.__rustylr_generated_stack_9.pop().unwrap();
+        let mut minus = self.__rustylr_generated_terminal_stack.pop().unwrap();
+        let mut p1 = self.__rustylr_generated_stack_9.pop().unwrap();
+        self.__rustylr_generated_stack_9
+            .push({ PatternArgs::Minus(Box::new(p1), Box::new(p2)) });
         Ok(())
     }
     fn reduce_Action_0(
@@ -1809,96 +1822,97 @@ impl ::rusty_lr_core::lr::Stack for GrammarStack {
             20usize => self.reduce_Pattern_6(lookahead, user_data),
             21usize => self.reduce_Pattern_7(lookahead, user_data),
             22usize => self.reduce_Pattern_8(lookahead, user_data),
-            23usize => self.reduce_Action_0(lookahead, user_data),
-            24usize => self.reduce_Action_1(lookahead, user_data),
-            25usize => self.reduce_TokenDef_0(lookahead, user_data),
-            26usize => self.reduce_RustCode_0(lookahead, user_data),
-            27usize => self.reduce_StartDef_0(lookahead, user_data),
-            28usize => self.reduce_EofDef_0(lookahead, user_data),
-            29usize => self.reduce_TokenTypeDef_0(lookahead, user_data),
-            30usize => self.reduce_UserDataDef_0(lookahead, user_data),
-            31usize => self.reduce_TerminalOrTerminalSet_0(lookahead, user_data),
-            32usize => self.reduce_TerminalOrTerminalSet_1(lookahead, user_data),
-            33usize => self.reduce_TerminalOrTerminalSet_2(lookahead, user_data),
-            34usize => self.reduce_IdentOrLiteral_0(lookahead, user_data),
-            35usize => self.reduce_IdentOrLiteral_1(lookahead, user_data),
-            36usize => self.reduce_ReduceType_0(lookahead, user_data),
-            37usize => self.reduce_ReduceType_1(lookahead, user_data),
-            38usize => self.reduce_ReduceDef_0(lookahead, user_data),
-            39usize => self.reduce_ErrorDef_0(lookahead, user_data),
-            40usize => self.reduce_ModulePrefixDef_0(lookahead, user_data),
-            41usize => self.reduce_Glr_0(lookahead, user_data),
-            42usize => self.reduce_Lalr_0(lookahead, user_data),
-            43usize => self.reduce_Precedence_0(lookahead, user_data),
-            44usize => self.reduce_NoOptim_0(lookahead, user_data),
-            45usize => self.reduce_GrammarLine_0(lookahead, user_data),
-            46usize => self.reduce_GrammarLine_1(lookahead, user_data),
-            47usize => self.reduce_GrammarLine_2(lookahead, user_data),
-            48usize => self.reduce_GrammarLine_3(lookahead, user_data),
-            49usize => self.reduce_GrammarLine_4(lookahead, user_data),
-            50usize => self.reduce_GrammarLine_5(lookahead, user_data),
-            51usize => self.reduce_GrammarLine_6(lookahead, user_data),
-            52usize => self.reduce_GrammarLine_7(lookahead, user_data),
-            53usize => self.reduce_GrammarLine_8(lookahead, user_data),
-            54usize => self.reduce_GrammarLine_9(lookahead, user_data),
-            55usize => self.reduce_GrammarLine_10(lookahead, user_data),
-            56usize => self.reduce_GrammarLine_11(lookahead, user_data),
-            57usize => self.reduce_GrammarLine_12(lookahead, user_data),
-            58usize => self.reduce_Grammar_0(lookahead, user_data),
-            59usize => self.reduce__TokenMappedPlus28_0(lookahead, user_data),
-            60usize => self.reduce__TokenMappedPlus28_1(lookahead, user_data),
-            61usize => self.reduce__TokenMappedStar29_0(lookahead, user_data),
-            62usize => self.reduce__TokenMappedStar29_1(lookahead, user_data),
-            63usize => self.reduce__PrecDefQuestion30_0(lookahead, user_data),
-            64usize => self.reduce__PrecDefQuestion30_1(lookahead, user_data),
-            65usize => self.reduce__caretQuestion31_0(lookahead, user_data),
-            66usize => self.reduce__caretQuestion31_1(lookahead, user_data),
-            67usize => self.reduce__TerminalSetItemPlus32_0(lookahead, user_data),
-            68usize => self.reduce__TerminalSetItemPlus32_1(lookahead, user_data),
-            69usize => self.reduce__TerminalSetItemStar33_0(lookahead, user_data),
-            70usize => self.reduce__TerminalSetItemStar33_1(lookahead, user_data),
-            71usize => self.reduce__PatternPlus34_0(lookahead, user_data),
-            72usize => self.reduce__PatternPlus34_1(lookahead, user_data),
-            73usize => self.reduce__TermSet35_0(lookahead, user_data),
-            74usize => self.reduce__TermSet35_1(lookahead, user_data),
-            75usize => self.reduce__TermSet35_2(lookahead, user_data),
-            76usize => self.reduce__TermSet35_3(lookahead, user_data),
-            77usize => self.reduce__TermSet35_4(lookahead, user_data),
-            78usize => self.reduce__TermSet35_5(lookahead, user_data),
-            79usize => self.reduce__TermSet35_6(lookahead, user_data),
-            80usize => self.reduce__TermSet35_7(lookahead, user_data),
-            81usize => self.reduce__TermSet35_8(lookahead, user_data),
-            82usize => self.reduce__TermSet35_9(lookahead, user_data),
-            83usize => self.reduce__TermSet35_10(lookahead, user_data),
-            84usize => self.reduce__TermSet35_11(lookahead, user_data),
-            85usize => self.reduce__TermSet35_12(lookahead, user_data),
-            86usize => self.reduce__TermSet35_13(lookahead, user_data),
-            87usize => self.reduce__TermSet35_14(lookahead, user_data),
-            88usize => self.reduce__TermSet35_15(lookahead, user_data),
-            89usize => self.reduce__TermSet35_16(lookahead, user_data),
-            90usize => self.reduce__TermSet35_17(lookahead, user_data),
-            91usize => self.reduce__TermSet35_18(lookahead, user_data),
-            92usize => self.reduce__TermSet35_19(lookahead, user_data),
-            93usize => self.reduce__TermSet35_20(lookahead, user_data),
-            94usize => self.reduce__TermSet35_21(lookahead, user_data),
-            95usize => self.reduce__TermSet35_22(lookahead, user_data),
-            96usize => self.reduce__TermSet35_23(lookahead, user_data),
-            97usize => self.reduce__TermSet35_24(lookahead, user_data),
-            98usize => self.reduce__TermSet35_25(lookahead, user_data),
-            99usize => self.reduce__TermSet35_26(lookahead, user_data),
-            100usize => self.reduce__TermSet35_27(lookahead, user_data),
-            101usize => self.reduce__TermSet35_28(lookahead, user_data),
-            102usize => self.reduce__TermSet35_29(lookahead, user_data),
-            103usize => self.reduce__TermSet35_30(lookahead, user_data),
-            104usize => self.reduce__TermSet35_31(lookahead, user_data),
-            105usize => self.reduce__TermSet35_32(lookahead, user_data),
-            106usize => self.reduce___TermSet35Plus36_0(lookahead, user_data),
-            107usize => self.reduce___TermSet35Plus36_1(lookahead, user_data),
-            108usize => self.reduce__IdentOrLiteralPlus37_0(lookahead, user_data),
-            109usize => self.reduce__IdentOrLiteralPlus37_1(lookahead, user_data),
-            110usize => self.reduce__GrammarLinePlus38_0(lookahead, user_data),
-            111usize => self.reduce__GrammarLinePlus38_1(lookahead, user_data),
-            112usize => self.reduce_Augmented_0(lookahead, user_data),
+            23usize => self.reduce_Pattern_9(lookahead, user_data),
+            24usize => self.reduce_Action_0(lookahead, user_data),
+            25usize => self.reduce_Action_1(lookahead, user_data),
+            26usize => self.reduce_TokenDef_0(lookahead, user_data),
+            27usize => self.reduce_RustCode_0(lookahead, user_data),
+            28usize => self.reduce_StartDef_0(lookahead, user_data),
+            29usize => self.reduce_EofDef_0(lookahead, user_data),
+            30usize => self.reduce_TokenTypeDef_0(lookahead, user_data),
+            31usize => self.reduce_UserDataDef_0(lookahead, user_data),
+            32usize => self.reduce_TerminalOrTerminalSet_0(lookahead, user_data),
+            33usize => self.reduce_TerminalOrTerminalSet_1(lookahead, user_data),
+            34usize => self.reduce_TerminalOrTerminalSet_2(lookahead, user_data),
+            35usize => self.reduce_IdentOrLiteral_0(lookahead, user_data),
+            36usize => self.reduce_IdentOrLiteral_1(lookahead, user_data),
+            37usize => self.reduce_ReduceType_0(lookahead, user_data),
+            38usize => self.reduce_ReduceType_1(lookahead, user_data),
+            39usize => self.reduce_ReduceDef_0(lookahead, user_data),
+            40usize => self.reduce_ErrorDef_0(lookahead, user_data),
+            41usize => self.reduce_ModulePrefixDef_0(lookahead, user_data),
+            42usize => self.reduce_Glr_0(lookahead, user_data),
+            43usize => self.reduce_Lalr_0(lookahead, user_data),
+            44usize => self.reduce_Precedence_0(lookahead, user_data),
+            45usize => self.reduce_NoOptim_0(lookahead, user_data),
+            46usize => self.reduce_GrammarLine_0(lookahead, user_data),
+            47usize => self.reduce_GrammarLine_1(lookahead, user_data),
+            48usize => self.reduce_GrammarLine_2(lookahead, user_data),
+            49usize => self.reduce_GrammarLine_3(lookahead, user_data),
+            50usize => self.reduce_GrammarLine_4(lookahead, user_data),
+            51usize => self.reduce_GrammarLine_5(lookahead, user_data),
+            52usize => self.reduce_GrammarLine_6(lookahead, user_data),
+            53usize => self.reduce_GrammarLine_7(lookahead, user_data),
+            54usize => self.reduce_GrammarLine_8(lookahead, user_data),
+            55usize => self.reduce_GrammarLine_9(lookahead, user_data),
+            56usize => self.reduce_GrammarLine_10(lookahead, user_data),
+            57usize => self.reduce_GrammarLine_11(lookahead, user_data),
+            58usize => self.reduce_GrammarLine_12(lookahead, user_data),
+            59usize => self.reduce_Grammar_0(lookahead, user_data),
+            60usize => self.reduce__TokenMappedPlus28_0(lookahead, user_data),
+            61usize => self.reduce__TokenMappedPlus28_1(lookahead, user_data),
+            62usize => self.reduce__TokenMappedStar29_0(lookahead, user_data),
+            63usize => self.reduce__TokenMappedStar29_1(lookahead, user_data),
+            64usize => self.reduce__PrecDefQuestion30_0(lookahead, user_data),
+            65usize => self.reduce__PrecDefQuestion30_1(lookahead, user_data),
+            66usize => self.reduce__caretQuestion31_0(lookahead, user_data),
+            67usize => self.reduce__caretQuestion31_1(lookahead, user_data),
+            68usize => self.reduce__TerminalSetItemPlus32_0(lookahead, user_data),
+            69usize => self.reduce__TerminalSetItemPlus32_1(lookahead, user_data),
+            70usize => self.reduce__TerminalSetItemStar33_0(lookahead, user_data),
+            71usize => self.reduce__TerminalSetItemStar33_1(lookahead, user_data),
+            72usize => self.reduce__PatternPlus34_0(lookahead, user_data),
+            73usize => self.reduce__PatternPlus34_1(lookahead, user_data),
+            74usize => self.reduce__TermSet35_0(lookahead, user_data),
+            75usize => self.reduce__TermSet35_1(lookahead, user_data),
+            76usize => self.reduce__TermSet35_2(lookahead, user_data),
+            77usize => self.reduce__TermSet35_3(lookahead, user_data),
+            78usize => self.reduce__TermSet35_4(lookahead, user_data),
+            79usize => self.reduce__TermSet35_5(lookahead, user_data),
+            80usize => self.reduce__TermSet35_6(lookahead, user_data),
+            81usize => self.reduce__TermSet35_7(lookahead, user_data),
+            82usize => self.reduce__TermSet35_8(lookahead, user_data),
+            83usize => self.reduce__TermSet35_9(lookahead, user_data),
+            84usize => self.reduce__TermSet35_10(lookahead, user_data),
+            85usize => self.reduce__TermSet35_11(lookahead, user_data),
+            86usize => self.reduce__TermSet35_12(lookahead, user_data),
+            87usize => self.reduce__TermSet35_13(lookahead, user_data),
+            88usize => self.reduce__TermSet35_14(lookahead, user_data),
+            89usize => self.reduce__TermSet35_15(lookahead, user_data),
+            90usize => self.reduce__TermSet35_16(lookahead, user_data),
+            91usize => self.reduce__TermSet35_17(lookahead, user_data),
+            92usize => self.reduce__TermSet35_18(lookahead, user_data),
+            93usize => self.reduce__TermSet35_19(lookahead, user_data),
+            94usize => self.reduce__TermSet35_20(lookahead, user_data),
+            95usize => self.reduce__TermSet35_21(lookahead, user_data),
+            96usize => self.reduce__TermSet35_22(lookahead, user_data),
+            97usize => self.reduce__TermSet35_23(lookahead, user_data),
+            98usize => self.reduce__TermSet35_24(lookahead, user_data),
+            99usize => self.reduce__TermSet35_25(lookahead, user_data),
+            100usize => self.reduce__TermSet35_26(lookahead, user_data),
+            101usize => self.reduce__TermSet35_27(lookahead, user_data),
+            102usize => self.reduce__TermSet35_28(lookahead, user_data),
+            103usize => self.reduce__TermSet35_29(lookahead, user_data),
+            104usize => self.reduce__TermSet35_30(lookahead, user_data),
+            105usize => self.reduce__TermSet35_31(lookahead, user_data),
+            106usize => self.reduce__TermSet35_32(lookahead, user_data),
+            107usize => self.reduce___TermSet35Plus36_0(lookahead, user_data),
+            108usize => self.reduce___TermSet35Plus36_1(lookahead, user_data),
+            109usize => self.reduce__IdentOrLiteralPlus37_0(lookahead, user_data),
+            110usize => self.reduce__IdentOrLiteralPlus37_1(lookahead, user_data),
+            111usize => self.reduce__GrammarLinePlus38_0(lookahead, user_data),
+            112usize => self.reduce__GrammarLinePlus38_1(lookahead, user_data),
+            113usize => self.reduce_Augmented_0(lookahead, user_data),
             _ => {
                 unreachable!("Invalid Rule: {}", rustylr_macro_generated_ruleid__);
             }
@@ -1965,12 +1979,42 @@ impl GrammarParser {
     #[allow(clippy::clone_on_copy)]
     pub fn new() -> Self {
         let mut builder = ::rusty_lr_core::builder::Grammar::new();
+        builder.add_reduce_type(
+            ::rusty_lr_core::builder::Operator::Term(11usize),
+            ::rusty_lr_core::ReduceType::Left,
+        );
+        builder.add_reduce_type(
+            ::rusty_lr_core::builder::Operator::Term(9usize),
+            ::rusty_lr_core::ReduceType::Left,
+        );
+        builder.add_reduce_type(
+            ::rusty_lr_core::builder::Operator::Term(12usize),
+            ::rusty_lr_core::ReduceType::Left,
+        );
+        builder.add_reduce_type(
+            ::rusty_lr_core::builder::Operator::Term(10usize),
+            ::rusty_lr_core::ReduceType::Left,
+        );
+        builder.add_reduce_type(
+            ::rusty_lr_core::builder::Operator::Term(8usize),
+            ::rusty_lr_core::ReduceType::Left,
+        );
+        builder.add_reduce_type(
+            ::rusty_lr_core::builder::Operator::Term(13usize),
+            ::rusty_lr_core::ReduceType::Left,
+        );
+        builder.add_precedence(::rusty_lr_core::builder::Operator::Term(11usize), 2usize);
+        builder.add_precedence(::rusty_lr_core::builder::Operator::Term(9usize), 1usize);
+        builder.add_precedence(::rusty_lr_core::builder::Operator::Term(12usize), 2usize);
+        builder.add_precedence(::rusty_lr_core::builder::Operator::Term(10usize), 2usize);
+        builder.add_precedence(::rusty_lr_core::builder::Operator::Term(8usize), 0usize);
+        builder.add_precedence(::rusty_lr_core::builder::Operator::Term(13usize), 2usize);
         builder.add_rule(
             GrammarNonTerminals::Rule,
             vec![
                 ::rusty_lr_core::Token::Term(0usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleType),
-                ::rusty_lr_core::Token::Term(28usize),
+                ::rusty_lr_core::Token::Term(29usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLines),
                 ::rusty_lr_core::Token::Term(33usize),
             ],
@@ -2033,7 +2077,7 @@ impl GrammarParser {
             GrammarNonTerminals::TokenMapped,
             vec![
                 ::rusty_lr_core::Token::Term(0usize),
-                ::rusty_lr_core::Token::Term(29usize),
+                ::rusty_lr_core::Token::Term(30usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
             ],
             None,
@@ -2049,7 +2093,7 @@ impl GrammarParser {
             GrammarNonTerminals::TerminalSetItem,
             vec![
                 ::rusty_lr_core::Token::Term(0usize),
-                ::rusty_lr_core::Token::Term(31usize),
+                ::rusty_lr_core::Token::Term(8usize),
                 ::rusty_lr_core::Token::Term(0usize),
             ],
             None,
@@ -2065,7 +2109,7 @@ impl GrammarParser {
             GrammarNonTerminals::TerminalSetItem,
             vec![
                 ::rusty_lr_core::Token::Term(2usize),
-                ::rusty_lr_core::Token::Term(31usize),
+                ::rusty_lr_core::Token::Term(8usize),
                 ::rusty_lr_core::Token::Term(2usize),
             ],
             None,
@@ -2074,37 +2118,19 @@ impl GrammarParser {
         builder.add_rule(
             GrammarNonTerminals::TerminalSet,
             vec![
-                ::rusty_lr_core::Token::Term(3usize),
+                ::rusty_lr_core::Token::Term(4usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_caretQuestion31),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItemStar33),
-                ::rusty_lr_core::Token::Term(14usize),
+                ::rusty_lr_core::Token::Term(15usize),
             ],
             None,
-            Some(::rusty_lr_core::builder::Operator::Term(3usize)),
+            Some(::rusty_lr_core::builder::Operator::Term(4usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::Pattern,
             vec![::rusty_lr_core::Token::Term(0usize)],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(0usize)),
-        );
-        builder.add_rule(
-            GrammarNonTerminals::Pattern,
-            vec![
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                ::rusty_lr_core::Token::Term(8usize),
-            ],
-            None,
-            Some(::rusty_lr_core::builder::Operator::Term(8usize)),
-        );
-        builder.add_rule(
-            GrammarNonTerminals::Pattern,
-            vec![
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                ::rusty_lr_core::Token::Term(9usize),
-            ],
-            None,
-            Some(::rusty_lr_core::builder::Operator::Term(9usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::Pattern,
@@ -2126,6 +2152,24 @@ impl GrammarParser {
         );
         builder.add_rule(
             GrammarNonTerminals::Pattern,
+            vec![
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
+                ::rusty_lr_core::Token::Term(12usize),
+            ],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(12usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Pattern,
+            vec![
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
+                ::rusty_lr_core::Token::Term(13usize),
+            ],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(13usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Pattern,
             vec![::rusty_lr_core::Token::NonTerm(
                 GrammarNonTerminals::TerminalSet,
             )],
@@ -2136,27 +2180,37 @@ impl GrammarParser {
             GrammarNonTerminals::Pattern,
             vec![
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                ::rusty_lr_core::Token::Term(12usize),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalOrTerminalSet),
+                ::rusty_lr_core::Token::Term(9usize),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
             ],
             None,
-            Some(::rusty_lr_core::builder::Operator::Term(12usize)),
+            Some(::rusty_lr_core::builder::Operator::Term(9usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::Pattern,
             vec![
-                ::rusty_lr_core::Token::Term(4usize),
+                ::rusty_lr_core::Token::Term(3usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PatternPlus34),
-                ::rusty_lr_core::Token::Term(13usize),
+                ::rusty_lr_core::Token::Term(14usize),
             ],
             None,
-            Some(::rusty_lr_core::builder::Operator::Term(4usize)),
+            Some(::rusty_lr_core::builder::Operator::Term(3usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::Pattern,
             vec![::rusty_lr_core::Token::Term(2usize)],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(2usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Pattern,
+            vec![
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
+                ::rusty_lr_core::Token::Term(8usize),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
+            ],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(8usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::Action,
@@ -2168,13 +2222,13 @@ impl GrammarParser {
         builder.add_rule(
             GrammarNonTerminals::TokenDef,
             vec![
-                ::rusty_lr_core::Token::Term(17usize),
+                ::rusty_lr_core::Token::Term(18usize),
                 ::rusty_lr_core::Token::Term(0usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
                 ::rusty_lr_core::Token::Term(33usize),
             ],
             None,
-            Some(::rusty_lr_core::builder::Operator::Term(17usize)),
+            Some(::rusty_lr_core::builder::Operator::Term(18usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::RustCode,
@@ -2187,25 +2241,15 @@ impl GrammarParser {
         builder.add_rule(
             GrammarNonTerminals::StartDef,
             vec![
-                ::rusty_lr_core::Token::Term(18usize),
-                ::rusty_lr_core::Token::Term(0usize),
-                ::rusty_lr_core::Token::Term(33usize),
-            ],
-            None,
-            Some(::rusty_lr_core::builder::Operator::Term(18usize)),
-        );
-        builder.add_rule(
-            GrammarNonTerminals::EofDef,
-            vec![
                 ::rusty_lr_core::Token::Term(19usize),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+                ::rusty_lr_core::Token::Term(0usize),
                 ::rusty_lr_core::Token::Term(33usize),
             ],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(19usize)),
         );
         builder.add_rule(
-            GrammarNonTerminals::TokenTypeDef,
+            GrammarNonTerminals::EofDef,
             vec![
                 ::rusty_lr_core::Token::Term(20usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
@@ -2215,7 +2259,7 @@ impl GrammarParser {
             Some(::rusty_lr_core::builder::Operator::Term(20usize)),
         );
         builder.add_rule(
-            GrammarNonTerminals::UserDataDef,
+            GrammarNonTerminals::TokenTypeDef,
             vec![
                 ::rusty_lr_core::Token::Term(21usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
@@ -2223,6 +2267,16 @@ impl GrammarParser {
             ],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(21usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::UserDataDef,
+            vec![
+                ::rusty_lr_core::Token::Term(22usize),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+                ::rusty_lr_core::Token::Term(33usize),
+            ],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(22usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::TerminalOrTerminalSet,
@@ -2258,15 +2312,15 @@ impl GrammarParser {
         );
         builder.add_rule(
             GrammarNonTerminals::ReduceType,
-            vec![::rusty_lr_core::Token::Term(15usize)],
-            None,
-            Some(::rusty_lr_core::builder::Operator::Term(15usize)),
-        );
-        builder.add_rule(
-            GrammarNonTerminals::ReduceType,
             vec![::rusty_lr_core::Token::Term(16usize)],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(16usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::ReduceType,
+            vec![::rusty_lr_core::Token::Term(17usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(17usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::ReduceDef,
@@ -2281,16 +2335,6 @@ impl GrammarParser {
         builder.add_rule(
             GrammarNonTerminals::ErrorDef,
             vec![
-                ::rusty_lr_core::Token::Term(22usize),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                ::rusty_lr_core::Token::Term(33usize),
-            ],
-            None,
-            Some(::rusty_lr_core::builder::Operator::Term(22usize)),
-        );
-        builder.add_rule(
-            GrammarNonTerminals::ModulePrefixDef,
-            vec![
                 ::rusty_lr_core::Token::Term(23usize),
                 ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
                 ::rusty_lr_core::Token::Term(33usize),
@@ -2299,7 +2343,26 @@ impl GrammarParser {
             Some(::rusty_lr_core::builder::Operator::Term(23usize)),
         );
         builder.add_rule(
+            GrammarNonTerminals::ModulePrefixDef,
+            vec![
+                ::rusty_lr_core::Token::Term(24usize),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+                ::rusty_lr_core::Token::Term(33usize),
+            ],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(24usize)),
+        );
+        builder.add_rule(
             GrammarNonTerminals::Glr,
+            vec![
+                ::rusty_lr_core::Token::Term(27usize),
+                ::rusty_lr_core::Token::Term(33usize),
+            ],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(27usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::Lalr,
             vec![
                 ::rusty_lr_core::Token::Term(26usize),
                 ::rusty_lr_core::Token::Term(33usize),
@@ -2308,32 +2371,23 @@ impl GrammarParser {
             Some(::rusty_lr_core::builder::Operator::Term(26usize)),
         );
         builder.add_rule(
-            GrammarNonTerminals::Lalr,
+            GrammarNonTerminals::Precedence,
             vec![
                 ::rusty_lr_core::Token::Term(25usize),
+                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus37),
                 ::rusty_lr_core::Token::Term(33usize),
             ],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(25usize)),
         );
         builder.add_rule(
-            GrammarNonTerminals::Precedence,
-            vec![
-                ::rusty_lr_core::Token::Term(24usize),
-                ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus37),
-                ::rusty_lr_core::Token::Term(33usize),
-            ],
-            None,
-            Some(::rusty_lr_core::builder::Operator::Term(24usize)),
-        );
-        builder.add_rule(
             GrammarNonTerminals::NoOptim,
             vec![
-                ::rusty_lr_core::Token::Term(27usize),
+                ::rusty_lr_core::Token::Term(28usize),
                 ::rusty_lr_core::Token::Term(33usize),
             ],
             None,
-            Some(::rusty_lr_core::builder::Operator::Term(27usize)),
+            Some(::rusty_lr_core::builder::Operator::Term(28usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
@@ -2476,9 +2530,9 @@ impl GrammarParser {
         builder.add_rule(GrammarNonTerminals::_PrecDefQuestion30, vec![], None, None);
         builder.add_rule(
             GrammarNonTerminals::_caretQuestion31,
-            vec![::rusty_lr_core::Token::Term(30usize)],
+            vec![::rusty_lr_core::Token::Term(31usize)],
             None,
-            Some(::rusty_lr_core::builder::Operator::Term(30usize)),
+            Some(::rusty_lr_core::builder::Operator::Term(31usize)),
         );
         builder.add_rule(GrammarNonTerminals::_caretQuestion31, vec![], None, None);
         builder.add_rule(
@@ -2537,9 +2591,9 @@ impl GrammarParser {
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet35,
-            vec![::rusty_lr_core::Token::Term(28usize)],
+            vec![::rusty_lr_core::Token::Term(29usize)],
             None,
-            Some(::rusty_lr_core::builder::Operator::Term(28usize)),
+            Some(::rusty_lr_core::builder::Operator::Term(29usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet35,
@@ -2555,39 +2609,15 @@ impl GrammarParser {
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet35,
-            vec![::rusty_lr_core::Token::Term(29usize)],
-            None,
-            Some(::rusty_lr_core::builder::Operator::Term(29usize)),
-        );
-        builder.add_rule(
-            GrammarNonTerminals::_TermSet35,
-            vec![::rusty_lr_core::Token::Term(8usize)],
-            None,
-            Some(::rusty_lr_core::builder::Operator::Term(8usize)),
-        );
-        builder.add_rule(
-            GrammarNonTerminals::_TermSet35,
-            vec![::rusty_lr_core::Token::Term(9usize)],
-            None,
-            Some(::rusty_lr_core::builder::Operator::Term(9usize)),
-        );
-        builder.add_rule(
-            GrammarNonTerminals::_TermSet35,
-            vec![::rusty_lr_core::Token::Term(10usize)],
-            None,
-            Some(::rusty_lr_core::builder::Operator::Term(10usize)),
-        );
-        builder.add_rule(
-            GrammarNonTerminals::_TermSet35,
             vec![::rusty_lr_core::Token::Term(30usize)],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(30usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet35,
-            vec![::rusty_lr_core::Token::Term(31usize)],
+            vec![::rusty_lr_core::Token::Term(10usize)],
             None,
-            Some(::rusty_lr_core::builder::Operator::Term(31usize)),
+            Some(::rusty_lr_core::builder::Operator::Term(10usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet35,
@@ -2600,6 +2630,30 @@ impl GrammarParser {
             vec![::rusty_lr_core::Token::Term(12usize)],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(12usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TermSet35,
+            vec![::rusty_lr_core::Token::Term(31usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(31usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TermSet35,
+            vec![::rusty_lr_core::Token::Term(8usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(8usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TermSet35,
+            vec![::rusty_lr_core::Token::Term(13usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(13usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TermSet35,
+            vec![::rusty_lr_core::Token::Term(9usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(9usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet35,
@@ -2621,18 +2675,6 @@ impl GrammarParser {
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet35,
-            vec![::rusty_lr_core::Token::Term(4usize)],
-            None,
-            Some(::rusty_lr_core::builder::Operator::Term(4usize)),
-        );
-        builder.add_rule(
-            GrammarNonTerminals::_TermSet35,
-            vec![::rusty_lr_core::Token::Term(13usize)],
-            None,
-            Some(::rusty_lr_core::builder::Operator::Term(13usize)),
-        );
-        builder.add_rule(
-            GrammarNonTerminals::_TermSet35,
             vec![::rusty_lr_core::Token::Term(3usize)],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(3usize)),
@@ -2642,6 +2684,12 @@ impl GrammarParser {
             vec![::rusty_lr_core::Token::Term(14usize)],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(14usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TermSet35,
+            vec![::rusty_lr_core::Token::Term(4usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(4usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet35,
@@ -2699,9 +2747,9 @@ impl GrammarParser {
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet35,
-            vec![::rusty_lr_core::Token::Term(25usize)],
+            vec![::rusty_lr_core::Token::Term(24usize)],
             None,
-            Some(::rusty_lr_core::builder::Operator::Term(25usize)),
+            Some(::rusty_lr_core::builder::Operator::Term(24usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet35,
@@ -2711,21 +2759,27 @@ impl GrammarParser {
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet35,
+            vec![::rusty_lr_core::Token::Term(27usize)],
+            None,
+            Some(::rusty_lr_core::builder::Operator::Term(27usize)),
+        );
+        builder.add_rule(
+            GrammarNonTerminals::_TermSet35,
             vec![::rusty_lr_core::Token::Term(7usize)],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(7usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet35,
-            vec![::rusty_lr_core::Token::Term(24usize)],
+            vec![::rusty_lr_core::Token::Term(25usize)],
             None,
-            Some(::rusty_lr_core::builder::Operator::Term(24usize)),
+            Some(::rusty_lr_core::builder::Operator::Term(25usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet35,
-            vec![::rusty_lr_core::Token::Term(27usize)],
+            vec![::rusty_lr_core::Token::Term(28usize)],
             None,
-            Some(::rusty_lr_core::builder::Operator::Term(27usize)),
+            Some(::rusty_lr_core::builder::Operator::Term(28usize)),
         );
         builder.add_rule(
             GrammarNonTerminals::__TermSet35Plus36,
@@ -2798,67 +2852,67 @@ impl GrammarParser {
             .collect();
         let mut terminals_class_map: ::rusty_lr_core::HashMap<Lexed, usize> = Default::default();
         terminals_class_map.insert(Lexed::Ident(Ident::new("id", Span::call_site())), 0usize);
-        terminals_class_map.insert(Lexed::Colon(punct!(':')), 28usize);
+        terminals_class_map.insert(Lexed::Colon(punct!(':')), 29usize);
         terminals_class_map.insert(Lexed::Semicolon(punct!(';')), 33usize);
         terminals_class_map.insert(Lexed::Pipe(punct!('|')), 5usize);
-        terminals_class_map.insert(Lexed::Equal(punct!('=')), 29usize);
-        terminals_class_map.insert(Lexed::Plus(punct!('+')), 8usize);
-        terminals_class_map.insert(Lexed::Star(punct!('*')), 9usize);
-        terminals_class_map.insert(Lexed::Question(punct!('?')), 10usize);
-        terminals_class_map.insert(Lexed::Caret(punct!('^')), 30usize);
-        terminals_class_map.insert(Lexed::Minus(punct!('-')), 31usize);
-        terminals_class_map.insert(Lexed::Exclamation(punct!('!')), 11usize);
-        terminals_class_map.insert(Lexed::Slash(punct!('/')), 12usize);
+        terminals_class_map.insert(Lexed::Equal(punct!('=')), 30usize);
+        terminals_class_map.insert(Lexed::Plus(punct!('+')), 10usize);
+        terminals_class_map.insert(Lexed::Star(punct!('*')), 11usize);
+        terminals_class_map.insert(Lexed::Question(punct!('?')), 12usize);
+        terminals_class_map.insert(Lexed::Caret(punct!('^')), 31usize);
+        terminals_class_map.insert(Lexed::Minus(punct!('-')), 8usize);
+        terminals_class_map.insert(Lexed::Exclamation(punct!('!')), 13usize);
+        terminals_class_map.insert(Lexed::Slash(punct!('/')), 9usize);
         terminals_class_map.insert(Lexed::Literal(Literal::usize_suffixed(0)), 2usize);
         terminals_class_map.insert(Lexed::ParenGroup(None), 32usize);
         terminals_class_map.insert(Lexed::BraceGroup(None), 6usize);
-        terminals_class_map.insert(Lexed::LParen(Span::call_site()), 4usize);
-        terminals_class_map.insert(Lexed::RParen(Span::call_site()), 13usize);
-        terminals_class_map.insert(Lexed::LBracket(Span::call_site()), 3usize);
-        terminals_class_map.insert(Lexed::RBracket(Span::call_site()), 14usize);
+        terminals_class_map.insert(Lexed::LParen(Span::call_site()), 3usize);
+        terminals_class_map.insert(Lexed::RParen(Span::call_site()), 14usize);
+        terminals_class_map.insert(Lexed::LBracket(Span::call_site()), 4usize);
+        terminals_class_map.insert(Lexed::RBracket(Span::call_site()), 15usize);
         terminals_class_map.insert(
             Lexed::Left(punct!('%'), Ident::new("id", Span::call_site())),
-            15usize,
-        );
-        terminals_class_map.insert(
-            Lexed::Right(punct!('%'), Ident::new("id", Span::call_site())),
             16usize,
         );
         terminals_class_map.insert(
-            Lexed::Token(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::Right(punct!('%'), Ident::new("id", Span::call_site())),
             17usize,
         );
         terminals_class_map.insert(
-            Lexed::Start(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::Token(punct!('%'), Ident::new("id", Span::call_site())),
             18usize,
         );
         terminals_class_map.insert(
-            Lexed::EofDef(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::Start(punct!('%'), Ident::new("id", Span::call_site())),
             19usize,
         );
         terminals_class_map.insert(
-            Lexed::TokenType(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::EofDef(punct!('%'), Ident::new("id", Span::call_site())),
             20usize,
         );
         terminals_class_map.insert(
-            Lexed::UserData(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::TokenType(punct!('%'), Ident::new("id", Span::call_site())),
             21usize,
         );
         terminals_class_map.insert(
-            Lexed::ErrorType(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::UserData(punct!('%'), Ident::new("id", Span::call_site())),
             22usize,
         );
         terminals_class_map.insert(
-            Lexed::ModulePrefix(punct!('%'), Ident::new("id", Span::call_site())),
+            Lexed::ErrorType(punct!('%'), Ident::new("id", Span::call_site())),
             23usize,
         );
         terminals_class_map.insert(
+            Lexed::ModulePrefix(punct!('%'), Ident::new("id", Span::call_site())),
+            24usize,
+        );
+        terminals_class_map.insert(
             Lexed::Lalr(punct!('%'), Ident::new("id", Span::call_site())),
-            25usize,
+            26usize,
         );
         terminals_class_map.insert(
             Lexed::Glr(punct!('%'), Ident::new("id", Span::call_site())),
-            26usize,
+            27usize,
         );
         terminals_class_map.insert(
             Lexed::Prec(punct!('%'), Ident::new("id", Span::call_site())),
@@ -2866,30 +2920,31 @@ impl GrammarParser {
         );
         terminals_class_map.insert(
             Lexed::Precedence(punct!('%'), Ident::new("id", Span::call_site())),
-            24usize,
+            25usize,
         );
         terminals_class_map.insert(
             Lexed::NoOptim(punct!('%'), Ident::new("id", Span::call_site())),
-            27usize,
+            28usize,
         );
         terminals_class_map.insert(Lexed::Eof, 34usize);
         let terminal_classes = vec![
             vec![Lexed::Ident(Ident::new("id", Span::call_site()))],
             vec![],
             vec![Lexed::Literal(Literal::usize_suffixed(0))],
-            vec![Lexed::LBracket(Span::call_site())],
             vec![Lexed::LParen(Span::call_site())],
+            vec![Lexed::LBracket(Span::call_site())],
             vec![Lexed::Pipe(punct!('|'))],
             vec![Lexed::BraceGroup(None)],
             vec![Lexed::Prec(
                 punct!('%'),
                 Ident::new("id", Span::call_site()),
             )],
+            vec![Lexed::Minus(punct!('-'))],
+            vec![Lexed::Slash(punct!('/'))],
             vec![Lexed::Plus(punct!('+'))],
             vec![Lexed::Star(punct!('*'))],
             vec![Lexed::Question(punct!('?'))],
             vec![Lexed::Exclamation(punct!('!'))],
-            vec![Lexed::Slash(punct!('/'))],
             vec![Lexed::RParen(Span::call_site())],
             vec![Lexed::RBracket(Span::call_site())],
             vec![Lexed::Left(
@@ -2944,7 +2999,6 @@ impl GrammarParser {
             vec![Lexed::Colon(punct!(':'))],
             vec![Lexed::Equal(punct!('='))],
             vec![Lexed::Caret(punct!('^'))],
-            vec![Lexed::Minus(punct!('-'))],
             vec![Lexed::ParenGroup(None)],
             vec![Lexed::Semicolon(punct!(';'))],
             vec![Lexed::Eof],

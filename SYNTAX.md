@@ -51,6 +51,7 @@ Patterns define the structure of the input that matches a production rule.
  - `(P1 P2 P3)` : Grouping of patterns.
  - `'a'` or `b'a'`: Single character literal or byte literal. This is only supported if the `%tokentype` is `char` or `u8`.
  - `"abcd"` or `b"abcd"`: String literal or byte string literal. This is only supported if the `%tokentype` is `char` or `u8`.
+ - `P - TerminalSet`: `P` must be a subset of terminal symbols. This pattern matches `P` but not any of the terminal symbols in `TerminalSet`.
 
 Note: When using range patterns like [first-last],
 the range is determined by the order of %token directives,
@@ -65,6 +66,12 @@ If you define tokens in the following order:
 %token nine '9';
 ```
 The range `[zero-nine]` will be `['0', '9']`, not `['0'-'9']`.
+
+If you are using `char` or `u8` as `%tokentype`, you can use the range pattern like this:
+```
+['0'-'9']
+```
+This exactly matches the range of characters from '0' to '9'.
 
 
 
