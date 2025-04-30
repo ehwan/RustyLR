@@ -16,6 +16,7 @@
  - [`%glr`](#glr-parser-generation)
  - [`%lalr`](#lalr-parser-generation)
  - [`%nooptim`](#no-optimization)
+ - [`%dense`](#dense-parser-table)
 
 
 ## Overview
@@ -385,3 +386,12 @@ See [GLR Parser](#glr-parser) section for more details.
 %nooptim;
 ```
 Disable grammar optimization.
+
+## Dense parser table
+```
+%dense;
+```
+
+Normally, the generated code will use `HashMap` to store the parser table.
+This directive will force the parser to use `Vec` instead of `HashMap`.
+Be careful, this could increase the size of the memory usage a lot.

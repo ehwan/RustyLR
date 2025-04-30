@@ -11,6 +11,8 @@ pub use error::InvalidTerminalError;
 pub use error::ParseError;
 pub use parser::Parser;
 pub use stack::Stack;
+pub use state::DenseState;
+pub use state::SparseState;
 pub use state::State;
 
 #[cfg(feature = "tree")]
@@ -30,7 +32,7 @@ where
     let class = parser.to_terminal_class(&term);
     // check if there is any reduce action with given terminal
     while let Some(reduce_rule) =
-        parser.get_states()[*context.state_stack.last().unwrap()].reduce(&class)
+        parser.get_states()[*context.state_stack.last().unwrap()].reduce(class)
     {
         let rule = &parser.get_rules()[reduce_rule];
         {
@@ -83,7 +85,7 @@ where
     let state = &parser.get_states()[*context.state_stack.last().unwrap()];
 
     // shift with terminal
-    if let Some(next_state_id) = state.shift_goto_term(&class) {
+    if let Some(next_state_id) = state.shift_goto_class(class) {
         context.state_stack.push(next_state_id);
 
         #[cfg(feature = "tree")]

@@ -4,6 +4,7 @@ use std::rc::Rc;
 use super::InvalidTerminalError;
 use super::Node;
 use super::Parser;
+use super::State;
 use super::{MultiplePathError, NodeData};
 
 use crate::HashMap;
@@ -277,7 +278,7 @@ impl<Data: NodeData> Context<Data> {
     {
         let mut nodes = self.current_nodes.clone();
         let mut nodes_pong: HashMap<usize, Vec<Rc<Node<Data>>>> = HashMap::default();
-        let term = parser.to_terminal_class(term);
+        let class = parser.to_terminal_class(term);
 
         loop {
             if nodes.is_empty() {
@@ -287,11 +288,11 @@ impl<Data: NodeData> Context<Data> {
             nodes_pong.clear();
             for (state, nodes) in nodes.drain() {
                 let state = &parser.get_states()[state];
-                if state.shift_goto_term(&term).is_some() {
+                if state.shift_goto_class(class).is_some() {
                     return true;
                 }
 
-                if let Some(reduce_rules) = state.reduce(&term) {
+                if let Some(reduce_rules) = state.reduce(class) {
                     for reduce_rule in reduce_rules {
                         let reduce_rule = &parser.get_rules()[*reduce_rule];
                         let reduce_len = reduce_rule.rule.len();
@@ -305,7 +306,7 @@ impl<Data: NodeData> Context<Data> {
                                 .shift_goto_nonterm(&reduce_rule.name)
                             {
                                 if parser.get_states()[nonterm_shift_state]
-                                    .shift_goto_term(&term)
+                                    .shift_goto_class(class)
                                     .is_some()
                                 {
                                     return true;

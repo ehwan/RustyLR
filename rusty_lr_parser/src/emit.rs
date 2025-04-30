@@ -31,6 +31,12 @@ impl Grammar {
             let multiple_path_error = format_ident!("{}MultiplePathError", start_rule_name);
             let node_enum_name = format_ident!("{}NodeEnum", start_rule_name);
 
+            let state_structname = if self.emit_dense {
+                format_ident!("DenseState")
+            } else {
+                format_ident!("SparseState")
+            };
+
             stream.extend(
         quote! {
                 /// type alias for `Context`
@@ -41,7 +47,7 @@ impl Grammar {
                 pub type #rule_typename = #module_prefix::ProductionRule<usize, #enum_name>;
                 /// type alias for DFA state
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #state_typename = #module_prefix::glr::State<usize, #enum_name>;
+                pub type #state_typename = #module_prefix::glr::#state_structname<#enum_name>;
                 /// type alias for `InvalidTerminalError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #invalid_terminal_error = #module_prefix::glr::InvalidTerminalError<#token_typename, #enum_name, #reduce_error_typename>;
@@ -52,6 +58,12 @@ impl Grammar {
             );
         } else {
             let stack_struct_name = format_ident!("{}Stack", start_rule_name);
+            let state_structname = if self.emit_dense {
+                format_ident!("DenseState")
+            } else {
+                format_ident!("SparseState")
+            };
+
             stream.extend(
         quote! {
                 /// type alias for `Context`
@@ -62,7 +74,7 @@ impl Grammar {
                 pub type #rule_typename = #module_prefix::ProductionRule<usize, #enum_name>;
                 /// type alias for DFA state
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #state_typename = #module_prefix::lr::State<usize, #enum_name>;
+                pub type #state_typename = #module_prefix::lr::#state_structname<#enum_name>;
                 /// type alias for `ParseError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #parse_error_typename = #module_prefix::lr::ParseError<#token_typename, #enum_name, #reduce_error_typename>;
@@ -791,20 +803,42 @@ impl Grammar {
         };
 
         let state_convert_stream = if self.glr {
-            quote! {
-                let states:Vec<_> = states.into_iter().map(
-                    |state| {
-                        state.into_glr_state(|x| x, |x| x)
-                    },
-                ).collect();
+            if self.emit_dense {
+                let classes_len = self.terminal_classes.len();
+                quote! {
+                    let states:Vec<_> = states.into_iter().map(
+                        |state| {
+                            state.into_glr_dense_state(|x| x, |x| x, #classes_len)
+                        },
+                    ).collect();
+                }
+            } else {
+                quote! {
+                    let states:Vec<_> = states.into_iter().map(
+                        |state| {
+                            state.into_glr_sparse_state(|x| x, |x| x)
+                        },
+                    ).collect();
+                }
             }
         } else {
-            quote! {
-                let states:Vec<_> = states.into_iter().map(
-                    |state| {
-                        state.into_lr_state(|x| x, |x| x)
-                    },
-                ).collect();
+            if self.emit_dense {
+                let classes_len = self.terminal_classes.len();
+                quote! {
+                    let states:Vec<_> = states.into_iter().map(
+                        |state| {
+                            state.into_lr_dense_state(|x| x, |x| x, #classes_len)
+                        },
+                    ).collect();
+                }
+            } else {
+                quote! {
+                    let states:Vec<_> = states.into_iter().map(
+                        |state| {
+                            state.into_lr_sparse_state(|x| x, |x| x)
+                        },
+                    ).collect();
+                }
             }
         };
 
@@ -908,6 +942,7 @@ impl Grammar {
                 type Term = #token_typename;
                 type NonTerm = #nonterminals_enum_name;
                 type TermRet<'a> = #token_typename;
+                type State = #state_typename;
 
                 fn get_rules(&self) -> &[#rule_typename] {
                     &self.rules
@@ -1051,6 +1086,7 @@ impl Grammar {
                 type Term = #token_typename;
                 type NonTerm = #nonterminals_enum_name;
                 type TermRet<'a> = &'a #token_typename;
+                type State = #state_typename;
 
                 fn get_rules(&self) -> &[#rule_typename] {
                     &self.rules

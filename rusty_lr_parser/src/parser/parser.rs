@@ -81,6 +81,7 @@ macro_rules! punct(
 %token prec Lexed::Prec(punct!('%'),Ident::new("id", Span::call_site()));
 %token precedence Lexed::Precedence(punct!('%'),Ident::new("id", Span::call_site()));
 %token nooptim Lexed::NoOptim(punct!('%'),Ident::new("id", Span::call_site()));
+%token dense Lexed::Dense(punct!('%'),Ident::new("id", Span::call_site()));
 
 %eof Lexed::Eof;
 
@@ -383,6 +384,8 @@ Precedence(Vec<IdentOrLiteral>): precedence IdentOrLiteral+ semicolon {
 
 NoOptim: nooptim semicolon;
 
+Dense: dense semicolon;
+
 GrammarLine : Rule { data.rules.push(Rule); }
 | TokenDef  { data.terminals.push(TokenDef); }
 | StartDef  { data.start_rule_name.push(StartDef); }
@@ -396,6 +399,7 @@ GrammarLine : Rule { data.rules.push(Rule); }
 | Glr { data.glr = true; }
 | Precedence { data.precedences.push(Precedence); }
 | NoOptim { data.no_optim = true; }
+| Dense { data.dense = true; }
 ;
 
 Grammar: GrammarLine+;

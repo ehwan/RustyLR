@@ -5,6 +5,7 @@
 %tokentype char;
 %start Json;
 %eof '\0';
+%dense;
 
 Json: Element;
 

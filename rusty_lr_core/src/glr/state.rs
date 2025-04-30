@@ -3,100 +3,122 @@ use std::hash::Hash;
 use crate::HashMap;
 use crate::ShiftedRuleRef;
 
-/// A type representing a single parser state and its associated table.
-/// This is used in the GLR parser.
-#[derive(Debug, Clone)]
-pub struct State<Term, NonTerm> {
-    /// terminal symbol -> next state
-    pub shift_goto_map_term: HashMap<Term, usize>,
-    /// non-terminal symbol -> next state
-    pub shift_goto_map_nonterm: HashMap<NonTerm, usize>,
-    /// terminal symbol -> reduce rule index
-    pub reduce_map: HashMap<Term, Vec<usize>>,
-    /// set of rules that this state is trying to parse
-    pub ruleset: Vec<ShiftedRuleRef>,
-}
-impl<Term, NonTerm> State<Term, NonTerm> {
-    pub fn new() -> Self {
-        State {
-            shift_goto_map_term: Default::default(),
-            shift_goto_map_nonterm: Default::default(),
-            reduce_map: Default::default(),
-            ruleset: Default::default(),
-        }
-    }
+/// A trait representing a parser state.
+pub trait State<NonTerm> {
+    /// Get the next state for a given terminal symbol.
+    fn shift_goto_class(&self, class: usize) -> Option<usize>;
 
-    /// feed one teminal and get action
-    pub fn shift_goto_term(&self, term: &Term) -> Option<usize>
+    /// Get the next state for a given non-terminal symbol.
+    fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
     where
-        Term: Hash + Eq,
-    {
-        self.shift_goto_map_term.get(term).copied()
+        NonTerm: Hash + Eq;
+
+    /// Get the reduce rule index for a given terminal symbol.
+    fn reduce(&self, class: usize) -> Option<&'_ [usize]>;
+
+    /// Check if this state is an accept state.
+    fn is_accept(&self) -> bool;
+
+    /// Get the set of expected classes for this state
+    fn expected(&self) -> impl Iterator<Item = usize> + '_;
+
+    /// Get the set of expected non-terminal symbols for this state
+    fn expected_nonterm<'a>(&'a self) -> impl Iterator<Item = &'a NonTerm> + 'a
+    where
+        NonTerm: 'a;
+
+    /// Get the set of rules that this state is trying to parse
+    fn get_rules(&self) -> &[ShiftedRuleRef];
+}
+
+/// `State` implementation for a sparse state representation using HashMap
+#[derive(Debug, Clone)]
+pub struct SparseState<NonTerm> {
+    /// terminal symbol -> next state
+    pub(crate) shift_goto_map_class: HashMap<usize, usize>,
+    /// non-terminal symbol -> next state
+    pub(crate) shift_goto_map_nonterm: HashMap<NonTerm, usize>,
+    /// terminal symbol -> reduce rule index
+    pub(crate) reduce_map: HashMap<usize, Vec<usize>>,
+    /// set of rules that this state is trying to parse
+    pub(crate) ruleset: Vec<ShiftedRuleRef>,
+}
+impl<NonTerm> State<NonTerm> for SparseState<NonTerm> {
+    fn shift_goto_class(&self, class: usize) -> Option<usize> {
+        self.shift_goto_map_class.get(&class).copied()
     }
-    /// feed one non-teminal and get action
-    pub fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
+    fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
     where
         NonTerm: Hash + Eq,
     {
         self.shift_goto_map_nonterm.get(nonterm).copied()
     }
-    /// feed one token and get action
-    pub fn reduce(&self, term: &Term) -> Option<&[usize]>
-    where
-        Term: Hash + Eq,
-    {
-        self.reduce_map.get(term).map(|v| v.as_slice())
+    fn reduce(&self, class: usize) -> Option<&'_ [usize]> {
+        self.reduce_map.get(&class).map(Vec::as_slice)
     }
-
-    /// check if this state is accept state.
-    /// Augmented -> Start EOF . is accept state.
-    pub fn is_accept(&self) -> bool {
+    fn is_accept(&self) -> bool {
         self.reduce_map.is_empty()
-            && self.shift_goto_map_term.is_empty()
+            && self.shift_goto_map_class.is_empty()
             && self.shift_goto_map_nonterm.is_empty()
     }
-
-    /// get expected terms set
-    pub fn expected(&self) -> impl Iterator<Item = &Term> {
-        self.shift_goto_map_term
+    fn expected(&self) -> impl Iterator<Item = usize> + '_ {
+        self.shift_goto_map_class
             .keys()
             .chain(self.reduce_map.keys())
+            .copied()
     }
-    /// get expected non-terms set
-    pub fn expected_nonterm(&self) -> impl Iterator<Item = &NonTerm> {
+    fn expected_nonterm<'a>(&'a self) -> impl Iterator<Item = &'a NonTerm> + 'a
+    where
+        NonTerm: 'a,
+    {
         self.shift_goto_map_nonterm.keys()
     }
-
-    /// Map terminal and non-terminal symbols to another type.
-    /// This is useful when exporting & importing rules.
-    pub fn map<NewTerm: Hash + Eq, NewNonTerm: Hash + Eq>(
-        self,
-        term_map: impl Fn(Term) -> NewTerm,
-        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
-    ) -> State<NewTerm, NewNonTerm> {
-        State {
-            shift_goto_map_term: self
-                .shift_goto_map_term
-                .into_iter()
-                .map(|(term, state)| (term_map(term), state))
-                .collect(),
-            shift_goto_map_nonterm: self
-                .shift_goto_map_nonterm
-                .into_iter()
-                .map(|(nonterm, state)| (nonterm_map(nonterm), state))
-                .collect(),
-            reduce_map: self
-                .reduce_map
-                .into_iter()
-                .map(|(term, rule)| (term_map(term), rule))
-                .collect(),
-            ruleset: self.ruleset,
-        }
+    fn get_rules(&self) -> &[ShiftedRuleRef] {
+        &self.ruleset
     }
 }
 
-impl<Term, NonTerm> Default for State<Term, NonTerm> {
-    fn default() -> Self {
-        Self::new()
+/// `State` implementation for a dense state representation using Vec
+#[derive(Debug, Clone)]
+pub struct DenseState<NonTerm> {
+    /// terminal symbol -> next state
+    pub(crate) shift_goto_map_class: Vec<Option<usize>>,
+    /// non-terminal symbol -> next state
+    pub(crate) shift_goto_map_nonterm: HashMap<NonTerm, usize>,
+    /// terminal symbol -> reduce rule index
+    pub(crate) reduce_map: Vec<Option<Vec<usize>>>,
+    /// set of rules that this state is trying to parse
+    pub(crate) ruleset: Vec<ShiftedRuleRef>,
+}
+impl<NonTerm> State<NonTerm> for DenseState<NonTerm> {
+    fn shift_goto_class(&self, class: usize) -> Option<usize> {
+        self.shift_goto_map_class[class]
+    }
+    fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
+    where
+        NonTerm: Hash + Eq,
+    {
+        self.shift_goto_map_nonterm.get(nonterm).copied()
+    }
+    fn reduce(&self, class: usize) -> Option<&'_ [usize]> {
+        self.reduce_map[class].as_ref().map(Vec::as_slice)
+    }
+    fn is_accept(&self) -> bool {
+        self.reduce_map.is_empty()
+            && self.shift_goto_map_class.is_empty()
+            && self.shift_goto_map_nonterm.is_empty()
+    }
+    fn expected(&self) -> impl Iterator<Item = usize> + '_ {
+        (0..self.shift_goto_map_class.len())
+            .filter(|&i| self.shift_goto_map_class[i].is_some() || self.reduce_map[i].is_some())
+    }
+    fn expected_nonterm<'a>(&'a self) -> impl Iterator<Item = &'a NonTerm> + 'a
+    where
+        NonTerm: 'a,
+    {
+        self.shift_goto_map_nonterm.keys()
+    }
+    fn get_rules(&self) -> &[ShiftedRuleRef] {
+        &self.ruleset
     }
 }

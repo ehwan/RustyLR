@@ -2,6 +2,8 @@ use std::ops::Deref;
 use std::ops::DerefMut;
 use std::rc::Rc;
 
+use super::State;
+
 #[cfg(feature = "tree")]
 use crate::Tree;
 #[cfg(feature = "tree")]
@@ -169,7 +171,7 @@ impl<Data: NodeData> Node<Data> {
         let mut non_zero_shifted_rules = BTreeSet::new();
         {
             let last_state = &states[self.state];
-            for rule in last_state.ruleset.iter() {
+            for rule in last_state.get_rules().iter() {
                 if rule.shifted == 0 {
                     zero_shifted_rules.insert(rule.rule);
                 } else {
@@ -182,7 +184,7 @@ impl<Data: NodeData> Node<Data> {
         let mut ret: HashSet<Data::NonTerm> = Default::default();
         loop {
             let state = &states[node.state];
-            let ruleset = &state.ruleset;
+            let ruleset = &state.get_rules();
 
             // insert new shifted rule that brings zero_shifted rules in this state
             let mut new_zero_shifted_rules = Vec::new();
@@ -268,8 +270,8 @@ impl<Data: NodeData> Node<Data> {
 
         if self.parent.is_none() {
             let state0 = &parser.get_states()[0];
-            let mut rules = Vec::with_capacity(state0.ruleset.len());
-            for rule in state0.ruleset.iter() {
+            let mut rules = Vec::with_capacity(state0.get_rules().len());
+            for rule in state0.get_rules().iter() {
                 rules.push(ShiftedRule {
                     rule: parser.get_rules()[rule.rule].clone(),
                     shifted: rule.shifted,
@@ -283,7 +285,7 @@ impl<Data: NodeData> Node<Data> {
 
         let mut traces = Vec::new();
         let mut current_rules: BTreeSet<_> = parser.get_states()[self.state]
-            .ruleset
+            .get_rules()
             .iter()
             .filter(|rule| rule.shifted > 0)
             .copied()
@@ -314,7 +316,7 @@ impl<Data: NodeData> Node<Data> {
 
             loop {
                 let len0 = current_rules.len();
-                for rule in parser.get_states()[state_idx].ruleset.iter() {
+                for rule in parser.get_states()[state_idx].get_rules().iter() {
                     let prod_rule = &parser.get_rules()[rule.rule];
                     if let Some(Token::NonTerm(nonterm)) = prod_rule.rule.get(rule.shifted) {
                         if zero_shifted_rules.contains(nonterm) {
@@ -353,7 +355,7 @@ impl<Data: NodeData> Node<Data> {
             if !zero_shifted_rules.is_empty() {
                 loop {
                     let len0 = current_rules.len();
-                    for rule in parser.get_states()[state_idx].ruleset.iter() {
+                    for rule in parser.get_states()[state_idx].get_rules().iter() {
                         let prod_rule = &parser.get_rules()[rule.rule];
                         if let Some(Token::NonTerm(nonterm)) = prod_rule.rule.get(rule.shifted) {
                             if zero_shifted_rules.contains(nonterm) {
@@ -399,7 +401,7 @@ impl<Data: NodeData> Node<Data> {
     {
         parser.get_states()[self.state]
             .expected()
-            .flat_map(|class| parser.get_terminals(*class).unwrap())
+            .flat_map(|class| parser.get_terminals(class).unwrap())
     }
     /// get expected non-terminals for current state.
     pub fn expected_nonterm<'a, P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(

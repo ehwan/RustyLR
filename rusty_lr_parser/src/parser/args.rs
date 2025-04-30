@@ -536,4 +536,5 @@ pub struct GrammarArgs {
     pub lalr: bool,
     pub glr: bool,
     pub no_optim: bool,
+    pub dense: bool,
 }

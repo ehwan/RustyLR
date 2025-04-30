@@ -4,6 +4,7 @@ use std::hash::Hash;
 use super::ParseError;
 use super::Parser;
 use super::Stack;
+use super::State;
 
 #[cfg(feature = "tree")]
 use crate::TreeList;
@@ -72,7 +73,7 @@ impl<S: Stack> Context<S> {
     {
         parser.get_states()[*self.state_stack.last().unwrap()]
             .expected()
-            .flat_map(|&class| parser.get_terminals(class).unwrap())
+            .flat_map(|class| parser.get_terminals(class).unwrap())
     }
     /// Get expected non-terminal tokens for next `feed()` call.
     pub fn expected_nonterm<'a, P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
@@ -115,7 +116,7 @@ impl<S: Stack> Context<S> {
     {
         let class = parser.to_terminal_class(term);
         if parser.get_states()[*self.state_stack.last().unwrap()]
-            .shift_goto_term(&class)
+            .shift_goto_class(class)
             .is_some()
         {
             return true;
@@ -123,7 +124,7 @@ impl<S: Stack> Context<S> {
 
         let mut state_stack = self.state_stack.clone();
         while let Some(reduce_rule) =
-            parser.get_states()[*state_stack.last().unwrap()].reduce(&class)
+            parser.get_states()[*state_stack.last().unwrap()].reduce(class)
         {
             let rule = &parser.get_rules()[reduce_rule];
             let new_len = state_stack.len() - rule.rule.len();
@@ -139,7 +140,7 @@ impl<S: Stack> Context<S> {
         }
 
         parser.get_states()[*state_stack.last().unwrap()]
-            .shift_goto_term(&class)
+            .shift_goto_class(class)
             .is_some()
     }
 
@@ -170,7 +171,7 @@ impl<S: Stack> Context<S> {
         let mut non_zero_shifted_rules = BTreeSet::new();
         {
             let last_state = &states[*self.state_stack.last().unwrap()];
-            for rule in last_state.ruleset.iter() {
+            for rule in last_state.get_rules().iter() {
                 if rule.shifted == 0 {
                     zero_shifted_rules.insert(rule.rule);
                 } else {
@@ -183,7 +184,7 @@ impl<S: Stack> Context<S> {
 
         for &state_idx in self.state_stack.iter().rev() {
             let state = &states[state_idx];
-            let ruleset = &state.ruleset;
+            let ruleset = state.get_rules();
 
             // insert new shifted rule that brings zero_shifted rules in this state
             let mut new_zero_shifted_rules = Vec::new();
@@ -263,8 +264,8 @@ impl<S: Stack> Context<S> {
 
         if self.state_stack.len() == 1 {
             let state0 = &parser.get_states()[0];
-            let mut rules = Vec::with_capacity(state0.ruleset.len());
-            for rule in state0.ruleset.iter() {
+            let mut rules = Vec::with_capacity(state0.get_rules().len());
+            for rule in state0.get_rules().iter() {
                 rules.push(ShiftedRule {
                     rule: parser.get_rules()[rule.rule].clone(),
                     shifted: rule.shifted,
@@ -278,7 +279,7 @@ impl<S: Stack> Context<S> {
 
         let mut traces = Vec::new();
         let mut current_rules: BTreeSet<_> = parser.get_states()[*self.state_stack.last().unwrap()]
-            .ruleset
+            .get_rules()
             .iter()
             .filter(|rule| rule.shifted > 0)
             .copied()
@@ -308,7 +309,7 @@ impl<S: Stack> Context<S> {
 
             loop {
                 let len0 = current_rules.len();
-                for rule in parser.get_states()[state_idx].ruleset.iter() {
+                for rule in parser.get_states()[state_idx].get_rules().iter() {
                     let prod_rule = &parser.get_rules()[rule.rule];
                     if let Some(Token::NonTerm(nonterm)) = prod_rule.rule.get(rule.shifted) {
                         if zero_shifted_rules.contains(nonterm) {

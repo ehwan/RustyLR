@@ -1,6 +1,9 @@
+/// A struct for character -> class_id mapping.
+/// If sequence of characters are in the same class, they are compressed into a range.
 pub struct RangeMap {
-    /// A sorted list of ranges, where each range is represented as a tuple (start, end)
+    /// A sorted list of inclusive ranges, where each range is represented as [start, end]
     pub range_starts: Vec<u32>,
+    /// A sorted list of inclusive ranges, where each range is represented as [start, end]
     pub range_lasts: Vec<u32>,
 
     /// A list of values corresponding to each range
@@ -35,7 +38,7 @@ impl RangeMap {
             }
             Err(idx) => {
                 // starts[idx] > key
-                // starts[idx] < key
+                // starts[idx-1] < key
                 if idx == 0 {
                     None
                 } else if self.range_lasts[idx - 1] >= key {

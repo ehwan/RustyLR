@@ -117,6 +117,9 @@ pub struct Grammar {
     pub other_terminal_index: usize,
 
     pub range_resolver: RangeResolver,
+
+    /// in the generated parser, the dense table `Vec` will be used instead of the sparse table `HashMap`.
+    pub emit_dense: bool,
 }
 
 impl Grammar {
@@ -329,6 +332,8 @@ impl Grammar {
             eof_index: 0,
             other_terminal_index: 0,
             range_resolver: RangeResolver::new(),
+
+            emit_dense: grammar_args.dense,
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";

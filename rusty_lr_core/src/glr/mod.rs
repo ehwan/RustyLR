@@ -13,6 +13,8 @@ pub use node::Node;
 pub use node::NodeData;
 pub use node::NodeRefIterator;
 pub use parser::Parser;
+pub use state::DenseState;
+pub use state::SparseState;
 pub use state::State;
 
 use crate::HashMap;
@@ -49,8 +51,8 @@ where
     // BFS reduce
     while !reduce_nodes.is_empty() {
         for (state, nodes) in reduce_nodes.drain() {
-            let next_term_shift_state = parser.get_states()[state].shift_goto_term(&class);
-            if let Some(reduce_rules) = parser.get_states()[state].reduce(&class) {
+            let next_term_shift_state = parser.get_states()[state].shift_goto_class(class);
+            if let Some(reduce_rules) = parser.get_states()[state].reduce(class) {
                 for node in nodes.into_iter() {
                     let mut shift_for_this_node = false;
 
@@ -197,8 +199,8 @@ where
         // BFS reduce
         while !reduce_nodes.is_empty() {
             for (state, nodes) in reduce_nodes.drain() {
-                let next_term_shift_state = parser.get_states()[state].shift_goto_term(&class);
-                if let Some(reduce_rules) = parser.get_states()[state].reduce(&class) {
+                let next_term_shift_state = parser.get_states()[state].shift_goto_class(class);
+                if let Some(reduce_rules) = parser.get_states()[state].reduce(class) {
                     for node in nodes.into_iter() {
                         let mut shift_for_this_node = false;
 

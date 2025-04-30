@@ -89,17 +89,16 @@ impl<Term, NonTerm> State<Term, NonTerm> {
             })
     }
 
-    pub fn into_lr_state<NewTerm, NewNonTerm>(
+    pub fn into_lr_sparse_state<NewNonTerm>(
         self,
-        term_map: impl Fn(Term) -> NewTerm,
+        term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
-    ) -> crate::lr::State<NewTerm, NewNonTerm>
+    ) -> crate::lr::SparseState<NewNonTerm>
     where
-        NewTerm: Hash + Eq,
         NewNonTerm: Hash + Eq,
     {
-        crate::lr::State {
-            shift_goto_map_term: self
+        crate::lr::SparseState {
+            shift_goto_map_class: self
                 .shift_goto_map_term
                 .into_iter()
                 .map(|(term, state)| (term_map(term), state))
@@ -117,18 +116,45 @@ impl<Term, NonTerm> State<Term, NonTerm> {
             ruleset: self.ruleset.rules.into_keys().collect(),
         }
     }
-
-    pub fn into_glr_state<NewTerm, NewNonTerm>(
+    pub fn into_lr_dense_state<NewNonTerm>(
         self,
-        term_map: impl Fn(Term) -> NewTerm,
+        term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
-    ) -> crate::glr::State<NewTerm, NewNonTerm>
+        terms_len: usize,
+    ) -> crate::lr::DenseState<NewNonTerm>
     where
-        NewTerm: Hash + Eq,
         NewNonTerm: Hash + Eq,
     {
-        crate::glr::State {
-            shift_goto_map_term: self
+        let mut shift_goto_map_class = vec![None; terms_len];
+        let mut reduce_map = vec![None; terms_len];
+        for (term, state) in self.shift_goto_map_term {
+            shift_goto_map_class[term_map(term)] = Some(state);
+        }
+        for (term, rule) in self.reduce_map {
+            reduce_map[term_map(term)] = Some(rule.into_iter().next().unwrap());
+        }
+        crate::lr::DenseState {
+            shift_goto_map_class,
+            shift_goto_map_nonterm: self
+                .shift_goto_map_nonterm
+                .into_iter()
+                .map(|(nonterm, state)| (nonterm_map(nonterm), state))
+                .collect(),
+            reduce_map,
+            ruleset: self.ruleset.rules.into_keys().collect(),
+        }
+    }
+
+    pub fn into_glr_sparse_state<NewNonTerm>(
+        self,
+        term_map: impl Fn(Term) -> usize,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+    ) -> crate::glr::SparseState<NewNonTerm>
+    where
+        NewNonTerm: Hash + Eq,
+    {
+        crate::glr::SparseState {
+            shift_goto_map_class: self
                 .shift_goto_map_term
                 .into_iter()
                 .map(|(term, state)| (term_map(term), state))
@@ -143,6 +169,34 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 .into_iter()
                 .map(|(term, rule)| (term_map(term), rule.into_iter().collect()))
                 .collect(),
+            ruleset: self.ruleset.rules.into_keys().collect(),
+        }
+    }
+    pub fn into_glr_dense_state<NewNonTerm>(
+        self,
+        term_map: impl Fn(Term) -> usize,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+        terms_len: usize,
+    ) -> crate::glr::DenseState<NewNonTerm>
+    where
+        NewNonTerm: Hash + Eq,
+    {
+        let mut shift_goto_map_class = vec![None; terms_len];
+        let mut reduce_map = vec![None; terms_len];
+        for (term, state) in self.shift_goto_map_term {
+            shift_goto_map_class[term_map(term)] = Some(state);
+        }
+        for (term, rule) in self.reduce_map {
+            reduce_map[term_map(term)] = Some(rule.into_iter().collect());
+        }
+        crate::glr::DenseState {
+            shift_goto_map_class,
+            shift_goto_map_nonterm: self
+                .shift_goto_map_nonterm
+                .into_iter()
+                .map(|(nonterm, state)| (nonterm_map(nonterm), state))
+                .collect(),
+            reduce_map,
             ruleset: self.ruleset.rules.into_keys().collect(),
         }
     }
