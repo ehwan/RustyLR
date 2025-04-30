@@ -17,7 +17,6 @@ pub use tree::TreeList;
 pub use tree::TreeNonTerminal;
 
 /// module for build DFA tables from CFG
-#[cfg(feature = "builder")]
 pub mod builder;
 
 /// module for LR(1), LALR(1) parser
