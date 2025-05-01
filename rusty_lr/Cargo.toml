@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr"
-version = "3.10.0"
+version = "3.10.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "GLR, LR(1) and LALR(1) parser generator with custom reduce action"
@@ -11,16 +11,12 @@ categories = ["parsing", "compilers", "parser-implementations"]
 
 [dependencies]
 rusty_lr_core = { version = "3.14.0", path = "../rusty_lr_core" }
-rusty_lr_derive = { version = "2.16.0", path = "../rusty_lr_derive", optional = true }
-rusty_lr_buildscript = { version = "0.34.0", path = "../rusty_lr_buildscript", optional = true }
+rusty_lr_derive = { version = "2.17.0", path = "../rusty_lr_derive", optional = true }
+rusty_lr_buildscript = { version = "0.35.0", path = "../rusty_lr_buildscript", optional = true }
 
 [features]
 default = ["derive"]
-fxhash = [
-  "rusty_lr_core/fxhash",
-  "rusty_lr_buildscript/fxhash",
-  "rusty_lr_derive/fxhash",
-]
+fxhash = []
 build = ["dep:rusty_lr_buildscript"]
 derive = ["dep:rusty_lr_derive"]
 tree = [
