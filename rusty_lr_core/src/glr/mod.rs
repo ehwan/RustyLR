@@ -403,7 +403,7 @@ where
     P::NonTerm: Hash + Eq + Clone,
 {
     context.reduce_args.clear();
-    let data_extracted = clone_pop_nodes(Rc::clone(&node), reduce_rule, parser, context);
+    let data_extracted = clone_pop_nodes(node, reduce_rule, parser, context);
 
     #[cfg(feature = "tree")]
     let (parent, tree) = data_extracted;
