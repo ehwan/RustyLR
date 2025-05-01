@@ -1071,6 +1071,7 @@ impl Grammar {
                 }
 
                 // change any terminal to its class id
+                // tokens in the rule
                 for token in &mut rule.tokens {
                     if let Token::Term(old_class) = token.token {
                         let new_class = old_class_to_new_class[old_class];
@@ -1080,6 +1081,7 @@ impl Grammar {
                         token.token = Token::Term(new_class);
                     }
                 }
+                // lookaheads in the rule
                 if let Some(lookaheads) = &mut rule.lookaheads {
                     let new_lookaheads = std::mem::take(lookaheads)
                         .into_iter()
@@ -1093,6 +1095,7 @@ impl Grammar {
                         .collect();
                     *lookaheads = new_lookaheads;
                 }
+                // precedence in the rule
                 if let Some((prec, span)) = rule.prec {
                     use rusty_lr_core::builder::Operator;
                     if let Operator::Term(old_class) = prec {
