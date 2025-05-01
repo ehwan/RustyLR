@@ -56,6 +56,10 @@ pub struct OptimizeDiag {
     pub removed: Vec<OptimizeRemove>,
 }
 
+/// type alias just for readability
+type ClassIndex = usize;
+type TerminalIndex = usize;
+
 pub struct Grammar {
     /// %moduleprefix
     pub(crate) module_prefix: TokenStream,
@@ -74,10 +78,10 @@ pub struct Grammar {
 
     pub terminals: Vec<TerminalInfo>,
     /// ident -> index map for terminals
-    pub terminals_index: HashMap<TerminalName, usize>,
+    pub terminals_index: HashMap<TerminalName, TerminalIndex>,
 
     /// precedence orders
-    pub precedences: HashMap<rusty_lr_core::builder::Operator<usize>, (Span, usize)>,
+    pub precedences: HashMap<rusty_lr_core::builder::Operator<TerminalIndex>, (Span, usize)>,
 
     /// %prec definitions
     pub prec_defeinitions: Vec<PrecDefinition>,
@@ -99,23 +103,23 @@ pub struct Grammar {
 
     /// do terminal classificate optimization
     pub optimize: bool,
-    pub builder: rusty_lr_core::builder::Grammar<usize, usize>,
-    pub states: Vec<rusty_lr_core::builder::State<usize, usize>>,
+    pub builder: rusty_lr_core::builder::Grammar<ClassIndex, usize>,
+    pub states: Vec<rusty_lr_core::builder::State<ClassIndex, usize>>,
 
     /// set of terminals for each terminal class
     pub terminal_classes: Vec<TerminalClassDefinintion>,
     /// id of teminal class for each terminal
-    pub terminal_class_id: Vec<usize>,
+    pub terminal_class_id: Vec<TerminalIndex>,
     /// class id for terminal that does not belong to any class
-    pub other_terminal_class_id: usize,
+    pub other_terminal_class_id: ClassIndex,
     pub other_used: bool,
 
     /// terminal index of eof
-    pub eof_index: usize,
+    pub eof_index: TerminalIndex,
     /// terminal index of other_terminals
     /// `other_terminal` can be only used by [^ term ...] pattern,
     /// to indicate *other terminals* not defined in this grammar.
-    pub other_terminal_index: usize,
+    pub other_terminal_index: TerminalIndex,
 
     /// character range resolver;
     pub range_resolver: RangeResolver,
@@ -890,11 +894,11 @@ impl Grammar {
         // all terminals in one class must have same precedence order
         let mut precedence_sets: HashMap<_, Vec<usize>> = Default::default();
         for (&op, &level) in &builder.precedence_map {
-            if let rusty_lr_core::builder::Operator::Term(term_idx) = op {
+            if let rusty_lr_core::builder::Operator::Term(class) = op {
                 precedence_sets
                     .entry(level)
                     .or_insert_with(Vec::new)
-                    .push(term_idx);
+                    .push(class);
             }
         }
         for (_, mut terms) in precedence_sets {
@@ -1405,23 +1409,23 @@ impl Grammar {
     }
 
     /// create the rusty_lr_core::Grammar from the parsed CFGs
-    pub fn create_builder(&self) -> rusty_lr_core::builder::Grammar<usize, usize> {
-        let mut grammar: rusty_lr_core::builder::Grammar<usize, usize> =
+    pub fn create_builder(&self) -> rusty_lr_core::builder::Grammar<ClassIndex, usize> {
+        let mut grammar: rusty_lr_core::builder::Grammar<ClassIndex, usize> =
             rusty_lr_core::builder::Grammar::new();
 
         // reduce types
         use rusty_lr_core::builder::Operator;
-        for (idx, term_info) in self.terminals.iter().enumerate() {
+        for (term_idx, term_info) in self.terminals.iter().enumerate() {
             if let Some(reduce_type) = &term_info.reduce_type {
-                let class = self.terminal_class_id[idx];
+                let class = self.terminal_class_id[term_idx];
                 if !grammar.add_reduce_type(Operator::Term(class), reduce_type.reduce_type) {
                     unreachable!("set_reduce_type error");
                 }
             }
         }
-        for (idx, prec_def) in self.prec_defeinitions.iter().enumerate() {
+        for (prec_idx, prec_def) in self.prec_defeinitions.iter().enumerate() {
             if let Some(reduce_type) = &prec_def.reduce_type {
-                if !grammar.add_reduce_type(Operator::Prec(idx), reduce_type.reduce_type) {
+                if !grammar.add_reduce_type(Operator::Prec(prec_idx), reduce_type.reduce_type) {
                     unreachable!("set_reduce_type error");
                 }
             }
