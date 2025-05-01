@@ -10,12 +10,12 @@ keywords = ["parser", "bison", "lr", "glr", "compiler"]
 categories = ["parsing"]
 
 [dependencies]
-rustc-hash = { version = "2.0", optional = true }
+rustc-hash = "2.1"
 termtree = { version = "0.5", optional = true }
 
 [features]
 default = []
 # use `rustc-hash` crate for hash map
-fxhash = ["dep:rustc-hash"]
+fxhash = []
 tree = ["dep:termtree"]
 error = []
