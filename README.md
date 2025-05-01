@@ -197,7 +197,6 @@ making it suitable for processing large or complex inputs.
 
 ## Cargo Features
  - `build`: Enable build script tools.
- - `fxhash`: Use FXHashMap instead of `std::collections::HashMap` for parser tables.
  - `tree`: Enable automatic syntax tree construction (For debugging purposes).
  - `error`: Enable detailed parsing error messages with backtrace (For debugging purposes).
 
