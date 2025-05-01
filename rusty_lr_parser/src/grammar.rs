@@ -49,6 +49,7 @@ pub struct TerminalClassDefinintion {
 pub enum OptimizeRemove {
     TerminalClassRuleMerge(Rule),
     SingleNonTerminalRule(Rule, Span),
+    NonTermNotUsed(Span),
 }
 pub struct OptimizeDiag {
     /// deleted rules
@@ -857,8 +858,10 @@ impl Grammar {
     }
 
     /// optimize grammar
-    /// 'optimize' could be multiple iterations, this function do only one iteration
     fn optimize_iterate(&mut self) -> Option<OptimizeDiag> {
+        //  Build parser tables from current terminal classes
+        //  Check if two or more terminal classes can be merged into one class
+        //  Update terminal classes
         let mut builder = self.create_builder();
         let augmented_idx = *self
             .nonterminals_index
@@ -876,8 +879,12 @@ impl Grammar {
             }
         };
 
+        // We are trying to find the 'minimum partitioning' of terminals
+        // First we collect all the *groups* of terminals
+        // Then we calculate the *minimal partitioning* to compress the groups
         let mut term_sets = BTreeSet::new();
         term_sets.insert((0..self.terminal_classes.len()).collect());
+
         // collect precedence orders
         // all terminals in one class must have same precedence order
         let mut precedence_sets: HashMap<_, Vec<usize>> = Default::default();
@@ -907,6 +914,13 @@ impl Grammar {
 
             // collect {set of terminals} that have same prefix-suffix-reduce_action in the production rules
             // so we can merge those terminals into one class
+            // e.g.
+            // consider the following state:
+            //      A -> X x Y
+            //      A -> X y Y
+            //      A -> X z Y
+            // here, we can group {x, y, z} into one class and merge them
+            //      A -> X <class> Y
             let mut same_ruleset = BTreeMap::new();
             for (&term, &next_state) in &state.shift_goto_map_term {
                 let ruleset = states[next_state].unshifted_ruleset().collect::<Vec<_>>();
@@ -953,8 +967,13 @@ impl Grammar {
         }
 
         // convert all terminals using terminal class
-        // Keep only the rules related with first terminal
-        // and remove the rest
+        // delete all rules that using non-first terminals in that class
+        // e.g. delete
+        //      A -> X y Y
+        //      A -> X z Y
+        // and convert x to class so that only
+        //      A -> X <class> Y
+        // remains
         let mut is_first_oldclass_in_newclass = Vec::new();
         is_first_oldclass_in_newclass.resize(self.terminal_classes.len(), false);
 
@@ -994,10 +1013,34 @@ impl Grammar {
         self.terminal_class_id = new_term_class_id;
         self.terminal_classes = new_class_defs;
         self.other_terminal_class_id = self.terminal_class_id[self.other_terminal_index];
+        // terminal class optimization ends
+
+        use rusty_lr_core::Token;
 
         let mut removed_rules_diag = Vec::new();
 
-        use rusty_lr_core::Token;
+        // check for unused non-terminals
+        let mut nonterm_used = vec![false; self.nonterminals.len()];
+        for state in &states {
+            for (rule, _) in state.ruleset.rules.iter() {
+                let nonterm = builder.rules[rule.rule].rule.name;
+                nonterm_used[nonterm] = true;
+            }
+        }
+        for (nonterm_idx, nonterm) in self.nonterminals.iter_mut().enumerate() {
+            if nonterm.rules.is_empty() {
+                continue;
+            }
+
+            if !nonterm_used[nonterm_idx] {
+                // this rule was not used
+                nonterm.rules.clear();
+                if nonterm.regex_span.is_none() {
+                    let span = nonterm.name.span();
+                    removed_rules_diag.push(OptimizeRemove::NonTermNotUsed(span));
+                }
+            }
+        }
 
         let mut other_was_used = false;
         for nonterm in &mut self.nonterminals {
@@ -1064,10 +1107,11 @@ impl Grammar {
             nonterm.rules = new_rules;
         }
 
-        // remove rules which is consisted of only one terminal
+        // remove rules that have single production rule and single token
+        // e.g. A -> B, then fix all occurrences of A to B
         loop {
             let mut changed = false;
-            let mut nonterm_replace: HashMap<Token<usize, usize>, (usize, bool)> =
+            let mut nonterm_replace: HashMap<Token<usize, usize>, (Token<usize, usize>, bool)> =
                 Default::default();
             for (nonterm_id, nonterm) in self.nonterminals.iter_mut().enumerate() {
                 if nonterm.rules.len() != 1 {
@@ -1077,10 +1121,7 @@ impl Grammar {
                 if rule.tokens.len() != 1 {
                     continue;
                 }
-                let token = rule.tokens[0].token;
-                let Token::Term(newclass) = token else {
-                    continue;
-                };
+                let totoken = rule.tokens[0].token;
 
                 // check if this rule's ruletype is %tokentype and reduce action is auto-generated
                 if (nonterm.ruletype.is_none() && rule.reduce_action.is_none())
@@ -1090,22 +1131,61 @@ impl Grammar {
                 {
                     changed = true;
 
-                    // this nonterm can be reduced to a single terminal class
-                    let rules = std::mem::take(&mut nonterm.rules);
-                    let rule = rules.into_iter().next().unwrap();
-
-                    // add to diags only if it was not auto-generated
-                    if nonterm.regex_span.is_none() {
-                        let diag = OptimizeRemove::SingleNonTerminalRule(rule, nonterm.name.span());
-                        removed_rules_diag.push(diag);
-                    }
-
                     nonterm_replace.insert(
                         Token::NonTerm(nonterm_id),
-                        (newclass, nonterm.ruletype.is_none()),
+                        (totoken, nonterm.ruletype.is_none()),
                     );
                 }
             }
+
+            // bfs to ensure from -> to map does not create a cycle, and reaches to the leaf
+            loop {
+                let mut changed = false;
+                let mut next_replace: HashMap<Token<usize, usize>, (Token<usize, usize>, bool)> =
+                    Default::default();
+
+                for (&from, &(to, is_none)) in &nonterm_replace {
+                    if let Some(&(new_to, _)) = nonterm_replace.get(&to) {
+                        if new_to == from {
+                            // cycle detected; stop optimization and return
+                            return None;
+                        }
+                        next_replace.insert(from, (new_to, is_none));
+                        changed = true;
+                    } else {
+                        next_replace.insert(from, (to, is_none));
+                    }
+                }
+
+                nonterm_replace = next_replace;
+                if !changed {
+                    break;
+                }
+            }
+            // remove cycle related non-terminals from optimization
+            nonterm_replace = nonterm_replace
+                .into_iter()
+                .filter(|(from, (to, _))| from != to)
+                .collect();
+
+            // delete rules - keys of nonterm_replace
+            for (&from, &(to, _)) in nonterm_replace.iter() {
+                if from == to {
+                    continue;
+                }
+                let Token::NonTerm(nonterm_id) = from else {
+                    unreachable!("nonterm_replace should only contain NonTerm");
+                };
+                let nonterm = &mut self.nonterminals[nonterm_id];
+                let rules = std::mem::take(&mut nonterm.rules);
+                let rule = rules.into_iter().next().unwrap();
+                // add to diags only if it was not auto-generated
+                if nonterm.regex_span.is_none() {
+                    let diag = OptimizeRemove::SingleNonTerminalRule(rule, nonterm.name.span());
+                    removed_rules_diag.push(diag);
+                }
+            }
+
             // replace all Token::NonTerm that can be replaced into Token::Term calculated above
             for nonterm in self.nonterminals.iter_mut() {
                 for rule in &mut nonterm.rules {
@@ -1113,7 +1193,7 @@ impl Grammar {
                         if let Some(&(newclass, is_ruletype_none)) =
                             nonterm_replace.get(&token.token)
                         {
-                            token.token = Token::Term(newclass);
+                            token.token = newclass;
                             if is_ruletype_none {
                                 token.mapto = None;
                             }

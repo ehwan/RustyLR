@@ -695,7 +695,8 @@ impl Builder {
                             let mut labels = Vec::new();
                             let mut notes = Vec::new();
                             notes.push(
-                                "This non-terminal will be replaced by terminal class".to_string(),
+                                "This non-terminal will be replaced by it's unique child rule"
+                                    .to_string(),
                             );
 
                             labels.push(
@@ -707,8 +708,32 @@ impl Builder {
                             let rule_range = b.byte_range().start..e.byte_range().end;
                             labels.push(
                                 Label::secondary(file_id, rule_range)
-                                    .with_message("this rule only has one terminal class"),
+                                    .with_message("this rule has only one child rule"),
                             );
+                            let diag = Diagnostic::note()
+                                .with_message(message)
+                                .with_labels(labels)
+                                .with_notes(notes);
+
+                            let writer = self.verbose_stream();
+                            let config = codespan_reporting::term::Config::default();
+                            term::emit(&mut writer.lock(), &config, &files, &diag)
+                                .expect("Failed to write to verbose stream");
+                        }
+                        OptimizeRemove::NonTermNotUsed(span) => {
+                            let message = "NonTerminal deleted";
+                            let mut labels = Vec::new();
+                            let mut notes = Vec::new();
+                            notes.push(
+                                "This non-terminal cannot be reached from initial state"
+                                    .to_string(),
+                            );
+
+                            labels.push(
+                                Label::primary(file_id, span.byte_range())
+                                    .with_message("non-terminal defined here"),
+                            );
+
                             let diag = Diagnostic::note()
                                 .with_message(message)
                                 .with_labels(labels)
