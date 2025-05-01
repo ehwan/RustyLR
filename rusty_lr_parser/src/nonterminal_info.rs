@@ -44,5 +44,16 @@ pub struct NonTerminalInfo {
 
     /// If this non-terminal is auto-generated from regex pattern,
     /// the (begin, end) span-pair of the regex pattern.
-    pub regex_span: Option<(Span, Span)>,
+    pub(crate) regex_span: Option<(Span, Span)>,
+}
+
+impl NonTerminalInfo {
+    pub fn is_auto_generated(&self) -> bool {
+        self.regex_span.is_some()
+    }
+    /// only for auto-generated rules
+    /// returns the span of the regex pattern that generated this rule
+    pub fn origin_span(&self) -> Option<(Span, Span)> {
+        self.regex_span
+    }
 }

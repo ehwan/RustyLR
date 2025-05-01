@@ -117,6 +117,7 @@ pub struct Grammar {
     /// to indicate *other terminals* not defined in this grammar.
     pub other_terminal_index: usize,
 
+    /// character range resolver;
     pub range_resolver: RangeResolver,
 
     /// in the generated parser, the dense table `Vec` will be used instead of the sparse table `HashMap`.
@@ -275,7 +276,7 @@ impl Grammar {
                 }
             })
     }
-    pub fn get_terminal_index_from_char(&self, ch: char) -> usize {
+    pub(crate) fn get_terminal_index_from_char(&self, ch: char) -> usize {
         let name: TerminalName = (ch, ch).into();
         *self.terminals_index.get(&name).unwrap()
     }
@@ -803,7 +804,7 @@ impl Grammar {
     /// calculate range-based terminal-class_id map
     /// only works if %tokentype is char or u8
     /// do not apply this optimization if |RangeCompressed| > |Terminals|/2
-    pub fn calculate_range_terminal_class_map(&self) -> Option<Vec<(u32, u32, usize)>> {
+    pub(crate) fn calculate_range_terminal_class_map(&self) -> Option<Vec<(u32, u32, usize)>> {
         let compressed_len_sum = self
             .terminal_classes
             .iter()
@@ -1035,7 +1036,7 @@ impl Grammar {
             if !nonterm_used[nonterm_idx] {
                 // this rule was not used
                 nonterm.rules.clear();
-                if nonterm.regex_span.is_none() {
+                if !nonterm.is_auto_generated() {
                     let span = nonterm.name.span();
                     removed_rules_diag.push(OptimizeRemove::NonTermNotUsed(span));
                 }
@@ -1062,7 +1063,7 @@ impl Grammar {
                     // this rule contains terminal that is not the first terminal in the class
                     // so remove this rule
                     // add to diags only if it was not auto-generated
-                    if nonterm.regex_span.is_none() {
+                    if !nonterm.is_auto_generated() {
                         let diag = OptimizeRemove::TerminalClassRuleMerge(rule);
                         removed_rules_diag.push(diag);
                     }
@@ -1180,7 +1181,7 @@ impl Grammar {
                 let rules = std::mem::take(&mut nonterm.rules);
                 let rule = rules.into_iter().next().unwrap();
                 // add to diags only if it was not auto-generated
-                if nonterm.regex_span.is_none() {
+                if !nonterm.is_auto_generated() {
                     let diag = OptimizeRemove::SingleNonTerminalRule(rule, nonterm.name.span());
                     removed_rules_diag.push(diag);
                 }

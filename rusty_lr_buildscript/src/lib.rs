@@ -146,7 +146,7 @@ impl Builder {
         prefix_in_this_line: &str,
     ) {
         let (nonterm, local_rule) = grammar.get_rule_by_id(ruleid).expect("Rule not found");
-        if let Some(origin_span) = &nonterm.regex_span {
+        if let Some(origin_span) = nonterm.origin_span() {
             let origin_range = origin_span.0.byte_range().start..origin_span.1.byte_range().end;
             labels.push(Label::primary(fileid, origin_range).with_message(format!(
                 "{}{} was generated here",

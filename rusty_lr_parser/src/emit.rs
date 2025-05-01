@@ -154,7 +154,7 @@ impl Grammar {
                 (true, true)
             } else {
                 // non-term is auto-generated if nonterm.regex_span.is_some()
-                (false, nonterm.regex_span.is_some())
+                (false, nonterm.is_auto_generated())
             };
 
             nonterm_trait_is_augmented_case.extend(quote! {
