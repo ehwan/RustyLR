@@ -1083,9 +1083,9 @@ impl Grammar {
                 };
 
                 // check if this rule's ruletype is %tokentype and reduce action is auto-generated
-                if nonterm.ruletype.is_none()
-                    || (nonterm.ruletype.as_ref().unwrap().to_string()
-                        == self.token_typename.to_string()
+                if (nonterm.ruletype.is_none() && rule.reduce_action.is_none())
+                    || (nonterm.ruletype.is_some()
+                        && rule.reduce_action.is_some()
                         && rule.reduce_action_generated)
                 {
                     changed = true;
