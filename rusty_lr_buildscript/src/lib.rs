@@ -1247,6 +1247,9 @@ impl Builder {
         // expand macro
         let expanded_stream = grammar.emit_compiletime();
 
+        let num_classes = grammar.terminal_classes.len();
+        let num_states = grammar.states.len();
+
         // this comments will be printed to the output file
         // build again here whether it was built before
         // since many informations are removed in the rusty_lr_parser output
@@ -1262,7 +1265,12 @@ impl Builder {
             })
             .collect::<Vec<_>>()
             .join("\n");
-        let debug_comments = format!("{:=^80}\n{rules_comments}\n", "Grammar");
+        let debug_comments = format!(
+            "{:=^80}\n
+# of terminal classes: {num_classes}\n# of states: {num_states}\n
+{rules_comments}\n",
+            "Grammar"
+        );
 
         Ok(output::Output {
             user_stream: output_stream,
