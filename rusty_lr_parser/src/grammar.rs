@@ -1143,6 +1143,8 @@ impl Grammar {
 
         // ensure that from -> to map does not create a cycle, and reaches to the leaf
         let mut cycles: HashSet<Token<usize, usize>> = Default::default();
+        let mut next_replace: HashMap<Token<usize, usize>, Token<usize, usize>> =
+            Default::default();
 
         // calculate cycle
         for (&from, _) in &nonterm_replace {
@@ -1160,21 +1162,23 @@ impl Grammar {
                 chains.insert(next);
                 cur = next;
             }
+            if !cycles.contains(&from) {
+                next_replace.insert(from, cur);
+            }
         }
+        nonterm_replace = next_replace;
 
         // remove cycle related non-terminals from optimization
-        for cycle in &cycles {
-            nonterm_replace.remove(cycle);
-
-            // let Token::NonTerm(nonterm) = *cycle else {
-            //     unreachable!("nonterm_replace should only contain NonTerm");
-            // };
-            // let nonterm = &self.nonterminals[nonterm];
-            // if !nonterm.is_auto_generated() {
-            //     let diag = OptimizeRemove::Cycle(nonterm.name.span());
-            //     removed_rules_diag.push(diag);
-            // }
-        }
+        // for cycle in &cycles {
+        // let Token::NonTerm(nonterm) = *cycle else {
+        //     unreachable!("nonterm_replace should only contain NonTerm");
+        // };
+        // let nonterm = &self.nonterminals[nonterm];
+        // if !nonterm.is_auto_generated() {
+        //     let diag = OptimizeRemove::Cycle(nonterm.name.span());
+        //     removed_rules_diag.push(diag);
+        // }
+        // }
 
         // replace all Token::NonTerm that can be replaced into Token::Term calculated above
         for nonterm in self.nonterminals.iter_mut() {
