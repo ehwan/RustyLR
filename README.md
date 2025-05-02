@@ -4,18 +4,18 @@
 
 ***A Yacc-like, procedural macro-based parser generator for Rust supporting LR(1), LALR(1), and GLR parsing strategies.***
 
-RustyLR enables you to define context-free grammars (CFGs) directly in Rust using macros or build scripts. It constructs optimized finite state automata at compile time, ensuring efficient and reliable parsing.​
+RustyLR enables you to define context-free grammars directly in Rust.
+Inspired by tools like *yacc* and *bison*, it uses a similar syntax while integrating seamlessly with Rust's ecosystem.
+It constructs optimized state machine, ensuring efficient and reliable parsing.​
 
 #### Number of terminal symbols reduced to 32 (from 0x10FFFF!) by optimization
 ![images/optimize.png](images/title.png)
 
 ## Features
+ - **Custom Reduce Actions:** Define custom actions in Rust, allowing you to build into custom data structures easily.
  - **Automatic Optimization:**: Reduces parser table size and improves performance by grouping terminals with identical behavior across parser states.
  - **Multiple Parsing Strategies:** Supports LR(1), LALR(1), and GLR parsers.
- - **Procedural Macros:** Define grammars using lr1! macro for compile-time parser generation.
- - **Build Script Integration:** Generate parsers via build scripts for complex grammars with detailed error messages.​
- - **Custom Reduce Actions:** Define custom actions during reductions to build ASTs or perform computations.​
- - **Grammar Conflict Detection:** Automatically detects shift/reduce and reduce/reduce conflicts during parser generation, providing informative diagnostics to help resolve ambiguities.
+ - **Detailed Diagnostics:** Detect grammar conflicts, verbose conflicts resolving stages, and optimization stages.
 
  ## Installation
  Add RustyLR to your `Cargo.toml`:
