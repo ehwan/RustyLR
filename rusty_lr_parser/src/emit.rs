@@ -289,7 +289,7 @@ impl Grammar {
 
                     // typename is defined, reduce action must be defined
                     // this will be ensured by Grammar::from_grammar_args()
-                    let action = rule.reduce_action.as_ref().unwrap();
+                    let action = &rule.reduce_action.as_ref().unwrap().stream;
                     fn_reduce_for_each_rule_stream.extend(quote! {
                         fn #reduce_fn_ident(&mut self, lookahead: &#token_typename, #user_data_parameter_name: &mut #user_data_typename ) -> Result<(), #reduce_error_typename> {
                             #token_pop_stream
@@ -301,6 +301,7 @@ impl Grammar {
                     // <RuleType> is not defined,
                     // just execute action
                     if let Some(action) = &rule.reduce_action {
+                        let action = &action.stream;
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             fn #reduce_fn_ident(&mut self, lookahead: &#token_typename, #user_data_parameter_name:&mut #user_data_typename) -> Result<(), #reduce_error_typename> {
                                 #token_pop_stream
@@ -526,7 +527,7 @@ impl Grammar {
                 if nonterm.ruletype.is_some() {
                     // typename is defined, reduce action must be defined
                     let variant_name = &variant_names_for_nonterm[nonterm_idx];
-                    let action = rule.reduce_action.as_ref().unwrap();
+                    let action = &rule.reduce_action.as_ref().unwrap().stream;
                     fn_reduce_for_each_rule_stream.extend(quote! {
                         fn #reduce_fn_ident(
                             __rustylr_args: &mut Vec<Self>,
@@ -545,8 +546,8 @@ impl Grammar {
 
                     let variant_name = &variant_names_for_nonterm[nonterm_idx];
                     if let Some(action) = &rule.reduce_action {
+                        let action = &action.stream;
                         fn_reduce_for_each_rule_stream.extend(quote! {
-
                             fn #reduce_fn_ident(
                                 __rustylr_args: &mut Vec<Self>,
                                 shift: &mut bool,

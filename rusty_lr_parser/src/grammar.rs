@@ -14,6 +14,7 @@ use crate::error::ConflictError;
 use crate::error::ParseArgError;
 use crate::error::ParseError;
 use crate::nonterminal_info::NonTerminalInfo;
+use crate::nonterminal_info::ReduceAction;
 use crate::nonterminal_info::Rule;
 use crate::parser::args::GrammarArgs;
 use crate::parser::args::IdentOrLiteral;
@@ -22,7 +23,7 @@ use crate::parser::parser_expanded::GrammarContext;
 use crate::parser::parser_expanded::GrammarParseError;
 use crate::parser::parser_expanded::GrammarParser;
 use crate::pattern::Pattern;
-use crate::pattern::PatternResult;
+use crate::pattern::PatternToToken;
 use crate::rangeresolver::RangeResolver;
 use crate::terminal_info::ReduceTypeInfo;
 use crate::terminal_info::TerminalInfo;
@@ -592,7 +593,7 @@ impl Grammar {
         }
 
         // pattern map for auto-generated rules
-        let mut pattern_map: HashMap<Pattern, PatternResult> = HashMap::default();
+        let mut pattern_map: HashMap<Pattern, PatternToToken> = HashMap::default();
 
         // insert production rules & auto-generated rules from regex pattern
         for (rule_idx, rules) in grammar_args.rules.into_iter().enumerate() {
@@ -603,7 +604,7 @@ impl Grammar {
                     let (begin_span, end_span) = pattern.span_pair();
                     let pattern = pattern.into_pattern(&mut grammar, false)?;
                     let pattern_rule =
-                        pattern.to_rule(&mut grammar, &mut pattern_map, (begin_span, end_span))?;
+                        pattern.to_token(&mut grammar, &mut pattern_map, (begin_span, end_span))?;
 
                     let mapto = match &pattern_rule.ruletype_map {
                         Some((_, mapto_)) => mapto.or(Some(mapto_.clone())),
@@ -627,8 +628,11 @@ impl Grammar {
 
                 rule_lines.push(Rule {
                     tokens,
-                    reduce_action: rule.reduce_action,
-                    reduce_action_generated: false,
+                    reduce_action: rule.reduce_action.map(|stream| ReduceAction {
+                        stream,
+                        generated: false,
+                        identity: false,
+                    }),
                     separator_span: rule.separator_span,
                     lookaheads: None,
                     prec,
@@ -673,7 +677,6 @@ impl Grammar {
                     },
                 ],
                 reduce_action: None,
-                reduce_action_generated: false,
                 separator_span: Span::call_site(),
                 lookaheads: None,
                 prec: None,
@@ -717,8 +720,11 @@ impl Grammar {
                         }
                         if let Some(unique_mapto) = unique_mapto {
                             let action = quote! { #unique_mapto };
-                            rule.reduce_action = Some(action);
-                            rule.reduce_action_generated = true;
+                            rule.reduce_action = Some(ReduceAction {
+                                stream: action,
+                                generated: true,
+                                identity: false,
+                            });
                         } else {
                             let span = if rule.tokens.is_empty() {
                                 (rule.separator_span, rule.separator_span)
@@ -940,7 +946,7 @@ impl Grammar {
                     // if this rule has reduce action, and it is not auto-generated,
                     // this terminal should be completely distinct from others (for user-defined inspection action)
                     // so put this terminal into separate class
-                    if r.reduce_action.is_some() && !r.reduce_action_generated {
+                    if r.reduce_action.is_some() && !r.reduce_action.as_ref().unwrap().identity {
                         term_sets.insert(vec![term]);
                         continue;
                     }
@@ -1135,7 +1141,7 @@ impl Grammar {
             if (nonterm.ruletype.is_none() && rule.reduce_action.is_none())
                 || (nonterm.ruletype.is_some()
                     && rule.reduce_action.is_some()
-                    && rule.reduce_action_generated)
+                    && rule.reduce_action.as_ref().unwrap().identity)
             {
                 nonterm_replace.insert(Token::NonTerm(nonterm_id), totoken);
             }
