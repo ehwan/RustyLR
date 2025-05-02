@@ -6,6 +6,7 @@ use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
 use quote::ToTokens;
+use rusty_lr_core::HashSet;
 use rusty_lr_core::Token;
 
 use crate::error::ArgError;
@@ -50,6 +51,7 @@ pub enum OptimizeRemove {
     TerminalClassRuleMerge(Rule),
     SingleNonTerminalRule(Rule, Span),
     NonTermNotUsed(Span),
+    // Cycle(Span),
 }
 pub struct OptimizeDiag {
     /// deleted rules
@@ -1117,104 +1119,92 @@ impl Grammar {
 
         // remove rules that have single production rule and single token
         // e.g. A -> B, then fix all occurrences of A to B
-        loop {
-            let mut changed = false;
-            let mut nonterm_replace: HashMap<Token<usize, usize>, (Token<usize, usize>, bool)> =
-                Default::default();
-            for (nonterm_id, nonterm) in self.nonterminals.iter_mut().enumerate() {
-                if nonterm.rules.len() != 1 {
-                    continue;
-                }
-                let rule = &nonterm.rules[0];
-                if rule.tokens.len() != 1 {
-                    continue;
-                }
-                let totoken = rule.tokens[0].token;
-
-                // check if this rule's ruletype is %tokentype and reduce action is auto-generated
-                if (nonterm.ruletype.is_none() && rule.reduce_action.is_none())
-                    || (nonterm.ruletype.is_some()
-                        && rule.reduce_action.is_some()
-                        && rule.reduce_action_generated)
-                {
-                    changed = true;
-
-                    nonterm_replace.insert(
-                        Token::NonTerm(nonterm_id),
-                        (totoken, nonterm.ruletype.is_none()),
-                    );
-                }
+        let mut nonterm_replace: HashMap<Token<usize, usize>, Token<usize, usize>> =
+            Default::default();
+        for (nonterm_id, nonterm) in self.nonterminals.iter_mut().enumerate() {
+            if nonterm.rules.len() != 1 {
+                continue;
             }
-
-            // bfs to ensure from -> to map does not create a cycle, and reaches to the leaf
-            loop {
-                let mut changed = false;
-                let mut next_replace: HashMap<Token<usize, usize>, (Token<usize, usize>, bool)> =
-                    Default::default();
-
-                for (&from, &(to, is_none)) in &nonterm_replace {
-                    if let Some(&(new_to, _)) = nonterm_replace.get(&to) {
-                        if new_to == from {
-                            // cycle detected; stop optimization and return
-                            return None;
-                        }
-                        next_replace.insert(from, (new_to, is_none));
-                        changed = true;
-                    } else {
-                        next_replace.insert(from, (to, is_none));
-                    }
-                }
-
-                nonterm_replace = next_replace;
-                if !changed {
-                    break;
-                }
+            let rule = &nonterm.rules[0];
+            if rule.tokens.len() != 1 {
+                continue;
             }
-            // remove cycle related non-terminals from optimization
-            nonterm_replace = nonterm_replace
-                .into_iter()
-                .filter(|(from, (to, _))| from != to)
-                .collect();
+            let totoken = rule.tokens[0].token;
 
-            // delete rules - keys of nonterm_replace
-            for (&from, &(to, _)) in nonterm_replace.iter() {
-                if from == to {
-                    continue;
-                }
-                let Token::NonTerm(nonterm_id) = from else {
-                    unreachable!("nonterm_replace should only contain NonTerm");
-                };
-                let nonterm = &mut self.nonterminals[nonterm_id];
-                let rules = std::mem::take(&mut nonterm.rules);
-                let rule = rules.into_iter().next().unwrap();
-                // add to diags only if it was not auto-generated
-                if !nonterm.is_auto_generated() {
-                    let diag = OptimizeRemove::SingleNonTerminalRule(rule, nonterm.name.span());
-                    removed_rules_diag.push(diag);
-                }
-            }
-
-            // replace all Token::NonTerm that can be replaced into Token::Term calculated above
-            for nonterm in self.nonterminals.iter_mut() {
-                for rule in &mut nonterm.rules {
-                    for token in &mut rule.tokens {
-                        if let Some(&(newclass, is_ruletype_none)) =
-                            nonterm_replace.get(&token.token)
-                        {
-                            token.token = newclass;
-                            if is_ruletype_none {
-                                token.mapto = None;
-                            }
-                            changed = true;
-                        }
-                    }
-                }
-            }
-
-            if !changed {
-                break;
+            // check if this rule's ruletype is %tokentype and reduce action is auto-generated
+            if (nonterm.ruletype.is_none() && rule.reduce_action.is_none())
+                || (nonterm.ruletype.is_some()
+                    && rule.reduce_action.is_some()
+                    && rule.reduce_action_generated)
+            {
+                nonterm_replace.insert(Token::NonTerm(nonterm_id), totoken);
             }
         }
+
+        // ensure that from -> to map does not create a cycle, and reaches to the leaf
+        let mut cycles: HashSet<Token<usize, usize>> = Default::default();
+
+        // calculate cycle
+        for (&from, _) in &nonterm_replace {
+            let mut cur = from;
+            let mut chains: HashSet<Token<usize, usize>> = Default::default();
+            while let Some(&next) = nonterm_replace.get(&cur) {
+                if cycles.contains(&next) {
+                    cycles.insert(from);
+                    break;
+                }
+                if chains.contains(&next) {
+                    cycles.insert(from);
+                    break;
+                }
+                chains.insert(next);
+                cur = next;
+            }
+        }
+
+        // remove cycle related non-terminals from optimization
+        for cycle in &cycles {
+            nonterm_replace.remove(cycle);
+
+            // let Token::NonTerm(nonterm) = *cycle else {
+            //     unreachable!("nonterm_replace should only contain NonTerm");
+            // };
+            // let nonterm = &self.nonterminals[nonterm];
+            // if !nonterm.is_auto_generated() {
+            //     let diag = OptimizeRemove::Cycle(nonterm.name.span());
+            //     removed_rules_diag.push(diag);
+            // }
+        }
+
+        // replace all Token::NonTerm that can be replaced into Token::Term calculated above
+        for nonterm in self.nonterminals.iter_mut() {
+            for rule in &mut nonterm.rules {
+                for token in &mut rule.tokens {
+                    if let Some(&newclass) = nonterm_replace.get(&token.token) {
+                        token.token = newclass;
+                        // if is_ruletype_none {
+                        //     token.mapto = None;
+                        // }
+                    }
+                }
+            }
+        }
+
+        // delete rules - keys of nonterm_replace
+        for &from in nonterm_replace.keys() {
+            let Token::NonTerm(nonterm_id) = from else {
+                unreachable!("nonterm_replace should only contain NonTerm");
+            };
+            let nonterm = &mut self.nonterminals[nonterm_id];
+            let rules = std::mem::take(&mut nonterm.rules);
+            let rule = rules.into_iter().next().unwrap();
+            // add to diags only if it was not auto-generated
+            if !nonterm.is_auto_generated() {
+                let diag = OptimizeRemove::SingleNonTerminalRule(rule, nonterm.name.span());
+                removed_rules_diag.push(diag);
+            }
+        }
+
         self.other_used = other_was_used;
 
         return Some(OptimizeDiag {

@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_parser"
-version = "3.38.1"
+version = "3.38.2"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "macro line parser for rusty_lr"
@@ -18,4 +18,4 @@ syn = { version = "2.0", features = ["extra-traits"] }
 [features]
 default = []
 tree = []
-fxhash = ["rusty_lr_core/fxhash"]
+fxhash = []
