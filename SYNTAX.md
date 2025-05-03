@@ -51,6 +51,7 @@ Patterns define the structure of the input that matches a production rule.
  - `P+` : One or more repetition of `P`.
  - `P?` : Zero or one repetition of `P`.
  - `(P1 P2 P3)` : Grouping of patterns.
+ - `P / term` or `P / [term1 term_start-term_last]`: Pattern `P` followed by a lookaheads. lookaheads will not be consumed.
  - `'a'` or `b'a'`: Single character literal or byte literal. This is only supported if the `%tokentype` is `char` or `u8`.
  - `"abcd"` or `b"abcd"`: String literal or byte string literal. This is only supported if the `%tokentype` is `char` or `u8`.
  - `P - TerminalSet`: `P` must be a subset of terminal symbols. This pattern matches `P` but not any of the terminal symbols in `TerminalSet`.
@@ -196,7 +197,6 @@ By calling `context.trace(): HashSet<NonTerminals>`, you can get the set of trac
 that current context is trying to parse.
 
  - Tracing non-terminals will not be automatically removed from the grammar by the optimization.
- - Start symbol is always `%trace`d.
 
 ```
 %trace NonTerm1, NonTerm2, ...;

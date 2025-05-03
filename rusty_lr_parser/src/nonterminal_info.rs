@@ -1,7 +1,5 @@
 use std::collections::BTreeSet;
 
-use crate::utils;
-
 use super::token::TokenMapped;
 use proc_macro2::Ident;
 use proc_macro2::Span;
@@ -59,6 +57,8 @@ pub struct NonTerminalInfo {
     pub(crate) regex_span: Option<(Span, Span)>,
 
     pub(crate) trace: bool,
+    /// protected from optimization removal; trace rules are always protected
+    pub(crate) protected: bool,
 }
 
 impl NonTerminalInfo {
@@ -73,6 +73,6 @@ impl NonTerminalInfo {
 
     /// if this non-terminal is protected from optimization; will not be automatically deleted
     pub(crate) fn is_protected(&self) -> bool {
-        self.name == utils::AUGMENTED_NAME || self.trace
+        self.protected
     }
 }

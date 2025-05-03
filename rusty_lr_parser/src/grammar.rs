@@ -577,6 +577,7 @@ impl Grammar {
                 rules: Vec::new(), // production rules will be added later
                 regex_span: None,
                 trace: false,
+                protected: false,
             };
 
             grammar.nonterminals.push(nonterminal);
@@ -689,7 +690,10 @@ impl Grammar {
                 regex_span: None,
                 rules: vec![augmented_rule],
                 trace: false,
+                protected: true,
             };
+            // start rule is protected
+            grammar.nonterminals[*start_idx].protected = true;
 
             let augmented_idx = grammar.nonterminals.len();
             grammar.nonterminals.push(nonterminal_info);
@@ -699,21 +703,14 @@ impl Grammar {
         }
 
         // set `%trace`
-        {
-            for trace in grammar_args.traces.into_iter() {
-                if let Some(&nonterm_idx) = grammar.nonterminals_index.get(&trace) {
-                    grammar.nonterminals[nonterm_idx].trace = true;
-                } else {
-                    return Err(ParseError::NonTerminalNotDefined(trace));
-                    // no such rule
-                }
+        for trace in grammar_args.traces.into_iter() {
+            if let Some(&nonterm_idx) = grammar.nonterminals_index.get(&trace) {
+                grammar.nonterminals[nonterm_idx].trace = true;
+                grammar.nonterminals[nonterm_idx].protected = true;
+            } else {
+                return Err(ParseError::NonTerminalNotDefined(trace));
+                // no such rule
             }
-            // start rule is always traced
-            let &start_idx = grammar
-                .nonterminals_index
-                .get(&grammar.start_rule_name)
-                .unwrap();
-            grammar.nonterminals[start_idx].trace = true;
         }
 
         // check reduce action
