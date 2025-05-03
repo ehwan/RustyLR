@@ -191,7 +191,7 @@ E(i32) : A! A A!;
 ```
 
 ## Tracing Non-Terminals
-Putting `%trace` before a non-terminal definition will enable tracing for that non-terminal.
+Putting non-terminals in `%trace` directive will enable tracing for that non-terminal.
 By calling `context.trace(): HashSet<NonTerminals>`, you can get the set of tracing non-terminals
 that current context is trying to parse.
 
