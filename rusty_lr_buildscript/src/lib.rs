@@ -36,6 +36,9 @@ use rusty_lr_parser::error::ParseError;
 use std::fs::read;
 use std::fs::write;
 
+/// reexport
+pub use rusty_lr_parser::target_rusty_lr_version;
+
 /// Main entry for the build script
 pub struct Builder {
     /// input_file to read
