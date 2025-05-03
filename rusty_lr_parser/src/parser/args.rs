@@ -16,67 +16,6 @@ use crate::terminal_info::TerminalName;
 use crate::terminalset::TerminalSet;
 use crate::utils;
 
-/// parsed arguments for reduce type def
-pub enum TerminalOrTerminalSet {
-    Ident(Ident),
-    Literal(Literal),
-    TerminalSet(TerminalSet),
-}
-
-impl TerminalOrTerminalSet {
-    /// in case of negation, `include_eof` is true if the final terminal set contains eof
-    pub fn to_terminal_set(
-        &self,
-        grammar: &mut Grammar,
-        include_eof: bool,
-    ) -> Result<(bool, BTreeSet<usize>), ParseError> {
-        match self {
-            TerminalOrTerminalSet::Ident(ident) => {
-                if let Some(idx) = grammar
-                    .terminals_index
-                    .get(&TerminalName::Ident(ident.clone()))
-                {
-                    Ok((false, BTreeSet::from([*idx])))
-                } else {
-                    Err(ParseError::TerminalNotDefined(ident.clone()))
-                }
-            }
-            TerminalOrTerminalSet::Literal(literal) => {
-                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
-                    .expect("failed on syn::parse2::<syn::Lit>");
-                let val = grammar.get_char_value(&lit)?;
-                let name: TerminalName = (val, val).into();
-                let idx = *grammar.terminals_index.get(&name).unwrap();
-                Ok((false, BTreeSet::from([idx])))
-            }
-            TerminalOrTerminalSet::TerminalSet(terminal_set) => {
-                terminal_set.to_terminal_set(grammar, include_eof)
-            }
-        }
-    }
-    /*
-    pub fn span_pair(&self) -> (Span, Span) {
-        match self {
-            TerminalOrTerminalSet::Ident(ident) => (ident.span(), ident.span()),
-            TerminalOrTerminalSet::Literal(literal) => (literal.span(), literal.span()),
-            TerminalOrTerminalSet::TerminalSet(terminal_set) => {
-                (terminal_set.open_span, terminal_set.close_span)
-            }
-        }
-    }
-    */
-}
-
-impl std::fmt::Display for TerminalOrTerminalSet {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            TerminalOrTerminalSet::Ident(ident) => write!(f, "{}", ident),
-            TerminalOrTerminalSet::Literal(literal) => write!(f, "{}", literal),
-            TerminalOrTerminalSet::TerminalSet(terminal_set) => write!(f, "{}", terminal_set),
-        }
-    }
-}
-
 #[derive(Debug, Clone)]
 pub enum IdentOrLiteral {
     Ident(Ident),
@@ -363,7 +302,14 @@ impl PatternArgs {
         match self {
             PatternArgs::TerminalSet(terminal_set) => terminal_set.to_terminal_set(grammar, false),
             PatternArgs::Ident(ident) => {
-                TerminalOrTerminalSet::Ident(ident.clone()).to_terminal_set(grammar, false)
+                if let Some(idx) = grammar
+                    .terminals_index
+                    .get(&TerminalName::Ident(ident.clone()))
+                {
+                    Ok((false, BTreeSet::from([*idx])))
+                } else {
+                    Err(ParseError::TerminalNotDefined(ident.clone()))
+                }
             }
             PatternArgs::Plus(base, span) => {
                 Err(ParseError::OnlyTerminalSet(base.span_pair().0, *span))
@@ -386,8 +332,13 @@ impl PatternArgs {
                     Err(ParseError::OnlyTerminalSet(*span_begin, *span_end))
                 }
             }
-            PatternArgs::Literal(lit) => {
-                TerminalOrTerminalSet::Literal(lit.clone()).to_terminal_set(grammar, false)
+            PatternArgs::Literal(literal) => {
+                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
+                    .expect("failed on syn::parse2::<syn::Lit>");
+                let val = grammar.get_char_value(&lit)?;
+                let name: TerminalName = (val, val).into();
+                let idx = *grammar.terminals_index.get(&name).unwrap();
+                Ok((false, BTreeSet::from([idx])))
             }
             PatternArgs::Minus(base, exclude) => {
                 let (negate_lhs, mut lhs_set) = base.to_terminal_set(grammar)?;
@@ -537,4 +488,5 @@ pub struct GrammarArgs {
     pub glr: bool,
     pub no_optim: bool,
     pub dense: bool,
+    pub traces: Vec<Ident>,
 }

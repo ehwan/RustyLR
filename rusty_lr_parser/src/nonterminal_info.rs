@@ -1,5 +1,7 @@
 use std::collections::BTreeSet;
 
+use crate::utils;
+
 use super::token::TokenMapped;
 use proc_macro2::Ident;
 use proc_macro2::Span;
@@ -55,6 +57,8 @@ pub struct NonTerminalInfo {
     /// If this non-terminal is auto-generated from regex pattern,
     /// the (begin, end) span-pair of the regex pattern.
     pub(crate) regex_span: Option<(Span, Span)>,
+
+    pub(crate) trace: bool,
 }
 
 impl NonTerminalInfo {
@@ -65,5 +69,10 @@ impl NonTerminalInfo {
     /// returns the span of the regex pattern that generated this rule
     pub fn origin_span(&self) -> Option<(Span, Span)> {
         self.regex_span
+    }
+
+    /// if this non-terminal is protected from optimization; will not be automatically deleted
+    pub(crate) fn is_protected(&self) -> bool {
+        self.name == utils::AUGMENTED_NAME || self.trace
     }
 }

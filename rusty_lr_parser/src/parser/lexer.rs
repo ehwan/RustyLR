@@ -60,6 +60,7 @@ pub enum Lexed {
     Precedence(Punct, Ident),   // %precedence
     NoOptim(Punct, Ident),      // %nooptim
     Dense(Punct, Ident),        // %dense
+    Trace(Punct, Ident),        // %trace
     Eof,
 }
 impl Lexed {
@@ -154,6 +155,10 @@ impl Lexed {
                 stream.append(punct);
                 stream.append(ident);
             }
+            Lexed::Trace(punct, ident) => {
+                stream.append(punct);
+                stream.append(ident);
+            }
 
             Lexed::Eof => unreachable!("Eof::stream()"),
         }
@@ -204,6 +209,7 @@ impl Lexed {
             Lexed::Precedence(punct, ident) => ident.span(),
             Lexed::NoOptim(punct, ident) => ident.span(),
             Lexed::Dense(punct, ident) => ident.span(),
+            Lexed::Trace(punct, ident) => ident.span(),
 
             Lexed::Eof => Span::call_site(),
         }
@@ -254,6 +260,7 @@ impl std::fmt::Display for Lexed {
             Lexed::Precedence(_, _) => write!(f, "%precedence"),
             Lexed::NoOptim(_, _) => write!(f, "%nooptim"),
             Lexed::Dense(_, _) => write!(f, "%dense"),
+            Lexed::Trace(_, _) => write!(f, "%trace"),
 
             Lexed::Eof => write!(f, "<eof>"),
         }
@@ -288,6 +295,7 @@ fn ident_to_keyword(percent: Punct, ident: Ident) -> Option<Lexed> {
         "precedence" => Some(Lexed::Precedence(percent, ident)),
         "nooptim" => Some(Lexed::NoOptim(percent, ident)),
         "dense" => Some(Lexed::Dense(percent, ident)),
+        "trace" => Some(Lexed::Trace(percent, ident)),
         _ => None,
     }
 }

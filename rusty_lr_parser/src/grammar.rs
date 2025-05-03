@@ -576,6 +576,7 @@ impl Grammar {
                 ruletype: rules_arg.typename.clone(),
                 rules: Vec::new(), // production rules will be added later
                 regex_span: None,
+                trace: false,
             };
 
             grammar.nonterminals.push(nonterminal);
@@ -687,6 +688,7 @@ impl Grammar {
                 ruletype: None,
                 regex_span: None,
                 rules: vec![augmented_rule],
+                trace: false,
             };
 
             let augmented_idx = grammar.nonterminals.len();
@@ -694,6 +696,24 @@ impl Grammar {
             grammar
                 .nonterminals_index
                 .insert(augmented_ident, augmented_idx);
+        }
+
+        // set `%trace`
+        {
+            for trace in grammar_args.traces.into_iter() {
+                if let Some(&nonterm_idx) = grammar.nonterminals_index.get(&trace) {
+                    grammar.nonterminals[nonterm_idx].trace = true;
+                } else {
+                    return Err(ParseError::NonTerminalNotDefined(trace));
+                    // no such rule
+                }
+            }
+            // start rule is always traced
+            let &start_idx = grammar
+                .nonterminals_index
+                .get(&grammar.start_rule_name)
+                .unwrap();
+            grammar.nonterminals[start_idx].trace = true;
         }
 
         // check reduce action
@@ -1041,6 +1061,10 @@ impl Grammar {
             }
         }
         for (nonterm_idx, nonterm) in self.nonterminals.iter_mut().enumerate() {
+            // do not delete protected non-terminals
+            if nonterm.is_protected() {
+                continue;
+            }
             if nonterm.rules.is_empty() {
                 continue;
             }
@@ -1128,6 +1152,10 @@ impl Grammar {
         let mut nonterm_replace: HashMap<Token<usize, usize>, Token<usize, usize>> =
             Default::default();
         for (nonterm_id, nonterm) in self.nonterminals.iter_mut().enumerate() {
+            // do not delete protected non-terminals
+            if nonterm.is_protected() {
+                continue;
+            }
             if nonterm.rules.len() != 1 {
                 continue;
             }
@@ -1233,6 +1261,36 @@ impl Grammar {
                     diag.removed.extend(new_diag.removed.into_iter());
                 }
                 None => break,
+            }
+        }
+
+        // remove nonterminals from Vecs which are deleted in the optimization
+        // nonterm idx remapping
+        let mut nonterm_old_to_new = Vec::new();
+        nonterm_old_to_new.resize(self.nonterminals.len(), 0);
+        let mut new_idx = 0;
+        for (old_idx, nonterm) in self.nonterminals.iter().enumerate() {
+            if nonterm.rules.is_empty() {
+                continue;
+            }
+            nonterm_old_to_new[old_idx] = new_idx;
+            new_idx += 1;
+        }
+        self.nonterminals = std::mem::take(&mut self.nonterminals)
+            .into_iter()
+            .filter(|nonterm| !nonterm.rules.is_empty())
+            .collect();
+        self.nonterminals_index.clear();
+        for (idx, nonterm) in self.nonterminals.iter().enumerate() {
+            self.nonterminals_index.insert(nonterm.name.clone(), idx);
+        }
+        for nonterm in &mut self.nonterminals {
+            for rule in &mut nonterm.rules {
+                for token in &mut rule.tokens {
+                    if let Token::NonTerm(nonterm_idx) = token.token {
+                        token.token = Token::NonTerm(nonterm_old_to_new[nonterm_idx]);
+                    }
+                }
             }
         }
 

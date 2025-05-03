@@ -5,4 +5,6 @@ pub trait NonTerminal<Term> {
     fn is_auto_generated(&self) -> bool;
     /// Augmented rule will be generated for entry point of the grammar.
     fn is_augmented(&self) -> bool;
+    /// whether this non-terminal is set as %trace
+    fn is_trace(&self) -> bool;
 }

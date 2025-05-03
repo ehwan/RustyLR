@@ -144,7 +144,7 @@ impl<S: Stack> Context<S> {
             .is_some()
     }
 
-    /// Get set of non-terminal symbols that current context is trying to parse.
+    /// Get set of `%trace` non-terminal symbols that current context is trying to parse.
     ///
     /// The order of the returned set does not mean anything.
     /// If the current context is attempting to recognize following grammar:
@@ -153,7 +153,7 @@ impl<S: Stack> Context<S> {
     ///
     /// Then the returned set will be:
     /// [`Chunk`, `Statement`, `IfStatement`, `ReturnStatement`]
-    pub fn on_parsing<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+    pub fn trace<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
         &self,
         parser: &P,
     ) -> crate::HashSet<S::NonTerm>
@@ -224,7 +224,7 @@ impl<S: Stack> Context<S> {
                 let nonterm0 = rules[zero_rule].name;
                 // do not insert auto-generated nonterminals
                 // since user don't need to know about them
-                if !nonterm0.is_auto_generated() && !nonterm0.is_augmented() {
+                if nonterm0.is_trace() {
                     ret.insert(nonterm0);
                 }
             }

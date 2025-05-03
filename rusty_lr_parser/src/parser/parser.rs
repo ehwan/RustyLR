@@ -3,7 +3,6 @@ use crate::parser::args::GrammarArgs;
 use crate::parser::args::RuleDefArgs;
 use crate::parser::args::RuleLineArgs;
 use crate::parser::lexer::Lexed;
-use crate::parser::args::TerminalOrTerminalSet;
 use crate::parser::args::IdentOrLiteral;
 use crate::terminalset::TerminalSet;
 use crate::terminalset::TerminalSetItem;
@@ -82,6 +81,7 @@ macro_rules! punct(
 %token precedence Lexed::Precedence(punct!('%'),Ident::new("id", Span::call_site()));
 %token nooptim Lexed::NoOptim(punct!('%'),Ident::new("id", Span::call_site()));
 %token dense Lexed::Dense(punct!('%'),Ident::new("id", Span::call_site()));
+%token trace Lexed::Trace(punct!('%'),Ident::new("id", Span::call_site()));
 
 %eof Lexed::Eof;
 
@@ -104,7 +104,7 @@ Rule(RuleDefArgs) : ident RuleType colon RuleLines semicolon {
     RuleDefArgs {
         name: ident,
         typename: RuleType.map(|t| t.stream()),
-        rule_lines: RuleLines
+        rule_lines: RuleLines,
     }
 }
 ;
@@ -330,22 +330,6 @@ TokenTypeDef((Span,TokenStream)): tokentype RustCode semicolon { (tokentype.span
 UserDataDef((Span,TokenStream)): userdata RustCode semicolon { (userdata.span(),RustCode) }
 ;
 
-TerminalOrTerminalSet(TerminalOrTerminalSet): TerminalSet { TerminalOrTerminalSet::TerminalSet( TerminalSet ) }
-| ident {
-    if let Lexed::Ident(ident) = ident {
-        TerminalOrTerminalSet::Ident( ident )
-    }else {
-        unreachable!( "TerminalOrTerminalSet-Ident" );
-    }
-}
-| literal {
-    let Lexed::Literal(literal) = literal else {
-        unreachable!( "TerminalOrTerminalSet-Literal" );
-    };
-    TerminalOrTerminalSet::Literal( literal )
-}
-;
-
 IdentOrLiteral(IdentOrLiteral): ident {
     let Lexed::Ident(ident) = ident else {
         unreachable!( "IdentOrLiteral-Ident" );
@@ -386,6 +370,16 @@ NoOptim: nooptim semicolon;
 
 Dense: dense semicolon;
 
+Trace(Vec<Ident>): trace ident* semicolon {
+    ident.into_iter().map(|t| {
+        let Lexed::Ident(ident) = t else {
+            unreachable!( "Trace-Ident" );
+        };
+        ident
+    }).collect()
+}
+;
+
 GrammarLine : Rule { data.rules.push(Rule); }
 | TokenDef  { data.terminals.push(TokenDef); }
 | StartDef  { data.start_rule_name.push(StartDef); }
@@ -400,6 +394,7 @@ GrammarLine : Rule { data.rules.push(Rule); }
 | Precedence { data.precedences.push(Precedence); }
 | NoOptim { data.no_optim = true; }
 | Dense { data.dense = true; }
+| Trace { data.traces.extend(Trace.into_iter()); }
 ;
 
 Grammar: GrammarLine+;

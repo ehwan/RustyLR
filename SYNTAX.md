@@ -6,6 +6,7 @@
  - [ReduceAction](#reduceaction-optional)
  - [Accessing token data in ReduceAction](#accessing-token-data-in-reduceaction)
  - [Exclamation mark `!`](#exclamation-mark-)
+ - [`%trace`](#tracing-non-terminals)
  - [`%tokentype`](#token-type-must-defined)
  - [`%token`](#token-definition-must-defined)
  - [`%start`](#start-symbol-must-defined)
@@ -189,6 +190,17 @@ A(i32) : ... ;
 E(i32) : A! A A!;
 ```
 
+## Tracing Non-Terminals
+Putting `%trace` before a non-terminal definition will enable tracing for that non-terminal.
+By calling `context.trace(): HashSet<NonTerminals>`, you can get the set of tracing non-terminals
+that current context is trying to parse.
+
+ - Tracing non-terminals will not be automatically removed from the grammar by the optimization.
+ - Start symbol is always `%trace`d.
+
+```
+%trace NonTerm1, NonTerm2, ...;
+```
 
 ## Token type <sub><sup>(must defined)</sup></sub>
 ```

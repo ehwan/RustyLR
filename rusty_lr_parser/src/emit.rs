@@ -148,13 +148,14 @@ impl Grammar {
         // impl NonTerminal trait
         let mut nonterm_trait_is_augmented_case = TokenStream::new();
         let mut nonterm_trait_is_generated_case = TokenStream::new();
+        let mut nonterm_trait_is_trace_case = TokenStream::new();
         for nonterm in self.nonterminals.iter() {
             let name = &nonterm.name;
-            let (is_augmented, is_generated) = if name == utils::AUGMENTED_NAME {
-                (true, true)
+            let (is_augmented, is_generated, is_trace) = if name == utils::AUGMENTED_NAME {
+                (true, true, false)
             } else {
                 // non-term is auto-generated if nonterm.regex_span.is_some()
-                (false, nonterm.is_auto_generated())
+                (false, nonterm.is_auto_generated(), nonterm.trace)
             };
 
             nonterm_trait_is_augmented_case.extend(quote! {
@@ -162,6 +163,9 @@ impl Grammar {
             });
             nonterm_trait_is_generated_case.extend(quote! {
                 #nonterminals_enum_name::#name => #is_generated,
+            });
+            nonterm_trait_is_trace_case.extend(quote! {
+                #nonterminals_enum_name::#name => #is_trace,
             });
         }
         stream.extend(quote! {
@@ -174,6 +178,11 @@ impl Grammar {
                 fn is_augmented(&self) -> bool {
                     match self {
                         #nonterm_trait_is_augmented_case
+                    }
+                }
+                fn is_trace(&self) -> bool {
+                    match self {
+                        #nonterm_trait_is_trace_case
                     }
                 }
             }

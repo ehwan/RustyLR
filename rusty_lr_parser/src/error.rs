@@ -113,7 +113,11 @@ pub enum ParseError {
         span: (Span, Span),
     },
 
+    /// Only terminal or terminal set is allowed
     OnlyTerminalSet(Span, Span),
+
+    /// unknown non-terminal symbol name
+    NonTerminalNotDefined(Ident),
 }
 #[allow(unused)]
 impl ArgError {
@@ -254,6 +258,7 @@ impl ParseError {
 
             ParseError::RuleTypeDefinedButActionNotDefined { name, span } => span.0,
             ParseError::OnlyTerminalSet(span_begin, span_end) => *span_begin,
+            ParseError::NonTerminalNotDefined(ident) => ident.span(),
         }
     }
 
@@ -324,6 +329,9 @@ impl ParseError {
                 "ReduceAction must be defined for this rule".into()
             }
             ParseError::OnlyTerminalSet(_, _) => "Only terminal or terminal set is allowed".into(),
+            ParseError::NonTerminalNotDefined(ident) => {
+                format!("Unknown non-terminal symbol name: {}", ident)
+            }
         }
     }
 }

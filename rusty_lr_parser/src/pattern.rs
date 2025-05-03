@@ -169,6 +169,7 @@ impl Pattern {
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         rules: vec![line1, line2],
                         regex_span: Some(root_span_pair),
+                        trace: false,
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -225,6 +226,7 @@ impl Pattern {
                         ruletype: None,
                         rules: vec![line1, line2],
                         regex_span: Some(root_span_pair),
+                        trace: false,
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -297,6 +299,7 @@ impl Pattern {
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         rules: vec![line1, line2],
                         regex_span: Some(root_span_pair),
+                        trace: false,
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -339,6 +342,7 @@ impl Pattern {
                         ruletype: None,
                         rules: vec![line1, line2],
                         regex_span: Some(root_span_pair),
+                        trace: false,
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -404,6 +408,7 @@ impl Pattern {
                         ruletype: Some(quote! {Option<#base_typename>}),
                         rules: vec![line1, line2],
                         regex_span: Some(root_span_pair),
+                        trace: false,
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -447,6 +452,7 @@ impl Pattern {
                         ruletype: None,
                         rules: vec![line1, line2],
                         regex_span: Some(root_span_pair),
+                        trace: false,
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -518,6 +524,7 @@ impl Pattern {
                     ruletype: Some(grammar.token_typename.clone()),
                     rules,
                     regex_span: Some(root_span_pair),
+                    trace: false,
                 };
                 grammar.nonterminals.push(nonterm_info);
                 grammar
@@ -575,6 +582,7 @@ impl Pattern {
                         ruletype: Some(base_typename.clone()),
                         rules: vec![rule],
                         regex_span: Some(root_span_pair),
+                        trace: false,
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -608,6 +616,7 @@ impl Pattern {
                         ruletype: None,
                         rules: vec![rule],
                         regex_span: Some(root_span_pair),
+                        trace: false,
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -678,6 +687,7 @@ impl Pattern {
                             ruletype: None,
                             rules: vec![rule],
                             regex_span: Some(root_span_pair),
+                            trace: false,
                         };
                         grammar.nonterminals.push(nonterm_info);
                         grammar
@@ -716,6 +726,7 @@ impl Pattern {
                             ruletype: Some(typename.clone()),
                             rules: vec![rule],
                             regex_span: Some(root_span_pair),
+                            trace: false,
                         };
                         grammar.nonterminals.push(nonterm_info);
                         grammar
@@ -760,6 +771,7 @@ impl Pattern {
                             ruletype: Some(typename.clone()),
                             rules: vec![rule],
                             regex_span: Some(root_span_pair),
+                            trace: false,
                         };
                         grammar.nonterminals.push(nonterm_info);
                         grammar
@@ -839,6 +851,7 @@ impl Pattern {
                         ruletype: None,
                         rules: vec![rule],
                         regex_span: Some((str_span, str_span)),
+                        trace: false,
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -885,6 +898,7 @@ impl Pattern {
                         ruletype: None,
                         rules: vec![rule],
                         regex_span: Some((str_span, str_span)),
+                        trace: false,
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar

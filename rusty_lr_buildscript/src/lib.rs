@@ -612,6 +612,13 @@ impl Builder {
                                 .with_message("This pattern is not terminal")])
                             .with_notes(vec!["".to_string()])
                     }
+                    ParseError::NonTerminalNotDefined(ident) => {
+                        let range = ident.span().byte_range();
+                        Diagnostic::error()
+                            .with_message("Non-terminal not defined")
+                            .with_labels(vec![Label::primary(file_id, range)
+                                .with_message("This non-terminal is not defined")])
+                    }
 
                     _ => {
                         let message = e.short_message();

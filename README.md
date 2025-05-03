@@ -156,6 +156,7 @@ You can get useful information from `<Start>NonTerminals` enum.
  let non_terminal: <Start>NonTerminals = ...;
 
  non_terminal.is_auto_generated(); // true if this non-terminal is auto-generated
+ non_terminal.is_trace();          // if this non-terminal is marked with `%trace`
  ```
 
 You can also get contextual information from `<Start>Context` struct.
@@ -167,7 +168,7 @@ let mut context = <Start>Context::new();
 context.expected();         // get expected terminal symbols
 context.expected_nonterm(); // get expected non-terminal symbols
 context.can_feed( term );   // check if a terminal symbol can be fed
-context.on_parsing();       // get all non-terminal symbols that are currently being parsed
+context.trace();            // get all `%trace` non-terminals that are currently being parsed
 ```
 
 The generated code will also include a `feed` method that takes a token and a mutable reference to the user data. This method will return an `Ok(())` if the token was successfully parsed, or an `Err` if there was an error.

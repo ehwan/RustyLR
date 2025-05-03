@@ -143,7 +143,7 @@ impl<Data: NodeData> Node<Data> {
         NodeRefIterator { node: Some(self) }
     }
 
-    /// Get set of non-terminal symbols that current context is trying to parse.
+    /// Get set of `%trace` non-terminal symbols that current context is trying to parse.
     ///
     /// The order of the returned set does not mean anything.
     /// If the current context is attempting to recognize following grammar:
@@ -152,7 +152,7 @@ impl<Data: NodeData> Node<Data> {
     ///
     /// Then the returned set will be:
     /// [`Chunk`, `Statement`, `IfStatement`, `ReturnStatement`]
-    pub fn on_parsing<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    pub fn trace<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
     ) -> crate::HashSet<Data::NonTerm>
@@ -224,7 +224,7 @@ impl<Data: NodeData> Node<Data> {
                 let nonterm0 = rules[zero_rule].name;
                 // do not insert auto-generated nonterminals
                 // since user don't need to know about them
-                if !nonterm0.is_auto_generated() && !nonterm0.is_augmented() {
+                if nonterm0.is_trace() {
                     ret.insert(nonterm0);
                 }
             }

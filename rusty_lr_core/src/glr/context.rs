@@ -186,7 +186,7 @@ impl<Data: NodeData> Context<Data> {
         self.nodes().flat_map(|node| node.expected_nonterm(parser))
     }
 
-    /// Get set of non-terminal symbols that current context is trying to parse.
+    /// Get set of `%trace` non-terminal symbols that current context is trying to parse.
     ///
     /// The order of the returned set does not mean anything.
     /// If the current context is attempting to recognize following grammar:
@@ -195,7 +195,7 @@ impl<Data: NodeData> Context<Data> {
     ///
     /// Then the returned set will be:
     /// [`Chunk`, `Statement`, `IfStatement`, `ReturnStatement`]
-    pub fn on_parsing<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    pub fn trace<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
     ) -> crate::HashSet<Data::NonTerm>
@@ -204,7 +204,7 @@ impl<Data: NodeData> Context<Data> {
     {
         let mut ret: crate::HashSet<Data::NonTerm> = Default::default();
         for node in self.nodes() {
-            let set = node.on_parsing(parser);
+            let set = node.trace(parser);
             ret.extend(set.into_iter());
         }
         ret
