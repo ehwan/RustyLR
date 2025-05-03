@@ -750,6 +750,27 @@ impl Builder {
                             term::emit(&mut writer.lock(), &config, &files, &diag)
                                 .expect("Failed to write to verbose stream");
                         }
+                        OptimizeRemove::Cycle(span) => {
+                            let message = "Cycle detected";
+                            let mut labels = Vec::new();
+                            let mut notes = Vec::new();
+                            notes.push("This non-terminal is involved in bad cycle".to_string());
+
+                            labels.push(
+                                Label::primary(file_id, span.byte_range())
+                                    .with_message("non-terminal defined here"),
+                            );
+
+                            let diag = Diagnostic::warning()
+                                .with_message(message)
+                                .with_labels(labels)
+                                .with_notes(notes);
+
+                            let writer = self.verbose_stream();
+                            let config = codespan_reporting::term::Config::default();
+                            term::emit(&mut writer.lock(), &config, &files, &diag)
+                                .expect("Failed to write to verbose stream");
+                        }
                     }
                 }
 

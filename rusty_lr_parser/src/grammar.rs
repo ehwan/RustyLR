@@ -52,7 +52,7 @@ pub enum OptimizeRemove {
     TerminalClassRuleMerge(Rule),
     SingleNonTerminalRule(Rule, Span),
     NonTermNotUsed(Span),
-    // Cycle(Span),
+    Cycle(Span),
 }
 pub struct OptimizeDiag {
     /// deleted rules
@@ -1203,16 +1203,16 @@ impl Grammar {
         nonterm_replace = next_replace;
 
         // remove cycle related non-terminals from optimization
-        // for cycle in &cycles {
-        // let Token::NonTerm(nonterm) = *cycle else {
-        //     unreachable!("nonterm_replace should only contain NonTerm");
-        // };
-        // let nonterm = &self.nonterminals[nonterm];
-        // if !nonterm.is_auto_generated() {
-        //     let diag = OptimizeRemove::Cycle(nonterm.name.span());
-        //     removed_rules_diag.push(diag);
-        // }
-        // }
+        for cycle in &cycles {
+            let Token::NonTerm(nonterm) = *cycle else {
+                unreachable!("nonterm_replace should only contain NonTerm");
+            };
+            let nonterm = &self.nonterminals[nonterm];
+            if !nonterm.is_auto_generated() {
+                let diag = OptimizeRemove::Cycle(nonterm.name.span());
+                removed_rules_diag.push(diag);
+            }
+        }
 
         // replace all Token::NonTerm that can be replaced into Token::Term calculated above
         for nonterm in self.nonterminals.iter_mut() {
