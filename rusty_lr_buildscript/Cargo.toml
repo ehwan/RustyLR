@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_buildscript"
-version = "0.35.2"
+version = "0.36.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "buildscipt tools for rusty_lr"
@@ -11,8 +11,8 @@ categories = ["parsing"]
 
 
 [dependencies]
-rusty_lr_parser = { version = "3.38.0", path = "../rusty_lr_parser" }
-rusty_lr_core = { version = "3.14.0", path = "../rusty_lr_core" }
+rusty_lr_parser = { version = "3.39.0", path = "../rusty_lr_parser" }
+rusty_lr_core = { version = "3.15.0", path = "../rusty_lr_core" }
 codespan-reporting = "0.12"
 proc-macro2 = { version = "1.0.86", features = ["span-locations"] }
 quote = "1.0"
@@ -20,4 +20,4 @@ quote = "1.0"
 [features]
 default = []
 tree = ["rusty_lr_parser/tree", "rusty_lr_core/tree"]
-fxhash = ["rusty_lr_core/fxhash", "rusty_lr_parser/fxhash"]
+fxhash = []
