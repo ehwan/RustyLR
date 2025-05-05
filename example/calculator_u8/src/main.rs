@@ -1,7 +1,7 @@
 pub mod parser;
 
 fn main() {
-    let input = "  1 +  20 *   (3 + 4 )   ";
+    let input = "  1 +  -20 *   (3 + 4 )   ";
 
     let parser = parser::EParser::new();
     let mut context = parser::EContext::new();

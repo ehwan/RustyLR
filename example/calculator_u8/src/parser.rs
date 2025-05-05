@@ -8,6 +8,7 @@ lr1! {
 
     %left '+';
     %left '*';
+    %precedence UMINUS;
 
     WS0: ' '*;
 
@@ -26,6 +27,9 @@ lr1! {
     }
     | E '*' e2=E {
         E * e2
+    }
+    | WS0 '-' E %prec UMINUS {
+        -E
     }
     | P
     ;

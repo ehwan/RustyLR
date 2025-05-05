@@ -783,16 +783,18 @@ impl Grammar {
         }
         // set operator for each rule
         for nonterm in &mut grammar.nonterminals {
+            use rusty_lr_core::builder::Operator;
             for rule in &mut nonterm.rules {
+                // if this rule has no explicit %prec operator
                 if rule.prec.is_none() {
+                    // choose the last terminal symbol that has precedence
                     let mut op = None;
                     for token in &rule.tokens {
                         if let Token::Term(term_idx) = token.token {
-                            op = Some((
-                                rusty_lr_core::builder::Operator::Term(term_idx),
-                                token.end_span,
-                            ));
-                            break;
+                            if grammar.precedences.contains_key(&Operator::Term(term_idx)) {
+                                op = Some((Operator::Term(term_idx), token.end_span));
+                                break;
+                            }
                         }
                     }
                     rule.prec = op;
