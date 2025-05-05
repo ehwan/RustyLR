@@ -2,7 +2,7 @@
 [![crates.io](https://img.shields.io/crates/v/rusty_lr.svg)](https://crates.io/crates/rusty_lr)
 [![docs.rs](https://docs.rs/rusty_lr/badge.svg)](https://docs.rs/rusty_lr)
 
-***A Yacc-like, procedural macro-based parser generator for Rust supporting LR(1), LALR(1), and GLR parsing strategies.***
+***A Bison-like, procedural macro-based parser generator for Rust supporting LR(1), LALR(1), and GLR parsing strategies.***
 
 RustyLR enables you to define context-free grammars directly in Rust.
 Inspired by tools like *yacc* and *bison*, it uses a similar syntax while integrating seamlessly with Rust's ecosystem.
