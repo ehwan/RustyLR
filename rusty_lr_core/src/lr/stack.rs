@@ -22,4 +22,7 @@ pub trait Stack: Sized {
 
     /// pop start non-terminal from data stack
     fn pop_start(&mut self) -> Self::StartType;
+
+    fn pop(&mut self, nonterm: Self::NonTerm);
+    fn pop_term(&mut self);
 }

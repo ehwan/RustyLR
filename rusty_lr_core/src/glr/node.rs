@@ -49,6 +49,8 @@ pub trait NodeData: Sized {
         userdata: &mut Self::UserData,
     ) -> Result<Self, Self::ReduceActionError>;
 
+    fn new_error_nonterm() -> Self;
+
     /// get data of start symbol
     fn into_start(self) -> Self::StartType;
 }

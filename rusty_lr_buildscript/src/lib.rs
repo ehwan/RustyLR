@@ -530,19 +530,11 @@ impl Builder {
                             .with_notes(vec!["Token name must be unique".to_string()])
                     }
 
-                    ParseError::EofDefined(ident) => {
+                    ParseError::ReservedName(ident) => {
                         let range = ident.span().byte_range();
 
                         Diagnostic::error()
-                            .with_message("'eof' is reserved name")
-                            .with_labels(vec![Label::primary(file_id, range)
-                                .with_message("This name is reserved")])
-                    }
-                    ParseError::AugmentedDefined(ident) => {
-                        let range = ident.span().byte_range();
-
-                        Diagnostic::error()
-                            .with_message("'Augmented' is reserved name")
+                            .with_message(format!("'{ident}' is reserved name"))
                             .with_labels(vec![Label::primary(file_id, range)
                                 .with_message("This name is reserved")])
                     }

@@ -183,6 +183,27 @@ Note that the actual definitions are bit different if you are building GLR parse
 RustyLR offers built-in support for Generalized LR (GLR) parsing, enabling it to handle ambiguous or nondeterministic grammars that traditional LR(1) or LALR(1) parsers cannot process.
 See [GLR.md](GLR.md) for details.
 
+## Semantic Error Handling
+RustyLR provides a mechanism for handling semantic errors during parsing.
+ - return `Err` from the reduce action
+ - using `error` token for panic-mode-error-recovery
+Or combine both.
+
+```
+JsonObject: '{' JsonKeyValue* '}'
+          | '{' error '}'          { println!("recovering with '}}'"); }
+          ;
+```
+The `error` token is a reserved non-terminal symbol that can be matched with **any tokens**.
+In the above example, if the parser encounters an invalid token while parsing a JSON object, it will enter panic mode and discard all tokens until it finds a closing brace `}`.
+
+When an invalid token is encountered,
+the parser enters panic mode and starts discarding symbols from the parsing stack until it finds a point where the special `error` token is allowed by the grammar.
+At that point, it shifts the invalid fed token as the `error` token,
+respectively trying to complete the rule that contains the `error` token.
+
+- The `error` token does not have any value, no associated rule-type.
+
 ## Examples
  - [Calculator](examples/calculator_u8/src/parser.rs): A calculator using `u8` as token type.
  - [Json Validator](examples/json/src/parser.rs): A JSON validator

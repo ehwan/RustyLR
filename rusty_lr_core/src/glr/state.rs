@@ -2,6 +2,7 @@ use std::hash::Hash;
 
 use crate::HashMap;
 use crate::ShiftedRuleRef;
+use crate::Token;
 
 /// A trait representing a parser state.
 pub trait State<NonTerm> {
@@ -29,6 +30,11 @@ pub trait State<NonTerm> {
 
     /// Get the set of rules that this state is trying to parse
     fn get_rules(&self) -> &[ShiftedRuleRef];
+
+    /// Get the token that is shifted to this state
+    fn shifted_token(&self) -> Option<Token<usize, NonTerm>>
+    where
+        NonTerm: Copy;
 }
 
 /// `State` implementation for a sparse state representation using HashMap
@@ -42,6 +48,8 @@ pub struct SparseState<NonTerm> {
     pub(crate) reduce_map: HashMap<usize, Vec<usize>>,
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<ShiftedRuleRef>,
+    /// token that is shifted to this state
+    pub(crate) shifted_token: Option<Token<usize, NonTerm>>,
 }
 impl<NonTerm> State<NonTerm> for SparseState<NonTerm> {
     fn shift_goto_class(&self, class: usize) -> Option<usize> {
@@ -76,6 +84,12 @@ impl<NonTerm> State<NonTerm> for SparseState<NonTerm> {
     fn get_rules(&self) -> &[ShiftedRuleRef] {
         &self.ruleset
     }
+    fn shifted_token(&self) -> Option<Token<usize, NonTerm>>
+    where
+        NonTerm: Copy,
+    {
+        self.shifted_token
+    }
 }
 
 /// `State` implementation for a dense state representation using Vec
@@ -89,6 +103,8 @@ pub struct DenseState<NonTerm> {
     pub(crate) reduce_map: Vec<Option<Vec<usize>>>,
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<ShiftedRuleRef>,
+    /// token that is shifted to this state
+    pub(crate) shifted_token: Option<Token<usize, NonTerm>>,
 }
 impl<NonTerm> State<NonTerm> for DenseState<NonTerm> {
     fn shift_goto_class(&self, class: usize) -> Option<usize> {
@@ -120,5 +136,11 @@ impl<NonTerm> State<NonTerm> for DenseState<NonTerm> {
     }
     fn get_rules(&self) -> &[ShiftedRuleRef] {
         &self.ruleset
+    }
+    fn shifted_token(&self) -> Option<Token<usize, NonTerm>>
+    where
+        NonTerm: Copy,
+    {
+        self.shifted_token
     }
 }

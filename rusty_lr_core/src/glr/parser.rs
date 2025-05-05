@@ -23,4 +23,6 @@ pub trait Parser {
     ) -> Option<impl IntoIterator<Item = Self::TermRet<'a>> + 'a>;
     /// Get the terminal class of the given terminal
     fn to_terminal_class(&self, terminal: &Self::Term) -> usize;
+
+    fn get_error_nonterm(&self) -> Option<Self::NonTerm>;
 }

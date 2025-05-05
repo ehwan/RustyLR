@@ -9,7 +9,6 @@ use rusty_lr_core::ProductionRule;
 use rusty_lr_core::ShiftedRule;
 
 use crate::parser::args::IdentOrLiteral;
-use crate::utils;
 
 /// failed to feed() the token
 #[non_exhaustive]
@@ -88,10 +87,8 @@ pub enum ParseError {
     /// unknown terminal symbol name
     TerminalNotDefined(Ident),
 
-    /// 'eof' is reserved name
-    EofDefined(Ident),
-    /// 'Augmented' is reserved name
-    AugmentedDefined(Ident),
+    /// can't use reserved keyword as token name
+    ReservedName(Ident),
 
     /// not supported literal type
     UnsupportedLiteralType(TokenStream),
@@ -243,8 +240,7 @@ impl ParseError {
 
             ParseError::MultipleTokenDefinition(old, new) => new.span(),
 
-            ParseError::EofDefined(ident) => ident.span(),
-            ParseError::AugmentedDefined(ident) => ident.span(),
+            ParseError::ReservedName(ident) => ident.span(),
 
             ParseError::UnsupportedLiteralType(stream) => {
                 stream.clone().into_iter().next().unwrap().span()
@@ -299,11 +295,8 @@ impl ParseError {
                 format!("Multiple %token definition with same name: {}", old)
             }
 
-            ParseError::EofDefined(ident) => {
-                format!("'{}' is reserved name", utils::EOF_NAME)
-            }
-            ParseError::AugmentedDefined(ident) => {
-                format!("'{}' is reserved name", utils::AUGMENTED_NAME)
+            ParseError::ReservedName(ident) => {
+                format!("'{}' is reserved name", ident)
             }
 
             ParseError::UnsupportedLiteralType(literal) => {

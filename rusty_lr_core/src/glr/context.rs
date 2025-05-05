@@ -210,6 +210,57 @@ impl<Data: NodeData> Context<Data> {
         ret
     }
 
+    /// Panic mode recovery with `error` non-terminal.
+    /// Returns true if error is shifted.
+    fn panic_mode<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &mut self,
+        parser: &P,
+    ) -> bool
+    where
+        Data::NonTerm: std::hash::Hash + Eq + Copy,
+    {
+        let Some(error_nonterm) = parser.get_error_nonterm() else {
+            return false;
+        };
+        let mut new_nodes: HashMap<usize, Vec<Rc<Node<Data>>>> = Default::default();
+        for (_, nodes) in self.current_nodes.iter() {
+            for mut node in nodes.iter() {
+                loop {
+                    let last_state = &parser.get_states()[node.state];
+                    if let Some(error_state) = last_state.shift_goto_nonterm(&error_nonterm) {
+                        // pop all states and data above this state
+                        let child_node = Node {
+                            data: Some(Data::new_error_nonterm()),
+                            parent: Some(Rc::clone(node)),
+                            state: error_state,
+                            #[cfg(feature = "tree")]
+                            tree: Some(crate::Tree::new_nonterminal(error_nonterm, Vec::new())),
+                        };
+
+                        new_nodes
+                            .entry(error_state)
+                            .or_default()
+                            .push(Rc::new(child_node));
+                        // shift to error state
+                        break;
+                    }
+
+                    if let Some(parent) = node.parent.as_ref() {
+                        node = parent;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        if new_nodes.is_empty() {
+            false
+        } else {
+            self.current_nodes = new_nodes;
+            true
+        }
+    }
+
     /// Get backtrace infos for all paths.
     pub fn backtraces<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &'a self,
@@ -242,9 +293,19 @@ impl<Data: NodeData> Context<Data> {
     where
         Data: Clone,
         P::Term: Hash + Eq + Clone,
-        P::NonTerm: Hash + Eq + Clone,
+        P::NonTerm: Hash + Eq + Copy,
     {
-        super::feed(parser, self, term, userdata)
+        match super::feed(parser, self, term, userdata) {
+            Ok(_) => Ok(()),
+            Err(err) => {
+                if self.panic_mode(parser) {
+                    // if panic mode is successful, we can ignore the error
+                    Ok(())
+                } else {
+                    Err(err)
+                }
+            }
+        }
     }
 
     /// feed multiple terminal symbols to the context.
@@ -264,7 +325,8 @@ impl<Data: NodeData> Context<Data> {
     }
 
     /// Check if `term` can be feeded to current state.
-    /// This does not check for reduce action error.
+    /// This does not check for reduce action error, nor the panic mode.
+    /// You should call `can_panic_mode()` after this fails to check if panic mode can accept this term.
     ///
     /// This does not change the state of the context.
     pub fn can_feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
@@ -331,6 +393,36 @@ impl<Data: NodeData> Context<Data> {
             std::mem::swap(&mut nodes, &mut nodes_pong);
         }
 
+        false
+    }
+
+    /// Check if current context can enter panic mode.
+    pub fn can_panic_mode<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &mut self,
+        parser: &P,
+    ) -> bool
+    where
+        Data::NonTerm: std::hash::Hash + Eq,
+    {
+        let Some(error_nonterm) = parser.get_error_nonterm() else {
+            return false;
+        };
+        for (_, nodes) in self.current_nodes.iter() {
+            for mut node in nodes.iter() {
+                loop {
+                    let last_state = &parser.get_states()[node.state];
+                    if last_state.shift_goto_nonterm(&error_nonterm).is_some() {
+                        return true;
+                    }
+
+                    if let Some(parent) = node.parent.as_ref() {
+                        node = parent;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
         false
     }
 

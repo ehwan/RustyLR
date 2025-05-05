@@ -365,6 +365,19 @@ impl Grammar {
             });
         }
 
+        // pop_term() and pop_nonterm()
+        let mut pop_nonterm_cases_stream = TokenStream::new();
+        for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
+            let name = &nonterm.name;
+            if let Some(stack_name) = &stack_names_for_nonterm[nonterm_idx] {
+                pop_nonterm_cases_stream.extend(quote! {
+                    #nonterminals_enum_name::#name => {
+                        self.#stack_name.pop();
+                    }
+                });
+            }
+        }
+
         stream.extend(quote! {
         /// struct that holds internal parser data,
         /// including data stack for each non-terminal,
@@ -411,6 +424,16 @@ impl Grammar {
             fn pop_start(&mut self) -> Self::StartType {
                 #pop_from_start_rule_stack
             }
+
+            fn pop(&mut self, nonterm: Self::NonTerm) {
+                match nonterm {
+                    #pop_nonterm_cases_stream
+                    _ => {} // do nothing
+                }
+            }
+            fn pop_term(&mut self) {
+                self.#terms_stack_name.pop();
+            }
         }
         });
     }
@@ -438,11 +461,9 @@ impl Grammar {
         let mut variant_names_in_order = Vec::new();
 
         // insert variant for empty-ruletype
-        ruletype_variant_map.insert(
-            "".to_string(),
-            Ident::new("NonTerminals", Span::call_site()),
-        );
-        variant_names_in_order.push((Ident::new("NonTerminals", Span::call_site()), quote! {}));
+        let empty_ruletype_variant_name = Ident::new("EmptyRuleType", Span::call_site());
+        ruletype_variant_map.insert("".to_string(), empty_ruletype_variant_name.clone());
+        variant_names_in_order.push((empty_ruletype_variant_name.clone(), quote! {}));
 
         // insert variant for terminal token type
         ruletype_variant_map.insert(self.token_typename.to_string(), terms_variant_name.clone());
@@ -663,6 +684,10 @@ impl Grammar {
             fn into_start(self) -> Self::StartType {
                 #start_extract
             }
+
+            fn new_error_nonterm() -> Self {
+                #node_enum_name::#empty_ruletype_variant_name
+            }
         }
         });
     }
@@ -789,6 +814,12 @@ impl Grammar {
                 );
             });
         }
+        // add `error` non-terminal
+        add_rules_stream.extend(quote! {
+            builder.add_empty_rule(
+                #nonterminals_enum_name::error
+            );
+        });
 
         // building grammar
         let augmented_name = Ident::new(utils::AUGMENTED_NAME, Span::call_site());
@@ -887,6 +918,12 @@ impl Grammar {
 
         let other_class_id = self.other_terminal_class_id;
 
+        let get_error_nonterm_stream = if self.error_used {
+            quote! { Some(#nonterminals_enum_name::error) }
+        } else {
+            quote! { None }
+        };
+
         // building terminal-class_id map
         if let Some(range_based_optimization) = use_range_based_optimization {
             // range-compressed Vec based terminal-class_id map
@@ -972,6 +1009,9 @@ impl Grammar {
                     self.term_class_map.get(*terminal as u32).unwrap_or(
                         self.other_class_id
                     )
+                }
+                fn get_error_nonterm(&self) -> Option<Self::NonTerm> {
+                    #get_error_nonterm_stream
                 }
             }
 
@@ -1109,6 +1149,9 @@ impl Grammar {
                 }
                 fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
                     self.term_class_map.get(terminal).copied().unwrap_or(self.other_class_id)
+                }
+                fn get_error_nonterm(&self) -> Option<Self::NonTerm> {
+                    #get_error_nonterm_stream
                 }
             }
 

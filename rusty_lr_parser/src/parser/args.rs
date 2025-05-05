@@ -14,7 +14,6 @@ use crate::pattern::Pattern;
 use crate::pattern::PatternInternal;
 use crate::terminal_info::TerminalName;
 use crate::terminalset::TerminalSet;
-use crate::utils;
 
 #[derive(Debug, Clone)]
 pub enum IdentOrLiteral {
@@ -157,7 +156,7 @@ impl PatternArgs {
         let pretty_name = format!("{}", self);
         match self {
             PatternArgs::Ident(ident) => {
-                utils::check_reserved_name(&ident)?;
+                // utils::check_reserved_name(&ident)?;
                 let pattern = Pattern {
                     internal: PatternInternal::Ident(ident),
                     pretty_name: pretty_name.clone(),

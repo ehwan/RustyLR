@@ -96,13 +96,23 @@ impl<S: Stack> Context<S> {
     ) -> Result<(), ParseError<S::Term, S::NonTerm, S::ReduceActionError>>
     where
         S::Term: Hash + Eq + Clone,
-        S::NonTerm: Hash + Eq + Clone,
+        S::NonTerm: Hash + Eq + Copy,
     {
-        super::feed(parser, self, term, userdata)
+        match super::feed(parser, self, term, userdata) {
+            Ok(_) => Ok(()),
+            Err(err) => {
+                if self.panic_mode(parser) {
+                    Ok(())
+                } else {
+                    Err(err)
+                }
+            }
+        }
     }
 
     /// Check if `term` can be feeded to current state.
-    /// This does not check for reduce action error.
+    /// This does not check for reduce action error, nor panic mode.
+    /// You should call `can_panic_mode()` after this fails to check if panic mode can accept this term.
     ///
     /// This does not change the state of the context.
     pub fn can_feed<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
@@ -142,6 +152,25 @@ impl<S: Stack> Context<S> {
         parser.get_states()[*state_stack.last().unwrap()]
             .shift_goto_class(class)
             .is_some()
+    }
+    /// Check if current context can enter panic mode.
+    pub fn can_panic_mode<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+        &self,
+        parser: &P,
+    ) -> bool
+    where
+        S::NonTerm: Hash + Eq,
+    {
+        let Some(error_nonterm) = parser.get_error_nonterm() else {
+            return false;
+        };
+        for &last_state in self.state_stack.iter().rev() {
+            let last_state = &parser.get_states()[last_state];
+            if last_state.shift_goto_nonterm(&error_nonterm).is_some() {
+                return true;
+            }
+        }
+        false
     }
 
     /// Get set of `%trace` non-terminal symbols that current context is trying to parse.
@@ -243,6 +272,60 @@ impl<S: Stack> Context<S> {
         }
 
         ret
+    }
+
+    /// Panic mode recovery with `error` non-terminal.
+    /// Returns true if error is shifted.
+    fn panic_mode<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(&mut self, parser: &P) -> bool
+    where
+        S::NonTerm: Hash + Eq + Copy,
+    {
+        use crate::Token;
+        let Some(error_nonterm) = parser.get_error_nonterm() else {
+            return false;
+        };
+        let mut popped_token = Vec::new();
+        for (stack_idx, &last_state) in self.state_stack.iter().enumerate().rev() {
+            let last_state = &parser.get_states()[last_state];
+            if let Some(error_state) = last_state.shift_goto_nonterm(&error_nonterm) {
+                // pop all states above this state
+                self.state_stack.truncate(stack_idx + 1);
+                // pop all data
+                for token in popped_token {
+                    match token {
+                        None => unreachable!("unexpected None token"),
+                        Some(Token::Term(_)) => {
+                            self.data_stack.pop_term();
+                        }
+                        Some(Token::NonTerm(nonterm)) => {
+                            // pop non-terminal
+                            self.data_stack.pop(nonterm);
+                        }
+                    }
+
+                    #[cfg(feature = "tree")]
+                    {
+                        // pop tree
+                        self.tree_stack.pop();
+                    }
+                }
+
+                // shift to error state
+                self.state_stack.push(error_state);
+
+                #[cfg(feature = "tree")]
+                {
+                    // push error tree
+                    self.tree_stack
+                        .push(crate::Tree::new_nonterminal(error_nonterm, Vec::new()));
+                }
+                return true;
+            }
+
+            let token = last_state.shifted_token();
+            popped_token.push(token);
+        }
+        false
     }
 
     /// Get backtrace information for current state.

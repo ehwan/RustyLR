@@ -89,6 +89,13 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         self.rules.push(rule);
         index
     }
+    /// add empty non-terminal so that BuildError::RuleNotFound is not returned
+    pub fn add_empty_rule(&mut self, name: NonTerm)
+    where
+        NonTerm: Copy + Hash + Eq,
+    {
+        self.rules_map.insert(name, Vec::new());
+    }
 
     /// false if precedence already exists and different
     pub fn add_precedence(&mut self, term: Operator<Term>, precedence: usize) -> bool
@@ -234,7 +241,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     }
 
     /// search for every production rules with name 'name'
-    fn search_rules(&self, name: NonTerm) -> Result<&Vec<usize>, BuildError<Term, NonTerm>>
+    fn search_rules(&self, name: NonTerm) -> Result<&[usize], BuildError<Term, NonTerm>>
     where
         NonTerm: Hash + Eq,
     {
@@ -637,6 +644,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         // add shift and goto action
         for (next_term, next_rule_set) in next_rules_term.into_iter() {
             let next_state_id = self.build_recursive(next_rule_set, states, state_map)?;
+            states[next_state_id].token = Some(Token::Term(next_term));
 
             states[state_id]
                 .shift_goto_map_term
@@ -645,6 +653,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
         for (next_nonterm, next_rule_set) in next_rules_nonterm.into_iter() {
             let next_state_id = self.build_recursive(next_rule_set, states, state_map)?;
+            states[next_state_id].token = Some(Token::NonTerm(next_nonterm));
 
             states[state_id]
                 .shift_goto_map_nonterm
@@ -749,6 +758,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         // if next_token is in reduce_map, then it is a reduce/shift conflict
         for (next_term, next_rule_set) in next_rules_term.into_iter() {
             let next_state_id = self.build_recursive_lalr(next_rule_set, states, state_map)?;
+            states[next_state_id].token = Some(Token::Term(next_term));
 
             states[state_id]
                 .shift_goto_map_term
@@ -757,6 +767,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
         for (next_nonterm, next_rule_set) in next_rules_nonterm.into_iter() {
             let next_state_id = self.build_recursive_lalr(next_rule_set, states, state_map)?;
+            states[next_state_id].token = Some(Token::NonTerm(next_nonterm));
 
             states[state_id]
                 .shift_goto_map_nonterm

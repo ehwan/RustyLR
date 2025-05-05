@@ -1,5 +1,6 @@
 use crate::rule::LookaheadRuleRefSet;
 use crate::ShiftedRuleRef;
+use crate::Token;
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -12,6 +13,8 @@ pub struct State<Term, NonTerm> {
     pub shift_goto_map_nonterm: BTreeMap<NonTerm, usize>,
     pub reduce_map: BTreeMap<Term, BTreeSet<usize>>,
     pub ruleset: LookaheadRuleRefSet<Term>,
+    /// The token that shifted into this state.
+    pub token: Option<Token<Term, NonTerm>>,
 }
 impl<Term, NonTerm> State<Term, NonTerm> {
     pub fn new() -> Self {
@@ -20,6 +23,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
             shift_goto_map_nonterm: Default::default(),
             reduce_map: Default::default(),
             ruleset: LookaheadRuleRefSet::new(),
+            token: None,
         }
     }
 
@@ -60,6 +64,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 .map(|(term, rule)| (term_map(term), rule))
                 .collect(),
             ruleset: self.ruleset.map(&term_map),
+            token: self.token.map(|token| token.map(&term_map, &nonterm_map)),
         }
     }
 
@@ -114,6 +119,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 .map(|(term, rule)| (term_map(term), rule.into_iter().next().unwrap()))
                 .collect(),
             ruleset: self.ruleset.rules.into_keys().collect(),
+            shifted_token: self.token.map(|token| token.map(&term_map, &nonterm_map)),
         }
     }
     pub fn into_lr_dense_state<NewNonTerm>(
@@ -142,6 +148,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 .collect(),
             reduce_map,
             ruleset: self.ruleset.rules.into_keys().collect(),
+            shifted_token: self.token.map(|token| token.map(&term_map, &nonterm_map)),
         }
     }
 
@@ -170,6 +177,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 .map(|(term, rule)| (term_map(term), rule.into_iter().collect()))
                 .collect(),
             ruleset: self.ruleset.rules.into_keys().collect(),
+            shifted_token: self.token.map(|token| token.map(&term_map, &nonterm_map)),
         }
     }
     pub fn into_glr_dense_state<NewNonTerm>(
@@ -198,6 +206,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 .collect(),
             reduce_map,
             ruleset: self.ruleset.rules.into_keys().collect(),
+            shifted_token: self.token.map(|token| token.map(&term_map, &nonterm_map)),
         }
     }
 }

@@ -24,3 +24,16 @@ impl<Term: Debug, NonTerm: Debug> Debug for Token<Term, NonTerm> {
         }
     }
 }
+
+impl<Term, NonTerm> Token<Term, NonTerm> {
+    pub fn map<NewTerm, NewNonTerm>(
+        self,
+        term_map: impl Fn(Term) -> NewTerm,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+    ) -> Token<NewTerm, NewNonTerm> {
+        match self {
+            Token::Term(term) => Token::Term(term_map(term)),
+            Token::NonTerm(nonterm) => Token::NonTerm(nonterm_map(nonterm)),
+        }
+    }
+}

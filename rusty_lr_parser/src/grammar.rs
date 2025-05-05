@@ -115,7 +115,9 @@ pub struct Grammar {
     pub terminal_class_id: Vec<TerminalIndex>,
     /// class id for terminal that does not belong to any class
     pub other_terminal_class_id: ClassIndex,
+
     pub other_used: bool,
+    pub error_used: bool,
 
     /// terminal index of eof
     pub eof_index: TerminalIndex,
@@ -337,6 +339,7 @@ impl Grammar {
             terminal_classes: Vec::new(),
             other_terminal_class_id: 0,
             other_used: false,
+            error_used: false,
 
             eof_index: 0,
             other_terminal_index: 0,
@@ -594,6 +597,24 @@ impl Grammar {
             }
         }
 
+        // insert `error` nonterminal
+        {
+            let name = Ident::new(utils::ERROR_NAME, Span::call_site());
+            let nonterminal = NonTerminalInfo {
+                name: name.clone(),
+                pretty_name: "'error'".to_string(),
+                ruletype: None,
+                rules: Vec::new(), // empty rules
+                regex_span: None,
+                trace: false,
+                protected: true,
+            };
+
+            let rule_idx = grammar.nonterminals.len();
+            grammar.nonterminals.push(nonterminal);
+            grammar.nonterminals_index.insert(name, rule_idx);
+        }
+
         // pattern map for auto-generated rules
         let mut pattern_map: HashMap<Pattern, PatternToToken> = HashMap::default();
 
@@ -804,24 +825,24 @@ impl Grammar {
         }
         grammar.other_terminal_class_id = grammar.terminal_class_id[grammar.other_terminal_index];
 
+        let error_nonterm_idx = *grammar
+            .nonterminals_index
+            .get(&Ident::new(utils::ERROR_NAME, Span::call_site()))
+            .unwrap();
+        // check other, error terminals used
         for nonterm in &grammar.nonterminals {
-            if grammar.other_used {
-                break;
-            }
             for rule in &nonterm.rules {
-                if grammar.other_used {
-                    break;
-                }
                 if let Some(lookaheads) = &rule.lookaheads {
                     if lookaheads.contains(&grammar.other_terminal_index) {
                         grammar.other_used = true;
-                        break;
                     }
                 }
                 for token in &rule.tokens {
                     if token.token == Token::Term(grammar.other_terminal_index) {
                         grammar.other_used = true;
-                        break;
+                    }
+                    if token.token == Token::NonTerm(error_nonterm_idx) {
+                        grammar.error_used = true;
                     }
                 }
             }
@@ -1267,7 +1288,7 @@ impl Grammar {
         nonterm_old_to_new.resize(self.nonterminals.len(), 0);
         let mut new_idx = 0;
         for (old_idx, nonterm) in self.nonterminals.iter().enumerate() {
-            if nonterm.rules.is_empty() {
+            if nonterm.rules.is_empty() && !nonterm.is_protected() {
                 continue;
             }
             nonterm_old_to_new[old_idx] = new_idx;
@@ -1275,7 +1296,7 @@ impl Grammar {
         }
         self.nonterminals = std::mem::take(&mut self.nonterminals)
             .into_iter()
-            .filter(|nonterm| !nonterm.rules.is_empty())
+            .filter(|nonterm| nonterm.is_protected() || !nonterm.rules.is_empty())
             .collect();
         self.nonterminals_index.clear();
         for (idx, nonterm) in self.nonterminals.iter().enumerate() {
@@ -1521,6 +1542,12 @@ impl Grammar {
                 );
             }
         }
+        // add special `error` nonterminal
+        let error_idx = *self
+            .nonterminals_index
+            .get(&Ident::new(utils::ERROR_NAME, Span::call_site()))
+            .unwrap();
+        grammar.add_empty_rule(error_idx);
 
         grammar
     }

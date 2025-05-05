@@ -19,7 +19,9 @@ Value: Object
      ;
 
 Object: '{' WS '}'
-      | '{' Members '}';
+      | '{' Members '}'
+      | '{' error '}' { println!("Error recovered with '}}'"); }
+      ;
 
 Members: Member
        | Member ',' Members

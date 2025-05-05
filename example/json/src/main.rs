@@ -23,6 +23,7 @@ const TEST_JSON: &'static str = r#"
       "id": "proj_001",
       "name": "High-Speed Simulation Engine",
       "description": "A tool used by scientists to simulate how air flows over objects like airplane wings or car bodies.",
+      aa
       "technologies": ["High-performance computing", "Graphics cards"],
       "team_size": 5
     },
