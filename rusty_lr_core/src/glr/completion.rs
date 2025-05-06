@@ -1,4 +1,3 @@
-use super::feed;
 use super::Context;
 use super::NodeData;
 use super::Parser;

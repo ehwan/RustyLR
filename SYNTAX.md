@@ -321,6 +321,7 @@ At that point, it shifts the invalid fed token as the `error` token,
 respectively trying to complete the rule that contains the `error` token.
 
 - The `error` token does not have any value, no associated rule-type.
+- In the GLR parsing, the `error` path will be ignored if there are any other valid paths. In other words, it enters panic-mode only if there is no other way to feed the terminal symbol.
 
 ### Operator Precedence
 ```

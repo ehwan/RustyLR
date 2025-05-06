@@ -88,6 +88,7 @@ impl<S: Stack> Context<S> {
     }
 
     /// Feed one terminal to parser, and update state stack.
+    /// This automatically enters panic mode if needed.
     pub fn feed<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
         &mut self,
         parser: &P,
@@ -98,14 +99,85 @@ impl<S: Stack> Context<S> {
         S::Term: Hash + Eq + Clone,
         S::NonTerm: Hash + Eq + Copy,
     {
-        match super::feed(parser, self, term, userdata) {
-            Ok(_) => Ok(()),
-            Err(err) => {
-                if self.panic_mode(parser) {
-                    Ok(())
-                } else {
-                    Err(err)
+        #[cfg(feature = "tree")]
+        use crate::Tree;
+
+        let class = parser.to_terminal_class(&term);
+        // check if there is any reduce action with given terminal
+        while let Some(reduce_rule) =
+            parser.get_states()[*self.state_stack.last().unwrap()].reduce(class)
+        {
+            let rule = &parser.get_rules()[reduce_rule];
+            // pop state stack
+            self.state_stack
+                .truncate(self.state_stack.len() - rule.rule.len());
+            // call reduce action
+            self.data_stack
+                .reduce(reduce_rule, userdata, &term)
+                .map_err(ParseError::ReduceAction)?;
+
+            // construct tree
+            #[cfg(feature = "tree")]
+            {
+                let mut children = Vec::with_capacity(rule.rule.len());
+                for _ in 0..rule.rule.len() {
+                    let tree = self.tree_stack.pop().unwrap();
+                    children.push(tree);
                 }
+                children.reverse();
+
+                self.tree_stack
+                    .push(Tree::new_nonterminal(rule.name.clone(), children));
+            }
+
+            // shift with reduced nonterminal
+            if let Some(next_state_id) = parser.get_states()[*self.state_stack.last().unwrap()]
+                .shift_goto_nonterm(&rule.name)
+            {
+                self.state_stack.push(next_state_id);
+            } else {
+                unreachable!("shift nonterm failed");
+            }
+        }
+
+        let state = &parser.get_states()[*self.state_stack.last().unwrap()];
+
+        // shift with terminal
+        if let Some(next_state_id) = state.shift_goto_class(class) {
+            self.state_stack.push(next_state_id);
+
+            #[cfg(feature = "tree")]
+            self.tree_stack.push(Tree::new_terminal(term.clone()));
+
+            self.data_stack.push(term);
+
+            Ok(())
+        } else {
+            // enters panic mode
+            if self.panic_mode(parser) {
+                // check for shift terminal again
+                if let Some(next_state_id) =
+                    parser.get_states()[*self.state_stack.last().unwrap()].shift_goto_class(class)
+                {
+                    self.state_stack.push(next_state_id);
+
+                    #[cfg(feature = "tree")]
+                    self.tree_stack.push(Tree::new_terminal(term.clone()));
+
+                    self.data_stack.push(term);
+                }
+                Ok(())
+            } else {
+                #[cfg(feature = "error")]
+                let backtrace = self.backtrace(parser);
+                let error = super::InvalidTerminalError {
+                    term,
+                    #[cfg(feature = "error")]
+                    backtrace,
+                    #[cfg(not(feature = "error"))]
+                    _phantom: std::marker::PhantomData,
+                };
+                Err(ParseError::InvalidTerminal(error))
             }
         }
     }

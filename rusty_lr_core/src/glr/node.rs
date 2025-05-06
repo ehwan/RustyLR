@@ -416,6 +416,65 @@ impl<Data: NodeData> Node<Data> {
     {
         parser.get_states()[self.state].expected_nonterm()
     }
+
+    pub fn panic_mode<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        mut node: &Rc<Node<Data>>,
+        parser: &P,
+    ) -> Option<Self>
+    where
+        Data::NonTerm: std::hash::Hash + Eq,
+    {
+        let Some(error_nonterm) = parser.get_error_nonterm() else {
+            return None;
+        };
+        loop {
+            let last_state = &parser.get_states()[node.state];
+            if let Some(error_state) = last_state.shift_goto_nonterm(&error_nonterm) {
+                // pop all states and data above this state
+                let child_node = Node {
+                    data: Some(Data::new_error_nonterm()),
+                    parent: Some(Rc::clone(node)),
+                    state: error_state,
+                    #[cfg(feature = "tree")]
+                    tree: Some(crate::Tree::new_nonterminal(error_nonterm, Vec::new())),
+                };
+
+                return Some(child_node);
+            }
+
+            if let Some(parent) = node.parent.as_ref() {
+                node = parent;
+            } else {
+                break;
+            }
+        }
+        None
+    }
+
+    pub fn can_panic_mode<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        mut node: &Rc<Node<Data>>,
+        parser: &P,
+    ) -> bool
+    where
+        Data::NonTerm: std::hash::Hash + Eq,
+    {
+        let Some(error_nonterm) = parser.get_error_nonterm() else {
+            return false;
+        };
+        loop {
+            let last_state = &parser.get_states()[node.state];
+            if last_state.shift_goto_nonterm(&error_nonterm).is_some() {
+                return true;
+            }
+
+            if let Some(parent) = node.parent.as_ref() {
+                node = parent;
+            } else {
+                break;
+            }
+        }
+        false
+    }
 }
 
 #[cfg(feature = "tree")]

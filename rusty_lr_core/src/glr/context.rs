@@ -210,57 +210,6 @@ impl<Data: NodeData> Context<Data> {
         ret
     }
 
-    /// Panic mode recovery with `error` non-terminal.
-    /// Returns true if error is shifted.
-    fn panic_mode<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &mut self,
-        parser: &P,
-    ) -> bool
-    where
-        Data::NonTerm: std::hash::Hash + Eq + Copy,
-    {
-        let Some(error_nonterm) = parser.get_error_nonterm() else {
-            return false;
-        };
-        let mut new_nodes: HashMap<usize, Vec<Rc<Node<Data>>>> = Default::default();
-        for (_, nodes) in self.current_nodes.iter() {
-            for mut node in nodes.iter() {
-                loop {
-                    let last_state = &parser.get_states()[node.state];
-                    if let Some(error_state) = last_state.shift_goto_nonterm(&error_nonterm) {
-                        // pop all states and data above this state
-                        let child_node = Node {
-                            data: Some(Data::new_error_nonterm()),
-                            parent: Some(Rc::clone(node)),
-                            state: error_state,
-                            #[cfg(feature = "tree")]
-                            tree: Some(crate::Tree::new_nonterminal(error_nonterm, Vec::new())),
-                        };
-
-                        new_nodes
-                            .entry(error_state)
-                            .or_default()
-                            .push(Rc::new(child_node));
-                        // shift to error state
-                        break;
-                    }
-
-                    if let Some(parent) = node.parent.as_ref() {
-                        node = parent;
-                    } else {
-                        break;
-                    }
-                }
-            }
-        }
-        if new_nodes.is_empty() {
-            false
-        } else {
-            self.current_nodes = new_nodes;
-            true
-        }
-    }
-
     /// Get backtrace infos for all paths.
     pub fn backtraces<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &'a self,
@@ -283,31 +232,185 @@ impl<Data: NodeData> Context<Data> {
         }
     }
 
-    /// feed a terminal symbol to the context.
+    /// Feed one terminal to parser, and update state stack.
+    /// For GLR parsing, this function will create multiple path if needed.
     pub fn feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &mut self,
         parser: &P,
         term: P::Term,
         userdata: &mut Data::UserData,
-    ) -> Result<(), InvalidTerminalError<Data::Term, Data::NonTerm, Data::ReduceActionError>>
+    ) -> Result<(), InvalidTerminalError<P::Term, P::NonTerm, Data::ReduceActionError>>
     where
-        Data: Clone,
         P::Term: Hash + Eq + Clone,
-        P::NonTerm: Hash + Eq + Copy,
+        P::NonTerm: Hash + Eq + Clone,
+        Data: Clone,
     {
-        match super::feed(parser, self, term, userdata) {
-            Ok(_) => Ok(()),
-            Err(err) => {
-                if self.panic_mode(parser) {
-                    // if panic mode is successful, we can ignore the error
-                    Ok(())
+        #[cfg(feature = "tree")]
+        use crate::Tree;
+
+        // current_nodes <-> nodes_pong <-> nodes_pong2
+        // cycle for no unnecessary heap allocation
+        let mut reduce_nodes = std::mem::take(&mut self.current_nodes);
+        std::mem::swap(&mut self.current_nodes, &mut self.nodes_pong2);
+        self.current_nodes.clear();
+        // here, nodes_pong2 is newlly created by `Default`, and we will assign it from `reduce_nodes` later
+        self.nodes_pong.clear();
+        self.reduce_errors.clear();
+        self.fallback_nodes.clear();
+
+        let class = parser.to_terminal_class(&term);
+
+        // BFS reduce
+        while !reduce_nodes.is_empty() {
+            for (state, nodes) in reduce_nodes.drain() {
+                let next_term_shift_state = parser.get_states()[state].shift_goto_class(class);
+                if let Some(reduce_rules) = parser.get_states()[state].reduce(class) {
+                    for node in nodes.into_iter() {
+                        let mut shift_for_this_node = false;
+
+                        // In reduce action, we call `Rc::try_unwrap` to avoid `clone()` data if possible.
+                        // So we need to avoid `Rc::clone()` if possible.
+                        for reduce_rule in reduce_rules.iter().skip(1).copied() {
+                            shift_for_this_node |= super::reduce(
+                                parser,
+                                reduce_rule,
+                                Rc::clone(&node),
+                                self,
+                                &term,
+                                next_term_shift_state.is_some(),
+                                userdata,
+                            );
+                        }
+                        if let Some(next_term_shift_state) = next_term_shift_state {
+                            shift_for_this_node |= super::reduce(
+                                parser,
+                                reduce_rules[0],
+                                Rc::clone(&node),
+                                self,
+                                &term,
+                                true,
+                                userdata,
+                            );
+                            if shift_for_this_node {
+                                // some shift action was performed; remove fallback_nodes immediately
+                                // to avoid cloned Rc nodes
+                                self.fallback_nodes.clear();
+
+                                let next_node = Node {
+                                    parent: Some(node),
+                                    state: next_term_shift_state,
+                                    data: Some(Data::new_term(term.clone())),
+                                    #[cfg(feature = "tree")]
+                                    tree: Some(Tree::new_terminal(term.clone())),
+                                };
+
+                                self.current_nodes
+                                    .entry(next_term_shift_state)
+                                    .or_default()
+                                    .push(Rc::new(next_node));
+                            }
+                        } else {
+                            super::reduce(
+                                parser,
+                                reduce_rules[0],
+                                node,
+                                self,
+                                &term,
+                                false,
+                                userdata,
+                            );
+                        }
+                    }
+                } else if let Some(next_term_shift_state) = next_term_shift_state {
+                    for node in nodes.into_iter() {
+                        // some shift action was performed; remove fallback_nodes immediately
+                        // to avoid cloned Rc nodes
+                        self.fallback_nodes.clear();
+
+                        let next_node = Node {
+                            parent: Some(node),
+                            state: next_term_shift_state,
+                            data: Some(Data::new_term(term.clone())),
+                            #[cfg(feature = "tree")]
+                            tree: Some(Tree::new_terminal(term.clone())),
+                        };
+
+                        self.current_nodes
+                            .entry(next_term_shift_state)
+                            .or_default()
+                            .push(Rc::new(next_node));
+                    }
                 } else {
-                    Err(err)
+                    // no reduce, no shift
+                    // add to fallback_nodes to restore if any shift action was performed
+                    if self.current_nodes.is_empty() {
+                        self.fallback_nodes.insert(state, nodes);
+                    }
                 }
             }
+            std::mem::swap(&mut reduce_nodes, &mut self.nodes_pong);
+        }
+        self.nodes_pong2 = reduce_nodes;
+
+        // no shift possible; invalid terminal was given
+        // restore nodes to original state from fallback_nodes
+        if self.current_nodes.is_empty() {
+            let mut error_nodes = Vec::new();
+            for (_, nodes) in self.fallback_nodes.iter() {
+                for node in nodes.iter() {
+                    if let Some(error_node) = Node::panic_mode(node, parser) {
+                        error_nodes.push(error_node);
+                    }
+                }
+            }
+            if error_nodes.is_empty() {
+                std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
+                self.fallback_nodes.clear();
+
+                #[cfg(feature = "error")]
+                let backtraces = self.backtraces(parser).collect::<Vec<_>>();
+
+                Err(InvalidTerminalError {
+                    term,
+                    reduce_errors: std::mem::take(&mut self.reduce_errors),
+                    #[cfg(feature = "error")]
+                    backtraces,
+
+                    #[cfg(not(feature = "error"))]
+                    _phantom: std::marker::PhantomData,
+                })
+            } else {
+                // try shift term to error state
+                for error_node in error_nodes {
+                    let next_state = parser.get_states()[error_node.state].shift_goto_class(class);
+                    if let Some(next_state) = next_state {
+                        let next_node = Node {
+                            parent: Some(Rc::new(error_node)),
+                            state: next_state,
+                            data: Some(Data::new_term(term.clone())),
+                            #[cfg(feature = "tree")]
+                            tree: Some(Tree::new_terminal(term.clone())),
+                        };
+                        self.current_nodes
+                            .entry(next_state)
+                            .or_default()
+                            .push(Rc::new(next_node));
+                    } else {
+                        self.current_nodes
+                            .entry(error_node.state)
+                            .or_default()
+                            .push(Rc::new(error_node));
+                    }
+                }
+                Ok(())
+            }
+        } else {
+            self.fallback_nodes.clear();
+            Ok(())
         }
     }
 
+    /*
     /// feed multiple terminal symbols to the context.
     /// This tries to feed all symbols at the same time, to the same state.
     pub fn feed_multiple<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
@@ -323,6 +426,7 @@ impl<Data: NodeData> Context<Data> {
     {
         super::feed_multiple(parser, self, terms, userdata)
     }
+    */
 
     /// Check if `term` can be feeded to current state.
     /// This does not check for reduce action error, nor the panic mode.
@@ -426,6 +530,7 @@ impl<Data: NodeData> Context<Data> {
         false
     }
 
+    /*
     /// Search for the shortest path that can be accepted and represented as CurrentState -> Terms^N -> Tails.
     /// Where Terms is set of terminals `terms`, and Tails is a sequence of terminals `tails`.
     /// Returns true if there is a alive path.
@@ -444,6 +549,7 @@ impl<Data: NodeData> Context<Data> {
     {
         super::completion::complete(parser, self, terms, userdata, tails, max_depth)
     }
+    */
 }
 
 impl<Data: NodeData> Default for Context<Data> {
