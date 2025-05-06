@@ -424,9 +424,7 @@ impl<Data: NodeData> Node<Data> {
     where
         Data::NonTerm: std::hash::Hash + Eq,
     {
-        let Some(error_nonterm) = parser.get_error_nonterm() else {
-            return None;
-        };
+        let error_nonterm = parser.get_error_nonterm()?;
         loop {
             let last_state = &parser.get_states()[node.state];
             if let Some(error_state) = last_state.shift_goto_nonterm(&error_nonterm) {

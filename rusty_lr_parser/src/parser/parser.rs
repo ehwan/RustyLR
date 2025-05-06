@@ -405,7 +405,7 @@ GrammarLine : Rule { data.rules.push(Rule); }
 | Precedence { data.precedences.push(Precedence); }
 | NoOptim { data.no_optim = true; }
 | Dense { data.dense = true; }
-| Trace { data.traces.extend(Trace.into_iter()); }
+| Trace { data.traces.extend(Trace); }
 ;
 
 Grammar: GrammarLine+;

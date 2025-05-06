@@ -166,7 +166,7 @@ impl Builder {
                 )),
             );
             labels.push(
-                Label::secondary(fileid, rule_range).with_message(format!("{}", message_secondary)),
+                Label::secondary(fileid, rule_range).with_message(message_secondary.to_string()),
             );
         }
     }
@@ -694,11 +694,10 @@ impl Builder {
                             let message = "Production Rule deleted";
                             let (b, e) = rule.span_pair();
                             let range = b.byte_range().start..e.byte_range().end;
-                            let mut labels = Vec::new();
-                            labels
-                                .push(Label::primary(file_id, range).with_message("defined here"));
-                            let mut notes = Vec::new();
-                            notes.push("Will be merged into rule using terminal class".to_string());
+                            let labels =
+                                vec![Label::primary(file_id, range).with_message("defined here")];
+                            let notes =
+                                vec!["Will be merged into rule using terminal class".to_string()];
                             let diag = Diagnostic::note()
                                 .with_message(message)
                                 .with_labels(labels)
@@ -712,11 +711,10 @@ impl Builder {
                         OptimizeRemove::SingleNonTerminalRule(rule, nonterm_span) => {
                             let message = "NonTerminal deleted";
                             let mut labels = Vec::new();
-                            let mut notes = Vec::new();
-                            notes.push(
+                            let notes = vec![
                                 "This non-terminal will be replaced by it's unique child rule"
                                     .to_string(),
-                            );
+                            ];
 
                             labels.push(
                                 Label::primary(file_id, nonterm_span.byte_range())
@@ -742,11 +740,9 @@ impl Builder {
                         OptimizeRemove::NonTermNotUsed(span) => {
                             let message = "NonTerminal deleted";
                             let mut labels = Vec::new();
-                            let mut notes = Vec::new();
-                            notes.push(
-                                "This non-terminal cannot be reached from initial state"
-                                    .to_string(),
-                            );
+                            let notes =
+                                vec!["This non-terminal cannot be reached from initial state"
+                                    .to_string()];
 
                             labels.push(
                                 Label::primary(file_id, span.byte_range())
@@ -766,8 +762,8 @@ impl Builder {
                         OptimizeRemove::Cycle(span) => {
                             let message = "Cycle detected";
                             let mut labels = Vec::new();
-                            let mut notes = Vec::new();
-                            notes.push("This non-terminal is involved in bad cycle".to_string());
+                            let notes =
+                                vec!["This non-terminal is involved in bad cycle".to_string()];
 
                             labels.push(
                                 Label::primary(file_id, span.byte_range())
@@ -840,8 +836,7 @@ impl Builder {
             for (reduce_rules, _) in reduce_reduce_conflict_set {
                 if reduce_rules
                     .iter()
-                    .find(|&&rule| grammar.builder.rules[rule].priority.is_none())
-                    .is_some()
+                    .any(|&rule| grammar.builder.rules[rule].priority.is_none())
                 {
                     continue;
                 }
@@ -868,9 +863,10 @@ impl Builder {
                     }
                 }
                 let message = "Reduce/Reduce conflict resolved";
-                let mut notes = Vec::new();
-                notes.push(format!("Max priority: {max_priority}"));
-                notes.push(format!("Set priority with %dprec"));
+                let notes = vec![
+                    "Max priority: {max_priority}".to_string(),
+                    "Set priority with %dprec".to_string(),
+                ];
                 conflict_diags_resolved.push(
                     Diagnostic::note()
                         .with_message(message)
@@ -965,7 +961,7 @@ impl Builder {
                             );
                             labels.push(
                                 Label::secondary(file_id, op_origin)
-                                    .with_message(format!("(Reduce) operator for reduce rule")),
+                                    .with_message("(Reduce) operator for reduce rule"),
                             );
                             remove_shift = false;
                             continue;
@@ -987,9 +983,11 @@ impl Builder {
                                     "[Removed] (Reduce) less precedence than shift",
                                 );
 
-                                labels.push(Label::secondary(file_id, op_origin).with_message(
-                                    format!("[Removed] (Reduce) operator for reduce rule"),
-                                ));
+                                labels.push(
+                                    Label::secondary(file_id, op_origin).with_message(
+                                        "[Removed] (Reduce) operator for reduce rule",
+                                    ),
+                                );
                                 labels.push(
                                     Label::secondary(
                                         file_id,
@@ -1011,10 +1009,10 @@ impl Builder {
                                     "(Reduce) ",
                                     "(Reduce) greater precedence than shift",
                                 );
-                                labels
-                                    .push(Label::secondary(file_id, op_origin).with_message(
-                                        format!("(Reduce) operator for reduce rule"),
-                                    ));
+                                labels.push(
+                                    Label::secondary(file_id, op_origin)
+                                        .with_message("(Reduce) operator for reduce rule"),
+                                );
                                 labels.push(
                                     Label::secondary(
                                         file_id,
@@ -1051,7 +1049,7 @@ impl Builder {
                                             );
                                             labels.push(
                                                 Label::secondary(file_id, op_origin).with_message(
-                                                    format!("(Reduce) operator for reduce rule"),
+                                                    "(Reduce) operator for reduce rule",
                                                 ),
                                             );
                                             labels.push(
@@ -1059,9 +1057,9 @@ impl Builder {
                                                     file_id,
                                                     precedence_defined_origin.byte_range(),
                                                 )
-                                                .with_message(format!(
+                                                .with_message(
                                         "(Reduce) Precedence was set as {reduce_level} here"
-                                    )),
+                                    ),
                                             );
 
                                             labels.push(
@@ -1069,9 +1067,9 @@ impl Builder {
                                                     file_id,
                                                     reduce_info.source.byte_range(),
                                                 )
-                                                .with_message(format!(
-                                                    "(Reduce) Reduce type was set as %left here"
-                                                )),
+                                                .with_message(
+                                                    "(Reduce) Reduce type was set as %left here",
+                                                ),
                                             );
                                         }
                                         rusty_lr_core::ReduceType::Right => {
@@ -1090,9 +1088,8 @@ impl Builder {
 
                                             labels.push(
                                                 Label::secondary(file_id, op_origin).with_message(
-                                                    format!(
-                                "[Removed] (Reduce) operator for reduce rule"
-                            ),
+                                                    "[Removed] (Reduce) operator for reduce rule"
+                                                        .to_string(),
                                                 ),
                                             );
                                             labels.push(
@@ -1110,9 +1107,9 @@ impl Builder {
                                                     file_id,
                                                     reduce_info.source.byte_range(),
                                                 )
-                                                .with_message(format!(
-                                "[Removed] (Reduce) Reduce type was set as %right here"
-                            )),
+                                                .with_message(
+                                "[Removed] (Reduce) Reduce type was set as %right here".to_string()
+                            ),
                                             );
                                         }
                                     }
@@ -1129,7 +1126,7 @@ impl Builder {
                                         "(Reduce) same precedence with shift; no reduce type defined; skip resolving",
                                     );
                                     labels.push(Label::secondary(file_id, op_origin).with_message(
-                                        format!("(Reduce) operator for reduce rule"),
+                                        "(Reduce) operator for reduce rule".to_string(),
                                     ));
                                     labels.push(
                                         Label::secondary(
@@ -1290,7 +1287,7 @@ impl Builder {
                     "Reduce/Reduce conflict detected with terminals: {}",
                     reduce_terms
                         .into_iter()
-                        .map(|class| class_mapper(class))
+                        .map(class_mapper)
                         .collect::<Vec<_>>()
                         .join(", ")
                 );
@@ -1369,7 +1366,7 @@ impl Builder {
             .map(|rule| {
                 rule.rule
                     .clone()
-                    .map(&class_mapper, &nonterm_mapper)
+                    .map(class_mapper, nonterm_mapper)
                     .to_string()
             })
             .collect::<Vec<_>>()

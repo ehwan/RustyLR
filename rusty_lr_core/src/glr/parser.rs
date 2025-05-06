@@ -17,10 +17,7 @@ pub trait Parser {
     /// Get list of states
     fn get_states(&self) -> &[Self::State];
     /// Get set of terminals for i'th terminal class
-    fn get_terminals<'a>(
-        &'a self,
-        i: usize,
-    ) -> Option<impl IntoIterator<Item = Self::TermRet<'a>> + 'a>;
+    fn get_terminals(&self, i: usize) -> Option<impl IntoIterator<Item = Self::TermRet<'_>> + '_>;
     /// Get the terminal class of the given terminal
     fn to_terminal_class(&self, terminal: &Self::Term) -> usize;
 

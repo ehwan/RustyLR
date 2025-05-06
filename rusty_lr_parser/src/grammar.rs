@@ -386,7 +386,7 @@ impl Grammar {
         if grammar.is_char || grammar.is_u8 {
             // add eof
             let eof_val = {
-                let eof_body = grammar_args.eof.iter().next().unwrap().1.clone();
+                let eof_body = grammar_args.eof.first().unwrap().1.clone();
                 let eof_parsed = syn::parse2::<syn::Lit>(eof_body.clone());
                 if let Ok(lit) = eof_parsed {
                     let val = grammar.get_char_value(&lit)?;
@@ -448,9 +448,10 @@ impl Grammar {
                 grammar.terminals.push(terminal_info);
                 grammar.terminals_index.insert(name, index);
             }
-            for (ident, _) in grammar_args.terminals.iter() {
-                // check if %tokentype is `char` or `u8`
-                return Err(ParseError::TokenInLiteralMode(ident.span()));
+            if !grammar_args.terminals.is_empty() {
+                return Err(ParseError::TokenInLiteralMode(
+                    grammar_args.terminals.first().unwrap().0.span(),
+                ));
             }
         } else {
             // add %token terminals
@@ -510,19 +511,17 @@ impl Grammar {
         // add precedence identifier from %prec definition in each rule
         for rules_arg in grammar_args.rules.iter() {
             for rule in rules_arg.rule_lines.iter() {
-                if let Some(ref prec_ident) = rule.prec {
-                    if let IdentOrLiteral::Ident(prec_ident) = prec_ident {
-                        let term_name = TerminalName::Ident(prec_ident.clone());
-                        if !grammar.terminals_index.contains_key(&term_name) {
-                            // check reserved name
-                            utils::check_reserved_name(prec_ident)?;
+                if let Some(IdentOrLiteral::Ident(prec_ident)) = &rule.prec {
+                    let term_name = TerminalName::Ident(prec_ident.clone());
+                    if !grammar.terminals_index.contains_key(&term_name) {
+                        // check reserved name
+                        utils::check_reserved_name(prec_ident)?;
 
-                            // add to prec definition
-                            grammar.prec_defeinitions.push(PrecDefinition {
-                                ident: prec_ident.clone(),
-                                reduce_type: None,
-                            });
-                        }
+                        // add to prec definition
+                        grammar.prec_defeinitions.push(PrecDefinition {
+                            ident: prec_ident.clone(),
+                            reduce_type: None,
+                        });
                     }
                 }
             }
@@ -1083,12 +1082,10 @@ impl Grammar {
         let mut is_first_oldclass_in_newclass = Vec::new();
         is_first_oldclass_in_newclass.resize(self.terminal_classes.len(), false);
 
-        let mut old_class_to_new_class = Vec::new();
-        old_class_to_new_class.resize(self.terminal_classes.len(), 0);
+        let mut old_class_to_new_class = vec![0; self.terminal_classes.len()];
 
         let mut new_class_defs = Vec::with_capacity(term_partition.len());
-        let mut new_term_class_id = Vec::with_capacity(self.terminals.len());
-        new_term_class_id.resize(self.terminals.len(), 0);
+        let mut new_term_class_id = vec![0; self.terminals.len()];
         let mut multiterm_counter = 0;
         for (new_class_id, (_setids, old_classes)) in term_partition.into_iter().enumerate() {
             let mut terms = Vec::new();
@@ -1254,7 +1251,7 @@ impl Grammar {
             Default::default();
 
         // calculate cycle
-        for (&from, _) in &nonterm_replace {
+        for &from in nonterm_replace.keys() {
             let mut cur = from;
             let mut chains: HashSet<Token<usize, usize>> = Default::default();
             while let Some(&next) = nonterm_replace.get(&cur) {
@@ -1318,9 +1315,9 @@ impl Grammar {
 
         self.other_used = other_was_used;
 
-        return Some(OptimizeDiag {
+        Some(OptimizeDiag {
             removed: removed_rules_diag,
-        });
+        })
     }
 
     pub fn optimize(&mut self, max_iter: usize) -> OptimizeDiag {
@@ -1339,8 +1336,7 @@ impl Grammar {
 
         // remove nonterminals from Vecs which are deleted in the optimization
         // nonterm idx remapping
-        let mut nonterm_old_to_new = Vec::new();
-        nonterm_old_to_new.resize(self.nonterminals.len(), 0);
+        let mut nonterm_old_to_new = vec![0; self.nonterminals.len()];
         let mut new_idx = 0;
         for (old_idx, nonterm) in self.nonterminals.iter().enumerate() {
             if nonterm.rules.is_empty() && !nonterm.is_protected() {
@@ -1487,14 +1483,14 @@ impl Grammar {
                             self.builder.rules[rule1]
                                 .rule
                                 .clone()
-                                .map(&term_mapper, &nonterm_mapper),
+                                .map(term_mapper, nonterm_mapper),
                         ),
                         rule2: (
                             rule2,
                             self.builder.rules[rule2]
                                 .rule
                                 .clone()
-                                .map(&term_mapper, &nonterm_mapper),
+                                .map(term_mapper, nonterm_mapper),
                         ),
                     }));
                 }
@@ -1512,7 +1508,7 @@ impl Grammar {
                             let prod_rule = self.builder.rules[rule.rule]
                                 .rule
                                 .clone()
-                                .map(&term_mapper, &nonterm_mapper);
+                                .map(term_mapper, nonterm_mapper);
                             (
                                 rule.rule,
                                 rusty_lr_core::ShiftedRule {

@@ -492,8 +492,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 // check if all rules have priority, and max priority
                 if reduce_rules
                     .iter()
-                    .find(|&&rule| self.rules[rule].priority.is_none())
-                    .is_some()
+                    .any(|&rule| self.rules[rule].priority.is_none())
                 {
                     continue;
                 }

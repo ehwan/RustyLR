@@ -25,76 +25,83 @@ impl RangeResolver {
 
             // must overlap here
 
-            if start < s {
-                if last == s {
-                    // nnnn
-                    //    rrrr
-                    //    r
-                    new_ranges.push((start, s - 1));
-                    new_ranges.push((s, s));
-                    if s != l {
-                        new_ranges.push((s + 1, l));
+            use std::cmp::Ordering;
+            match start.cmp(&s) {
+                Ordering::Less => {
+                    match last.cmp(&l) {
+                        Ordering::Less => {
+                            // nnnnnnn
+                            //     rrrrr
+                            new_ranges.push((start, s - 1));
+                            new_ranges.push((s, last));
+                            new_ranges.push((last + 1, l));
+                            added = true;
+                        }
+                        Ordering::Equal => {
+                            // nnnnnn
+                            //    rrr
+                            new_ranges.push((start, s - 1));
+                            new_ranges.push((s, l));
+                            added = true;
+                        }
+                        Ordering::Greater => {
+                            // nnnnnnn
+                            //   rrr
+                            new_ranges.push((start, s - 1));
+                            new_ranges.push((s, l));
+                            start = l + 1;
+                        }
                     }
-                    added = true;
-                } else if last < l {
-                    // nnnnnnn
-                    //     rrrrr
-                    new_ranges.push((start, s - 1));
-                    new_ranges.push((s, last));
-                    new_ranges.push((last + 1, l));
-                    added = true;
-                } else if last == l {
-                    // nnnnnn
-                    //    rrr
-                    new_ranges.push((start, s - 1));
-                    new_ranges.push((s, l));
-                    added = true;
-                } else {
-                    // nnnnnnn
-                    //   rrr
-                    new_ranges.push((start, s - 1));
-                    new_ranges.push((s, l));
-                    start = l + 1;
                 }
-            } else if start == s {
-                if last < l {
-                    // nnnn
-                    // rrrrrr
-                    new_ranges.push((start, last));
-                    added = true;
-                    new_ranges.push((last + 1, l));
-                } else if last == l {
-                    // nnnn
-                    // rrrr
-                    new_ranges.push((start, last));
-                    added = true;
-                } else {
-                    // nnnnnnnn
-                    // rrrr
-                    new_ranges.push((s, l));
-                    start = l + 1;
+                Ordering::Equal => {
+                    match last.cmp(&l) {
+                        Ordering::Less => {
+                            // nnnn
+                            // rrrrrr
+                            new_ranges.push((start, last));
+                            added = true;
+                            new_ranges.push((last + 1, l));
+                        }
+                        Ordering::Equal => {
+                            // nnnn
+                            // rrrr
+                            new_ranges.push((start, last));
+                            added = true;
+                        }
+                        Ordering::Greater => {
+                            // nnnnnnnn
+                            // rrrr
+                            new_ranges.push((s, l));
+                            start = l + 1;
+                        }
+                    }
                 }
-            } else {
-                // start > s
-                if last < l {
-                    //    nnnnn
-                    //  rrrrrrrrr
-                    new_ranges.push((s, start - 1));
-                    new_ranges.push((start, last));
-                    new_ranges.push((last + 1, l));
-                    added = true;
-                } else if last == l {
-                    //    nnnnnnn
-                    //  rrrrrrrrr
-                    new_ranges.push((s, start - 1));
-                    new_ranges.push((start, last));
-                    added = true;
-                } else {
-                    //    nnnnnnnnn
-                    //  rrrrrrrrr
-                    new_ranges.push((s, start - 1));
-                    new_ranges.push((start, l));
-                    start = l + 1;
+                Ordering::Greater => {
+                    // start > s
+                    match last.cmp(&l) {
+                        Ordering::Less => {
+                            //    nnnnn
+                            //  rrrrrrrrr
+                            new_ranges.push((s, start - 1));
+                            new_ranges.push((start, last));
+                            new_ranges.push((last + 1, l));
+                            added = true;
+                        }
+                        Ordering::Equal => {
+                            //    nnnnnnn
+                            //  rrrrrrrrr
+                            new_ranges.push((s, start - 1));
+                            new_ranges.push((start, last));
+                            added = true;
+                        }
+                        Ordering::Greater => {
+                            //    nnnnnnnnn
+                            //  rrrrrrrrr
+                            new_ranges.push((s, start - 1));
+                            new_ranges.push((start, l));
+                            start = l + 1;
+                        }
+                    }
                 }
             }
         }

@@ -326,7 +326,8 @@ impl ParseError {
             }
 
             ParseError::TokenInLiteralMode(_) => {
-                format!("%token with %tokentype `char` or `u8` is not supported. Use 'a' or b'a' instead")
+                "%token with %tokentype `char` or `u8` is not supported. Use 'a' or b'a' instead"
+                    .to_string()
             }
 
             ParseError::MultiplePrecedenceOrderDefinition { cur, old } => {

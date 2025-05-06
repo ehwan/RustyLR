@@ -1004,7 +1004,7 @@ impl Grammar {
                 fn get_states(&self) -> &[#state_typename] {
                     &self.states
                 }
-                fn get_terminals<'a>(&'a self, i: usize) -> Option<impl IntoIterator<Item = Self::TermRet<'a>> + 'a> {
+                fn get_terminals(&self, i: usize) -> Option<impl IntoIterator<Item = Self::TermRet<'_>> + '_> {
                     self.classes.get(i).map(
                         |class| class.iter().flat_map( |&(start,last)| {
                             (start..=last).into_iter()
@@ -1151,7 +1151,7 @@ impl Grammar {
                 fn get_states(&self) -> &[#state_typename] {
                     &self.states
                 }
-                fn get_terminals<'a>(&'a self, i: usize) -> Option<impl IntoIterator<Item = Self::TermRet<'a>> + 'a> {
+                fn get_terminals(&self, i: usize) -> Option<impl IntoIterator<Item = Self::TermRet<'_>> + '_> {
                     self.classes.get(i)
                 }
                 fn to_terminal_class(&self, terminal: &Self::Term) -> usize {

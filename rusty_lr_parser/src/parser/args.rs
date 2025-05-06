@@ -37,7 +37,7 @@ impl IdentOrLiteral {
                     .terminals_index
                     .get(&TerminalName::Ident(ident.clone()))
                 {
-                    return Ok(rusty_lr_core::builder::Operator::Term(idx));
+                    Ok(rusty_lr_core::builder::Operator::Term(idx))
                 } else {
                     // check %prec definitions
                     if let Some(idx) = grammar.find_prec_definition(ident) {
@@ -45,7 +45,7 @@ impl IdentOrLiteral {
                     }
 
                     // unknown ident
-                    return Err(ParseError::TerminalNotDefined(ident.clone()));
+                    Err(ParseError::TerminalNotDefined(ident.clone()))
                 }
             }
             Self::Literal(literal) => {
@@ -436,11 +436,9 @@ impl PatternArgs {
                         }
                         Ok(())
                     }
-                    _ => {
-                        return Err(ParseError::UnsupportedLiteralType(
-                            literal.to_token_stream(),
-                        ));
-                    }
+                    _ => Err(ParseError::UnsupportedLiteralType(
+                        literal.to_token_stream(),
+                    )),
                 }
             }
             PatternArgs::Minus(base, terminal_set) => {

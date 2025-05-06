@@ -117,7 +117,7 @@ impl<NonTerm> State<NonTerm> for DenseState<NonTerm> {
         self.shift_goto_map_nonterm.get(nonterm).copied()
     }
     fn reduce(&self, class: usize) -> Option<&'_ [usize]> {
-        self.reduce_map[class].as_ref().map(Vec::as_slice)
+        self.reduce_map[class].as_deref()
     }
     fn is_accept(&self) -> bool {
         self.reduce_map.is_empty()
