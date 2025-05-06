@@ -25,6 +25,8 @@ pub struct Rule {
     pub lookaheads: Option<BTreeSet<usize>>,
     /// %prec definition
     pub prec: Option<(rusty_lr_core::builder::Operator<usize>, Span)>,
+    /// %dprec definition
+    pub dprec: Option<(usize, Span)>,
 }
 
 impl Rule {

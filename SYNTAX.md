@@ -6,18 +6,21 @@
  - [ReduceAction](#reduceaction-optional)
  - [Accessing token data in ReduceAction](#accessing-token-data-in-reduceaction)
  - [Exclamation mark `!`](#exclamation-mark-)
- - [`%trace`](#tracing-non-terminals)
- - [`%tokentype`](#token-type-must-defined)
- - [`%token`](#token-definition-must-defined)
- - [`%start`](#start-symbol-must-defined)
- - [`%eof`](#eof-symbol-must-defined)
- - [`%userdata`](#userdata-type-optional)
- - [`%left`, `%right`, `%precedence`](#reduce-type-optional)
- - [`%err`, `%error`](#error-type-optional)
- - [`%glr`](#glr-parser-generation)
- - [`%lalr`](#lalr-parser-generation)
- - [`%nooptim`](#no-optimization)
- - [`%dense`](#dense-parser-table)
+ - [Tracable Non-Terminals - `%trace`](#tracing-non-terminals)
+ - [Token type - `%tokentype`](#token-type-must-defined)
+ - [Defining tokens - `%token`](#token-definition-must-defined)
+ - [Start symbol - `%start`](#start-symbol-must-defined)
+ - [Eof token - `%eof`](#eof-symbol-must-defined)
+ - [UserData type - `%userdata`](#userdata-type-optional)
+ - [Resolving Conflicts](#resolving-conflicts)
+    - [Panic Mode Error Recovery - `error`](#panic-mode-error-recovery)
+    - [Shift/Reduce conflicts - `%left`, `%right`, `%precedence`, `%prec`](#operator-precedence)
+    - [Reduce/Reduce conflicts - `%dprec`](#rule-priority)
+ - [Error variants - `%err`, `%error`](#error-type-optional)
+ - [GLR parser - `%glr`](#glr-parser-generation)
+ - [LALR parser - `%lalr`](#lalr-parser-generation)
+ - [Disable Optimization - `%nooptim`](#no-optimization)
+ - [Make dense parser table - `%dense`](#dense-parser-table)
 
 
 ## Overview
@@ -301,22 +304,45 @@ fn main() {
 ```
 
 
+## Resolving Conflicts
 
-## Reduce type <sub><sup>(optional)</sup></sub>
+### Panic Mode Error Recovery
+```
+JsonObject: '{' JsonKeyValue* '}'
+          | '{' error '}'          { println!("recovering with '}}'"); }
+          ;
+```
+The `error` token is a reserved non-terminal symbol that can be matched with **any tokens**.
+In the above example, if the parser encounters an invalid token while parsing a JSON object, it will enter panic mode and discard all tokens until it finds a closing brace `}`.
+
+When an invalid token is encountered,
+the parser enters panic mode and starts discarding symbols from the parsing stack until it finds a point where the special `error` token is allowed by the grammar.
+At that point, it shifts the invalid fed token as the `error` token,
+respectively trying to complete the rule that contains the `error` token.
+
+- The `error` token does not have any value, no associated rule-type.
+
+### Operator Precedence
 ```
 // reduce first
 %left term1 term2 term3 ...;
 
 // shift first
-%right term1 ;
-%right term1 term2 term3 ... ;
+%right term4 term5 term6 ... ;
 
 // only precedence
-%precedence term1 term2 term3 ... ;
+%precedence term7 term8 term9 ... ;
 ```
-%left can be abbreviated as %reduce or %l, and %right as %shift or %r.
+For shift/reduce conflicts, the `%left`, `%right`, and `%precedence` directives are used to resolve the conflicts.
 These directives define the associativity and precedence of operators.
-As in `yacc` and `bison`, the order of precedence is determined by the order in which %left, %right, or %precedence directives appear.
+As in `bison`, the order of precedence is determined by the order in which `%left`, `%right`, or `%precedence` directives appear.
+
+When a conflict occurs, the parser will compare the precedence of the shift terminal and the *operator* in the reduce rule. If both precedences are defined, either the shift or reduce will be chosen based on the precedence of the operator.
+ - If the shift terminal has a higher precedence than the reduce operator, the shift will be chosen.
+ - If the reduce operator has a higher precedence than the shift terminal, the reduce will be chosen.
+ - If both have the same precedence, the `%left` or `%right` directive will be used to determine the resolving process.
+
+The *operator* of the reduce rule is the rightmost terminal symbol in the production rule, that has a precedence defined by `%left`, `%right`, or `%precedence` directive. In other way, the operator of the reduce rule can be defined explicitly by using `%prec` directive.
 
 ```rust
 // left reduction for binary operator '+'
@@ -336,6 +362,15 @@ E: E '+' E { E + E }
  | '-' E %prec UnaryMinus { -E } // make operator for this production rule `UnaryMinus`
  ;
 ```
+
+### Rule priority
+```
+E:
+    P1 P2 P3 %dprec 2
+  | P4 P5 P6 %dprec 1
+  ;
+```
+For reduce/reduce conflicts, if every rules those are in conflict have priority set with `%dprec`, the rule with the highest priority will be chosen.
 
 
 ## Error type <sub><sup>(optional)</sup></sub>

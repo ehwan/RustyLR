@@ -135,6 +135,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
+                        dprec: None,
                     };
                     let line2 = Rule {
                         tokens: vec![
@@ -161,6 +162,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
+                        dprec: None,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -199,6 +201,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
+                        dprec: None,
                     };
                     let line2 = Rule {
                         tokens: vec![
@@ -219,6 +222,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
+                        dprec: None,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -280,6 +284,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
+                        dprec: None,
                     };
                     let line2 = Rule {
                         tokens: vec![],
@@ -293,6 +298,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
+                        dprec: None,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -331,6 +337,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
+                        dprec: None,
                     };
                     let line2 = Rule {
                         tokens: vec![],
@@ -338,6 +345,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
+                        dprec: None,
                     };
                     let nonterm_info = NonTerminalInfo {
                         name: newrule_name.clone(),
@@ -391,6 +399,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
+                        dprec: None,
                     };
                     let line2 = Rule {
                         tokens: vec![],
@@ -404,6 +413,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
+                        dprec: None,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -442,6 +452,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
+                        dprec: None,
                     };
                     let line2 = Rule {
                         tokens: vec![],
@@ -449,6 +460,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
+                        dprec: None,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -521,6 +533,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
+                        dprec: None,
                     };
                     rules.push(rule);
                 }
@@ -581,6 +594,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: Some(lookaheads),
                         prec: None,
+                        dprec: None,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -616,6 +630,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: Some(lookaheads),
                         prec: None,
+                        dprec: None,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -689,6 +704,7 @@ impl Pattern {
                             separator_span: Span::call_site(),
                             lookaheads: None,
                             prec: None,
+                            dprec: None,
                         };
                         let nonterm_info = NonTerminalInfo {
                             name: newrule_name.clone(),
@@ -729,6 +745,7 @@ impl Pattern {
                             separator_span: Span::call_site(),
                             lookaheads: None,
                             prec: None,
+                            dprec: None,
                         };
                         let nonterm_info = NonTerminalInfo {
                             name: newrule_name.clone(),
@@ -775,6 +792,7 @@ impl Pattern {
                             separator_span: Span::call_site(),
                             lookaheads: None,
                             prec: None,
+                            dprec: None,
                         };
                         let nonterm_info = NonTerminalInfo {
                             name: newrule_name.clone(),
@@ -855,6 +873,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
+                        dprec: None,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -903,6 +922,7 @@ impl Pattern {
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
+                        dprec: None,
                     };
 
                     let nonterm_info = NonTerminalInfo {

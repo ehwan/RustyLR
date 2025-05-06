@@ -38,6 +38,11 @@ pub enum ArgError {
     StartNotDefined,
     EofNotDefined,
     TokenTypeNotDefined,
+
+    /// multiple %prec in the same rule
+    MultiplePrecDefinition(Span),
+    /// multiple %dprec in the same rule
+    MultipleDPrecDefinition(Span),
 }
 
 #[non_exhaustive]
@@ -115,6 +120,9 @@ pub enum ParseError {
 
     /// unknown non-terminal symbol name
     NonTerminalNotDefined(Ident),
+
+    /// only 'usize' literal is allowed for %dprec
+    OnlyUsizeLiteral(Span),
 }
 #[allow(unused)]
 impl ArgError {
@@ -148,6 +156,9 @@ impl ArgError {
             ArgError::StartNotDefined => Span::call_site(),
             ArgError::EofNotDefined => Span::call_site(),
             ArgError::TokenTypeNotDefined => Span::call_site(),
+
+            ArgError::MultiplePrecDefinition(span) => *span,
+            ArgError::MultipleDPrecDefinition(span) => *span,
         }
     }
 
@@ -178,6 +189,9 @@ impl ArgError {
             ArgError::TokenTypeNotDefined => {
                 "Token type not defined\n>>> %tokentype <token_type_name>;".into()
             }
+
+            ArgError::MultiplePrecDefinition(span) => "Multiple %prec definition".into(),
+            ArgError::MultipleDPrecDefinition(span) => "Multiple %dprec definition".into(),
         }
     }
 }
@@ -255,6 +269,7 @@ impl ParseError {
             ParseError::RuleTypeDefinedButActionNotDefined { name, span } => span.0,
             ParseError::OnlyTerminalSet(span_begin, span_end) => *span_begin,
             ParseError::NonTerminalNotDefined(ident) => ident.span(),
+            ParseError::OnlyUsizeLiteral(span) => *span,
         }
     }
 
@@ -325,6 +340,7 @@ impl ParseError {
             ParseError::NonTerminalNotDefined(ident) => {
                 format!("Unknown non-terminal symbol name: {}", ident)
             }
+            ParseError::OnlyUsizeLiteral(_) => "Only 'usize' literal is allowed for %dprec".into(),
         }
     }
 }

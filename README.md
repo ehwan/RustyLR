@@ -5,7 +5,7 @@
 ***A Bison-like, parser generator for Rust supporting LR(1), LALR(1), and GLR parsing strategies.***
 
 RustyLR enables you to define context-free grammars directly in Rust.
-Inspired by tools like *yacc* and *bison*, it uses a similar syntax while integrating seamlessly with Rust's ecosystem.
+Highly inspired by tools like *bison*, it uses a similar syntax while integrating seamlessly with Rust's ecosystem.
 It constructs optimized state machine, ensuring efficient and reliable parsing.​
 
 #### Number of terminal symbols reduced to 32 (from 0x10FFFF!) by optimization
@@ -183,26 +183,14 @@ Note that the actual definitions are bit different if you are building GLR parse
 RustyLR offers built-in support for Generalized LR (GLR) parsing, enabling it to handle ambiguous or nondeterministic grammars that traditional LR(1) or LALR(1) parsers cannot process.
 See [GLR.md](GLR.md) for details.
 
-## Semantic Error Handling
+## Semantic Error Handling, and Resolving Conflicts
 RustyLR provides a mechanism for handling semantic errors during parsing.
- - return `Err` from the reduce action
  - using `error` token for panic-mode-error-recovery
-Or combine both.
+ - setting reduce type `%left`, `%right`, `%precedence` to terminals
+ - setting priority `%dprec` to production rules
+ - return `Err` from the reduce action
 
-```
-JsonObject: '{' JsonKeyValue* '}'
-          | '{' error '}'          { println!("recovering with '}}'"); }
-          ;
-```
-The `error` token is a reserved non-terminal symbol that can be matched with **any tokens**.
-In the above example, if the parser encounters an invalid token while parsing a JSON object, it will enter panic mode and discard all tokens until it finds a closing brace `}`.
-
-When an invalid token is encountered,
-the parser enters panic mode and starts discarding symbols from the parsing stack until it finds a point where the special `error` token is allowed by the grammar.
-At that point, it shifts the invalid fed token as the `error` token,
-respectively trying to complete the rule that contains the `error` token.
-
-- The `error` token does not have any value, no associated rule-type.
+See [SYNTAX.md - Resolving Conflicts](SYNTAX.md#resolving-conflicts) for details.
 
 ## Examples
  - [Calculator](examples/calculator_u8/src/parser.rs): A calculator using `u8` as token type.
@@ -219,8 +207,8 @@ making it suitable for processing large or complex inputs.
 
 ## Cargo Features
  - `build`: Enable build script tools.
- - `tree`: Enable automatic syntax tree construction (For debugging purposes).
- - `error`: Enable detailed parsing error messages with backtrace (For debugging purposes).
+ - `tree`: Enable automatic syntax tree construction (For debugging purposes). Make `Context` tobe `Display`-able.
+ - `error`: Enable detailed parsing error messages with backtrace when displaying feed error (For debugging purposes).
 
 ## Syntax
 RustyLR's grammar syntax is inspired by traditional Yacc/Bison formats.

@@ -459,8 +459,19 @@ pub struct RuleLineArgs {
     pub reduce_action: Option<TokenStream>,
     /// span of ':' or '|' in front of this rule line
     pub separator_span: Span,
-    /// %prec definition
-    pub precedence: Option<IdentOrLiteral>,
+    /// %prec or %dprec, allow duplicates here, return error later
+    pub precs: Vec<PrecDPrecArgs>,
+
+    /// %prec
+    pub prec: Option<IdentOrLiteral>,
+    /// %dprec
+    pub dprec: Option<Literal>,
+}
+
+/// For %prec and %dprec at the end of a rule line
+pub enum PrecDPrecArgs {
+    Prec(IdentOrLiteral),
+    DPrec(Literal),
 }
 
 /// parsed arguments for multiple lines of a rule

@@ -33,6 +33,8 @@ pub struct Rule<Term, NonTerm> {
     pub rule: ProductionRule<Term, NonTerm>,
     pub lookaheads: Option<BTreeSet<Term>>,
     pub operator: Option<Operator<Term>>,
+    /// for reduce/reduce conflict resolving
+    pub priority: Option<usize>,
 }
 
 /// A struct for Context Free Grammar and DFA construction
@@ -75,6 +77,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         rule: Vec<Token<Term, NonTerm>>,
         lookaheads: Option<BTreeSet<Term>>,
         operator: Option<Operator<Term>>,
+        priority: Option<usize>,
     ) -> usize
     where
         NonTerm: Copy + Hash + Eq,
@@ -85,6 +88,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             rule: ProductionRule { name, rule },
             lookaheads,
             operator,
+            priority,
         };
         self.rules.push(rule);
         index
@@ -133,6 +137,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         NonTerm: Copy + Hash + Ord,
     {
         let mut table = self.build_without_resolving(augmented_name)?;
+        self.resolve_priority(&mut table);
         self.resolve_precedence(&mut table);
         Ok(table)
     }
@@ -191,6 +196,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         NonTerm: Copy + Hash + Ord,
     {
         let mut table = self.build_lalr_without_resolving(augmented_name)?;
+        self.resolve_priority(&mut table);
         self.resolve_precedence(&mut table);
         Ok(table)
     }
@@ -471,6 +477,37 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         Ok(())
     }
 
+    pub fn resolve_priority(&self, dfa: &mut DFA<Term, NonTerm>)
+    where
+        Term: Copy + Ord + Hash,
+        NonTerm: PartialEq,
+    {
+        // resolve reduce/reduce conflicts by priority
+        for state in dfa.states.iter_mut() {
+            for reduce_rules in state.reduce_map.values_mut() {
+                if reduce_rules.len() <= 1 {
+                    continue;
+                }
+
+                // check if all rules have priority, and max priority
+                if reduce_rules
+                    .iter()
+                    .find(|&&rule| self.rules[rule].priority.is_none())
+                    .is_some()
+                {
+                    continue;
+                }
+                let max_priority = reduce_rules
+                    .iter()
+                    .map(|&rule| self.rules[rule].priority)
+                    .max()
+                    .unwrap()
+                    .unwrap();
+
+                reduce_rules.retain(|&rule| self.rules[rule].priority.unwrap() == max_priority);
+            }
+        }
+    }
     pub fn resolve_precedence(&self, dfa: &mut DFA<Term, NonTerm>)
     where
         Term: Copy + Ord + Hash,

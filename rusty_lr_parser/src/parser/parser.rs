@@ -2,8 +2,9 @@ use crate::parser::args::PatternArgs;
 use crate::parser::args::GrammarArgs;
 use crate::parser::args::RuleDefArgs;
 use crate::parser::args::RuleLineArgs;
-use crate::parser::lexer::Lexed;
 use crate::parser::args::IdentOrLiteral;
+use crate::parser::args::PrecDPrecArgs;
+use crate::parser::lexer::Lexed;
 use crate::terminalset::TerminalSet;
 use crate::terminalset::TerminalSetItem;
 
@@ -82,6 +83,7 @@ macro_rules! punct(
 %token nooptim Lexed::NoOptim(punct!('%'),Ident::new("id", Span::call_site()));
 %token dense Lexed::Dense(punct!('%'),Ident::new("id", Span::call_site()));
 %token trace Lexed::Trace(punct!('%'),Ident::new("id", Span::call_site()));
+%token dprec Lexed::DPrec(punct!('%'),Ident::new("id", Span::call_site()));
 
 %eof Lexed::Eof;
 
@@ -133,18 +135,27 @@ RuleLines(Vec<RuleLineArgs>): RuleLines pipe RuleLine {
 }
 ;
 
-RuleLine(RuleLineArgs): TokenMapped* PrecDef? Action
+RuleLine(RuleLineArgs): TokenMapped* PrecDef* Action
 {
     RuleLineArgs {
         tokens: TokenMapped,
         reduce_action: Action.map(|action| action.to_token_stream()),
         separator_span: Span::call_site(),
-        precedence: PrecDef,
+        precs: PrecDef,
+        prec: None,
+        dprec: None,
     }
 }
 ;
 
-PrecDef(IdentOrLiteral): prec! IdentOrLiteral;
+PrecDef(PrecDPrecArgs): prec! IdentOrLiteral { PrecDPrecArgs::Prec(IdentOrLiteral) }
+| dprec! literal { 
+    let Lexed::Literal(literal) = literal else {
+        unreachable!( "PrecDPrecArgs-DPrec" );
+    };
+    PrecDPrecArgs::DPrec(literal) 
+}
+;
 
 TokenMapped((Option<Ident>, PatternArgs)): Pattern {
     ( None, Pattern )

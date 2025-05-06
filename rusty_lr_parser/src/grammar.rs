@@ -189,7 +189,7 @@ impl Grammar {
 
         Ok(grammar_args)
     }
-    pub fn arg_check_error(grammar_args: &GrammarArgs) -> Result<(), ArgError> {
+    pub fn arg_check_error(grammar_args: &mut GrammarArgs) -> Result<(), ArgError> {
         // %error
         if grammar_args.error_typename.len() > 1 {
             return Err(ArgError::MultipleErrorDefinition(
@@ -243,6 +243,33 @@ impl Grammar {
                 grammar_args.start_rule_name[1].clone(),
             ));
         }
+
+        for rules in grammar_args.rules.iter_mut() {
+            use crate::parser::args::PrecDPrecArgs;
+            for rule in rules.rule_lines.iter_mut() {
+                let mut unique_prec = None;
+                let mut unique_dprec = None;
+                for prec in std::mem::take(&mut rule.precs) {
+                    match prec {
+                        PrecDPrecArgs::Prec(p) => {
+                            if unique_prec.is_some() {
+                                return Err(ArgError::MultiplePrecDefinition(p.span()));
+                            }
+                            unique_prec = Some(p);
+                        }
+                        PrecDPrecArgs::DPrec(d) => {
+                            if unique_dprec.is_some() {
+                                return Err(ArgError::MultipleDPrecDefinition(d.span()));
+                            }
+                            unique_dprec = Some(d);
+                        }
+                    }
+                }
+                rule.prec = unique_prec;
+                rule.dprec = unique_dprec;
+            }
+        }
+
         Ok(())
     }
 
@@ -372,7 +399,7 @@ impl Grammar {
             // add terminals from %prec definition in each rule
             for rules_arg in grammar_args.rules.iter() {
                 for rule in rules_arg.rule_lines.iter() {
-                    if let Some(ref prec_ident) = rule.precedence {
+                    if let Some(ref prec_ident) = rule.prec {
                         prec_ident.range_resolve(&mut grammar)?;
                     }
                 }
@@ -395,7 +422,7 @@ impl Grammar {
             // production rule definition
             for rules_arg in grammar_args.rules.iter() {
                 for rule in &rules_arg.rule_lines {
-                    if let Some(ref prec_ident) = rule.precedence {
+                    if let Some(ref prec_ident) = rule.prec {
                         prec_ident.range_resolve(&mut grammar)?;
                     }
                     for (_, pattern) in &rule.tokens {
@@ -483,7 +510,7 @@ impl Grammar {
         // add precedence identifier from %prec definition in each rule
         for rules_arg in grammar_args.rules.iter() {
             for rule in rules_arg.rule_lines.iter() {
-                if let Some(ref prec_ident) = rule.precedence {
+                if let Some(ref prec_ident) = rule.prec {
                     if let IdentOrLiteral::Ident(prec_ident) = prec_ident {
                         let term_name = TerminalName::Ident(prec_ident.clone());
                         if !grammar.terminals_index.contains_key(&term_name) {
@@ -642,9 +669,33 @@ impl Grammar {
                     });
                 }
 
-                let prec = if let Some(prec) = rule.precedence {
+                let prec = if let Some(prec) = rule.prec {
                     let prec_op = prec.to_terminal(&mut grammar)?;
                     Some((prec_op, prec.span()))
+                } else {
+                    None
+                };
+
+                // parse %dprec literal value
+                let dprec = if let Some(dprec) = rule.dprec {
+                    let lit = match syn::parse2::<syn::Lit>(dprec.to_token_stream()) {
+                        Ok(lit) => lit,
+                        Err(_) => {
+                            unreachable!("dprec parse error");
+                        }
+                    };
+                    let val = match lit {
+                        syn::Lit::Int(lit) => match lit.base10_parse::<usize>() {
+                            Ok(val) => val,
+                            Err(_) => {
+                                return Err(ParseError::OnlyUsizeLiteral(lit.span()));
+                            }
+                        },
+                        _ => {
+                            return Err(ParseError::OnlyUsizeLiteral(dprec.span()));
+                        }
+                    };
+                    Some((val, dprec.span()))
                 } else {
                     None
                 };
@@ -659,6 +710,7 @@ impl Grammar {
                     separator_span: rule.separator_span,
                     lookaheads: None,
                     prec,
+                    dprec,
                 });
             }
 
@@ -703,6 +755,7 @@ impl Grammar {
                 separator_span: Span::call_site(),
                 lookaheads: None,
                 prec: None,
+                dprec: None,
             };
             let nonterminal_info = NonTerminalInfo {
                 name: augmented_ident.clone(),
@@ -1541,6 +1594,7 @@ impl Grammar {
                     tokens,
                     rule.lookaheads.clone(),
                     rule.prec.map(|(op, _)| op),
+                    rule.dprec.map(|(p, _)| p),
                 );
             }
         }
@@ -1568,6 +1622,13 @@ impl Grammar {
             unreachable!("grammar build error");
         };
         self.states = states.states;
+    }
+    pub fn resolve_priority(&mut self) {
+        let mut dfa = rusty_lr_core::builder::DFA {
+            states: std::mem::take(&mut self.states),
+        };
+        self.builder.resolve_priority(&mut dfa);
+        self.states = dfa.states;
     }
     pub fn resolve_precedence(&mut self) {
         let mut dfa = rusty_lr_core::builder::DFA {

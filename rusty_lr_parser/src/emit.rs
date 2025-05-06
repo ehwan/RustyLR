@@ -804,13 +804,20 @@ impl Grammar {
                 }
             };
 
+            let dprec_stream = if let Some(dprec) = rule.priority {
+                quote! { Some(#dprec) }
+            } else {
+                quote! { None }
+            };
+
             let nonterm_name = &nonterminals_token[rule.rule.name];
             add_rules_stream.extend(quote! {
                 builder.add_rule(
                     #nonterm_name,
                     vec![ #tokens_vec_body_stream ],
                     #lookaheads_stream,
-                    #op_stream
+                    #op_stream,
+                    #dprec_stream
                 );
             });
         }

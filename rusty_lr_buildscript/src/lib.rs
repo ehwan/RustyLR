@@ -237,7 +237,7 @@ impl Builder {
             }
         };
 
-        let grammar_args = match rusty_lr_parser::grammar::Grammar::parse_args(macro_stream) {
+        let mut grammar_args = match rusty_lr_parser::grammar::Grammar::parse_args(macro_stream) {
             Ok(grammar_args) => grammar_args,
             Err(e) => {
                 let diag =
@@ -272,7 +272,7 @@ impl Builder {
                 return Err(diag.message);
             }
         };
-        match rusty_lr_parser::grammar::Grammar::arg_check_error(&grammar_args) {
+        match rusty_lr_parser::grammar::Grammar::arg_check_error(&mut grammar_args) {
             Ok(_) => {}
             Err(e) => {
                 let diag = match e {
@@ -391,6 +391,18 @@ impl Builder {
                             "%tokentype must be defined".to_string(),
                             ">>> %tokentype <TokenType>".to_string(),
                         ]),
+
+                    ArgError::MultiplePrecDefinition(span) => Diagnostic::error()
+                        .with_message("multiple %prec definition")
+                        .with_labels(vec![Label::primary(file_id, span.byte_range())
+                            .with_message("This %prec is defined here")])
+                        .with_notes(vec!["%prec must be unique".to_string()]),
+
+                    ArgError::MultipleDPrecDefinition(span) => Diagnostic::error()
+                        .with_message("multiple %dprec definition")
+                        .with_labels(vec![Label::primary(file_id, span.byte_range())
+                            .with_message("This %dprec is defined here")])
+                        .with_notes(vec!["%dprec must be unique".to_string()]),
                     _ => {
                         let message = e.short_message();
                         let span = e.span().byte_range();
@@ -614,6 +626,12 @@ impl Builder {
                             .with_labels(vec![Label::primary(file_id, range)
                                 .with_message("This non-terminal is not defined")])
                     }
+                    ParseError::OnlyUsizeLiteral(span) => {
+                        let range = span.byte_range();
+                        Diagnostic::error()
+                            .with_message("Only usize literal is allowed for %dprec")
+                            .with_labels(vec![Label::primary(file_id, range)])
+                    }
 
                     _ => {
                         let message = e.short_message();
@@ -799,11 +817,69 @@ impl Builder {
         let mut conflict_diags = Vec::new();
         let mut conflict_diags_resolved = Vec::new();
 
-        let class_mapper = |class| grammar.class_pretty_name_list(class, 5);
-
         // calculate conflicts
         {
+            use std::collections::BTreeMap;
             use std::collections::BTreeSet;
+
+            let mut reduce_reduce_conflict_set = BTreeMap::new();
+            // reduce reduce conflicts
+            for state in &grammar.states {
+                for (term, reduce_rules) in state.reduce_map.iter() {
+                    if reduce_rules.len() <= 1 {
+                        continue;
+                    }
+
+                    if !reduce_reduce_conflict_set
+                        .entry(reduce_rules)
+                        .or_insert_with(BTreeSet::new)
+                        .insert(*term)
+                    {}
+                }
+            }
+            for (reduce_rules, _) in reduce_reduce_conflict_set {
+                if reduce_rules
+                    .iter()
+                    .find(|&&rule| grammar.builder.rules[rule].priority.is_none())
+                    .is_some()
+                {
+                    continue;
+                }
+                let max_priority = reduce_rules
+                    .iter()
+                    .map(|&rule| grammar.builder.rules[rule].priority)
+                    .max()
+                    .unwrap()
+                    .unwrap();
+                let mut labels = Vec::new();
+                for &rule in reduce_rules {
+                    let priority = grammar.builder.rules[rule].priority.unwrap();
+                    let (nonterm, local_id) = grammar.get_rule_by_id(rule).unwrap();
+                    let (begin, end) = nonterm.rules[local_id].span_pair();
+                    let range = begin.byte_range().start..end.byte_range().end;
+                    if priority < max_priority {
+                        labels.push(Label::primary(file_id, range).with_message(format!(
+                            "[Removed] (Reduce) rule with lower priority: {priority}"
+                        )));
+                    } else {
+                        labels.push(Label::primary(file_id, range).with_message(format!(
+                            "(Reduce) rule with highest priority: {priority}"
+                        )));
+                    }
+                }
+                let message = "Reduce/Reduce conflict resolved";
+                let mut notes = Vec::new();
+                notes.push(format!("Max priority: {max_priority}"));
+                notes.push(format!("Set priority with %dprec"));
+                conflict_diags_resolved.push(
+                    Diagnostic::note()
+                        .with_message(message)
+                        .with_labels(labels)
+                        .with_notes(notes),
+                );
+            }
+            grammar.resolve_priority();
+
             let mut shift_reduce_conflict_set = BTreeSet::new();
 
             for state in &grammar.states {
@@ -1075,7 +1151,7 @@ impl Builder {
                         labels.push(
                             Label::primary(file_id, shift_prec_span.byte_range()).with_message(
                                 format!(
-                                    "[Removed] (Shift) precedence was set as {shift_level} here"
+                                    "[Removed] (Shift) Precedence was set as {shift_level} here"
                                 ),
                             ),
                         );
@@ -1095,7 +1171,7 @@ impl Builder {
                     } else {
                         labels.push(
                             Label::primary(file_id, shift_prec_span.byte_range()).with_message(
-                                format!("(Shift) precedence was set as {shift_level} here"),
+                                format!("(Shift) Precedence was set as {shift_level} here"),
                             ),
                         );
 
@@ -1111,6 +1187,8 @@ impl Builder {
                             );
                         }
                     }
+
+                    let class_mapper = |class| grammar.class_pretty_name_list(class, 5);
 
                     // only show this diag if some shift/reduce conflict was resolved
                     if remove_shift || reduce_removed {
@@ -1145,9 +1223,10 @@ impl Builder {
         let nonterm_mapper = |nonterm| grammar.nonterm_pretty_name(nonterm);
         let class_mapper = |class| grammar.class_pretty_name_list(class, 5);
         {
+            use std::collections::BTreeMap;
             use std::collections::BTreeSet;
             let mut shift_reduce_conflict_set = BTreeSet::new();
-            let mut reduce_reduce_conflict_set = BTreeSet::new();
+            let mut reduce_reduce_conflict_map = BTreeMap::new();
 
             for state in &grammar.states {
                 for (&reduce_term, reduce_rules) in state.reduce_map.iter() {
@@ -1164,7 +1243,7 @@ impl Builder {
                         }
 
                         let message = format!(
-                            "Conflict detected with terminal: {}",
+                            "Shift/Reduce conflict detected with terminal: {}",
                             class_mapper(reduce_term)
                         );
                         let mut labels = Vec::new();
@@ -1198,36 +1277,43 @@ impl Builder {
                                 .with_notes(notes),
                         );
                     } else if reduce_rules.len() > 1 {
-                        if !reduce_reduce_conflict_set.insert((reduce_rules.clone(), reduce_term)) {
-                            continue;
-                        }
-
-                        let message = format!(
-                            "Conflict detected with terminal: {}",
-                            class_mapper(reduce_term)
-                        );
-                        let mut labels = Vec::new();
-                        let notes = Vec::new();
-
-                        for &reduce_rule in reduce_rules {
-                            Self::extend_rule_source_label(
-                                &mut labels,
-                                file_id,
-                                reduce_rule,
-                                &grammar,
-                                "(Reduce) ",
-                                "(Reduce) ",
-                            );
-                        }
-
-                        conflict_diags.push(
-                            Diagnostic::error()
-                                .with_message(message)
-                                .with_labels(labels)
-                                .with_notes(notes),
-                        );
+                        reduce_reduce_conflict_map
+                            .entry(reduce_rules.clone())
+                            .or_insert_with(BTreeSet::new)
+                            .insert(reduce_term);
                     }
                 }
+            }
+
+            for (reduce_rules, reduce_terms) in reduce_reduce_conflict_map {
+                let message = format!(
+                    "Reduce/Reduce conflict detected with terminals: {}",
+                    reduce_terms
+                        .into_iter()
+                        .map(|class| class_mapper(class))
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                );
+                let mut labels = Vec::new();
+                let notes = Vec::new();
+
+                for reduce_rule in reduce_rules {
+                    Self::extend_rule_source_label(
+                        &mut labels,
+                        file_id,
+                        reduce_rule,
+                        &grammar,
+                        "(Reduce) ",
+                        "(Reduce) ",
+                    );
+                }
+
+                conflict_diags.push(
+                    Diagnostic::error()
+                        .with_message(message)
+                        .with_labels(labels)
+                        .with_notes(notes),
+                );
             }
         }
 

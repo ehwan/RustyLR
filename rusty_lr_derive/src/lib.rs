@@ -12,11 +12,11 @@ use proc_macro::TokenStream;
 pub fn lr1(input: TokenStream) -> TokenStream {
     let input = input.into();
     use rusty_lr_parser::grammar::Grammar;
-    let grammar_args = match Grammar::parse_args(input) {
+    let mut grammar_args = match Grammar::parse_args(input) {
         Ok(grammar_args) => grammar_args,
         Err(e) => return e.to_compile_error().into(),
     };
-    match Grammar::arg_check_error(&grammar_args) {
+    match Grammar::arg_check_error(&mut grammar_args) {
         Ok(_) => {}
         Err(e) => return e.to_compile_error().into(),
     }
@@ -29,6 +29,7 @@ pub fn lr1(input: TokenStream) -> TokenStream {
     }
     grammar.builder = grammar.create_builder();
     grammar.build_grammar_without_resolve();
+    grammar.resolve_priority();
     grammar.resolve_precedence();
     if let Err(e) = grammar.conflict() {
         return e.to_compile_error().into();
