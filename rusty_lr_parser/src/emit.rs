@@ -94,9 +94,14 @@ impl Grammar {
 
         let start_rule_name = &self.start_rule_name;
         let enum_typename = format_ident!("{}NonTerminals", start_rule_name);
+        let module_prefix = &self.module_prefix;
+        let token_typename = &self.token_typename;
 
         let mut comma_separated_variants = TokenStream::new();
-        let mut case_display = TokenStream::new();
+        let mut case_as_str = TokenStream::new();
+        let mut nonterm_trait_is_augmented_case = TokenStream::new();
+        let mut nonterm_trait_is_generated_case = TokenStream::new();
+        let mut nonterm_trait_is_trace_case = TokenStream::new();
         for nonterm in self.nonterminals.iter() {
             let name = &nonterm.name;
             // enum variants definition
@@ -105,9 +110,26 @@ impl Grammar {
             });
 
             // impl `Display` and `Debug` for NonTerminal
-            let display_str = &nonterm.pretty_name;
-            case_display.extend(quote! {
-                #enum_typename::#name=>write!(f, "{}", #display_str),
+            let display_str = nonterm.pretty_name.as_str();
+            case_as_str.extend(quote! {
+                #enum_typename::#name => #display_str,
+            });
+
+            let (is_augmented, is_generated, is_trace) = if name == utils::AUGMENTED_NAME {
+                (true, true, false)
+            } else {
+                // non-term is auto-generated if nonterm.regex_span.is_some()
+                (false, nonterm.is_auto_generated(), nonterm.trace)
+            };
+
+            nonterm_trait_is_augmented_case.extend(quote! {
+                #enum_typename::#name => #is_augmented,
+            });
+            nonterm_trait_is_generated_case.extend(quote! {
+                #enum_typename::#name => #is_generated,
+            });
+            nonterm_trait_is_trace_case.extend(quote! {
+                #enum_typename::#name => #is_trace,
             });
         }
 
@@ -120,56 +142,27 @@ impl Grammar {
                 #comma_separated_variants
             }
 
+            impl #enum_typename {
+                /// convert to string
+                pub fn as_str(&self) -> &'static str {
+                    match self {
+                        #case_as_str
+                    }
+                }
+            }
+
             impl std::fmt::Display for #enum_typename {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                    match self {
-                        #case_display
-                    }
+                    write!(f, "{}", self.as_str())
                 }
             }
             impl std::fmt::Debug for #enum_typename {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                    match self {
-                        #case_display
-                    }
+                    write!(f, "{}", self.as_str())
                 }
             }
-        }
-        );
-    }
 
-    // emit impl NonTreminal trait and grammar compiletime check
-    fn emit_nonterm_trait(&self, stream: &mut TokenStream) {
-        let module_prefix = &self.module_prefix;
-        let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
-
-        let token_typename = &self.token_typename;
-
-        // impl NonTerminal trait
-        let mut nonterm_trait_is_augmented_case = TokenStream::new();
-        let mut nonterm_trait_is_generated_case = TokenStream::new();
-        let mut nonterm_trait_is_trace_case = TokenStream::new();
-        for nonterm in self.nonterminals.iter() {
-            let name = &nonterm.name;
-            let (is_augmented, is_generated, is_trace) = if name == utils::AUGMENTED_NAME {
-                (true, true, false)
-            } else {
-                // non-term is auto-generated if nonterm.regex_span.is_some()
-                (false, nonterm.is_auto_generated(), nonterm.trace)
-            };
-
-            nonterm_trait_is_augmented_case.extend(quote! {
-                #nonterminals_enum_name::#name => #is_augmented,
-            });
-            nonterm_trait_is_generated_case.extend(quote! {
-                #nonterminals_enum_name::#name => #is_generated,
-            });
-            nonterm_trait_is_trace_case.extend(quote! {
-                #nonterminals_enum_name::#name => #is_trace,
-            });
-        }
-        stream.extend(quote! {
-            impl #module_prefix::NonTerminal<#token_typename> for #nonterminals_enum_name {
+            impl #module_prefix::NonTerminal<#token_typename> for #enum_typename{
                 fn is_auto_generated(&self) -> bool {
                     match self {
                         #nonterm_trait_is_generated_case
@@ -186,7 +179,8 @@ impl Grammar {
                     }
                 }
             }
-        });
+        }
+        );
     }
 
     fn emit_context_lr(&self, stream: &mut TokenStream) {
@@ -1192,7 +1186,6 @@ impl Grammar {
         let mut stream = TokenStream::new();
         self.emit_type_alises(&mut stream);
         self.emit_nonterm_enum(&mut stream);
-        self.emit_nonterm_trait(&mut stream);
         if self.glr {
             self.emit_context_glr(&mut stream);
             self.emit_parser(&mut stream);
