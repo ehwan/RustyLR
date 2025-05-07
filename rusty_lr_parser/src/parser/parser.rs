@@ -51,6 +51,7 @@ macro_rules! punct(
 %token minus Lexed::Minus(punct!('-'));
 %token exclamation Lexed::Exclamation(punct!('!'));
 %token slash Lexed::Slash(punct!('/'));
+%token dot Lexed::Dot(punct!('.'));
 // %token otherpunct Lexed::OtherPunct(punct!('.'));
 
 %token literal Lexed::Literal(Literal::usize_suffixed(0));
@@ -224,6 +225,15 @@ TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
       items: TerminalSetItem,
       open_span,
       close_span,
+    }
+}
+| dot {
+    let span = dot.span();
+    TerminalSet {
+        negate: true,
+        items: vec![],
+        open_span: span,
+        close_span: span,
     }
 }
 ;

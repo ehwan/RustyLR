@@ -30,6 +30,7 @@ pub enum Lexed {
     Minus(Punct),
     Exclamation(Punct),
     Slash(Punct),
+    Dot(Punct),
     OtherPunct(Punct),
 
     Literal(Literal),
@@ -80,6 +81,7 @@ impl Lexed {
             Lexed::Minus(punct) => stream.append(punct),
             Lexed::Exclamation(punct) => stream.append(punct),
             Lexed::Slash(punct) => stream.append(punct),
+            Lexed::Dot(punct) => stream.append(punct),
             Lexed::OtherPunct(punct) => stream.append(punct),
 
             Lexed::Literal(lit) => stream.append(lit),
@@ -184,6 +186,7 @@ impl Lexed {
             Lexed::Minus(punct) => punct.span(),
             Lexed::Exclamation(punct) => punct.span(),
             Lexed::Slash(punct) => punct.span(),
+            Lexed::Dot(punct) => punct.span(),
             Lexed::OtherPunct(punct) => punct.span(),
 
             Lexed::Literal(lit) => lit.span(),
@@ -238,6 +241,7 @@ impl std::fmt::Display for Lexed {
             Lexed::Minus(_) => write!(f, "'-'"),
             Lexed::Exclamation(_) => write!(f, "'!'"),
             Lexed::Slash(_) => write!(f, "'/'"),
+            Lexed::Dot(_) => write!(f, "'.'"),
             Lexed::OtherPunct(_) => write!(f, "<Punct>"),
 
             Lexed::ParenGroup(_) => write!(f, "<ParenGroup>"),
@@ -337,6 +341,7 @@ pub fn feed_recursive(
                 '=' => context.feed(parser, Lexed::Equal(punct), grammar_args)?,
                 '!' => context.feed(parser, Lexed::Exclamation(punct), grammar_args)?,
                 '/' => context.feed(parser, Lexed::Slash(punct), grammar_args)?,
+                '.' => context.feed(parser, Lexed::Dot(punct), grammar_args)?,
                 '%' => {
                     // check next is ident, and is a keyword
                     let next_ident = input.peek().cloned();

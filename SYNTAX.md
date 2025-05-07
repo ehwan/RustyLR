@@ -48,6 +48,7 @@ NonTerminalName
 ## Patterns
 Patterns define the structure of the input that matches a production rule.
 
+ - `.` : Any single terminal symbol.
  - `name` : Non-terminal or terminal symbol `name` defined in the grammar.
  - `[term1 term_start-term_last]`, `[^term1 term_start-term_last]` : Set of terminal symbols. [`eof`](#eof-symbol-must-defined) will be automatically removed from the terminal set.
  - `P*` : Zero or more repetition of `P`.
