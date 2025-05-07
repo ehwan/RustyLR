@@ -1378,6 +1378,9 @@ impl Builder {
             "Grammar"
         );
 
+        println!("# of terminal classes: {num_classes}");
+        println!("# of states: {num_states}");
+
         Ok(output::Output {
             user_stream: output_stream,
             generated_stream: expanded_stream,
