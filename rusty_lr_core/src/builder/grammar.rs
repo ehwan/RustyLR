@@ -560,6 +560,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                                     // reduce == shift => remove shift action
                                 }
                                 Some(ReduceType::Right) => {
+                                    remove_shift = false;
                                     remove_reduces.push(reduce_rule);
                                 }
                                 None => {
