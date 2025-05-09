@@ -372,7 +372,8 @@ E:
   | P4 P5 P6 %dprec 1
   ;
 ```
-For reduce/reduce conflicts, if every rules those are in conflict have priority set with `%dprec`, the rule with the highest priority will be chosen.
+For reduce/reduce conflicts, rule with the highest priority will be chosen.
+The priority is defined by the `%dprec` directive. Default priority is `0`.
 
 
 ## Error type <sub><sup>(optional)</sup></sub>
