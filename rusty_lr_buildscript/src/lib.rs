@@ -841,7 +841,7 @@ impl Builder {
                 } => {
                     let mut labels = Vec::new();
                     for rule in remaining {
-                        let priority = grammar.builder.rules[rule].priority.unwrap();
+                        let priority = grammar.builder.rules[rule].priority;
                         Self::extend_rule_source_label(
                             &mut labels,
                             file_id,
@@ -852,7 +852,7 @@ impl Builder {
                         );
                     }
                     for del in deleted {
-                        let priority = grammar.builder.rules[del].priority.unwrap();
+                        let priority = grammar.builder.rules[del].priority;
                         Self::extend_rule_source_label(
                             &mut labels,
                             file_id,

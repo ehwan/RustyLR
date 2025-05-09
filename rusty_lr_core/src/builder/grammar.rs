@@ -104,7 +104,7 @@ pub struct Rule<Term, NonTerm> {
     pub lookaheads: Option<BTreeSet<Term>>,
     pub operator: Option<Operator<Term>>,
     /// for reduce/reduce conflict resolving
-    pub priority: Option<usize>,
+    pub priority: usize,
 }
 
 /// A struct for Context Free Grammar and DFA construction
@@ -147,7 +147,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         rule: Vec<Token<Term, NonTerm>>,
         lookaheads: Option<BTreeSet<Term>>,
         operator: Option<Operator<Term>>,
-        priority: Option<usize>,
+        priority: usize,
     ) -> usize
     where
         NonTerm: Copy + Hash + Eq,
@@ -291,23 +291,15 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                     continue;
                 }
 
-                // check if all rules have priority, and max priority
-                if reduce_rules
-                    .iter()
-                    .any(|&rule| self.rules[rule].priority.is_none())
-                {
-                    continue;
-                }
                 let max_priority = reduce_rules
                     .iter()
                     .map(|&rule| self.rules[rule].priority)
                     .max()
-                    .unwrap()
                     .unwrap();
 
                 let deleted_rules: Vec<usize> = reduce_rules
                     .iter()
-                    .filter(|&&rule| self.rules[rule].priority.unwrap() != max_priority)
+                    .filter(|&&rule| self.rules[rule].priority != max_priority)
                     .copied()
                     .collect();
                 if deleted_rules.is_empty() {
@@ -315,10 +307,10 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 }
                 let remained_rules = reduce_rules
                     .iter()
-                    .filter(|&&rule| self.rules[rule].priority.unwrap() == max_priority)
+                    .filter(|&&rule| self.rules[rule].priority == max_priority)
                     .copied()
                     .collect();
-                reduce_rules.retain(|rule| self.rules[*rule].priority.unwrap() == max_priority);
+                reduce_rules.retain(|rule| self.rules[*rule].priority == max_priority);
 
                 diags.add_resolved(ResolveDiagnostic::Priority {
                     max_priority,
@@ -757,22 +749,15 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             }
 
             // check if all rules have priority, and max priority
-            if reduce_rules
-                .iter()
-                .any(|&rule| self.rules[rule].priority.is_none())
-            {
-                continue;
-            }
             let max_priority = reduce_rules
                 .iter()
                 .map(|&rule| self.rules[rule].priority)
                 .max()
-                .unwrap()
                 .unwrap();
 
             let deleted_rules: Vec<usize> = reduce_rules
                 .iter()
-                .filter(|&&rule| self.rules[rule].priority.unwrap() != max_priority)
+                .filter(|&&rule| self.rules[rule].priority != max_priority)
                 .copied()
                 .collect();
             if deleted_rules.is_empty() {
@@ -780,10 +765,10 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             }
             let remained_rules = reduce_rules
                 .iter()
-                .filter(|&&rule| self.rules[rule].priority.unwrap() == max_priority)
+                .filter(|&&rule| self.rules[rule].priority == max_priority)
                 .copied()
                 .collect();
-            reduce_rules.retain(|rule| self.rules[*rule].priority.unwrap() == max_priority);
+            reduce_rules.retain(|rule| self.rules[*rule].priority == max_priority);
 
             diags.add_resolved(ResolveDiagnostic::Priority {
                 max_priority,

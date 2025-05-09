@@ -1597,7 +1597,7 @@ impl Grammar {
                     tokens,
                     rule.lookaheads.clone(),
                     rule.prec.map(|(op, _)| op),
-                    rule.dprec.map(|(p, _)| p),
+                    rule.dprec.map_or(0, |(p, _)| p),
                 );
             }
         }

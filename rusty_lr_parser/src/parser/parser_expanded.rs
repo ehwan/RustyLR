@@ -2389,16 +2389,16 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::RuleType,
             vec![::rusty_lr_core::Token::Term(36usize)],
             None,
             None,
-            None,
+            0,
         );
-        builder.add_rule(GrammarNonTerminals::RuleType, vec![], None, None, None);
+        builder.add_rule(GrammarNonTerminals::RuleType, vec![], None, None, 0);
         builder.add_rule(
             GrammarNonTerminals::RuleLines,
             vec![
@@ -2408,7 +2408,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::RuleLines,
@@ -2417,7 +2417,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::RuleLine,
@@ -2428,7 +2428,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::PrecDef,
@@ -2438,7 +2438,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::PrecDef,
@@ -2448,7 +2448,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::TokenMapped,
@@ -2457,7 +2457,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::TokenMapped,
@@ -2468,14 +2468,14 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::TerminalSetItem,
             vec![::rusty_lr_core::Token::Term(0usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::TerminalSetItem,
@@ -2486,14 +2486,14 @@ impl GrammarParser {
             ],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(10usize)),
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::TerminalSetItem,
             vec![::rusty_lr_core::Token::Term(2usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::TerminalSetItem,
@@ -2504,7 +2504,7 @@ impl GrammarParser {
             ],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(10usize)),
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::TerminalSet,
@@ -2516,21 +2516,21 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::TerminalSet,
             vec![::rusty_lr_core::Token::Term(3usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Pattern,
             vec![::rusty_lr_core::Token::Term(0usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Pattern,
@@ -2540,7 +2540,7 @@ impl GrammarParser {
             ],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(12usize)),
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Pattern,
@@ -2550,7 +2550,7 @@ impl GrammarParser {
             ],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(13usize)),
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Pattern,
@@ -2560,7 +2560,7 @@ impl GrammarParser {
             ],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(14usize)),
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Pattern,
@@ -2570,7 +2570,7 @@ impl GrammarParser {
             ],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(15usize)),
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Pattern,
@@ -2579,7 +2579,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Pattern,
@@ -2590,7 +2590,7 @@ impl GrammarParser {
             ],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(11usize)),
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Pattern,
@@ -2601,14 +2601,14 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Pattern,
             vec![::rusty_lr_core::Token::Term(2usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Pattern,
@@ -2619,16 +2619,16 @@ impl GrammarParser {
             ],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(10usize)),
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Action,
             vec![::rusty_lr_core::Token::Term(7usize)],
             None,
             None,
-            None,
+            0,
         );
-        builder.add_rule(GrammarNonTerminals::Action, vec![], None, None, None);
+        builder.add_rule(GrammarNonTerminals::Action, vec![], None, None, 0);
         builder.add_rule(
             GrammarNonTerminals::TokenDef,
             vec![
@@ -2639,7 +2639,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::RustCode,
@@ -2648,7 +2648,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::StartDef,
@@ -2659,7 +2659,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::EofDef,
@@ -2670,7 +2670,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::TokenTypeDef,
@@ -2681,7 +2681,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::UserDataDef,
@@ -2692,35 +2692,35 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::IdentOrLiteral,
             vec![::rusty_lr_core::Token::Term(0usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::IdentOrLiteral,
             vec![::rusty_lr_core::Token::Term(2usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::ReduceType,
             vec![::rusty_lr_core::Token::Term(18usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::ReduceType,
             vec![::rusty_lr_core::Token::Term(19usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::ReduceDef,
@@ -2731,7 +2731,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::ErrorDef,
@@ -2742,7 +2742,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::ModulePrefixDef,
@@ -2753,7 +2753,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Glr,
@@ -2763,7 +2763,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Lalr,
@@ -2773,7 +2773,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Precedence,
@@ -2784,7 +2784,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::NoOptim,
@@ -2794,7 +2794,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Dense,
@@ -2804,7 +2804,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Trace,
@@ -2815,14 +2815,14 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
             vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Rule)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
@@ -2831,7 +2831,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
@@ -2840,14 +2840,14 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
             vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::EofDef)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
@@ -2856,7 +2856,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
@@ -2865,7 +2865,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
@@ -2874,7 +2874,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
@@ -2883,7 +2883,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
@@ -2892,21 +2892,21 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
             vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Lalr)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
             vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Glr)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
@@ -2915,7 +2915,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
@@ -2924,21 +2924,21 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
             vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Dense)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::GrammarLine,
             vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Trace)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Grammar,
@@ -2947,7 +2947,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TokenMappedPlus30,
@@ -2956,7 +2956,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TokenMappedPlus30,
@@ -2966,7 +2966,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TokenMappedStar31,
@@ -2975,14 +2975,14 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TokenMappedStar31,
             vec![],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_PrecDefPlus32,
@@ -2991,7 +2991,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_PrecDefPlus32,
@@ -3001,7 +3001,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_PrecDefStar33,
@@ -3010,29 +3010,17 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
-        builder.add_rule(
-            GrammarNonTerminals::_PrecDefStar33,
-            vec![],
-            None,
-            None,
-            None,
-        );
+        builder.add_rule(GrammarNonTerminals::_PrecDefStar33, vec![], None, None, 0);
         builder.add_rule(
             GrammarNonTerminals::_caretQuestion34,
             vec![::rusty_lr_core::Token::Term(35usize)],
             None,
             None,
-            None,
+            0,
         );
-        builder.add_rule(
-            GrammarNonTerminals::_caretQuestion34,
-            vec![],
-            None,
-            None,
-            None,
-        );
+        builder.add_rule(GrammarNonTerminals::_caretQuestion34, vec![], None, None, 0);
         builder.add_rule(
             GrammarNonTerminals::_TerminalSetItemPlus35,
             vec![::rusty_lr_core::Token::NonTerm(
@@ -3040,7 +3028,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TerminalSetItemPlus35,
@@ -3050,7 +3038,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TerminalSetItemStar36,
@@ -3059,14 +3047,14 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TerminalSetItemStar36,
             vec![],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_PatternPlus37,
@@ -3075,7 +3063,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_PatternPlus37,
@@ -3085,266 +3073,266 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(0usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(33usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(6usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(1usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(34usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(12usize)],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(12usize)),
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(13usize)],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(13usize)),
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(14usize)],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(14usize)),
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(35usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(10usize)],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(10usize)),
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(15usize)],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(15usize)),
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(11usize)],
             None,
             Some(::rusty_lr_core::builder::Operator::Term(11usize)),
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(3usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(2usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(36usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(7usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(4usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(16usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(5usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(17usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(18usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(19usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(20usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(21usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(22usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(23usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(24usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(25usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(26usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(29usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(30usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(8usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(27usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(31usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(32usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(28usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_TermSet38,
             vec![::rusty_lr_core::Token::Term(9usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::__TermSet38Plus39,
@@ -3353,7 +3341,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::__TermSet38Plus39,
@@ -3363,7 +3351,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_IdentOrLiteralPlus40,
@@ -3372,7 +3360,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_IdentOrLiteralPlus40,
@@ -3382,14 +3370,14 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_identPlus41,
             vec![::rusty_lr_core::Token::Term(0usize)],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_identPlus41,
@@ -3399,7 +3387,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_identStar42,
@@ -3408,9 +3396,9 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
-        builder.add_rule(GrammarNonTerminals::_identStar42, vec![], None, None, None);
+        builder.add_rule(GrammarNonTerminals::_identStar42, vec![], None, None, 0);
         builder.add_rule(
             GrammarNonTerminals::_GrammarLinePlus43,
             vec![::rusty_lr_core::Token::NonTerm(
@@ -3418,7 +3406,7 @@ impl GrammarParser {
             )],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::_GrammarLinePlus43,
@@ -3428,7 +3416,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_rule(
             GrammarNonTerminals::Augmented,
@@ -3438,7 +3426,7 @@ impl GrammarParser {
             ],
             None,
             None,
-            None,
+            0,
         );
         builder.add_empty_rule(GrammarNonTerminals::error);
         let Ok(states) = builder.build(

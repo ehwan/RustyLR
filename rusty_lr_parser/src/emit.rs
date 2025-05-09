@@ -798,11 +798,8 @@ impl Grammar {
                 }
             };
 
-            let dprec_stream = if let Some(dprec) = rule.priority {
-                quote! { Some(#dprec) }
-            } else {
-                quote! { None }
-            };
+            let priority = rule.priority;
+            let dprec_stream = quote! { #priority };
 
             let nonterm_name = &nonterminals_token[rule.rule.name];
             add_rules_stream.extend(quote! {
