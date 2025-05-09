@@ -28,6 +28,76 @@ pub enum Operator<Term> {
     Prec(Term),
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub enum ResolveDiagnostic<Term> {
+    Priority {
+        max_priority: usize,
+        remaining: Vec<usize>,
+        deleted: Vec<usize>,
+    },
+    Precedence {
+        term: Term,
+        shift_precedence: usize,
+        shift_deleted: bool,
+        shift_rules: Vec<ShiftedRuleRef>,
+
+        // rule, precedence, reduce_type
+        reduce_rules: Vec<(usize, Option<usize>, Option<ReduceType>)>,
+        deleted_reduces: Vec<(usize, usize, Option<ReduceType>)>,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct ShiftReduceConflictDiag<Term> {
+    pub term: Term,
+    pub shift_rules: Vec<ShiftedRuleRef>,
+    pub reduce_rules: BTreeSet<usize>,
+}
+
+pub struct DiagnosticCollector<Term> {
+    pub enabled: bool,
+    pub resolved: BTreeSet<ResolveDiagnostic<Term>>,
+    pub shift_reduce_conflicts: BTreeSet<ShiftReduceConflictDiag<Term>>,
+    pub reduce_reduce_conflicts: BTreeMap<BTreeSet<usize>, BTreeSet<Term>>,
+}
+impl<Term> DiagnosticCollector<Term> {
+    pub fn new(collect: bool) -> Self {
+        DiagnosticCollector {
+            enabled: collect,
+            resolved: BTreeSet::new(),
+            shift_reduce_conflicts: BTreeSet::new(),
+            reduce_reduce_conflicts: BTreeMap::new(),
+        }
+    }
+    pub fn add_resolved(&mut self, resolved: ResolveDiagnostic<Term>)
+    where
+        Term: Ord,
+    {
+        if self.enabled {
+            self.resolved.insert(resolved);
+        }
+    }
+    pub fn add_shift_reduce_conflict(&mut self, diag: ShiftReduceConflictDiag<Term>)
+    where
+        Term: Ord,
+    {
+        if self.enabled {
+            self.shift_reduce_conflicts.insert(diag);
+        }
+    }
+    pub fn update_reduce_reduce_conflict(&mut self, reduce_rules: &BTreeSet<usize>, term: Term)
+    where
+        Term: Ord,
+    {
+        if self.enabled {
+            self.reduce_reduce_conflicts
+                .entry(reduce_rules.clone())
+                .or_default()
+                .insert(term);
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Rule<Term, NonTerm> {
     pub rule: ProductionRule<Term, NonTerm>,
@@ -131,22 +201,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     pub fn build(
         &mut self,
         augmented_name: NonTerm,
-    ) -> Result<DFA<Term, NonTerm>, BuildError<Term, NonTerm>>
-    where
-        Term: Copy + Ord + Hash,
-        NonTerm: Copy + Hash + Ord,
-    {
-        let mut table = self.build_without_resolving(augmented_name)?;
-        self.resolve_priority(&mut table);
-        self.resolve_precedence(&mut table);
-        Ok(table)
-    }
-
-    /// build LR(1) parser table from given grammar
-    /// but do not resolve shift/reduce conflict
-    pub fn build_without_resolving(
-        &mut self,
-        augmented_name: NonTerm,
+        diags: &mut DiagnosticCollector<Term>,
     ) -> Result<DFA<Term, NonTerm>, BuildError<Term, NonTerm>>
     where
         Term: Copy + Ord + Hash,
@@ -178,7 +233,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
         let mut states = Vec::new();
         let mut state_map = BTreeMap::new();
-        let main_state = self.build_recursive(augmented_rule_set, &mut states, &mut state_map)?;
+        let main_state =
+            self.build_recursive(augmented_rule_set, &mut states, &mut state_map, diags)?;
         if main_state != 0 {
             panic!("main state is not 0");
         }
@@ -190,22 +246,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     pub fn build_lalr(
         &mut self,
         augmented_name: NonTerm,
-    ) -> Result<DFA<Term, NonTerm>, BuildError<Term, NonTerm>>
-    where
-        Term: Copy + Ord + Hash,
-        NonTerm: Copy + Hash + Ord,
-    {
-        let mut table = self.build_lalr_without_resolving(augmented_name)?;
-        self.resolve_priority(&mut table);
-        self.resolve_precedence(&mut table);
-        Ok(table)
-    }
-
-    /// build LALR(1) parser table from given grammar
-    /// but do not resolve shift/reduce conflict
-    pub fn build_lalr_without_resolving(
-        &mut self,
-        augmented_name: NonTerm,
+        diags: &mut DiagnosticCollector<Term>,
     ) -> Result<DFA<Term, NonTerm>, BuildError<Term, NonTerm>>
     where
         Term: Copy + Ord + Hash,
@@ -241,6 +282,177 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             self.build_recursive_lalr(augmented_rule_set, &mut states, &mut state_map)?;
         if main_state != 0 {
             panic!("main state is not 0");
+        }
+
+        for state in &mut states {
+            // check reduce/reduce conflicts resolving by its priority
+            for reduce_rules in state.reduce_map.values_mut() {
+                if reduce_rules.len() <= 1 {
+                    continue;
+                }
+
+                // check if all rules have priority, and max priority
+                if reduce_rules
+                    .iter()
+                    .any(|&rule| self.rules[rule].priority.is_none())
+                {
+                    continue;
+                }
+                let max_priority = reduce_rules
+                    .iter()
+                    .map(|&rule| self.rules[rule].priority)
+                    .max()
+                    .unwrap()
+                    .unwrap();
+
+                let deleted_rules: Vec<usize> = reduce_rules
+                    .iter()
+                    .filter(|&&rule| self.rules[rule].priority.unwrap() != max_priority)
+                    .copied()
+                    .collect();
+                if deleted_rules.is_empty() {
+                    continue;
+                }
+                let remained_rules = reduce_rules
+                    .iter()
+                    .filter(|&&rule| self.rules[rule].priority.unwrap() == max_priority)
+                    .copied()
+                    .collect();
+                reduce_rules.retain(|rule| self.rules[*rule].priority.unwrap() == max_priority);
+
+                diags.add_resolved(ResolveDiagnostic::Priority {
+                    max_priority,
+                    remaining: remained_rules,
+                    deleted: deleted_rules,
+                });
+            }
+
+            // check shift/reduce conflicts resolving
+            for (&term, reduce_rules) in state.reduce_map.iter_mut() {
+                if !state.shift_goto_map_term.contains_key(&term) {
+                    continue;
+                };
+                let Some(&shift_prec) = self.precedence_map.get(&Operator::Term(term)) else {
+                    // no precedence for this shift rule
+                    continue;
+                };
+
+                let mut reduces = Vec::new();
+                let mut remove_reduces = Vec::new();
+                let mut remove_shift = true;
+
+                for &reduce_rule in reduce_rules.iter() {
+                    let Some(reduce_op) = self.rules[reduce_rule].operator else {
+                        // no operator for this reduce rule
+                        remove_shift = false;
+                        reduces.push((reduce_rule, None, None));
+                        continue;
+                    };
+                    let Some(&reduce_prec) = self.precedence_map.get(&reduce_op) else {
+                        // no precedence for this reduce rule
+                        remove_shift = false;
+                        reduces.push((reduce_rule, None, None));
+                        continue;
+                    };
+
+                    // compare precedence
+                    match reduce_prec.cmp(&shift_prec) {
+                        Ordering::Less => {
+                            // reduce < shift => remove reduce
+                            remove_reduces.push((reduce_rule, reduce_prec, None));
+                            remove_shift = false;
+                        }
+                        Ordering::Greater => {
+                            // reduce > shift => remove shift, but check other reduce rules
+                            reduces.push((reduce_rule, Some(reduce_prec), None));
+                        }
+                        Ordering::Equal => {
+                            // reduce == shift => check reduce type
+                            let reduce_type = self.reduce_types.get(&reduce_op).copied();
+                            match reduce_type {
+                                Some(ReduceType::Left) => {
+                                    // reduce first => remove shift
+                                    reduces.push((reduce_rule, Some(reduce_prec), reduce_type));
+                                }
+                                Some(ReduceType::Right) => {
+                                    // shift first => remove reduce
+                                    remove_reduces.push((reduce_rule, reduce_prec, reduce_type));
+                                    remove_shift = false;
+                                }
+                                None => {
+                                    // no reduce type => conflict
+                                    reduces.push((reduce_rule, Some(reduce_prec), None));
+                                    remove_shift = false;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                let shift_rules = state
+                    .ruleset
+                    .rules
+                    .iter()
+                    .filter_map(|(rule_ref, _)| {
+                        if self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
+                            == Some(&Token::Term(term))
+                        {
+                            Some(*rule_ref)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
+
+                if remove_shift {
+                    // remove rules that start with `term`
+                    state.shift_goto_map_term.remove(&term);
+                    state.ruleset.rules.retain(|rule_ref, _| {
+                        self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
+                            != Some(&Token::Term(term))
+                    });
+                }
+
+                // remove reduce rules
+                for &(remove_reduce, _, _) in remove_reduces.iter() {
+                    reduce_rules.remove(&remove_reduce);
+                }
+
+                if !remove_shift && remove_reduces.is_empty() {
+                    continue;
+                }
+
+                diags.add_resolved(ResolveDiagnostic::Precedence {
+                    term,
+                    shift_precedence: shift_prec,
+                    shift_deleted: remove_shift,
+                    shift_rules,
+                    reduce_rules: reduces,
+                    deleted_reduces: remove_reduces,
+                });
+            }
+            state
+                .reduce_map
+                .retain(|_, reduce_rules| !reduce_rules.is_empty());
+        }
+
+        for state in &states {
+            for (&term, reduce_rules) in state.reduce_map.iter() {
+                if let Some(&next_shift_state) = state.shift_goto_map_term.get(&term) {
+                    // shift/reduce conflict
+                    let shift_rules = states[next_shift_state].unshifted_ruleset().collect();
+                    let reduce_rules = reduce_rules.clone();
+                    diags.add_shift_reduce_conflict(ShiftReduceConflictDiag {
+                        term,
+                        shift_rules,
+                        reduce_rules,
+                    });
+                } else if reduce_rules.len() > 1 {
+                    // no shift/reduce conflict
+                    // check for reduce/reduce conflict
+                    diags.update_reduce_reduce_conflict(reduce_rules, term);
+                }
+            }
         }
 
         Ok(DFA { states })
@@ -477,142 +689,13 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         Ok(())
     }
 
-    pub fn resolve_priority(&self, dfa: &mut DFA<Term, NonTerm>)
-    where
-        Term: Copy + Ord + Hash,
-        NonTerm: PartialEq,
-    {
-        // resolve reduce/reduce conflicts by priority
-        for state in dfa.states.iter_mut() {
-            for reduce_rules in state.reduce_map.values_mut() {
-                if reduce_rules.len() <= 1 {
-                    continue;
-                }
-
-                // check if all rules have priority, and max priority
-                if reduce_rules
-                    .iter()
-                    .any(|&rule| self.rules[rule].priority.is_none())
-                {
-                    continue;
-                }
-                let max_priority = reduce_rules
-                    .iter()
-                    .map(|&rule| self.rules[rule].priority)
-                    .max()
-                    .unwrap()
-                    .unwrap();
-
-                reduce_rules.retain(|&rule| self.rules[rule].priority.unwrap() == max_priority);
-            }
-        }
-    }
-    pub fn resolve_precedence(&self, dfa: &mut DFA<Term, NonTerm>)
-    where
-        Term: Copy + Ord + Hash,
-        NonTerm: PartialEq,
-    {
-        // resolve shift/reduce conflicts for operator precedence
-        let mut remove_reduces = Vec::new();
-        for state in dfa.states.iter_mut() {
-            let mut both_in_reduce_shift = Vec::new();
-            for term in state.reduce_map.keys().copied() {
-                if state.shift_goto_map_term.contains_key(&term) {
-                    both_in_reduce_shift.push(term);
-                }
-            }
-
-            for shift_term in both_in_reduce_shift.into_iter() {
-                let Some(shift_prec) = self
-                    .precedence_map
-                    .get(&Operator::Term(shift_term))
-                    .copied()
-                else {
-                    continue;
-                };
-                let reduce_rules = state.reduce_map.get(&shift_term).unwrap();
-
-                remove_reduces.clear();
-                let mut remove_shift = true;
-                // if all operators in reduce rules have greater precedence than shift_term,
-                // remove shift action
-                for &reduce_rule in reduce_rules {
-                    let Some(reduce_op) = self.rules[reduce_rule].operator else {
-                        remove_shift = false;
-                        continue;
-                    };
-                    let Some(reduce_prec) = self.precedence_map.get(&reduce_op).copied() else {
-                        remove_shift = false;
-                        continue;
-                    };
-
-                    match reduce_prec.cmp(&shift_prec) {
-                        Ordering::Less => {
-                            remove_shift = false;
-                            remove_reduces.push(reduce_rule);
-                            // reduce < shift => remove reduce rule
-                        }
-                        Ordering::Greater => {}
-                        Ordering::Equal => {
-                            let reduce_type = self.reduce_types.get(&reduce_op).copied();
-                            match reduce_type {
-                                Some(ReduceType::Left) => {
-                                    // reduce == shift => remove shift action
-                                }
-                                Some(ReduceType::Right) => {
-                                    remove_shift = false;
-                                    remove_reduces.push(reduce_rule);
-                                }
-                                None => {
-                                    remove_shift = false;
-                                    // reduce == shift => remove shift action
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if remove_shift {
-                    // remove shift action with this term
-                    state.shift_goto_map_term.remove(&shift_term);
-
-                    // remove rules from ruleset starting with this term
-                    let rules = std::mem::take(&mut state.ruleset.rules);
-                    let rules = rules
-                        .into_iter()
-                        .filter_map(|(shifted_rule, lookaheads)| {
-                            if self.rules[shifted_rule.rule]
-                                .rule
-                                .rule
-                                .get(shifted_rule.shifted)
-                                == Some(&Token::Term(shift_term))
-                            {
-                                None
-                            } else {
-                                Some((shifted_rule, lookaheads))
-                            }
-                        })
-                        .collect();
-                    state.ruleset.rules = rules;
-                }
-
-                let reduce_map = state.reduce_map.get_mut(&shift_term).unwrap();
-                for reduce_rule in remove_reduces.iter() {
-                    reduce_map.remove(reduce_rule);
-                }
-                if reduce_map.is_empty() {
-                    state.reduce_map.remove(&shift_term);
-                }
-            }
-        }
-    }
-
     /// build new state with given production rules
     fn build_recursive(
         &self,
         mut rules: LookaheadRuleRefSet<Term>,
         states: &mut Vec<State<Term, NonTerm>>,
         state_map: &mut BTreeMap<LookaheadRuleRefSet<Term>, usize>,
+        diags: &mut DiagnosticCollector<Term>,
     ) -> Result<usize, BuildError<Term, NonTerm>>
     where
         Term: Hash + Ord + Copy,
@@ -632,6 +715,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         states.push(State::new());
         states[state_id].ruleset = rules.clone();
 
+        // calculate next shifted rules and reduce rules
+        // we don't care about the conflicts here
         let mut next_rules_term = BTreeMap::new();
         let mut next_rules_nonterm = BTreeMap::new();
         let mut reduce_map: BTreeMap<Term, BTreeSet<usize>> = BTreeMap::new();
@@ -665,6 +750,177 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             }
         }
 
+        // remove reduce/reduce conflicts by its priority
+        for reduce_rules in reduce_map.values_mut() {
+            if reduce_rules.len() <= 1 {
+                continue;
+            }
+
+            // check if all rules have priority, and max priority
+            if reduce_rules
+                .iter()
+                .any(|&rule| self.rules[rule].priority.is_none())
+            {
+                continue;
+            }
+            let max_priority = reduce_rules
+                .iter()
+                .map(|&rule| self.rules[rule].priority)
+                .max()
+                .unwrap()
+                .unwrap();
+
+            let deleted_rules: Vec<usize> = reduce_rules
+                .iter()
+                .filter(|&&rule| self.rules[rule].priority.unwrap() != max_priority)
+                .copied()
+                .collect();
+            if deleted_rules.is_empty() {
+                continue;
+            }
+            let remained_rules = reduce_rules
+                .iter()
+                .filter(|&&rule| self.rules[rule].priority.unwrap() == max_priority)
+                .copied()
+                .collect();
+            reduce_rules.retain(|rule| self.rules[*rule].priority.unwrap() == max_priority);
+
+            diags.add_resolved(ResolveDiagnostic::Priority {
+                max_priority,
+                remaining: remained_rules,
+                deleted: deleted_rules,
+            });
+        }
+
+        // check shift/reduce conflicts
+        for (&term, reduce_rules) in reduce_map.iter_mut() {
+            if !next_rules_term.contains_key(&term) {
+                continue;
+            };
+            let Some(&shift_prec) = self.precedence_map.get(&Operator::Term(term)) else {
+                // no precedence for this shift rule
+                continue;
+            };
+
+            let mut reduces = Vec::new();
+            let mut remove_reduces = Vec::new();
+            let mut remove_shift = true;
+
+            for &reduce_rule in reduce_rules.iter() {
+                let Some(reduce_op) = self.rules[reduce_rule].operator else {
+                    // no operator for this reduce rule
+                    reduces.push((reduce_rule, None, None));
+                    remove_shift = false;
+                    continue;
+                };
+                let Some(&reduce_prec) = self.precedence_map.get(&reduce_op) else {
+                    // no precedence for this reduce rule
+                    reduces.push((reduce_rule, None, None));
+                    remove_shift = false;
+                    continue;
+                };
+
+                // compare precedence
+                match reduce_prec.cmp(&shift_prec) {
+                    Ordering::Less => {
+                        // reduce < shift => remove reduce
+                        remove_reduces.push((reduce_rule, reduce_prec, None));
+                        remove_shift = false;
+                    }
+                    Ordering::Greater => {
+                        // reduce > shift => remove shift, but check other reduce rules
+                        reduces.push((reduce_rule, Some(reduce_prec), None));
+                    }
+                    Ordering::Equal => {
+                        // reduce == shift => check reduce type
+                        let reduce_type = self.reduce_types.get(&reduce_op).copied();
+                        match reduce_type {
+                            Some(ReduceType::Left) => {
+                                // reduce first => remove shift
+                                reduces.push((reduce_rule, Some(reduce_prec), reduce_type));
+                            }
+                            Some(ReduceType::Right) => {
+                                // shift first => remove reduce
+                                remove_reduces.push((reduce_rule, reduce_prec, reduce_type));
+                                remove_shift = false;
+                            }
+                            None => {
+                                // no reduce type => conflict
+                                reduces.push((reduce_rule, Some(reduce_prec), None));
+                                remove_shift = false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            let shift_rules = if remove_shift {
+                // remove rules that start with `term`
+                states[state_id].ruleset.rules.retain(|rule_ref, _| {
+                    self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
+                        != Some(&Token::Term(term))
+                });
+
+                next_rules_term
+                    .remove(&term)
+                    .unwrap()
+                    .rules
+                    .into_iter()
+                    .map(|(rule_ref, _)| rule_ref)
+                    .collect()
+            } else {
+                next_rules_term
+                    .get(&term)
+                    .unwrap()
+                    .rules
+                    .iter()
+                    .map(|(rule_ref, _)| *rule_ref)
+                    .collect()
+            };
+
+            // remove reduce rules
+            for &(remove_reduce, _, _) in remove_reduces.iter() {
+                reduce_rules.remove(&remove_reduce);
+            }
+
+            if !remove_shift && remove_reduces.is_empty() {
+                continue;
+            }
+
+            diags.add_resolved(ResolveDiagnostic::Precedence {
+                term,
+                shift_precedence: shift_prec,
+                shift_deleted: remove_shift,
+                shift_rules,
+                reduce_rules: reduces,
+                deleted_reduces: remove_reduces,
+            });
+        }
+        reduce_map.retain(|_, reduce_rules| !reduce_rules.is_empty());
+
+        for (&term, reduce_rules) in reduce_map.iter() {
+            if next_rules_term.contains_key(&term) {
+                // shift/reduce conflict
+                let shift_rules = next_rules_term
+                    .get(&term)
+                    .unwrap()
+                    .rules
+                    .iter()
+                    .map(|(rule_ref, _)| *rule_ref)
+                    .collect::<Vec<_>>();
+                let reduce_rules = reduce_rules.clone();
+                diags.add_shift_reduce_conflict(ShiftReduceConflictDiag {
+                    term,
+                    shift_rules,
+                    reduce_rules: reduce_rules.clone(),
+                });
+            } else if reduce_rules.len() > 1 {
+                // no shift/reduce conflict
+                // check for reduce/reduce conflict
+                diags.update_reduce_reduce_conflict(reduce_rules, term);
+            }
+        }
+
         // process rules that no more tokens left to shift
         // if next token is one of lookahead, add reduce action
         // if there are multiple recude rules for same lookahead, it is a reduce/reduce conflict
@@ -680,7 +936,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         // process next rules with token
         // add shift and goto action
         for (next_term, next_rule_set) in next_rules_term.into_iter() {
-            let next_state_id = self.build_recursive(next_rule_set, states, state_map)?;
+            let next_state_id = self.build_recursive(next_rule_set, states, state_map, diags)?;
             states[next_state_id].token = Some(Token::Term(next_term));
 
             states[state_id]
@@ -689,7 +945,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         }
 
         for (next_nonterm, next_rule_set) in next_rules_nonterm.into_iter() {
-            let next_state_id = self.build_recursive(next_rule_set, states, state_map)?;
+            let next_state_id = self.build_recursive(next_rule_set, states, state_map, diags)?;
             states[next_state_id].token = Some(Token::NonTerm(next_nonterm));
 
             states[state_id]
@@ -777,6 +1033,9 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         if !newly_added && lookaheads_empty {
             return Ok(state_id);
         }
+
+        // no conflict resolving here for LALR
+        // it will be handled after all `build_recursive` calls
 
         // process rules that no more tokens left to shift
         // if next token is one of lookahead, add reduce action

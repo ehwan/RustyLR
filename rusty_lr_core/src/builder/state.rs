@@ -40,60 +40,6 @@ impl<Term, NonTerm> State<Term, NonTerm> {
             })
     }
 
-    /// Map terminal and non-terminal symbols to another type.
-    /// This is useful when exporting & importing rules.
-    pub fn map<NewTerm: Ord, NewNonTerm: Ord>(
-        self,
-        term_map: impl Fn(Term) -> NewTerm,
-        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
-    ) -> State<NewTerm, NewNonTerm> {
-        State {
-            shift_goto_map_term: self
-                .shift_goto_map_term
-                .into_iter()
-                .map(|(term, state)| (term_map(term), state))
-                .collect(),
-            shift_goto_map_nonterm: self
-                .shift_goto_map_nonterm
-                .into_iter()
-                .map(|(nonterm, state)| (nonterm_map(nonterm), state))
-                .collect(),
-            reduce_map: self
-                .reduce_map
-                .into_iter()
-                .map(|(term, rule)| (term_map(term), rule))
-                .collect(),
-            ruleset: self.ruleset.map(&term_map),
-            token: self.token.map(|token| token.map(&term_map, &nonterm_map)),
-        }
-    }
-
-    pub fn conflict_rr(&self) -> impl Iterator<Item = (&BTreeSet<usize>, Vec<&Term>)> {
-        let mut reversed_map: BTreeMap<_, Vec<_>> = BTreeMap::new();
-        for (term, rules) in self.reduce_map.iter() {
-            if rules.len() > 1 {
-                reversed_map.entry(rules).or_default().push(term);
-            }
-        }
-        reversed_map.into_iter()
-    }
-    pub fn conflict_sr<'a>(
-        &'a self,
-        idx2state: impl Fn(usize) -> &'a State<Term, NonTerm> + 'a,
-    ) -> impl Iterator<Item = (&'a Term, &'a BTreeSet<usize>, Vec<ShiftedRuleRef>)> + 'a
-    where
-        Term: Ord,
-    {
-        self.shift_goto_map_term
-            .iter()
-            .filter_map(move |(term, &shift_state)| {
-                self.reduce_map.get(term).map(|reduces| {
-                    let next_rules: Vec<_> = idx2state(shift_state).unshifted_ruleset().collect();
-                    (term, reduces, next_rules)
-                })
-            })
-    }
-
     pub fn into_lr_sparse_state<NewNonTerm>(
         self,
         term_map: impl Fn(Term) -> usize,

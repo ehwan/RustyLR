@@ -76,6 +76,14 @@ impl<Term, NonTerm> ProductionRule<Term, NonTerm> {
                 .collect(),
         }
     }
+
+    /// shift this rule
+    pub fn into_shifted(self, shifted: usize) -> ShiftedRule<Term, NonTerm> {
+        ShiftedRule {
+            rule: self,
+            shifted,
+        }
+    }
 }
 
 /// A struct for single shifted named production rule.

@@ -15,6 +15,7 @@ proc-macro = true
 [dependencies]
 proc-macro2 = "1.0.86"
 rusty_lr_parser = { version = "3.41.0", path = "../rusty_lr_parser" }
+quote = "1.0"
 
 
 [features]

@@ -10,7 +10,6 @@ use rusty_lr_core::HashSet;
 use rusty_lr_core::Token;
 
 use crate::error::ArgError;
-use crate::error::ConflictError;
 use crate::error::ParseArgError;
 use crate::error::ParseError;
 use crate::nonterminal_info::NonTerminalInfo;
@@ -973,9 +972,15 @@ impl Grammar {
             .get(&Ident::new(utils::AUGMENTED_NAME, Span::call_site()))
             .unwrap();
         let tables = if self.lalr {
-            builder.build_lalr(augmented_idx)
+            builder.build_lalr(
+                augmented_idx,
+                &mut rusty_lr_core::builder::DiagnosticCollector::new(false),
+            )
         } else {
-            builder.build(augmented_idx)
+            builder.build(
+                augmented_idx,
+                &mut rusty_lr_core::builder::DiagnosticCollector::new(false),
+            )
         };
         let states = match tables {
             Ok(tables) => tables.states,
@@ -1461,6 +1466,7 @@ impl Grammar {
         self.nonterminals[nonterm_idx].pretty_name.clone()
     }
 
+    /*
     pub fn conflict(&self) -> Result<(), Box<ConflictError>> {
         // check for SR/RR conflicts if it's not GLR
         if !self.glr {
@@ -1534,6 +1540,7 @@ impl Grammar {
         }
         Ok(())
     }
+    */
 
     /// create the rusty_lr_core::Grammar from the parsed CFGs
     pub fn create_builder(&self) -> rusty_lr_core::builder::Grammar<ClassIndex, usize> {
@@ -1604,33 +1611,22 @@ impl Grammar {
         grammar
     }
 
-    pub fn build_grammar_without_resolve(&mut self) {
+    pub fn build_grammar(&mut self) -> rusty_lr_core::builder::DiagnosticCollector<usize> {
         let augmented_idx = *self
             .nonterminals_index
             .get(&Ident::new(utils::AUGMENTED_NAME, Span::call_site()))
             .unwrap();
+        let mut collector = rusty_lr_core::builder::DiagnosticCollector::new(true);
         let states = if self.lalr {
-            self.builder.build_lalr_without_resolving(augmented_idx)
+            self.builder.build_lalr(augmented_idx, &mut collector)
         } else {
-            self.builder.build_without_resolving(augmented_idx)
+            self.builder.build(augmented_idx, &mut collector)
         };
         let Ok(states) = states else {
             unreachable!("grammar build error");
         };
         self.states = states.states;
-    }
-    pub fn resolve_priority(&mut self) {
-        let mut dfa = rusty_lr_core::builder::DFA {
-            states: std::mem::take(&mut self.states),
-        };
-        self.builder.resolve_priority(&mut dfa);
-        self.states = dfa.states;
-    }
-    pub fn resolve_precedence(&mut self) {
-        let mut dfa = rusty_lr_core::builder::DFA {
-            states: std::mem::take(&mut self.states),
-        };
-        self.builder.resolve_precedence(&mut dfa);
-        self.states = dfa.states;
+
+        collector
     }
 }

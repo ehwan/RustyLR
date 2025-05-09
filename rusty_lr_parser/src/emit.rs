@@ -827,7 +827,8 @@ impl Grammar {
         let build_stream = if self.lalr {
             quote! {
                 let Ok(states) = builder.build_lalr(
-                    #nonterminals_enum_name::#augmented_name
+                    #nonterminals_enum_name::#augmented_name,
+                    &mut #module_prefix::builder::DiagnosticCollector::new(false),
                 ) else {
                     unreachable!( "Failed to build LALR parser" )
                 };
@@ -836,7 +837,8 @@ impl Grammar {
         } else {
             quote! {
                 let Ok(states) = builder.build(
-                    #nonterminals_enum_name::#augmented_name
+                    #nonterminals_enum_name::#augmented_name,
+                    &mut #module_prefix::builder::DiagnosticCollector::new(false),
                 ) else {
                     unreachable!( "Failed to build LR parser" )
                 };

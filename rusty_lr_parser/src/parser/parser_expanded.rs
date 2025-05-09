@@ -3441,7 +3441,10 @@ impl GrammarParser {
             None,
         );
         builder.add_empty_rule(GrammarNonTerminals::error);
-        let Ok(states) = builder.build(GrammarNonTerminals::Augmented) else {
+        let Ok(states) = builder.build(
+            GrammarNonTerminals::Augmented,
+            &mut rusty_lr_core::builder::DiagnosticCollector::new(false),
+        ) else {
             unreachable!("Failed to build LR parser")
         };
         let states = states.states;

@@ -4,6 +4,7 @@
 //! Please use the [`rusty_lr`](https://crates.io/crates/rusty_lr) crate instead.
 
 use proc_macro::TokenStream;
+use quote::quote;
 
 /// Build a LR(1) Deterministic Finite Automaton (DFA) parser.
 ///
@@ -28,11 +29,75 @@ pub fn lr1(input: TokenStream) -> TokenStream {
         grammar.optimize(5);
     }
     grammar.builder = grammar.create_builder();
-    grammar.build_grammar_without_resolve();
-    grammar.resolve_priority();
-    grammar.resolve_precedence();
-    if let Err(e) = grammar.conflict() {
-        return e.to_compile_error().into();
+    let diags = grammar.build_grammar();
+    if !grammar.glr {
+        if let Some(sr_conflict) = diags.shift_reduce_conflicts.into_iter().next() {
+            let class_mapper = |term| grammar.class_pretty_name_list(term, 5);
+            let nonterm_mapper = |term| grammar.nonterm_pretty_name(term);
+            let term = class_mapper(sr_conflict.term);
+            let reduce_rule = sr_conflict.reduce_rules.into_iter().next().unwrap();
+            let reduce_rule = grammar.builder.rules[reduce_rule]
+                .rule
+                .clone()
+                .map(class_mapper, nonterm_mapper);
+            let shift_rules = sr_conflict
+                .shift_rules
+                .into_iter()
+                .map(|rule| {
+                    format!(
+                        "\n>>> {}",
+                        grammar.builder.rules[rule.rule]
+                            .rule
+                            .clone()
+                            .map(class_mapper, nonterm_mapper)
+                            .into_shifted(rule.shifted)
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join("");
+
+            let message = format!(
+                "Shift-Reduce conflict with terminal symbol: {}\n>>> Reduce: {}\n>>> Shifts: {}",
+                term, reduce_rule, shift_rules
+            );
+            return quote! {
+                compile_error!(#message);
+            }
+            .into();
+        }
+        if let Some((reduce_rules, reduce_terms)) = diags.reduce_reduce_conflicts.into_iter().next()
+        {
+            let class_mapper = |term| grammar.class_pretty_name_list(term, 5);
+            let nonterm_mapper = |term| grammar.nonterm_pretty_name(term);
+            let terms = reduce_terms
+                .into_iter()
+                .map(&class_mapper)
+                .collect::<Vec<_>>()
+                .join(", ");
+            let reduce_rules = reduce_rules
+                .into_iter()
+                .map(|rule| {
+                    format!(
+                        "\n>>> {}",
+                        grammar.builder.rules[rule]
+                            .rule
+                            .clone()
+                            .map(class_mapper, nonterm_mapper)
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join("");
+
+            let message = format!(
+                "Reduce-Reduce conflict with terminal symbols: {}\n>>> Reduce: {}",
+                terms, reduce_rules
+            );
+            return quote! {
+                compile_error!(#message);
+            }
+            .into();
+        }
     }
+
     grammar.emit_compiletime().into()
 }
