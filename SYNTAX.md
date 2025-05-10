@@ -417,6 +417,7 @@ match parser.feed( ... ) {
 %lalr;
 ```
 Switch generated parser table to LALR parser.
+By default, the parser will be generated as minimal-LR(1) parser.
 
 
 

@@ -2,7 +2,7 @@
 [![crates.io](https://img.shields.io/crates/v/rusty_lr.svg)](https://crates.io/crates/rusty_lr)
 [![docs.rs](https://docs.rs/rusty_lr/badge.svg)](https://docs.rs/rusty_lr)
 
-***A Bison-like, parser generator for Rust supporting LR(1), LALR(1), and GLR parsing strategies.***
+***A Bison-like, parser generator for Rust supporting minimal-LR(1), LALR(1), and GLR parsing strategies.***
 
 RustyLR enables you to define context-free grammars directly in Rust.
 Highly inspired by tools like *bison*, it uses a similar syntax while integrating seamlessly with Rust's ecosystem.
@@ -14,7 +14,7 @@ It constructs optimized state machine, ensuring efficient and reliable parsing.â
 ## Features
  - **Custom Reduce Actions:** Define custom actions in Rust, allowing you to build into custom data structures easily.
  - **Automatic Optimization:**: Reduces parser table size and improves performance by grouping terminals with identical behavior across parser states.
- - **Multiple Parsing Strategies:** Supports LR(1), LALR(1), and GLR parsers.
+ - **Multiple Parsing Strategies:** Supports minimal-LR(1), LALR(1) parser table, and GLR parsing strategy.
  - **Detailed Diagnostics:** Detect grammar conflicts, verbose conflicts resolving stages, and optimization stages.
 
  ## Installation
