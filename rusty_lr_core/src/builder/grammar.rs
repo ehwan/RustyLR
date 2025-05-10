@@ -263,9 +263,10 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             core_map.entry(shifted_rules).or_default().push(state_id);
         }
 
-        let mut merge_into = BTreeMap::new();
+        let mut merged_count = 0;
         loop {
             let mut merged = false;
+            let mut merge_into = BTreeMap::new();
             for state_ids in core_map.values_mut() {
                 /*
                 mergeing states A and B
@@ -285,6 +286,9 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 A \cup b must be null ) => merging must not make new conflict
                 */
                 for i in 0..state_ids.len() {
+                    if state_ids[i] == usize::MAX {
+                        continue;
+                    }
                     for j in i + 1..state_ids.len() {
                         if state_ids[j] == usize::MAX {
                             continue;
@@ -358,6 +362,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                             }
                         }
                         if valid {
+                            merged_count += 1;
                             merge_into.insert(state_ids[j], state_ids[i]);
                             let mut state_b = std::mem::take(&mut states[state_ids[j]]);
                             state_ids[j] = usize::MAX;
@@ -365,10 +370,10 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                             state_a
                                 .shift_goto_map_term
                                 .append(&mut state_b.shift_goto_map_term);
-                            state_a.reduce_map.append(&mut state_b.reduce_map);
                             state_a
                                 .shift_goto_map_nonterm
                                 .append(&mut state_b.shift_goto_map_nonterm);
+                            state_a.reduce_map.append(&mut state_b.reduce_map);
                             for ((_, lookaheads), mut l) in state_a
                                 .ruleset
                                 .rules
@@ -381,6 +386,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                         }
                     }
                 }
+                state_ids.retain(|&state_id| state_id != usize::MAX);
             }
             // update state ids
             if merged {
@@ -400,10 +406,10 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 break;
             }
         }
-        let mut new_states = Vec::with_capacity(states.len() - merge_into.len());
+        let mut new_states = Vec::with_capacity(states.len() - merged_count);
         let mut old_to_new = vec![0; states.len()];
         for (state_id, state) in states.into_iter().enumerate() {
-            if merge_into.contains_key(&state_id) {
+            if state.ruleset.rules.is_empty() {
                 continue;
             }
             let new_state_id = new_states.len();
