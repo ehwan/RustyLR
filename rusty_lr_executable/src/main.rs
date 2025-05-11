@@ -28,6 +28,9 @@ fn main() {
     if args.verbose_optimization {
         builder.verbose_optimization();
     }
+    if args.no_backtrace {
+        builder.no_print_backtrace();
+    }
 
     let out = match builder.build_impl() {
         Ok(out) => out,

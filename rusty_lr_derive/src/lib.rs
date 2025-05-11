@@ -35,7 +35,7 @@ pub fn lr1(input: TokenStream) -> TokenStream {
             let class_mapper = |term| grammar.class_pretty_name_list(term, 5);
             let nonterm_mapper = |term| grammar.nonterm_pretty_name(term);
             let term = class_mapper(sr_conflict.term);
-            let reduce_rule = sr_conflict.reduce_rules.into_iter().next().unwrap();
+            let (reduce_rule, _) = sr_conflict.reduce_rules.into_iter().next().unwrap();
             let reduce_rule = grammar.builder.rules[reduce_rule]
                 .rule
                 .clone()
@@ -76,7 +76,7 @@ pub fn lr1(input: TokenStream) -> TokenStream {
                 .join(", ");
             let reduce_rules = reduce_rules
                 .into_iter()
-                .map(|rule| {
+                .map(|(rule, _)| {
                     format!(
                         "\n>>> {}",
                         grammar.builder.rules[rule]

@@ -50,15 +50,15 @@ pub enum ResolveDiagnostic<Term> {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ShiftReduceConflictDiag<Term> {
     pub term: Term,
-    pub shift_rules: Vec<ShiftedRuleRef>,
-    pub reduce_rules: BTreeSet<usize>,
+    pub shift_rules: BTreeSet<ShiftedRuleRef>,
+    pub reduce_rules: Vec<(usize, BTreeSet<ShiftedRuleRef>)>,
 }
 
 pub struct DiagnosticCollector<Term> {
     pub enabled: bool,
     pub resolved: BTreeSet<ResolveDiagnostic<Term>>,
     pub shift_reduce_conflicts: BTreeSet<ShiftReduceConflictDiag<Term>>,
-    pub reduce_reduce_conflicts: BTreeMap<BTreeSet<usize>, BTreeSet<Term>>,
+    pub reduce_reduce_conflicts: BTreeMap<Vec<(usize, BTreeSet<ShiftedRuleRef>)>, BTreeSet<Term>>,
 }
 impl<Term> DiagnosticCollector<Term> {
     pub fn new(collect: bool) -> Self {
@@ -85,13 +85,16 @@ impl<Term> DiagnosticCollector<Term> {
             self.shift_reduce_conflicts.insert(diag);
         }
     }
-    pub fn update_reduce_reduce_conflict(&mut self, reduce_rules: &BTreeSet<usize>, term: Term)
-    where
+    pub fn update_reduce_reduce_conflict(
+        &mut self,
+        reduce_rules: Vec<(usize, BTreeSet<ShiftedRuleRef>)>,
+        term: Term,
+    ) where
         Term: Ord,
     {
         if self.enabled {
             self.reduce_reduce_conflicts
-                .entry(reduce_rules.clone())
+                .entry(reduce_rules)
                 .or_default()
                 .insert(term);
         }
@@ -195,464 +198,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             }
         }
         true
-    }
-
-    /// build full LR(1) parser table from given grammar
-    fn build_full(
-        &mut self,
-        augmented_name: NonTerm,
-        diags: &mut DiagnosticCollector<Term>,
-    ) -> Result<DFA<Term, NonTerm>, BuildError<Term, NonTerm>>
-    where
-        Term: Copy + Ord + Hash,
-        NonTerm: Copy + Hash + Ord,
-    {
-        self.calculate_first();
-        self.calculate_expand_cache()?;
-
-        // add main augmented rule
-        let augmented_rule_set = {
-            let augmented_rules = self.search_rules(augmented_name)?;
-
-            if augmented_rules.is_empty() {
-                return Err(BuildError::NoAugmented);
-            }
-
-            let mut augmented_rules_set = LookaheadRuleRefSet::new();
-            for rule in augmented_rules.iter() {
-                augmented_rules_set.rules.insert(
-                    ShiftedRuleRef {
-                        rule: *rule,
-                        shifted: 0,
-                    },
-                    BTreeSet::new(),
-                );
-            }
-            augmented_rules_set
-        };
-
-        let mut states = Vec::new();
-        let mut state_map = BTreeMap::new();
-        let main_state =
-            self.build_recursive(augmented_rule_set, &mut states, &mut state_map, diags)?;
-        if main_state != 0 {
-            panic!("main state is not 0");
-        }
-
-        Ok(DFA { states })
-    }
-
-    /// build minimal-LR(1) parser table from given grammar
-    pub fn build(
-        &mut self,
-        augmented_name: NonTerm,
-        diags: &mut DiagnosticCollector<Term>,
-    ) -> Result<DFA<Term, NonTerm>, BuildError<Term, NonTerm>>
-    where
-        Term: Copy + Ord + Hash,
-        NonTerm: Copy + Hash + Ord,
-    {
-        // build full LR(1) parser table first
-        let mut states = self.build_full(augmented_name, diags)?.states;
-
-        // building minimal LR(1)
-        // now merge some states into LALR form, but without conflicts
-        let mut core_map: BTreeMap<BTreeSet<ShiftedRuleRef>, Vec<_>> = BTreeMap::new();
-        for (state_id, state) in states.iter().enumerate() {
-            let shifted_rules: BTreeSet<_> = state.ruleset.rules.keys().copied().collect();
-            core_map.entry(shifted_rules).or_default().push(state_id);
-        }
-
-        let mut merged_count = 0;
-        loop {
-            let mut merged = false;
-            let mut merge_into = BTreeMap::new();
-            for state_ids in core_map.values_mut() {
-                /*
-                mergeing states A and B
-                state A and B can be merged if
-                new conflicts are not created by merging them
-
-                shift map
-                A  AB  B
-
-                reduce map
-                a  ab  b
-
-                AB must be equal
-                ab must be equal
-
-                B \cup a must be null )
-                A \cup b must be null ) => merging must not make new conflict
-                */
-                for i in 0..state_ids.len() {
-                    if state_ids[i] == usize::MAX {
-                        continue;
-                    }
-                    for j in i + 1..state_ids.len() {
-                        if state_ids[j] == usize::MAX {
-                            continue;
-                        }
-                        let state_a = &states[state_ids[i]];
-                        let state_b = &states[state_ids[j]];
-                        let mut valid = true;
-
-                        // check shift nonterm map
-                        for (&shift_nonterm_a, &state_id_a) in state_a.shift_goto_map_nonterm.iter()
-                        {
-                            if let Some(&state_id_b) =
-                                state_b.shift_goto_map_nonterm.get(&shift_nonterm_a)
-                            {
-                                // AB
-                                if state_id_a != state_id_b {
-                                    valid = false;
-                                    break;
-                                }
-                            }
-                        }
-
-                        // check shift map
-                        for (&shift_term_a, &state_id_a) in state_a.shift_goto_map_term.iter() {
-                            if let Some(&state_id_b) =
-                                state_b.shift_goto_map_term.get(&shift_term_a)
-                            {
-                                // AB
-                                if state_id_a != state_id_b {
-                                    valid = false;
-                                    break;
-                                }
-                            } else {
-                                // A
-                                // check if term is in b but not in a
-                                if state_b.reduce_map.contains_key(&shift_term_a) {
-                                    if state_a.reduce_map.contains_key(&shift_term_a) {
-                                        // continue
-                                    } else {
-                                        valid = false;
-                                        break;
-                                    }
-                                } else {
-                                    // continue
-                                }
-                            }
-                        }
-                        if !valid {
-                            continue;
-                        }
-                        for (&reduce_term_a, state_ids_a) in state_a.reduce_map.iter() {
-                            if let Some(state_ids_b) = state_b.reduce_map.get(&reduce_term_a) {
-                                // ab
-                                if state_ids_a != state_ids_b {
-                                    valid = false;
-                                    break;
-                                }
-                            } else {
-                                // A
-                                // check if term is in b but not in a
-                                if state_b.shift_goto_map_term.contains_key(&reduce_term_a) {
-                                    if state_a.shift_goto_map_term.contains_key(&reduce_term_a) {
-                                        // continue
-                                    } else {
-                                        valid = false;
-                                        break;
-                                    }
-                                } else {
-                                    // continue
-                                }
-                            }
-                        }
-                        if valid {
-                            merged_count += 1;
-                            merge_into.insert(state_ids[j], state_ids[i]);
-                            let mut state_b = std::mem::take(&mut states[state_ids[j]]);
-                            state_ids[j] = usize::MAX;
-                            let state_a = &mut states[state_ids[i]];
-                            state_a
-                                .shift_goto_map_term
-                                .append(&mut state_b.shift_goto_map_term);
-                            state_a
-                                .shift_goto_map_nonterm
-                                .append(&mut state_b.shift_goto_map_nonterm);
-                            state_a.reduce_map.append(&mut state_b.reduce_map);
-                            for ((_, lookaheads), mut l) in state_a
-                                .ruleset
-                                .rules
-                                .iter_mut()
-                                .zip(state_b.ruleset.rules.into_values())
-                            {
-                                lookaheads.append(&mut l);
-                            }
-                            merged = true;
-                        }
-                    }
-                }
-                state_ids.retain(|&state_id| state_id != usize::MAX);
-            }
-            // update state ids
-            if merged {
-                for state in &mut states {
-                    for next_state in state.shift_goto_map_term.values_mut() {
-                        if let Some(&new_state) = merge_into.get(next_state) {
-                            *next_state = new_state;
-                        }
-                    }
-                    for next_state in state.shift_goto_map_nonterm.values_mut() {
-                        if let Some(&new_state) = merge_into.get(next_state) {
-                            *next_state = new_state;
-                        }
-                    }
-                }
-            } else {
-                break;
-            }
-        }
-        let mut new_states = Vec::with_capacity(states.len() - merged_count);
-        let mut old_to_new = vec![0; states.len()];
-        for (state_id, state) in states.into_iter().enumerate() {
-            if state.ruleset.rules.is_empty() {
-                continue;
-            }
-            let new_state_id = new_states.len();
-            new_states.push(state);
-            old_to_new[state_id] = new_state_id;
-        }
-
-        for state in &mut new_states {
-            for next_state in state.shift_goto_map_term.values_mut() {
-                *next_state = old_to_new[*next_state];
-            }
-            for next_state in state.shift_goto_map_nonterm.values_mut() {
-                *next_state = old_to_new[*next_state];
-            }
-        }
-
-        Ok(DFA { states: new_states })
-    }
-
-    /// build LALR(1) parser table from given grammar
-    pub fn build_lalr(
-        &mut self,
-        augmented_name: NonTerm,
-        diags: &mut DiagnosticCollector<Term>,
-    ) -> Result<DFA<Term, NonTerm>, BuildError<Term, NonTerm>>
-    where
-        Term: Copy + Ord + Hash,
-        NonTerm: Copy + Hash + Ord,
-    {
-        // build full LR(1) parser table first
-        let mut states = self.build_full(augmented_name, diags)?.states;
-
-        // building LALR(1)
-        // merge every states with same core;
-        // but we do have to check for resolving conflicts
-        let mut core_map: BTreeMap<BTreeSet<ShiftedRuleRef>, Vec<_>> = BTreeMap::new();
-        for (state_id, state) in states.iter().enumerate() {
-            let shifted_rules: BTreeSet<_> = state.ruleset.rules.keys().copied().collect();
-            core_map.entry(shifted_rules).or_default().push(state_id);
-        }
-
-        let mut merge_into = BTreeMap::new();
-        for merge_states in core_map.into_values() {
-            let mut merge_states = merge_states.into_iter();
-            let state_a = merge_states.next().unwrap();
-            for state_b in merge_states {
-                merge_into.insert(state_b, state_a);
-
-                let mut state_b = std::mem::take(&mut states[state_b]);
-                states[state_a]
-                    .shift_goto_map_term
-                    .append(&mut state_b.shift_goto_map_term);
-                states[state_a]
-                    .shift_goto_map_nonterm
-                    .append(&mut state_b.shift_goto_map_nonterm);
-                states[state_a].reduce_map.append(&mut state_b.reduce_map);
-            }
-        }
-        let mut new_states = Vec::with_capacity(states.len() - merge_into.len());
-        let mut old_to_new = vec![0; states.len()];
-        for (state_id, state) in states.into_iter().enumerate() {
-            if merge_into.contains_key(&state_id) {
-                continue;
-            }
-            let new_state_id = new_states.len();
-            new_states.push(state);
-            old_to_new[state_id] = new_state_id;
-        }
-
-        for state in &mut new_states {
-            for next_state in state.shift_goto_map_term.values_mut() {
-                *next_state = old_to_new[*next_state];
-            }
-            for next_state in state.shift_goto_map_nonterm.values_mut() {
-                *next_state = old_to_new[*next_state];
-            }
-        }
-        states = new_states;
-
-        for state in &mut states {
-            // check reduce/reduce conflicts resolving by its priority
-            for reduce_rules in state.reduce_map.values_mut() {
-                if reduce_rules.len() <= 1 {
-                    continue;
-                }
-
-                let max_priority = reduce_rules
-                    .iter()
-                    .map(|&rule| self.rules[rule].priority)
-                    .max()
-                    .unwrap();
-
-                let deleted_rules: Vec<usize> = reduce_rules
-                    .iter()
-                    .filter(|&&rule| self.rules[rule].priority != max_priority)
-                    .copied()
-                    .collect();
-                if deleted_rules.is_empty() {
-                    continue;
-                }
-                let remained_rules = reduce_rules
-                    .iter()
-                    .filter(|&&rule| self.rules[rule].priority == max_priority)
-                    .copied()
-                    .collect();
-                reduce_rules.retain(|rule| self.rules[*rule].priority == max_priority);
-
-                diags.add_resolved(ResolveDiagnostic::Priority {
-                    max_priority,
-                    remaining: remained_rules,
-                    deleted: deleted_rules,
-                });
-            }
-
-            // check shift/reduce conflicts resolving
-            for (&term, reduce_rules) in state.reduce_map.iter_mut() {
-                if !state.shift_goto_map_term.contains_key(&term) {
-                    continue;
-                };
-                let Some(&shift_prec) = self.precedence_map.get(&Operator::Term(term)) else {
-                    // no precedence for this shift rule
-                    continue;
-                };
-
-                let mut reduces = Vec::new();
-                let mut remove_reduces = Vec::new();
-                let mut remove_shift = true;
-
-                for &reduce_rule in reduce_rules.iter() {
-                    let Some(reduce_op) = self.rules[reduce_rule].operator else {
-                        // no operator for this reduce rule
-                        remove_shift = false;
-                        reduces.push((reduce_rule, None, None));
-                        continue;
-                    };
-                    let Some(&reduce_prec) = self.precedence_map.get(&reduce_op) else {
-                        // no precedence for this reduce rule
-                        remove_shift = false;
-                        reduces.push((reduce_rule, None, None));
-                        continue;
-                    };
-
-                    // compare precedence
-                    match reduce_prec.cmp(&shift_prec) {
-                        Ordering::Less => {
-                            // reduce < shift => remove reduce
-                            remove_reduces.push((reduce_rule, reduce_prec, None));
-                            remove_shift = false;
-                        }
-                        Ordering::Greater => {
-                            // reduce > shift => remove shift, but check other reduce rules
-                            reduces.push((reduce_rule, Some(reduce_prec), None));
-                        }
-                        Ordering::Equal => {
-                            // reduce == shift => check reduce type
-                            let reduce_type = self.reduce_types.get(&reduce_op).copied();
-                            match reduce_type {
-                                Some(ReduceType::Left) => {
-                                    // reduce first => remove shift
-                                    reduces.push((reduce_rule, Some(reduce_prec), reduce_type));
-                                }
-                                Some(ReduceType::Right) => {
-                                    // shift first => remove reduce
-                                    remove_reduces.push((reduce_rule, reduce_prec, reduce_type));
-                                    remove_shift = false;
-                                }
-                                None => {
-                                    // no reduce type => conflict
-                                    reduces.push((reduce_rule, Some(reduce_prec), None));
-                                    remove_shift = false;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                let shift_rules = state
-                    .ruleset
-                    .rules
-                    .iter()
-                    .filter_map(|(rule_ref, _)| {
-                        if self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
-                            == Some(&Token::Term(term))
-                        {
-                            Some(*rule_ref)
-                        } else {
-                            None
-                        }
-                    })
-                    .collect();
-
-                if remove_shift {
-                    // remove rules that start with `term`
-                    state.shift_goto_map_term.remove(&term);
-                    state.ruleset.rules.retain(|rule_ref, _| {
-                        self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
-                            != Some(&Token::Term(term))
-                    });
-                }
-
-                // remove reduce rules
-                for &(remove_reduce, _, _) in remove_reduces.iter() {
-                    reduce_rules.remove(&remove_reduce);
-                }
-
-                if !remove_shift && remove_reduces.is_empty() {
-                    continue;
-                }
-
-                diags.add_resolved(ResolveDiagnostic::Precedence {
-                    term,
-                    shift_precedence: shift_prec,
-                    shift_deleted: remove_shift,
-                    shift_rules,
-                    reduce_rules: reduces,
-                    deleted_reduces: remove_reduces,
-                });
-            }
-            state
-                .reduce_map
-                .retain(|_, reduce_rules| !reduce_rules.is_empty());
-        }
-
-        for state in &states {
-            for (&term, reduce_rules) in state.reduce_map.iter() {
-                if let Some(&next_shift_state) = state.shift_goto_map_term.get(&term) {
-                    // shift/reduce conflict
-                    let shift_rules = states[next_shift_state].unshifted_ruleset().collect();
-                    let reduce_rules = reduce_rules.clone();
-                    diags.add_shift_reduce_conflict(ShiftReduceConflictDiag {
-                        term,
-                        shift_rules,
-                        reduce_rules,
-                    });
-                } else if reduce_rules.len() > 1 {
-                    // no shift/reduce conflict
-                    // check for reduce/reduce conflict
-                    diags.update_reduce_reduce_conflict(reduce_rules, term);
-                }
-            }
-        }
-
-        Ok(DFA { states })
     }
 
     /// search for every production rules with name 'name'
@@ -886,6 +431,593 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         Ok(())
     }
 
+    /// in certain state (with ruleset),
+    /// given a subset of ruleset (which is `rules`),
+    /// add other rules in `ruleset` that is related to `rules`
+    fn expand_backward(
+        &self,
+        rules: &mut BTreeSet<ShiftedRuleRef>,
+        ruleset: &LookaheadRuleRefSet<Term>,
+    ) where
+        Term: PartialEq + Copy,
+        NonTerm: Copy + PartialEq,
+    {
+        let mut new_rules = Vec::new();
+        loop {
+            new_rules.clear();
+            for &rule in rules.iter() {
+                // if rule is shifted = 0, which is newly added rule,
+                // search for the rule that brings this rule to this state
+                // and add that rule to the `rules`
+                if rule.shifted == 0 {
+                    let nonterm = self.rules[rule.rule].rule.name;
+                    new_rules.extend(
+                        ruleset
+                            .rules
+                            .keys()
+                            .filter(|&rule_ref| {
+                                self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
+                                    == Some(&Token::NonTerm(nonterm))
+                            })
+                            .copied(),
+                    );
+                }
+            }
+            let len0 = rules.len();
+            rules.extend(new_rules.iter().copied());
+            if len0 == rules.len() {
+                break;
+            }
+        }
+    }
+
+    fn check_conflicts(
+        &self,
+        states: &[State<Term, NonTerm>],
+        diags: &mut DiagnosticCollector<Term>,
+    ) where
+        Term: Ord + Copy,
+        NonTerm: Copy + PartialEq,
+    {
+        if !diags.enabled {
+            return;
+        }
+        let mut from = vec![usize::MAX; states.len()];
+        for (state_id, state) in states.iter().enumerate() {
+            for &next_state in state
+                .shift_goto_map_term
+                .values()
+                .chain(state.shift_goto_map_nonterm.values())
+            {
+                from[next_state] = from[next_state].min(state_id);
+            }
+        }
+        for (state_id, state) in states.iter().enumerate() {
+            for (&term, reduce_rules) in state.reduce_map.iter() {
+                if let Some(&next_shift_state) = state.shift_goto_map_term.get(&term) {
+                    // shift/reduce conflict
+                    let mut shift_rules = states[next_shift_state].unshifted_ruleset().collect();
+                    self.expand_backward(&mut shift_rules, &states[state_id].ruleset);
+                    let reduce_rules = reduce_rules
+                        .iter()
+                        .map(|&rule| {
+                            let len = self.rules[rule].rule.rule.len();
+                            let nonterm = self.rules[rule].rule.name;
+                            let mut state = state_id;
+                            for _ in 0..len {
+                                if state == usize::MAX {
+                                    break;
+                                }
+                                state = from[state];
+                            }
+                            let shift_rules = if state != usize::MAX {
+                                let mut rules = states[state]
+                                    .ruleset
+                                    .rules
+                                    .keys()
+                                    .filter(|&&rule| {
+                                        self.rules[rule.rule].rule.rule.get(rule.shifted)
+                                            == Some(&Token::NonTerm(nonterm))
+                                    })
+                                    .copied()
+                                    .collect();
+                                self.expand_backward(&mut rules, &states[state].ruleset);
+                                rules
+                            } else {
+                                Default::default()
+                            };
+                            (rule, shift_rules)
+                        })
+                        .collect();
+                    diags.add_shift_reduce_conflict(ShiftReduceConflictDiag {
+                        term,
+                        shift_rules,
+                        reduce_rules,
+                    });
+                } else if reduce_rules.len() > 1 {
+                    let reduce_rules = reduce_rules
+                        .iter()
+                        .map(|&rule| {
+                            let len = self.rules[rule].rule.rule.len();
+                            let nonterm = self.rules[rule].rule.name;
+                            let mut state = state_id;
+                            for _ in 0..len {
+                                if state == usize::MAX {
+                                    break;
+                                }
+                                state = from[state];
+                            }
+                            let shift_rules = if state != usize::MAX {
+                                let mut rules = states[state]
+                                    .ruleset
+                                    .rules
+                                    .keys()
+                                    .filter(|&&rule| {
+                                        self.rules[rule.rule].rule.rule.get(rule.shifted)
+                                            == Some(&Token::NonTerm(nonterm))
+                                    })
+                                    .copied()
+                                    .collect();
+                                self.expand_backward(&mut rules, &states[state].ruleset);
+                                rules
+                            } else {
+                                Default::default()
+                            };
+                            (rule, shift_rules)
+                        })
+                        .collect();
+                    // no shift/reduce conflict
+                    // check for reduce/reduce conflict
+                    diags.update_reduce_reduce_conflict(reduce_rules, term);
+                }
+            }
+        }
+    }
+
+    /// build full LR(1) parser table from given grammar
+    fn build_full(
+        &mut self,
+        augmented_name: NonTerm,
+        diags: &mut DiagnosticCollector<Term>,
+    ) -> Result<DFA<Term, NonTerm>, BuildError<Term, NonTerm>>
+    where
+        Term: Copy + Ord + Hash,
+        NonTerm: Copy + Hash + Ord,
+    {
+        self.calculate_first();
+        self.calculate_expand_cache()?;
+
+        // add main augmented rule
+        let augmented_rule_set = {
+            let augmented_rules = self.search_rules(augmented_name)?;
+
+            if augmented_rules.is_empty() {
+                return Err(BuildError::NoAugmented);
+            }
+
+            let mut augmented_rules_set = LookaheadRuleRefSet::new();
+            for rule in augmented_rules.iter() {
+                augmented_rules_set.rules.insert(
+                    ShiftedRuleRef {
+                        rule: *rule,
+                        shifted: 0,
+                    },
+                    BTreeSet::new(),
+                );
+            }
+            augmented_rules_set
+        };
+
+        let mut states = Vec::new();
+        let mut state_map = BTreeMap::new();
+        let main_state =
+            self.build_recursive(augmented_rule_set, &mut states, &mut state_map, diags)?;
+        if main_state != 0 {
+            panic!("main state is not 0");
+        }
+
+        Ok(DFA { states })
+    }
+
+    /// build minimal-LR(1) parser table from given grammar
+    pub fn build(
+        &mut self,
+        augmented_name: NonTerm,
+        diags: &mut DiagnosticCollector<Term>,
+    ) -> Result<DFA<Term, NonTerm>, BuildError<Term, NonTerm>>
+    where
+        Term: Copy + Ord + Hash,
+        NonTerm: Copy + Hash + Ord,
+    {
+        // build full LR(1) parser table first
+        let mut states = self.build_full(augmented_name, diags)?.states;
+
+        // building minimal LR(1)
+        // now merge some states into LALR form, but without conflicts
+        let mut core_map: BTreeMap<BTreeSet<ShiftedRuleRef>, Vec<_>> = BTreeMap::new();
+        for (state_id, state) in states.iter().enumerate() {
+            let shifted_rules: BTreeSet<_> = state.ruleset.rules.keys().copied().collect();
+            core_map.entry(shifted_rules).or_default().push(state_id);
+        }
+
+        let mut merged_count = 0;
+        loop {
+            let mut merged = false;
+            let mut merge_into = BTreeMap::new();
+            for state_ids in core_map.values_mut() {
+                /*
+                mergeing states A and B
+                state A and B can be merged if
+                new conflicts are not created by merging them
+
+                shift map
+                A  AB  B
+
+                reduce map
+                a  ab  b
+
+                AB must be equal
+                ab must be equal
+
+                B \cup a must be null )
+                A \cup b must be null ) => merging must not make new conflict
+                */
+                for i in 0..state_ids.len() {
+                    if state_ids[i] == usize::MAX {
+                        continue;
+                    }
+                    for j in i + 1..state_ids.len() {
+                        if state_ids[j] == usize::MAX {
+                            continue;
+                        }
+                        let state_a = &states[state_ids[i]];
+                        let state_b = &states[state_ids[j]];
+                        let mut valid = true;
+
+                        // check shift nonterm map
+                        for (&shift_nonterm_a, &state_id_a) in state_a.shift_goto_map_nonterm.iter()
+                        {
+                            if let Some(&state_id_b) =
+                                state_b.shift_goto_map_nonterm.get(&shift_nonterm_a)
+                            {
+                                // AB
+                                if state_id_a != state_id_b {
+                                    valid = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // check shift map
+                        for (&shift_term_a, &state_id_a) in state_a.shift_goto_map_term.iter() {
+                            if let Some(&state_id_b) =
+                                state_b.shift_goto_map_term.get(&shift_term_a)
+                            {
+                                // AB
+                                if state_id_a != state_id_b {
+                                    valid = false;
+                                    break;
+                                }
+                            } else {
+                                // A
+                                // check if term is in b but not in a
+                                if state_b.reduce_map.contains_key(&shift_term_a) {
+                                    if state_a.reduce_map.contains_key(&shift_term_a) {
+                                        // continue
+                                    } else {
+                                        valid = false;
+                                        break;
+                                    }
+                                } else {
+                                    // continue
+                                }
+                            }
+                        }
+                        if !valid {
+                            continue;
+                        }
+                        for (&reduce_term_a, state_ids_a) in state_a.reduce_map.iter() {
+                            if let Some(state_ids_b) = state_b.reduce_map.get(&reduce_term_a) {
+                                // ab
+                                if state_ids_a != state_ids_b {
+                                    valid = false;
+                                    break;
+                                }
+                            } else {
+                                // A
+                                // check if term is in b but not in a
+                                if state_b.shift_goto_map_term.contains_key(&reduce_term_a) {
+                                    if state_a.shift_goto_map_term.contains_key(&reduce_term_a) {
+                                        // continue
+                                    } else {
+                                        valid = false;
+                                        break;
+                                    }
+                                } else {
+                                    // continue
+                                }
+                            }
+                        }
+                        if valid {
+                            merged_count += 1;
+                            merge_into.insert(state_ids[j], state_ids[i]);
+                            let mut state_b = std::mem::take(&mut states[state_ids[j]]);
+                            state_ids[j] = usize::MAX;
+                            let state_a = &mut states[state_ids[i]];
+                            state_a
+                                .shift_goto_map_term
+                                .append(&mut state_b.shift_goto_map_term);
+                            state_a
+                                .shift_goto_map_nonterm
+                                .append(&mut state_b.shift_goto_map_nonterm);
+                            state_a.reduce_map.append(&mut state_b.reduce_map);
+                            for ((_, lookaheads), mut l) in state_a
+                                .ruleset
+                                .rules
+                                .iter_mut()
+                                .zip(state_b.ruleset.rules.into_values())
+                            {
+                                lookaheads.append(&mut l);
+                            }
+                            merged = true;
+                        }
+                    }
+                }
+                state_ids.retain(|&state_id| state_id != usize::MAX);
+            }
+            // update state ids
+            if merged {
+                for state in &mut states {
+                    for next_state in state.shift_goto_map_term.values_mut() {
+                        if let Some(&new_state) = merge_into.get(next_state) {
+                            *next_state = new_state;
+                        }
+                    }
+                    for next_state in state.shift_goto_map_nonterm.values_mut() {
+                        if let Some(&new_state) = merge_into.get(next_state) {
+                            *next_state = new_state;
+                        }
+                    }
+                }
+            } else {
+                break;
+            }
+        }
+        let mut new_states = Vec::with_capacity(states.len() - merged_count);
+        let mut old_to_new = vec![0; states.len()];
+        for (state_id, state) in states.into_iter().enumerate() {
+            if state.ruleset.rules.is_empty() {
+                continue;
+            }
+            let new_state_id = new_states.len();
+            new_states.push(state);
+            old_to_new[state_id] = new_state_id;
+        }
+
+        for state in &mut new_states {
+            for next_state in state.shift_goto_map_term.values_mut() {
+                *next_state = old_to_new[*next_state];
+            }
+            for next_state in state.shift_goto_map_nonterm.values_mut() {
+                *next_state = old_to_new[*next_state];
+            }
+        }
+
+        states = new_states;
+        self.check_conflicts(&states, diags);
+
+        Ok(DFA { states })
+    }
+
+    /// build LALR(1) parser table from given grammar
+    pub fn build_lalr(
+        &mut self,
+        augmented_name: NonTerm,
+        diags: &mut DiagnosticCollector<Term>,
+    ) -> Result<DFA<Term, NonTerm>, BuildError<Term, NonTerm>>
+    where
+        Term: Copy + Ord + Hash,
+        NonTerm: Copy + Hash + Ord,
+    {
+        // build full LR(1) parser table first
+        let mut states = self.build_full(augmented_name, diags)?.states;
+
+        // building LALR(1)
+        // merge every states with same core;
+        // but we do have to check for resolving conflicts
+        let mut core_map: BTreeMap<BTreeSet<ShiftedRuleRef>, Vec<_>> = BTreeMap::new();
+        for (state_id, state) in states.iter().enumerate() {
+            let shifted_rules: BTreeSet<_> = state.ruleset.rules.keys().copied().collect();
+            core_map.entry(shifted_rules).or_default().push(state_id);
+        }
+
+        let mut merge_into = BTreeMap::new();
+        for merge_states in core_map.into_values() {
+            let mut merge_states = merge_states.into_iter();
+            let state_a = merge_states.next().unwrap();
+            for state_b in merge_states {
+                merge_into.insert(state_b, state_a);
+
+                let mut state_b = std::mem::take(&mut states[state_b]);
+                states[state_a]
+                    .shift_goto_map_term
+                    .append(&mut state_b.shift_goto_map_term);
+                states[state_a]
+                    .shift_goto_map_nonterm
+                    .append(&mut state_b.shift_goto_map_nonterm);
+                states[state_a].reduce_map.append(&mut state_b.reduce_map);
+            }
+        }
+        let mut new_states = Vec::with_capacity(states.len() - merge_into.len());
+        let mut old_to_new = vec![0; states.len()];
+        for (state_id, state) in states.into_iter().enumerate() {
+            if merge_into.contains_key(&state_id) {
+                continue;
+            }
+            let new_state_id = new_states.len();
+            new_states.push(state);
+            old_to_new[state_id] = new_state_id;
+        }
+
+        for state in &mut new_states {
+            for next_state in state.shift_goto_map_term.values_mut() {
+                *next_state = old_to_new[*next_state];
+            }
+            for next_state in state.shift_goto_map_nonterm.values_mut() {
+                *next_state = old_to_new[*next_state];
+            }
+        }
+        states = new_states;
+
+        for state in &mut states {
+            // check reduce/reduce conflicts resolving by its priority
+            for reduce_rules in state.reduce_map.values_mut() {
+                if reduce_rules.len() <= 1 {
+                    continue;
+                }
+
+                let max_priority = reduce_rules
+                    .iter()
+                    .map(|&rule| self.rules[rule].priority)
+                    .max()
+                    .unwrap();
+
+                let deleted_rules: Vec<usize> = reduce_rules
+                    .iter()
+                    .filter(|&&rule| self.rules[rule].priority != max_priority)
+                    .copied()
+                    .collect();
+                if deleted_rules.is_empty() {
+                    continue;
+                }
+                let remained_rules = reduce_rules
+                    .iter()
+                    .filter(|&&rule| self.rules[rule].priority == max_priority)
+                    .copied()
+                    .collect();
+                reduce_rules.retain(|rule| self.rules[*rule].priority == max_priority);
+
+                diags.add_resolved(ResolveDiagnostic::Priority {
+                    max_priority,
+                    remaining: remained_rules,
+                    deleted: deleted_rules,
+                });
+            }
+
+            // check shift/reduce conflicts resolving
+            for (&term, reduce_rules) in state.reduce_map.iter_mut() {
+                if !state.shift_goto_map_term.contains_key(&term) {
+                    continue;
+                };
+                let Some(&shift_prec) = self.precedence_map.get(&Operator::Term(term)) else {
+                    // no precedence for this shift rule
+                    continue;
+                };
+
+                let mut reduces = Vec::new();
+                let mut remove_reduces = Vec::new();
+                let mut remove_shift = true;
+
+                for &reduce_rule in reduce_rules.iter() {
+                    let Some(reduce_op) = self.rules[reduce_rule].operator else {
+                        // no operator for this reduce rule
+                        remove_shift = false;
+                        reduces.push((reduce_rule, None, None));
+                        continue;
+                    };
+                    let Some(&reduce_prec) = self.precedence_map.get(&reduce_op) else {
+                        // no precedence for this reduce rule
+                        remove_shift = false;
+                        reduces.push((reduce_rule, None, None));
+                        continue;
+                    };
+
+                    // compare precedence
+                    match reduce_prec.cmp(&shift_prec) {
+                        Ordering::Less => {
+                            // reduce < shift => remove reduce
+                            remove_reduces.push((reduce_rule, reduce_prec, None));
+                            remove_shift = false;
+                        }
+                        Ordering::Greater => {
+                            // reduce > shift => remove shift, but check other reduce rules
+                            reduces.push((reduce_rule, Some(reduce_prec), None));
+                        }
+                        Ordering::Equal => {
+                            // reduce == shift => check reduce type
+                            let reduce_type = self.reduce_types.get(&reduce_op).copied();
+                            match reduce_type {
+                                Some(ReduceType::Left) => {
+                                    // reduce first => remove shift
+                                    reduces.push((reduce_rule, Some(reduce_prec), reduce_type));
+                                }
+                                Some(ReduceType::Right) => {
+                                    // shift first => remove reduce
+                                    remove_reduces.push((reduce_rule, reduce_prec, reduce_type));
+                                    remove_shift = false;
+                                }
+                                None => {
+                                    // no reduce type => conflict
+                                    reduces.push((reduce_rule, Some(reduce_prec), None));
+                                    remove_shift = false;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                let shift_rules = state
+                    .ruleset
+                    .rules
+                    .iter()
+                    .filter_map(|(rule_ref, _)| {
+                        if self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
+                            == Some(&Token::Term(term))
+                        {
+                            Some(*rule_ref)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
+
+                if remove_shift {
+                    // remove rules that start with `term`
+                    state.shift_goto_map_term.remove(&term);
+                    state.ruleset.rules.retain(|rule_ref, _| {
+                        self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
+                            != Some(&Token::Term(term))
+                    });
+                }
+
+                // remove reduce rules
+                for &(remove_reduce, _, _) in remove_reduces.iter() {
+                    reduce_rules.remove(&remove_reduce);
+                }
+
+                if !remove_shift && remove_reduces.is_empty() {
+                    continue;
+                }
+
+                diags.add_resolved(ResolveDiagnostic::Precedence {
+                    term,
+                    shift_precedence: shift_prec,
+                    shift_deleted: remove_shift,
+                    shift_rules,
+                    reduce_rules: reduces,
+                    deleted_reduces: remove_reduces,
+                });
+            }
+            state
+                .reduce_map
+                .retain(|_, reduce_rules| !reduce_rules.is_empty());
+        }
+
+        self.check_conflicts(&states, diags);
+
+        Ok(DFA { states })
+    }
+
     /// build new state with given production rules
     fn build_recursive(
         &self,
@@ -1087,29 +1219,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             });
         }
         reduce_map.retain(|_, reduce_rules| !reduce_rules.is_empty());
-
-        for (&term, reduce_rules) in reduce_map.iter() {
-            if next_rules_term.contains_key(&term) {
-                // shift/reduce conflict
-                let shift_rules = next_rules_term
-                    .get(&term)
-                    .unwrap()
-                    .rules
-                    .iter()
-                    .map(|(rule_ref, _)| *rule_ref)
-                    .collect::<Vec<_>>();
-                let reduce_rules = reduce_rules.clone();
-                diags.add_shift_reduce_conflict(ShiftReduceConflictDiag {
-                    term,
-                    shift_rules,
-                    reduce_rules: reduce_rules.clone(),
-                });
-            } else if reduce_rules.len() > 1 {
-                // no shift/reduce conflict
-                // check for reduce/reduce conflict
-                diags.update_reduce_reduce_conflict(reduce_rules, term);
-            }
-        }
 
         // process rules that no more tokens left to shift
         // if next token is one of lookahead, add reduce action

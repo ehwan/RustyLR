@@ -37,4 +37,8 @@ pub struct Args {
     /// verbose output for the terminal class optimization process
     #[arg(short = 'o', long, default_value = "false")]
     pub verbose_optimization: bool,
+
+    /// do not print the backtrace rules in current state when a conflict occurs
+    #[arg(short = 'b', long, default_value = "false")]
+    pub no_backtrace: bool,
 }

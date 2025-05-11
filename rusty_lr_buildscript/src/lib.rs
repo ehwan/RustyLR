@@ -58,6 +58,9 @@ pub struct Builder {
 
     /// print verbose information to stderr
     verbose_on_stderr: bool,
+
+    /// print backtrace rules in state when conflicts occured. ruleset could be massive
+    print_backtrace: bool,
 }
 
 impl Builder {
@@ -68,6 +71,7 @@ impl Builder {
             verbose_conflicts_resolving: false,
             verbose_on_stderr: false,
             verbose_optimization: false,
+            print_backtrace: true,
         }
     }
 
@@ -107,6 +111,12 @@ impl Builder {
     /// print debug information to stderr.
     pub fn verbose_on_stderr(&mut self) -> &mut Self {
         self.verbose_on_stderr = true;
+        self
+    }
+
+    /// do not print backtrace rules in state when conflicts occured.
+    pub fn no_print_backtrace(&mut self) -> &mut Self {
+        self.print_backtrace = false;
         self
     }
 
@@ -1019,6 +1029,16 @@ impl Builder {
         }
         for shift_reduce_conflict in diags_collector.shift_reduce_conflicts {
             let mut labels = Vec::new();
+            let mut notes = vec![
+                        "Operator of production rule is the rightmost terminal symbol with precedence defined".to_string(),
+                        "Set operator for rule explicitly with %prec".to_string(),
+                        "Set precedence for operator with %left, %right, or %precedence"
+                            .to_string(),
+                    ];
+
+            if self.print_backtrace {
+                notes.push("Backtrace for the shift rule:".to_string());
+            }
             for shift_rule in shift_reduce_conflict.shift_rules {
                 Self::extend_rule_source_label(
                     &mut labels,
@@ -1028,8 +1048,17 @@ impl Builder {
                     "(Shift) ",
                     "(Shift) ",
                 );
+
+                if self.print_backtrace {
+                    let rule_str = grammar.builder.rules[shift_rule.rule]
+                        .rule
+                        .clone()
+                        .map(class_mapper, nonterm_mapper)
+                        .into_shifted(shift_rule.shifted);
+                    notes.push(format!("\t>>> {rule_str}"));
+                }
             }
-            for reduce_rule in shift_reduce_conflict.reduce_rules {
+            for (reduce_rule, reduce_rule_from) in shift_reduce_conflict.reduce_rules {
                 Self::extend_rule_source_label(
                     &mut labels,
                     file_id,
@@ -1038,18 +1067,27 @@ impl Builder {
                     "(Reduce) ",
                     "(Reduce) ",
                 );
+
+                if self.print_backtrace {
+                    let name = nonterm_mapper(grammar.builder.rules[reduce_rule].rule.name);
+
+                    notes.push(format!("Backtrace for {name}:"));
+                    notes.extend(reduce_rule_from.into_iter().map(|shifted_rule| {
+                        let rule_str = grammar.builder.rules[shifted_rule.rule]
+                            .rule
+                            .clone()
+                            .map(class_mapper, nonterm_mapper)
+                            .into_shifted(shifted_rule.shifted);
+
+                        format!("\t>>> {rule_str}")
+                    }));
+                }
             }
 
             let message = format!(
                 "Shift/Reduce conflict detected with terminal(class): {}",
                 grammar.class_pretty_name_list(shift_reduce_conflict.term, 5)
             );
-            let notes = vec![
-                        "Operator of production rule is the rightmost terminal symbol with precedence defined".to_string(),
-                        "Set operator for rule explicitly with %prec".to_string(),
-                        "Set precedence for operator with %left, %right, or %precedence"
-                            .to_string(),
-                    ];
 
             conflict_diags.push(
                 Diagnostic::error()
@@ -1061,7 +1099,8 @@ impl Builder {
         for (reduce_rules, reduce_terms) in diags_collector.reduce_reduce_conflicts {
             let mut labels = Vec::new();
 
-            for reduce_rule in reduce_rules {
+            let mut notes = vec!["Set priority for the rule with %dprec".to_string()];
+            for (reduce_rule, reduce_rule_from) in reduce_rules {
                 Self::extend_rule_source_label(
                     &mut labels,
                     file_id,
@@ -1070,6 +1109,21 @@ impl Builder {
                     "(Reduce) ",
                     "(Reduce) ",
                 );
+
+                if self.print_backtrace {
+                    let name = nonterm_mapper(grammar.builder.rules[reduce_rule].rule.name);
+
+                    notes.push(format!("Backtrace for {name}:"));
+                    notes.extend(reduce_rule_from.into_iter().map(|shifted_rule| {
+                        let rule_str = grammar.builder.rules[shifted_rule.rule]
+                            .rule
+                            .clone()
+                            .map(class_mapper, nonterm_mapper)
+                            .into_shifted(shifted_rule.shifted);
+
+                        format!("\t>>> {rule_str}")
+                    }));
+                }
             }
 
             let message = format!(
@@ -1080,7 +1134,6 @@ impl Builder {
                     .collect::<Vec<_>>()
                     .join(", ")
             );
-            let notes = vec!["Set priority for the rule with %dprec".to_string()];
 
             conflict_diags.push(
                 Diagnostic::error()
