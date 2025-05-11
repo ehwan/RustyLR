@@ -364,38 +364,45 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     /// in certain state (with ruleset),
     /// given a subset of ruleset (which is `rules`),
     /// add other rules in `ruleset` that is related to `rules`
-    fn expand_backward(
-        &self,
-        rules: &mut BTreeSet<ShiftedRuleRef>,
-        ruleset: &LookaheadRuleRefSet<Term>,
-    ) where
+    fn expand_backward(&self, rules: &mut Vec<ShiftedRuleRef>, ruleset: &LookaheadRuleRefSet<Term>)
+    where
         Term: PartialEq + Copy,
-        NonTerm: Copy + PartialEq,
+        NonTerm: Copy + PartialEq + Ord,
     {
-        let mut new_rules = Vec::new();
+        let mut zero_shifted: BTreeSet<_> = rules
+            .iter()
+            .filter_map(|rule| {
+                if rule.shifted == 0 {
+                    Some(self.rules[rule.rule].rule.name)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        let mut next_zeros = BTreeSet::new();
+        let mut inserted: BTreeSet<_> = rules.iter().copied().collect();
         loop {
-            new_rules.clear();
-            for &rule in rules.iter() {
+            let mut changed = false;
+            next_zeros.clear();
+            for &nonterm in zero_shifted.iter() {
                 // if rule is shifted = 0, which is newly added rule,
                 // search for the rule that brings this rule to this state
                 // and add that rule to the `rules`
-                if rule.shifted == 0 {
-                    let nonterm = self.rules[rule.rule].rule.name;
-                    new_rules.extend(
-                        ruleset
-                            .rules
-                            .keys()
-                            .filter(|&rule_ref| {
-                                self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
-                                    == Some(&Token::NonTerm(nonterm))
-                            })
-                            .copied(),
-                    );
+                for &rule in ruleset.rules.keys().filter(|&rule_ref| {
+                    self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
+                        == Some(&Token::NonTerm(nonterm))
+                }) {
+                    if inserted.insert(rule) {
+                        changed = true;
+                        rules.push(rule);
+                        if rule.shifted == 0 {
+                            next_zeros.insert(self.rules[rule.rule].rule.name);
+                        }
+                    }
                 }
             }
-            let len0 = rules.len();
-            rules.extend(new_rules.iter().copied());
-            if len0 == rules.len() {
+            std::mem::swap(&mut zero_shifted, &mut next_zeros);
+            if !changed {
                 break;
             }
         }
@@ -407,7 +414,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         diags: &mut DiagnosticCollector<Term>,
     ) where
         Term: Ord + Copy,
-        NonTerm: Copy + PartialEq,
+        NonTerm: Copy + PartialEq + Ord,
     {
         if !diags.enabled {
             return;
@@ -432,7 +439,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                         .iter()
                         .map(|&rule| {
                             let len = self.rules[rule].rule.rule.len();
-                            let nonterm = self.rules[rule].rule.name;
                             let mut state = state_id;
                             for _ in 0..len {
                                 if state == usize::MAX {
@@ -441,16 +447,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                                 state = from[state];
                             }
                             let shift_rules = if state != usize::MAX {
-                                let mut rules = states[state]
-                                    .ruleset
-                                    .rules
-                                    .keys()
-                                    .filter(|&&rule| {
-                                        self.rules[rule.rule].rule.rule.get(rule.shifted)
-                                            == Some(&Token::NonTerm(nonterm))
-                                    })
-                                    .copied()
-                                    .collect();
+                                let mut rules = vec![ShiftedRuleRef { rule, shifted: 0 }];
                                 self.expand_backward(&mut rules, &states[state].ruleset);
                                 rules
                             } else {
@@ -469,7 +466,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                         .iter()
                         .map(|&rule| {
                             let len = self.rules[rule].rule.rule.len();
-                            let nonterm = self.rules[rule].rule.name;
                             let mut state = state_id;
                             for _ in 0..len {
                                 if state == usize::MAX {
@@ -478,16 +474,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                                 state = from[state];
                             }
                             let shift_rules = if state != usize::MAX {
-                                let mut rules = states[state]
-                                    .ruleset
-                                    .rules
-                                    .keys()
-                                    .filter(|&&rule| {
-                                        self.rules[rule.rule].rule.rule.get(rule.shifted)
-                                            == Some(&Token::NonTerm(nonterm))
-                                    })
-                                    .copied()
-                                    .collect();
+                                let mut rules = vec![ShiftedRuleRef { rule, shifted: 0 }];
                                 self.expand_backward(&mut rules, &states[state].ruleset);
                                 rules
                             } else {

@@ -26,15 +26,15 @@ pub enum ResolveDiagnostic<Term> {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ShiftReduceConflictDiag<Term> {
     pub term: Term,
-    pub shift_rules: BTreeSet<ShiftedRuleRef>,
-    pub reduce_rules: Vec<(usize, BTreeSet<ShiftedRuleRef>)>,
+    pub shift_rules: Vec<ShiftedRuleRef>,
+    pub reduce_rules: Vec<(usize, Vec<ShiftedRuleRef>)>,
 }
 
 pub struct DiagnosticCollector<Term> {
     pub enabled: bool,
     pub resolved: BTreeSet<ResolveDiagnostic<Term>>,
     pub shift_reduce_conflicts: BTreeSet<ShiftReduceConflictDiag<Term>>,
-    pub reduce_reduce_conflicts: BTreeMap<Vec<(usize, BTreeSet<ShiftedRuleRef>)>, BTreeSet<Term>>,
+    pub reduce_reduce_conflicts: BTreeMap<Vec<(usize, Vec<ShiftedRuleRef>)>, BTreeSet<Term>>,
 }
 impl<Term> DiagnosticCollector<Term> {
     pub fn new(collect: bool) -> Self {
@@ -63,7 +63,7 @@ impl<Term> DiagnosticCollector<Term> {
     }
     pub fn update_reduce_reduce_conflict(
         &mut self,
-        reduce_rules: Vec<(usize, BTreeSet<ShiftedRuleRef>)>,
+        reduce_rules: Vec<(usize, Vec<ShiftedRuleRef>)>,
         term: Term,
     ) where
         Term: Ord,
