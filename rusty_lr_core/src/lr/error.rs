@@ -8,7 +8,7 @@ pub struct InvalidTerminalError<Term, NonTerm> {
     pub term: Term,
 
     #[cfg(feature = "error")]
-    pub(crate) backtrace: crate::Backtrace<usize, NonTerm>,
+    pub(crate) backtrace: crate::Backtrace<&'static str, NonTerm>,
 
     #[cfg(not(feature = "error"))]
     pub(crate) _phantom: std::marker::PhantomData<(Term, NonTerm)>,

@@ -10,7 +10,7 @@ pub struct InvalidTerminalError<Term, NonTerm, ReduceActionError> {
     pub reduce_errors: Vec<ReduceActionError>,
 
     #[cfg(feature = "error")]
-    pub(crate) backtraces: Vec<crate::Backtrace<usize, NonTerm>>,
+    pub(crate) backtraces: Vec<crate::Backtrace<&'static str, NonTerm>>,
 
     #[cfg(not(feature = "error"))]
     pub(crate) _phantom: std::marker::PhantomData<NonTerm>,

@@ -405,7 +405,7 @@ impl<S: Stack> Context<S> {
     pub fn backtrace<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
         &self,
         parser: &P,
-    ) -> crate::Backtrace<usize, S::NonTerm>
+    ) -> crate::Backtrace<&'static str, S::NonTerm>
     where
         S::Term: Clone,
         S::NonTerm: Hash + Eq + Clone,
@@ -436,7 +436,7 @@ impl<S: Stack> Context<S> {
         let mut current_rules: BTreeSet<_> = parser.get_states()[*self.state_stack.last().unwrap()]
             .get_rules()
             .iter()
-            .filter(|rule| rule.shifted > 0)
+            // .filter(|rule| rule.shifted > 0)
             .copied()
             .collect();
         let mut next_rules = BTreeSet::new();

@@ -214,7 +214,7 @@ impl<Data: NodeData> Context<Data> {
     pub fn backtraces<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &'a self,
         parser: &'a P,
-    ) -> impl Iterator<Item = crate::Backtrace<usize, P::NonTerm>> + 'a
+    ) -> impl Iterator<Item = crate::Backtrace<&'static str, P::NonTerm>> + 'a
     where
         Data::Term: Clone,
         Data::NonTerm: Clone + Hash + Eq,

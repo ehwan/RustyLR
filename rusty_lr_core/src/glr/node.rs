@@ -258,7 +258,7 @@ impl<Data: NodeData> Node<Data> {
     pub fn backtrace<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> crate::Backtrace<usize, Data::NonTerm>
+    ) -> crate::Backtrace<&'static str, Data::NonTerm>
     where
         Data::Term: Clone,
         Data::NonTerm: std::hash::Hash + Eq + Clone,
@@ -289,7 +289,7 @@ impl<Data: NodeData> Node<Data> {
         let mut current_rules: BTreeSet<_> = parser.get_states()[self.state]
             .get_rules()
             .iter()
-            .filter(|rule| rule.shifted > 0)
+            // .filter(|rule| rule.shifted > 0)
             .copied()
             .collect();
         let mut next_rules = BTreeSet::new();

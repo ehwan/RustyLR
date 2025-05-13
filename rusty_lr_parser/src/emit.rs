@@ -44,7 +44,7 @@ impl Grammar {
                 pub type #context_struct_name = #module_prefix::glr::Context<#node_enum_name>;
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #rule_typename = #module_prefix::ProductionRule<usize, #enum_name>;
+                pub type #rule_typename = #module_prefix::ProductionRule<&'static str, #enum_name>;
                 /// type alias for DFA state
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #state_typename = #module_prefix::glr::#state_structname<#enum_name>;
@@ -71,7 +71,7 @@ impl Grammar {
                 pub type #context_struct_name = #module_prefix::lr::Context<#stack_struct_name>;
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #rule_typename = #module_prefix::ProductionRule<usize, #enum_name>;
+                pub type #rule_typename = #module_prefix::ProductionRule<&'static str, #enum_name>;
                 /// type alias for DFA state
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #state_typename = #module_prefix::lr::#state_structname<#enum_name>;
@@ -883,6 +883,14 @@ impl Grammar {
             }
         };
 
+        let mut terminal_class_names_stream = TokenStream::new();
+        for class in 0..self.terminal_classes.len() {
+            let name = self.class_pretty_name_list(class, 4);
+            terminal_class_names_stream.extend(quote! {
+                #name,
+            });
+        }
+
         let grammar_build_stream = quote! {
             // create grammar builder
             let mut builder = #module_prefix::builder::Grammar::new();
@@ -898,9 +906,16 @@ impl Grammar {
 
             #build_stream
 
+            let terminal_class_names = vec![
+                #terminal_class_names_stream
+            ];
+
             let rules = builder.rules.into_iter().map(
-                |rule| {
-                    rule.rule
+                move |rule| {
+                    rule.rule.map(
+                        |term| terminal_class_names[term],
+                        |nonterm| nonterm,
+                    )
                 }
             ).collect();
             #state_convert_stream

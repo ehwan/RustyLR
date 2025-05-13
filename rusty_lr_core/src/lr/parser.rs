@@ -13,7 +13,7 @@ pub trait Parser {
         Self: 'a;
 
     /// Get list of production rules
-    fn get_rules(&self) -> &[ProductionRule<usize, Self::NonTerm>];
+    fn get_rules(&self) -> &[ProductionRule<&'static str, Self::NonTerm>];
     /// Get list of states
     fn get_states(&self) -> &[Self::State];
     /// Get set of terminals for i'th terminal class
