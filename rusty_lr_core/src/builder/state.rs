@@ -1,4 +1,3 @@
-use crate::rule::LookaheadRuleRefSet;
 use crate::ShiftedRuleRef;
 use crate::Token;
 
@@ -12,7 +11,7 @@ pub struct State<Term, NonTerm> {
     pub shift_goto_map_term: BTreeMap<Term, usize>,
     pub shift_goto_map_nonterm: BTreeMap<NonTerm, usize>,
     pub reduce_map: BTreeMap<Term, BTreeSet<usize>>,
-    pub ruleset: LookaheadRuleRefSet<Term>,
+    pub ruleset: BTreeSet<ShiftedRuleRef>,
     /// The token that shifted into this state.
     pub token: Option<Token<Term, NonTerm>>,
 }
@@ -22,7 +21,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
             shift_goto_map_term: Default::default(),
             shift_goto_map_nonterm: Default::default(),
             reduce_map: Default::default(),
-            ruleset: LookaheadRuleRefSet::new(),
+            ruleset: Default::default(),
             token: None,
         }
     }
@@ -30,10 +29,9 @@ impl<Term, NonTerm> State<Term, NonTerm> {
     /// shift -= 1 for all rules in the ruleset
     pub fn unshifted_ruleset(&self) -> impl Iterator<Item = ShiftedRuleRef> + '_ {
         self.ruleset
-            .rules
             .iter()
-            .filter(|rule| rule.0.shifted > 0)
-            .map(|(rule, _)| {
+            .filter(|rule| rule.shifted > 0)
+            .map(|rule| {
                 let mut rule = *rule;
                 rule.shifted -= 1;
                 rule
@@ -64,7 +62,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 .into_iter()
                 .map(|(term, rule)| (term_map(term), rule.into_iter().next().unwrap()))
                 .collect(),
-            ruleset: self.ruleset.rules.into_keys().collect(),
+            ruleset: self.ruleset.into_iter().collect(),
             shifted_token: self.token.map(|token| token.map(&term_map, &nonterm_map)),
         }
     }
@@ -93,7 +91,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 .map(|(nonterm, state)| (nonterm_map(nonterm), state))
                 .collect(),
             reduce_map,
-            ruleset: self.ruleset.rules.into_keys().collect(),
+            ruleset: self.ruleset.into_iter().collect(),
             shifted_token: self.token.map(|token| token.map(&term_map, &nonterm_map)),
         }
     }
@@ -122,7 +120,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 .into_iter()
                 .map(|(term, rule)| (term_map(term), rule.into_iter().collect()))
                 .collect(),
-            ruleset: self.ruleset.rules.into_keys().collect(),
+            ruleset: self.ruleset.into_iter().collect(),
             shifted_token: self.token.map(|token| token.map(&term_map, &nonterm_map)),
         }
     }
@@ -151,7 +149,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 .map(|(nonterm, state)| (nonterm_map(nonterm), state))
                 .collect(),
             reduce_map,
-            ruleset: self.ruleset.rules.into_keys().collect(),
+            ruleset: self.ruleset.into_iter().collect(),
             shifted_token: self.token.map(|token| token.map(&term_map, &nonterm_map)),
         }
     }

@@ -364,7 +364,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     /// in certain state (with ruleset),
     /// given a subset of ruleset (which is `rules`),
     /// add other rules in `ruleset` that is related to `rules`
-    fn expand_backward(&self, rules: &mut Vec<ShiftedRuleRef>, ruleset: &LookaheadRuleRefSet<Term>)
+    fn expand_backward(&self, rules: &mut Vec<ShiftedRuleRef>, ruleset: &BTreeSet<ShiftedRuleRef>)
     where
         Term: PartialEq + Copy,
         NonTerm: Copy + PartialEq + Ord,
@@ -388,7 +388,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 // if rule is shifted = 0, which is newly added rule,
                 // search for the rule that brings this rule to this state
                 // and add that rule to the `rules`
-                for &rule in ruleset.rules.keys().filter(|&rule_ref| {
+                for &rule in ruleset.iter().filter(|&rule_ref| {
                     self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
                         == Some(&Token::NonTerm(nonterm))
                 }) {
@@ -551,10 +551,12 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
         // building minimal LR(1)
         // now merge some states into LALR form, but without conflicts
-        let mut core_map: BTreeMap<BTreeSet<ShiftedRuleRef>, Vec<_>> = BTreeMap::new();
+        let mut core_map: BTreeMap<_, Vec<_>> = BTreeMap::new();
         for (state_id, state) in states.iter().enumerate() {
-            let shifted_rules: BTreeSet<_> = state.ruleset.rules.keys().copied().collect();
-            core_map.entry(shifted_rules).or_default().push(state_id);
+            core_map
+                .entry(state.ruleset.clone())
+                .or_default()
+                .push(state_id);
         }
 
         let mut merged_count = 0;
@@ -668,14 +670,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                                 .shift_goto_map_nonterm
                                 .append(&mut state_b.shift_goto_map_nonterm);
                             state_a.reduce_map.append(&mut state_b.reduce_map);
-                            for ((_, lookaheads), mut l) in state_a
-                                .ruleset
-                                .rules
-                                .iter_mut()
-                                .zip(state_b.ruleset.rules.into_values())
-                            {
-                                lookaheads.append(&mut l);
-                            }
                             merged = true;
                         }
                     }
@@ -703,7 +697,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         let mut new_states = Vec::with_capacity(states.len() - merged_count);
         let mut old_to_new = vec![0; states.len()];
         for (state_id, state) in states.into_iter().enumerate() {
-            if state.ruleset.rules.is_empty() {
+            if state.ruleset.is_empty() {
                 continue;
             }
             let new_state_id = new_states.len();
@@ -742,10 +736,12 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         // building LALR(1)
         // merge every states with same core;
         // but we do have to check for resolving conflicts
-        let mut core_map: BTreeMap<BTreeSet<ShiftedRuleRef>, Vec<_>> = BTreeMap::new();
+        let mut core_map: BTreeMap<_, Vec<_>> = BTreeMap::new();
         for (state_id, state) in states.iter().enumerate() {
-            let shifted_rules: BTreeSet<_> = state.ruleset.rules.keys().copied().collect();
-            core_map.entry(shifted_rules).or_default().push(state_id);
+            core_map
+                .entry(state.ruleset.clone())
+                .or_default()
+                .push(state_id);
         }
 
         let mut merge_into = BTreeMap::new();
@@ -897,9 +893,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
                 let shift_rules = state
                     .ruleset
-                    .rules
                     .iter()
-                    .filter_map(|(rule_ref, _)| {
+                    .filter_map(|rule_ref| {
                         if self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
                             == Some(&Token::Term(term))
                         {
@@ -913,7 +908,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 if remove_shift {
                     // remove rules that start with `term`
                     state.shift_goto_map_term.remove(&term);
-                    state.ruleset.rules.retain(|rule_ref, _| {
+                    state.ruleset.retain(|rule_ref| {
                         self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
                             != Some(&Token::Term(term))
                     });
@@ -971,7 +966,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         let state_id = states.len();
         state_map.insert(rules.clone(), state_id);
         states.push(State::new());
-        states[state_id].ruleset = rules.clone();
+        states[state_id].ruleset = rules.rules.keys().copied().collect();
 
         // calculate next shifted rules and reduce rules
         // we don't care about the conflicts here
@@ -1107,7 +1102,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
             let shift_rules = if remove_shift {
                 // remove rules that start with `term`
-                states[state_id].ruleset.rules.retain(|rule_ref, _| {
+                states[state_id].ruleset.retain(|rule_ref| {
                     self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
                         != Some(&Token::Term(term))
                 });
