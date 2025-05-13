@@ -762,7 +762,13 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 states[state_a]
                     .shift_goto_map_nonterm
                     .append(&mut state_b.shift_goto_map_nonterm);
-                states[state_a].reduce_map.append(&mut state_b.reduce_map);
+                for (term, mut reduce_rules) in state_b.reduce_map {
+                    states[state_a]
+                        .reduce_map
+                        .entry(term)
+                        .or_default()
+                        .append(&mut reduce_rules);
+                }
             }
         }
         let mut new_states = Vec::with_capacity(states.len() - merge_into.len());
@@ -778,9 +784,15 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
         for state in &mut new_states {
             for next_state in state.shift_goto_map_term.values_mut() {
+                if let Some(&new_state) = merge_into.get(next_state) {
+                    *next_state = new_state;
+                }
                 *next_state = old_to_new[*next_state];
             }
             for next_state in state.shift_goto_map_nonterm.values_mut() {
+                if let Some(&new_state) = merge_into.get(next_state) {
+                    *next_state = new_state;
+                }
                 *next_state = old_to_new[*next_state];
             }
         }
