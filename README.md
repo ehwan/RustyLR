@@ -169,6 +169,8 @@ context.expected();         // get expected terminal symbols
 context.expected_nonterm(); // get expected non-terminal symbols
 context.can_feed( term );   // check if a terminal symbol can be fed
 context.trace();            // get all `%trace` non-terminals that are currently being parsed
+println!("{}", context.backtrace()); // print backtrace of the parser state
+println!("{}", context);    // print tree-structure of the parser state (`tree` feature)
 ```
 
 The generated code will also include a `feed` method that takes a token and a mutable reference to the user data. This method will return an `Ok(())` if the token was successfully parsed, or an `Err` if there was an error.
