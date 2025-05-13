@@ -11,7 +11,7 @@ use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
-use quote::quote;
+use quote::{quote, ToTokens};
 
 use rusty_lr_core::HashMap;
 use rusty_lr_core::Token;
@@ -878,7 +878,7 @@ impl Pattern {
 
                     let nonterm_info = NonTerminalInfo {
                         name: newrule_name.clone(),
-                        pretty_name: s.value(),
+                        pretty_name: s.to_token_stream().to_string(),
                         ruletype: None,
                         rules: vec![rule],
                         regex_span: Some((str_span, str_span)),
@@ -927,7 +927,7 @@ impl Pattern {
 
                     let nonterm_info = NonTerminalInfo {
                         name: newrule_name.clone(),
-                        pretty_name: String::from_utf8(vec).unwrap(),
+                        pretty_name: s.to_token_stream().to_string(),
                         ruletype: None,
                         rules: vec![rule],
                         regex_span: Some((str_span, str_span)),

@@ -812,7 +812,7 @@ impl Grammar {
                             rule.reduce_action = Some(ReduceAction {
                                 stream: action,
                                 generated: true,
-                                identity: false,
+                                identity: true,
                             });
                         } else {
                             let span = if rule.tokens.is_empty() {
@@ -963,32 +963,6 @@ impl Grammar {
 
     /// optimize grammar
     fn optimize_iterate(&mut self) -> Option<OptimizeDiag> {
-        //  Build parser tables from current terminal classes
-        //  Check if two or more terminal classes can be merged into one class
-        //  Update terminal classes
-        let mut builder = self.create_builder();
-        let augmented_idx = *self
-            .nonterminals_index
-            .get(&Ident::new(utils::AUGMENTED_NAME, Span::call_site()))
-            .unwrap();
-        let tables = if self.lalr {
-            builder.build_lalr(
-                augmented_idx,
-                &mut rusty_lr_core::builder::DiagnosticCollector::new(false),
-            )
-        } else {
-            builder.build(
-                augmented_idx,
-                &mut rusty_lr_core::builder::DiagnosticCollector::new(false),
-            )
-        };
-        let states = match tables {
-            Ok(tables) => tables.states,
-            Err(_) => {
-                unreachable!("optimize_iterate");
-            }
-        };
-
         // We are trying to find the 'minimum partitioning' of terminals
         // First we collect all the *groups* of terminals
         // Then we calculate the *minimal partitioning* to compress the groups
@@ -997,72 +971,67 @@ impl Grammar {
 
         // collect precedence orders
         // all terminals in one class must have same precedence order
-        let mut precedence_sets: HashMap<_, Vec<usize>> = Default::default();
-        for (&op, &level) in &builder.precedence_map {
-            if let rusty_lr_core::builder::Operator::Term(class) = op {
-                precedence_sets
-                    .entry(level)
-                    .or_insert_with(Vec::new)
-                    .push(class);
+        use rusty_lr_core::builder::Operator;
+        let mut precedence_sets: BTreeMap<_, BTreeSet<usize>> = Default::default();
+        for (&op, (_, level)) in &self.precedences {
+            if let Operator::Term(term) = op {
+                let class = self.terminal_class_id[term];
+                precedence_sets.entry(*level).or_default().insert(class);
             }
         }
-        for (_, mut terms) in precedence_sets {
-            terms.sort();
-            term_sets.insert(terms);
-        }
+        term_sets.extend(precedence_sets.into_values());
 
-        for state in &states {
-            // collect {set of terminals} that have same reduce action
-            let mut same_reduce = BTreeMap::new();
-            for (&term, reduces) in &state.reduce_map {
-                same_reduce
-                    .entry(reduces)
-                    .or_insert_with(Vec::new)
-                    .push(term);
-            }
-            term_sets.extend(same_reduce.into_values());
-
-            // collect {set of terminals} that have same prefix-suffix-reduce_action in the production rules
-            // so we can merge those terminals into one class
-            // e.g.
-            // consider the following state:
-            //      A -> X x Y
-            //      A -> X y Y
-            //      A -> X z Y
-            // here, we can group {x, y, z} into one class and merge them
-            //      A -> X <class> Y
+        // collect {set of terminals} that have same prefix-suffix-reduce_action in the production rules
+        // so we can merge those terminals into one class
+        // e.g.
+        // consider the following state:
+        //      A -> X x Y
+        //      A -> X y Y
+        //      A -> X z Y
+        // here, we can group {x, y, z} into one class and merge them
+        //      A -> X <class> Y
+        for nonterm_def in self.nonterminals.iter() {
             let mut same_ruleset = BTreeMap::new();
-            for (&term, &next_state) in &state.shift_goto_map_term {
-                let ruleset = states[next_state].unshifted_ruleset().collect::<Vec<_>>();
+            for rule in &nonterm_def.rules {
+                for (token_idx, term) in rule.tokens.iter().enumerate() {
+                    if let Token::Term(term) = term.token {
+                        // if this rule has reduce action, and it is not auto-generated,
+                        // this terminal should be completely distinct from others (for user-defined inspection action)
+                        // so put this terminal into separate class
+                        if rule.reduce_action.is_some()
+                            && !rule.reduce_action.as_ref().unwrap().identity
+                        {
+                            term_sets.insert(BTreeSet::from([term]));
+                            continue;
+                        }
 
-                let mut no_reduceaction_sets = Vec::new();
-                for rule in ruleset {
-                    let (nonterm, local_id) = self.get_rule_by_id(rule.rule).unwrap();
-                    let r = &nonterm.rules[local_id];
+                        // tokens before this token
+                        let prefix = rule
+                            .tokens
+                            .iter()
+                            .take(token_idx)
+                            .map(|token| token.token)
+                            .collect::<Vec<_>>();
+                        // tokens after this token
+                        let suffix = rule
+                            .tokens
+                            .iter()
+                            .skip(token_idx + 1)
+                            .map(|token| token.token)
+                            .collect::<Vec<_>>();
+                        let lookaheads = &rule.lookaheads;
 
-                    // if this rule has reduce action, and it is not auto-generated,
-                    // this terminal should be completely distinct from others (for user-defined inspection action)
-                    // so put this terminal into separate class
-                    if r.reduce_action.is_some() && !r.reduce_action.as_ref().unwrap().identity {
-                        term_sets.insert(vec![term]);
-                        continue;
+                        if !same_ruleset
+                            .entry((prefix, suffix, lookaheads))
+                            .or_insert_with(BTreeSet::new)
+                            .insert(term)
+                        {
+                            // if it is false, it is reduce/reduce conflict (duplicated rule)
+                            // so stop optimization
+                            return None;
+                        }
                     }
-
-                    let lookahead = &r.lookaheads;
-                    let mut presuffix: Vec<Token<_, _>> =
-                        r.tokens.iter().map(|token| token.token).collect();
-                    presuffix.remove(rule.shifted);
-                    // add rule name to the end of the presuffix
-                    let nonterm_id = *self.nonterminals_index.get(&nonterm.name).unwrap();
-                    presuffix.push(Token::NonTerm(nonterm_id));
-
-                    no_reduceaction_sets.push((presuffix, lookahead));
                 }
-
-                same_ruleset
-                    .entry(no_reduceaction_sets)
-                    .or_insert_with(Vec::new)
-                    .push(term);
             }
             term_sets.extend(same_ruleset.into_values());
         }
@@ -1129,10 +1098,13 @@ impl Grammar {
 
         // check for unused non-terminals
         let mut nonterm_used = vec![false; self.nonterminals.len()];
-        for state in &states {
-            for (rule, _) in state.ruleset.rules.iter() {
-                let nonterm = builder.rules[rule.rule].rule.name;
-                nonterm_used[nonterm] = true;
+        for nonterm in &self.nonterminals {
+            for rule in &nonterm.rules {
+                for token in &rule.tokens {
+                    if let Token::NonTerm(nonterm_idx) = token.token {
+                        nonterm_used[nonterm_idx] = true;
+                    }
+                }
             }
         }
         for (nonterm_idx, nonterm) in self.nonterminals.iter_mut().enumerate() {
@@ -1335,7 +1307,9 @@ impl Grammar {
                 Some(new_diag) => {
                     diag.removed.extend(new_diag.removed.into_iter());
                 }
-                None => break,
+                None => {
+                    break;
+                }
             }
         }
 
@@ -1465,82 +1439,6 @@ impl Grammar {
     pub fn nonterm_pretty_name(&self, nonterm_idx: usize) -> String {
         self.nonterminals[nonterm_idx].pretty_name.clone()
     }
-
-    /*
-    pub fn conflict(&self) -> Result<(), Box<ConflictError>> {
-        // check for SR/RR conflicts if it's not GLR
-        if !self.glr {
-            let term_mapper = |class| self.class_pretty_name_list(class, 5);
-            let nonterm_mapper = |nonterm| self.nonterm_pretty_name(nonterm);
-
-            // rr conflicts
-            for state in self.states.iter() {
-                if let Some((rules, lookaheads)) = state.conflict_rr().next() {
-                    let lookahead = *lookaheads.into_iter().next().unwrap();
-                    let (rule1, rule2) = {
-                        let mut iter = rules.iter();
-                        let r1 = *iter.next().unwrap();
-                        (r1, *iter.next().unwrap())
-                    };
-                    return Err(Box::new(ConflictError::ReduceReduceConflict {
-                        lookahead: term_mapper(lookahead),
-                        rule1: (
-                            rule1,
-                            self.builder.rules[rule1]
-                                .rule
-                                .clone()
-                                .map(term_mapper, nonterm_mapper),
-                        ),
-                        rule2: (
-                            rule2,
-                            self.builder.rules[rule2]
-                                .rule
-                                .clone()
-                                .map(term_mapper, nonterm_mapper),
-                        ),
-                    }));
-                }
-            }
-
-            // sr conflicts
-            for state in self.states.iter() {
-                if let Some((&term, reduces, shift_rules)) =
-                    state.conflict_sr(|idx| &self.states[idx]).next()
-                {
-                    let reduce = *reduces.iter().next().unwrap();
-                    let shift_rules = shift_rules
-                        .into_iter()
-                        .map(|rule| {
-                            let prod_rule = self.builder.rules[rule.rule]
-                                .rule
-                                .clone()
-                                .map(term_mapper, nonterm_mapper);
-                            (
-                                rule.rule,
-                                rusty_lr_core::ShiftedRule {
-                                    rule: prod_rule,
-                                    shifted: rule.shifted,
-                                },
-                            )
-                        })
-                        .collect();
-                    return Err(Box::new(ConflictError::ShiftReduceConflict {
-                        term: term_mapper(term),
-                        reduce_rule: (
-                            reduce,
-                            self.builder.rules[reduce]
-                                .rule
-                                .clone()
-                                .map(term_mapper, nonterm_mapper),
-                        ),
-                        shift_rules,
-                    }));
-                }
-            }
-        }
-        Ok(())
-    }
-    */
 
     /// create the rusty_lr_core::Grammar from the parsed CFGs
     pub fn create_builder(&self) -> rusty_lr_core::builder::Grammar<ClassIndex, usize> {
