@@ -17,27 +17,26 @@ It constructs optimized state machine, ensuring efficient and reliable parsing.â
  - **Multiple Parsing Strategies:** Supports minimal-LR(1), LALR(1) parser table, and GLR parsing strategy.
  - **Detailed Diagnostics:** Detect grammar conflicts, verbose conflicts resolving stages, and optimization stages.
 
- ## Installation
+ ## Installation & How to Use
  Add RustyLR to your `Cargo.toml`:
  ```toml
  [dependencies]
  rusty_lr = "..."
  ```
- To use buildscript tools:
- ```toml
- [build-dependencies]
- rusty_lr = { version = "...", features = ["build"] }
- ```
- Or you want to use executable version (optional):
- ```sh
- cargo install rustylr
- ```
+ To work with `rusty_lr`, you need to generate parser code using one of the following methods:
+  - **Procedural macros:** Use the built-in `lr1!` macro
+  - **Build script:** Enable the `build` feature and generate parser code during the build process
+    ```toml
+    [build-dependencies]
+    rusty_lr = { version = "...", features = ["build"] }
+    ```
+  - **Executable:** Use the standalone `rustylr` executable to generate parser code
+    ```sh
+    cargo install rustylr
+    ```
+Recommend using the `rustylr` executable. It's faster and provides helpful grammar diagnostics.
+Ensure the version of the generated code targets the same version of `rusty_lr` in your `Cargo.toml`. Otherwise you may encounter build errors.
 
- `rusty_lr` is designed for use with auto-generated code,
- either through `lr1!` macro (default), a build script (with `build` feature), or the `rustylr` executable.
- When using a buildscript or executable, you can get beautiful and detailed messages generated from your grammar.
-
- ## Quick Start
  ### Using Procedural Macros
  Define your grammar using the `lr1!` macro:
  ```rust
