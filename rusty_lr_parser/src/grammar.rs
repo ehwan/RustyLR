@@ -1207,6 +1207,14 @@ impl Grammar {
                 continue;
             }
             let rule = &nonterm.rules[0];
+            if rule.dprec.is_some() {
+                // this rule has %dprec, so do not optimize
+                continue;
+            }
+            if rule.prec.is_some() {
+                // this rule has %prec, so do not optimize
+                continue;
+            }
             if rule.tokens.len() != 1 {
                 continue;
             }
