@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_buildscript"
-version = "0.41.1"
+version = "0.41.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "buildscipt tools for rusty_lr"

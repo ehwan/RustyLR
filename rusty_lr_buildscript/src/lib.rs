@@ -1039,25 +1039,23 @@ impl Builder {
             if self.print_backtrace {
                 notes.push("Backtrace for the shift rule:".to_string());
             }
-            // pretty-print only for the 0th rule; which is the original, and others are backtrace
-            if !shift_reduce_conflict.shift_rules.is_empty() {
+            for shift_rule in shift_reduce_conflict.shift_rules {
                 Self::extend_rule_source_label(
                     &mut labels,
                     file_id,
-                    shift_reduce_conflict.shift_rules[0].rule,
+                    shift_rule.rule,
                     &grammar,
                     "(Shift) ",
                     "(Shift) ",
                 );
+
                 if self.print_backtrace {
-                    for shift_rule in shift_reduce_conflict.shift_rules {
-                        let rule_str = grammar.builder.rules[shift_rule.rule]
-                            .rule
-                            .clone()
-                            .map(class_mapper, nonterm_mapper)
-                            .into_shifted(shift_rule.shifted);
-                        notes.push(format!("\t>>> {rule_str}"));
-                    }
+                    let rule_str = grammar.builder.rules[shift_rule.rule]
+                        .rule
+                        .clone()
+                        .map(class_mapper, nonterm_mapper)
+                        .into_shifted(shift_rule.shifted);
+                    notes.push(format!("\t>>> {rule_str}"));
                 }
             }
             for (reduce_rule, reduce_rule_from) in shift_reduce_conflict.reduce_rules {
