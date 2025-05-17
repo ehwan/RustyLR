@@ -1020,9 +1020,10 @@ impl Grammar {
                             .map(|token| token.token)
                             .collect::<Vec<_>>();
                         let lookaheads = &rule.lookaheads;
+                        let dprec = rule.dprec.map_or(0, |(val, _)| val);
 
                         if !same_ruleset
-                            .entry((prefix, suffix, lookaheads))
+                            .entry((prefix, suffix, lookaheads, dprec))
                             .or_insert_with(BTreeSet::new)
                             .insert(term)
                         {
