@@ -175,24 +175,32 @@ impl Builder {
         } else {
             let (rule_begin, rule_end) = nonterm.rules[local_rule].span_pair();
             let rule_range = rule_begin.byte_range().start..rule_end.byte_range().end;
+            let origin_range = nonterm.name.span().byte_range();
 
             let primary_message = format!("{}{} was defined here", prefix_str, nonterm.pretty_name);
             let mut duplicated_primary = false;
+            let mut duplicated_secondary = false;
             for label in labels.iter() {
-                if label.range == rule_range && label.message == primary_message {
+                if label.range == origin_range && label.message == primary_message {
                     duplicated_primary = true;
                     break;
                 }
             }
+            for label in labels.iter() {
+                if label.range == rule_range && label.message == message_secondary {
+                    duplicated_secondary = true;
+                    break;
+                }
+            }
             if !duplicated_primary {
+                labels.push(Label::primary(fileid, origin_range).with_message(primary_message));
+            }
+            if !duplicated_secondary {
                 labels.push(
-                    Label::primary(fileid, nonterm.name.span().byte_range())
-                        .with_message(primary_message),
+                    Label::secondary(fileid, rule_range)
+                        .with_message(message_secondary.to_string()),
                 );
             }
-            labels.push(
-                Label::secondary(fileid, rule_range).with_message(message_secondary.to_string()),
-            );
         }
     }
 
