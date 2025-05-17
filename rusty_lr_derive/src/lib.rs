@@ -31,17 +31,18 @@ pub fn lr1(input: TokenStream) -> TokenStream {
     grammar.builder = grammar.create_builder();
     let diags = grammar.build_grammar();
     if !grammar.glr {
-        if let Some(sr_conflict) = diags.shift_reduce_conflicts.into_iter().next() {
+        if let Some(((term, shift_rules, _), reduce_rules)) =
+            diags.shift_reduce_conflicts.into_iter().next()
+        {
             let class_mapper = |term| grammar.class_pretty_name_list(term, 5);
             let nonterm_mapper = |term| grammar.nonterm_pretty_name(term);
-            let term = class_mapper(sr_conflict.term);
-            let (reduce_rule, _) = sr_conflict.reduce_rules.into_iter().next().unwrap();
+            let term = class_mapper(term);
+            let (reduce_rule, _) = reduce_rules.into_iter().next().unwrap();
             let reduce_rule = grammar.builder.rules[reduce_rule]
                 .rule
                 .clone()
                 .map(class_mapper, nonterm_mapper);
-            let shift_rules = sr_conflict
-                .shift_rules
+            let shift_rules = shift_rules
                 .into_iter()
                 .map(|rule| {
                     format!(

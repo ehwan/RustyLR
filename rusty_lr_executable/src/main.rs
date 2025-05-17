@@ -15,6 +15,7 @@ fn main() {
     };
 
     let mut builder = rusty_lr_buildscript::Builder::new();
+    builder.is_executable = true;
     builder.file(&args.input_file);
     if args.verbose {
         builder.verbose();

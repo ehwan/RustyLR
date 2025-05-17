@@ -7,8 +7,6 @@ use std::vec::Vec;
 
 use super::BuildError;
 use super::DiagnosticCollector;
-use super::ResolveDiagnostic;
-use super::ShiftReduceConflictDiag;
 use super::State;
 use super::DFA;
 use crate::hashmap::HashMap;
@@ -433,8 +431,10 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             for (&term, reduce_rules) in state.reduce_map.iter() {
                 if let Some(&next_shift_state) = state.shift_goto_map_term.get(&term) {
                     // shift/reduce conflict
-                    let mut shift_rules = states[next_shift_state].unshifted_ruleset().collect();
-                    self.expand_backward(&mut shift_rules, &states[state_id].ruleset);
+                    let shift_rules: Vec<_> =
+                        states[next_shift_state].unshifted_ruleset().collect();
+                    let mut shift_rules_backtrace = shift_rules.clone();
+                    self.expand_backward(&mut shift_rules_backtrace, &states[state_id].ruleset);
                     let reduce_rules = reduce_rules
                         .iter()
                         .map(|&rule| {
@@ -456,11 +456,12 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                             (rule, shift_rules)
                         })
                         .collect();
-                    diags.add_shift_reduce_conflict(ShiftReduceConflictDiag {
+                    diags.add_shift_reduce_conflict(
                         term,
                         shift_rules,
+                        shift_rules_backtrace,
                         reduce_rules,
-                    });
+                    );
                 } else if reduce_rules.len() > 1 {
                     let reduce_rules = reduce_rules
                         .iter()
@@ -807,7 +808,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                     .max()
                     .unwrap();
 
-                let deleted_rules: Vec<usize> = reduce_rules
+                let deleted_rules: BTreeSet<usize> = reduce_rules
                     .iter()
                     .filter(|&&rule| self.rules[rule].priority != max_priority)
                     .copied()
@@ -815,18 +816,9 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 if deleted_rules.is_empty() {
                     continue;
                 }
-                let remained_rules = reduce_rules
-                    .iter()
-                    .filter(|&&rule| self.rules[rule].priority == max_priority)
-                    .copied()
-                    .collect();
                 reduce_rules.retain(|rule| self.rules[*rule].priority == max_priority);
 
-                diags.add_resolved(ResolveDiagnostic::Priority {
-                    max_priority,
-                    remaining: remained_rules,
-                    deleted: deleted_rules,
-                });
+                diags.add_reduce_reduce_resolved(max_priority, reduce_rules.clone(), deleted_rules);
             }
 
             // check shift/reduce conflicts resolving
@@ -839,21 +831,19 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                     continue;
                 };
 
-                let mut reduces = Vec::new();
-                let mut remove_reduces = Vec::new();
+                let mut reduces = BTreeMap::new();
+                let mut remove_reduces = BTreeMap::new();
                 let mut remove_shift = true;
 
                 for &reduce_rule in reduce_rules.iter() {
                     let Some(reduce_op) = self.rules[reduce_rule].operator else {
                         // no operator for this reduce rule
                         remove_shift = false;
-                        reduces.push((reduce_rule, None, None));
                         continue;
                     };
                     let Some(&reduce_prec) = self.precedence_map.get(&reduce_op) else {
                         // no precedence for this reduce rule
                         remove_shift = false;
-                        reduces.push((reduce_rule, None, None));
                         continue;
                     };
 
@@ -861,29 +851,28 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                     match reduce_prec.cmp(&shift_prec) {
                         Ordering::Less => {
                             // reduce < shift => remove reduce
-                            remove_reduces.push((reduce_rule, reduce_prec, None));
+                            remove_reduces.insert(reduce_rule, reduce_prec);
                             remove_shift = false;
                         }
                         Ordering::Greater => {
                             // reduce > shift => remove shift, but check other reduce rules
-                            reduces.push((reduce_rule, Some(reduce_prec), None));
+                            reduces.insert(reduce_rule, reduce_prec);
                         }
                         Ordering::Equal => {
                             // reduce == shift => check reduce type
-                            let reduce_type = self.reduce_types.get(&reduce_op).copied();
-                            match reduce_type {
+                            match self.reduce_types.get(&reduce_op) {
                                 Some(ReduceType::Left) => {
                                     // reduce first => remove shift
-                                    reduces.push((reduce_rule, Some(reduce_prec), reduce_type));
+                                    reduces.insert(reduce_rule, reduce_prec);
                                 }
                                 Some(ReduceType::Right) => {
                                     // shift first => remove reduce
-                                    remove_reduces.push((reduce_rule, reduce_prec, reduce_type));
+                                    remove_reduces.insert(reduce_rule, reduce_prec);
                                     remove_shift = false;
                                 }
                                 None => {
                                     // no reduce type => conflict
-                                    reduces.push((reduce_rule, Some(reduce_prec), None));
+                                    reduces.insert(reduce_rule, reduce_prec);
                                     remove_shift = false;
                                 }
                             }
@@ -915,7 +904,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 }
 
                 // remove reduce rules
-                for &(remove_reduce, _, _) in remove_reduces.iter() {
+                for (&remove_reduce, _) in remove_reduces.iter() {
                     reduce_rules.remove(&remove_reduce);
                 }
 
@@ -923,14 +912,16 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                     continue;
                 }
 
-                diags.add_resolved(ResolveDiagnostic::Precedence {
-                    term,
-                    shift_precedence: shift_prec,
-                    shift_deleted: remove_shift,
-                    shift_rules,
-                    reduce_rules: reduces,
-                    deleted_reduces: remove_reduces,
-                });
+                if remove_shift {
+                    diags.add_shift_reduce_resolved_reduce(term, shift_rules, shift_prec, reduces);
+                } else {
+                    diags.add_shift_reduce_resolved_shift(
+                        term,
+                        shift_rules,
+                        shift_prec,
+                        remove_reduces,
+                    );
+                }
             }
             state
                 .reduce_map
@@ -1016,7 +1007,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 .max()
                 .unwrap();
 
-            let deleted_rules: Vec<usize> = reduce_rules
+            let deleted_rules: BTreeSet<_> = reduce_rules
                 .iter()
                 .filter(|&&rule| self.rules[rule].priority != max_priority)
                 .copied()
@@ -1024,18 +1015,9 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             if deleted_rules.is_empty() {
                 continue;
             }
-            let remained_rules = reduce_rules
-                .iter()
-                .filter(|&&rule| self.rules[rule].priority == max_priority)
-                .copied()
-                .collect();
             reduce_rules.retain(|rule| self.rules[*rule].priority == max_priority);
 
-            diags.add_resolved(ResolveDiagnostic::Priority {
-                max_priority,
-                remaining: remained_rules,
-                deleted: deleted_rules,
-            });
+            diags.add_reduce_reduce_resolved(max_priority, reduce_rules.clone(), deleted_rules);
         }
 
         // check shift/reduce conflicts
@@ -1048,20 +1030,19 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 continue;
             };
 
-            let mut reduces = Vec::new();
-            let mut remove_reduces = Vec::new();
+            // reduce_rule, reduce_prec map
+            let mut reduces = BTreeMap::new();
+            let mut remove_reduces = BTreeMap::new();
             let mut remove_shift = true;
 
             for &reduce_rule in reduce_rules.iter() {
                 let Some(reduce_op) = self.rules[reduce_rule].operator else {
                     // no operator for this reduce rule
-                    reduces.push((reduce_rule, None, None));
                     remove_shift = false;
                     continue;
                 };
                 let Some(&reduce_prec) = self.precedence_map.get(&reduce_op) else {
                     // no precedence for this reduce rule
-                    reduces.push((reduce_rule, None, None));
                     remove_shift = false;
                     continue;
                 };
@@ -1070,29 +1051,28 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 match reduce_prec.cmp(&shift_prec) {
                     Ordering::Less => {
                         // reduce < shift => remove reduce
-                        remove_reduces.push((reduce_rule, reduce_prec, None));
+                        remove_reduces.insert(reduce_rule, reduce_prec);
                         remove_shift = false;
                     }
                     Ordering::Greater => {
                         // reduce > shift => remove shift, but check other reduce rules
-                        reduces.push((reduce_rule, Some(reduce_prec), None));
+                        reduces.insert(reduce_rule, reduce_prec);
                     }
                     Ordering::Equal => {
                         // reduce == shift => check reduce type
-                        let reduce_type = self.reduce_types.get(&reduce_op).copied();
-                        match reduce_type {
+                        match self.reduce_types.get(&reduce_op) {
                             Some(ReduceType::Left) => {
                                 // reduce first => remove shift
-                                reduces.push((reduce_rule, Some(reduce_prec), reduce_type));
+                                reduces.insert(reduce_rule, reduce_prec);
                             }
                             Some(ReduceType::Right) => {
                                 // shift first => remove reduce
-                                remove_reduces.push((reduce_rule, reduce_prec, reduce_type));
+                                remove_reduces.insert(reduce_rule, reduce_prec);
                                 remove_shift = false;
                             }
                             None => {
                                 // no reduce type => conflict
-                                reduces.push((reduce_rule, Some(reduce_prec), None));
+                                reduces.insert(reduce_rule, reduce_prec);
                                 remove_shift = false;
                             }
                         }
@@ -1125,7 +1105,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             };
 
             // remove reduce rules
-            for &(remove_reduce, _, _) in remove_reduces.iter() {
+            for (&remove_reduce, _) in remove_reduces.iter() {
                 reduce_rules.remove(&remove_reduce);
             }
 
@@ -1133,14 +1113,16 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 continue;
             }
 
-            diags.add_resolved(ResolveDiagnostic::Precedence {
-                term,
-                shift_precedence: shift_prec,
-                shift_deleted: remove_shift,
-                shift_rules,
-                reduce_rules: reduces,
-                deleted_reduces: remove_reduces,
-            });
+            if remove_shift {
+                diags.add_shift_reduce_resolved_reduce(term, shift_rules, shift_prec, reduces);
+            } else {
+                diags.add_shift_reduce_resolved_shift(
+                    term,
+                    shift_rules,
+                    shift_prec,
+                    remove_reduces,
+                );
+            }
         }
         reduce_map.retain(|_, reduce_rules| !reduce_rules.is_empty());
 
