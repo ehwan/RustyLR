@@ -130,6 +130,8 @@ pub struct Grammar {
 
     /// in the generated parser, the dense table `Vec` will be used instead of the sparse table `HashMap`.
     pub emit_dense: bool,
+
+    pub filter: Option<TokenStream>,
 }
 
 impl Grammar {
@@ -372,6 +374,7 @@ impl Grammar {
             range_resolver: RangeResolver::new(),
 
             emit_dense: grammar_args.dense,
+            filter: grammar_args.filter,
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";

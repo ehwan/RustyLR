@@ -2,6 +2,7 @@
 ## Quick Reference
  - [Token type - `%tokentype`](#token-type-must-defined)
  - [Defining tokens - `%token`](#token-definition-must-defined)
+ - [`%filter`](#filter-directive)
  - [Production rules](#production-rules)
  - [Regex pattern](#regex-pattern)
  - [RuleType](#ruletype-optional)
@@ -65,8 +66,6 @@ match terminal_symbol {
 }
 ```
 
-`<RustExpr>` must be accessible at the point where the macro is called.
-
 ```rust
 %tokentype MyToken;
 
@@ -81,6 +80,23 @@ E: num plus num ;
 Note: If `%tokentype` is either `char` or `u8`, you can't use this directive. You must use literal value in the grammar directly.
 
 Note: This directive is not for defining the *Whole Token Space*. Any token not defined here could also be captured by [^ term1 ...]-like negation pattern.
+
+
+## `%filter` directive
+For %tokentype that can not be used in `match` statement directly,
+you can define filter function using `%filter` directive.
+```rust
+%filter ::my::filter_fn ;
+```
+Now the `match` statement will be generated as follows:
+```rust
+match ::my::filter_fn( terminal_symbol ) {
+    <MatchPattern> => { classification }
+    ...
+}
+```
+
+The signature of the filter function must be `fn (&Terminal) -> MatchType`.
 
 
 ## Production rules

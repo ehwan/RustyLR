@@ -1134,6 +1134,12 @@ impl Grammar {
                 _ => #other_class_id,
             });
 
+            let match_terminal_filter_expression = if let Some(filter) = &self.filter {
+                quote! { #filter(terminal) }
+            } else {
+                quote! {terminal}
+            };
+
             stream.extend(quote! {
             /// A struct that holds the entire parser table and production rules.
             #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
@@ -1164,7 +1170,7 @@ impl Grammar {
                 }
                 fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
                     #[allow(unreachable_patterns)]
-                    match terminal {
+                    match #match_terminal_filter_expression {
                         #terminal_class_match_body_stream
                     }
                 }

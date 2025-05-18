@@ -71,6 +71,7 @@ use rusty_lr_core::ReduceType;
 %token dense Lexed::Dense(_,_);
 %token trace Lexed::Trace(_,_);
 %token dprec Lexed::DPrec(_,_);
+%token filter Lexed::Filter(_,_);
 
 %eof Lexed::Eof;
 
@@ -387,6 +388,8 @@ Trace(Vec<Ident>): trace ident* semicolon {
 }
 ;
 
+Filter(TokenStream): filter! RustCode semicolon! ;
+
 GrammarLine : Rule { data.rules.push(Rule); }
 | TokenDef  { data.terminals.push(TokenDef); }
 | StartDef  { data.start_rule_name.push(StartDef); }
@@ -402,6 +405,7 @@ GrammarLine : Rule { data.rules.push(Rule); }
 | NoOptim { data.no_optim = true; }
 | Dense { data.dense = true; }
 | Trace { data.traces.extend(Trace); }
+| Filter { data.filter = Some(Filter); }
 ;
 
 Grammar: GrammarLine+;

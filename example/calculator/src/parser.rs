@@ -19,6 +19,10 @@ impl std::cmp::PartialEq for Token {
 }
 impl std::cmp::Eq for Token {}
 
+fn filter( term: &Token ) -> &Token {
+    term
+}
+
 %%
 
 // this define struct `EParser`
@@ -50,6 +54,8 @@ impl std::cmp::Eq for Token {}
 // resolving shift/reduce conflict
 %left plus;
 %left star;
+
+%filter filter;
 
 // data that each token holds can be accessed by its name
 // s is slice of shifted terminal symbols captured by current rule

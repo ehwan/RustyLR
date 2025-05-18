@@ -497,4 +497,5 @@ pub struct GrammarArgs {
     pub no_optim: bool,
     pub dense: bool,
     pub traces: Vec<Ident>,
+    pub filter: Option<TokenStream>,
 }
