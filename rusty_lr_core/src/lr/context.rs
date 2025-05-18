@@ -62,11 +62,22 @@ impl<S: Stack> Context<S> {
         self.tree_stack
     }
 
+    /// Get expected terminal classes for next `feed()` call.
+    pub fn expected_class<'a, P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+        &self,
+        parser: &'a P,
+    ) -> impl Iterator<Item = usize> + 'a
+    where
+        S::Term: 'a,
+        S::NonTerm: 'a,
+    {
+        parser.get_states()[*self.state_stack.last().unwrap()].expected()
+    }
     /// Get expected tokens for next `feed()` call.
     pub fn expected<'a, P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
         &self,
         parser: &'a P,
-    ) -> impl Iterator<Item = P::TermRet<'a>> + 'a
+    ) -> impl Iterator<Item = P::TerminalClassElement> + 'a
     where
         S::Term: 'a,
         S::NonTerm: 'a,

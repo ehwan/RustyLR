@@ -42,26 +42,36 @@ Ensure the version of the generated code targets the same version of `rusty_lr` 
  ```rust
 // this define `EParser` struct
 // where `E` is the start symbol
+pub enum MyToken {
+    Num(i32),
+    Op(char),
+    Whitespace(char),
+    EOF,
+}
 lr1! {
     %userdata i32;           // userdata type passed to parser
-    %tokentype char;         // token type; sequence of `tokentype` is fed to parser
+    %tokentype MyToken;         // token type; sequence of `tokentype` is fed to parser
     %start E;                // start symbol; this is the final value of parser
-    %eof '\0';               // eof token; this token is used to finish parsing
+    %eof MyToken::EOF;
+
+    // token definitions
+    %token num  MyToken::Num(_);
+    %token plus MyToken::Op('+');
+    %token star MyToken::Op('*');
+    %token ws   MyToken::Whitespace(_);
 
     // left reduction for '+' and '*'
-    %left '+';
-    %left '*';
     // operator precedence '*' > '+'
+    %left plus;
+    %left star;
 
     // ================= Production rules =================
-    Digit(char): ['0'-'9'];           // character set '0' to '9'
+    Number(i32)                   // production rule `Number` holds `i32` value
+        : ws* num+ ws*            // `Number` is one or more `num` surrounded by zero or more whitespaces
+        { /* `num` is Vec<MyToken> here */ }; // this will be the value of `Number` (i32) by this production rule
 
-    Number(i32)                       // production rule `Number` holds `i32` value
-        : ' '* Digit+ ' '*            // `Number` is one or more `Digit` surrounded by zero or more spaces
-        { Digit.into_iter().collect::<String>().parse().unwrap() }; // this will be the value of `Number` (i32) by this production rule
-
-    E(f32): E '*' e2=E { E * e2 }
-          | E '+' e2=E {
+    E(f32): E star e2=E { E * e2 }
+          | E plus e2=E {
               *data += 1;                       // access userdata by `data`
               println!( "{:?} {:?}", E, e2 );   // any Rust code can be written here
               E + e2                            // this will be the value of `E` (f32) by this production rule
@@ -119,17 +129,17 @@ include!(concat!(env!("OUT_DIR"), "/parser.rs"));
 let mut parser = parser::EParser::new(); // create <StartSymbol>Parser class
 let mut context = parser::EContext::new(); // create <StartSymbol>Context class
 let mut userdata: i32 = 0;
-for b in input.chars() {
-    match context.feed(&parser, b, &mut userdata) {
+for token in tokens {
+    match context.feed(&parser, token, &mut userdata) {
         Ok(_) => {}
         Err(e) => {
+            let expected = context.expected(); // get expected symbols
             eprintln!("error: {}", e);
             return;
         }
     }
 }
-println!("{:?}", context);
-context.feed(&parser, 0 as char, &mut userdata).unwrap(); // feed EOF
+context.feed(&parser, MyToken::EOF, &mut userdata).unwrap(); // feed EOF
 
 let result:i32 = context.accept(); // get value of start 'E'
 ```
@@ -194,7 +204,8 @@ RustyLR provides a mechanism for handling semantic errors during parsing.
 See [SYNTAX.md - Resolving Conflicts](SYNTAX.md#resolving-conflicts) for details.
 
 ## Examples
- - [Calculator](examples/calculator_u8/src/parser.rs): A calculator using `u8` as token type.
+ - [Calculator (enum version)](examples/calculator/src/parser.rs): A numeric expression parser
+ - [Calculator (u8 version)](examples/calculator_u8/src/parser.rs): A numeric expression parser
  - [Json Validator](examples/json/src/parser.rs): A JSON validator
  - [lua 5.4 syntax parser](https://github.com/ehwan/lua_rust/blob/main/parser/src/parser.rs)
  - [Bootstrap](rusty_lr_parser/src/parser/parser.rs): rusty_lr syntax parser is written in rusty_lr itself.

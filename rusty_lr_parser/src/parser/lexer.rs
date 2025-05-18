@@ -35,10 +35,10 @@ pub enum Lexed {
 
     Literal(Literal),
 
-    ParenGroup(Option<Group>),
-    BraceGroup(Option<Group>),
-    BracketGroup(Option<Group>),
-    NoneGroup(Option<Group>),
+    ParenGroup(Group),
+    BraceGroup(Group),
+    BracketGroup(Group),
+    NoneGroup(Group),
     LParen(Span),
     RParen(Span),
     LBrace(Span),
@@ -86,10 +86,10 @@ impl Lexed {
 
             Lexed::Literal(lit) => stream.append(lit),
 
-            Lexed::ParenGroup(group) => stream.append(group.unwrap()),
-            Lexed::BraceGroup(group) => stream.append(group.unwrap()),
-            Lexed::BracketGroup(group) => stream.append(group.unwrap()),
-            Lexed::NoneGroup(group) => stream.append(group.unwrap()),
+            Lexed::ParenGroup(group) => stream.append(group),
+            Lexed::BraceGroup(group) => stream.append(group),
+            Lexed::BracketGroup(group) => stream.append(group),
+            Lexed::NoneGroup(group) => stream.append(group),
 
             Lexed::LParen(_) => unreachable!("LParen::stream()"),
             Lexed::RParen(_) => unreachable!("RParen::stream()"),
@@ -191,10 +191,10 @@ impl Lexed {
 
             Lexed::Literal(lit) => lit.span(),
 
-            Lexed::ParenGroup(group) => group.as_ref().unwrap().span(),
-            Lexed::BraceGroup(group) => group.as_ref().unwrap().span(),
-            Lexed::BracketGroup(group) => group.as_ref().unwrap().span(),
-            Lexed::NoneGroup(group) => group.as_ref().unwrap().span(),
+            Lexed::ParenGroup(group) => group.span(),
+            Lexed::BraceGroup(group) => group.span(),
+            Lexed::BracketGroup(group) => group.span(),
+            Lexed::NoneGroup(group) => group.span(),
             Lexed::LParen(span) => *span,
             Lexed::RParen(span) => *span,
             Lexed::LBrace(span) => *span,
@@ -372,16 +372,14 @@ pub fn feed_recursive(
             },
             TokenTree::Group(group) => match group.delimiter() {
                 Delimiter::Parenthesis => {
-                    if let Err(err) =
-                        context.feed(parser, Lexed::ParenGroup(Some(group)), grammar_args)
-                    {
+                    if let Err(err) = context.feed(parser, Lexed::ParenGroup(group), grammar_args) {
                         let term = if let GrammarParseError::InvalidTerminal(err) = err {
                             err.term
                         } else {
                             unreachable!();
                         };
                         let group = if let Lexed::ParenGroup(group) = term {
-                            group.unwrap()
+                            group
                         } else {
                             unreachable!();
                         };
@@ -393,7 +391,7 @@ pub fn feed_recursive(
                 }
                 Delimiter::Brace => {
                     // for now, splitted for brace is not in syntax, so ignore it
-                    context.feed(parser, Lexed::BraceGroup(Some(group)), grammar_args)?;
+                    context.feed(parser, Lexed::BraceGroup(group), grammar_args)?;
 
                     // feed the compound token
                     // if parser
@@ -427,7 +425,7 @@ pub fn feed_recursive(
                 }
                 _ => {
                     // for now, compound for nonegroup is not in syntax, so ignore it
-                    context.feed(parser, Lexed::NoneGroup(Some(group)), grammar_args)?;
+                    context.feed(parser, Lexed::NoneGroup(group), grammar_args)?;
 
                     // feed the compound token
                     // if parser

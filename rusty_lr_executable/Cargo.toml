@@ -1,6 +1,6 @@
 [package]
 name = "rustylr"
-version = "1.8.1"
+version = "1.9.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "executable for rusty_lr"
@@ -11,4 +11,4 @@ categories = ["parsing"]
 
 [dependencies]
 clap = { version = "4.5.7", features = ["derive"] }
-rusty_lr_buildscript = { version = "0.42.0", path = "../rusty_lr_buildscript" }
+rusty_lr_buildscript = { version = "0.43.0", path = "../rusty_lr_buildscript" }

@@ -997,14 +997,12 @@ impl Grammar {
                 pub classes: Vec<Vec<(#token_typename,#token_typename)>>,
                 /// term to class map
                 pub term_class_map: #module_prefix::RangeMap,
-                /// class id for terminal not matched with any in grammar
-                pub other_class_id: usize,
             }
             impl #parser_trait_name for #parser_struct_name {
                 type Term = #token_typename;
                 type NonTerm = #nonterminals_enum_name;
-                type TermRet<'a> = #token_typename;
                 type State = #state_typename;
+                type TerminalClassElement = ::std::ops::RangeInclusive<#token_typename>;
 
                 fn get_rules(&self) -> &[#rule_typename] {
                     &self.rules
@@ -1012,17 +1010,17 @@ impl Grammar {
                 fn get_states(&self) -> &[#state_typename] {
                     &self.states
                 }
-                fn get_terminals(&self, i: usize) -> Option<impl IntoIterator<Item = Self::TermRet<'_>> + '_> {
+                fn get_terminals(&self, i: usize) -> Option<impl IntoIterator<Item = Self::TerminalClassElement> + '_> {
                     self.classes.get(i).map(
-                        |class| class.iter().flat_map( |&(start,last)| {
-                            (start..=last).into_iter()
+                        |class| class.iter().map( |&(start,last)| {
+                            start..=last
                         })
                     )
                 }
                 fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
                     // Self::Term is char or u8 here
                     self.term_class_map.get(*terminal as u32).unwrap_or(
-                        self.other_class_id
+                        #other_class_id
                     )
                 }
                 fn get_error_nonterm(&self) -> Option<Self::NonTerm> {
@@ -1050,15 +1048,15 @@ impl Grammar {
                             terminal_class_ranges,
                             terminal_class_values,
                         ),
-                        other_class_id: #other_class_id,
                     }
                 }
             }
 
             });
         } else {
-            // HashMap based terminal-class_id map
+            // match based terminal-class_id map
 
+            // for terminal_class -> [terminals] map
             let mut classes_body = TokenStream::new();
             for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
                 let mut terminals_body = TokenStream::new();
@@ -1066,29 +1064,36 @@ impl Grammar {
                 if class_id != self.other_terminal_class_id {
                     for &term in &class_def.terminals {
                         // check if this term is range-based character
-                        if let TerminalName::CharRange(s, l) = &self.terminals[term].name {
-                            if self.is_char {
-                                for ch in *s..=*l {
+                        match &self.terminals[term].name {
+                            TerminalName::CharRange(s, l) => {
+                                if self.is_char {
+                                    let range_stream = quote! {
+                                        #s-#l
+                                    }
+                                    .to_string();
                                     terminals_body.extend(quote! {
-                                        #ch,
+                                        #range_stream,
                                     });
-                                }
-                            } else if self.is_u8 {
-                                let s = *s as u8;
-                                let l = *l as u8;
-                                for ch in s..=l {
+                                } else if self.is_u8 {
+                                    let s = *s as u8;
+                                    let l = *l as u8;
+                                    let range_stream = quote! {
+                                        #s-#l
+                                    }
+                                    .to_string();
                                     terminals_body.extend(quote! {
-                                        #ch,
+                                        #range_stream,
                                     });
+                                } else {
+                                    unreachable!("unexpected char type")
                                 }
-                            } else {
-                                unreachable!("unexpected char type")
                             }
-                        } else {
-                            let term_stream = &self.terminals[term].body;
-                            terminals_body.extend(quote! {
-                                #term_stream,
-                            });
+                            TerminalName::Ident(ident) => {
+                                let name = ident.to_string();
+                                terminals_body.extend(quote! {
+                                    #name,
+                                });
+                            }
                         }
                     }
                 }
@@ -1098,26 +1103,20 @@ impl Grammar {
                 });
             }
 
-            let mut terminal_class_map_stream = quote! {
-                let mut terminals_class_map:#module_prefix::HashMap<#token_typename,usize> = Default::default();
-            };
+            let mut terminal_class_match_body_stream = TokenStream::new();
             for (term, &class) in self.terminal_class_id.iter().enumerate() {
                 // check if this term is range-based character
                 if let TerminalName::CharRange(s, l) = &self.terminals[term].name {
                     if self.is_char {
-                        for ch in *s..=*l {
-                            terminal_class_map_stream.extend(quote! {
-                                terminals_class_map.insert(#ch, #class);
-                            });
-                        }
+                        terminal_class_match_body_stream.extend(quote! {
+                            #s..=#l => #class,
+                        });
                     } else if self.is_u8 {
                         let s = *s as u8;
                         let l = *l as u8;
-                        for ch in s..=l {
-                            terminal_class_map_stream.extend(quote! {
-                                terminals_class_map.insert(#ch, #class);
-                            });
-                        }
+                        terminal_class_match_body_stream.extend(quote! {
+                            #s..=#l => #class,
+                        });
                     } else {
                         unreachable!("unexpected char type")
                     }
@@ -1125,12 +1124,15 @@ impl Grammar {
                     let term_stream = &self.terminals[term].body;
                     // do not add other_class into map
                     if class != self.other_terminal_class_id {
-                        terminal_class_map_stream.extend(quote! {
-                            terminals_class_map.insert(#term_stream, #class);
+                        terminal_class_match_body_stream.extend(quote! {
+                            #term_stream => #class,
                         });
                     }
                 }
             }
+            terminal_class_match_body_stream.extend(quote! {
+                _ => #other_class_id,
+            });
 
             stream.extend(quote! {
             /// A struct that holds the entire parser table and production rules.
@@ -1141,17 +1143,13 @@ impl Grammar {
                 /// states
                 pub states: Vec<#state_typename>,
                 /// terminal classes
-                pub classes: Vec<Vec<#token_typename>>,
-                /// term to class map
-                pub term_class_map: #module_prefix::HashMap<#token_typename,usize>,
-                /// class id for terminal not matched with any in grammar
-                pub other_class_id: usize,
+                pub classes: Vec<Vec<&'static str>>,
             }
             impl #parser_trait_name for #parser_struct_name {
                 type Term = #token_typename;
                 type NonTerm = #nonterminals_enum_name;
-                type TermRet<'a> = &'a #token_typename;
                 type State = #state_typename;
+                type TerminalClassElement = &'static str;
 
                 fn get_rules(&self) -> &[#rule_typename] {
                     &self.rules
@@ -1159,11 +1157,16 @@ impl Grammar {
                 fn get_states(&self) -> &[#state_typename] {
                     &self.states
                 }
-                fn get_terminals(&self, i: usize) -> Option<impl IntoIterator<Item = Self::TermRet<'_>> + '_> {
-                    self.classes.get(i)
+                fn get_terminals(&self, i: usize) -> Option<impl IntoIterator<Item = Self::TerminalClassElement> + '_> {
+                    self.classes.get(i).map(
+                        |class| class.iter().copied()
+                    )
                 }
                 fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
-                    self.term_class_map.get(terminal).copied().unwrap_or(self.other_class_id)
+                    #[allow(unreachable_patterns)]
+                    match terminal {
+                        #terminal_class_match_body_stream
+                    }
                 }
                 fn get_error_nonterm(&self) -> Option<Self::NonTerm> {
                     #get_error_nonterm_stream
@@ -1177,7 +1180,6 @@ impl Grammar {
                 #[allow(clippy::clone_on_copy)]
                 pub fn new() -> Self {
                     #grammar_build_stream
-                    #terminal_class_map_stream
                     let terminal_classes = vec![
                         #classes_body
                     ];
@@ -1186,8 +1188,6 @@ impl Grammar {
                         rules,
                         states,
                         classes: terminal_classes,
-                        term_class_map: terminals_class_map,
-                        other_class_id: #other_class_id,
                     }
                 }
             }

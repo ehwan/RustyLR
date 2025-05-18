@@ -392,11 +392,22 @@ impl<Data: NodeData> Node<Data> {
         }
     }
 
+    /// get expected terminal classes for current state.
+    pub fn expected_class<'a, P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &'a P,
+    ) -> impl Iterator<Item = usize> + 'a
+    where
+        P::Term: 'a,
+        P::NonTerm: 'a,
+    {
+        parser.get_states()[self.state].expected()
+    }
     /// get expected terminals for current state.
     pub fn expected<'a, P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &'a P,
-    ) -> impl Iterator<Item = P::TermRet<'a>> + 'a
+    ) -> impl Iterator<Item = P::TerminalClassElement> + 'a
     where
         P::Term: 'a,
         P::NonTerm: 'a,

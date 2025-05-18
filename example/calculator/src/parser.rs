@@ -41,7 +41,7 @@ impl std::cmp::Eq for Token {}
 %err String;
 
 // define tokens
-%token num Token::Num(0); // `num` maps to `Token::Num(0)`
+%token num Token::Num(_); // `num` maps to `Token::Num(0)`
 %token plus Token::Plus;
 %token star Token::Star;
 %token lparen Token::LParen;

@@ -1,5 +1,7 @@
 # Syntax
 ## Quick Reference
+ - [Token type - `%tokentype`](#token-type-must-defined)
+ - [Defining tokens - `%token`](#token-definition-must-defined)
  - [Production rules](#production-rules)
  - [Regex pattern](#regex-pattern)
  - [RuleType](#ruletype-optional)
@@ -7,8 +9,6 @@
  - [Accessing token data in ReduceAction](#accessing-token-data-in-reduceaction)
  - [Exclamation mark `!`](#exclamation-mark-)
  - [Tracable Non-Terminals - `%trace`](#tracing-non-terminals)
- - [Token type - `%tokentype`](#token-type-must-defined)
- - [Defining tokens - `%token`](#token-definition-must-defined)
  - [Start symbol - `%start`](#start-symbol-must-defined)
  - [Eof token - `%eof`](#eof-symbol-must-defined)
  - [UserData type - `%userdata`](#userdata-type-optional)
@@ -29,6 +29,58 @@ Grammars are defined using a combination of directives, token definitions, and p
 
 In procedural macros, the grammar is defined using the `lr1!` macro.
 In build script files, the grammar section is separated from Rust code using `%%`. Everything before `%%` is treated as regular Rust code and is copied as-is to the generated output.
+
+## Token type <sub><sup>(must defined)</sup></sub>
+```
+%tokentype <RustType> ;
+```
+Define the type of terminal symbols.
+`<RustType>` must be accessible at the point where the macro is called.
+
+```rust
+enum MyTokenType<Generic> {
+    Digit,
+    Ident,
+    ...
+    VariantWithGeneric<Generic>
+}
+
+lr! {
+...
+%tokentype MyTokenType<i32>;
+}
+```
+
+
+## Token definition <sub><sup>(must defined)</sup></sub>
+```
+%token name <MatchPattern> ;
+```
+Defines the terminal symbol `name` for further use in the grammar,
+and `<MatchPattern>` will be used in the terminal classification `match` statement
+```rust
+match terminal_symbol {
+    <MatchPattern> => { classification }
+    ...
+}
+```
+
+`<RustExpr>` must be accessible at the point where the macro is called.
+
+```rust
+%tokentype MyToken;
+
+%token num MyToken::Num(_);
+%token plus MyToken::Punct('+');
+%token minus MyToken::Punct('-');
+...
+
+E: num plus num ;
+ | num minus num ;
+```
+Note: If `%tokentype` is either `char` or `u8`, you can't use this directive. You must use literal value in the grammar directly.
+
+Note: This directive is not for defining the *Whole Token Space*. Any token not defined here could also be captured by [^ term1 ...]-like negation pattern.
 
 
 ## Production rules
@@ -206,49 +258,6 @@ that current context is trying to parse.
 %trace NonTerm1, NonTerm2, ...;
 ```
 
-## Token type <sub><sup>(must defined)</sup></sub>
-```
-%tokentype <RustType> ;
-```
-Define the type of terminal symbols.
-`<RustType>` must be accessible at the point where the macro is called.
-
-```rust
-enum MyTokenType<Generic> {
-    Digit,
-    Ident,
-    ...
-    VariantWithGeneric<Generic>
-}
-
-lr! {
-...
-%tokentype MyTokenType<i32>;
-}
-```
-
-
-## Token definition <sub><sup>(must defined)</sup></sub>
-```
-%token name <RustExpr> ;
-```
-Map terminal symbol `name` to the actual value `<RustExpr>`.
-`<RustExpr>` must be accessible at the point where the macro is called.
-
-```rust
-%tokentype MyToken;
-
-%token zero MyToken::Zero;
-%token one MyToken::One;
-
-...
-
-// 'zero' and 'one' will be replaced by b'0' and b'1' respectively
-E: zero one;
-```
-Note: If `%tokentype` is either `char` or `u8`, you can't use this directive. You must use literal value in the grammar directly.
-
-Note: This directive is not for defining the *Whole Token Space*. Any token not defined here could also be captured by [^ term1 ...]-like negation pattern.
 
 ## Start symbol <sub><sup>(must defined)</sup></sub>
 ```

@@ -12,9 +12,6 @@ use proc_macro2::Group;
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
-use proc_macro2::Literal;
-use proc_macro2::Punct;
-use proc_macro2::Spacing;
 use quote::ToTokens;
 
 use std::boxed::Box;
@@ -25,12 +22,6 @@ use rusty_lr_core::ReduceType;
 // this define the actual parser for proc-macro line parsing
 // This should be changed to GLR parser in the future
 
-macro_rules! punct(
-    ($l:literal) => {
-        Punct::new($l, Spacing::Alone)
-    };
-);
-
 %%
 
 %moduleprefix ::rusty_lr_core;
@@ -38,53 +29,48 @@ macro_rules! punct(
 %userdata GrammarArgs;
 
 %tokentype Lexed;
-%token ident Lexed::Ident(Ident::new("id", Span::call_site()));
-%token colon Lexed::Colon(punct!(':'));
-%token semicolon Lexed::Semicolon(punct!(';'));
-%token pipe Lexed::Pipe(punct!('|'));
-%token percent Lexed::Percent(punct!('%'));
-%token equal Lexed::Equal(punct!('='));
-%token plus Lexed::Plus(punct!('+'));
-%token star Lexed::Star(punct!('*'));
-%token question Lexed::Question(punct!('?'));
-%token caret Lexed::Caret(punct!('^'));
-%token minus Lexed::Minus(punct!('-'));
-%token exclamation Lexed::Exclamation(punct!('!'));
-%token slash Lexed::Slash(punct!('/'));
-%token dot Lexed::Dot(punct!('.'));
-// %token otherpunct Lexed::OtherPunct(punct!('.'));
+%token ident Lexed::Ident(_);
+%token colon Lexed::Colon(_);
+%token semicolon Lexed::Semicolon(_);
+%token pipe Lexed::Pipe(_);
+%token percent Lexed::Percent(_);
+%token equal Lexed::Equal(_);
+%token plus Lexed::Plus(_);
+%token star Lexed::Star(_);
+%token question Lexed::Question(_);
+%token caret Lexed::Caret(_);
+%token minus Lexed::Minus(_);
+%token exclamation Lexed::Exclamation(_);
+%token slash Lexed::Slash(_);
+%token dot Lexed::Dot(_);
 
-%token literal Lexed::Literal(Literal::usize_suffixed(0));
+%token literal Lexed::Literal(_);
 
-%token parengroup Lexed::ParenGroup(None);
-%token bracegroup Lexed::BraceGroup(None);
-// %token bracketgroup Lexed::BracketGroup(None);
-// %token nonegroup Lexed::NoneGroup(None);
+%token parengroup Lexed::ParenGroup(_);
+%token bracegroup Lexed::BraceGroup(_);
 
-%token lparen Lexed::LParen(Span::call_site());
-%token rparen Lexed::RParen(Span::call_site());
-// %token lbrace Lexed::LBrace(Span::call_site());
-// %token rbrace Lexed::RBrace(Span::call_site());
-%token lbracket Lexed::LBracket(Span::call_site());
-%token rbracket Lexed::RBracket(Span::call_site());
+%token lparen Lexed::LParen(_);
+%token rparen Lexed::RParen(_);
+%token lbracket Lexed::LBracket(_);
+%token rbracket Lexed::RBracket(_);
 
-%token left Lexed::Left(punct!('%'),Ident::new("id", Span::call_site()));
-%token right Lexed::Right(punct!('%'),Ident::new("id", Span::call_site()));
-%token token Lexed::Token(punct!('%'),Ident::new("id", Span::call_site()));
-%token start Lexed::Start(punct!('%'),Ident::new("id", Span::call_site()));
-%token eofdef Lexed::EofDef(punct!('%'),Ident::new("id", Span::call_site()));
-%token tokentype Lexed::TokenType(punct!('%'),Ident::new("id", Span::call_site()));
-%token userdata Lexed::UserData(punct!('%'),Ident::new("id", Span::call_site()));
-%token errortype Lexed::ErrorType(punct!('%'),Ident::new("id", Span::call_site()));
-%token moduleprefix Lexed::ModulePrefix(punct!('%'),Ident::new("id", Span::call_site()));
-%token lalr Lexed::Lalr(punct!('%'),Ident::new("id", Span::call_site()));
-%token glr Lexed::Glr(punct!('%'),Ident::new("id", Span::call_site()));
-%token prec Lexed::Prec(punct!('%'),Ident::new("id", Span::call_site()));
-%token precedence Lexed::Precedence(punct!('%'),Ident::new("id", Span::call_site()));
-%token nooptim Lexed::NoOptim(punct!('%'),Ident::new("id", Span::call_site()));
-%token dense Lexed::Dense(punct!('%'),Ident::new("id", Span::call_site()));
-%token trace Lexed::Trace(punct!('%'),Ident::new("id", Span::call_site()));
-%token dprec Lexed::DPrec(punct!('%'),Ident::new("id", Span::call_site()));
+%token left Lexed::Left(_,_);
+%token right Lexed::Right(_,_);
+%token token Lexed::Token(_,_);
+%token start Lexed::Start(_,_);
+%token eofdef Lexed::EofDef(_,_);
+%token tokentype Lexed::TokenType(_,_);
+%token userdata Lexed::UserData(_,_);
+%token errortype Lexed::ErrorType(_,_);
+%token moduleprefix Lexed::ModulePrefix(_,_);
+%token lalr Lexed::Lalr(_,_);
+%token glr Lexed::Glr(_,_);
+%token prec Lexed::Prec(_,_);
+%token precedence Lexed::Precedence(_,_);
+%token nooptim Lexed::NoOptim(_,_);
+%token dense Lexed::Dense(_,_);
+%token trace Lexed::Trace(_,_);
+%token dprec Lexed::DPrec(_,_);
 
 %eof Lexed::Eof;
 
@@ -114,7 +100,7 @@ Rule(RuleDefArgs) : ident RuleType colon RuleLines semicolon {
 
 RuleType(Option<Group>): parengroup {
     if let Lexed::ParenGroup(group) = parengroup {
-        group
+        Some(group)
     }else{
         unreachable!( "RuleType - Group" );
     }
@@ -310,7 +296,7 @@ Pattern(PatternArgs): ident {
 
 Action(Option<Group>): bracegroup {
     if let Lexed::BraceGroup(group) = bracegroup {
-        group
+        Some(group)
     }else {
         unreachable!( "Action0" );
     }
