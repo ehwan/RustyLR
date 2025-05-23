@@ -1049,6 +1049,7 @@ impl Grammar {
                 }
                 fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
                     // Self::Term is char or u8 here
+                    #[allow(unreachable_patterns)]
                     match *terminal {
                         #terminal_class_match_body_stream
                     }
@@ -1081,41 +1082,50 @@ impl Grammar {
             // for terminal_class -> [terminals] map get_terminals()
             let mut classes_body = TokenStream::new();
             for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
-                let mut terminals_body = TokenStream::new();
                 // no need to store all characters for 'other' class, if it was not used in the grammar
-                if class_id != self.other_terminal_class_id {
-                    for &term in &class_def.terminals {
-                        // check if this term is range-based character
-                        match &self.terminals[term].name {
-                            TerminalName::CharRange(s, l) => {
-                                if self.is_char {
-                                    let range_stream = quote! {
-                                        #s-#l
-                                    }
-                                    .to_string();
-                                    terminals_body.extend(quote! {
-                                        #range_stream,
-                                    });
-                                } else if self.is_u8 {
-                                    let s = *s as u8;
-                                    let l = *l as u8;
-                                    let range_stream = quote! {
-                                        #s-#l
-                                    }
-                                    .to_string();
-                                    terminals_body.extend(quote! {
-                                        #range_stream,
-                                    });
+                if class_id == self.other_terminal_class_id {
+                    continue;
+                }
+                let mut terminals_body = TokenStream::new();
+                for &term in &class_def.terminals {
+                    // check if this term is range-based character
+                    match &self.terminals[term].name {
+                        TerminalName::CharRange(s, l) => {
+                            if self.is_char {
+                                let range_stream = if s == l {
+                                    quote! { #s }.to_string()
                                 } else {
-                                    unreachable!("unexpected char type")
-                                }
-                            }
-                            TerminalName::Ident(ident) => {
-                                let name = ident.to_string();
+                                    quote! {
+                                        #s-#l
+                                    }
+                                    .to_string()
+                                };
                                 terminals_body.extend(quote! {
-                                    #name,
+                                    #range_stream,
                                 });
+                            } else if self.is_u8 {
+                                let s = *s as u8;
+                                let l = *l as u8;
+                                let range_stream = if s == l {
+                                    quote! { #s }.to_string()
+                                } else {
+                                    quote! {
+                                        #s-#l
+                                    }
+                                    .to_string()
+                                };
+                                terminals_body.extend(quote! {
+                                    #range_stream,
+                                });
+                            } else {
+                                unreachable!("unexpected char type")
                             }
+                        }
+                        TerminalName::Ident(ident) => {
+                            let name = ident.to_string();
+                            terminals_body.extend(quote! {
+                                #name,
+                            });
                         }
                     }
                 }
@@ -1127,43 +1137,48 @@ impl Grammar {
 
             // for terminal -> terminal_class_id map to_terminal_class()
             let mut terminal_class_match_body_stream = TokenStream::new();
-            for (term, &class) in self.terminal_class_id.iter().enumerate() {
-                // check if this term is range-based character
-                if let TerminalName::CharRange(s, l) = &self.terminals[term].name {
-                    if self.is_char {
-                        if s == l {
-                            terminal_class_match_body_stream.extend(quote! {
-                                #s => #class,
-                            });
-                        } else {
-                            terminal_class_match_body_stream.extend(quote! {
-                                #s..=#l => #class,
-                            });
-                        }
-                    } else if self.is_u8 {
-                        let s = *s as u8;
-                        let l = *l as u8;
-                        if s == l {
-                            terminal_class_match_body_stream.extend(quote! {
-                                #s => #class,
-                            });
-                        } else {
-                            terminal_class_match_body_stream.extend(quote! {
-                                #s..=#l => #class,
-                            });
-                        }
-                    } else {
-                        unreachable!("unexpected char type")
-                    }
-                } else {
-                    let term_stream = &self.terminals[term].body;
-                    // do not add other_class into map
-                    if class != self.other_terminal_class_id {
-                        terminal_class_match_body_stream.extend(quote! {
-                            #term_stream => #class,
-                        });
-                    }
+            for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
+                if class_id == self.other_terminal_class_id {
+                    continue;
                 }
+                let mut match_case_stream = TokenStream::new();
+                for (i, &term) in class_def.terminals.iter().enumerate() {
+                    // check if this term is range-based character
+                    let case_stream = match &self.terminals[term].name {
+                        TerminalName::CharRange(s, l) => {
+                            if self.is_char {
+                                if s == l {
+                                    quote! {#s}
+                                } else {
+                                    quote! {#s..=#l}
+                                }
+                            } else if self.is_u8 {
+                                let s = *s as u8;
+                                let l = *l as u8;
+                                if s == l {
+                                    quote! {#s}
+                                } else {
+                                    quote! {#s..=#l}
+                                }
+                            } else {
+                                unreachable!("unexpected char type")
+                            }
+                        }
+                        TerminalName::Ident(_) => {
+                            let term_stream = &self.terminals[term].body;
+                            quote! {#term_stream}
+                        }
+                    };
+
+                    if i > 0 {
+                        match_case_stream.extend(quote! { | });
+                    }
+                    match_case_stream.extend(case_stream);
+                }
+
+                terminal_class_match_body_stream.extend(quote! {
+                    #match_case_stream => #class_id,
+                });
             }
             terminal_class_match_body_stream.extend(quote! {
                 _ => #other_class_id,

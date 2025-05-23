@@ -2330,15 +2330,14 @@ impl ::rusty_lr_core::lr::Parser for GrammarParser {
         match terminal {
             Lexed::Ident(_) => 0usize,
             Lexed::Colon(_) => 2usize,
-            Lexed::Semicolon(_) => 38usize,
             Lexed::Pipe(_) => 3usize,
             Lexed::Equal(_) => 4usize,
             Lexed::Plus(_) => 5usize,
             Lexed::Star(_) => 6usize,
             Lexed::Question(_) => 7usize,
+            Lexed::Exclamation(_) => 8usize,
             Lexed::Caret(_) => 9usize,
             Lexed::Minus(_) => 10usize,
-            Lexed::Exclamation(_) => 8usize,
             Lexed::Slash(_) => 11usize,
             Lexed::Dot(_) => 12usize,
             Lexed::Literal(_) => 13usize,
@@ -2366,6 +2365,7 @@ impl ::rusty_lr_core::lr::Parser for GrammarParser {
             Lexed::Trace(_, _) => 35usize,
             Lexed::DPrec(_, _) => 36usize,
             Lexed::Filter(_, _) => 37usize,
+            Lexed::Semicolon(_) => 38usize,
             Lexed::Eof => 39usize,
             _ => 1usize,
         }
@@ -3577,7 +3577,6 @@ impl GrammarParser {
             states,
             classes: vec![
                 vec!["ident"],
-                vec![],
                 vec!["colon"],
                 vec!["pipe"],
                 vec!["equal"],
