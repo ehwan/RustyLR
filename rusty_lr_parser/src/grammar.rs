@@ -910,8 +910,8 @@ impl Grammar {
     /// calculate range-based terminal-class_id map
     /// only works if %tokentype is char or u8
     /// do not apply this optimization if |RangeCompressed| > |Terminals|/2
-    pub(crate) fn calculate_range_terminal_class_map(&self) -> Option<Vec<(u32, u32, usize)>> {
-        let compressed_len_sum = self
+    pub(crate) fn calculate_range_terminal_class_map(&self) -> bool {
+        let compressed_len_sum: usize = self
             .terminal_classes
             .iter()
             .enumerate()
@@ -941,27 +941,7 @@ impl Grammar {
                 }
             })
             .sum();
-        // println!("compressed: {}", compressed_len_sum);
-        // println!("noncompressed: {}", noncompressed_len_sum);
-        if compressed_len_sum * 2 <= noncompressed_len_sum {
-            let mut ranges_class_map = Vec::with_capacity(compressed_len_sum);
-            for (class_id, class) in self.terminal_classes.iter().enumerate() {
-                if class_id == self.other_terminal_class_id {
-                    continue;
-                }
-                ranges_class_map.extend(
-                    class
-                        .ranges
-                        .iter()
-                        .map(|(start, last)| (*start, *last, class_id)),
-                );
-            }
-            ranges_class_map.sort();
-            // println!("{:?}", ranges_class_map);
-            Some(ranges_class_map)
-        } else {
-            None
-        }
+        compressed_len_sum * 2 <= noncompressed_len_sum
     }
 
     /// optimize grammar

@@ -928,7 +928,7 @@ impl Grammar {
         let use_range_based_optimization = if self.is_char || self.is_u8 {
             self.calculate_range_terminal_class_map()
         } else {
-            None
+            false
         };
 
         let other_class_id = self.other_terminal_class_id;
@@ -940,50 +940,84 @@ impl Grammar {
         };
 
         // building terminal-class_id map
-        if let Some(range_based_optimization) = use_range_based_optimization {
+        if use_range_based_optimization {
             // range-compressed Vec based terminal-class_id map
 
+            // for terminal_class -> [terminals] map get_terminals()
             let mut classes_body = TokenStream::new();
             for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
-                let mut terminals_body = TokenStream::new();
-                // no need to store all characters for 'other' class, if it was not used in the grammar
-                if class_id != self.other_terminal_class_id {
-                    for &(start, last) in &class_def.ranges {
-                        if self.is_char {
-                            let start = unsafe { char::from_u32_unchecked(start) };
-                            let last = unsafe { char::from_u32_unchecked(last) };
-                            terminals_body.extend(quote! {
-                                (#start,#last),
-                            });
-                        } else if self.is_u8 {
-                            let start = start as u8;
-                            let last = last as u8;
-                            terminals_body.extend(quote! {
-                                (#start,#last),
-                            });
-                        }
-                    }
+                if class_id == self.other_terminal_class_id {
+                    classes_body.extend(quote! {
+                        vec![],
+                    });
                 }
+                let mut terminals_body = TokenStream::new();
+                for &(s, e) in class_def.ranges.iter() {
+                    let stream = if self.is_char {
+                        let s = unsafe { char::from_u32_unchecked(s) };
+                        let e = unsafe { char::from_u32_unchecked(e) };
 
+                        quote! { #s..=#e }
+                    } else if self.is_u8 {
+                        let s = s as u8;
+                        let e = e as u8;
+
+                        quote! { #s..=#e }
+                    } else {
+                        unreachable!("unexpected char type")
+                    };
+
+                    terminals_body.extend(quote! {
+                        #stream,
+                    });
+                }
                 classes_body.extend(quote! {
                     vec![ #terminals_body ],
                 });
             }
 
-            let len = range_based_optimization.len();
-            let mut terminal_class_map_stream = quote! {
-                let mut terminal_class_ranges: Vec<(u32,u32)> = Vec::with_capacity(#len);
-                let mut terminal_class_values: Vec<usize> = Vec::with_capacity(#len);
-            };
-            for &(start, last, class) in range_based_optimization.iter() {
-                if class == self.other_terminal_class_id {
+            // for terminal -> terminal_class_id map to_terminal_class()
+            let mut terminal_class_match_body_stream = TokenStream::new();
+            for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
+                if class_id == self.other_terminal_class_id {
                     continue;
                 }
-                terminal_class_map_stream.extend(quote! {
-                    terminal_class_ranges.push((#start, #last));
-                    terminal_class_values.push(#class);
+                let mut match_case_stream = TokenStream::new();
+                for (i, &(s, e)) in class_def.ranges.iter().enumerate() {
+                    let stream = if self.is_char {
+                        let s = unsafe { char::from_u32_unchecked(s) };
+                        let e = unsafe { char::from_u32_unchecked(e) };
+
+                        if s == e {
+                            quote! { #s }
+                        } else {
+                            quote! { #s..=#e }
+                        }
+                    } else if self.is_u8 {
+                        let s = s as u8;
+                        let e = e as u8;
+
+                        if s == e {
+                            quote! { #s }
+                        } else {
+                            quote! { #s..=#e }
+                        }
+                    } else {
+                        unreachable!("unexpected char type")
+                    };
+
+                    if i > 0 {
+                        match_case_stream.extend(quote! {|});
+                    }
+                    match_case_stream.extend(quote! { #stream });
+                }
+                terminal_class_match_body_stream.extend(quote! {
+                    #match_case_stream => #class_id,
                 });
             }
+            terminal_class_match_body_stream.extend(quote! {
+                _ => #other_class_id,
+            });
 
             stream.extend(quote! {
             /// A struct that holds the entire parser table and production rules.
@@ -994,9 +1028,7 @@ impl Grammar {
                 /// states
                 pub states: Vec<#state_typename>,
                 /// terminal classes
-                pub classes: Vec<Vec<(#token_typename,#token_typename)>>,
-                /// term to class map
-                pub term_class_map: #module_prefix::RangeMap,
+                pub classes: Vec<Vec<::std::ops::RangeInclusive<#token_typename>>>,
             }
             impl #parser_trait_name for #parser_struct_name {
                 type Term = #token_typename;
@@ -1012,16 +1044,14 @@ impl Grammar {
                 }
                 fn get_terminals(&self, i: usize) -> Option<impl IntoIterator<Item = Self::TerminalClassElement> + '_> {
                     self.classes.get(i).map(
-                        |class| class.iter().map( |&(start,last)| {
-                            start..=last
-                        })
+                        |class| class.iter().cloned()
                     )
                 }
                 fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
                     // Self::Term is char or u8 here
-                    self.term_class_map.get(*terminal as u32).unwrap_or(
-                        #other_class_id
-                    )
+                    match *terminal {
+                        #terminal_class_match_body_stream
+                    }
                 }
                 fn get_error_nonterm(&self) -> Option<Self::NonTerm> {
                     #get_error_nonterm_stream
@@ -1035,19 +1065,11 @@ impl Grammar {
                 #[allow(clippy::clone_on_copy)]
                 pub fn new() -> Self {
                     #grammar_build_stream
-                    #terminal_class_map_stream
-                    let terminal_classes = vec![
-                        #classes_body
-                    ];
 
                     Self {
                         rules,
                         states,
-                        classes: terminal_classes,
-                        term_class_map: #module_prefix::RangeMap::new(
-                            terminal_class_ranges,
-                            terminal_class_values,
-                        ),
+                        classes: vec![ #classes_body ],
                     }
                 }
             }
@@ -1056,7 +1078,7 @@ impl Grammar {
         } else {
             // match based terminal-class_id map
 
-            // for terminal_class -> [terminals] map
+            // for terminal_class -> [terminals] map get_terminals()
             let mut classes_body = TokenStream::new();
             for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
                 let mut terminals_body = TokenStream::new();
@@ -1103,20 +1125,33 @@ impl Grammar {
                 });
             }
 
+            // for terminal -> terminal_class_id map to_terminal_class()
             let mut terminal_class_match_body_stream = TokenStream::new();
             for (term, &class) in self.terminal_class_id.iter().enumerate() {
                 // check if this term is range-based character
                 if let TerminalName::CharRange(s, l) = &self.terminals[term].name {
                     if self.is_char {
-                        terminal_class_match_body_stream.extend(quote! {
-                            #s..=#l => #class,
-                        });
+                        if s == l {
+                            terminal_class_match_body_stream.extend(quote! {
+                                #s => #class,
+                            });
+                        } else {
+                            terminal_class_match_body_stream.extend(quote! {
+                                #s..=#l => #class,
+                            });
+                        }
                     } else if self.is_u8 {
                         let s = *s as u8;
                         let l = *l as u8;
-                        terminal_class_match_body_stream.extend(quote! {
-                            #s..=#l => #class,
-                        });
+                        if s == l {
+                            terminal_class_match_body_stream.extend(quote! {
+                                #s => #class,
+                            });
+                        } else {
+                            terminal_class_match_body_stream.extend(quote! {
+                                #s..=#l => #class,
+                            });
+                        }
                     } else {
                         unreachable!("unexpected char type")
                     }
@@ -1186,14 +1221,11 @@ impl Grammar {
                 #[allow(clippy::clone_on_copy)]
                 pub fn new() -> Self {
                     #grammar_build_stream
-                    let terminal_classes = vec![
-                        #classes_body
-                    ];
 
                     Self {
                         rules,
                         states,
-                        classes: terminal_classes,
+                        classes: vec![#classes_body],
                     }
                 }
             }
