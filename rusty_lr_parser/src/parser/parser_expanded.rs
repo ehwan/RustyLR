@@ -163,7 +163,7 @@ Augmented -> Grammar eof
 // =============================Generated Codes Begin==============================
 #[doc = r" type alias for `Context`"]
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarContext = ::rusty_lr_core::lr::Context<GrammarStack>;
+pub type GrammarContext = ::rusty_lr_core::lr::Context<GrammarTokenData>;
 #[doc = r" type alias for CFG production rule"]
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarRule = ::rusty_lr_core::ProductionRule<&'static str, GrammarNonTerminals>;
@@ -418,65 +418,68 @@ impl ::rusty_lr_core::NonTerminal for GrammarNonTerminals {
         }
     }
 }
-#[doc = r" struct that holds internal parser data,"]
-#[doc = r" including data stack for each non-terminal,"]
-#[doc = r" and state stack for DFA"]
-#[allow(
-    unused_braces,
-    unused_parens,
-    unused_variables,
-    unused_mut,
-    non_snake_case,
-    non_camel_case_types
-)]
-pub struct GrammarStack {
-    __rustylr_generated_terminal_stack: Vec<Lexed>,
-    __rustylr_generated_stack_1: Vec<RuleDefArgs>,
-    __rustylr_generated_stack_2: Vec<Option<Group>>,
-    __rustylr_generated_stack_3: Vec<Vec<RuleLineArgs>>,
-    __rustylr_generated_stack_4: Vec<RuleLineArgs>,
-    __rustylr_generated_stack_5: Vec<PrecDPrecArgs>,
-    __rustylr_generated_stack_6: Vec<(Option<Ident>, PatternArgs)>,
-    __rustylr_generated_stack_7: Vec<TerminalSetItem>,
-    __rustylr_generated_stack_8: Vec<TerminalSet>,
-    __rustylr_generated_stack_9: Vec<PatternArgs>,
-    __rustylr_generated_stack_10: Vec<(Ident, TokenStream)>,
-    __rustylr_generated_stack_11: Vec<TokenStream>,
-    __rustylr_generated_stack_12: Vec<Ident>,
-    __rustylr_generated_stack_13: Vec<(Span, TokenStream)>,
-    __rustylr_generated_stack_14: Vec<IdentOrLiteral>,
-    __rustylr_generated_stack_15: Vec<ReduceType>,
-    __rustylr_generated_stack_16: Vec<(ReduceType, Vec<IdentOrLiteral>)>,
-    __rustylr_generated_stack_17: Vec<Vec<IdentOrLiteral>>,
-    __rustylr_generated_stack_18: Vec<Vec<Ident>>,
-    __rustylr_generated_stack_19: Vec<Vec<(Option<Ident>, PatternArgs)>>,
-    __rustylr_generated_stack_20: Vec<Vec<PrecDPrecArgs>>,
-    __rustylr_generated_stack_21: Vec<Option<Lexed>>,
-    __rustylr_generated_stack_22: Vec<Vec<TerminalSetItem>>,
-    __rustylr_generated_stack_23: Vec<Vec<PatternArgs>>,
-    __rustylr_generated_stack_24: Vec<Vec<Lexed>>,
+#[doc = r" enum for each non-terminal and terminal symbol, that actually hold data"]
+#[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
+#[derive(Clone)]
+pub enum GrammarTokenData {
+    Terminals(Lexed),
+    Empty,
+    Variant2(RuleDefArgs),
+    Variant3(Option<Group>),
+    Variant4(Vec<RuleLineArgs>),
+    Variant5(RuleLineArgs),
+    Variant6(PrecDPrecArgs),
+    Variant7((Option<Ident>, PatternArgs)),
+    Variant8(TerminalSetItem),
+    Variant9(TerminalSet),
+    Variant10(PatternArgs),
+    Variant11((Ident, TokenStream)),
+    Variant12(TokenStream),
+    Variant13(Ident),
+    Variant14((Span, TokenStream)),
+    Variant15(IdentOrLiteral),
+    Variant16(ReduceType),
+    Variant17((ReduceType, Vec<IdentOrLiteral>)),
+    Variant18(Vec<IdentOrLiteral>),
+    Variant19(Vec<Ident>),
+    Variant20(Vec<(Option<Ident>, PatternArgs)>),
+    Variant21(Vec<PrecDPrecArgs>),
+    Variant22(Option<Lexed>),
+    Variant23(Vec<TerminalSetItem>),
+    Variant24(Vec<PatternArgs>),
+    Variant25(Vec<Lexed>),
 }
 #[allow(
     unused_braces,
     unused_parens,
     unused_variables,
-    unused_mut,
     non_snake_case,
-    non_camel_case_types,
+    unused_mut,
     dead_code
 )]
-impl GrammarStack {
+impl GrammarTokenData {
     fn reduce_Rule_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RuleLines = self.__rustylr_generated_stack_3.pop().unwrap();
-        let mut colon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RuleType = self.__rustylr_generated_stack_2.pop().unwrap();
-        let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_1.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant4(mut RuleLines) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut colon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant3(mut RuleType) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut ident) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant2({
             let ident = if let Lexed::Ident(ident) = ident {
                 ident
             } else {
@@ -495,67 +498,83 @@ impl GrammarStack {
                 typename: RuleType.map(|t| t.stream()),
                 rule_lines: RuleLines,
             }
-        });
-        Ok(())
+        }))
     }
     fn reduce_RuleType_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut parengroup = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_2.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut parengroup) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant3({
             if let Lexed::ParenGroup(group) = parengroup {
                 Some(group)
             } else {
                 unreachable!("RuleType - Group");
             }
-        });
-        Ok(())
+        }))
     }
     fn reduce_RuleType_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        self.__rustylr_generated_stack_2.push({ None });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        Ok(GrammarTokenData::Variant3({ None }))
     }
     fn reduce_RuleLines_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut RuleLine = self.__rustylr_generated_stack_4.pop().unwrap();
-        let mut pipe = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RuleLines = self.__rustylr_generated_stack_3.pop().unwrap();
-        self.__rustylr_generated_stack_3.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant5(mut RuleLine) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut pipe) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant4(mut RuleLines) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant4({
             if let Lexed::Pipe(punct) = pipe {
                 RuleLine.separator_span = punct.span();
                 RuleLines.push(RuleLine);
             }
             RuleLines
-        });
-        Ok(())
+        }))
     }
     fn reduce_RuleLines_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut RuleLine = self.__rustylr_generated_stack_4.pop().unwrap();
-        self.__rustylr_generated_stack_3.push({ vec![RuleLine] });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant5(mut RuleLine) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant4({ vec![RuleLine] }))
     }
     fn reduce_RuleLine_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut Action = self.__rustylr_generated_stack_2.pop().unwrap();
-        let mut PrecDef = self.__rustylr_generated_stack_20.pop().unwrap();
-        let mut TokenMapped = self.__rustylr_generated_stack_19.pop().unwrap();
-        self.__rustylr_generated_stack_4.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant3(mut Action) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant21(mut PrecDef) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant20(mut TokenMapped) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant5({
             RuleLineArgs {
                 tokens: TokenMapped,
                 reduce_action: Action.map(|action| action.to_token_stream()),
@@ -564,86 +583,107 @@ impl GrammarStack {
                 prec: None,
                 dprec: None,
             }
-        });
-        Ok(())
+        }))
     }
     fn reduce_PrecDef_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut IdentOrLiteral = self.__rustylr_generated_stack_14.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.pop();
-        self.__rustylr_generated_stack_5
-            .push({ PrecDPrecArgs::Prec(IdentOrLiteral) });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant15(mut IdentOrLiteral) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        __rustylr_args.pop();
+        Ok(GrammarTokenData::Variant6({
+            PrecDPrecArgs::Prec(IdentOrLiteral)
+        }))
     }
     fn reduce_PrecDef_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut literal = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.pop();
-        self.__rustylr_generated_stack_5.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut literal) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        __rustylr_args.pop();
+        Ok(GrammarTokenData::Variant6({
             let Lexed::Literal(literal) = literal else {
                 unreachable!("PrecDPrecArgs-DPrec");
             };
             PrecDPrecArgs::DPrec(literal)
-        });
-        Ok(())
+        }))
     }
     fn reduce_TokenMapped_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut Pattern = self.__rustylr_generated_stack_9.pop().unwrap();
-        self.__rustylr_generated_stack_6.push({ (None, Pattern) });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant10(mut Pattern) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant7({ (None, Pattern) }))
     }
     fn reduce_TokenMapped_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut Pattern = self.__rustylr_generated_stack_9.pop().unwrap();
-        let mut equal = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_6.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant10(mut Pattern) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut equal) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut ident) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant7({
             if let Lexed::Ident(ident) = ident {
                 (Some(ident), Pattern)
             } else {
                 unreachable!("Token-Ident");
             }
-        });
-        Ok(())
+        }))
     }
     fn reduce_TerminalSetItem_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_7.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut ident) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant8({
             let ident = if let Lexed::Ident(ident) = ident {
                 ident
             } else {
                 unreachable!("TerminalSetItem-Range1");
             };
             TerminalSetItem::Terminal(ident)
-        });
-        Ok(())
+        }))
     }
     fn reduce_TerminalSetItem_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut last = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut minus = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut first = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_7.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut last) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut minus) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut first) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant8({
             let first = if let Lexed::Ident(first) = first {
                 first
             } else {
@@ -655,32 +695,40 @@ impl GrammarStack {
                 unreachable!("TerminalSetItem-Range3");
             };
             TerminalSetItem::Range(first, last)
-        });
-        Ok(())
+        }))
     }
     fn reduce_TerminalSetItem_2(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut literal = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_7.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut literal) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant8({
             let Lexed::Literal(literal) = literal else {
                 unreachable!("TerminalSetItem-Literal");
             };
             TerminalSetItem::Literal(literal)
-        });
-        Ok(())
+        }))
     }
     fn reduce_TerminalSetItem_3(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut last = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut minus = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut first = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_7.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut last) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut minus) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut first) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant8({
             let Lexed::Literal(first) = first else {
                 unreachable!("TerminalSetItem-Range1");
             };
@@ -688,19 +736,27 @@ impl GrammarStack {
                 unreachable!("TerminalSetItem-Range3");
             };
             TerminalSetItem::LiteralRange(first, last)
-        });
-        Ok(())
+        }))
     }
     fn reduce_TerminalSet_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut rbracket = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut TerminalSetItem = self.__rustylr_generated_stack_22.pop().unwrap();
-        let mut caret = self.__rustylr_generated_stack_21.pop().unwrap();
-        let mut lbracket = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_8.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut rbracket) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant23(mut TerminalSetItem) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant22(mut caret) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut lbracket) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant9({
             let open_span = if let Lexed::LBracket(lbracket) = lbracket {
                 lbracket
             } else {
@@ -717,16 +773,18 @@ impl GrammarStack {
                 open_span,
                 close_span,
             }
-        });
-        Ok(())
+        }))
     }
     fn reduce_TerminalSet_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut dot = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_8.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut dot) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant9({
             let span = dot.span();
             TerminalSet {
                 negate: true,
@@ -734,119 +792,153 @@ impl GrammarStack {
                 open_span: span,
                 close_span: span,
             }
-        });
-        Ok(())
+        }))
     }
     fn reduce_Pattern_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_9.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut ident) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant10({
             if let Lexed::Ident(ident) = ident {
                 PatternArgs::Ident(ident)
             } else {
                 unreachable!("Pattern-Ident");
             }
-        });
-        Ok(())
+        }))
     }
     fn reduce_Pattern_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut plus = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self.__rustylr_generated_stack_9.pop().unwrap();
-        self.__rustylr_generated_stack_9.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut plus) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant10(mut Pattern) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant10({
             if let Lexed::Plus(plus) = plus {
                 PatternArgs::Plus(Box::new(Pattern), plus.span())
             } else {
                 unreachable!("Pattern-Plus");
             }
-        });
-        Ok(())
+        }))
     }
     fn reduce_Pattern_2(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut star = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self.__rustylr_generated_stack_9.pop().unwrap();
-        self.__rustylr_generated_stack_9.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut star) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant10(mut Pattern) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant10({
             if let Lexed::Star(star) = star {
                 PatternArgs::Star(Box::new(Pattern), star.span())
             } else {
                 unreachable!("Pattern-Star");
             }
-        });
-        Ok(())
+        }))
     }
     fn reduce_Pattern_3(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut question = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self.__rustylr_generated_stack_9.pop().unwrap();
-        self.__rustylr_generated_stack_9.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut question) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant10(mut Pattern) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant10({
             if let Lexed::Question(question) = question {
                 PatternArgs::Question(Box::new(Pattern), question.span())
             } else {
                 unreachable!("Pattern-Question");
             }
-        });
-        Ok(())
+        }))
     }
     fn reduce_Pattern_4(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut exclamation = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self.__rustylr_generated_stack_9.pop().unwrap();
-        self.__rustylr_generated_stack_9.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut exclamation) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant10(mut Pattern) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant10({
             if let Lexed::Exclamation(exclamation) = exclamation {
                 PatternArgs::Exclamation(Box::new(Pattern), exclamation.span())
             } else {
                 unreachable!("Pattern-Exclamation");
             }
-        });
-        Ok(())
+        }))
     }
     fn reduce_Pattern_5(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut TerminalSet = self.__rustylr_generated_stack_8.pop().unwrap();
-        self.__rustylr_generated_stack_9
-            .push({ PatternArgs::TerminalSet(TerminalSet) });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant9(mut TerminalSet) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant10({
+            PatternArgs::TerminalSet(TerminalSet)
+        }))
     }
     fn reduce_Pattern_6(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut lh = self.__rustylr_generated_stack_9.pop().unwrap();
-        let mut slash = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut p1 = self.__rustylr_generated_stack_9.pop().unwrap();
-        self.__rustylr_generated_stack_9
-            .push({ PatternArgs::Lookaheads(Box::new(p1), Box::new(lh)) });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant10(mut lh) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut slash) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant10(mut p1) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant10({
+            PatternArgs::Lookaheads(Box::new(p1), Box::new(lh))
+        }))
     }
     fn reduce_Pattern_7(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut rparen = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Pattern = self.__rustylr_generated_stack_23.pop().unwrap();
-        let mut lparen = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_9.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut rparen) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant24(mut Pattern) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut lparen) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant10({
             let open = if let Lexed::LParen(lparen) = lparen {
                 lparen
             } else {
@@ -858,283 +950,387 @@ impl GrammarStack {
                 unreachable!("Pattern-Group-Close");
             };
             PatternArgs::Group(Pattern, open, close)
-        });
-        Ok(())
+        }))
     }
     fn reduce_Pattern_8(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut literal = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_9.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut literal) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant10({
             let Lexed::Literal(literal) = literal else {
                 unreachable!("Pattern-Literal");
             };
             PatternArgs::Literal(literal)
-        });
-        Ok(())
+        }))
     }
     fn reduce_Pattern_9(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut p2 = self.__rustylr_generated_stack_9.pop().unwrap();
-        let mut minus = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut p1 = self.__rustylr_generated_stack_9.pop().unwrap();
-        self.__rustylr_generated_stack_9
-            .push({ PatternArgs::Minus(Box::new(p1), Box::new(p2)) });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant10(mut p2) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut minus) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant10(mut p1) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant10({
+            PatternArgs::Minus(Box::new(p1), Box::new(p2))
+        }))
     }
     fn reduce_Action_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut bracegroup = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_2.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut bracegroup) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant3({
             if let Lexed::BraceGroup(group) = bracegroup {
                 Some(group)
             } else {
                 unreachable!("Action0");
             }
-        });
-        Ok(())
+        }))
     }
     fn reduce_Action_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        self.__rustylr_generated_stack_2.push({ None });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        Ok(GrammarTokenData::Variant3({ None }))
     }
     fn reduce_TokenDef_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self.__rustylr_generated_stack_11.pop().unwrap();
-        let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut token = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_10.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant12(mut RustCode) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut ident) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut token) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant11({
             if let Lexed::Ident(ident) = ident {
                 (ident, RustCode)
             } else {
                 unreachable!("TokenDef-Ident");
             }
-        });
-        Ok(())
+        }))
     }
     fn reduce_RustCode_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut t = self.__rustylr_generated_stack_24.pop().unwrap();
-        self.__rustylr_generated_stack_11.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant25(mut t) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant12({
             let mut tokens = TokenStream::new();
             for token in t.into_iter() {
                 token.append_to_stream(&mut tokens);
             }
             tokens
-        });
-        Ok(())
+        }))
     }
     fn reduce_StartDef_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut start = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_12.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut ident) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut start) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant13({
             if let Lexed::Ident(ident) = ident {
                 ident
             } else {
                 unreachable!("StartDef-Ident");
             }
-        });
-        Ok(())
+        }))
     }
     fn reduce_EofDef_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self.__rustylr_generated_stack_11.pop().unwrap();
-        let mut eofdef = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_13
-            .push({ (eofdef.span(), RustCode) });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant12(mut RustCode) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut eofdef) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant14({ (eofdef.span(), RustCode) }))
     }
     fn reduce_TokenTypeDef_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self.__rustylr_generated_stack_11.pop().unwrap();
-        let mut tokentype = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_13
-            .push({ (tokentype.span(), RustCode) });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant12(mut RustCode) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut tokentype) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant14({
+            (tokentype.span(), RustCode)
+        }))
     }
     fn reduce_UserDataDef_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self.__rustylr_generated_stack_11.pop().unwrap();
-        let mut userdata = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_13
-            .push({ (userdata.span(), RustCode) });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant12(mut RustCode) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut userdata) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant14({ (userdata.span(), RustCode) }))
     }
     fn reduce_IdentOrLiteral_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut ident = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_14.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut ident) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant15({
             let Lexed::Ident(ident) = ident else {
                 unreachable!("IdentOrLiteral-Ident");
             };
             IdentOrLiteral::Ident(ident)
-        });
-        Ok(())
+        }))
     }
     fn reduce_IdentOrLiteral_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut literal = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_14.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut literal) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant15({
             let Lexed::Literal(literal) = literal else {
                 unreachable!("IdentOrLiteral-Literal");
             };
             IdentOrLiteral::Literal(literal)
-        });
-        Ok(())
+        }))
     }
     fn reduce_ReduceType_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut left = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_15.push({ ReduceType::Left });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut left) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant16({ ReduceType::Left }))
     }
     fn reduce_ReduceType_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut right = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_15
-            .push({ ReduceType::Right });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut right) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant16({ ReduceType::Right }))
     }
     fn reduce_ReduceDef_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut IdentOrLiteral = self.__rustylr_generated_stack_17.pop().unwrap();
-        let mut reducetype = self.__rustylr_generated_stack_15.pop().unwrap();
-        self.__rustylr_generated_stack_16
-            .push({ (reducetype, IdentOrLiteral) });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant18(mut IdentOrLiteral) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant16(mut reducetype) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant17({
+            (reducetype, IdentOrLiteral)
+        }))
     }
     fn reduce_ErrorDef_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self.__rustylr_generated_stack_11.pop().unwrap();
-        let mut errortype = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_13
-            .push({ (errortype.span(), RustCode) });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant12(mut RustCode) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut errortype) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant14({
+            (errortype.span(), RustCode)
+        }))
     }
     fn reduce_ModulePrefixDef_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut RustCode = self.__rustylr_generated_stack_11.pop().unwrap();
-        let mut moduleprefix = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_13
-            .push({ (moduleprefix.span(), RustCode) });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant12(mut RustCode) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut moduleprefix) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant14({
+            (moduleprefix.span(), RustCode)
+        }))
     }
     fn reduce_Glr_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut glr = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut glr) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_Lalr_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut lalr = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut lalr) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_Precedence_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut IdentOrLiteral = self.__rustylr_generated_stack_17.pop().unwrap();
-        let mut precedence = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_17.push({ IdentOrLiteral });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant18(mut IdentOrLiteral) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut precedence) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant18({ IdentOrLiteral }))
     }
     fn reduce_NoOptim_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut nooptim = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut nooptim) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_Dense_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut dense = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut dense) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_Trace_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut semicolon = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut ident = self.__rustylr_generated_stack_24.pop().unwrap();
-        let mut trace = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_18.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant25(mut ident) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Terminals(mut trace) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant19({
             ident
                 .into_iter()
                 .map(|t| {
@@ -1144,1115 +1340,1184 @@ impl GrammarStack {
                     ident
                 })
                 .collect()
-        });
-        Ok(())
+        }))
     }
     fn reduce_Filter_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        self.__rustylr_generated_terminal_stack.pop();
-        let mut RustCode = self.__rustylr_generated_stack_11.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.pop();
-        self.__rustylr_generated_stack_11.push(RustCode);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        __rustylr_args.pop();
+        let GrammarTokenData::Variant12(mut RustCode) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        __rustylr_args.pop();
+        Ok(GrammarTokenData::Variant12(RustCode))
     }
     fn reduce_GrammarLine_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut Rule = self.__rustylr_generated_stack_1.pop().unwrap();
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant2(mut Rule) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
         {
             data.rules.push(Rule);
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_GrammarLine_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut TokenDef = self.__rustylr_generated_stack_10.pop().unwrap();
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant11(mut TokenDef) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
         {
             data.terminals.push(TokenDef);
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_GrammarLine_2(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut StartDef = self.__rustylr_generated_stack_12.pop().unwrap();
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant13(mut StartDef) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
         {
             data.start_rule_name.push(StartDef);
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_GrammarLine_3(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut EofDef = self.__rustylr_generated_stack_13.pop().unwrap();
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant14(mut EofDef) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
         {
             data.eof.push(EofDef);
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_GrammarLine_4(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut TokenTypeDef = self.__rustylr_generated_stack_13.pop().unwrap();
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant14(mut TokenTypeDef) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
         {
             data.token_typename.push(TokenTypeDef);
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_GrammarLine_5(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut UserDataDef = self.__rustylr_generated_stack_13.pop().unwrap();
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant14(mut UserDataDef) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
         {
             data.userdata_typename.push(UserDataDef);
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_GrammarLine_6(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut ReduceDef = self.__rustylr_generated_stack_16.pop().unwrap();
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant17(mut ReduceDef) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
         {
             data.precedences.push(ReduceDef.1.clone());
             data.reduce_types.push(ReduceDef);
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_GrammarLine_7(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut ErrorDef = self.__rustylr_generated_stack_13.pop().unwrap();
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant14(mut ErrorDef) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
         {
             data.error_typename.push(ErrorDef);
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_GrammarLine_8(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut ModulePrefixDef = self.__rustylr_generated_stack_13.pop().unwrap();
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant14(mut ModulePrefixDef) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
         {
             data.module_prefix.push(ModulePrefixDef);
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_GrammarLine_9(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        __rustylr_args.pop();
         {
             data.lalr = true;
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_GrammarLine_10(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        __rustylr_args.pop();
         {
             data.glr = true;
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_GrammarLine_11(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut Precedence = self.__rustylr_generated_stack_17.pop().unwrap();
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant18(mut Precedence) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
         {
             data.precedences.push(Precedence);
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_GrammarLine_12(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        __rustylr_args.pop();
         {
             data.no_optim = true;
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_GrammarLine_13(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        __rustylr_args.pop();
         {
             data.dense = true;
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_GrammarLine_14(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut Trace = self.__rustylr_generated_stack_18.pop().unwrap();
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant19(mut Trace) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
         {
             data.traces.extend(Trace);
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_GrammarLine_15(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut Filter = self.__rustylr_generated_stack_11.pop().unwrap();
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant12(mut Filter) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
         {
             data.filter = Some(Filter);
         }
-        Ok(())
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_Grammar_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        __rustylr_args.pop();
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce__TokenMappedPlus31_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_stack_6.pop().unwrap();
-        self.__rustylr_generated_stack_19.push({ vec![A] });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant7(mut A) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant20({ vec![A] }))
     }
     fn reduce__TokenMappedPlus31_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_stack_6.pop().unwrap();
-        let mut Ap = self.__rustylr_generated_stack_19.pop().unwrap();
-        self.__rustylr_generated_stack_19.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant7(mut A) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant20(mut Ap) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant20({
             Ap.push(A);
             Ap
-        });
-        Ok(())
+        }))
     }
     fn reduce__TokenMappedStar32_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut Ap = self.__rustylr_generated_stack_19.pop().unwrap();
-        self.__rustylr_generated_stack_19.push({ Ap });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant20(mut Ap) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant20({ Ap }))
     }
     fn reduce__TokenMappedStar32_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        self.__rustylr_generated_stack_19.push({ vec![] });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        Ok(GrammarTokenData::Variant20({ vec![] }))
     }
     fn reduce__PrecDefPlus33_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_stack_5.pop().unwrap();
-        self.__rustylr_generated_stack_20.push({ vec![A] });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant6(mut A) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant21({ vec![A] }))
     }
     fn reduce__PrecDefPlus33_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_stack_5.pop().unwrap();
-        let mut Ap = self.__rustylr_generated_stack_20.pop().unwrap();
-        self.__rustylr_generated_stack_20.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant6(mut A) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant21(mut Ap) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant21({
             Ap.push(A);
             Ap
-        });
-        Ok(())
+        }))
     }
     fn reduce__PrecDefStar34_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut Ap = self.__rustylr_generated_stack_20.pop().unwrap();
-        self.__rustylr_generated_stack_20.push({ Ap });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant21(mut Ap) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant21({ Ap }))
     }
     fn reduce__PrecDefStar34_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        self.__rustylr_generated_stack_20.push({ vec![] });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        Ok(GrammarTokenData::Variant21({ vec![] }))
     }
     fn reduce__caretQuestion35_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_21.push({ Some(A) });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut A) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant22({ Some(A) }))
     }
     fn reduce__caretQuestion35_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        self.__rustylr_generated_stack_21.push({ None });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        Ok(GrammarTokenData::Variant22({ None }))
     }
     fn reduce__TerminalSetItemPlus36_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_stack_7.pop().unwrap();
-        self.__rustylr_generated_stack_22.push({ vec![A] });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant8(mut A) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant23({ vec![A] }))
     }
     fn reduce__TerminalSetItemPlus36_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_stack_7.pop().unwrap();
-        let mut Ap = self.__rustylr_generated_stack_22.pop().unwrap();
-        self.__rustylr_generated_stack_22.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant8(mut A) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant23(mut Ap) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant23({
             Ap.push(A);
             Ap
-        });
-        Ok(())
+        }))
     }
     fn reduce__TerminalSetItemStar37_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut Ap = self.__rustylr_generated_stack_22.pop().unwrap();
-        self.__rustylr_generated_stack_22.push({ Ap });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant23(mut Ap) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant23({ Ap }))
     }
     fn reduce__TerminalSetItemStar37_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        self.__rustylr_generated_stack_22.push({ vec![] });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        Ok(GrammarTokenData::Variant23({ vec![] }))
     }
     fn reduce__PatternPlus38_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_stack_9.pop().unwrap();
-        self.__rustylr_generated_stack_23.push({ vec![A] });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant10(mut A) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant24({ vec![A] }))
     }
     fn reduce__PatternPlus38_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_stack_9.pop().unwrap();
-        let mut Ap = self.__rustylr_generated_stack_23.pop().unwrap();
-        self.__rustylr_generated_stack_23.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant10(mut A) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant24(mut Ap) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant24({
             Ap.push(A);
             Ap
-        });
-        Ok(())
+        }))
     }
     fn reduce__TermSet39_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_2(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_3(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_4(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_5(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_6(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_7(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_8(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_9(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_10(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_11(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_12(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_13(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_14(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_15(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_16(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_17(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_18(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_19(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_20(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_21(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_22(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_23(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_24(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_25(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_26(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_27(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_28(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_29(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_30(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_31(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_32(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_33(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_34(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_35(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_36(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce__TermSet39_37(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut term = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_terminal_stack.push(term);
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut term) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Terminals(term))
     }
     fn reduce___TermSet39Plus40_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_24.push({ vec![A] });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut A) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant25({ vec![A] }))
     }
     fn reduce___TermSet39Plus40_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Ap = self.__rustylr_generated_stack_24.pop().unwrap();
-        self.__rustylr_generated_stack_24.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut A) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant25(mut Ap) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant25({
             Ap.push(A);
             Ap
-        });
-        Ok(())
+        }))
     }
     fn reduce__IdentOrLiteralPlus41_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_stack_14.pop().unwrap();
-        self.__rustylr_generated_stack_17.push({ vec![A] });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant15(mut A) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant18({ vec![A] }))
     }
     fn reduce__IdentOrLiteralPlus41_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_stack_14.pop().unwrap();
-        let mut Ap = self.__rustylr_generated_stack_17.pop().unwrap();
-        self.__rustylr_generated_stack_17.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant15(mut A) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant18(mut Ap) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant18({
             Ap.push(A);
             Ap
-        });
-        Ok(())
+        }))
     }
     fn reduce__identPlus42_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        self.__rustylr_generated_stack_24.push({ vec![A] });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut A) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant25({ vec![A] }))
     }
     fn reduce__identPlus42_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut A = self.__rustylr_generated_terminal_stack.pop().unwrap();
-        let mut Ap = self.__rustylr_generated_stack_24.pop().unwrap();
-        self.__rustylr_generated_stack_24.push({
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Terminals(mut A) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        let GrammarTokenData::Variant25(mut Ap) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant25({
             Ap.push(A);
             Ap
-        });
-        Ok(())
+        }))
     }
     fn reduce__identStar43_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        let mut Ap = self.__rustylr_generated_stack_24.pop().unwrap();
-        self.__rustylr_generated_stack_24.push({ Ap });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        let GrammarTokenData::Variant25(mut Ap) = __rustylr_args.pop().unwrap() else {
+            unreachable!()
+        };
+        Ok(GrammarTokenData::Variant25({ Ap }))
     }
     fn reduce__identStar43_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        self.__rustylr_generated_stack_24.push({ vec![] });
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        Ok(GrammarTokenData::Variant25({ vec![] }))
     }
     fn reduce__GrammarLinePlus44_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        __rustylr_args.pop();
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce__GrammarLinePlus44_1(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        __rustylr_args.pop();
+        __rustylr_args.pop();
+        Ok(GrammarTokenData::Empty)
     }
     fn reduce_Augmented_0(
-        &mut self,
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        self.__rustylr_generated_terminal_stack.pop();
-        Ok(())
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        __rustylr_args.pop();
+        __rustylr_args.pop();
+        Ok(GrammarTokenData::Empty)
     }
 }
 #[allow(
     unused_braces,
     unused_parens,
-    unused_variables,
-    unused_mut,
     non_snake_case,
     non_camel_case_types,
-    dead_code
+    unused_variables
 )]
-impl ::rusty_lr_core::lr::Stack for GrammarStack {
+impl ::rusty_lr_core::TokenData for GrammarTokenData {
     type Term = Lexed;
     type NonTerm = GrammarNonTerminals;
     type ReduceActionError = ::rusty_lr_core::DefaultReduceActionError;
     type UserData = GrammarArgs;
     type StartType = ();
-    fn new() -> Self {
-        Self {
-            __rustylr_generated_terminal_stack: Vec::new(),
-            __rustylr_generated_stack_1: Vec::new(),
-            __rustylr_generated_stack_2: Vec::new(),
-            __rustylr_generated_stack_3: Vec::new(),
-            __rustylr_generated_stack_4: Vec::new(),
-            __rustylr_generated_stack_5: Vec::new(),
-            __rustylr_generated_stack_6: Vec::new(),
-            __rustylr_generated_stack_7: Vec::new(),
-            __rustylr_generated_stack_8: Vec::new(),
-            __rustylr_generated_stack_9: Vec::new(),
-            __rustylr_generated_stack_10: Vec::new(),
-            __rustylr_generated_stack_11: Vec::new(),
-            __rustylr_generated_stack_12: Vec::new(),
-            __rustylr_generated_stack_13: Vec::new(),
-            __rustylr_generated_stack_14: Vec::new(),
-            __rustylr_generated_stack_15: Vec::new(),
-            __rustylr_generated_stack_16: Vec::new(),
-            __rustylr_generated_stack_17: Vec::new(),
-            __rustylr_generated_stack_18: Vec::new(),
-            __rustylr_generated_stack_19: Vec::new(),
-            __rustylr_generated_stack_20: Vec::new(),
-            __rustylr_generated_stack_21: Vec::new(),
-            __rustylr_generated_stack_22: Vec::new(),
-            __rustylr_generated_stack_23: Vec::new(),
-            __rustylr_generated_stack_24: Vec::new(),
-        }
-    }
-    fn push(&mut self, term: Self::Term) {
-        self.__rustylr_generated_terminal_stack.push(term);
-    }
-    fn reduce(
-        &mut self,
-        rustylr_macro_generated_ruleid__: usize,
-        user_data: &mut Self::UserData,
+    fn reduce_action(
+        rule_index: usize,
+        reduce_args: &mut Vec<Self>,
+        shift: &mut bool,
         lookahead: &Self::Term,
-    ) -> Result<(), Self::ReduceActionError> {
-        match rustylr_macro_generated_ruleid__ {
-            0usize => self.reduce_Rule_0(lookahead, user_data),
-            1usize => self.reduce_RuleType_0(lookahead, user_data),
-            2usize => self.reduce_RuleType_1(lookahead, user_data),
-            3usize => self.reduce_RuleLines_0(lookahead, user_data),
-            4usize => self.reduce_RuleLines_1(lookahead, user_data),
-            5usize => self.reduce_RuleLine_0(lookahead, user_data),
-            6usize => self.reduce_PrecDef_0(lookahead, user_data),
-            7usize => self.reduce_PrecDef_1(lookahead, user_data),
-            8usize => self.reduce_TokenMapped_0(lookahead, user_data),
-            9usize => self.reduce_TokenMapped_1(lookahead, user_data),
-            10usize => self.reduce_TerminalSetItem_0(lookahead, user_data),
-            11usize => self.reduce_TerminalSetItem_1(lookahead, user_data),
-            12usize => self.reduce_TerminalSetItem_2(lookahead, user_data),
-            13usize => self.reduce_TerminalSetItem_3(lookahead, user_data),
-            14usize => self.reduce_TerminalSet_0(lookahead, user_data),
-            15usize => self.reduce_TerminalSet_1(lookahead, user_data),
-            16usize => self.reduce_Pattern_0(lookahead, user_data),
-            17usize => self.reduce_Pattern_1(lookahead, user_data),
-            18usize => self.reduce_Pattern_2(lookahead, user_data),
-            19usize => self.reduce_Pattern_3(lookahead, user_data),
-            20usize => self.reduce_Pattern_4(lookahead, user_data),
-            21usize => self.reduce_Pattern_5(lookahead, user_data),
-            22usize => self.reduce_Pattern_6(lookahead, user_data),
-            23usize => self.reduce_Pattern_7(lookahead, user_data),
-            24usize => self.reduce_Pattern_8(lookahead, user_data),
-            25usize => self.reduce_Pattern_9(lookahead, user_data),
-            26usize => self.reduce_Action_0(lookahead, user_data),
-            27usize => self.reduce_Action_1(lookahead, user_data),
-            28usize => self.reduce_TokenDef_0(lookahead, user_data),
-            29usize => self.reduce_RustCode_0(lookahead, user_data),
-            30usize => self.reduce_StartDef_0(lookahead, user_data),
-            31usize => self.reduce_EofDef_0(lookahead, user_data),
-            32usize => self.reduce_TokenTypeDef_0(lookahead, user_data),
-            33usize => self.reduce_UserDataDef_0(lookahead, user_data),
-            34usize => self.reduce_IdentOrLiteral_0(lookahead, user_data),
-            35usize => self.reduce_IdentOrLiteral_1(lookahead, user_data),
-            36usize => self.reduce_ReduceType_0(lookahead, user_data),
-            37usize => self.reduce_ReduceType_1(lookahead, user_data),
-            38usize => self.reduce_ReduceDef_0(lookahead, user_data),
-            39usize => self.reduce_ErrorDef_0(lookahead, user_data),
-            40usize => self.reduce_ModulePrefixDef_0(lookahead, user_data),
-            41usize => self.reduce_Glr_0(lookahead, user_data),
-            42usize => self.reduce_Lalr_0(lookahead, user_data),
-            43usize => self.reduce_Precedence_0(lookahead, user_data),
-            44usize => self.reduce_NoOptim_0(lookahead, user_data),
-            45usize => self.reduce_Dense_0(lookahead, user_data),
-            46usize => self.reduce_Trace_0(lookahead, user_data),
-            47usize => self.reduce_Filter_0(lookahead, user_data),
-            48usize => self.reduce_GrammarLine_0(lookahead, user_data),
-            49usize => self.reduce_GrammarLine_1(lookahead, user_data),
-            50usize => self.reduce_GrammarLine_2(lookahead, user_data),
-            51usize => self.reduce_GrammarLine_3(lookahead, user_data),
-            52usize => self.reduce_GrammarLine_4(lookahead, user_data),
-            53usize => self.reduce_GrammarLine_5(lookahead, user_data),
-            54usize => self.reduce_GrammarLine_6(lookahead, user_data),
-            55usize => self.reduce_GrammarLine_7(lookahead, user_data),
-            56usize => self.reduce_GrammarLine_8(lookahead, user_data),
-            57usize => self.reduce_GrammarLine_9(lookahead, user_data),
-            58usize => self.reduce_GrammarLine_10(lookahead, user_data),
-            59usize => self.reduce_GrammarLine_11(lookahead, user_data),
-            60usize => self.reduce_GrammarLine_12(lookahead, user_data),
-            61usize => self.reduce_GrammarLine_13(lookahead, user_data),
-            62usize => self.reduce_GrammarLine_14(lookahead, user_data),
-            63usize => self.reduce_GrammarLine_15(lookahead, user_data),
-            64usize => self.reduce_Grammar_0(lookahead, user_data),
-            65usize => self.reduce__TokenMappedPlus31_0(lookahead, user_data),
-            66usize => self.reduce__TokenMappedPlus31_1(lookahead, user_data),
-            67usize => self.reduce__TokenMappedStar32_0(lookahead, user_data),
-            68usize => self.reduce__TokenMappedStar32_1(lookahead, user_data),
-            69usize => self.reduce__PrecDefPlus33_0(lookahead, user_data),
-            70usize => self.reduce__PrecDefPlus33_1(lookahead, user_data),
-            71usize => self.reduce__PrecDefStar34_0(lookahead, user_data),
-            72usize => self.reduce__PrecDefStar34_1(lookahead, user_data),
-            73usize => self.reduce__caretQuestion35_0(lookahead, user_data),
-            74usize => self.reduce__caretQuestion35_1(lookahead, user_data),
-            75usize => self.reduce__TerminalSetItemPlus36_0(lookahead, user_data),
-            76usize => self.reduce__TerminalSetItemPlus36_1(lookahead, user_data),
-            77usize => self.reduce__TerminalSetItemStar37_0(lookahead, user_data),
-            78usize => self.reduce__TerminalSetItemStar37_1(lookahead, user_data),
-            79usize => self.reduce__PatternPlus38_0(lookahead, user_data),
-            80usize => self.reduce__PatternPlus38_1(lookahead, user_data),
-            81usize => self.reduce__TermSet39_0(lookahead, user_data),
-            82usize => self.reduce__TermSet39_1(lookahead, user_data),
-            83usize => self.reduce__TermSet39_2(lookahead, user_data),
-            84usize => self.reduce__TermSet39_3(lookahead, user_data),
-            85usize => self.reduce__TermSet39_4(lookahead, user_data),
-            86usize => self.reduce__TermSet39_5(lookahead, user_data),
-            87usize => self.reduce__TermSet39_6(lookahead, user_data),
-            88usize => self.reduce__TermSet39_7(lookahead, user_data),
-            89usize => self.reduce__TermSet39_8(lookahead, user_data),
-            90usize => self.reduce__TermSet39_9(lookahead, user_data),
-            91usize => self.reduce__TermSet39_10(lookahead, user_data),
-            92usize => self.reduce__TermSet39_11(lookahead, user_data),
-            93usize => self.reduce__TermSet39_12(lookahead, user_data),
-            94usize => self.reduce__TermSet39_13(lookahead, user_data),
-            95usize => self.reduce__TermSet39_14(lookahead, user_data),
-            96usize => self.reduce__TermSet39_15(lookahead, user_data),
-            97usize => self.reduce__TermSet39_16(lookahead, user_data),
-            98usize => self.reduce__TermSet39_17(lookahead, user_data),
-            99usize => self.reduce__TermSet39_18(lookahead, user_data),
-            100usize => self.reduce__TermSet39_19(lookahead, user_data),
-            101usize => self.reduce__TermSet39_20(lookahead, user_data),
-            102usize => self.reduce__TermSet39_21(lookahead, user_data),
-            103usize => self.reduce__TermSet39_22(lookahead, user_data),
-            104usize => self.reduce__TermSet39_23(lookahead, user_data),
-            105usize => self.reduce__TermSet39_24(lookahead, user_data),
-            106usize => self.reduce__TermSet39_25(lookahead, user_data),
-            107usize => self.reduce__TermSet39_26(lookahead, user_data),
-            108usize => self.reduce__TermSet39_27(lookahead, user_data),
-            109usize => self.reduce__TermSet39_28(lookahead, user_data),
-            110usize => self.reduce__TermSet39_29(lookahead, user_data),
-            111usize => self.reduce__TermSet39_30(lookahead, user_data),
-            112usize => self.reduce__TermSet39_31(lookahead, user_data),
-            113usize => self.reduce__TermSet39_32(lookahead, user_data),
-            114usize => self.reduce__TermSet39_33(lookahead, user_data),
-            115usize => self.reduce__TermSet39_34(lookahead, user_data),
-            116usize => self.reduce__TermSet39_35(lookahead, user_data),
-            117usize => self.reduce__TermSet39_36(lookahead, user_data),
-            118usize => self.reduce__TermSet39_37(lookahead, user_data),
-            119usize => self.reduce___TermSet39Plus40_0(lookahead, user_data),
-            120usize => self.reduce___TermSet39Plus40_1(lookahead, user_data),
-            121usize => self.reduce__IdentOrLiteralPlus41_0(lookahead, user_data),
-            122usize => self.reduce__IdentOrLiteralPlus41_1(lookahead, user_data),
-            123usize => self.reduce__identPlus42_0(lookahead, user_data),
-            124usize => self.reduce__identPlus42_1(lookahead, user_data),
-            125usize => self.reduce__identStar43_0(lookahead, user_data),
-            126usize => self.reduce__identStar43_1(lookahead, user_data),
-            127usize => self.reduce__GrammarLinePlus44_0(lookahead, user_data),
-            128usize => self.reduce__GrammarLinePlus44_1(lookahead, user_data),
-            129usize => self.reduce_Augmented_0(lookahead, user_data),
+        user_data: &mut Self::UserData,
+    ) -> Result<Self, Self::ReduceActionError> {
+        match rule_index {
+            0usize => Self::reduce_Rule_0(reduce_args, shift, lookahead, user_data),
+            1usize => Self::reduce_RuleType_0(reduce_args, shift, lookahead, user_data),
+            2usize => Self::reduce_RuleType_1(reduce_args, shift, lookahead, user_data),
+            3usize => Self::reduce_RuleLines_0(reduce_args, shift, lookahead, user_data),
+            4usize => Self::reduce_RuleLines_1(reduce_args, shift, lookahead, user_data),
+            5usize => Self::reduce_RuleLine_0(reduce_args, shift, lookahead, user_data),
+            6usize => Self::reduce_PrecDef_0(reduce_args, shift, lookahead, user_data),
+            7usize => Self::reduce_PrecDef_1(reduce_args, shift, lookahead, user_data),
+            8usize => Self::reduce_TokenMapped_0(reduce_args, shift, lookahead, user_data),
+            9usize => Self::reduce_TokenMapped_1(reduce_args, shift, lookahead, user_data),
+            10usize => Self::reduce_TerminalSetItem_0(reduce_args, shift, lookahead, user_data),
+            11usize => Self::reduce_TerminalSetItem_1(reduce_args, shift, lookahead, user_data),
+            12usize => Self::reduce_TerminalSetItem_2(reduce_args, shift, lookahead, user_data),
+            13usize => Self::reduce_TerminalSetItem_3(reduce_args, shift, lookahead, user_data),
+            14usize => Self::reduce_TerminalSet_0(reduce_args, shift, lookahead, user_data),
+            15usize => Self::reduce_TerminalSet_1(reduce_args, shift, lookahead, user_data),
+            16usize => Self::reduce_Pattern_0(reduce_args, shift, lookahead, user_data),
+            17usize => Self::reduce_Pattern_1(reduce_args, shift, lookahead, user_data),
+            18usize => Self::reduce_Pattern_2(reduce_args, shift, lookahead, user_data),
+            19usize => Self::reduce_Pattern_3(reduce_args, shift, lookahead, user_data),
+            20usize => Self::reduce_Pattern_4(reduce_args, shift, lookahead, user_data),
+            21usize => Self::reduce_Pattern_5(reduce_args, shift, lookahead, user_data),
+            22usize => Self::reduce_Pattern_6(reduce_args, shift, lookahead, user_data),
+            23usize => Self::reduce_Pattern_7(reduce_args, shift, lookahead, user_data),
+            24usize => Self::reduce_Pattern_8(reduce_args, shift, lookahead, user_data),
+            25usize => Self::reduce_Pattern_9(reduce_args, shift, lookahead, user_data),
+            26usize => Self::reduce_Action_0(reduce_args, shift, lookahead, user_data),
+            27usize => Self::reduce_Action_1(reduce_args, shift, lookahead, user_data),
+            28usize => Self::reduce_TokenDef_0(reduce_args, shift, lookahead, user_data),
+            29usize => Self::reduce_RustCode_0(reduce_args, shift, lookahead, user_data),
+            30usize => Self::reduce_StartDef_0(reduce_args, shift, lookahead, user_data),
+            31usize => Self::reduce_EofDef_0(reduce_args, shift, lookahead, user_data),
+            32usize => Self::reduce_TokenTypeDef_0(reduce_args, shift, lookahead, user_data),
+            33usize => Self::reduce_UserDataDef_0(reduce_args, shift, lookahead, user_data),
+            34usize => Self::reduce_IdentOrLiteral_0(reduce_args, shift, lookahead, user_data),
+            35usize => Self::reduce_IdentOrLiteral_1(reduce_args, shift, lookahead, user_data),
+            36usize => Self::reduce_ReduceType_0(reduce_args, shift, lookahead, user_data),
+            37usize => Self::reduce_ReduceType_1(reduce_args, shift, lookahead, user_data),
+            38usize => Self::reduce_ReduceDef_0(reduce_args, shift, lookahead, user_data),
+            39usize => Self::reduce_ErrorDef_0(reduce_args, shift, lookahead, user_data),
+            40usize => Self::reduce_ModulePrefixDef_0(reduce_args, shift, lookahead, user_data),
+            41usize => Self::reduce_Glr_0(reduce_args, shift, lookahead, user_data),
+            42usize => Self::reduce_Lalr_0(reduce_args, shift, lookahead, user_data),
+            43usize => Self::reduce_Precedence_0(reduce_args, shift, lookahead, user_data),
+            44usize => Self::reduce_NoOptim_0(reduce_args, shift, lookahead, user_data),
+            45usize => Self::reduce_Dense_0(reduce_args, shift, lookahead, user_data),
+            46usize => Self::reduce_Trace_0(reduce_args, shift, lookahead, user_data),
+            47usize => Self::reduce_Filter_0(reduce_args, shift, lookahead, user_data),
+            48usize => Self::reduce_GrammarLine_0(reduce_args, shift, lookahead, user_data),
+            49usize => Self::reduce_GrammarLine_1(reduce_args, shift, lookahead, user_data),
+            50usize => Self::reduce_GrammarLine_2(reduce_args, shift, lookahead, user_data),
+            51usize => Self::reduce_GrammarLine_3(reduce_args, shift, lookahead, user_data),
+            52usize => Self::reduce_GrammarLine_4(reduce_args, shift, lookahead, user_data),
+            53usize => Self::reduce_GrammarLine_5(reduce_args, shift, lookahead, user_data),
+            54usize => Self::reduce_GrammarLine_6(reduce_args, shift, lookahead, user_data),
+            55usize => Self::reduce_GrammarLine_7(reduce_args, shift, lookahead, user_data),
+            56usize => Self::reduce_GrammarLine_8(reduce_args, shift, lookahead, user_data),
+            57usize => Self::reduce_GrammarLine_9(reduce_args, shift, lookahead, user_data),
+            58usize => Self::reduce_GrammarLine_10(reduce_args, shift, lookahead, user_data),
+            59usize => Self::reduce_GrammarLine_11(reduce_args, shift, lookahead, user_data),
+            60usize => Self::reduce_GrammarLine_12(reduce_args, shift, lookahead, user_data),
+            61usize => Self::reduce_GrammarLine_13(reduce_args, shift, lookahead, user_data),
+            62usize => Self::reduce_GrammarLine_14(reduce_args, shift, lookahead, user_data),
+            63usize => Self::reduce_GrammarLine_15(reduce_args, shift, lookahead, user_data),
+            64usize => Self::reduce_Grammar_0(reduce_args, shift, lookahead, user_data),
+            65usize => Self::reduce__TokenMappedPlus31_0(reduce_args, shift, lookahead, user_data),
+            66usize => Self::reduce__TokenMappedPlus31_1(reduce_args, shift, lookahead, user_data),
+            67usize => Self::reduce__TokenMappedStar32_0(reduce_args, shift, lookahead, user_data),
+            68usize => Self::reduce__TokenMappedStar32_1(reduce_args, shift, lookahead, user_data),
+            69usize => Self::reduce__PrecDefPlus33_0(reduce_args, shift, lookahead, user_data),
+            70usize => Self::reduce__PrecDefPlus33_1(reduce_args, shift, lookahead, user_data),
+            71usize => Self::reduce__PrecDefStar34_0(reduce_args, shift, lookahead, user_data),
+            72usize => Self::reduce__PrecDefStar34_1(reduce_args, shift, lookahead, user_data),
+            73usize => Self::reduce__caretQuestion35_0(reduce_args, shift, lookahead, user_data),
+            74usize => Self::reduce__caretQuestion35_1(reduce_args, shift, lookahead, user_data),
+            75usize => {
+                Self::reduce__TerminalSetItemPlus36_0(reduce_args, shift, lookahead, user_data)
+            }
+            76usize => {
+                Self::reduce__TerminalSetItemPlus36_1(reduce_args, shift, lookahead, user_data)
+            }
+            77usize => {
+                Self::reduce__TerminalSetItemStar37_0(reduce_args, shift, lookahead, user_data)
+            }
+            78usize => {
+                Self::reduce__TerminalSetItemStar37_1(reduce_args, shift, lookahead, user_data)
+            }
+            79usize => Self::reduce__PatternPlus38_0(reduce_args, shift, lookahead, user_data),
+            80usize => Self::reduce__PatternPlus38_1(reduce_args, shift, lookahead, user_data),
+            81usize => Self::reduce__TermSet39_0(reduce_args, shift, lookahead, user_data),
+            82usize => Self::reduce__TermSet39_1(reduce_args, shift, lookahead, user_data),
+            83usize => Self::reduce__TermSet39_2(reduce_args, shift, lookahead, user_data),
+            84usize => Self::reduce__TermSet39_3(reduce_args, shift, lookahead, user_data),
+            85usize => Self::reduce__TermSet39_4(reduce_args, shift, lookahead, user_data),
+            86usize => Self::reduce__TermSet39_5(reduce_args, shift, lookahead, user_data),
+            87usize => Self::reduce__TermSet39_6(reduce_args, shift, lookahead, user_data),
+            88usize => Self::reduce__TermSet39_7(reduce_args, shift, lookahead, user_data),
+            89usize => Self::reduce__TermSet39_8(reduce_args, shift, lookahead, user_data),
+            90usize => Self::reduce__TermSet39_9(reduce_args, shift, lookahead, user_data),
+            91usize => Self::reduce__TermSet39_10(reduce_args, shift, lookahead, user_data),
+            92usize => Self::reduce__TermSet39_11(reduce_args, shift, lookahead, user_data),
+            93usize => Self::reduce__TermSet39_12(reduce_args, shift, lookahead, user_data),
+            94usize => Self::reduce__TermSet39_13(reduce_args, shift, lookahead, user_data),
+            95usize => Self::reduce__TermSet39_14(reduce_args, shift, lookahead, user_data),
+            96usize => Self::reduce__TermSet39_15(reduce_args, shift, lookahead, user_data),
+            97usize => Self::reduce__TermSet39_16(reduce_args, shift, lookahead, user_data),
+            98usize => Self::reduce__TermSet39_17(reduce_args, shift, lookahead, user_data),
+            99usize => Self::reduce__TermSet39_18(reduce_args, shift, lookahead, user_data),
+            100usize => Self::reduce__TermSet39_19(reduce_args, shift, lookahead, user_data),
+            101usize => Self::reduce__TermSet39_20(reduce_args, shift, lookahead, user_data),
+            102usize => Self::reduce__TermSet39_21(reduce_args, shift, lookahead, user_data),
+            103usize => Self::reduce__TermSet39_22(reduce_args, shift, lookahead, user_data),
+            104usize => Self::reduce__TermSet39_23(reduce_args, shift, lookahead, user_data),
+            105usize => Self::reduce__TermSet39_24(reduce_args, shift, lookahead, user_data),
+            106usize => Self::reduce__TermSet39_25(reduce_args, shift, lookahead, user_data),
+            107usize => Self::reduce__TermSet39_26(reduce_args, shift, lookahead, user_data),
+            108usize => Self::reduce__TermSet39_27(reduce_args, shift, lookahead, user_data),
+            109usize => Self::reduce__TermSet39_28(reduce_args, shift, lookahead, user_data),
+            110usize => Self::reduce__TermSet39_29(reduce_args, shift, lookahead, user_data),
+            111usize => Self::reduce__TermSet39_30(reduce_args, shift, lookahead, user_data),
+            112usize => Self::reduce__TermSet39_31(reduce_args, shift, lookahead, user_data),
+            113usize => Self::reduce__TermSet39_32(reduce_args, shift, lookahead, user_data),
+            114usize => Self::reduce__TermSet39_33(reduce_args, shift, lookahead, user_data),
+            115usize => Self::reduce__TermSet39_34(reduce_args, shift, lookahead, user_data),
+            116usize => Self::reduce__TermSet39_35(reduce_args, shift, lookahead, user_data),
+            117usize => Self::reduce__TermSet39_36(reduce_args, shift, lookahead, user_data),
+            118usize => Self::reduce__TermSet39_37(reduce_args, shift, lookahead, user_data),
+            119usize => Self::reduce___TermSet39Plus40_0(reduce_args, shift, lookahead, user_data),
+            120usize => Self::reduce___TermSet39Plus40_1(reduce_args, shift, lookahead, user_data),
+            121usize => {
+                Self::reduce__IdentOrLiteralPlus41_0(reduce_args, shift, lookahead, user_data)
+            }
+            122usize => {
+                Self::reduce__IdentOrLiteralPlus41_1(reduce_args, shift, lookahead, user_data)
+            }
+            123usize => Self::reduce__identPlus42_0(reduce_args, shift, lookahead, user_data),
+            124usize => Self::reduce__identPlus42_1(reduce_args, shift, lookahead, user_data),
+            125usize => Self::reduce__identStar43_0(reduce_args, shift, lookahead, user_data),
+            126usize => Self::reduce__identStar43_1(reduce_args, shift, lookahead, user_data),
+            127usize => Self::reduce__GrammarLinePlus44_0(reduce_args, shift, lookahead, user_data),
+            128usize => Self::reduce__GrammarLinePlus44_1(reduce_args, shift, lookahead, user_data),
+            129usize => Self::reduce_Augmented_0(reduce_args, shift, lookahead, user_data),
             _ => {
-                unreachable!("Invalid Rule: {}", rustylr_macro_generated_ruleid__);
+                unreachable!("Invalid Rule: {}", rule_index);
             }
         }
     }
-    #[allow(clippy::unused_unit)]
-    fn pop_start(&mut self) -> Self::StartType {
-        ()
+    fn new_error_nonterm() -> Self {
+        GrammarTokenData::Empty
     }
-    fn pop(&mut self, nonterm: Self::NonTerm) {
-        match nonterm {
-            GrammarNonTerminals::Rule => {
-                self.__rustylr_generated_stack_1.pop();
-            }
-            GrammarNonTerminals::RuleType => {
-                self.__rustylr_generated_stack_2.pop();
-            }
-            GrammarNonTerminals::RuleLines => {
-                self.__rustylr_generated_stack_3.pop();
-            }
-            GrammarNonTerminals::RuleLine => {
-                self.__rustylr_generated_stack_4.pop();
-            }
-            GrammarNonTerminals::PrecDef => {
-                self.__rustylr_generated_stack_5.pop();
-            }
-            GrammarNonTerminals::TokenMapped => {
-                self.__rustylr_generated_stack_6.pop();
-            }
-            GrammarNonTerminals::TerminalSetItem => {
-                self.__rustylr_generated_stack_7.pop();
-            }
-            GrammarNonTerminals::TerminalSet => {
-                self.__rustylr_generated_stack_8.pop();
-            }
-            GrammarNonTerminals::Pattern => {
-                self.__rustylr_generated_stack_9.pop();
-            }
-            GrammarNonTerminals::Action => {
-                self.__rustylr_generated_stack_2.pop();
-            }
-            GrammarNonTerminals::TokenDef => {
-                self.__rustylr_generated_stack_10.pop();
-            }
-            GrammarNonTerminals::RustCode => {
-                self.__rustylr_generated_stack_11.pop();
-            }
-            GrammarNonTerminals::StartDef => {
-                self.__rustylr_generated_stack_12.pop();
-            }
-            GrammarNonTerminals::EofDef => {
-                self.__rustylr_generated_stack_13.pop();
-            }
-            GrammarNonTerminals::TokenTypeDef => {
-                self.__rustylr_generated_stack_13.pop();
-            }
-            GrammarNonTerminals::UserDataDef => {
-                self.__rustylr_generated_stack_13.pop();
-            }
-            GrammarNonTerminals::IdentOrLiteral => {
-                self.__rustylr_generated_stack_14.pop();
-            }
-            GrammarNonTerminals::ReduceType => {
-                self.__rustylr_generated_stack_15.pop();
-            }
-            GrammarNonTerminals::ReduceDef => {
-                self.__rustylr_generated_stack_16.pop();
-            }
-            GrammarNonTerminals::ErrorDef => {
-                self.__rustylr_generated_stack_13.pop();
-            }
-            GrammarNonTerminals::ModulePrefixDef => {
-                self.__rustylr_generated_stack_13.pop();
-            }
-            GrammarNonTerminals::Precedence => {
-                self.__rustylr_generated_stack_17.pop();
-            }
-            GrammarNonTerminals::Trace => {
-                self.__rustylr_generated_stack_18.pop();
-            }
-            GrammarNonTerminals::Filter => {
-                self.__rustylr_generated_stack_11.pop();
-            }
-            GrammarNonTerminals::_TokenMappedPlus31 => {
-                self.__rustylr_generated_stack_19.pop();
-            }
-            GrammarNonTerminals::_TokenMappedStar32 => {
-                self.__rustylr_generated_stack_19.pop();
-            }
-            GrammarNonTerminals::_PrecDefPlus33 => {
-                self.__rustylr_generated_stack_20.pop();
-            }
-            GrammarNonTerminals::_PrecDefStar34 => {
-                self.__rustylr_generated_stack_20.pop();
-            }
-            GrammarNonTerminals::_caretQuestion35 => {
-                self.__rustylr_generated_stack_21.pop();
-            }
-            GrammarNonTerminals::_TerminalSetItemPlus36 => {
-                self.__rustylr_generated_stack_22.pop();
-            }
-            GrammarNonTerminals::_TerminalSetItemStar37 => {
-                self.__rustylr_generated_stack_22.pop();
-            }
-            GrammarNonTerminals::_PatternPlus38 => {
-                self.__rustylr_generated_stack_23.pop();
-            }
-            GrammarNonTerminals::_TermSet39 => {
-                self.__rustylr_generated_terminal_stack.pop();
-            }
-            GrammarNonTerminals::__TermSet39Plus40 => {
-                self.__rustylr_generated_stack_24.pop();
-            }
-            GrammarNonTerminals::_IdentOrLiteralPlus41 => {
-                self.__rustylr_generated_stack_17.pop();
-            }
-            GrammarNonTerminals::_identPlus42 => {
-                self.__rustylr_generated_stack_24.pop();
-            }
-            GrammarNonTerminals::_identStar43 => {
-                self.__rustylr_generated_stack_24.pop();
-            }
-            _ => {}
+}
+#[allow(
+    unused_braces,
+    unused_parens,
+    non_snake_case,
+    non_camel_case_types,
+    unused_variables
+)]
+impl From<Lexed> for GrammarTokenData {
+    fn from(token: Lexed) -> Self {
+        GrammarTokenData::Terminals(token)
+    }
+}
+#[allow(
+    unused_braces,
+    unused_parens,
+    non_snake_case,
+    non_camel_case_types,
+    unused_variables
+)]
+impl TryFrom<GrammarTokenData> for () {
+    type Error = ();
+    fn try_from(token: GrammarTokenData) -> Result<Self, Self::Error> {
+        match token {
+            GrammarTokenData::Empty => Ok(()),
+            _ => Err(()),
         }
-    }
-    fn pop_term(&mut self) {
-        self.__rustylr_generated_terminal_stack.pop();
     }
 }
 #[doc = r" A struct that holds the entire parser table and production rules."]

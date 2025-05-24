@@ -9,13 +9,15 @@ use crate::Tree;
 #[cfg(feature = "tree")]
 use crate::TreeList;
 
+use crate::TokenData;
+
 /// Iterator for traverse node to root.
 /// Note that root node is not included in this iterator.
-pub struct NodeRefIterator<'a, Data: NodeData> {
+pub struct NodeRefIterator<'a, Data: TokenData> {
     node: Option<&'a Node<Data>>,
 }
 
-impl<'a, Data: NodeData> Iterator for NodeRefIterator<'a, Data> {
+impl<'a, Data: TokenData> Iterator for NodeRefIterator<'a, Data> {
     type Item = &'a Node<Data>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -31,46 +33,24 @@ impl<'a, Data: NodeData> Iterator for NodeRefIterator<'a, Data> {
     }
 }
 
-/// Trait for user-defined data in node.
-pub trait NodeData: Sized {
-    type Term;
-    type NonTerm;
-    type UserData;
-    type ReduceActionError;
-
-    type StartType;
-
-    fn new_term(term: Self::Term) -> Self;
-    fn new_nonterm(
-        rule_index: usize,
-        reduce_args: &mut Vec<Self>,
-        shift: &mut bool,
-        lookahead: &Self::Term,
-        userdata: &mut Self::UserData,
-    ) -> Result<Self, Self::ReduceActionError>;
-
-    fn new_error_nonterm() -> Self;
-
-    /// get data of start symbol
-    fn into_start(self) -> Self::StartType;
-}
-
-/// Node represents single shift action in GLR parser.
+/// Node represents single token in the parse tree.
+/// To handle multiple paths in the GLR parsing,
+/// this constructs Linked List of nodes, where parent node is the previous token in the parse tree.
 #[derive(Clone)]
-pub struct Node<Data: NodeData> {
+pub struct Node<Data: TokenData> {
     /// parent node
     pub parent: Option<Rc<Node<Data>>>,
     /// index of state in parser
     pub state: usize,
 
-    /// actual data(RuleType) of this node
+    /// token data for this node
     pub data: Option<Data>,
     /// tree representation of this node
     #[cfg(feature = "tree")]
     pub tree: Option<Tree<Data::Term, Data::NonTerm>>,
 }
 
-impl<Data: NodeData> Node<Data> {
+impl<Data: TokenData> Node<Data> {
     /// generate new root node
     pub fn new_root() -> Self {
         Self {
@@ -487,14 +467,14 @@ impl<Data: NodeData> Node<Data> {
 }
 
 #[cfg(feature = "tree")]
-impl<Data: NodeData> From<Node<Data>> for Tree<Data::Term, Data::NonTerm> {
+impl<Data: TokenData> From<Node<Data>> for Tree<Data::Term, Data::NonTerm> {
     fn from(node: Node<Data>) -> Self {
         node.into_tree()
     }
 }
 
 #[cfg(feature = "tree")]
-impl<Data: NodeData> std::fmt::Display for Node<Data>
+impl<Data: TokenData> std::fmt::Display for Node<Data>
 where
     Data::Term: std::fmt::Display,
     Data::NonTerm: std::fmt::Display + crate::NonTerminal,
@@ -508,7 +488,7 @@ where
     }
 }
 #[cfg(feature = "tree")]
-impl<Data: NodeData> std::fmt::Debug for Node<Data>
+impl<Data: TokenData> std::fmt::Debug for Node<Data>
 where
     Data::Term: std::fmt::Debug,
     Data::NonTerm: std::fmt::Debug + crate::NonTerminal,
@@ -522,14 +502,14 @@ where
     }
 }
 
-impl<Data: NodeData> Deref for Node<Data> {
+impl<Data: TokenData> Deref for Node<Data> {
     type Target = Data;
 
     fn deref(&self) -> &Self::Target {
         self.to_data()
     }
 }
-impl<Data: NodeData> DerefMut for Node<Data> {
+impl<Data: TokenData> DerefMut for Node<Data> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.data.as_mut().unwrap()
     }

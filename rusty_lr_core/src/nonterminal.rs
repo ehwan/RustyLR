@@ -20,6 +20,8 @@ pub trait NonTerminal {
     fn as_str(&self) -> &'static str;
 }
 
+/// If the non-terminal is auto-generated,
+/// the pattern where this non-terminal was generated from.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NonTerminalType {
     /// zero or more repetitions
@@ -35,11 +37,36 @@ pub enum NonTerminalType {
     /// error recovery non-terminal
     Error,
 
+    /// terminal set enclosed in brackets ( [a-zA-Z0-9] )
     TerminalSet,
     /// rule with explicit lookaheads
     Lookahead,
 
+    /// sequence of tokens enclosed in parentheses ( a B c ... )
     Group,
 
+    /// "abc" or b"abc"
     LiteralString,
+}
+
+/// A trait for token that holds data.
+/// This will be used for data stack in the parser.
+pub trait TokenData: Sized {
+    type Term;
+    type NonTerm;
+    type UserData;
+    type ReduceActionError;
+    type StartType;
+
+    /// performs a reduce action with the given rule index
+    fn reduce_action(
+        rule_index: usize,
+        reduce_args: &mut Vec<Self>,
+        shift: &mut bool,
+        lookahead: &Self::Term,
+        userdata: &mut Self::UserData,
+    ) -> Result<Self, Self::ReduceActionError>;
+
+    /// create new non-terminal for error recovery
+    fn new_error_nonterm() -> Self;
 }

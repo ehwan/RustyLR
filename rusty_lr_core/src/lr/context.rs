@@ -3,112 +3,135 @@ use std::hash::Hash;
 
 use super::ParseError;
 use super::Parser;
-use super::Stack;
 use super::State;
 
 #[cfg(feature = "tree")]
 use crate::TreeList;
 
+use crate::TokenData;
+
 /// A struct that maintains the current state and the values associated with each symbol.
-pub struct Context<S: Stack> {
-    /// state stack
+pub struct Context<Data: TokenData> {
+    /// State stack
     pub state_stack: Vec<usize>,
 
-    pub(crate) data_stack: S,
+    /// Data stack holds the values associated with each symbol.
+    pub(crate) data_stack: Vec<Data>,
 
+    /// Tree stack for tree representation of the parse.
     #[cfg(feature = "tree")]
-    pub(crate) tree_stack: TreeList<S::Term, S::NonTerm>,
+    pub(crate) tree_stack: TreeList<Data::Term, Data::NonTerm>,
 }
 
-impl<S: Stack> Context<S> {
+impl<Data: TokenData> Context<Data> {
     /// Create a new context.
-    /// `state_stack` is initialized with 0 (root state).
-    pub fn new() -> Self
-    where
-        S: Stack,
-    {
+    /// `state_stack` is initialized with [0] (root state).
+    pub fn new() -> Self {
         Context {
             state_stack: vec![0],
 
-            data_stack: S::new(),
+            data_stack: Vec::new(),
 
             #[cfg(feature = "tree")]
             tree_stack: TreeList::new(),
         }
     }
-    /// pop value from start rule
+    /// Create a new context with given capacity of `state_stack` and `data_stack`.
+    /// `state_stack` is initialized with [0] (root state).
+    pub fn with_capacity(capacity: usize) -> Self {
+        let mut state_stack = Vec::with_capacity(capacity);
+        state_stack.push(0);
+        Context {
+            state_stack,
+
+            data_stack: Vec::with_capacity(capacity),
+
+            #[cfg(feature = "tree")]
+            tree_stack: TreeList::new(),
+        }
+    }
+    /// Pops the value of the start symbol from the data stack.
+    /// This must be called when the parser is in the final state (after feeding EOF).
     #[inline]
-    pub fn accept(&mut self) -> S::StartType
+    pub fn accept(&mut self) -> Data::StartType
     where
-        S: Stack,
+        Data: TryInto<Data::StartType>,
     {
-        self.data_stack.pop_start()
+        // data_stack must be <Start> <EOF> in this point
+        self.data_stack.pop();
+        self.data_stack
+            .pop()
+            .expect("data stack must have at least one element")
+            .try_into()
+            .ok()
+            .expect("data stack must have <Start> as the last element")
     }
 
     /// For debugging.
     /// Get `TreeList` that current context holds.
     #[cfg(feature = "tree")]
-    pub fn to_tree_list(&self) -> TreeList<S::Term, S::NonTerm>
+    pub fn to_tree_list(&self) -> TreeList<Data::Term, Data::NonTerm>
     where
-        S::Term: Clone,
-        S::NonTerm: Clone,
+        Data::Term: Clone,
+        Data::NonTerm: Clone,
     {
         self.tree_stack.clone()
     }
     /// For debugging.
     /// Get `TreeList` that current context holds.
     #[cfg(feature = "tree")]
-    pub fn into_tree_list(self) -> TreeList<S::Term, S::NonTerm> {
+    pub fn into_tree_list(self) -> TreeList<Data::Term, Data::NonTerm> {
         self.tree_stack
     }
 
     /// Get expected terminal classes for next `feed()` call.
-    pub fn expected_class<'a, P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+    pub fn expected_class<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &'a P,
     ) -> impl Iterator<Item = usize> + 'a
     where
-        S::Term: 'a,
-        S::NonTerm: 'a,
+        Data::Term: 'a,
+        Data::NonTerm: 'a,
     {
         parser.get_states()[*self.state_stack.last().unwrap()].expected()
     }
     /// Get expected tokens for next `feed()` call.
-    pub fn expected<'a, P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+    pub fn expected<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &'a P,
     ) -> impl Iterator<Item = P::TerminalClassElement> + 'a
     where
-        S::Term: 'a,
-        S::NonTerm: 'a,
+        Data::Term: 'a,
+        Data::NonTerm: 'a,
     {
         parser.get_states()[*self.state_stack.last().unwrap()]
             .expected()
             .flat_map(|class| parser.get_terminals(class).unwrap())
     }
     /// Get expected non-terminal tokens for next `feed()` call.
-    pub fn expected_nonterm<'a, P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+    pub fn expected_nonterm<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &'a P,
-    ) -> impl Iterator<Item = &'a S::NonTerm>
+    ) -> impl Iterator<Item = &'a Data::NonTerm>
     where
-        S::Term: 'a,
-        S::NonTerm: 'a,
+        Data::Term: 'a,
+        Data::NonTerm: 'a,
     {
         parser.get_states()[*self.state_stack.last().unwrap()].expected_nonterm()
     }
 
     /// Feed one terminal to parser, and update state stack.
     /// This automatically enters panic mode if needed.
-    pub fn feed<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+    pub fn feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &mut self,
         parser: &P,
-        term: S::Term,
-        userdata: &mut S::UserData,
-    ) -> Result<(), ParseError<S::Term, S::NonTerm, S::ReduceActionError>>
+        term: Data::Term,
+        userdata: &mut Data::UserData,
+    ) -> Result<(), ParseError<Data::Term, Data::NonTerm, Data::ReduceActionError>>
     where
-        S::Term: Hash + Eq + Clone,
-        S::NonTerm: Hash + Eq + Copy,
+        Data::Term: Hash + Eq + Clone,
+        Data::NonTerm: Hash + Eq + Copy,
+        Data: From<Data::Term>,
     {
         #[cfg(feature = "tree")]
         use crate::Tree;
@@ -122,10 +145,19 @@ impl<S: Stack> Context<S> {
             // pop state stack
             self.state_stack
                 .truncate(self.state_stack.len() - rule.rule.len());
+
+            let mut shift = false;
+
             // call reduce action
-            self.data_stack
-                .reduce(reduce_rule, userdata, &term)
-                .map_err(ParseError::ReduceAction)?;
+            let new_data = Data::reduce_action(
+                reduce_rule,
+                &mut self.data_stack,
+                &mut shift,
+                &term,
+                userdata,
+            )
+            .map_err(ParseError::ReduceAction)?;
+            self.data_stack.push(new_data);
 
             // construct tree
             #[cfg(feature = "tree")]
@@ -160,7 +192,7 @@ impl<S: Stack> Context<S> {
             #[cfg(feature = "tree")]
             self.tree_stack.push(Tree::new_terminal(term.clone()));
 
-            self.data_stack.push(term);
+            self.data_stack.push(term.into());
 
             Ok(())
         } else {
@@ -175,7 +207,7 @@ impl<S: Stack> Context<S> {
                     #[cfg(feature = "tree")]
                     self.tree_stack.push(Tree::new_terminal(term.clone()));
 
-                    self.data_stack.push(term);
+                    self.data_stack.push(term.into());
                 }
                 Ok(())
             } else {
@@ -198,14 +230,14 @@ impl<S: Stack> Context<S> {
     /// You should call `can_panic_mode()` after this fails to check if panic mode can accept this term.
     ///
     /// This does not change the state of the context.
-    pub fn can_feed<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+    pub fn can_feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-        term: &S::Term,
+        term: &Data::Term,
     ) -> bool
     where
-        S::Term: Hash + Eq,
-        S::NonTerm: Hash + Eq,
+        Data::Term: Hash + Eq,
+        Data::NonTerm: Hash + Eq,
     {
         let class = parser.to_terminal_class(term);
         if parser.get_states()[*self.state_stack.last().unwrap()]
@@ -237,12 +269,12 @@ impl<S: Stack> Context<S> {
             .is_some()
     }
     /// Check if current context can enter panic mode.
-    pub fn can_panic_mode<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+    pub fn can_panic_mode<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
     ) -> bool
     where
-        S::NonTerm: Hash + Eq,
+        Data::NonTerm: Hash + Eq,
     {
         let Some(error_nonterm) = parser.get_error_nonterm() else {
             return false;
@@ -265,12 +297,12 @@ impl<S: Stack> Context<S> {
     ///
     /// Then the returned set will be:
     /// [`Chunk`, `Statement`, `IfStatement`, `ReturnStatement`]
-    pub fn trace<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+    pub fn trace<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> crate::HashSet<S::NonTerm>
+    ) -> crate::HashSet<Data::NonTerm>
     where
-        S::NonTerm: Copy + Eq + Hash + crate::NonTerminal,
+        Data::NonTerm: Copy + Eq + Hash + crate::NonTerminal,
     {
         use crate::token::Token;
         use crate::HashSet;
@@ -292,7 +324,7 @@ impl<S: Stack> Context<S> {
             }
         }
 
-        let mut ret: HashSet<S::NonTerm> = Default::default();
+        let mut ret: HashSet<Data::NonTerm> = Default::default();
 
         for &state_idx in self.state_stack.iter().rev() {
             let state = &states[state_idx];
@@ -359,43 +391,36 @@ impl<S: Stack> Context<S> {
 
     /// Panic mode recovery with `error` non-terminal.
     /// Returns true if error is shifted.
-    fn panic_mode<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(&mut self, parser: &P) -> bool
+    fn panic_mode<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &mut self,
+        parser: &P,
+    ) -> bool
     where
-        S::NonTerm: Hash + Eq + Copy,
+        Data::NonTerm: Hash + Eq + Copy,
     {
-        use crate::Token;
         let Some(error_nonterm) = parser.get_error_nonterm() else {
             return false;
         };
-        let mut popped_token = Vec::new();
+        let mut popped_token = 0;
         for (stack_idx, &last_state) in self.state_stack.iter().enumerate().rev() {
             let last_state = &parser.get_states()[last_state];
             if let Some(error_state) = last_state.shift_goto_nonterm(&error_nonterm) {
                 // pop all states above this state
                 self.state_stack.truncate(stack_idx + 1);
                 // pop all data
-                for token in popped_token {
-                    match token {
-                        None => unreachable!("unexpected None token"),
-                        Some(Token::Term(_)) => {
-                            self.data_stack.pop_term();
-                        }
-                        Some(Token::NonTerm(nonterm)) => {
-                            // pop non-terminal
-                            self.data_stack.pop(nonterm);
-                        }
-                    }
-
-                    #[cfg(feature = "tree")]
-                    {
-                        // pop tree
-                        self.tree_stack.pop();
-                    }
+                {
+                    let new_len = self.data_stack.len() - popped_token;
+                    self.data_stack.truncate(new_len);
+                }
+                #[cfg(feature = "tree")]
+                {
+                    let new_len = self.tree_stack.len() - popped_token;
+                    self.tree_stack.truncate(new_len);
                 }
 
                 // shift to error state
                 self.state_stack.push(error_state);
-
+                self.data_stack.push(Data::new_error_nonterm());
                 #[cfg(feature = "tree")]
                 {
                     // push error tree
@@ -405,21 +430,20 @@ impl<S: Stack> Context<S> {
                 return true;
             }
 
-            let token = last_state.shifted_token();
-            popped_token.push(token);
+            popped_token += 1;
         }
         false
     }
 
     /// Get backtrace information for current state.
     /// What current state is trying to parse, and where it comes from.
-    pub fn backtrace<P: Parser<Term = S::Term, NonTerm = S::NonTerm>>(
+    pub fn backtrace<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> crate::Backtrace<&'static str, S::NonTerm>
+    ) -> crate::Backtrace<&'static str, Data::NonTerm>
     where
-        S::Term: Clone,
-        S::NonTerm: Hash + Eq + Clone,
+        Data::Term: Clone,
+        Data::NonTerm: Hash + Eq + Clone,
     {
         use crate::Backtrace;
         use crate::HashSet;
@@ -452,7 +476,7 @@ impl<S: Stack> Context<S> {
             .collect();
         let mut next_rules = BTreeSet::new();
         traces.push(current_rules.clone());
-        let mut zero_shifted_rules: HashSet<S::NonTerm> = Default::default();
+        let mut zero_shifted_rules: HashSet<Data::NonTerm> = Default::default();
 
         for state_idx in self.state_stack.iter().rev().skip(1).copied() {
             zero_shifted_rules.clear();
@@ -511,20 +535,17 @@ impl<S: Stack> Context<S> {
     }
 }
 
-impl<S: Stack> Default for Context<S>
-where
-    S: Stack,
-{
+impl<Data: TokenData> Default for Context<Data> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<S: Stack> Clone for Context<S>
+impl<Data: TokenData> Clone for Context<Data>
 where
-    S: Clone,
-    S::Term: Clone,
-    S::NonTerm: Clone,
+    Data: Clone,
+    Data::Term: Clone,
+    Data::NonTerm: Clone,
 {
     fn clone(&self) -> Self {
         Context {
@@ -538,20 +559,20 @@ where
 }
 
 #[cfg(feature = "tree")]
-impl<S: Stack> std::fmt::Display for Context<S>
+impl<Data: TokenData> std::fmt::Display for Context<Data>
 where
-    S::Term: std::fmt::Display + Clone,
-    S::NonTerm: std::fmt::Display + Clone + crate::NonTerminal,
+    Data::Term: std::fmt::Display + Clone,
+    Data::NonTerm: std::fmt::Display + Clone + crate::NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.to_tree_list())
     }
 }
 #[cfg(feature = "tree")]
-impl<S: Stack> std::fmt::Debug for Context<S>
+impl<Data: TokenData> std::fmt::Debug for Context<Data>
 where
-    S::Term: std::fmt::Debug + Clone,
-    S::NonTerm: std::fmt::Debug + Clone + crate::NonTerminal,
+    Data::Term: std::fmt::Debug + Clone,
+    Data::NonTerm: std::fmt::Debug + Clone + crate::NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.to_tree_list())
@@ -559,15 +580,15 @@ where
 }
 
 #[cfg(feature = "tree")]
-impl<S: Stack> std::ops::Deref for Context<S> {
-    type Target = TreeList<S::Term, S::NonTerm>;
+impl<Data: TokenData> std::ops::Deref for Context<Data> {
+    type Target = TreeList<Data::Term, Data::NonTerm>;
     fn deref(&self) -> &Self::Target {
         &self.tree_stack
     }
 }
 
 #[cfg(feature = "tree")]
-impl<S: Stack> std::ops::DerefMut for Context<S> {
+impl<Data: TokenData> std::ops::DerefMut for Context<Data> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.tree_stack
     }

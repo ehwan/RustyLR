@@ -31,6 +31,7 @@ pub use rangemap::RangeMap;
 mod nonterminal;
 pub use nonterminal::NonTerminal;
 pub use nonterminal::NonTerminalType;
+pub use nonterminal::TokenData;
 
 pub use hashmap::HashMap;
 pub use hashmap::HashSet;

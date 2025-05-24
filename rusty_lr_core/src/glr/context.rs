@@ -2,19 +2,20 @@ use std::hash::Hash;
 use std::rc::Rc;
 
 use super::InvalidTerminalError;
+use super::MultiplePathError;
 use super::Node;
 use super::Parser;
 use super::State;
-use super::{MultiplePathError, NodeData};
 
 use crate::HashMap;
+use crate::TokenData;
 
 #[cfg(feature = "tree")]
 use crate::TreeList;
 
 /// A struct that maintains the current state and the values associated with each symbol.
 /// This handles the divergence and merging of the parser.
-pub struct Context<Data: NodeData> {
+pub struct Context<Data: TokenData> {
     /// each element represents an end-point of diverged paths.
     pub(crate) current_nodes: HashMap<usize, Vec<Rc<Node<Data>>>>,
 
@@ -34,7 +35,7 @@ pub struct Context<Data: NodeData> {
     pub(crate) fallback_nodes: HashMap<usize, Vec<Rc<Node<Data>>>>,
 }
 
-impl<Data: NodeData> Context<Data> {
+impl<Data: TokenData> Context<Data> {
     /// Create a new context.
     /// `current_nodes` is initialized with a root node.
     pub fn new() -> Self {
@@ -74,7 +75,7 @@ impl<Data: NodeData> Context<Data> {
     /// Get value of start symbol, if there is only one path.
     pub fn accept(self) -> Result<Data::StartType, MultiplePathError<Data::Term, Data::NonTerm>>
     where
-        Data: Clone,
+        Data: Clone + TryInto<Data::StartType>,
         Data::Term: Clone,
         Data::NonTerm: Clone,
     {
@@ -92,7 +93,12 @@ impl<Data: NodeData> Context<Data> {
                 Ok(data_node) => data_node.data.unwrap(),
                 Err(rc_data_node) => rc_data_node.data.as_ref().unwrap().clone(),
             };
-            Ok(data_node.into_start())
+            Ok(match data_node.try_into() {
+                Ok(start_type) => start_type,
+                Err(_) => {
+                    unreachable!("Data must contains StartType");
+                }
+            })
         } else {
             Err(MultiplePathError {
                 #[cfg(feature = "tree")]
@@ -108,7 +114,7 @@ impl<Data: NodeData> Context<Data> {
     /// Unlike `accept`, this function will return all possible results if there are multiple paths.
     pub fn accept_all(self) -> impl Iterator<Item = Data::StartType>
     where
-        Data: Clone,
+        Data: Clone + TryInto<Data::StartType>,
     {
         // since `eof` is feeded, the node graph should be like this:
         // Root <- Start <- EOF
@@ -121,7 +127,12 @@ impl<Data: NodeData> Context<Data> {
                 Ok(data_node) => data_node.data.unwrap(),
                 Err(rc_data_node) => rc_data_node.data.as_ref().unwrap().clone(),
             };
-            data_node.into_start()
+            match data_node.try_into() {
+                Ok(start_type) => start_type,
+                Err(_) => {
+                    unreachable!("Data must contains StartType");
+                }
+            }
         })
     }
 
@@ -251,7 +262,7 @@ impl<Data: NodeData> Context<Data> {
     where
         P::Term: Hash + Eq + Clone,
         P::NonTerm: Hash + Eq + Clone,
-        Data: Clone,
+        Data: Clone + From<P::Term>,
     {
         #[cfg(feature = "tree")]
         use crate::Tree;
@@ -307,7 +318,7 @@ impl<Data: NodeData> Context<Data> {
                                 let next_node = Node {
                                     parent: Some(node),
                                     state: next_term_shift_state,
-                                    data: Some(Data::new_term(term.clone())),
+                                    data: Some(term.clone().into()),
                                     #[cfg(feature = "tree")]
                                     tree: Some(Tree::new_terminal(term.clone())),
                                 };
@@ -338,7 +349,7 @@ impl<Data: NodeData> Context<Data> {
                         let next_node = Node {
                             parent: Some(node),
                             state: next_term_shift_state,
-                            data: Some(Data::new_term(term.clone())),
+                            data: Some(term.clone().into()),
                             #[cfg(feature = "tree")]
                             tree: Some(Tree::new_terminal(term.clone())),
                         };
@@ -395,7 +406,7 @@ impl<Data: NodeData> Context<Data> {
                         let next_node = Node {
                             parent: Some(Rc::new(error_node)),
                             state: next_state,
-                            data: Some(Data::new_term(term.clone())),
+                            data: Some(term.clone().into()),
                             #[cfg(feature = "tree")]
                             tree: Some(Tree::new_terminal(term.clone())),
                         };
@@ -560,7 +571,7 @@ impl<Data: NodeData> Context<Data> {
     */
 }
 
-impl<Data: NodeData> Default for Context<Data> {
+impl<Data: TokenData> Default for Context<Data> {
     fn default() -> Self {
         Context {
             current_nodes: HashMap::from_iter([(0, vec![Rc::new(Node::new_root())])]),
@@ -573,7 +584,7 @@ impl<Data: NodeData> Default for Context<Data> {
     }
 }
 
-impl<Data: NodeData> Clone for Context<Data> {
+impl<Data: TokenData> Clone for Context<Data> {
     fn clone(&self) -> Self {
         Context {
             current_nodes: self.current_nodes.clone(),
@@ -583,7 +594,7 @@ impl<Data: NodeData> Clone for Context<Data> {
 }
 
 #[cfg(feature = "tree")]
-impl<Data: NodeData> std::fmt::Display for Context<Data>
+impl<Data: TokenData> std::fmt::Display for Context<Data>
 where
     Data::Term: std::fmt::Display + Clone,
     Data::NonTerm: std::fmt::Display + Clone + crate::NonTerminal,
@@ -597,7 +608,7 @@ where
     }
 }
 #[cfg(feature = "tree")]
-impl<Data: NodeData> std::fmt::Debug for Context<Data>
+impl<Data: TokenData> std::fmt::Debug for Context<Data>
 where
     Data::Term: std::fmt::Debug + Clone,
     Data::NonTerm: std::fmt::Debug + Clone + crate::NonTerminal,

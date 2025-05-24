@@ -26,10 +26,10 @@ impl Grammar {
         let parse_error_typename = format_ident!("{}ParseError", start_rule_name);
         let invalid_terminal_error = format_ident!("{}InvalidTerminalError", start_rule_name);
         let context_struct_name = format_ident!("{}Context", start_rule_name);
+        let token_data_typename = format_ident!("{}TokenData", start_rule_name);
 
         if self.glr {
             let multiple_path_error = format_ident!("{}MultiplePathError", start_rule_name);
-            let node_enum_name = format_ident!("{}NodeEnum", start_rule_name);
 
             let state_structname = if self.emit_dense {
                 format_ident!("DenseState")
@@ -41,7 +41,7 @@ impl Grammar {
         quote! {
                 /// type alias for `Context`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #context_struct_name = #module_prefix::glr::Context<#node_enum_name>;
+                pub type #context_struct_name = #module_prefix::glr::Context<#token_data_typename>;
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #rule_typename = #module_prefix::ProductionRule<&'static str, #enum_name>;
@@ -57,7 +57,6 @@ impl Grammar {
             }
             );
         } else {
-            let stack_struct_name = format_ident!("{}Stack", start_rule_name);
             let state_structname = if self.emit_dense {
                 format_ident!("DenseState")
             } else {
@@ -68,7 +67,7 @@ impl Grammar {
         quote! {
                 /// type alias for `Context`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #context_struct_name = #module_prefix::lr::Context<#stack_struct_name>;
+                pub type #context_struct_name = #module_prefix::lr::Context<#token_data_typename>;
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #rule_typename = #module_prefix::ProductionRule<&'static str, #enum_name>;
@@ -178,508 +177,6 @@ impl Grammar {
         );
     }
 
-    fn emit_context_lr(&self, stream: &mut TokenStream) {
-        let module_prefix = &self.module_prefix;
-        let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
-        let reduce_error_typename = &self.error_typename;
-        let stack_struct_name = format_ident!("{}Stack", self.start_rule_name);
-        let token_typename = &self.token_typename;
-        let terms_stack_name = Ident::new(utils::TERMINAL_STACK_NAME, Span::call_site());
-        let user_data_parameter_name =
-            Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
-        let user_data_typename = &self.userdata_typename;
-
-        // stack name for each non-terminal
-        let mut stack_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
-
-        // (<RuleType as ToString>, stack_name) map
-        let mut ruletype_stackname_map: HashMap<String, Ident> = HashMap::default();
-
-        // (stack_name, TokenStream for typename) sorted in insertion order
-        // for consistent output
-        let mut stack_names_in_order = Vec::new();
-
-        // insert terminal token type
-        ruletype_stackname_map.insert(self.token_typename.to_string(), terms_stack_name.clone());
-        stack_names_in_order.push((terms_stack_name.clone(), self.token_typename.clone()));
-
-        for nonterm in self.nonterminals.iter() {
-            if let Some(ruletype) = &nonterm.ruletype {
-                let ruletype_str = ruletype.to_string();
-
-                let cur_len = ruletype_stackname_map.len();
-                let stack_name = ruletype_stackname_map
-                    .entry(ruletype_str)
-                    .or_insert_with(|| {
-                        let new_stack_name = Ident::new(
-                            &format!("__rustylr_generated_stack_{}", cur_len),
-                            Span::call_site(),
-                        );
-                        stack_names_in_order.push((new_stack_name.clone(), ruletype.clone()));
-                        new_stack_name
-                    })
-                    .clone();
-
-                stack_names_for_nonterm.push(Some(stack_name));
-            } else {
-                stack_names_for_nonterm.push(None);
-            }
-        }
-        drop(ruletype_stackname_map);
-
-        let mut ruleid: usize = 0;
-        let mut case_streams = quote! {};
-        // stack for end index of each rule in term stack
-
-        // TokenStream to define reduce function for each production rule
-        let mut fn_reduce_for_each_rule_stream = TokenStream::new();
-
-        // define reduce function for each production rule
-        for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
-            for (rule_local_id, rule) in nonterm.rules.iter().enumerate() {
-                let mut token_pop_stream = TokenStream::new();
-                for token in rule.tokens.iter().rev() {
-                    match &token.token {
-                        Token::Term(_) => {
-                            if let Some(mapto) = &token.mapto {
-                                token_pop_stream.extend(quote! {
-                                    let mut #mapto = self.#terms_stack_name.pop().unwrap();
-                                });
-                            } else {
-                                token_pop_stream.extend(quote! {
-                                    self.#terms_stack_name.pop();
-                                });
-                            }
-                        }
-                        Token::NonTerm(nonterm_idx) => {
-                            if let Some(stack_name) = &stack_names_for_nonterm[*nonterm_idx] {
-                                if let Some(mapto) = &token.mapto {
-                                    token_pop_stream.extend(quote! {
-                                        let mut #mapto = self.#stack_name.pop().unwrap();
-                                    });
-                                } else {
-                                    token_pop_stream.extend(quote! {
-                                        self.#stack_name.pop();
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-
-                let reduce_fn_ident = format_ident!("reduce_{}_{}", nonterm.name, rule_local_id);
-
-                case_streams.extend(quote! {
-                    #ruleid => {
-                        self.#reduce_fn_ident( lookahead, user_data )
-                    }
-                });
-
-                // if typename is defined for this rule, push result of action to stack
-                // else, just execute action
-                if nonterm.ruletype.is_some() {
-                    // push result to this stack
-                    let stack_name = stack_names_for_nonterm[nonterm_idx]
-                        .as_ref()
-                        .unwrap_or_else(|| {
-                            unreachable!("Non-terminal stack name must be defined for <RuleType>")
-                        });
-
-                    // typename is defined, reduce action must be defined
-                    // this will be ensured by Grammar::from_grammar_args()
-                    let action = &rule.reduce_action.as_ref().unwrap().stream;
-                    fn_reduce_for_each_rule_stream.extend(quote! {
-                        fn #reduce_fn_ident(&mut self, lookahead: &#token_typename, #user_data_parameter_name: &mut #user_data_typename ) -> Result<(), #reduce_error_typename> {
-                            #token_pop_stream
-                            self.#stack_name.push(#action);
-                            Ok(())
-                        }
-                    });
-                } else {
-                    // <RuleType> is not defined,
-                    // just execute action
-                    if let Some(action) = &rule.reduce_action {
-                        let action = &action.stream;
-                        fn_reduce_for_each_rule_stream.extend(quote! {
-                            fn #reduce_fn_ident(&mut self, lookahead: &#token_typename, #user_data_parameter_name:&mut #user_data_typename) -> Result<(), #reduce_error_typename> {
-                                #token_pop_stream
-                                #action
-                                Ok(())
-                            }
-                        });
-                    } else {
-                        fn_reduce_for_each_rule_stream.extend(quote! {
-                            fn #reduce_fn_ident(&mut self, lookahead: &#token_typename, #user_data_parameter_name: &mut #user_data_typename) -> Result<(), #reduce_error_typename> {
-                                #token_pop_stream
-                                Ok(())
-                            }
-                        });
-                    }
-                }
-
-                ruleid += 1;
-            }
-        }
-
-        // TokenStream for <RuleType> of start rule
-        // and pop from start rule stack
-        let start_nonterm_idx = self.nonterminals_index.get(&self.start_rule_name).unwrap();
-        let (start_typename, pop_from_start_rule_stack) = {
-            if let Some(start_stack_name) = &stack_names_for_nonterm[*start_nonterm_idx] {
-                (
-                    self.nonterminals[*start_nonterm_idx]
-                        .ruletype
-                        .as_ref()
-                        .unwrap()
-                        .clone(),
-                    quote! {
-                        self.#start_stack_name.pop().unwrap()
-                    },
-                )
-            } else {
-                (quote! {()}, quote! {()})
-            }
-        };
-
-        // TokenStream for member variables declaration
-        let mut stack_def_streams = quote! {};
-        let mut stack_init_streams = quote! {};
-
-        for (stack_name, typename) in stack_names_in_order.into_iter() {
-            stack_def_streams.extend(quote! {
-                #stack_name : Vec<#typename>,
-            });
-            stack_init_streams.extend(quote! {
-                #stack_name : Vec::new(),
-            });
-        }
-
-        // pop_term() and pop_nonterm()
-        let mut pop_nonterm_cases_stream = TokenStream::new();
-        for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
-            let name = &nonterm.name;
-            if let Some(stack_name) = &stack_names_for_nonterm[nonterm_idx] {
-                pop_nonterm_cases_stream.extend(quote! {
-                    #nonterminals_enum_name::#name => {
-                        self.#stack_name.pop();
-                    }
-                });
-            }
-        }
-
-        stream.extend(quote! {
-        /// struct that holds internal parser data,
-        /// including data stack for each non-terminal,
-        /// and state stack for DFA
-        #[allow(unused_braces, unused_parens, unused_variables, unused_mut, non_snake_case, non_camel_case_types)]
-        pub struct #stack_struct_name {
-            #stack_def_streams
-        }
-        #[allow(unused_braces, unused_parens, unused_variables, unused_mut, non_snake_case, non_camel_case_types, dead_code)]
-        impl #stack_struct_name {
-            #fn_reduce_for_each_rule_stream
-        }
-        #[allow(unused_braces, unused_parens, unused_variables, unused_mut, non_snake_case, non_camel_case_types, dead_code)]
-        impl #module_prefix::lr::Stack for #stack_struct_name {
-            type Term = #token_typename;
-            type NonTerm = #nonterminals_enum_name;
-            type ReduceActionError = #reduce_error_typename;
-            type UserData = #user_data_typename;
-
-            type StartType = #start_typename;
-
-            fn new() -> Self {
-                Self {
-                    #stack_init_streams
-                }
-            }
-            fn push( &mut self, term: Self::Term ) {
-                self.#terms_stack_name.push(term);
-            }
-            fn reduce(&mut self,
-                rustylr_macro_generated_ruleid__: usize,
-                user_data: &mut Self::UserData,
-                lookahead: &Self::Term,
-            ) -> Result<(), Self::ReduceActionError> {
-                match rustylr_macro_generated_ruleid__ {
-                    #case_streams
-                    _ => {
-                        unreachable!( "Invalid Rule: {}", rustylr_macro_generated_ruleid__ );
-                    }
-                }
-            }
-
-            #[allow(clippy::unused_unit)]
-            fn pop_start(&mut self) -> Self::StartType {
-                #pop_from_start_rule_stack
-            }
-
-            fn pop(&mut self, nonterm: Self::NonTerm) {
-                match nonterm {
-                    #pop_nonterm_cases_stream
-                    _ => {} // do nothing
-                }
-            }
-            fn pop_term(&mut self) {
-                self.#terms_stack_name.pop();
-            }
-        }
-        });
-    }
-
-    fn emit_context_glr(&self, stream: &mut TokenStream) {
-        let module_prefix = &self.module_prefix;
-        let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
-        let reduce_error_typename = &self.error_typename;
-        let node_enum_name = format_ident!("{}NodeEnum", self.start_rule_name);
-        let token_typename = &self.token_typename;
-        let terms_variant_name = Ident::new("Terminals", Span::call_site());
-
-        let user_data_parameter_name =
-            Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
-        let user_data_typename = &self.userdata_typename;
-
-        // enum variant name for each non-terminal
-        let mut variant_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
-
-        // (<RuleType as ToString>, variant_name) map
-        let mut ruletype_variant_map: HashMap<String, Ident> = HashMap::default();
-
-        // (variant_name, TokenStream for typename) sorted in insertion order
-        // for consistent output
-        let mut variant_names_in_order = Vec::new();
-
-        // insert variant for empty-ruletype
-        let empty_ruletype_variant_name = Ident::new("EmptyRuleType", Span::call_site());
-        ruletype_variant_map.insert("".to_string(), empty_ruletype_variant_name.clone());
-        variant_names_in_order.push((empty_ruletype_variant_name.clone(), quote! {}));
-
-        // insert variant for terminal token type
-        ruletype_variant_map.insert(self.token_typename.to_string(), terms_variant_name.clone());
-        variant_names_in_order.push((terms_variant_name.clone(), self.token_typename.clone()));
-
-        for nonterm in self.nonterminals.iter() {
-            let (ruletype_stream, ruletype_string) = if let Some(ruletype) = &nonterm.ruletype {
-                (ruletype.clone(), ruletype.to_string())
-            } else {
-                (quote! {}, "".to_string())
-            };
-
-            let cur_len = ruletype_variant_map.len();
-            let variant_name = ruletype_variant_map
-                .entry(ruletype_string)
-                .or_insert_with(|| {
-                    let new_variant_name =
-                        Ident::new(&format!("Variant{}", cur_len), Span::call_site());
-                    variant_names_in_order
-                        .push((new_variant_name.clone(), ruletype_stream.clone()));
-                    new_variant_name
-                })
-                .clone();
-            variant_names_for_nonterm.push(variant_name);
-        }
-        drop(ruletype_variant_map);
-
-        let mut rule_index: usize = 0;
-        let mut case_streams = quote! {};
-
-        // TokenStream to define reduce function for each production rule
-        let mut fn_reduce_for_each_rule_stream = TokenStream::new();
-
-        for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
-            for (rule_local_id, rule) in nonterm.rules.iter().enumerate() {
-                let mut extract_data_from_node_enum = TokenStream::new();
-                for token in rule.tokens.iter() {
-                    match &token.token {
-                        Token::Term(_) => match &token.mapto {
-                            Some(mapto) => {
-                                extract_data_from_node_enum.extend(quote! {
-                                    let #node_enum_name::#terms_variant_name(mut #mapto) = __rustylr_args.pop().unwrap() else {
-                                        unreachable!()
-                                    };
-                                });
-                            }
-                            None => {
-                                extract_data_from_node_enum.extend(quote! {
-                                    __rustylr_args.pop();
-                                });
-                            }
-                        },
-                        Token::NonTerm(nonterm_idx) => {
-                            match &self.nonterminals[*nonterm_idx].ruletype {
-                                Some(_) => {
-                                    let variant_name = &variant_names_for_nonterm[*nonterm_idx];
-                                    match &token.mapto {
-                                        Some(mapto) => {
-                                            extract_data_from_node_enum.extend(quote! {
-                                            let #node_enum_name::#variant_name(mut #mapto) = __rustylr_args.pop().unwrap() else {
-                                                unreachable!()
-                                            };
-                                            });
-                                        }
-                                        None => {
-                                            extract_data_from_node_enum.extend(quote! {
-                                                __rustylr_args.pop();
-                                            });
-                                        }
-                                    }
-                                }
-                                None => {
-                                    extract_data_from_node_enum.extend(quote! {
-                                        __rustylr_args.pop();
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-                let reduce_fn_ident = format_ident!("reduce_{}_{}", nonterm.name, rule_local_id);
-
-                case_streams.extend(quote! {
-                    #rule_index => {
-                        Self::#reduce_fn_ident( reduce_args, shift, lookahead, user_data )
-                    }
-                });
-
-                // if typename is defined for this rule, push result of action to stack
-                // else, just execute action
-                if nonterm.ruletype.is_some() {
-                    // typename is defined, reduce action must be defined
-                    let variant_name = &variant_names_for_nonterm[nonterm_idx];
-                    let action = &rule.reduce_action.as_ref().unwrap().stream;
-                    fn_reduce_for_each_rule_stream.extend(quote! {
-                        fn #reduce_fn_ident(
-                            __rustylr_args: &mut Vec<Self>,
-                            shift: &mut bool,
-                            lookahead: &#token_typename,
-                            #user_data_parameter_name: &mut #user_data_typename
-                        ) -> Result<#node_enum_name, #reduce_error_typename> {
-                            #extract_data_from_node_enum
-
-                            Ok( #node_enum_name::#variant_name(#action) )
-                        }
-                    });
-                } else {
-                    // <RuleType> is not defined,
-                    // just execute action
-
-                    let variant_name = &variant_names_for_nonterm[nonterm_idx];
-                    if let Some(action) = &rule.reduce_action {
-                        let action = &action.stream;
-                        fn_reduce_for_each_rule_stream.extend(quote! {
-                            fn #reduce_fn_ident(
-                                __rustylr_args: &mut Vec<Self>,
-                                shift: &mut bool,
-                                lookahead: &#token_typename,
-                                #user_data_parameter_name: &mut #user_data_typename
-                            ) -> Result<#node_enum_name, #reduce_error_typename> {
-                                #extract_data_from_node_enum
-                                #action
-
-                                Ok( #node_enum_name::#variant_name )
-                            }
-                        });
-                    } else {
-                        fn_reduce_for_each_rule_stream.extend(quote! {
-                            fn #reduce_fn_ident(
-                                __rustylr_args: &mut Vec<Self>,
-                                shift: &mut bool,
-                                lookahead: &#token_typename,
-                                #user_data_parameter_name: &mut #user_data_typename
-                            ) -> Result<#node_enum_name, #reduce_error_typename> {
-                                __rustylr_args.clear();
-                                Ok( #node_enum_name::#variant_name )
-                            }
-                        });
-                    }
-                }
-
-                rule_index += 1;
-            }
-        }
-
-        let start_idx = self.nonterminals_index.get(&self.start_rule_name).unwrap();
-        let (start_typename, start_extract) =
-            if let Some(start_typename) = self.nonterminals[*start_idx].ruletype.as_ref() {
-                let start_variant_name = &variant_names_for_nonterm[*start_idx];
-                (
-                    start_typename.clone(),
-                    quote! {
-                        match self {
-                            #node_enum_name::#start_variant_name(start) => start,
-                            _ => unreachable!(),
-                        }
-                    },
-                )
-            } else {
-                (quote! {()}, quote! {()})
-            };
-
-        // enum data type
-        let mut enum_variants_stream = TokenStream::new();
-        for (variant_name, typename) in variant_names_in_order.into_iter() {
-            if typename.is_empty() {
-                enum_variants_stream.extend(quote! {
-                    #variant_name,
-                });
-            } else {
-                enum_variants_stream.extend(quote! {
-                    #variant_name(#typename),
-                });
-            }
-        }
-
-        stream.extend(quote! {
-        /// enum for each non-terminal and terminal symbol, that actually hold data
-        #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-        #[derive(Clone)]
-        pub enum #node_enum_name {
-            #enum_variants_stream
-        }
-
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
-        impl #node_enum_name {
-            #fn_reduce_for_each_rule_stream
-        }
-
-
-        #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types, unused_variables)]
-        impl #module_prefix::glr::NodeData for #node_enum_name {
-            type Term = #token_typename;
-            type NonTerm = #nonterminals_enum_name;
-            type ReduceActionError = #reduce_error_typename;
-            type UserData = #user_data_typename;
-
-            type StartType = #start_typename;
-
-            fn new_term(term: #token_typename) -> Self {
-                #node_enum_name::#terms_variant_name(term)
-            }
-            fn new_nonterm(
-                rule_index: usize,
-                reduce_args: &mut Vec<Self>,
-                shift: &mut bool,
-                lookahead: &Self::Term,
-                user_data: &mut Self::UserData,
-            ) -> Result<Self, Self::ReduceActionError> {
-                match rule_index {
-                    #case_streams
-                    _ => {
-                        unreachable!( "Invalid Rule: {}", rule_index );
-                    }
-                }
-            }
-
-            fn into_start(self) -> Self::StartType {
-                #start_extract
-            }
-
-            fn new_error_nonterm() -> Self {
-                #node_enum_name::#empty_ruletype_variant_name
-            }
-        }
-        });
-    }
     fn emit_parser(&self, stream: &mut TokenStream) {
         let module_prefix = &self.module_prefix;
         let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
@@ -1244,17 +741,272 @@ impl Grammar {
         }
     }
 
+    fn emit_token_data(&self, stream: &mut TokenStream) {
+        let module_prefix = &self.module_prefix;
+        let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
+        let reduce_error_typename = &self.error_typename;
+        let token_data_typename = format_ident!("{}TokenData", self.start_rule_name);
+        let token_typename = &self.token_typename;
+        let user_data_parameter_name =
+            Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
+        let user_data_typename = &self.userdata_typename;
+
+        // variant name for terminal symbol
+        let terminal_variant_name = Ident::new("Terminals", Span::call_site());
+        // enum variant name for each non-terminal
+        let mut variant_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
+
+        // (<RuleType as ToString>, variant_name) map
+        let mut ruletype_variant_map: HashMap<String, Ident> = HashMap::default();
+
+        // (variant_name, TokenStream for typename) sorted in insertion order
+        // for consistent output
+        let mut variant_names_in_order = Vec::new();
+
+        // insert variant for terminal token type
+        ruletype_variant_map.insert(
+            self.token_typename.to_string(),
+            terminal_variant_name.clone(),
+        );
+        variant_names_in_order.push((terminal_variant_name.clone(), self.token_typename.clone()));
+
+        // insert variant for empty-ruletype
+        let empty_ruletype_variant_name = Ident::new("Empty", Span::call_site());
+        ruletype_variant_map.insert("".to_string(), empty_ruletype_variant_name.clone());
+        // ruletype_variant_map.insert(quote! {()}.to_string(), empty_ruletype_variant_name.clone());
+        variant_names_in_order.push((empty_ruletype_variant_name.clone(), quote! {}));
+
+        for nonterm in self.nonterminals.iter() {
+            let ruletype_stream = nonterm.ruletype.as_ref().cloned().unwrap_or_default();
+
+            let cur_len = ruletype_variant_map.len();
+            let variant_name = ruletype_variant_map
+                .entry(ruletype_stream.to_string())
+                .or_insert_with(|| {
+                    let new_variant_name =
+                        Ident::new(&format!("Variant{}", cur_len), Span::call_site());
+                    variant_names_in_order
+                        .push((new_variant_name.clone(), ruletype_stream.clone()));
+                    new_variant_name
+                })
+                .clone();
+            variant_names_for_nonterm.push(variant_name);
+        }
+        drop(ruletype_variant_map);
+
+        let mut rule_index: usize = 0;
+        let mut case_streams = quote! {};
+
+        // TokenStream to define reduce function for each production rule
+        let mut fn_reduce_for_each_rule_stream = TokenStream::new();
+
+        for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
+            for (rule_local_id, rule) in nonterm.rules.iter().enumerate() {
+                let mut extract_token_data_from_args = TokenStream::new();
+                for token in rule.tokens.iter().rev() {
+                    match &token.token {
+                        Token::Term(_) => match &token.mapto {
+                            Some(mapto) => {
+                                extract_token_data_from_args.extend(quote! {
+                                    let #token_data_typename::#terminal_variant_name(mut #mapto) = __rustylr_args.pop().unwrap() else {
+                                        unreachable!()
+                                    };
+                                });
+                            }
+                            None => {
+                                extract_token_data_from_args.extend(quote! {
+                                    __rustylr_args.pop();
+                                });
+                            }
+                        },
+                        Token::NonTerm(nonterm_idx) => {
+                            match &self.nonterminals[*nonterm_idx].ruletype {
+                                Some(_) => {
+                                    let variant_name = &variant_names_for_nonterm[*nonterm_idx];
+                                    match &token.mapto {
+                                        Some(mapto) => {
+                                            extract_token_data_from_args.extend(quote! {
+                                            let #token_data_typename::#variant_name(mut #mapto) = __rustylr_args.pop().unwrap() else {
+                                                unreachable!()
+                                            };
+                                            });
+                                        }
+                                        None => {
+                                            extract_token_data_from_args.extend(quote! {
+                                                __rustylr_args.pop();
+                                            });
+                                        }
+                                    }
+                                }
+                                None => {
+                                    extract_token_data_from_args.extend(quote! {
+                                        __rustylr_args.pop();
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+                let reduce_fn_ident = format_ident!("reduce_{}_{}", nonterm.name, rule_local_id);
+
+                case_streams.extend(quote! {
+                    #rule_index => {
+                        Self::#reduce_fn_ident( reduce_args, shift, lookahead, user_data )
+                    }
+                });
+
+                // if typename is defined for this rule, push result of action to stack
+                // else, just execute action
+                if nonterm.ruletype.is_some() {
+                    // typename is defined, reduce action must be defined
+                    let variant_name = &variant_names_for_nonterm[nonterm_idx];
+                    let action = &rule.reduce_action.as_ref().unwrap().stream;
+                    fn_reduce_for_each_rule_stream.extend(quote! {
+                        fn #reduce_fn_ident(
+                            __rustylr_args: &mut Vec<Self>,
+                            shift: &mut bool,
+                            lookahead: &#token_typename,
+                            #user_data_parameter_name: &mut #user_data_typename
+                        ) -> Result<#token_data_typename, #reduce_error_typename> {
+                            #extract_token_data_from_args
+
+                            Ok( #token_data_typename::#variant_name(#action) )
+                        }
+                    });
+                } else {
+                    // <RuleType> is not defined,
+                    // just execute action
+
+                    let variant_name = &variant_names_for_nonterm[nonterm_idx];
+                    if let Some(action) = &rule.reduce_action {
+                        let action = &action.stream;
+                        fn_reduce_for_each_rule_stream.extend(quote! {
+                            fn #reduce_fn_ident(
+                                __rustylr_args: &mut Vec<Self>,
+                                shift: &mut bool,
+                                lookahead: &#token_typename,
+                                #user_data_parameter_name: &mut #user_data_typename
+                            ) -> Result<#token_data_typename, #reduce_error_typename> {
+                                #extract_token_data_from_args
+                                #action
+
+                                Ok( #token_data_typename::#variant_name )
+                            }
+                        });
+                    } else {
+                        fn_reduce_for_each_rule_stream.extend(quote! {
+                            fn #reduce_fn_ident(
+                                __rustylr_args: &mut Vec<Self>,
+                                shift: &mut bool,
+                                lookahead: &#token_typename,
+                                #user_data_parameter_name: &mut #user_data_typename
+                            ) -> Result<#token_data_typename, #reduce_error_typename> {
+                                #extract_token_data_from_args
+                                Ok( #token_data_typename::#variant_name )
+                            }
+                        });
+                    }
+                }
+
+                rule_index += 1;
+            }
+        }
+
+        let start_idx = *self.nonterminals_index.get(&self.start_rule_name).unwrap();
+        let start_variant_name = &variant_names_for_nonterm[start_idx];
+        let (start_typename, extract_start) = match &self.nonterminals[start_idx].ruletype {
+            Some(typename) => (
+                typename.clone(),
+                quote! { #token_data_typename::#start_variant_name(data) => Ok(data) },
+            ),
+            None => (
+                quote! {()},
+                quote! { #token_data_typename::#start_variant_name => Ok(())},
+            ),
+        };
+
+        // enum data type
+        let mut enum_variants_stream = TokenStream::new();
+        for (variant_name, typename) in variant_names_in_order.into_iter() {
+            if typename.is_empty() {
+                enum_variants_stream.extend(quote! {
+                    #variant_name,
+                });
+            } else {
+                enum_variants_stream.extend(quote! {
+                    #variant_name(#typename),
+                });
+            }
+        }
+
+        stream.extend(quote! {
+        /// enum for each non-terminal and terminal symbol, that actually hold data
+        #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
+        #[derive(Clone)]
+        pub enum #token_data_typename {
+            #enum_variants_stream
+        }
+
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
+        impl #token_data_typename {
+            #fn_reduce_for_each_rule_stream
+        }
+
+
+        #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types, unused_variables)]
+        impl #module_prefix::TokenData for #token_data_typename {
+            type Term = #token_typename;
+            type NonTerm = #nonterminals_enum_name;
+            type ReduceActionError = #reduce_error_typename;
+            type UserData = #user_data_typename;
+            type StartType = #start_typename;
+
+            fn reduce_action(
+                rule_index: usize,
+                reduce_args: &mut Vec<Self>,
+                shift: &mut bool,
+                lookahead: &Self::Term,
+                user_data: &mut Self::UserData,
+            ) -> Result<Self, Self::ReduceActionError> {
+                match rule_index {
+                    #case_streams
+                    _ => {
+                        unreachable!( "Invalid Rule: {}", rule_index );
+                    }
+                }
+            }
+            fn new_error_nonterm() -> Self {
+                #token_data_typename::#empty_ruletype_variant_name
+            }
+        }
+
+        #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types, unused_variables)]
+        impl From<#token_typename> for #token_data_typename {
+            fn from(token: #token_typename) -> Self {
+                #token_data_typename::#terminal_variant_name(token)
+            }
+        }
+
+        #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types, unused_variables)]
+        impl TryFrom<#token_data_typename> for #start_typename {
+            type Error = ();
+
+            fn try_from(token: #token_data_typename) -> Result<Self, Self::Error> {
+                match token {
+                    #extract_start,
+                    _ => Err(()),
+                }
+            }
+        }
+        });
+    }
+
     pub fn emit_compiletime(&self) -> TokenStream {
         let mut stream = TokenStream::new();
         self.emit_type_alises(&mut stream);
         self.emit_nonterm_enum(&mut stream);
-        if self.glr {
-            self.emit_context_glr(&mut stream);
-            self.emit_parser(&mut stream);
-        } else {
-            self.emit_context_lr(&mut stream);
-            self.emit_parser(&mut stream);
-        };
+        self.emit_token_data(&mut stream);
+        self.emit_parser(&mut stream);
 
         stream
     }

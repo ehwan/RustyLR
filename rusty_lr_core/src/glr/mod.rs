@@ -1,4 +1,3 @@
-// pub(crate) mod completion;
 pub(crate) mod context;
 pub(crate) mod error;
 pub(crate) mod parser;
@@ -10,7 +9,6 @@ pub use context::Context;
 pub use error::InvalidTerminalError;
 pub use error::MultiplePathError;
 pub use node::Node;
-pub use node::NodeData;
 pub use node::NodeRefIterator;
 pub use parser::Parser;
 pub use state::DenseState;
@@ -20,13 +18,15 @@ pub use state::State;
 #[cfg(feature = "tree")]
 use crate::Tree;
 
+use crate::TokenData;
+
 use std::hash::Hash;
 use std::rc::Rc;
 
 #[cfg(feature = "tree")]
 type ReduceArgs<Data> = (
     Rc<Node<Data>>,
-    Tree<<Data as NodeData>::Term, <Data as NodeData>::NonTerm>,
+    Tree<<Data as TokenData>::Term, <Data as TokenData>::NonTerm>,
 );
 
 #[cfg(not(feature = "tree"))]
@@ -34,7 +34,7 @@ type ReduceArgs<Data> = Rc<Node<Data>>;
 
 /// from current node, get the last n nodes and create new non-terminal node
 /// use Rc::try_unwrap to avoid clone if possible
-fn clone_pop_nodes<Data: NodeData + Clone, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+fn clone_pop_nodes<Data: TokenData + Clone, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
     node: Rc<Node<Data>>,
     rule_index: usize,
     parser: &P,
@@ -51,6 +51,7 @@ where
     let mut trees = Vec::with_capacity(count);
 
     let mut current_node = node;
+    context.reduce_args.reserve(count);
     for _ in 0..count {
         let data = match Rc::try_unwrap(current_node) {
             Ok(node) => {
@@ -78,6 +79,7 @@ where
         };
         context.reduce_args.push(data);
     }
+    context.reduce_args.reverse();
 
     #[cfg(feature = "tree")]
     {
@@ -95,7 +97,7 @@ where
 }
 /// give lookahead token to parser, and check if there is any reduce action.
 /// returns false if shift action is revoked
-pub(crate) fn reduce<P: Parser, Data: NodeData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
+pub(crate) fn reduce<P: Parser, Data: TokenData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
     parser: &P,
     reduce_rule: usize,
     node: Rc<Node<Data>>,
@@ -117,7 +119,7 @@ where
     let parent = data_extracted;
 
     let mut do_shift = has_shift;
-    match Data::new_nonterm(
+    match Data::reduce_action(
         reduce_rule,
         &mut context.reduce_args,
         &mut do_shift,

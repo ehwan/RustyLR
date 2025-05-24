@@ -81,6 +81,7 @@ impl std::fmt::Display for IdentOrLiteral {
 }
 
 /// parsed arguments for pattern
+#[derive(Clone)]
 pub enum PatternArgs {
     Ident(Ident),
 
@@ -451,6 +452,7 @@ impl PatternArgs {
 }
 
 /// parsed arguments for single line of a rule separated by '|'
+#[derive(Clone)]
 pub struct RuleLineArgs {
     /// mapto '=' pattern
     pub tokens: Vec<(Option<Ident>, PatternArgs)>,
@@ -467,12 +469,14 @@ pub struct RuleLineArgs {
 }
 
 /// For %prec and %dprec at the end of a rule line
+#[derive(Clone)]
 pub enum PrecDPrecArgs {
     Prec(IdentOrLiteral),
     DPrec(Literal),
 }
 
 /// parsed arguments for multiple lines of a rule
+#[derive(Clone)]
 pub struct RuleDefArgs {
     pub name: Ident,
     pub typename: Option<TokenStream>,
