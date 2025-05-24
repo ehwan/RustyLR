@@ -270,7 +270,7 @@ impl<S: Stack> Context<S> {
         parser: &P,
     ) -> crate::HashSet<S::NonTerm>
     where
-        S::NonTerm: Copy + Eq + Hash + crate::NonTerminal<S::Term>,
+        S::NonTerm: Copy + Eq + Hash + crate::NonTerminal,
     {
         use crate::token::Token;
         use crate::HashSet;
@@ -541,7 +541,7 @@ where
 impl<S: Stack> std::fmt::Display for Context<S>
 where
     S::Term: std::fmt::Display + Clone,
-    S::NonTerm: std::fmt::Display + Clone,
+    S::NonTerm: std::fmt::Display + Clone + crate::NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.to_tree_list())
@@ -551,7 +551,7 @@ where
 impl<S: Stack> std::fmt::Debug for Context<S>
 where
     S::Term: std::fmt::Debug + Clone,
-    S::NonTerm: std::fmt::Debug + Clone,
+    S::NonTerm: std::fmt::Debug + Clone + crate::NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.to_tree_list())

@@ -5,12 +5,12 @@ use std::ops::DerefMut;
 
 use termtree::Tree as TermTree;
 
-/// Default depth of tree when pretty printing through Display
-const DEFAULT_MAX_LEVEL: usize = usize::MAX;
+use crate::NonTerminal;
+use crate::NonTerminalType;
 
 /// Tree represention of single non-terminal token.
 /// User must enable feature `tree` to use this.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct TreeNonTerminal<Term, NonTerm> {
     /// non terminal symbol that this tree reduced to
     pub nonterm: NonTerm,
@@ -25,38 +25,131 @@ impl<Term, NonTerm> TreeNonTerminal<Term, NonTerm> {
     }
 
     /// convert this tree to termtree::Tree using Display trait
-    pub(crate) fn to_term_tree(&self, max_level: usize) -> TermTree<String>
+    pub(crate) fn to_term_tree<D: Display>(
+        &self,
+        term_to_display: &impl Fn(&Term) -> D,
+        nonterm_to_display: &impl Fn(&NonTerm) -> D,
+    ) -> Vec<TermTree<D>>
     where
-        Term: Display,
-        NonTerm: Display,
+        NonTerm: NonTerminal,
     {
-        let tree = TermTree::new(format!("{}", self.nonterm));
-        if max_level == 0 {
-            tree
-        } else {
-            tree.with_leaves(
-                self.tokens
-                    .iter()
-                    .map(|token| token.to_term_tree(max_level - 1)),
-            )
-        }
-    }
+        // Manually configure the format for the auto-generated non-teminals.
+        // for example, one or more repetitions A+ will be implemented as left recursion,
+        // but we want to display the tree as flat array.
+        let nonterm_name = nonterm_to_display(&self.nonterm);
+        match self.nonterm.nonterm_type() {
+            // normal tree
+            None
+            | Some(NonTerminalType::Augmented)
+            | Some(NonTerminalType::Error)
+            | Some(NonTerminalType::Group) => {
+                let tree = TermTree::new(nonterm_name);
+                vec![tree.with_leaves(
+                    self.tokens
+                        .iter()
+                        .flat_map(|token| token.to_term_tree(term_to_display, nonterm_to_display)),
+                )]
+            }
 
-    /// convert this tree to termtree::Tree using Debug trait
-    pub(crate) fn to_term_tree_debug(&self, max_level: usize) -> TermTree<String>
-    where
-        Term: Debug,
-        NonTerm: Debug,
-    {
-        let tree = TermTree::new(format!("{:?}", self.nonterm));
-        if max_level == 0 {
-            tree
-        } else {
-            tree.with_leaves(
-                self.tokens
-                    .iter()
-                    .map(|token| token.to_term_tree_debug(max_level - 1)),
-            )
+            // remove parent, directly add children
+            Some(NonTerminalType::Lookahead) | Some(NonTerminalType::TerminalSet) => self
+                .tokens
+                .iter()
+                .flat_map(|token| token.to_term_tree(term_to_display, nonterm_to_display))
+                .collect(),
+
+            // remove left/right recursion, make it to flat array
+            Some(NonTerminalType::Star) => {
+                let tree = TermTree::new(nonterm_name);
+                let tree = if self.tokens.is_empty() {
+                    tree
+                } else {
+                    let plus = self.tokens[0]
+                        .to_term_tree(term_to_display, nonterm_to_display)
+                        .into_iter()
+                        .next()
+                        .unwrap();
+                    tree.with_leaves(plus.leaves)
+                };
+                vec![tree]
+            }
+            // remove left/right recursion, make it to flat array
+            Some(NonTerminalType::PlusLeft) => {
+                let tree = TermTree::new(nonterm_name);
+                let tree = if self.tokens.len() == 1 {
+                    let child = self.tokens[0]
+                        .to_term_tree(term_to_display, nonterm_to_display)
+                        .into_iter()
+                        .next()
+                        .unwrap();
+                    tree.with_leaves([child])
+                } else {
+                    // 2
+                    let mut child_list = self.tokens[0]
+                        .to_term_tree(term_to_display, nonterm_to_display)
+                        .into_iter()
+                        .next()
+                        .unwrap()
+                        .leaves;
+                    let child = self.tokens[1]
+                        .to_term_tree(term_to_display, nonterm_to_display)
+                        .into_iter()
+                        .next()
+                        .unwrap();
+                    child_list.push(child);
+                    tree.with_leaves(child_list)
+                };
+                vec![tree]
+            }
+            // remove left/right recursion, make it to flat array
+            Some(NonTerminalType::PlusRight) => {
+                let tree = TermTree::new(nonterm_name);
+                let tree = if self.tokens.len() == 1 {
+                    let child = self.tokens[0]
+                        .to_term_tree(term_to_display, nonterm_to_display)
+                        .into_iter()
+                        .next()
+                        .unwrap();
+                    tree.with_leaves([child])
+                } else {
+                    // 2
+                    let child = self.tokens[0]
+                        .to_term_tree(term_to_display, nonterm_to_display)
+                        .into_iter()
+                        .next()
+                        .unwrap();
+                    let mut child_list = self.tokens[1]
+                        .to_term_tree(term_to_display, nonterm_to_display)
+                        .into_iter()
+                        .next()
+                        .unwrap()
+                        .leaves;
+                    let mut children = vec![child];
+                    children.append(&mut child_list);
+
+                    tree.with_leaves(children)
+                };
+                vec![tree]
+            }
+            // remove left/right recursion, make it to flat array
+            Some(NonTerminalType::Optional) => {
+                let tree = TermTree::new(nonterm_name);
+                let tree =
+                    if self.tokens.is_empty() {
+                        tree
+                    } else {
+                        tree.with_leaves(self.tokens.iter().flat_map(|token| {
+                            token.to_term_tree(term_to_display, nonterm_to_display)
+                        }))
+                    };
+                vec![tree]
+            }
+
+            // show the literal directly
+            Some(NonTerminalType::LiteralString) => {
+                let tree = TermTree::new(nonterm_name);
+                vec![tree]
+            }
         }
     }
 }
@@ -78,81 +171,43 @@ impl<Term, NonTerm> Tree<Term, NonTerm> {
     }
 
     /// convert this tree to termtree::Tree using Display trait
-    pub(crate) fn to_term_tree(&self, max_level: usize) -> TermTree<String>
+    pub(crate) fn to_term_tree<D: Display>(
+        &self,
+        term_to_display: &impl Fn(&Term) -> D,
+        nonterm_to_display: &impl Fn(&NonTerm) -> D,
+    ) -> Vec<TermTree<D>>
     where
-        Term: Display,
-        NonTerm: Display,
+        NonTerm: NonTerminal,
     {
         match self {
-            Tree::Terminal(term) => TermTree::new(format!("{}", term)),
-            Tree::NonTerminal(nonterm) => nonterm.to_term_tree(max_level),
+            Tree::Terminal(term) => vec![TermTree::new(term_to_display(term))],
+            Tree::NonTerminal(nonterm) => nonterm.to_term_tree(term_to_display, nonterm_to_display),
         }
-    }
-
-    /// convert this tree to termtree::Tree using Debug trait
-    pub(crate) fn to_term_tree_debug(&self, max_level: usize) -> TermTree<String>
-    where
-        Term: Debug,
-        NonTerm: Debug,
-    {
-        match self {
-            Tree::Terminal(term) => TermTree::new(format!("{:?}", term)),
-            Tree::NonTerminal(nonterm) => nonterm.to_term_tree_debug(max_level),
-        }
-    }
-
-    /// pretty print this tree using Display trait
-    pub fn pretty_print_format(
-        &self,
-        max_level: usize,
-        f: &mut std::fmt::Formatter<'_>,
-    ) -> std::fmt::Result
-    where
-        Term: Display,
-        NonTerm: Display,
-    {
-        write!(f, "{}", self.to_term_tree(max_level))
-    }
-
-    /// pretty print this tree using Debug trait
-    pub fn pretty_print_format_debug(
-        &self,
-        max_level: usize,
-        f: &mut std::fmt::Formatter<'_>,
-    ) -> std::fmt::Result
-    where
-        Term: Debug,
-        NonTerm: Debug,
-    {
-        write!(f, "{}", self.to_term_tree_debug(max_level))
-    }
-
-    /// pretty print this tree with max level using Display trait
-    pub fn pretty_print(&self, max_level: usize)
-    where
-        Term: Display,
-        NonTerm: Display,
-    {
-        print!("{}", self.to_term_tree(max_level));
-    }
-    /// pretty print this tree with max level using Debug trait
-    pub fn pretty_print_debug(&self, max_level: usize)
-    where
-        Term: Debug,
-        NonTerm: Debug,
-    {
-        print!("{}", self.to_term_tree_debug(max_level));
     }
 }
 
-impl<Term: Display, NonTerm: Display> Display for Tree<Term, NonTerm> {
+impl<Term: Display, NonTerm: NonTerminal> Display for Tree<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.pretty_print_format(DEFAULT_MAX_LEVEL, f)
+        let child = self.to_term_tree(&|term| term.to_string(), &|nonterm| {
+            nonterm.as_str().to_string()
+        });
+        write!(
+            f,
+            "{}",
+            TermTree::new("Tree".to_string()).with_leaves(child)
+        )
     }
 }
-impl<Term: Debug, NonTerm: Debug> Debug for Tree<Term, NonTerm> {
+impl<Term: Debug, NonTerm: NonTerminal> Debug for Tree<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.pretty_print_format_debug(DEFAULT_MAX_LEVEL, f)
+        let child = self.to_term_tree(&|term| format!("{:?}", term), &|nonterm| {
+            nonterm.as_str().to_string()
+        });
+        write!(
+            f,
+            "{}",
+            TermTree::new("Tree".to_string()).with_leaves(child)
+        )
     }
 }
 
@@ -175,109 +230,34 @@ impl<Term, NonTerm> DerefMut for TreeList<Term, NonTerm> {
 impl<Term, NonTerm> TreeList<Term, NonTerm> {
     /// create new empty tree list
     pub fn new() -> Self {
-        Default::default()
-    }
-
-    /// pretty print this tree list using `Display` trait
-    pub fn pretty_print_format(
-        &self,
-        max_level: usize,
-        f: &mut std::fmt::Formatter<'_>,
-    ) -> std::fmt::Result
-    where
-        Term: Display,
-        NonTerm: Display,
-    {
-        let tree = TermTree::new("TreeList".to_string());
-        let mut tree = if max_level == 0 {
-            tree
-        } else {
-            tree.with_leaves(
-                self.trees
-                    .iter()
-                    .map(|tree| tree.to_term_tree(max_level - 1)),
-            )
-        };
-        tree.set_multiline(false);
-        writeln!(f, "{}", tree)
-    }
-
-    /// pretty print this tree using `Debug` trait
-    pub fn pretty_print_format_debug(
-        &self,
-        max_level: usize,
-        f: &mut std::fmt::Formatter<'_>,
-    ) -> std::fmt::Result
-    where
-        Term: Debug,
-        NonTerm: Debug,
-    {
-        let tree = TermTree::new("TreeList".to_string());
-        let mut tree = if max_level == 0 {
-            tree
-        } else {
-            tree.with_leaves(
-                self.trees
-                    .iter()
-                    .map(|tree| tree.to_term_tree_debug(max_level - 1)),
-            )
-        };
-        tree.set_multiline(true);
-        writeln!(f, "{}", tree)
-    }
-
-    /// pretty print this tree with max level using `Display` trait
-    pub fn pretty_print(&self, max_level: usize)
-    where
-        Term: Display,
-        NonTerm: Display,
-    {
-        let tree = TermTree::new("TreeList".to_string());
-        let mut tree = if max_level == 0 {
-            tree
-        } else {
-            tree.with_leaves(
-                self.trees
-                    .iter()
-                    .map(|tree| tree.to_term_tree(max_level - 1)),
-            )
-        };
-        tree.set_multiline(false);
-        println!("{}", tree)
-    }
-    /// pretty print this tree with max level
-    pub fn pretty_print_debug(&self, max_level: usize)
-    where
-        Term: Debug,
-        NonTerm: Debug,
-    {
-        let tree = TermTree::new("TreeList".to_string());
-        let mut tree = if max_level == 0 {
-            tree
-        } else {
-            tree.with_leaves(
-                self.trees
-                    .iter()
-                    .map(|tree| tree.to_term_tree_debug(max_level - 1)),
-            )
-        };
-        tree.set_multiline(false);
-        println!("{}", tree)
+        Self { trees: Vec::new() }
     }
 }
-impl<Term: Display, NonTerm: Display> Display for TreeList<Term, NonTerm> {
+impl<Term: Display, NonTerm: NonTerminal> Display for TreeList<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.pretty_print_format(DEFAULT_MAX_LEVEL, f)
+        let tree =
+            TermTree::new("TreeList".to_string()).with_leaves(self.trees.iter().flat_map(|tree| {
+                tree.to_term_tree(&|term| term.to_string(), &|nonterm| {
+                    nonterm.as_str().to_string()
+                })
+            }));
+        write!(f, "{}", tree)
     }
 }
-impl<Term: Debug, NonTerm: Debug> Debug for TreeList<Term, NonTerm> {
+impl<Term: Debug, NonTerm: NonTerminal> Debug for TreeList<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.pretty_print_format_debug(DEFAULT_MAX_LEVEL, f)
+        let tree =
+            TermTree::new("TreeList".to_string()).with_leaves(self.trees.iter().flat_map(|tree| {
+                tree.to_term_tree(&|term| format!("{:?}", term), &|nonterm| {
+                    nonterm.as_str().to_string()
+                })
+            }));
+        write!(f, "{}", tree)
     }
 }
 impl<Term, NonTerm> Default for TreeList<Term, NonTerm> {
     /// create new empty tree list
     fn default() -> Self {
-        Self { trees: Vec::new() }
+        Self::new()
     }
 }

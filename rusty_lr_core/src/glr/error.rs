@@ -1,6 +1,8 @@
 use std::fmt::Debug;
 use std::fmt::Display;
 
+use crate::NonTerminal;
+
 /// Error when there is an invalid terminal feeded to the parser.
 #[derive(Clone)]
 pub struct InvalidTerminalError<Term, NonTerm, ReduceActionError> {
@@ -76,7 +78,7 @@ pub struct MultiplePathError<Term, NonTerm> {
     pub(crate) _phantom: std::marker::PhantomData<(Term, NonTerm)>,
 }
 
-impl<Term: Display, NonTerm: Display> Display for MultiplePathError<Term, NonTerm> {
+impl<Term: Display, NonTerm: Display + NonTerminal> Display for MultiplePathError<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "MultiplePathError")?;
 
@@ -90,7 +92,7 @@ impl<Term: Display, NonTerm: Display> Display for MultiplePathError<Term, NonTer
         Ok(())
     }
 }
-impl<Term: Debug, NonTerm: Debug> Debug for MultiplePathError<Term, NonTerm> {
+impl<Term: Debug, NonTerm: Debug + NonTerminal> Debug for MultiplePathError<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "MultiplePathError")?;
 
@@ -105,7 +107,7 @@ impl<Term: Debug, NonTerm: Debug> Debug for MultiplePathError<Term, NonTerm> {
     }
 }
 
-impl<Term: Display + Debug, NonTerm: Display + Debug> std::error::Error
+impl<Term: Display + Debug, NonTerm: Display + Debug + NonTerminal> std::error::Error
     for MultiplePathError<Term, NonTerm>
 {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {

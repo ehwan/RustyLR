@@ -173,6 +173,7 @@ impl Pattern {
                         regex_span: Some(root_span_pair),
                         trace: false,
                         protected: false,
+                        nonterm_type: Some(rusty_lr_core::NonTerminalType::PlusLeft),
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -233,6 +234,7 @@ impl Pattern {
                         regex_span: Some(root_span_pair),
                         trace: false,
                         protected: false,
+                        nonterm_type: Some(rusty_lr_core::NonTerminalType::PlusRight),
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -309,6 +311,7 @@ impl Pattern {
                         regex_span: Some(root_span_pair),
                         trace: false,
                         protected: false,
+                        nonterm_type: Some(rusty_lr_core::NonTerminalType::Star),
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -355,6 +358,7 @@ impl Pattern {
                         regex_span: Some(root_span_pair),
                         trace: false,
                         protected: false,
+                        nonterm_type: Some(rusty_lr_core::NonTerminalType::Star),
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -424,6 +428,7 @@ impl Pattern {
                         regex_span: Some(root_span_pair),
                         trace: false,
                         protected: false,
+                        nonterm_type: Some(rusty_lr_core::NonTerminalType::Optional),
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -471,6 +476,7 @@ impl Pattern {
                         regex_span: Some(root_span_pair),
                         trace: false,
                         protected: false,
+                        nonterm_type: Some(rusty_lr_core::NonTerminalType::Optional),
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -545,6 +551,7 @@ impl Pattern {
                     regex_span: Some(root_span_pair),
                     trace: false,
                     protected: false,
+                    nonterm_type: Some(rusty_lr_core::NonTerminalType::TerminalSet),
                 };
                 grammar.nonterminals.push(nonterm_info);
                 grammar
@@ -605,6 +612,7 @@ impl Pattern {
                         regex_span: Some(root_span_pair),
                         trace: false,
                         protected: false,
+                        nonterm_type: Some(rusty_lr_core::NonTerminalType::Lookahead),
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -641,6 +649,7 @@ impl Pattern {
                         regex_span: Some(root_span_pair),
                         trace: false,
                         protected: false,
+                        nonterm_type: Some(rusty_lr_core::NonTerminalType::Lookahead),
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -714,6 +723,7 @@ impl Pattern {
                             regex_span: Some(root_span_pair),
                             trace: false,
                             protected: false,
+                            nonterm_type: Some(rusty_lr_core::NonTerminalType::Group),
                         };
                         grammar.nonterminals.push(nonterm_info);
                         grammar
@@ -755,6 +765,7 @@ impl Pattern {
                             regex_span: Some(root_span_pair),
                             trace: false,
                             protected: false,
+                            nonterm_type: Some(rusty_lr_core::NonTerminalType::Group),
                         };
                         grammar.nonterminals.push(nonterm_info);
                         grammar
@@ -802,6 +813,7 @@ impl Pattern {
                             regex_span: Some(root_span_pair),
                             trace: false,
                             protected: false,
+                            nonterm_type: Some(rusty_lr_core::NonTerminalType::Group),
                         };
                         grammar.nonterminals.push(nonterm_info);
                         grammar
@@ -884,6 +896,7 @@ impl Pattern {
                         regex_span: Some((str_span, str_span)),
                         trace: false,
                         protected: false,
+                        nonterm_type: Some(rusty_lr_core::NonTerminalType::LiteralString),
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -933,6 +946,7 @@ impl Pattern {
                         regex_span: Some((str_span, str_span)),
                         trace: false,
                         protected: false,
+                        nonterm_type: Some(rusty_lr_core::NonTerminalType::LiteralString),
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar

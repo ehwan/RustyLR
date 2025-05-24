@@ -159,7 +159,7 @@ impl<Data: NodeData> Node<Data> {
         parser: &P,
     ) -> crate::HashSet<Data::NonTerm>
     where
-        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::NonTerminal<Data::Term>,
+        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::NonTerminal,
     {
         use crate::token::Token;
         use crate::HashSet;
@@ -497,7 +497,7 @@ impl<Data: NodeData> From<Node<Data>> for Tree<Data::Term, Data::NonTerm> {
 impl<Data: NodeData> std::fmt::Display for Node<Data>
 where
     Data::Term: std::fmt::Display,
-    Data::NonTerm: std::fmt::Display,
+    Data::NonTerm: std::fmt::Display + crate::NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.parent.is_none() {
@@ -511,7 +511,7 @@ where
 impl<Data: NodeData> std::fmt::Debug for Node<Data>
 where
     Data::Term: std::fmt::Debug,
-    Data::NonTerm: std::fmt::Debug,
+    Data::NonTerm: std::fmt::Debug + crate::NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.parent.is_none() {

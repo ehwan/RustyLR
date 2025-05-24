@@ -208,7 +208,7 @@ impl<Data: NodeData> Context<Data> {
         parser: &P,
     ) -> crate::HashSet<Data::NonTerm>
     where
-        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::NonTerminal<Data::Term>,
+        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::NonTerminal,
     {
         let mut ret: crate::HashSet<Data::NonTerm> = Default::default();
         for node in self.nodes() {
@@ -586,7 +586,7 @@ impl<Data: NodeData> Clone for Context<Data> {
 impl<Data: NodeData> std::fmt::Display for Context<Data>
 where
     Data::Term: std::fmt::Display + Clone,
-    Data::NonTerm: std::fmt::Display + Clone,
+    Data::NonTerm: std::fmt::Display + Clone + crate::NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (i, path) in self.to_tree_lists().enumerate() {
@@ -600,7 +600,7 @@ where
 impl<Data: NodeData> std::fmt::Debug for Context<Data>
 where
     Data::Term: std::fmt::Debug + Clone,
-    Data::NonTerm: std::fmt::Debug + Clone,
+    Data::NonTerm: std::fmt::Debug + Clone + crate::NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (i, path) in self.to_tree_lists().enumerate() {

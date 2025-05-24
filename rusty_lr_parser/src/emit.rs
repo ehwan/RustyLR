@@ -95,13 +95,11 @@ impl Grammar {
         let start_rule_name = &self.start_rule_name;
         let enum_typename = format_ident!("{}NonTerminals", start_rule_name);
         let module_prefix = &self.module_prefix;
-        let token_typename = &self.token_typename;
 
         let mut comma_separated_variants = TokenStream::new();
         let mut case_as_str = TokenStream::new();
-        let mut nonterm_trait_is_augmented_case = TokenStream::new();
-        let mut nonterm_trait_is_generated_case = TokenStream::new();
         let mut nonterm_trait_is_trace_case = TokenStream::new();
+        let mut nonterm_type_case = TokenStream::new();
         for nonterm in self.nonterminals.iter() {
             let name = &nonterm.name;
             // enum variants definition
@@ -115,22 +113,27 @@ impl Grammar {
                 #enum_typename::#name => #display_str,
             });
 
-            let (is_augmented, is_generated, is_trace) = if name == utils::AUGMENTED_NAME {
-                (true, true, false)
+            let is_trace = if name == utils::AUGMENTED_NAME {
+                false
             } else {
                 // non-term is auto-generated if nonterm.regex_span.is_some()
-                (false, nonterm.is_auto_generated(), nonterm.trace)
+                nonterm.trace
             };
 
-            nonterm_trait_is_augmented_case.extend(quote! {
-                #enum_typename::#name => #is_augmented,
-            });
-            nonterm_trait_is_generated_case.extend(quote! {
-                #enum_typename::#name => #is_generated,
-            });
             nonterm_trait_is_trace_case.extend(quote! {
                 #enum_typename::#name => #is_trace,
             });
+            if let Some(enum_name) = &nonterm.nonterm_type {
+                let enum_name = format!("{:?}", enum_name);
+                let enum_name = Ident::new(&enum_name, Span::call_site());
+                nonterm_type_case.extend(quote! {
+                    #enum_typename::#name => Some(#module_prefix::NonTerminalType::#enum_name),
+                });
+            } else {
+                nonterm_type_case.extend(quote! {
+                    #enum_typename::#name => None,
+                });
+            }
         }
 
         stream.extend(
@@ -141,41 +144,33 @@ impl Grammar {
             pub enum #enum_typename {
                 #comma_separated_variants
             }
-
-            impl #enum_typename {
-                /// convert to string
-                pub fn as_str(&self) -> &'static str {
-                    match self {
-                        #case_as_str
-                    }
-                }
-            }
-
             impl std::fmt::Display for #enum_typename {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    use #module_prefix::NonTerminal;
                     write!(f, "{}", self.as_str())
                 }
             }
             impl std::fmt::Debug for #enum_typename {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    use #module_prefix::NonTerminal;
                     write!(f, "{}", self.as_str())
                 }
             }
 
-            impl #module_prefix::NonTerminal<#token_typename> for #enum_typename{
-                fn is_auto_generated(&self) -> bool {
+            impl #module_prefix::NonTerminal for #enum_typename{
+                fn as_str(&self) -> &'static str {
                     match self {
-                        #nonterm_trait_is_generated_case
-                    }
-                }
-                fn is_augmented(&self) -> bool {
-                    match self {
-                        #nonterm_trait_is_augmented_case
+                        #case_as_str
                     }
                 }
                 fn is_trace(&self) -> bool {
                     match self {
                         #nonterm_trait_is_trace_case
+                    }
+                }
+                fn nonterm_type(&self) -> Option<#module_prefix::NonTerminalType> {
+                    match self {
+                        #nonterm_type_case
                     }
                 }
             }

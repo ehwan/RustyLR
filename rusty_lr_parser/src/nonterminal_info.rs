@@ -61,6 +61,9 @@ pub struct NonTerminalInfo {
     pub(crate) trace: bool,
     /// protected from optimization removal; trace rules are always protected
     pub(crate) protected: bool,
+
+    /// if this non-terminal is auto-generated, the pattern that generated this rule
+    pub(crate) nonterm_type: Option<rusty_lr_core::NonTerminalType>,
 }
 
 impl NonTerminalInfo {

@@ -58,6 +58,7 @@ fn main() {
                 .expect("Error parsing character");
         }
         println!("Parsed successfully");
+        println!("{:?}", context);
     }
 
     // error

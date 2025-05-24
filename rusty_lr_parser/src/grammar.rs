@@ -609,6 +609,7 @@ impl Grammar {
                 regex_span: None,
                 trace: false,
                 protected: false,
+                nonterm_type: None,
             };
 
             grammar.nonterminals.push(nonterminal);
@@ -636,6 +637,7 @@ impl Grammar {
                 regex_span: None,
                 trace: false,
                 protected: true,
+                nonterm_type: Some(rusty_lr_core::NonTerminalType::Error),
             };
 
             let rule_idx = grammar.nonterminals.len();
@@ -766,6 +768,7 @@ impl Grammar {
                 rules: vec![augmented_rule],
                 trace: false,
                 protected: true,
+                nonterm_type: Some(rusty_lr_core::NonTerminalType::Augmented),
             };
             // start rule is protected
             grammar.nonterminals[*start_idx].protected = true;

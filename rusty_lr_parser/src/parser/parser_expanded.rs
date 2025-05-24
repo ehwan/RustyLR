@@ -240,9 +240,20 @@ pub enum GrammarNonTerminals {
     _GrammarLinePlus44,
     Augmented,
 }
-impl GrammarNonTerminals {
-    #[doc = r" convert to string"]
-    pub fn as_str(&self) -> &'static str {
+impl std::fmt::Display for GrammarNonTerminals {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use rusty_lr_core::NonTerminal;
+        write!(f, "{}", self.as_str())
+    }
+}
+impl std::fmt::Debug for GrammarNonTerminals {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use rusty_lr_core::NonTerminal;
+        write!(f, "{}", self.as_str())
+    }
+}
+impl ::rusty_lr_core::NonTerminal for GrammarNonTerminals {
+    fn as_str(&self) -> &'static str {
         match self {
             GrammarNonTerminals::Rule => "Rule",
             GrammarNonTerminals::RuleType => "RuleType",
@@ -290,118 +301,6 @@ impl GrammarNonTerminals {
             GrammarNonTerminals::_identStar43 => "ident*",
             GrammarNonTerminals::_GrammarLinePlus44 => "GrammarLine+",
             GrammarNonTerminals::Augmented => "Augmented",
-        }
-    }
-}
-impl std::fmt::Display for GrammarNonTerminals {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
-impl std::fmt::Debug for GrammarNonTerminals {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
-impl ::rusty_lr_core::NonTerminal<Lexed> for GrammarNonTerminals {
-    fn is_auto_generated(&self) -> bool {
-        match self {
-            GrammarNonTerminals::Rule => false,
-            GrammarNonTerminals::RuleType => false,
-            GrammarNonTerminals::RuleLines => false,
-            GrammarNonTerminals::RuleLine => false,
-            GrammarNonTerminals::PrecDef => false,
-            GrammarNonTerminals::TokenMapped => false,
-            GrammarNonTerminals::TerminalSetItem => false,
-            GrammarNonTerminals::TerminalSet => false,
-            GrammarNonTerminals::Pattern => false,
-            GrammarNonTerminals::Action => false,
-            GrammarNonTerminals::TokenDef => false,
-            GrammarNonTerminals::RustCode => false,
-            GrammarNonTerminals::StartDef => false,
-            GrammarNonTerminals::EofDef => false,
-            GrammarNonTerminals::TokenTypeDef => false,
-            GrammarNonTerminals::UserDataDef => false,
-            GrammarNonTerminals::IdentOrLiteral => false,
-            GrammarNonTerminals::ReduceType => false,
-            GrammarNonTerminals::ReduceDef => false,
-            GrammarNonTerminals::ErrorDef => false,
-            GrammarNonTerminals::ModulePrefixDef => false,
-            GrammarNonTerminals::Glr => false,
-            GrammarNonTerminals::Lalr => false,
-            GrammarNonTerminals::Precedence => false,
-            GrammarNonTerminals::NoOptim => false,
-            GrammarNonTerminals::Dense => false,
-            GrammarNonTerminals::Trace => false,
-            GrammarNonTerminals::Filter => false,
-            GrammarNonTerminals::GrammarLine => false,
-            GrammarNonTerminals::Grammar => false,
-            GrammarNonTerminals::error => false,
-            GrammarNonTerminals::_TokenMappedPlus31 => true,
-            GrammarNonTerminals::_TokenMappedStar32 => true,
-            GrammarNonTerminals::_PrecDefPlus33 => true,
-            GrammarNonTerminals::_PrecDefStar34 => true,
-            GrammarNonTerminals::_caretQuestion35 => true,
-            GrammarNonTerminals::_TerminalSetItemPlus36 => true,
-            GrammarNonTerminals::_TerminalSetItemStar37 => true,
-            GrammarNonTerminals::_PatternPlus38 => true,
-            GrammarNonTerminals::_TermSet39 => true,
-            GrammarNonTerminals::__TermSet39Plus40 => true,
-            GrammarNonTerminals::_IdentOrLiteralPlus41 => true,
-            GrammarNonTerminals::_identPlus42 => true,
-            GrammarNonTerminals::_identStar43 => true,
-            GrammarNonTerminals::_GrammarLinePlus44 => true,
-            GrammarNonTerminals::Augmented => true,
-        }
-    }
-    fn is_augmented(&self) -> bool {
-        match self {
-            GrammarNonTerminals::Rule => false,
-            GrammarNonTerminals::RuleType => false,
-            GrammarNonTerminals::RuleLines => false,
-            GrammarNonTerminals::RuleLine => false,
-            GrammarNonTerminals::PrecDef => false,
-            GrammarNonTerminals::TokenMapped => false,
-            GrammarNonTerminals::TerminalSetItem => false,
-            GrammarNonTerminals::TerminalSet => false,
-            GrammarNonTerminals::Pattern => false,
-            GrammarNonTerminals::Action => false,
-            GrammarNonTerminals::TokenDef => false,
-            GrammarNonTerminals::RustCode => false,
-            GrammarNonTerminals::StartDef => false,
-            GrammarNonTerminals::EofDef => false,
-            GrammarNonTerminals::TokenTypeDef => false,
-            GrammarNonTerminals::UserDataDef => false,
-            GrammarNonTerminals::IdentOrLiteral => false,
-            GrammarNonTerminals::ReduceType => false,
-            GrammarNonTerminals::ReduceDef => false,
-            GrammarNonTerminals::ErrorDef => false,
-            GrammarNonTerminals::ModulePrefixDef => false,
-            GrammarNonTerminals::Glr => false,
-            GrammarNonTerminals::Lalr => false,
-            GrammarNonTerminals::Precedence => false,
-            GrammarNonTerminals::NoOptim => false,
-            GrammarNonTerminals::Dense => false,
-            GrammarNonTerminals::Trace => false,
-            GrammarNonTerminals::Filter => false,
-            GrammarNonTerminals::GrammarLine => false,
-            GrammarNonTerminals::Grammar => false,
-            GrammarNonTerminals::error => false,
-            GrammarNonTerminals::_TokenMappedPlus31 => false,
-            GrammarNonTerminals::_TokenMappedStar32 => false,
-            GrammarNonTerminals::_PrecDefPlus33 => false,
-            GrammarNonTerminals::_PrecDefStar34 => false,
-            GrammarNonTerminals::_caretQuestion35 => false,
-            GrammarNonTerminals::_TerminalSetItemPlus36 => false,
-            GrammarNonTerminals::_TerminalSetItemStar37 => false,
-            GrammarNonTerminals::_PatternPlus38 => false,
-            GrammarNonTerminals::_TermSet39 => false,
-            GrammarNonTerminals::__TermSet39Plus40 => false,
-            GrammarNonTerminals::_IdentOrLiteralPlus41 => false,
-            GrammarNonTerminals::_identPlus42 => false,
-            GrammarNonTerminals::_identStar43 => false,
-            GrammarNonTerminals::_GrammarLinePlus44 => false,
-            GrammarNonTerminals::Augmented => true,
         }
     }
     fn is_trace(&self) -> bool {
@@ -452,6 +351,70 @@ impl ::rusty_lr_core::NonTerminal<Lexed> for GrammarNonTerminals {
             GrammarNonTerminals::_identStar43 => false,
             GrammarNonTerminals::_GrammarLinePlus44 => false,
             GrammarNonTerminals::Augmented => false,
+        }
+    }
+    fn nonterm_type(&self) -> Option<::rusty_lr_core::NonTerminalType> {
+        match self {
+            GrammarNonTerminals::Rule => None,
+            GrammarNonTerminals::RuleType => None,
+            GrammarNonTerminals::RuleLines => None,
+            GrammarNonTerminals::RuleLine => None,
+            GrammarNonTerminals::PrecDef => None,
+            GrammarNonTerminals::TokenMapped => None,
+            GrammarNonTerminals::TerminalSetItem => None,
+            GrammarNonTerminals::TerminalSet => None,
+            GrammarNonTerminals::Pattern => None,
+            GrammarNonTerminals::Action => None,
+            GrammarNonTerminals::TokenDef => None,
+            GrammarNonTerminals::RustCode => None,
+            GrammarNonTerminals::StartDef => None,
+            GrammarNonTerminals::EofDef => None,
+            GrammarNonTerminals::TokenTypeDef => None,
+            GrammarNonTerminals::UserDataDef => None,
+            GrammarNonTerminals::IdentOrLiteral => None,
+            GrammarNonTerminals::ReduceType => None,
+            GrammarNonTerminals::ReduceDef => None,
+            GrammarNonTerminals::ErrorDef => None,
+            GrammarNonTerminals::ModulePrefixDef => None,
+            GrammarNonTerminals::Glr => None,
+            GrammarNonTerminals::Lalr => None,
+            GrammarNonTerminals::Precedence => None,
+            GrammarNonTerminals::NoOptim => None,
+            GrammarNonTerminals::Dense => None,
+            GrammarNonTerminals::Trace => None,
+            GrammarNonTerminals::Filter => None,
+            GrammarNonTerminals::GrammarLine => None,
+            GrammarNonTerminals::Grammar => None,
+            GrammarNonTerminals::error => Some(::rusty_lr_core::NonTerminalType::Error),
+            GrammarNonTerminals::_TokenMappedPlus31 => {
+                Some(::rusty_lr_core::NonTerminalType::PlusLeft)
+            }
+            GrammarNonTerminals::_TokenMappedStar32 => Some(::rusty_lr_core::NonTerminalType::Star),
+            GrammarNonTerminals::_PrecDefPlus33 => Some(::rusty_lr_core::NonTerminalType::PlusLeft),
+            GrammarNonTerminals::_PrecDefStar34 => Some(::rusty_lr_core::NonTerminalType::Star),
+            GrammarNonTerminals::_caretQuestion35 => {
+                Some(::rusty_lr_core::NonTerminalType::Optional)
+            }
+            GrammarNonTerminals::_TerminalSetItemPlus36 => {
+                Some(::rusty_lr_core::NonTerminalType::PlusLeft)
+            }
+            GrammarNonTerminals::_TerminalSetItemStar37 => {
+                Some(::rusty_lr_core::NonTerminalType::Star)
+            }
+            GrammarNonTerminals::_PatternPlus38 => Some(::rusty_lr_core::NonTerminalType::PlusLeft),
+            GrammarNonTerminals::_TermSet39 => Some(::rusty_lr_core::NonTerminalType::TerminalSet),
+            GrammarNonTerminals::__TermSet39Plus40 => {
+                Some(::rusty_lr_core::NonTerminalType::PlusLeft)
+            }
+            GrammarNonTerminals::_IdentOrLiteralPlus41 => {
+                Some(::rusty_lr_core::NonTerminalType::PlusLeft)
+            }
+            GrammarNonTerminals::_identPlus42 => Some(::rusty_lr_core::NonTerminalType::PlusLeft),
+            GrammarNonTerminals::_identStar43 => Some(::rusty_lr_core::NonTerminalType::Star),
+            GrammarNonTerminals::_GrammarLinePlus44 => {
+                Some(::rusty_lr_core::NonTerminalType::PlusRight)
+            }
+            GrammarNonTerminals::Augmented => Some(::rusty_lr_core::NonTerminalType::Augmented),
         }
     }
 }
