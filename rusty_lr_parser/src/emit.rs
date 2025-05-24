@@ -939,10 +939,16 @@ impl Grammar {
             }
         }
 
+        let derive_clone_for_glr = if self.glr {
+            quote! {#[derive(Clone)]}
+        } else {
+            quote! {}
+        };
+
         stream.extend(quote! {
         /// enum for each non-terminal and terminal symbol, that actually hold data
         #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-        #[derive(Clone)]
+        #derive_clone_for_glr
         pub enum #token_data_typename {
             #enum_variants_stream
         }
