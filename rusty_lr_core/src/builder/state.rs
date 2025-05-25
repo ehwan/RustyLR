@@ -63,7 +63,6 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 .map(|(term, rule)| (term_map(term), rule.into_iter().next().unwrap()))
                 .collect(),
             ruleset: self.ruleset.into_iter().collect(),
-            shifted_token: self.token.map(|token| token.map(&term_map, &nonterm_map)),
         }
     }
     pub fn into_lr_dense_state<NewNonTerm>(
@@ -92,7 +91,6 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 .collect(),
             reduce_map,
             ruleset: self.ruleset.into_iter().collect(),
-            shifted_token: self.token.map(|token| token.map(&term_map, &nonterm_map)),
         }
     }
 
@@ -121,7 +119,6 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 .map(|(term, rule)| (term_map(term), rule.into_iter().collect()))
                 .collect(),
             ruleset: self.ruleset.into_iter().collect(),
-            shifted_token: self.token.map(|token| token.map(&term_map, &nonterm_map)),
         }
     }
     pub fn into_glr_dense_state<NewNonTerm>(
@@ -150,7 +147,6 @@ impl<Term, NonTerm> State<Term, NonTerm> {
                 .collect(),
             reduce_map,
             ruleset: self.ruleset.into_iter().collect(),
-            shifted_token: self.token.map(|token| token.map(&term_map, &nonterm_map)),
         }
     }
 }
