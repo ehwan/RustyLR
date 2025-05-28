@@ -79,7 +79,6 @@ where
         };
         context.reduce_args.push(data);
     }
-    context.reduce_args.reverse();
 
     #[cfg(feature = "tree")]
     {

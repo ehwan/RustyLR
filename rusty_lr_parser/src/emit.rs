@@ -803,7 +803,7 @@ impl Grammar {
         for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
             for (rule_local_id, rule) in nonterm.rules.iter().enumerate() {
                 let mut extract_token_data_from_args = TokenStream::new();
-                for token in rule.tokens.iter().rev() {
+                for token in rule.tokens.iter() {
                     match &token.token {
                         Token::Term(_) => match &token.mapto {
                             Some(mapto) => {
@@ -901,7 +901,7 @@ impl Grammar {
                                 lookahead: &#token_typename,
                                 #user_data_parameter_name: &mut #user_data_typename
                             ) -> Result<#token_data_typename, #reduce_error_typename> {
-                                #extract_token_data_from_args
+                                __rustylr_args.clear();
                                 Ok( #token_data_typename::#variant_name )
                             }
                         });

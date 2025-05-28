@@ -18,6 +18,9 @@ pub struct Context<Data: TokenData> {
     /// Data stack holds the values associated with each symbol.
     pub(crate) data_stack: Vec<Data>,
 
+    /// temporary data stack for reduce action.
+    pub(crate) reduce_args: Vec<Data>,
+
     /// Tree stack for tree representation of the parse.
     #[cfg(feature = "tree")]
     pub(crate) tree_stack: TreeList<Data::Term, Data::NonTerm>,
@@ -31,6 +34,7 @@ impl<Data: TokenData> Context<Data> {
             state_stack: vec![0],
 
             data_stack: Vec::new(),
+            reduce_args: Vec::new(),
 
             #[cfg(feature = "tree")]
             tree_stack: TreeList::new(),
@@ -45,6 +49,7 @@ impl<Data: TokenData> Context<Data> {
             state_stack,
 
             data_stack: Vec::with_capacity(capacity),
+            reduce_args: Vec::new(),
 
             #[cfg(feature = "tree")]
             tree_stack: TreeList::new(),
@@ -148,10 +153,20 @@ impl<Data: TokenData> Context<Data> {
 
             let mut shift = false;
 
+            self.reduce_args.clear();
+            self.reduce_args.reserve(rule.rule.len());
+            for _ in 0..rule.rule.len() {
+                self.reduce_args.push(
+                    self.data_stack
+                        .pop()
+                        .expect("data stack must have at least one element"),
+                );
+            }
+
             // call reduce action
             let new_data = Data::reduce_action(
                 reduce_rule,
-                &mut self.data_stack,
+                &mut self.reduce_args,
                 &mut shift,
                 &term,
                 userdata,
@@ -551,6 +566,7 @@ where
         Context {
             state_stack: self.state_stack.clone(),
             data_stack: self.data_stack.clone(),
+            reduce_args: Vec::new(),
 
             #[cfg(feature = "tree")]
             tree_stack: self.tree_stack.clone(),
