@@ -457,6 +457,8 @@ pub enum GrammarTokenData {
     dead_code
 )]
 impl GrammarTokenData {
+    #[doc = "Rule-> ident RuleType colon RuleLines semicolon"]
+    #[inline]
     fn reduce_Rule_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -499,6 +501,8 @@ impl GrammarTokenData {
             }
         }))
     }
+    #[doc = "RuleType-> parengroup"]
+    #[inline]
     fn reduce_RuleType_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -516,6 +520,8 @@ impl GrammarTokenData {
             }
         }))
     }
+    #[doc = "RuleType-> "]
+    #[inline]
     fn reduce_RuleType_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -524,6 +530,8 @@ impl GrammarTokenData {
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         Ok(GrammarTokenData::Variant3({ None }))
     }
+    #[doc = "RuleLines-> RuleLines pipe RuleLine"]
+    #[inline]
     fn reduce_RuleLines_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -547,6 +555,8 @@ impl GrammarTokenData {
             RuleLines
         }))
     }
+    #[doc = "RuleLines-> RuleLine"]
+    #[inline]
     fn reduce_RuleLines_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -558,6 +568,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant4({ vec![RuleLine] }))
     }
+    #[doc = "RuleLine-> TokenMapped* PrecDef* Action"]
+    #[inline]
     fn reduce_RuleLine_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -584,6 +596,8 @@ impl GrammarTokenData {
             }
         }))
     }
+    #[doc = "PrecDef-> prec IdentOrLiteral"]
+    #[inline]
     fn reduce_PrecDef_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -598,6 +612,8 @@ impl GrammarTokenData {
             PrecDPrecArgs::Prec(IdentOrLiteral)
         }))
     }
+    #[doc = "PrecDef-> dprec literal"]
+    #[inline]
     fn reduce_PrecDef_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -615,6 +631,8 @@ impl GrammarTokenData {
             PrecDPrecArgs::DPrec(literal)
         }))
     }
+    #[doc = "TokenMapped-> Pattern"]
+    #[inline]
     fn reduce_TokenMapped_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -626,6 +644,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant7({ (None, Pattern) }))
     }
+    #[doc = "TokenMapped-> ident equal Pattern"]
+    #[inline]
     fn reduce_TokenMapped_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -649,6 +669,8 @@ impl GrammarTokenData {
             }
         }))
     }
+    #[doc = "TerminalSetItem-> ident"]
+    #[inline]
     fn reduce_TerminalSetItem_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -667,6 +689,8 @@ impl GrammarTokenData {
             TerminalSetItem::Terminal(ident)
         }))
     }
+    #[doc = "TerminalSetItem-> ident minus ident"]
+    #[inline]
     fn reduce_TerminalSetItem_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -696,6 +720,8 @@ impl GrammarTokenData {
             TerminalSetItem::Range(first, last)
         }))
     }
+    #[doc = "TerminalSetItem-> literal"]
+    #[inline]
     fn reduce_TerminalSetItem_2(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -712,6 +738,8 @@ impl GrammarTokenData {
             TerminalSetItem::Literal(literal)
         }))
     }
+    #[doc = "TerminalSetItem-> literal minus literal"]
+    #[inline]
     fn reduce_TerminalSetItem_3(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -737,6 +765,8 @@ impl GrammarTokenData {
             TerminalSetItem::LiteralRange(first, last)
         }))
     }
+    #[doc = "TerminalSet-> lbracket caret? TerminalSetItem* rbracket"]
+    #[inline]
     fn reduce_TerminalSet_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -774,6 +804,8 @@ impl GrammarTokenData {
             }
         }))
     }
+    #[doc = "TerminalSet-> dot"]
+    #[inline]
     fn reduce_TerminalSet_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -793,6 +825,8 @@ impl GrammarTokenData {
             }
         }))
     }
+    #[doc = "Pattern-> ident"]
+    #[inline]
     fn reduce_Pattern_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -810,6 +844,8 @@ impl GrammarTokenData {
             }
         }))
     }
+    #[doc = "Pattern-> Pattern plus"]
+    #[inline]
     fn reduce_Pattern_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -830,6 +866,8 @@ impl GrammarTokenData {
             }
         }))
     }
+    #[doc = "Pattern-> Pattern star"]
+    #[inline]
     fn reduce_Pattern_2(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -850,6 +888,8 @@ impl GrammarTokenData {
             }
         }))
     }
+    #[doc = "Pattern-> Pattern question"]
+    #[inline]
     fn reduce_Pattern_3(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -870,6 +910,8 @@ impl GrammarTokenData {
             }
         }))
     }
+    #[doc = "Pattern-> Pattern exclamation"]
+    #[inline]
     fn reduce_Pattern_4(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -890,6 +932,8 @@ impl GrammarTokenData {
             }
         }))
     }
+    #[doc = "Pattern-> TerminalSet"]
+    #[inline]
     fn reduce_Pattern_5(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -903,6 +947,8 @@ impl GrammarTokenData {
             PatternArgs::TerminalSet(TerminalSet)
         }))
     }
+    #[doc = "Pattern-> Pattern slash Pattern"]
+    #[inline]
     fn reduce_Pattern_6(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -922,6 +968,8 @@ impl GrammarTokenData {
             PatternArgs::Lookaheads(Box::new(p1), Box::new(lh))
         }))
     }
+    #[doc = "Pattern-> lparen Pattern+ rparen"]
+    #[inline]
     fn reduce_Pattern_7(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -951,6 +999,8 @@ impl GrammarTokenData {
             PatternArgs::Group(Pattern, open, close)
         }))
     }
+    #[doc = "Pattern-> literal"]
+    #[inline]
     fn reduce_Pattern_8(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -967,6 +1017,8 @@ impl GrammarTokenData {
             PatternArgs::Literal(literal)
         }))
     }
+    #[doc = "Pattern-> Pattern minus Pattern"]
+    #[inline]
     fn reduce_Pattern_9(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -986,6 +1038,8 @@ impl GrammarTokenData {
             PatternArgs::Minus(Box::new(p1), Box::new(p2))
         }))
     }
+    #[doc = "Action-> bracegroup"]
+    #[inline]
     fn reduce_Action_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1003,6 +1057,8 @@ impl GrammarTokenData {
             }
         }))
     }
+    #[doc = "Action-> "]
+    #[inline]
     fn reduce_Action_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1011,6 +1067,8 @@ impl GrammarTokenData {
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         Ok(GrammarTokenData::Variant3({ None }))
     }
+    #[doc = "TokenDef-> token ident RustCode semicolon"]
+    #[inline]
     fn reduce_TokenDef_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1037,6 +1095,8 @@ impl GrammarTokenData {
             }
         }))
     }
+    #[doc = "RustCode-> [^semicolon]+"]
+    #[inline]
     fn reduce_RustCode_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1054,6 +1114,8 @@ impl GrammarTokenData {
             tokens
         }))
     }
+    #[doc = "StartDef-> start ident semicolon"]
+    #[inline]
     fn reduce_StartDef_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1077,6 +1139,8 @@ impl GrammarTokenData {
             }
         }))
     }
+    #[doc = "EofDef-> eofdef RustCode semicolon"]
+    #[inline]
     fn reduce_EofDef_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1094,6 +1158,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant14({ (eofdef.span(), RustCode) }))
     }
+    #[doc = "TokenTypeDef-> tokentype RustCode semicolon"]
+    #[inline]
     fn reduce_TokenTypeDef_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1113,6 +1179,8 @@ impl GrammarTokenData {
             (tokentype.span(), RustCode)
         }))
     }
+    #[doc = "UserDataDef-> userdata RustCode semicolon"]
+    #[inline]
     fn reduce_UserDataDef_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1130,6 +1198,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant14({ (userdata.span(), RustCode) }))
     }
+    #[doc = "IdentOrLiteral-> ident"]
+    #[inline]
     fn reduce_IdentOrLiteral_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1146,6 +1216,8 @@ impl GrammarTokenData {
             IdentOrLiteral::Ident(ident)
         }))
     }
+    #[doc = "IdentOrLiteral-> literal"]
+    #[inline]
     fn reduce_IdentOrLiteral_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1162,6 +1234,8 @@ impl GrammarTokenData {
             IdentOrLiteral::Literal(literal)
         }))
     }
+    #[doc = "ReduceType-> left"]
+    #[inline]
     fn reduce_ReduceType_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1173,6 +1247,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant16({ ReduceType::Left }))
     }
+    #[doc = "ReduceType-> right"]
+    #[inline]
     fn reduce_ReduceType_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1184,6 +1260,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant16({ ReduceType::Right }))
     }
+    #[doc = "ReduceDef-> ReduceType IdentOrLiteral+ semicolon"]
+    #[inline]
     fn reduce_ReduceDef_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1203,6 +1281,8 @@ impl GrammarTokenData {
             (reducetype, IdentOrLiteral)
         }))
     }
+    #[doc = "ErrorDef-> errortype RustCode semicolon"]
+    #[inline]
     fn reduce_ErrorDef_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1222,6 +1302,8 @@ impl GrammarTokenData {
             (errortype.span(), RustCode)
         }))
     }
+    #[doc = "ModulePrefixDef-> moduleprefix RustCode semicolon"]
+    #[inline]
     fn reduce_ModulePrefixDef_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1241,6 +1323,8 @@ impl GrammarTokenData {
             (moduleprefix.span(), RustCode)
         }))
     }
+    #[doc = "Glr-> glr semicolon"]
+    #[inline]
     fn reduce_Glr_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1250,6 +1334,8 @@ impl GrammarTokenData {
         __rustylr_args.clear();
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "Lalr-> lalr semicolon"]
+    #[inline]
     fn reduce_Lalr_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1259,6 +1345,8 @@ impl GrammarTokenData {
         __rustylr_args.clear();
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "Precedence-> precedence IdentOrLiteral+ semicolon"]
+    #[inline]
     fn reduce_Precedence_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1276,6 +1364,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant18({ IdentOrLiteral }))
     }
+    #[doc = "NoOptim-> nooptim semicolon"]
+    #[inline]
     fn reduce_NoOptim_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1285,6 +1375,8 @@ impl GrammarTokenData {
         __rustylr_args.clear();
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "Dense-> dense semicolon"]
+    #[inline]
     fn reduce_Dense_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1294,6 +1386,8 @@ impl GrammarTokenData {
         __rustylr_args.clear();
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "Trace-> trace ident* semicolon"]
+    #[inline]
     fn reduce_Trace_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1321,6 +1415,8 @@ impl GrammarTokenData {
                 .collect()
         }))
     }
+    #[doc = "Filter-> filter RustCode semicolon"]
+    #[inline]
     fn reduce_Filter_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1334,6 +1430,8 @@ impl GrammarTokenData {
         __rustylr_args.pop();
         Ok(GrammarTokenData::Variant12(RustCode))
     }
+    #[doc = "GrammarLine-> Rule"]
+    #[inline]
     fn reduce_GrammarLine_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1348,6 +1446,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine-> TokenDef"]
+    #[inline]
     fn reduce_GrammarLine_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1362,6 +1462,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine-> StartDef"]
+    #[inline]
     fn reduce_GrammarLine_2(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1376,6 +1478,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine-> EofDef"]
+    #[inline]
     fn reduce_GrammarLine_3(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1390,6 +1494,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine-> TokenTypeDef"]
+    #[inline]
     fn reduce_GrammarLine_4(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1404,6 +1510,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine-> UserDataDef"]
+    #[inline]
     fn reduce_GrammarLine_5(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1418,6 +1526,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine-> ReduceDef"]
+    #[inline]
     fn reduce_GrammarLine_6(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1433,6 +1543,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine-> ErrorDef"]
+    #[inline]
     fn reduce_GrammarLine_7(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1447,6 +1559,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine-> ModulePrefixDef"]
+    #[inline]
     fn reduce_GrammarLine_8(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1461,6 +1575,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine-> Lalr"]
+    #[inline]
     fn reduce_GrammarLine_9(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1473,6 +1589,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine-> Glr"]
+    #[inline]
     fn reduce_GrammarLine_10(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1485,6 +1603,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine-> Precedence"]
+    #[inline]
     fn reduce_GrammarLine_11(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1499,6 +1619,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine-> NoOptim"]
+    #[inline]
     fn reduce_GrammarLine_12(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1511,6 +1633,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine-> Dense"]
+    #[inline]
     fn reduce_GrammarLine_13(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1523,6 +1647,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine-> Trace"]
+    #[inline]
     fn reduce_GrammarLine_14(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1537,6 +1663,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine-> Filter"]
+    #[inline]
     fn reduce_GrammarLine_15(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1551,6 +1679,8 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "Grammar-> GrammarLine+"]
+    #[inline]
     fn reduce_Grammar_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1560,6 +1690,8 @@ impl GrammarTokenData {
         __rustylr_args.clear();
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "_TokenMappedPlus31-> TokenMapped"]
+    #[inline]
     fn reduce__TokenMappedPlus31_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1571,6 +1703,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant20({ vec![A] }))
     }
+    #[doc = "_TokenMappedPlus31-> TokenMapped+ TokenMapped"]
+    #[inline]
     fn reduce__TokenMappedPlus31_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1588,6 +1722,8 @@ impl GrammarTokenData {
             Ap
         }))
     }
+    #[doc = "_TokenMappedStar32-> TokenMapped+"]
+    #[inline]
     fn reduce__TokenMappedStar32_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1599,6 +1735,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant20({ Ap }))
     }
+    #[doc = "_TokenMappedStar32-> "]
+    #[inline]
     fn reduce__TokenMappedStar32_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1607,6 +1745,8 @@ impl GrammarTokenData {
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         Ok(GrammarTokenData::Variant20({ vec![] }))
     }
+    #[doc = "_PrecDefPlus33-> PrecDef"]
+    #[inline]
     fn reduce__PrecDefPlus33_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1618,6 +1758,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant21({ vec![A] }))
     }
+    #[doc = "_PrecDefPlus33-> PrecDef+ PrecDef"]
+    #[inline]
     fn reduce__PrecDefPlus33_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1635,6 +1777,8 @@ impl GrammarTokenData {
             Ap
         }))
     }
+    #[doc = "_PrecDefStar34-> PrecDef+"]
+    #[inline]
     fn reduce__PrecDefStar34_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1646,6 +1790,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant21({ Ap }))
     }
+    #[doc = "_PrecDefStar34-> "]
+    #[inline]
     fn reduce__PrecDefStar34_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1654,6 +1800,8 @@ impl GrammarTokenData {
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         Ok(GrammarTokenData::Variant21({ vec![] }))
     }
+    #[doc = "_caretQuestion35-> caret"]
+    #[inline]
     fn reduce__caretQuestion35_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1665,6 +1813,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant22({ Some(A) }))
     }
+    #[doc = "_caretQuestion35-> "]
+    #[inline]
     fn reduce__caretQuestion35_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1673,6 +1823,8 @@ impl GrammarTokenData {
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         Ok(GrammarTokenData::Variant22({ None }))
     }
+    #[doc = "_TerminalSetItemPlus36-> TerminalSetItem"]
+    #[inline]
     fn reduce__TerminalSetItemPlus36_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1684,6 +1836,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant23({ vec![A] }))
     }
+    #[doc = "_TerminalSetItemPlus36-> TerminalSetItem+ TerminalSetItem"]
+    #[inline]
     fn reduce__TerminalSetItemPlus36_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1701,6 +1855,8 @@ impl GrammarTokenData {
             Ap
         }))
     }
+    #[doc = "_TerminalSetItemStar37-> TerminalSetItem+"]
+    #[inline]
     fn reduce__TerminalSetItemStar37_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1712,6 +1868,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant23({ Ap }))
     }
+    #[doc = "_TerminalSetItemStar37-> "]
+    #[inline]
     fn reduce__TerminalSetItemStar37_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1720,6 +1878,8 @@ impl GrammarTokenData {
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         Ok(GrammarTokenData::Variant23({ vec![] }))
     }
+    #[doc = "_PatternPlus38-> Pattern"]
+    #[inline]
     fn reduce__PatternPlus38_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1731,6 +1891,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant24({ vec![A] }))
     }
+    #[doc = "_PatternPlus38-> Pattern+ Pattern"]
+    #[inline]
     fn reduce__PatternPlus38_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1748,6 +1910,8 @@ impl GrammarTokenData {
             Ap
         }))
     }
+    #[doc = "_TermSet39-> ident"]
+    #[inline]
     fn reduce__TermSet39_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1759,6 +1923,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> colon"]
+    #[inline]
     fn reduce__TermSet39_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1770,6 +1936,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> pipe"]
+    #[inline]
     fn reduce__TermSet39_2(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1781,6 +1949,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> [percent, <Others>] (2 terms)"]
+    #[inline]
     fn reduce__TermSet39_3(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1792,6 +1962,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> equal"]
+    #[inline]
     fn reduce__TermSet39_4(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1803,6 +1975,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> plus"]
+    #[inline]
     fn reduce__TermSet39_5(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1814,6 +1988,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> star"]
+    #[inline]
     fn reduce__TermSet39_6(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1825,6 +2001,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> question"]
+    #[inline]
     fn reduce__TermSet39_7(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1836,6 +2014,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> caret"]
+    #[inline]
     fn reduce__TermSet39_8(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1847,6 +2027,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> minus"]
+    #[inline]
     fn reduce__TermSet39_9(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1858,6 +2040,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> exclamation"]
+    #[inline]
     fn reduce__TermSet39_10(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1869,6 +2053,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> slash"]
+    #[inline]
     fn reduce__TermSet39_11(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1880,6 +2066,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> dot"]
+    #[inline]
     fn reduce__TermSet39_12(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1891,6 +2079,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> literal"]
+    #[inline]
     fn reduce__TermSet39_13(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1902,6 +2092,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> parengroup"]
+    #[inline]
     fn reduce__TermSet39_14(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1913,6 +2105,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> bracegroup"]
+    #[inline]
     fn reduce__TermSet39_15(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1924,6 +2118,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> lparen"]
+    #[inline]
     fn reduce__TermSet39_16(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1935,6 +2131,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> rparen"]
+    #[inline]
     fn reduce__TermSet39_17(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1946,6 +2144,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> lbracket"]
+    #[inline]
     fn reduce__TermSet39_18(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1957,6 +2157,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> rbracket"]
+    #[inline]
     fn reduce__TermSet39_19(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1968,6 +2170,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> left"]
+    #[inline]
     fn reduce__TermSet39_20(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1979,6 +2183,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> right"]
+    #[inline]
     fn reduce__TermSet39_21(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -1990,6 +2196,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> token"]
+    #[inline]
     fn reduce__TermSet39_22(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2001,6 +2209,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> start"]
+    #[inline]
     fn reduce__TermSet39_23(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2012,6 +2222,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> eofdef"]
+    #[inline]
     fn reduce__TermSet39_24(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2023,6 +2235,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> tokentype"]
+    #[inline]
     fn reduce__TermSet39_25(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2034,6 +2248,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> userdata"]
+    #[inline]
     fn reduce__TermSet39_26(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2045,6 +2261,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> errortype"]
+    #[inline]
     fn reduce__TermSet39_27(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2056,6 +2274,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> moduleprefix"]
+    #[inline]
     fn reduce__TermSet39_28(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2067,6 +2287,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> lalr"]
+    #[inline]
     fn reduce__TermSet39_29(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2078,6 +2300,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> glr"]
+    #[inline]
     fn reduce__TermSet39_30(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2089,6 +2313,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> prec"]
+    #[inline]
     fn reduce__TermSet39_31(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2100,6 +2326,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> precedence"]
+    #[inline]
     fn reduce__TermSet39_32(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2111,6 +2339,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> nooptim"]
+    #[inline]
     fn reduce__TermSet39_33(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2122,6 +2352,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> dense"]
+    #[inline]
     fn reduce__TermSet39_34(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2133,6 +2365,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> trace"]
+    #[inline]
     fn reduce__TermSet39_35(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2144,6 +2378,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> dprec"]
+    #[inline]
     fn reduce__TermSet39_36(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2155,6 +2391,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "_TermSet39-> filter"]
+    #[inline]
     fn reduce__TermSet39_37(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2166,6 +2404,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Terminals(term))
     }
+    #[doc = "__TermSet39Plus40-> [^semicolon]"]
+    #[inline]
     fn reduce___TermSet39Plus40_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2177,6 +2417,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant25({ vec![A] }))
     }
+    #[doc = "__TermSet39Plus40-> [^semicolon]+ [^semicolon]"]
+    #[inline]
     fn reduce___TermSet39Plus40_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2194,6 +2436,8 @@ impl GrammarTokenData {
             Ap
         }))
     }
+    #[doc = "_IdentOrLiteralPlus41-> IdentOrLiteral"]
+    #[inline]
     fn reduce__IdentOrLiteralPlus41_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2205,6 +2449,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant18({ vec![A] }))
     }
+    #[doc = "_IdentOrLiteralPlus41-> IdentOrLiteral+ IdentOrLiteral"]
+    #[inline]
     fn reduce__IdentOrLiteralPlus41_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2222,6 +2468,8 @@ impl GrammarTokenData {
             Ap
         }))
     }
+    #[doc = "_identPlus42-> ident"]
+    #[inline]
     fn reduce__identPlus42_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2233,6 +2481,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant25({ vec![A] }))
     }
+    #[doc = "_identPlus42-> ident+ ident"]
+    #[inline]
     fn reduce__identPlus42_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2250,6 +2500,8 @@ impl GrammarTokenData {
             Ap
         }))
     }
+    #[doc = "_identStar43-> ident+"]
+    #[inline]
     fn reduce__identStar43_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2261,6 +2513,8 @@ impl GrammarTokenData {
         };
         Ok(GrammarTokenData::Variant25({ Ap }))
     }
+    #[doc = "_identStar43-> "]
+    #[inline]
     fn reduce__identStar43_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2269,6 +2523,8 @@ impl GrammarTokenData {
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         Ok(GrammarTokenData::Variant25({ vec![] }))
     }
+    #[doc = "_GrammarLinePlus44-> GrammarLine"]
+    #[inline]
     fn reduce__GrammarLinePlus44_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2278,6 +2534,8 @@ impl GrammarTokenData {
         __rustylr_args.clear();
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "_GrammarLinePlus44-> GrammarLine GrammarLine+"]
+    #[inline]
     fn reduce__GrammarLinePlus44_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
@@ -2287,6 +2545,8 @@ impl GrammarTokenData {
         __rustylr_args.clear();
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "Augmented-> Grammar eof"]
+    #[inline]
     fn reduce_Augmented_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,

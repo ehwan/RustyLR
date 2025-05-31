@@ -849,6 +849,21 @@ impl Grammar {
                 }
                 let reduce_fn_ident = format_ident!("reduce_{}_{}", nonterm.name, rule_local_id);
 
+                let rule_debug_str = format!(
+                    "{}-> {}",
+                    nonterm.name,
+                    rule.tokens
+                        .iter()
+                        .map(|t| {
+                            match t.token {
+                                Token::Term(term) => self.class_pretty_name_list(term, 5),
+                                Token::NonTerm(nonterm) => self.nonterm_pretty_name(nonterm),
+                            }
+                        })
+                        .collect::<Vec<_>>()
+                        .join(" ")
+                );
+
                 case_streams.extend(quote! {
                     #rule_index => {
                         Self::#reduce_fn_ident( reduce_args, shift, lookahead, user_data )
@@ -862,6 +877,8 @@ impl Grammar {
                     let variant_name = &variant_names_for_nonterm[nonterm_idx];
                     let action = &rule.reduce_action.as_ref().unwrap().stream;
                     fn_reduce_for_each_rule_stream.extend(quote! {
+                        #[doc = #rule_debug_str]
+                        #[inline]
                         fn #reduce_fn_ident(
                             __rustylr_args: &mut Vec<Self>,
                             shift: &mut bool,
@@ -881,6 +898,8 @@ impl Grammar {
                     if let Some(action) = &rule.reduce_action {
                         let action = &action.stream;
                         fn_reduce_for_each_rule_stream.extend(quote! {
+                            #[doc = #rule_debug_str]
+                            #[inline]
                             fn #reduce_fn_ident(
                                 __rustylr_args: &mut Vec<Self>,
                                 shift: &mut bool,
@@ -895,6 +914,8 @@ impl Grammar {
                         });
                     } else {
                         fn_reduce_for_each_rule_stream.extend(quote! {
+                            #[doc = #rule_debug_str]
+                            #[inline]
                             fn #reduce_fn_ident(
                                 __rustylr_args: &mut Vec<Self>,
                                 shift: &mut bool,
