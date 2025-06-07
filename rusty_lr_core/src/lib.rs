@@ -25,9 +25,6 @@ pub mod lr;
 /// module for GLR parser
 pub mod glr;
 
-mod rangemap;
-pub use rangemap::RangeMap;
-
 mod nonterminal;
 pub use nonterminal::NonTerminal;
 pub use nonterminal::NonTerminalType;

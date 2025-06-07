@@ -8,7 +8,7 @@ use std::vec::Vec;
 use super::BuildError;
 use super::DiagnosticCollector;
 use super::State;
-use super::DFA;
+use super::States;
 use crate::hashmap::HashMap;
 use crate::rule::*;
 use crate::token::Token;
@@ -406,6 +406,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         }
     }
 
+    /// check for any shift/reduce or reduce/reduce conflicts and report them to `diags`.
     fn check_conflicts(
         &self,
         states: &[State<Term, NonTerm>],
@@ -497,7 +498,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         &mut self,
         augmented_name: NonTerm,
         diags: &mut DiagnosticCollector<Term>,
-    ) -> Result<DFA<Term, NonTerm>, BuildError<Term, NonTerm>>
+    ) -> Result<States<Term, NonTerm>, BuildError<Term, NonTerm>>
     where
         Term: Copy + Ord + Hash,
         NonTerm: Copy + Hash + Ord,
@@ -534,7 +535,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             panic!("main state is not 0");
         }
 
-        Ok(DFA { states })
+        Ok(States { states })
     }
 
     /// build minimal-LR(1) parser table from given grammar
@@ -542,7 +543,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         &mut self,
         augmented_name: NonTerm,
         diags: &mut DiagnosticCollector<Term>,
-    ) -> Result<DFA<Term, NonTerm>, BuildError<Term, NonTerm>>
+    ) -> Result<States<Term, NonTerm>, BuildError<Term, NonTerm>>
     where
         Term: Copy + Ord + Hash,
         NonTerm: Copy + Hash + Ord,
@@ -718,7 +719,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         states = new_states;
         self.check_conflicts(&states, diags);
 
-        Ok(DFA { states })
+        Ok(States { states })
     }
 
     /// build LALR(1) parser table from given grammar
@@ -726,7 +727,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         &mut self,
         augmented_name: NonTerm,
         diags: &mut DiagnosticCollector<Term>,
-    ) -> Result<DFA<Term, NonTerm>, BuildError<Term, NonTerm>>
+    ) -> Result<States<Term, NonTerm>, BuildError<Term, NonTerm>>
     where
         Term: Copy + Ord + Hash,
         NonTerm: Copy + Hash + Ord,
@@ -930,7 +931,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
         self.check_conflicts(&states, diags);
 
-        Ok(DFA { states })
+        Ok(States { states })
     }
 
     /// build new state with given production rules
