@@ -708,7 +708,7 @@ impl Grammar {
                     reduce_action: rule.reduce_action.map(|stream| ReduceAction {
                         stream,
                         generated: false,
-                        identity: false,
+                        identity_token_index: None,
                     }),
                     separator_span: rule.separator_span,
                     lookaheads: None,
@@ -803,13 +803,16 @@ impl Grammar {
                         // only one token in this rule have <RuleType> defined (include terminal)
                         // the unique value will be pushed to stack
                         let mut unique_mapto = None;
-                        for token in rule.tokens.iter() {
+                        let mut unique_mapto_idx = None;
+                        for (idx, token) in rule.tokens.iter().enumerate() {
                             if token.mapto.is_some() {
                                 if unique_mapto.is_some() {
                                     unique_mapto = None;
+                                    unique_mapto_idx = None;
                                     break;
                                 } else {
                                     unique_mapto = token.mapto.as_ref();
+                                    unique_mapto_idx = Some(idx);
                                 }
                             }
                         }
@@ -818,7 +821,7 @@ impl Grammar {
                             rule.reduce_action = Some(ReduceAction {
                                 stream: action,
                                 generated: true,
-                                identity: true,
+                                identity_token_index: unique_mapto_idx,
                             });
                         } else {
                             let span = if rule.tokens.is_empty() {
@@ -985,7 +988,12 @@ impl Grammar {
                         // this terminal should be completely distinct from others (for user-defined inspection action)
                         // so put this terminal into separate class
                         if rule.reduce_action.is_some()
-                            && !rule.reduce_action.as_ref().unwrap().identity
+                            && rule
+                                .reduce_action
+                                .as_ref()
+                                .unwrap()
+                                .identity_token_index
+                                .is_none()
                         {
                             term_sets.insert(BTreeSet::from([term]));
                             continue;
@@ -1007,9 +1015,13 @@ impl Grammar {
                             .collect::<Vec<_>>();
                         let lookaheads = &rule.lookaheads;
                         let dprec = rule.dprec.map_or(0, |(val, _)| val);
+                        let token_index = rule
+                            .reduce_action
+                            .as_ref()
+                            .map(|reduce_action| reduce_action.identity_token_index.unwrap());
 
                         if !same_ruleset
-                            .entry((prefix, suffix, lookaheads, dprec))
+                            .entry((prefix, suffix, lookaheads, dprec, token_index))
                             .or_insert_with(BTreeSet::new)
                             .insert(term)
                         {
@@ -1211,7 +1223,12 @@ impl Grammar {
             if (nonterm.ruletype.is_none() && rule.reduce_action.is_none())
                 || (nonterm.ruletype.is_some()
                     && rule.reduce_action.is_some()
-                    && rule.reduce_action.as_ref().unwrap().identity)
+                    && rule
+                        .reduce_action
+                        .as_ref()
+                        .unwrap()
+                        .identity_token_index
+                        .is_some())
             {
                 nonterm_replace.insert(Token::NonTerm(nonterm_id), totoken);
             }

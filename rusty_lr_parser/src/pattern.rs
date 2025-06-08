@@ -130,7 +130,7 @@ impl Pattern {
                                 { vec![A] }
                             },
                             generated: true,
-                            identity: false,
+                            identity_token_index: None,
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: None,
@@ -157,7 +157,7 @@ impl Pattern {
                                 { Ap.push(A); Ap }
                             },
                             generated: true,
-                            identity: false,
+                            identity_token_index: None,
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: None,
@@ -281,7 +281,7 @@ impl Pattern {
                                 { Ap }
                             },
                             generated: true,
-                            identity: true,
+                            identity_token_index: Some(0),
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: None,
@@ -295,7 +295,7 @@ impl Pattern {
                                 { vec![] }
                             },
                             generated: true,
-                            identity: false,
+                            identity_token_index: None,
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: None,
@@ -327,8 +327,8 @@ impl Pattern {
                     Ok(res)
                 } else {
                     // typename not exist, make new rule with typename ()
-                    // A* -> A+ { Ap }
-                    //     |    { vec![] }
+                    // A* -> A+
+                    //     |
                     let line1 = Rule {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
@@ -398,7 +398,7 @@ impl Pattern {
                                 { Some(A) }
                             },
                             generated: true,
-                            identity: false,
+                            identity_token_index: None,
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: None,
@@ -412,7 +412,7 @@ impl Pattern {
                                 { None }
                             },
                             generated: true,
-                            identity: false,
+                            identity_token_index: None,
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: None,
@@ -534,7 +534,7 @@ impl Pattern {
                                 term
                             },
                             generated: true,
-                            identity: true,
+                            identity_token_index: Some(0),
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: None,
@@ -596,7 +596,7 @@ impl Pattern {
                                 A
                             },
                             generated: true,
-                            identity: true,
+                            identity_token_index: Some(0),
                         }),
                         separator_span: Span::call_site(),
                         lookaheads: Some(lookaheads),
@@ -750,7 +750,7 @@ impl Pattern {
                                     #mapto
                                 },
                                 generated: true,
-                                identity: true,
+                                identity_token_index: Some(unique_child_idx),
                             }),
                             separator_span: Span::call_site(),
                             lookaheads: None,
@@ -798,7 +798,7 @@ impl Pattern {
                             reduce_action: Some(ReduceAction {
                                 stream: initializer,
                                 generated: true,
-                                identity: false,
+                                identity_token_index: None,
                             }),
                             separator_span: Span::call_site(),
                             lookaheads: None,
