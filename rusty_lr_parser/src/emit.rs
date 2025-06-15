@@ -800,36 +800,50 @@ impl Grammar {
         // TokenStream to define reduce function for each production rule
         let mut fn_reduce_for_each_rule_stream = TokenStream::new();
 
+        let identity_reduce_fn_name = format_ident!("reduce_identity");
+        let clear_reduce_fn_name = format_ident!("reduce_clear");
+
         for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
             for (rule_local_id, rule) in nonterm.rules.iter().enumerate() {
-                let mut extract_token_data_from_args = TokenStream::new();
-                for token in rule.tokens.iter() {
-                    match &token.token {
-                        Token::Term(_) => match &token.mapto {
-                            Some(mapto) => {
-                                extract_token_data_from_args.extend(quote! {
+                use super::nonterminal_info::ReduceAction;
+                match &rule.reduce_action {
+                    Some(ReduceAction::Custom(reduce_action)) => {
+                        let mut extract_token_data_from_args = TokenStream::new();
+                        for token in rule.tokens.iter() {
+                            match &token.token {
+                                Token::Term(_) => match &token.mapto {
+                                    Some(mapto) => {
+                                        extract_token_data_from_args.extend(quote! {
                                     let #token_data_typename::#terminal_variant_name(mut #mapto) = __rustylr_args.pop().unwrap() else {
                                         unreachable!()
                                     };
                                 });
-                            }
-                            None => {
-                                extract_token_data_from_args.extend(quote! {
-                                    __rustylr_args.pop();
-                                });
-                            }
-                        },
-                        Token::NonTerm(nonterm_idx) => {
-                            match &self.nonterminals[*nonterm_idx].ruletype {
-                                Some(_) => {
-                                    let variant_name = &variant_names_for_nonterm[*nonterm_idx];
-                                    match &token.mapto {
-                                        Some(mapto) => {
-                                            extract_token_data_from_args.extend(quote! {
+                                    }
+                                    None => {
+                                        extract_token_data_from_args.extend(quote! {
+                                            __rustylr_args.pop();
+                                        });
+                                    }
+                                },
+                                Token::NonTerm(nonterm_idx) => {
+                                    match &self.nonterminals[*nonterm_idx].ruletype {
+                                        Some(_) => {
+                                            let variant_name =
+                                                &variant_names_for_nonterm[*nonterm_idx];
+                                            match &token.mapto {
+                                                Some(mapto) => {
+                                                    extract_token_data_from_args.extend(quote! {
                                             let #token_data_typename::#variant_name(mut #mapto) = __rustylr_args.pop().unwrap() else {
                                                 unreachable!()
                                             };
                                             });
+                                                }
+                                                None => {
+                                                    extract_token_data_from_args.extend(quote! {
+                                                        __rustylr_args.pop();
+                                                    });
+                                                }
+                                            }
                                         }
                                         None => {
                                             extract_token_data_from_args.extend(quote! {
@@ -838,92 +852,91 @@ impl Grammar {
                                         }
                                     }
                                 }
-                                None => {
-                                    extract_token_data_from_args.extend(quote! {
-                                        __rustylr_args.pop();
-                                    });
-                                }
                             }
                         }
-                    }
-                }
-                let reduce_fn_ident = format_ident!("reduce_{}_{}", nonterm.name, rule_local_id);
+                        let reduce_fn_ident =
+                            format_ident!("reduce_{}_{}", nonterm.name, rule_local_id);
 
-                let rule_debug_str = format!(
-                    "{}-> {}",
-                    nonterm.name,
-                    rule.tokens
-                        .iter()
-                        .map(|t| {
-                            match t.token {
-                                Token::Term(term) => self.class_pretty_name_list(term, 5),
-                                Token::NonTerm(nonterm) => self.nonterm_pretty_name(nonterm),
-                            }
-                        })
-                        .collect::<Vec<_>>()
-                        .join(" ")
-                );
+                        let rule_debug_str = format!(
+                            "{} -> {}",
+                            nonterm.name,
+                            rule.tokens
+                                .iter()
+                                .map(|t| {
+                                    match t.token {
+                                        Token::Term(term) => self.class_pretty_name_list(term, 5),
+                                        Token::NonTerm(nonterm) => {
+                                            self.nonterm_pretty_name(nonterm)
+                                        }
+                                    }
+                                })
+                                .collect::<Vec<_>>()
+                                .join(" ")
+                        );
 
-                case_streams.extend(quote! {
-                    #rule_index => {
-                        Self::#reduce_fn_ident( reduce_args, shift, lookahead, user_data )
-                    }
-                });
-
-                // if typename is defined for this rule, push result of action to stack
-                // else, just execute action
-                if nonterm.ruletype.is_some() {
-                    // typename is defined, reduce action must be defined
-                    let variant_name = &variant_names_for_nonterm[nonterm_idx];
-                    let action = &rule.reduce_action.as_ref().unwrap().stream;
-                    fn_reduce_for_each_rule_stream.extend(quote! {
-                        #[doc = #rule_debug_str]
-                        #[inline]
-                        fn #reduce_fn_ident(
-                            __rustylr_args: &mut Vec<Self>,
-                            shift: &mut bool,
-                            lookahead: &#token_typename,
-                            #user_data_parameter_name: &mut #user_data_typename
-                        ) -> Result<#token_data_typename, #reduce_error_typename> {
-                            #extract_token_data_from_args
-
-                            Ok( #token_data_typename::#variant_name(#action) )
-                        }
-                    });
-                } else {
-                    // <RuleType> is not defined,
-                    // just execute action
-
-                    let variant_name = &variant_names_for_nonterm[nonterm_idx];
-                    if let Some(action) = &rule.reduce_action {
-                        let action = &action.stream;
-                        fn_reduce_for_each_rule_stream.extend(quote! {
-                            #[doc = #rule_debug_str]
-                            #[inline]
-                            fn #reduce_fn_ident(
-                                __rustylr_args: &mut Vec<Self>,
-                                shift: &mut bool,
-                                lookahead: &#token_typename,
-                                #user_data_parameter_name: &mut #user_data_typename
-                            ) -> Result<#token_data_typename, #reduce_error_typename> {
-                                #extract_token_data_from_args
-                                #action
-
-                                Ok( #token_data_typename::#variant_name )
+                        case_streams.extend(quote! {
+                            #rule_index => {
+                                Self::#reduce_fn_ident( reduce_args, shift, lookahead, user_data )
                             }
                         });
-                    } else {
-                        fn_reduce_for_each_rule_stream.extend(quote! {
-                            #[doc = #rule_debug_str]
-                            #[inline]
-                            fn #reduce_fn_ident(
-                                __rustylr_args: &mut Vec<Self>,
-                                shift: &mut bool,
-                                lookahead: &#token_typename,
-                                #user_data_parameter_name: &mut #user_data_typename
-                            ) -> Result<#token_data_typename, #reduce_error_typename> {
-                                __rustylr_args.clear();
-                                Ok( #token_data_typename::#variant_name )
+
+                        // if typename is defined for this rule, push result of action to stack
+                        // else, just execute action
+                        if nonterm.ruletype.is_some() {
+                            // typename is defined, reduce action must be defined
+                            let variant_name = &variant_names_for_nonterm[nonterm_idx];
+                            fn_reduce_for_each_rule_stream.extend(quote! {
+                                #[doc = #rule_debug_str]
+                                #[inline]
+                                fn #reduce_fn_ident(
+                                    __rustylr_args: &mut Vec<Self>,
+                                    shift: &mut bool,
+                                    lookahead: &#token_typename,
+                                    #user_data_parameter_name: &mut #user_data_typename
+                                ) -> Result<#token_data_typename, #reduce_error_typename> {
+                                    #extract_token_data_from_args
+
+                                    Ok( #token_data_typename::#variant_name(#reduce_action) )
+                                }
+                            });
+                        } else {
+                            // <RuleType> is not defined,
+                            // just execute action
+
+                            let variant_name = &variant_names_for_nonterm[nonterm_idx];
+                            fn_reduce_for_each_rule_stream.extend(quote! {
+                                #[doc = #rule_debug_str]
+                                #[inline]
+                                fn #reduce_fn_ident(
+                                    __rustylr_args: &mut Vec<Self>,
+                                    shift: &mut bool,
+                                    lookahead: &#token_typename,
+                                    #user_data_parameter_name: &mut #user_data_typename
+                                ) -> Result<#token_data_typename, #reduce_error_typename> {
+                                    #extract_token_data_from_args
+                                    #reduce_action
+
+                                    Ok( #token_data_typename::#variant_name )
+                                }
+                            });
+                        }
+                    }
+                    &Some(ReduceAction::Identity(reduce_action_identity)) => {
+                        // reduce_args is in reverse order
+                        let reversed_idx = rule.tokens.len() - reduce_action_identity - 1;
+                        // identity action
+                        case_streams.extend(quote! {
+                            #rule_index => {
+                                Ok(Self::#identity_reduce_fn_name( reduce_args, #reversed_idx ))
+                            }
+                        });
+                    }
+                    None => {
+                        // no reduce action (without ruletype)
+                        // clear the arguments stack and return empty token data
+                        case_streams.extend(quote! {
+                            #rule_index => {
+                                Ok(Self::#clear_reduce_fn_name( reduce_args ))
                             }
                         });
                     }
@@ -976,6 +989,21 @@ impl Grammar {
 
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
         impl #token_data_typename {
+            fn #identity_reduce_fn_name(
+                args: &mut Vec<Self>,
+                idx: usize,
+            ) -> Self {
+                let value = args.swap_remove(idx);
+                args.clear();
+                value
+            }
+            fn #clear_reduce_fn_name(
+                args: &mut Vec<Self>,
+            ) -> Self {
+                args.clear();
+                #token_data_typename::#empty_ruletype_variant_name
+            }
+
             #fn_reduce_for_each_rule_stream
         }
 

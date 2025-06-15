@@ -705,11 +705,9 @@ impl Grammar {
 
                 rule_lines.push(Rule {
                     tokens,
-                    reduce_action: rule.reduce_action.map(|stream| ReduceAction {
-                        stream,
-                        generated: false,
-                        identity_token_index: None,
-                    }),
+                    reduce_action: rule
+                        .reduce_action
+                        .map(|stream| ReduceAction::Custom(stream)),
                     separator_span: rule.separator_span,
                     lookaheads: None,
                     prec,
@@ -802,27 +800,19 @@ impl Grammar {
                         // check for special case:
                         // only one token in this rule have <RuleType> defined (include terminal)
                         // the unique value will be pushed to stack
-                        let mut unique_mapto = None;
                         let mut unique_mapto_idx = None;
                         for (idx, token) in rule.tokens.iter().enumerate() {
                             if token.mapto.is_some() {
-                                if unique_mapto.is_some() {
-                                    unique_mapto = None;
+                                if unique_mapto_idx.is_some() {
                                     unique_mapto_idx = None;
                                     break;
                                 } else {
-                                    unique_mapto = token.mapto.as_ref();
                                     unique_mapto_idx = Some(idx);
                                 }
                             }
                         }
-                        if let Some(unique_mapto) = unique_mapto {
-                            let action = quote! { #unique_mapto };
-                            rule.reduce_action = Some(ReduceAction {
-                                stream: action,
-                                generated: true,
-                                identity_token_index: unique_mapto_idx,
-                            });
+                        if let Some(unique_mapto_idx) = unique_mapto_idx {
+                            rule.reduce_action = Some(ReduceAction::Identity(unique_mapto_idx));
                         } else {
                             let span = if rule.tokens.is_empty() {
                                 (rule.separator_span, rule.separator_span)
@@ -988,12 +978,7 @@ impl Grammar {
                         // this terminal should be completely distinct from others (for user-defined inspection action)
                         // so put this terminal into separate class
                         if rule.reduce_action.is_some()
-                            && rule
-                                .reduce_action
-                                .as_ref()
-                                .unwrap()
-                                .identity_token_index
-                                .is_none()
+                            && !rule.reduce_action.as_ref().unwrap().is_identity()
                         {
                             term_sets.insert(BTreeSet::from([term]));
                             continue;
@@ -1015,10 +1000,13 @@ impl Grammar {
                             .collect::<Vec<_>>();
                         let lookaheads = &rule.lookaheads;
                         let dprec = rule.dprec.map_or(0, |(val, _)| val);
-                        let token_index = rule
-                            .reduce_action
-                            .as_ref()
-                            .map(|reduce_action| reduce_action.identity_token_index.unwrap());
+                        let token_index =
+                            rule.reduce_action
+                                .as_ref()
+                                .map(|reduce_action| match reduce_action {
+                                    ReduceAction::Identity(idx) => *idx,
+                                    _ => unreachable!("only identity reduce action should be here"),
+                                });
 
                         if !same_ruleset
                             .entry((prefix, suffix, lookaheads, dprec, token_index))
@@ -1223,12 +1211,7 @@ impl Grammar {
             if (nonterm.ruletype.is_none() && rule.reduce_action.is_none())
                 || (nonterm.ruletype.is_some()
                     && rule.reduce_action.is_some()
-                    && rule
-                        .reduce_action
-                        .as_ref()
-                        .unwrap()
-                        .identity_token_index
-                        .is_some())
+                    && rule.reduce_action.as_ref().unwrap().is_identity())
             {
                 nonterm_replace.insert(Token::NonTerm(nonterm_id), totoken);
             }

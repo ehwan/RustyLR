@@ -125,13 +125,9 @@ impl Pattern {
                             begin_span: Span::call_site(),
                             end_span: Span::call_site(),
                         }],
-                        reduce_action: Some(ReduceAction {
-                            stream: quote! {
-                                { vec![A] }
-                            },
-                            generated: true,
-                            identity_token_index: None,
-                        }),
+                        reduce_action: Some(ReduceAction::Custom(quote! {
+                            { vec![A] }
+                        })),
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
@@ -152,13 +148,9 @@ impl Pattern {
                                 end_span: Span::call_site(),
                             },
                         ],
-                        reduce_action: Some(ReduceAction {
-                            stream: quote! {
-                                { Ap.push(A); Ap }
-                            },
-                            generated: true,
-                            identity_token_index: None,
-                        }),
+                        reduce_action: Some(ReduceAction::Custom(quote! {
+                            { Ap.push(A); Ap }
+                        })),
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
@@ -272,17 +264,11 @@ impl Pattern {
                     let line1 = Rule {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
-                            mapto: Some(Ident::new("Ap", Span::call_site())),
+                            mapto: Some(Ident::new("__token0", Span::call_site())),
                             begin_span: Span::call_site(),
                             end_span: Span::call_site(),
                         }],
-                        reduce_action: Some(ReduceAction {
-                            stream: quote! {
-                                { Ap }
-                            },
-                            generated: true,
-                            identity_token_index: Some(0),
-                        }),
+                        reduce_action: Some(ReduceAction::Identity(0)),
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
@@ -290,13 +276,9 @@ impl Pattern {
                     };
                     let line2 = Rule {
                         tokens: vec![],
-                        reduce_action: Some(ReduceAction {
-                            stream: quote! {
-                                { vec![] }
-                            },
-                            generated: true,
-                            identity_token_index: None,
-                        }),
+                        reduce_action: Some(ReduceAction::Custom(quote! {
+                            { vec![] }
+                        })),
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
@@ -393,13 +375,7 @@ impl Pattern {
                             begin_span: Span::call_site(),
                             end_span: Span::call_site(),
                         }],
-                        reduce_action: Some(ReduceAction {
-                            stream: quote! {
-                                { Some(A) }
-                            },
-                            generated: true,
-                            identity_token_index: None,
-                        }),
+                        reduce_action: Some(ReduceAction::Custom(quote! { Some(A) })),
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
@@ -407,13 +383,9 @@ impl Pattern {
                     };
                     let line2 = Rule {
                         tokens: vec![],
-                        reduce_action: Some(ReduceAction {
-                            stream: quote! {
-                                { None }
-                            },
-                            generated: true,
-                            identity_token_index: None,
-                        }),
+                        reduce_action: Some(ReduceAction::Custom(quote! {
+                            { None }
+                        })),
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
@@ -512,7 +484,7 @@ impl Pattern {
                         token: Token::Term(terminal),
                         ruletype_map: Some((
                             grammar.token_typename.clone(),
-                            Ident::new("__rustylr_terminal", Span::call_site()),
+                            Ident::new("__terminal00", Span::call_site()),
                         )),
                     });
                 }
@@ -525,17 +497,11 @@ impl Pattern {
                     let rule = Rule {
                         tokens: vec![TokenMapped {
                             token: Token::Term(terminal),
-                            mapto: Some(Ident::new("term", Span::call_site())),
+                            mapto: Some(Ident::new("__token0", Span::call_site())),
                             begin_span: Span::call_site(),
                             end_span: Span::call_site(),
                         }],
-                        reduce_action: Some(ReduceAction {
-                            stream: quote! {
-                                term
-                            },
-                            generated: true,
-                            identity_token_index: Some(0),
-                        }),
+                        reduce_action: Some(ReduceAction::Identity(0)),
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
@@ -563,7 +529,10 @@ impl Pattern {
                     token: Token::NonTerm(newrule_idx),
                     ruletype_map: Some((
                         grammar.token_typename.clone(),
-                        Ident::new("__rustylr_terminal", Span::call_site()),
+                        Ident::new(
+                            format!("__terminal{newrule_idx}").as_str(),
+                            Span::call_site(),
+                        ),
                     )),
                 };
                 pattern_cache.insert(self.clone(), res.clone());
@@ -587,17 +556,11 @@ impl Pattern {
                     let rule = Rule {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
-                            mapto: Some(Ident::new("A", Span::call_site())),
+                            mapto: Some(Ident::new("__token0", Span::call_site())),
                             begin_span: Span::call_site(),
                             end_span: Span::call_site(),
                         }],
-                        reduce_action: Some(ReduceAction {
-                            stream: quote! {
-                                A
-                            },
-                            generated: true,
-                            identity_token_index: Some(0),
-                        }),
+                        reduce_action: Some(ReduceAction::Identity(0)),
                         separator_span: Span::call_site(),
                         lookaheads: Some(lookaheads),
                         prec: None,
@@ -677,10 +640,8 @@ impl Pattern {
                 for (child_idx, child) in group.iter().enumerate() {
                     let mut child_rule = child.to_token(grammar, pattern_cache, root_span_pair)?;
                     if let Some((_, mapto)) = &mut child_rule.ruletype_map {
-                        *mapto = Ident::new(
-                            format!("__rustylr_group_elem{}", child_idx).as_str(),
-                            Span::call_site(),
-                        );
+                        *mapto =
+                            Ident::new(format!("__token{}", child_idx).as_str(), Span::call_site());
                     }
                     elements.push(child_rule);
                 }
@@ -745,13 +706,7 @@ impl Pattern {
                             &elements[unique_child_idx].ruletype_map.as_ref().unwrap();
                         let rule = Rule {
                             tokens,
-                            reduce_action: Some(ReduceAction {
-                                stream: quote! {
-                                    #mapto
-                                },
-                                generated: true,
-                                identity_token_index: Some(unique_child_idx),
-                            }),
+                            reduce_action: Some(ReduceAction::Identity(unique_child_idx)),
                             separator_span: Span::call_site(),
                             lookaheads: None,
                             prec: None,
@@ -795,11 +750,7 @@ impl Pattern {
                         let initializer = quote! {(#initializer)};
                         let rule = Rule {
                             tokens,
-                            reduce_action: Some(ReduceAction {
-                                stream: initializer,
-                                generated: true,
-                                identity_token_index: None,
-                            }),
+                            reduce_action: Some(ReduceAction::Custom(initializer)),
                             separator_span: Span::call_site(),
                             lookaheads: None,
                             prec: None,
@@ -825,7 +776,10 @@ impl Pattern {
                             token: Token::NonTerm(newrule_idx),
                             ruletype_map: Some((
                                 typename,
-                                Ident::new("__rustylr_group", Span::call_site()),
+                                Ident::new(
+                                    format!("__group{newrule_idx}").as_str(),
+                                    Span::call_site(),
+                                ),
                             )),
                         };
                         pattern_cache.insert(self.clone(), res.clone());
