@@ -78,18 +78,15 @@ use rusty_lr_core::ReduceType;
 %start Grammar;
 
 Rule(RuleDefArgs) : ident RuleType colon RuleLines semicolon {
-    let ident = if let Lexed::Ident(ident) = ident {
-        ident
-    } else {
+    let Lexed::Ident(ident) = ident else {
         unreachable!( "Rule-Ident" );
     };
-    if let Lexed::Colon(colon) = colon {
-        let span = colon.span();
-        if let Some(fisrt) = RuleLines.first_mut() {
-            fisrt.separator_span = span;
-        }
-    }else {
+    let Lexed::Colon(colon) = colon else {
         unreachable!( "Rule-Colon2" );
+    };
+    let span = colon.span();
+    if let Some(fisrt) = RuleLines.first_mut() {
+        fisrt.separator_span = span;
     }
     RuleDefArgs {
         name: ident,
@@ -100,11 +97,10 @@ Rule(RuleDefArgs) : ident RuleType colon RuleLines semicolon {
 ;
 
 RuleType(Option<Group>): parengroup {
-    if let Lexed::ParenGroup(group) = parengroup {
-        Some(group)
-    }else{
+    let Lexed::ParenGroup(group) = parengroup else {
         unreachable!( "RuleType - Group" );
-    }
+    };
+    Some(group)
 }
 | {
     None
@@ -112,10 +108,11 @@ RuleType(Option<Group>): parengroup {
 ;
 
 RuleLines(Vec<RuleLineArgs>): RuleLines pipe RuleLine {
-    if let Lexed::Pipe(punct) = pipe {
-        RuleLine.separator_span = punct.span();
-        RuleLines.push( RuleLine );
-    }
+    let Lexed::Pipe(punct) = pipe else {
+        unreachable!( "RuleLines-Pipe" );
+    };
+    RuleLine.separator_span = punct.span();
+    RuleLines.push( RuleLine );
     RuleLines
 }
 | RuleLine {
@@ -149,31 +146,24 @@ TokenMapped((Option<Ident>, PatternArgs)): Pattern {
     ( None, Pattern )
 }
 | ident equal Pattern {
-    if let Lexed::Ident(ident) = ident {
-        ( Some(ident), Pattern )
-    }else {
+    let Lexed::Ident(ident) = ident else {
         unreachable!( "Token-Ident" );
-    }
+    };
+    ( Some(ident), Pattern )
 }
 ;
 
 TerminalSetItem(TerminalSetItem): ident {
-    let ident = if let Lexed::Ident(ident) = ident {
-        ident
-    }else {
+    let Lexed::Ident(ident) = ident else {
         unreachable!( "TerminalSetItem-Range1" );
     };
     TerminalSetItem::Terminal( ident )
 }
 | first=ident minus last=ident {
-    let first = if let Lexed::Ident(first) = first {
-        first
-    }else {
+    let Lexed::Ident(first) = first else {
         unreachable!( "TerminalSetItem-Range1" );
     };
-    let last = if let Lexed::Ident(last) = last {
-        last
-    }else {
+    let Lexed::Ident(last) = last else {
         unreachable!( "TerminalSetItem-Range3" );
     };
 
@@ -197,14 +187,10 @@ TerminalSetItem(TerminalSetItem): ident {
 ;
 
 TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
-    let open_span = if let Lexed::LBracket(lbracket) = lbracket {
-        lbracket
-    } else {
+    let Lexed::LBracket(open_span) = lbracket else {
         unreachable!( "TerminalSet-Open" );
     };
-    let close_span = if let Lexed::RBracket(rbracket) = rbracket {
-        rbracket
-    } else {
+    let Lexed::RBracket(close_span) = rbracket else {
         unreachable!( "TerminalSet-Close" );
     };
     TerminalSet {
@@ -230,39 +216,34 @@ TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
 %left star plus question exclamation;
 
 Pattern(PatternArgs): ident {
-    if let Lexed::Ident(ident) = ident {
-        PatternArgs::Ident( ident )
-    }else {
+    let Lexed::Ident(ident) = ident else {
         unreachable!( "Pattern-Ident" );
-    }
+    };
+    PatternArgs::Ident( ident )
 }
 | Pattern plus {
-    if let Lexed::Plus(plus) = plus {
-        PatternArgs::Plus( Box::new(Pattern), plus.span() )
-    }else {
+    let Lexed::Plus(plus) = plus else {
         unreachable!( "Pattern-Plus" );
-    }
+    };
+    PatternArgs::Plus( Box::new(Pattern), plus.span() )
 }
 | Pattern star {
-    if let Lexed::Star(star) = star {
-        PatternArgs::Star( Box::new(Pattern), star.span() )
-    }else {
+    let Lexed::Star(star) = star else {
         unreachable!( "Pattern-Star" );
-    }
+    };
+    PatternArgs::Star( Box::new(Pattern), star.span() )
 }
 | Pattern question {
-    if let Lexed::Question(question) = question {
-        PatternArgs::Question( Box::new(Pattern), question.span() )
-    }else {
+    let Lexed::Question(question) = question else {
         unreachable!( "Pattern-Question" );
-    }
+    };
+    PatternArgs::Question( Box::new(Pattern), question.span() )
 }
 | Pattern exclamation {
-    if let Lexed::Exclamation(exclamation) = exclamation {
-        PatternArgs::Exclamation( Box::new(Pattern), exclamation.span() )
-    }else {
+    let Lexed::Exclamation(exclamation) = exclamation else {
         unreachable!( "Pattern-Exclamation" );
-    }
+    };
+    PatternArgs::Exclamation( Box::new(Pattern), exclamation.span() )
 }
 | TerminalSet {
     PatternArgs::TerminalSet( TerminalSet )
@@ -271,14 +252,10 @@ Pattern(PatternArgs): ident {
     PatternArgs::Lookaheads( Box::new(p1), Box::new(lh) )
 }
 | lparen Pattern+ rparen {
-    let open = if let Lexed::LParen(lparen) = lparen {
-        lparen
-    } else {
+    let Lexed::LParen(open) = lparen else {
         unreachable!( "Pattern-Group-Open" );
     };
-    let close = if let Lexed::RParen(rparen) = rparen {
-        rparen
-    } else {
+    let Lexed::RParen(close) = rparen else {
         unreachable!( "Pattern-Group-Close" );
     };
     PatternArgs::Group(Pattern, open, close)
@@ -296,22 +273,20 @@ Pattern(PatternArgs): ident {
 
 
 Action(Option<Group>): bracegroup {
-    if let Lexed::BraceGroup(group) = bracegroup {
-        Some(group)
-    }else {
+    let Lexed::BraceGroup(group) = bracegroup else {
         unreachable!( "Action0" );
-    }
+    };
+    Some(group)
 }
 | { None }
 ;
 
 TokenDef((Ident, TokenStream)): token ident RustCode semicolon
 {
-    if let Lexed::Ident(ident) = ident {
-        ( ident, RustCode )
-    }else {
+    let Lexed::Ident(ident) = ident else {
         unreachable!( "TokenDef-Ident" );
-    }
+    };
+    ( ident, RustCode )
 }
 ;
 
@@ -324,11 +299,10 @@ RustCode(TokenStream): t=[^semicolon]+ {
 };
 
 StartDef(Ident): start ident semicolon {
-    if let Lexed::Ident(ident) = ident {
-        ident
-    }else {
+    let Lexed::Ident(ident) = ident else {
         unreachable!( "StartDef-Ident" );
-    }
+    };
+    ident
 }
 ;
 EofDef((Span,TokenStream)): eofdef RustCode semicolon { (eofdef.span(), RustCode) }
@@ -369,10 +343,7 @@ Glr: glr semicolon;
 
 Lalr: lalr semicolon;
 
-Precedence(Vec<IdentOrLiteral>): precedence IdentOrLiteral+ semicolon {
-    IdentOrLiteral
-}
-;
+Precedence(Vec<IdentOrLiteral>): precedence! IdentOrLiteral+ semicolon!;
 
 NoOptim: nooptim semicolon;
 

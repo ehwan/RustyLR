@@ -490,18 +490,15 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant2({
-            let ident = if let Lexed::Ident(ident) = ident {
-                ident
-            } else {
+            let Lexed::Ident(ident) = ident else {
                 unreachable!("Rule-Ident");
             };
-            if let Lexed::Colon(colon) = colon {
-                let span = colon.span();
-                if let Some(fisrt) = RuleLines.first_mut() {
-                    fisrt.separator_span = span;
-                }
-            } else {
+            let Lexed::Colon(colon) = colon else {
                 unreachable!("Rule-Colon2");
+            };
+            let span = colon.span();
+            if let Some(fisrt) = RuleLines.first_mut() {
+                fisrt.separator_span = span;
             }
             RuleDefArgs {
                 name: ident,
@@ -522,11 +519,10 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant3({
-            if let Lexed::ParenGroup(group) = parengroup {
-                Some(group)
-            } else {
+            let Lexed::ParenGroup(group) = parengroup else {
                 unreachable!("RuleType - Group");
-            }
+            };
+            Some(group)
         }))
     }
     #[doc = "RuleType -> "]
@@ -557,10 +553,11 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant4({
-            if let Lexed::Pipe(punct) = pipe {
-                RuleLine.separator_span = punct.span();
-                RuleLines.push(RuleLine);
-            }
+            let Lexed::Pipe(punct) = pipe else {
+                unreachable!("RuleLines-Pipe");
+            };
+            RuleLine.separator_span = punct.span();
+            RuleLines.push(RuleLine);
             RuleLines
         }))
     }
@@ -671,11 +668,10 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant7({
-            if let Lexed::Ident(ident) = ident {
-                (Some(ident), Pattern)
-            } else {
+            let Lexed::Ident(ident) = ident else {
                 unreachable!("Token-Ident");
-            }
+            };
+            (Some(ident), Pattern)
         }))
     }
     #[doc = "TerminalSetItem -> ident"]
@@ -690,9 +686,7 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant8({
-            let ident = if let Lexed::Ident(ident) = ident {
-                ident
-            } else {
+            let Lexed::Ident(ident) = ident else {
                 unreachable!("TerminalSetItem-Range1");
             };
             TerminalSetItem::Terminal(ident)
@@ -716,14 +710,10 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant8({
-            let first = if let Lexed::Ident(first) = first {
-                first
-            } else {
+            let Lexed::Ident(first) = first else {
                 unreachable!("TerminalSetItem-Range1");
             };
-            let last = if let Lexed::Ident(last) = last {
-                last
-            } else {
+            let Lexed::Ident(last) = last else {
                 unreachable!("TerminalSetItem-Range3");
             };
             TerminalSetItem::Range(first, last)
@@ -795,14 +785,10 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant9({
-            let open_span = if let Lexed::LBracket(lbracket) = lbracket {
-                lbracket
-            } else {
+            let Lexed::LBracket(open_span) = lbracket else {
                 unreachable!("TerminalSet-Open");
             };
-            let close_span = if let Lexed::RBracket(rbracket) = rbracket {
-                rbracket
-            } else {
+            let Lexed::RBracket(close_span) = rbracket else {
                 unreachable!("TerminalSet-Close");
             };
             TerminalSet {
@@ -846,11 +832,10 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
-            if let Lexed::Ident(ident) = ident {
-                PatternArgs::Ident(ident)
-            } else {
+            let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Ident");
-            }
+            };
+            PatternArgs::Ident(ident)
         }))
     }
     #[doc = "Pattern -> Pattern plus"]
@@ -868,11 +853,10 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
-            if let Lexed::Plus(plus) = plus {
-                PatternArgs::Plus(Box::new(Pattern), plus.span())
-            } else {
+            let Lexed::Plus(plus) = plus else {
                 unreachable!("Pattern-Plus");
-            }
+            };
+            PatternArgs::Plus(Box::new(Pattern), plus.span())
         }))
     }
     #[doc = "Pattern -> Pattern star"]
@@ -890,11 +874,10 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
-            if let Lexed::Star(star) = star {
-                PatternArgs::Star(Box::new(Pattern), star.span())
-            } else {
+            let Lexed::Star(star) = star else {
                 unreachable!("Pattern-Star");
-            }
+            };
+            PatternArgs::Star(Box::new(Pattern), star.span())
         }))
     }
     #[doc = "Pattern -> Pattern question"]
@@ -912,11 +895,10 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
-            if let Lexed::Question(question) = question {
-                PatternArgs::Question(Box::new(Pattern), question.span())
-            } else {
+            let Lexed::Question(question) = question else {
                 unreachable!("Pattern-Question");
-            }
+            };
+            PatternArgs::Question(Box::new(Pattern), question.span())
         }))
     }
     #[doc = "Pattern -> Pattern exclamation"]
@@ -934,11 +916,10 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
-            if let Lexed::Exclamation(exclamation) = exclamation {
-                PatternArgs::Exclamation(Box::new(Pattern), exclamation.span())
-            } else {
+            let Lexed::Exclamation(exclamation) = exclamation else {
                 unreachable!("Pattern-Exclamation");
-            }
+            };
+            PatternArgs::Exclamation(Box::new(Pattern), exclamation.span())
         }))
     }
     #[doc = "Pattern -> TerminalSet"]
@@ -995,14 +976,10 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
-            let open = if let Lexed::LParen(lparen) = lparen {
-                lparen
-            } else {
+            let Lexed::LParen(open) = lparen else {
                 unreachable!("Pattern-Group-Open");
             };
-            let close = if let Lexed::RParen(rparen) = rparen {
-                rparen
-            } else {
+            let Lexed::RParen(close) = rparen else {
                 unreachable!("Pattern-Group-Close");
             };
             PatternArgs::Group(Pattern, open, close)
@@ -1059,11 +1036,10 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant3({
-            if let Lexed::BraceGroup(group) = bracegroup {
-                Some(group)
-            } else {
+            let Lexed::BraceGroup(group) = bracegroup else {
                 unreachable!("Action0");
-            }
+            };
+            Some(group)
         }))
     }
     #[doc = "Action -> "]
@@ -1097,11 +1073,10 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant11({
-            if let Lexed::Ident(ident) = ident {
-                (ident, RustCode)
-            } else {
+            let Lexed::Ident(ident) = ident else {
                 unreachable!("TokenDef-Ident");
-            }
+            };
+            (ident, RustCode)
         }))
     }
     #[doc = "RustCode -> [^semicolon]+"]
@@ -1141,11 +1116,10 @@ impl GrammarTokenData {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant13({
-            if let Lexed::Ident(ident) = ident {
-                ident
-            } else {
+            let Lexed::Ident(ident) = ident else {
                 unreachable!("StartDef-Ident");
-            }
+            };
+            ident
         }))
     }
     #[doc = "EofDef -> eofdef RustCode semicolon"]
@@ -1331,25 +1305,6 @@ impl GrammarTokenData {
         Ok(GrammarTokenData::Variant14({
             (moduleprefix.span(), RustCode)
         }))
-    }
-    #[doc = "Precedence -> precedence IdentOrLiteral+ semicolon"]
-    #[inline]
-    fn reduce_Precedence_0(
-        __rustylr_args: &mut Vec<Self>,
-        shift: &mut bool,
-        lookahead: &Lexed,
-        data: &mut GrammarArgs,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut precedence) = __rustylr_args.pop().unwrap() else {
-            unreachable!()
-        };
-        let GrammarTokenData::Variant18(mut IdentOrLiteral) = __rustylr_args.pop().unwrap() else {
-            unreachable!()
-        };
-        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap() else {
-            unreachable!()
-        };
-        Ok(GrammarTokenData::Variant18({ IdentOrLiteral }))
     }
     #[doc = "Trace -> trace ident* semicolon"]
     #[inline]
@@ -1981,7 +1936,7 @@ impl ::rusty_lr_core::TokenData for GrammarTokenData {
             40usize => Self::reduce_ModulePrefixDef_0(reduce_args, shift, lookahead, user_data),
             41usize => Ok(Self::reduce_clear(reduce_args)),
             42usize => Ok(Self::reduce_clear(reduce_args)),
-            43usize => Self::reduce_Precedence_0(reduce_args, shift, lookahead, user_data),
+            43usize => Ok(Self::reduce_identity(reduce_args, 1usize)),
             44usize => Ok(Self::reduce_clear(reduce_args)),
             45usize => Ok(Self::reduce_clear(reduce_args)),
             46usize => Self::reduce_Trace_0(reduce_args, shift, lookahead, user_data),
