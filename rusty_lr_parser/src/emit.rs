@@ -863,7 +863,7 @@ impl Grammar {
 
                     let rule_debug_str = format!(
                         "{} -> {}",
-                        nonterm.name,
+                        self.nonterm_pretty_name(nonterm_idx),
                         rule.tokens
                             .iter()
                             .map(|t| {
