@@ -131,7 +131,17 @@ pub struct Grammar {
     /// in the generated parser, the dense table `Vec` will be used instead of the sparse table `HashMap`.
     pub emit_dense: bool,
 
+    /// the filter function for the parser feed();
+    /// every terminal will be filtered by this function on classification.
+    /// the actual code will be:
+    /// ```rust
+    /// let terminal_class: usize = match filter( terminal ) {
+    ///     ...
+    /// };
     pub filter: Option<TokenStream>,
+
+    /// sorted production rules; (nonterminal_id, rule_local_id)
+    pub rules_sorted: Vec<(usize, usize)>,
 }
 
 impl Grammar {
@@ -375,6 +385,8 @@ impl Grammar {
 
             emit_dense: grammar_args.dense,
             filter: grammar_args.filter,
+
+            rules_sorted: Vec::new(),
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";
@@ -1221,7 +1233,6 @@ impl Grammar {
         let mut cycles: HashSet<Token<usize, usize>> = Default::default();
         let mut next_replace: HashMap<Token<usize, usize>, Token<usize, usize>> =
             Default::default();
-
         // calculate cycle
         for &from in nonterm_replace.keys() {
             let mut cur = from;
@@ -1436,9 +1447,44 @@ impl Grammar {
     }
 
     /// create the rusty_lr_core::Grammar from the parsed CFGs
-    pub fn create_builder(&self) -> rusty_lr_core::builder::Grammar<ClassIndex, usize> {
+    pub fn create_builder(&mut self) -> rusty_lr_core::builder::Grammar<ClassIndex, usize> {
         let mut grammar: rusty_lr_core::builder::Grammar<ClassIndex, usize> =
             rusty_lr_core::builder::Grammar::new();
+
+        let mut rules = Vec::new();
+        for (nonterm_idx, nonterminal) in self.nonterminals.iter().enumerate() {
+            rules.reserve(nonterminal.rules.len());
+            for rule in 0..nonterminal.rules.len() {
+                rules.push((nonterm_idx, rule));
+            }
+        }
+        // sort rules by its reduce action type;
+        // so we can merge same reduce actions in match statement
+        // Custom -> Identity -> None
+        rules.sort_by(|&(nonterm_idx_a, rule_a), &(nonterm_idx_b, rule_b)| {
+            let a = &self.nonterminals[nonterm_idx_a].rules[rule_a];
+            let b = &self.nonterminals[nonterm_idx_b].rules[rule_b];
+
+            use std::cmp::Ordering;
+            match (a.reduce_action.as_ref(), b.reduce_action.as_ref()) {
+                (Some(ReduceAction::Custom(_)), Some(ReduceAction::Custom(_))) => Ordering::Equal,
+                (Some(ReduceAction::Custom(_)), Some(ReduceAction::Identity(_))) => Ordering::Less,
+                (Some(ReduceAction::Custom(_)), None) => Ordering::Less,
+                (Some(ReduceAction::Identity(_)), Some(ReduceAction::Custom(_))) => {
+                    Ordering::Greater
+                }
+                (Some(ReduceAction::Identity(a_idx)), Some(ReduceAction::Identity(b_idx))) => {
+                    let a_idx_reversed = a.tokens.len() - 1 - *a_idx;
+                    let b_idx_reversed = b.tokens.len() - 1 - *b_idx;
+                    a_idx_reversed.cmp(&b_idx_reversed)
+                }
+                (Some(ReduceAction::Identity(_)), None) => Ordering::Less,
+                (None, Some(ReduceAction::Custom(_))) => Ordering::Greater,
+                (None, Some(ReduceAction::Identity(_))) => Ordering::Greater,
+                (None, None) => Ordering::Equal,
+            }
+        });
+        self.rules_sorted = rules;
 
         // reduce types
         use rusty_lr_core::builder::Operator;
@@ -1477,22 +1523,21 @@ impl Grammar {
         }
 
         // add rules
-        for (idx, nonterminal) in self.nonterminals.iter().enumerate() {
-            for rule in nonterminal.rules.iter() {
-                let tokens = rule
-                    .tokens
-                    .iter()
-                    .map(|token_mapped| token_mapped.token)
-                    .collect();
+        for &(nonterm_id, rule_id) in self.rules_sorted.iter() {
+            let rule = &self.nonterminals[nonterm_id].rules[rule_id];
+            let tokens = rule
+                .tokens
+                .iter()
+                .map(|token_mapped| token_mapped.token)
+                .collect();
 
-                grammar.add_rule(
-                    idx,
-                    tokens,
-                    rule.lookaheads.clone(),
-                    rule.prec.map(|(op, _)| op),
-                    rule.dprec.map_or(0, |(p, _)| p),
-                );
-            }
+            grammar.add_rule(
+                nonterm_id,
+                tokens,
+                rule.lookaheads.clone(),
+                rule.prec.map(|(op, _)| op),
+                rule.dprec.map_or(0, |(p, _)| p),
+            );
         }
         // add special `error` nonterminal
         let error_idx = *self
