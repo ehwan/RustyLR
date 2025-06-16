@@ -146,15 +146,9 @@ pub struct Grammar {
 
 impl Grammar {
     /// get rule by ruleid
-    pub fn get_rule_by_id(&self, mut ruleid: usize) -> Option<(&NonTerminalInfo, usize)> {
-        for nonterm in self.nonterminals.iter() {
-            // rule_name is same as name, but can have different Span
-            if ruleid < nonterm.rules.len() {
-                return Some((nonterm, ruleid));
-            }
-            ruleid -= nonterm.rules.len();
-        }
-        None
+    pub fn get_rule_by_id(&self, rule_idx: usize) -> Option<(&NonTerminalInfo, usize)> {
+        let &(nonterm_idx, rule_local_id) = self.rules_sorted.get(rule_idx)?;
+        Some((&self.nonterminals[nonterm_idx], rule_local_id))
     }
 
     pub(crate) fn find_prec_definition(&self, ident: &Ident) -> Option<usize> {
