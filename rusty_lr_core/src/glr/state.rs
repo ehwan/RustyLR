@@ -14,7 +14,7 @@ pub trait State<NonTerm> {
         NonTerm: Hash + Eq;
 
     /// Get the reduce rule index for a given terminal symbol.
-    fn reduce(&self, class: usize) -> Option<&'_ [usize]>;
+    fn reduce(&self, class: usize) -> Option<impl Iterator<Item = usize> + Clone + '_>;
 
     /// Check if this state is an accept state.
     fn is_accept(&self) -> bool;
@@ -31,19 +31,44 @@ pub trait State<NonTerm> {
     fn get_rules(&self) -> &[ShiftedRuleRef];
 }
 
+pub trait ToUsizeList {
+    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone;
+}
+use smallvec::SmallVec;
+impl ToUsizeList for SmallVec<[usize; 2]> {
+    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
+        self.iter().copied()
+    }
+}
+impl ToUsizeList for SmallVec<[u32; 4]> {
+    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
+        self.iter().map(|&x| x as usize)
+    }
+}
+impl ToUsizeList for SmallVec<[u16; 8]> {
+    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
+        self.iter().map(|&x| x as usize)
+    }
+}
+impl ToUsizeList for SmallVec<[u8; 16]> {
+    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
+        self.iter().map(|&x| x as usize)
+    }
+}
+
 /// `State` implementation for a sparse state representation using HashMap
 #[derive(Debug, Clone)]
-pub struct SparseState<NonTerm> {
+pub struct SparseState<NonTerm, RuleVec> {
     /// terminal symbol -> next state
     pub(crate) shift_goto_map_class: HashMap<usize, usize>,
     /// non-terminal symbol -> next state
     pub(crate) shift_goto_map_nonterm: HashMap<NonTerm, usize>,
     /// terminal symbol -> reduce rule index
-    pub(crate) reduce_map: HashMap<usize, Vec<usize>>,
+    pub(crate) reduce_map: HashMap<usize, RuleVec>,
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<ShiftedRuleRef>,
 }
-impl<NonTerm> State<NonTerm> for SparseState<NonTerm> {
+impl<NonTerm, RuleIndex: ToUsizeList> State<NonTerm> for SparseState<NonTerm, RuleIndex> {
     fn shift_goto_class(&self, class: usize) -> Option<usize> {
         self.shift_goto_map_class.get(&class).copied()
     }
@@ -53,8 +78,8 @@ impl<NonTerm> State<NonTerm> for SparseState<NonTerm> {
     {
         self.shift_goto_map_nonterm.get(nonterm).copied()
     }
-    fn reduce(&self, class: usize) -> Option<&'_ [usize]> {
-        self.reduce_map.get(&class).map(Vec::as_slice)
+    fn reduce(&self, class: usize) -> Option<impl Iterator<Item = usize> + Clone + '_> {
+        self.reduce_map.get(&class).map(ToUsizeList::to_usize_list)
     }
     fn is_accept(&self) -> bool {
         self.reduce_map.is_empty()
@@ -80,17 +105,17 @@ impl<NonTerm> State<NonTerm> for SparseState<NonTerm> {
 
 /// `State` implementation for a dense state representation using Vec
 #[derive(Debug, Clone)]
-pub struct DenseState<NonTerm> {
+pub struct DenseState<NonTerm, RuleVec> {
     /// terminal symbol -> next state
     pub(crate) shift_goto_map_class: Vec<Option<usize>>,
     /// non-terminal symbol -> next state
     pub(crate) shift_goto_map_nonterm: HashMap<NonTerm, usize>,
     /// terminal symbol -> reduce rule index
-    pub(crate) reduce_map: Vec<Option<Vec<usize>>>,
+    pub(crate) reduce_map: Vec<Option<RuleVec>>,
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<ShiftedRuleRef>,
 }
-impl<NonTerm> State<NonTerm> for DenseState<NonTerm> {
+impl<NonTerm, RuleVec: ToUsizeList> State<NonTerm> for DenseState<NonTerm, RuleVec> {
     fn shift_goto_class(&self, class: usize) -> Option<usize> {
         self.shift_goto_map_class[class]
     }
@@ -100,8 +125,12 @@ impl<NonTerm> State<NonTerm> for DenseState<NonTerm> {
     {
         self.shift_goto_map_nonterm.get(nonterm).copied()
     }
-    fn reduce(&self, class: usize) -> Option<&'_ [usize]> {
-        self.reduce_map[class].as_deref()
+    fn reduce(&self, class: usize) -> Option<impl Iterator<Item = usize> + Clone + '_> {
+        self.reduce_map
+            .get(class)
+            .unwrap()
+            .as_ref()
+            .map(ToUsizeList::to_usize_list)
     }
     fn is_accept(&self) -> bool {
         self.reduce_map.is_empty()
