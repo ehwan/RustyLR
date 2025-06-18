@@ -34,27 +34,6 @@ pub trait State<NonTerm> {
 pub trait ToUsizeList {
     fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone;
 }
-use smallvec::SmallVec;
-impl ToUsizeList for SmallVec<[usize; 2]> {
-    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
-        self.iter().copied()
-    }
-}
-impl ToUsizeList for SmallVec<[u32; 4]> {
-    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
-        self.iter().map(|&x| x as usize)
-    }
-}
-impl ToUsizeList for SmallVec<[u16; 8]> {
-    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
-        self.iter().map(|&x| x as usize)
-    }
-}
-impl ToUsizeList for SmallVec<[u8; 16]> {
-    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
-        self.iter().map(|&x| x as usize)
-    }
-}
 
 /// `State` implementation for a sparse state representation using HashMap
 #[derive(Debug, Clone)]
