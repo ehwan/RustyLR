@@ -94,11 +94,12 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         }
     }
 
-    pub fn into_glr_sparse_state<NewNonTerm>(
+    pub fn into_glr_sparse_state<RuleContainer, NewNonTerm>(
         self,
         term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
-    ) -> crate::glr::SparseState<NewNonTerm>
+        rule_vec_map: impl Fn(BTreeSet<usize>) -> RuleContainer,
+    ) -> crate::glr::SparseState<NewNonTerm, RuleContainer>
     where
         NewNonTerm: Hash + Eq,
     {
@@ -116,17 +117,70 @@ impl<Term, NonTerm> State<Term, NonTerm> {
             reduce_map: self
                 .reduce_map
                 .into_iter()
-                .map(|(term, rule)| (term_map(term), rule.into_iter().collect()))
+                .map(|(term, rule)| (term_map(term), rule_vec_map(rule)))
                 .collect(),
             ruleset: self.ruleset.into_iter().collect(),
         }
     }
-    pub fn into_glr_dense_state<NewNonTerm>(
+
+    pub fn into_glr_sparse_state_u8<NewNonTerm>(
+        self,
+        term_map: impl Fn(Term) -> usize,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+    ) -> crate::glr::SparseState<NewNonTerm, crate::stackvec::SmallVecU8>
+    where
+        NewNonTerm: Hash + Eq,
+    {
+        self.into_glr_sparse_state(term_map, nonterm_map, |reduce_map| {
+            crate::stackvec::SmallVecU8::from_iter(reduce_map.into_iter().map(|x| x as u8))
+        })
+    }
+    pub fn into_glr_sparse_state_u16<NewNonTerm>(
+        self,
+        term_map: impl Fn(Term) -> usize,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+    ) -> crate::glr::SparseState<NewNonTerm, crate::stackvec::SmallVecU16>
+    where
+        NewNonTerm: Hash + Eq,
+    {
+        self.into_glr_sparse_state(term_map, nonterm_map, |reduce_map| {
+            crate::stackvec::SmallVecU16::from_iter(reduce_map.into_iter().map(|x| x as u16))
+        })
+    }
+    pub fn into_glr_sparse_state_u32<NewNonTerm>(
+        self,
+        term_map: impl Fn(Term) -> usize,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+    ) -> crate::glr::SparseState<NewNonTerm, crate::stackvec::SmallVecU32>
+    where
+        NewNonTerm: Hash + Eq,
+    {
+        self.into_glr_sparse_state(term_map, nonterm_map, |reduce_map| {
+            crate::stackvec::SmallVecU32::from_iter(reduce_map.into_iter().map(|x| x as u32))
+        })
+    }
+    pub fn into_glr_sparse_state_usize<NewNonTerm>(
+        self,
+        term_map: impl Fn(Term) -> usize,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+    ) -> crate::glr::SparseState<NewNonTerm, crate::stackvec::SmallVecUsize>
+    where
+        NewNonTerm: Hash + Eq,
+    {
+        self.into_glr_sparse_state(
+            term_map,
+            nonterm_map,
+            crate::stackvec::SmallVecUsize::from_iter,
+        )
+    }
+
+    pub fn into_glr_dense_state<RuleContainer: Clone, NewNonTerm>(
         self,
         term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
         terms_len: usize,
-    ) -> crate::glr::DenseState<NewNonTerm>
+        rule_vec_map: impl Fn(BTreeSet<usize>) -> RuleContainer,
+    ) -> crate::glr::DenseState<NewNonTerm, RuleContainer>
     where
         NewNonTerm: Hash + Eq,
     {
@@ -136,7 +190,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
             shift_goto_map_class[term_map(term)] = Some(state);
         }
         for (term, rule) in self.reduce_map {
-            reduce_map[term_map(term)] = Some(rule.into_iter().collect());
+            reduce_map[term_map(term)] = Some(rule_vec_map(rule));
         }
         crate::glr::DenseState {
             shift_goto_map_class,
@@ -148,6 +202,61 @@ impl<Term, NonTerm> State<Term, NonTerm> {
             reduce_map,
             ruleset: self.ruleset.into_iter().collect(),
         }
+    }
+    pub fn into_glr_dense_state_u8<NewNonTerm>(
+        self,
+        term_map: impl Fn(Term) -> usize,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+        terms_len: usize,
+    ) -> crate::glr::DenseState<NewNonTerm, crate::stackvec::SmallVecU8>
+    where
+        NewNonTerm: Hash + Eq,
+    {
+        self.into_glr_dense_state(term_map, nonterm_map, terms_len, |reduce_map| {
+            crate::stackvec::SmallVecU8::from_iter(reduce_map.into_iter().map(|x| x as u8))
+        })
+    }
+    pub fn into_glr_dense_state_u16<NewNonTerm>(
+        self,
+        term_map: impl Fn(Term) -> usize,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+        terms_len: usize,
+    ) -> crate::glr::DenseState<NewNonTerm, crate::stackvec::SmallVecU16>
+    where
+        NewNonTerm: Hash + Eq,
+    {
+        self.into_glr_dense_state(term_map, nonterm_map, terms_len, |reduce_map| {
+            crate::stackvec::SmallVecU16::from_iter(reduce_map.into_iter().map(|x| x as u16))
+        })
+    }
+    pub fn into_glr_dense_state_u32<NewNonTerm>(
+        self,
+        term_map: impl Fn(Term) -> usize,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+        terms_len: usize,
+    ) -> crate::glr::DenseState<NewNonTerm, crate::stackvec::SmallVecU32>
+    where
+        NewNonTerm: Hash + Eq,
+    {
+        self.into_glr_dense_state(term_map, nonterm_map, terms_len, |reduce_map| {
+            crate::stackvec::SmallVecU32::from_iter(reduce_map.into_iter().map(|x| x as u32))
+        })
+    }
+    pub fn into_glr_dense_state_usize<NewNonTerm>(
+        self,
+        term_map: impl Fn(Term) -> usize,
+        nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
+        terms_len: usize,
+    ) -> crate::glr::DenseState<NewNonTerm, crate::stackvec::SmallVecUsize>
+    where
+        NewNonTerm: Hash + Eq,
+    {
+        self.into_glr_dense_state(
+            term_map,
+            nonterm_map,
+            terms_len,
+            crate::stackvec::SmallVecUsize::from_iter,
+        )
     }
 }
 

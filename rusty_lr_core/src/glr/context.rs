@@ -287,9 +287,12 @@ impl<Data: TokenData> Context<Data> {
                     for node in nodes.into_iter() {
                         let mut shift_for_this_node = false;
 
+                        let mut reduce_rules = reduce_rules.clone();
+                        let reduce0 = reduce_rules.next().unwrap();
+
                         // In reduce action, we call `Rc::try_unwrap` to avoid `clone()` data if possible.
                         // So we need to avoid `Rc::clone()` if possible.
-                        for reduce_rule in reduce_rules.iter().skip(1).copied() {
+                        for reduce_rule in reduce_rules {
                             shift_for_this_node |= super::reduce(
                                 parser,
                                 reduce_rule,
@@ -303,7 +306,7 @@ impl<Data: TokenData> Context<Data> {
                         if let Some(next_term_shift_state) = next_term_shift_state {
                             shift_for_this_node |= super::reduce(
                                 parser,
-                                reduce_rules[0],
+                                reduce0,
                                 Rc::clone(&node),
                                 self,
                                 &term,
@@ -329,15 +332,7 @@ impl<Data: TokenData> Context<Data> {
                                     .push(Rc::new(next_node));
                             }
                         } else {
-                            super::reduce(
-                                parser,
-                                reduce_rules[0],
-                                node,
-                                self,
-                                &term,
-                                false,
-                                userdata,
-                            );
+                            super::reduce(parser, reduce0, node, self, &term, false, userdata);
                         }
                     }
                 } else if let Some(next_term_shift_state) = next_term_shift_state {
@@ -479,7 +474,7 @@ impl<Data: TokenData> Context<Data> {
 
                 if let Some(reduce_rules) = state.reduce(class) {
                     for reduce_rule in reduce_rules {
-                        let reduce_rule = &parser.get_rules()[*reduce_rule];
+                        let reduce_rule = &parser.get_rules()[reduce_rule];
                         let reduce_len = reduce_rule.rule.len();
 
                         for p in nodes.iter() {

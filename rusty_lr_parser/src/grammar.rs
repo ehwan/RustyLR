@@ -63,7 +63,7 @@ type ClassIndex = usize;
 type TerminalIndex = usize;
 
 pub struct Grammar {
-    /// %moduleprefix
+    /// %moduleprefix, "rusty_lr" for normal use
     pub(crate) module_prefix: TokenStream,
 
     /// %tokentype

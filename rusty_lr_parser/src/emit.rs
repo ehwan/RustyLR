@@ -29,6 +29,18 @@ impl Grammar {
         let token_data_typename = format_ident!("{}TokenData", start_rule_name);
 
         if self.glr {
+            // count the number of rules
+            // and calculate the integral type for rule index -> u8, u16, u32, usize ...
+            let rule_container_type = if self.builder.rules.len() <= u8::MAX as usize {
+                quote! { #module_prefix::stackvec::SmallVecU8 }
+            } else if self.builder.rules.len() <= u16::MAX as usize {
+                quote! { #module_prefix::stackvec::SmallVecU16 }
+            } else if self.builder.rules.len() <= u32::MAX as usize {
+                quote! { #module_prefix::stackvec::SmallVecU32 }
+            } else {
+                quote! { #module_prefix::stackvec::SmallVecUsize }
+            };
+
             let multiple_path_error = format_ident!("{}MultiplePathError", start_rule_name);
 
             let state_structname = if self.emit_dense {
@@ -47,7 +59,7 @@ impl Grammar {
                 pub type #rule_typename = #module_prefix::ProductionRule<&'static str, #enum_name>;
                 /// type alias for DFA state
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #state_typename = #module_prefix::glr::#state_structname<#enum_name>;
+                pub type #state_typename = #module_prefix::glr::#state_structname<#enum_name, #rule_container_type>;
                 /// type alias for `InvalidTerminalError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #invalid_terminal_error = #module_prefix::glr::InvalidTerminalError<#token_typename, #enum_name, #reduce_error_typename>;
@@ -335,21 +347,35 @@ impl Grammar {
             }
         };
 
+        // count the number of rules
+        // and calculate the integral type for rule index -> u8, u16, u32, usize ...
+        let rule_index_type = if self.builder.rules.len() <= u8::MAX as usize {
+            quote! { u8 }
+        } else if self.builder.rules.len() <= u16::MAX as usize {
+            quote! { u16 }
+        } else if self.builder.rules.len() <= u32::MAX as usize {
+            quote! { u32 }
+        } else {
+            quote! { usize }
+        };
+
         let state_convert_stream = if self.glr {
             if self.emit_dense {
+                let convert_fn_name = format_ident!("into_glr_dense_state_{rule_index_type}");
                 let classes_len = self.terminal_classes.len();
                 quote! {
                     let states:Vec<_> = states.into_iter().map(
                         |state| {
-                            state.into_glr_dense_state(|x| x, |x| x, #classes_len)
+                            state.#convert_fn_name(|x| x, |x| x, #classes_len)
                         },
                     ).collect();
                 }
             } else {
+                let convert_fn_name = format_ident!("into_glr_sparse_state_{rule_index_type}");
                 quote! {
                     let states:Vec<_> = states.into_iter().map(
                         |state| {
-                            state.into_glr_sparse_state(|x| x, |x| x)
+                            state.#convert_fn_name(|x| x, |x| x)
                         },
                     ).collect();
                 }
