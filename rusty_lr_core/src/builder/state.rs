@@ -94,12 +94,12 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         }
     }
 
-    pub fn into_glr_sparse_state<RuleVec, NewNonTerm>(
+    pub fn into_glr_sparse_state<RuleContainer, NewNonTerm>(
         self,
         term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
-        rule_vec_map: impl Fn(BTreeSet<usize>) -> RuleVec,
-    ) -> crate::glr::SparseState<NewNonTerm, RuleVec>
+        rule_vec_map: impl Fn(BTreeSet<usize>) -> RuleContainer,
+    ) -> crate::glr::SparseState<NewNonTerm, RuleContainer>
     where
         NewNonTerm: Hash + Eq,
     {
@@ -174,13 +174,13 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         )
     }
 
-    pub fn into_glr_dense_state<RuleVec: Clone, NewNonTerm>(
+    pub fn into_glr_dense_state<RuleContainer: Clone, NewNonTerm>(
         self,
         term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
         terms_len: usize,
-        rule_vec_map: impl Fn(BTreeSet<usize>) -> RuleVec,
-    ) -> crate::glr::DenseState<NewNonTerm, RuleVec>
+        rule_vec_map: impl Fn(BTreeSet<usize>) -> RuleContainer,
+    ) -> crate::glr::DenseState<NewNonTerm, RuleContainer>
     where
         NewNonTerm: Hash + Eq,
     {

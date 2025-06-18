@@ -33,13 +33,13 @@ pub trait State<NonTerm> {
 
 /// `State` implementation for a sparse state representation using HashMap
 #[derive(Debug, Clone)]
-pub struct SparseState<NonTerm, RuleVec> {
+pub struct SparseState<NonTerm, RuleContainer> {
     /// terminal symbol -> next state
     pub(crate) shift_goto_map_class: HashMap<usize, usize>,
     /// non-terminal symbol -> next state
     pub(crate) shift_goto_map_nonterm: HashMap<NonTerm, usize>,
     /// terminal symbol -> reduce rule index
-    pub(crate) reduce_map: HashMap<usize, RuleVec>,
+    pub(crate) reduce_map: HashMap<usize, RuleContainer>,
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<ShiftedRuleRef>,
 }
@@ -85,18 +85,18 @@ impl<NonTerm, RuleIndex: crate::stackvec::ToUsizeList> State<NonTerm>
 
 /// `State` implementation for a dense state representation using Vec
 #[derive(Debug, Clone)]
-pub struct DenseState<NonTerm, RuleVec> {
+pub struct DenseState<NonTerm, RuleContainer> {
     /// terminal symbol -> next state
     pub(crate) shift_goto_map_class: Vec<Option<usize>>,
     /// non-terminal symbol -> next state
     pub(crate) shift_goto_map_nonterm: HashMap<NonTerm, usize>,
     /// terminal symbol -> reduce rule index
-    pub(crate) reduce_map: Vec<Option<RuleVec>>,
+    pub(crate) reduce_map: Vec<Option<RuleContainer>>,
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<ShiftedRuleRef>,
 }
-impl<NonTerm, RuleVec: crate::stackvec::ToUsizeList> State<NonTerm>
-    for DenseState<NonTerm, RuleVec>
+impl<NonTerm, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
+    for DenseState<NonTerm, RuleContainer>
 {
     fn shift_goto_class(&self, class: usize) -> Option<usize> {
         self.shift_goto_map_class[class]
