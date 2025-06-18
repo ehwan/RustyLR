@@ -5,6 +5,7 @@
 
 pub(crate) mod hashmap;
 pub(crate) mod rule;
+pub mod stackvec;
 pub(crate) mod token;
 
 #[cfg(feature = "tree")]

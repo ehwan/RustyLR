@@ -31,10 +31,6 @@ pub trait State<NonTerm> {
     fn get_rules(&self) -> &[ShiftedRuleRef];
 }
 
-pub trait ToUsizeList {
-    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone;
-}
-
 /// `State` implementation for a sparse state representation using HashMap
 #[derive(Debug, Clone)]
 pub struct SparseState<NonTerm, RuleVec> {
@@ -47,7 +43,10 @@ pub struct SparseState<NonTerm, RuleVec> {
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<ShiftedRuleRef>,
 }
-impl<NonTerm, RuleIndex: ToUsizeList> State<NonTerm> for SparseState<NonTerm, RuleIndex> {
+
+impl<NonTerm, RuleIndex: crate::stackvec::ToUsizeList> State<NonTerm>
+    for SparseState<NonTerm, RuleIndex>
+{
     fn shift_goto_class(&self, class: usize) -> Option<usize> {
         self.shift_goto_map_class.get(&class).copied()
     }
@@ -58,7 +57,9 @@ impl<NonTerm, RuleIndex: ToUsizeList> State<NonTerm> for SparseState<NonTerm, Ru
         self.shift_goto_map_nonterm.get(nonterm).copied()
     }
     fn reduce(&self, class: usize) -> Option<impl Iterator<Item = usize> + Clone + '_> {
-        self.reduce_map.get(&class).map(ToUsizeList::to_usize_list)
+        self.reduce_map
+            .get(&class)
+            .map(crate::stackvec::ToUsizeList::to_usize_list)
     }
     fn is_accept(&self) -> bool {
         self.reduce_map.is_empty()
@@ -94,7 +95,9 @@ pub struct DenseState<NonTerm, RuleVec> {
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<ShiftedRuleRef>,
 }
-impl<NonTerm, RuleVec: ToUsizeList> State<NonTerm> for DenseState<NonTerm, RuleVec> {
+impl<NonTerm, RuleVec: crate::stackvec::ToUsizeList> State<NonTerm>
+    for DenseState<NonTerm, RuleVec>
+{
     fn shift_goto_class(&self, class: usize) -> Option<usize> {
         self.shift_goto_map_class[class]
     }
@@ -109,7 +112,7 @@ impl<NonTerm, RuleVec: ToUsizeList> State<NonTerm> for DenseState<NonTerm, RuleV
             .get(class)
             .unwrap()
             .as_ref()
-            .map(ToUsizeList::to_usize_list)
+            .map(crate::stackvec::ToUsizeList::to_usize_list)
     }
     fn is_accept(&self) -> bool {
         self.reduce_map.is_empty()
