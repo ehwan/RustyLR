@@ -95,7 +95,7 @@ for token in input_sequence {
 }
 
 // Retrieve all possible parse results
-for result in context.accept_all() {
+for result in context.accept() {
     println!("Parse result: {:?}", result);
 }
 ```
@@ -104,4 +104,4 @@ In this code:​
 - `EParser::new()` creates a new parser instance.​
 - `EContext::new()` initializes the parsing context.​
 - `context.feed(&parser, token)` feeds tokens to the parser.​
-- `context.accept_all()` retrieves all valid parse results from the parse forest.
+- `context.accept()` Gets all of the value of `%start` symbol from every parse paths.
