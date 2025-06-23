@@ -2,7 +2,6 @@ use std::hash::Hash;
 use std::rc::Rc;
 
 use super::InvalidTerminalError;
-use super::MultiplePathError;
 use super::Node;
 use super::Parser;
 use super::State;
@@ -71,48 +70,9 @@ impl<Data: TokenData> Context<Data> {
             .flat_map(|nodes| nodes.into_iter())
     }
 
-    /// After feeding all tokens (include EOF), call this function to get result.
-    /// Get value of start symbol, if there is only one path.
-    pub fn accept(self) -> Result<Data::StartType, MultiplePathError<Data::Term, Data::NonTerm>>
-    where
-        Data: Clone + TryInto<Data::StartType>,
-        Data::Term: Clone,
-        Data::NonTerm: Clone,
-    {
-        if self.len_paths() == 1 {
-            // if there is only one path, we can get the result
-
-            // since `eof` is feeded, the node graph should be like this:
-            // Root <- Start <- EOF
-            //                  ^^^ here, current_node
-
-            let rc_eof_node = self.into_nodes().next().unwrap();
-            let rc_data_node = Rc::clone(rc_eof_node.parent.as_ref().unwrap());
-            drop(rc_eof_node);
-            let data_node = match Rc::try_unwrap(rc_data_node) {
-                Ok(data_node) => data_node.data.unwrap(),
-                Err(rc_data_node) => rc_data_node.data.as_ref().unwrap().clone(),
-            };
-            Ok(match data_node.try_into() {
-                Ok(start_type) => start_type,
-                Err(_) => {
-                    unreachable!("Data must contains StartType");
-                }
-            })
-        } else {
-            Err(MultiplePathError {
-                #[cfg(feature = "tree")]
-                tree_lists: self.to_tree_lists().collect(),
-
-                #[cfg(not(feature = "tree"))]
-                _phantom: std::marker::PhantomData,
-            })
-        }
-    }
-
-    /// After feeding all tokens (include EOF), call this function to get result.
-    /// Unlike `accept`, this function will return all possible results if there are multiple paths.
-    pub fn accept_all(self) -> impl Iterator<Item = Data::StartType>
+    /// Returns an iterator of `%start` symbols from all diverged paths.
+    /// This function should be called after feeding all tokens (including EOF).
+    pub fn accept(self) -> impl Iterator<Item = Data::StartType>
     where
         Data: Clone + TryInto<Data::StartType>,
     {

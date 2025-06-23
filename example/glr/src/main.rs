@@ -27,16 +27,8 @@ fn main() {
             println!("Error: {}", e);
         }
     }
-
-    match c.accept() {
-        Ok(res) => {
-            println!("Result: {}", res);
-        }
-
-        Err(e) => {
-            println!("Error: {}", e);
-        }
-    }
+    let result = c.accept().next().unwrap();
+    println!("Result: {}", result);
 
     let input = "1+2**3+4";
     let mut c = parser::EContext::new();
@@ -62,7 +54,7 @@ fn main() {
         }
     }
 
-    for result in c.accept_all() {
+    for result in c.accept() {
         println!("Result: {}", result);
     }
 
