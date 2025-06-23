@@ -7,7 +7,6 @@ pub(crate) mod node;
 
 pub use context::Context;
 pub use error::InvalidTerminalError;
-pub use error::MultiplePathError;
 pub use node::Node;
 pub use node::NodeRefIterator;
 pub use parser::Parser;

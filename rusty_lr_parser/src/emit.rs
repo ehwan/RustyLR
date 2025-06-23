@@ -41,8 +41,6 @@ impl Grammar {
                 quote! { #module_prefix::stackvec::SmallVecUsize }
             };
 
-            let multiple_path_error = format_ident!("{}MultiplePathError", start_rule_name);
-
             let state_structname = if self.emit_dense {
                 format_ident!("DenseState")
             } else {
@@ -63,9 +61,6 @@ impl Grammar {
                 /// type alias for `InvalidTerminalError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #invalid_terminal_error = #module_prefix::glr::InvalidTerminalError<#token_typename, #enum_name, #reduce_error_typename>;
-                /// type alias for `MultiplePathError`
-                #[allow(non_camel_case_types,dead_code)]
-                pub type #multiple_path_error = #module_prefix::glr::MultiplePathError<#token_typename, #enum_name>;
             }
             );
         } else {
