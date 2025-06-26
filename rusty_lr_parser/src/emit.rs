@@ -24,7 +24,6 @@ impl Grammar {
         let enum_name = format_ident!("{}NonTerminals", start_rule_name);
         let reduce_error_typename = &self.error_typename;
         let parse_error_typename = format_ident!("{}ParseError", start_rule_name);
-        let invalid_terminal_error = format_ident!("{}InvalidTerminalError", start_rule_name);
         let context_struct_name = format_ident!("{}Context", start_rule_name);
         let token_data_typename = format_ident!("{}TokenData", start_rule_name);
 
@@ -60,7 +59,7 @@ impl Grammar {
                 pub type #state_typename = #module_prefix::glr::#state_structname<#enum_name, #rule_container_type>;
                 /// type alias for `InvalidTerminalError`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #invalid_terminal_error = #module_prefix::glr::InvalidTerminalError<#token_typename, #enum_name, #reduce_error_typename>;
+                pub type #parse_error_typename = #module_prefix::glr::ParseError<#token_typename, #reduce_error_typename>;
             }
             );
         } else {

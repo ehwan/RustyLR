@@ -18,7 +18,7 @@ impl<Term: Display, ReduceActionError: Display> Display for ParseError<Term, Red
                 write!(f, "NoAction: {}", err)
             }
             ParseError::ReduceAction(err) => {
-                write!(f, "{}", err)
+                write!(f, "ReduceActionError: {}", err)
             }
         }
     }

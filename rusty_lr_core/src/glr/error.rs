@@ -1,67 +1,45 @@
 use std::fmt::Debug;
 use std::fmt::Display;
 
-/// Error when there is an invalid terminal feeded to the parser.
+/// Error type for feed()
 #[derive(Clone)]
-pub struct InvalidTerminalError<Term, NonTerm, ReduceActionError> {
-    /// The terminal that feeded to the parser.
-    pub term: Term,
-    /// The reduce action errors.
-    pub reduce_errors: Vec<ReduceActionError>,
+pub enum ParseError<Term, ReduceActionError> {
+    /// No action defined for the given terminal in the parser table
+    NoAction(Term),
 
-    #[cfg(feature = "error")]
-    pub(crate) backtraces: Vec<crate::Backtrace<&'static str, NonTerm>>,
-
-    #[cfg(not(feature = "error"))]
-    pub(crate) _phantom: std::marker::PhantomData<NonTerm>,
+    /// Error from reduce action (from every diverged paths)
+    ReduceAction(Vec<ReduceActionError>),
 }
 
-impl<Term: Display, NonTerm: Display, ReduceActionError: Display> Display
-    for InvalidTerminalError<Term, NonTerm, ReduceActionError>
-{
+impl<Term: Display, ReduceActionError: Display> Display for ParseError<Term, ReduceActionError> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Invalid Terminal: {}", self.term)?;
-
-        for error in &self.reduce_errors {
-            write!(f, "\nReduce action error: {}", error)?;
-        }
-
-        #[cfg(feature = "error")]
-        {
-            for (idx, backtrace) in self.backtraces.iter().enumerate() {
-                write!(f, "\nBacktrace for path {}: ", idx)?;
-                write!(f, "\n{}", backtrace)?;
+        match self {
+            ParseError::NoAction(err) => {
+                write!(f, "NoAction: {}", err)
+            }
+            ParseError::ReduceAction(err) => {
+                write!(
+                    f,
+                    "ReduceAction: {}",
+                    err.iter()
+                        .map(|e| e.to_string())
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                )
             }
         }
-        Ok(())
     }
 }
 
-impl<Term: Debug, NonTerm: Debug, ReduceActionError: Debug> Debug
-    for InvalidTerminalError<Term, NonTerm, ReduceActionError>
-{
+impl<Term: Debug, ReduceActionError: Debug> Debug for ParseError<Term, ReduceActionError> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Invalid Terminal: {:?}", self.term)?;
-
-        for error in &self.reduce_errors {
-            write!(f, "\nReduce action error: {:?}", error)?;
-        }
-
-        #[cfg(feature = "error")]
-        {
-            for (idx, backtrace) in self.backtraces.iter().enumerate() {
-                write!(f, "\nBacktrace for path {}: ", idx)?;
-                write!(f, "\n{:?}", backtrace)?;
+        match self {
+            ParseError::NoAction(err) => {
+                write!(f, "{:?}", err)
+            }
+            ParseError::ReduceAction(err) => {
+                write!(f, "{:?}", err)
             }
         }
-        Ok(())
-    }
-}
-
-impl<Term: Display + Debug, NonTerm: Display + Debug, ReduceActionError: Display + Debug>
-    std::error::Error for InvalidTerminalError<Term, NonTerm, ReduceActionError>
-{
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        None
     }
 }
