@@ -32,7 +32,7 @@ fn main() {
         }
     }
     // res = value of start symbol ( E(i32) )
-    let res = context.accept();
+    let res = context.accept().unwrap();
     println!("{}", res);
     println!("userdata: {}", userdata);
 }

@@ -96,7 +96,7 @@ for token in input_sequence {
 
 // Retrieve all possible parse results
 for result in context.accept() {
-    println!("Parse result: {:?}", result);
+    println!("Parse result: {:?}", result.unwrap());
 }
 ```
 In this code:​

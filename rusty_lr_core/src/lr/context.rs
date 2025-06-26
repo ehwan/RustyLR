@@ -56,20 +56,15 @@ impl<Data: TokenData> Context<Data> {
         }
     }
     /// Pops the value of the start symbol from the data stack.
-    /// This must be called when the parser is in the final state (after feeding EOF).
+    /// The result is `None` if current context is not in the final state (i.e. not after feeding EOF).
     #[inline]
-    pub fn accept(&mut self) -> Data::StartType
+    pub fn accept(&mut self) -> Option<Data::StartType>
     where
         Data: TryInto<Data::StartType>,
     {
         // data_stack must be <Start> <EOF> in this point
         self.data_stack.pop();
-        self.data_stack
-            .pop()
-            .expect("data stack must have at least one element")
-            .try_into()
-            .ok()
-            .expect("data stack must have <Start> as the last element")
+        self.data_stack.pop()?.try_into().ok()
     }
 
     /// For debugging.

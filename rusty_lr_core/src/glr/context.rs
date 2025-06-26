@@ -79,20 +79,15 @@ impl<Data: TokenData> Context<Data> {
         // since `eof` is feeded, the node graph should be like this:
         // Root <- Start <- EOF
         //                  ^^^ here, current_node
-        self.into_nodes().map(|rc_eof_node| {
-            let rc_data_node = Rc::clone(rc_eof_node.parent.as_ref().unwrap());
+        self.into_nodes().filter_map(|rc_eof_node| {
+            let rc_data_node = Rc::clone(rc_eof_node.parent.as_ref()?);
             drop(rc_eof_node);
 
             let data_node = match Rc::try_unwrap(rc_data_node) {
-                Ok(data_node) => data_node.data.unwrap(),
-                Err(rc_data_node) => rc_data_node.data.as_ref().unwrap().clone(),
+                Ok(data_node) => data_node.data?,
+                Err(rc_data_node) => rc_data_node.data.as_ref()?.clone(),
             };
-            match data_node.try_into() {
-                Ok(start_type) => start_type,
-                Err(_) => {
-                    unreachable!("Data must contains StartType");
-                }
-            }
+            data_node.try_into().ok()
         })
     }
 

@@ -142,7 +142,7 @@ for token in tokens {
 }
 context.feed(&parser, MyToken::EOF, &mut userdata).unwrap(); // feed EOF
 
-let result:i32 = context.accept(); // get value of start 'E'
+let result:i32 = context.accept().unwrap(); // get value of start 'E'
 ```
 
 ### Using `rustylr` Executable
