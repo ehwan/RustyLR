@@ -1143,7 +1143,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         // add shift and goto action
         for (next_term, next_rule_set) in next_rules_term.into_iter() {
             let next_state_id = self.build_recursive(next_rule_set, states, state_map, diags)?;
-            states[next_state_id].token = Some(Token::Term(next_term));
 
             states[state_id]
                 .shift_goto_map_term
@@ -1152,7 +1151,6 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
         for (next_nonterm, next_rule_set) in next_rules_nonterm.into_iter() {
             let next_state_id = self.build_recursive(next_rule_set, states, state_map, diags)?;
-            states[next_state_id].token = Some(Token::NonTerm(next_nonterm));
 
             states[state_id]
                 .shift_goto_map_nonterm
