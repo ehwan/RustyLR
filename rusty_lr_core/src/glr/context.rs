@@ -1,8 +1,8 @@
 use std::hash::Hash;
 use std::rc::Rc;
 
-use super::InvalidTerminalError;
 use super::Node;
+use super::ParseError;
 use super::Parser;
 use super::State;
 
@@ -213,7 +213,7 @@ impl<Data: TokenData> Context<Data> {
         parser: &P,
         term: P::Term,
         userdata: &mut Data::UserData,
-    ) -> Result<(), InvalidTerminalError<P::Term, P::NonTerm, Data::ReduceActionError>>
+    ) -> Result<(), ParseError<P::Term, Data::ReduceActionError>>
     where
         P::Term: Hash + Eq + Clone,
         P::NonTerm: Hash + Eq + Clone,
@@ -336,18 +336,13 @@ impl<Data: TokenData> Context<Data> {
                 std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
                 self.fallback_nodes.clear();
 
-                #[cfg(feature = "error")]
-                let backtraces = self.backtraces(parser).collect::<Vec<_>>();
-
-                Err(InvalidTerminalError {
-                    term,
-                    reduce_errors: std::mem::take(&mut self.reduce_errors),
-                    #[cfg(feature = "error")]
-                    backtraces,
-
-                    #[cfg(not(feature = "error"))]
-                    _phantom: std::marker::PhantomData,
-                })
+                if self.reduce_errors.is_empty() {
+                    Err(ParseError::NoAction(term))
+                } else {
+                    Err(ParseError::ReduceAction(std::mem::take(
+                        &mut self.reduce_errors,
+                    )))
+                }
             } else {
                 // try shift term to error state
                 for error_node in error_nodes {

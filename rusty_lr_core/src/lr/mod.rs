@@ -4,7 +4,6 @@ pub(crate) mod parser;
 pub(crate) mod state;
 
 pub use context::Context;
-pub use error::InvalidTerminalError;
 pub use error::ParseError;
 pub use parser::Parser;
 pub use state::DenseState;

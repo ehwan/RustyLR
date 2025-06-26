@@ -381,9 +381,7 @@ pub fn feed_recursive(
             TokenTree::Group(group) => match group.delimiter() {
                 Delimiter::Parenthesis => {
                     if let Err(err) = context.feed(parser, Lexed::ParenGroup(group), grammar_args) {
-                        let term = if let GrammarParseError::InvalidTerminal(err) = err {
-                            err.term
-                        } else {
+                        let GrammarParseError::NoAction(term) = err else {
                             unreachable!();
                         };
                         let group = if let Lexed::ParenGroup(group) = term {

@@ -127,7 +127,7 @@ impl<Data: TokenData> Context<Data> {
         parser: &P,
         term: Data::Term,
         userdata: &mut Data::UserData,
-    ) -> Result<(), ParseError<Data::Term, Data::NonTerm, Data::ReduceActionError>>
+    ) -> Result<(), ParseError<Data::Term, Data::ReduceActionError>>
     where
         Data::Term: Hash + Eq + Clone,
         Data::NonTerm: Hash + Eq + Copy,
@@ -221,16 +221,7 @@ impl<Data: TokenData> Context<Data> {
                 }
                 Ok(())
             } else {
-                #[cfg(feature = "error")]
-                let backtrace = self.backtrace(parser);
-                let error = super::InvalidTerminalError {
-                    term,
-                    #[cfg(feature = "error")]
-                    backtrace,
-                    #[cfg(not(feature = "error"))]
-                    _phantom: std::marker::PhantomData,
-                };
-                Err(ParseError::InvalidTerminal(error))
+                Err(ParseError::NoAction(term))
             }
         }
     }
