@@ -64,6 +64,7 @@ pub enum Lexed {
     Trace(Punct, Ident),        // %trace
     DPrec(Punct, Ident),        // %dprec
     Filter(Punct, Ident),       // %filter
+    Runtime(Punct, Ident),      // %runtime
     Eof,
 }
 impl Lexed {
@@ -171,6 +172,10 @@ impl Lexed {
                 stream.append(punct);
                 stream.append(ident);
             }
+            Lexed::Runtime(punct, ident) => {
+                stream.append(punct);
+                stream.append(ident);
+            }
 
             Lexed::Eof => unreachable!("Eof::stream()"),
         }
@@ -225,6 +230,7 @@ impl Lexed {
             Lexed::Trace(punct, ident) => ident.span(),
             Lexed::DPrec(punct, ident) => ident.span(),
             Lexed::Filter(punct, ident) => ident.span(),
+            Lexed::Runtime(punct, ident) => ident.span(),
 
             Lexed::Eof => Span::call_site(),
         }
@@ -279,6 +285,7 @@ impl std::fmt::Display for Lexed {
             Lexed::Trace(_, _) => write!(f, "%trace"),
             Lexed::DPrec(_, _) => write!(f, "%dprec"),
             Lexed::Filter(_, _) => write!(f, "%filter"),
+            Lexed::Runtime(_, _) => write!(f, "%runtime"),
 
             Lexed::Eof => write!(f, "<eof>"),
         }
@@ -316,6 +323,7 @@ fn ident_to_keyword(percent: Punct, ident: Ident) -> Option<Lexed> {
         "trace" => Some(Lexed::Trace(percent, ident)),
         "dprec" => Some(Lexed::DPrec(percent, ident)),
         "filter" => Some(Lexed::Filter(percent, ident)),
+        "runtime" => Some(Lexed::Runtime(percent, ident)),
         _ => None,
     }
 }

@@ -1,5 +1,4 @@
 use crate::ShiftedRuleRef;
-use crate::Token;
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -12,8 +11,6 @@ pub struct State<Term, NonTerm> {
     pub shift_goto_map_nonterm: BTreeMap<NonTerm, usize>,
     pub reduce_map: BTreeMap<Term, BTreeSet<usize>>,
     pub ruleset: BTreeSet<ShiftedRuleRef>,
-    /// The token that shifted into this state.
-    pub token: Option<Token<Term, NonTerm>>,
 }
 impl<Term, NonTerm> State<Term, NonTerm> {
     pub fn new() -> Self {
@@ -22,7 +19,6 @@ impl<Term, NonTerm> State<Term, NonTerm> {
             shift_goto_map_nonterm: Default::default(),
             reduce_map: Default::default(),
             ruleset: Default::default(),
-            token: None,
         }
     }
 

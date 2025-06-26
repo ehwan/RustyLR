@@ -142,6 +142,9 @@ pub struct Grammar {
 
     /// sorted production rules; (nonterminal_id, rule_local_id)
     pub rules_sorted: Vec<(usize, usize)>,
+
+    /// switch between compile-time and runtime table generation
+    pub compiled: bool,
 }
 
 impl Grammar {
@@ -381,6 +384,8 @@ impl Grammar {
             filter: grammar_args.filter,
 
             rules_sorted: Vec::new(),
+
+            compiled: grammar_args.compiled,
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";
