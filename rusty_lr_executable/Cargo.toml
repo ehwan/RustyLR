@@ -1,6 +1,6 @@
 [package]
 name = "rustylr"
-version = "1.11.0"
+version = "1.12.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Executable for rusty_lr, a parser generator that converts context-free grammars into IELR(1)/LALR(1) tables with deterministic LR and GLR parsing support"
@@ -11,4 +11,4 @@ categories = ["parsing"]
 
 [dependencies]
 clap = { version = "4.5.7", features = ["derive"] }
-rusty_lr_buildscript = { version = "0.45.0", path = "../rusty_lr_buildscript" }
+rusty_lr_buildscript = { version = "0.46.0", path = "../rusty_lr_buildscript" }
