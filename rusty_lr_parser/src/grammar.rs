@@ -384,7 +384,7 @@ impl Grammar {
 
             rules_sorted: Vec::new(),
 
-            compiled: true,
+            compiled: grammar_args.compiled,
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";

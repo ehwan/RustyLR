@@ -484,7 +484,6 @@ pub struct RuleDefArgs {
 }
 
 /// parsed arguments for the grammar
-#[derive(Default)]
 pub struct GrammarArgs {
     pub module_prefix: Vec<(Span, TokenStream)>,
     pub token_typename: Vec<(Span, TokenStream)>,
@@ -502,4 +501,29 @@ pub struct GrammarArgs {
     pub dense: bool,
     pub traces: Vec<Ident>,
     pub filter: Option<TokenStream>,
+    pub compiled: bool,
+}
+
+impl Default for GrammarArgs {
+    fn default() -> Self {
+        GrammarArgs {
+            module_prefix: Vec::new(),
+            token_typename: Vec::new(),
+            userdata_typename: Vec::new(),
+            start_rule_name: Vec::new(),
+            eof: Vec::new(),
+            error_typename: Vec::new(),
+            terminals: Vec::new(),
+            reduce_types: Vec::new(),
+            precedences: Vec::new(),
+            rules: Vec::new(),
+            lalr: false,
+            glr: false,
+            no_optim: false,
+            dense: false,
+            traces: Vec::new(),
+            filter: None,
+            compiled: true,
+        }
+    }
 }
