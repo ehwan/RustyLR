@@ -172,15 +172,8 @@ pub type GrammarRule = ::rusty_lr_core::ProductionRule<&'static str, GrammarNonT
 pub type GrammarState = ::rusty_lr_core::lr::SparseState<GrammarNonTerminals>;
 #[doc = r" type alias for `ParseError`"]
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarParseError = ::rusty_lr_core::lr::ParseError<
-    Lexed,
-    GrammarNonTerminals,
-    ::rusty_lr_core::DefaultReduceActionError,
->;
-#[doc = r" type alias for `InvalidTerminalError`"]
-#[allow(non_camel_case_types, dead_code)]
-pub type GrammarInvalidTerminalError =
-    ::rusty_lr_core::lr::InvalidTerminalError<Lexed, GrammarNonTerminals>;
+pub type GrammarParseError =
+    ::rusty_lr_core::lr::ParseError<Lexed, ::rusty_lr_core::DefaultReduceActionError>;
 #[doc = r" An enum that represents non-terminal symbols"]
 #[allow(non_camel_case_types, dead_code)]
 #[derive(

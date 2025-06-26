@@ -83,10 +83,7 @@ impl Grammar {
                 pub type #state_typename = #module_prefix::lr::#state_structname<#enum_name>;
                 /// type alias for `ParseError`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #parse_error_typename = #module_prefix::lr::ParseError<#token_typename, #enum_name, #reduce_error_typename>;
-                /// type alias for `InvalidTerminalError`
-                #[allow(non_camel_case_types,dead_code)]
-                pub type #invalid_terminal_error = #module_prefix::lr::InvalidTerminalError<#token_typename, #enum_name>;
+                pub type #parse_error_typename = #module_prefix::lr::ParseError<#token_typename, #reduce_error_typename>;
             }
             );
         }
