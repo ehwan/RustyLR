@@ -221,7 +221,6 @@ making it suitable for processing large or complex inputs.
 ## Cargo Features
  - `build`: Enable build script tools.
  - `tree`: Enable automatic syntax tree construction (For debugging purposes). Make `Context` tobe `Display`-able.
- - `error`: Enable detailed parsing error messages with backtrace when displaying feed error (For debugging purposes).
 
 ## Syntax
 RustyLR's grammar syntax is inspired by traditional Yacc/Bison formats.
