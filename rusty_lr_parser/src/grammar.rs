@@ -143,6 +143,7 @@ pub struct Grammar {
     /// sorted production rules; (nonterminal_id, rule_local_id)
     pub rules_sorted: Vec<(usize, usize)>,
 
+    /// switch between compile-time and runtime table generation
     pub compiled: bool,
 }
 
