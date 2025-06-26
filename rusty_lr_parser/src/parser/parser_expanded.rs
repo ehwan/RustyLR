@@ -25,8 +25,8 @@ use std::boxed::Box;
 /*
 ====================================Grammar=====================================
 
-# of terminal classes: 40
-# of states: 172
+# of terminal classes: 41
+# of states: 176
 
 Rule -> ident RuleType colon RuleLines semicolon
 RuleType -> parengroup
@@ -86,6 +86,7 @@ GrammarLine -> NoOptim
 GrammarLine -> Dense
 GrammarLine -> Trace
 GrammarLine -> Filter
+GrammarLine -> Runtime
 TokenMapped+ -> TokenMapped
 TokenMapped+ -> TokenMapped+ TokenMapped
 TokenMapped* ->
@@ -147,6 +148,7 @@ TerminalSetItem* -> TerminalSetItem+
 [^semicolon] -> trace
 [^semicolon] -> dprec
 [^semicolon] -> filter
+[^semicolon] -> runtime
 ident* -> ident+
 Precedence -> precedence IdentOrLiteral+ semicolon
 Filter -> filter RustCode semicolon
@@ -154,6 +156,7 @@ Glr -> glr semicolon
 Lalr -> lalr semicolon
 NoOptim -> nooptim semicolon
 Dense -> dense semicolon
+Runtime -> runtime semicolon
 Grammar -> GrammarLine+
 GrammarLine+ -> GrammarLine
 GrammarLine+ -> GrammarLine GrammarLine+
@@ -214,23 +217,24 @@ pub enum GrammarNonTerminals {
     Dense,
     Trace,
     Filter,
+    Runtime,
     GrammarLine,
     Grammar,
     error,
-    _TokenMappedPlus31,
-    _TokenMappedStar32,
-    _PrecDefPlus33,
-    _PrecDefStar34,
-    _caretQuestion35,
-    _TerminalSetItemPlus36,
-    _TerminalSetItemStar37,
-    _PatternPlus38,
-    _TermSet39,
-    __TermSet39Plus40,
-    _IdentOrLiteralPlus41,
-    _identPlus42,
-    _identStar43,
-    _GrammarLinePlus44,
+    _TokenMappedPlus32,
+    _TokenMappedStar33,
+    _PrecDefPlus34,
+    _PrecDefStar35,
+    _caretQuestion36,
+    _TerminalSetItemPlus37,
+    _TerminalSetItemStar38,
+    _PatternPlus39,
+    _TermSet40,
+    __TermSet40Plus41,
+    _IdentOrLiteralPlus42,
+    _identPlus43,
+    _identStar44,
+    _GrammarLinePlus45,
     Augmented,
 }
 impl std::fmt::Display for GrammarNonTerminals {
@@ -276,23 +280,24 @@ impl ::rusty_lr_core::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::Dense => "Dense",
             GrammarNonTerminals::Trace => "Trace",
             GrammarNonTerminals::Filter => "Filter",
+            GrammarNonTerminals::Runtime => "Runtime",
             GrammarNonTerminals::GrammarLine => "GrammarLine",
             GrammarNonTerminals::Grammar => "Grammar",
             GrammarNonTerminals::error => "'error'",
-            GrammarNonTerminals::_TokenMappedPlus31 => "TokenMapped+",
-            GrammarNonTerminals::_TokenMappedStar32 => "TokenMapped*",
-            GrammarNonTerminals::_PrecDefPlus33 => "PrecDef+",
-            GrammarNonTerminals::_PrecDefStar34 => "PrecDef*",
-            GrammarNonTerminals::_caretQuestion35 => "caret?",
-            GrammarNonTerminals::_TerminalSetItemPlus36 => "TerminalSetItem+",
-            GrammarNonTerminals::_TerminalSetItemStar37 => "TerminalSetItem*",
-            GrammarNonTerminals::_PatternPlus38 => "Pattern+",
-            GrammarNonTerminals::_TermSet39 => "[^semicolon]",
-            GrammarNonTerminals::__TermSet39Plus40 => "[^semicolon]+",
-            GrammarNonTerminals::_IdentOrLiteralPlus41 => "IdentOrLiteral+",
-            GrammarNonTerminals::_identPlus42 => "ident+",
-            GrammarNonTerminals::_identStar43 => "ident*",
-            GrammarNonTerminals::_GrammarLinePlus44 => "GrammarLine+",
+            GrammarNonTerminals::_TokenMappedPlus32 => "TokenMapped+",
+            GrammarNonTerminals::_TokenMappedStar33 => "TokenMapped*",
+            GrammarNonTerminals::_PrecDefPlus34 => "PrecDef+",
+            GrammarNonTerminals::_PrecDefStar35 => "PrecDef*",
+            GrammarNonTerminals::_caretQuestion36 => "caret?",
+            GrammarNonTerminals::_TerminalSetItemPlus37 => "TerminalSetItem+",
+            GrammarNonTerminals::_TerminalSetItemStar38 => "TerminalSetItem*",
+            GrammarNonTerminals::_PatternPlus39 => "Pattern+",
+            GrammarNonTerminals::_TermSet40 => "[^semicolon]",
+            GrammarNonTerminals::__TermSet40Plus41 => "[^semicolon]+",
+            GrammarNonTerminals::_IdentOrLiteralPlus42 => "IdentOrLiteral+",
+            GrammarNonTerminals::_identPlus43 => "ident+",
+            GrammarNonTerminals::_identStar44 => "ident*",
+            GrammarNonTerminals::_GrammarLinePlus45 => "GrammarLine+",
             GrammarNonTerminals::Augmented => "Augmented",
         }
     }
@@ -326,23 +331,24 @@ impl ::rusty_lr_core::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::Dense => false,
             GrammarNonTerminals::Trace => false,
             GrammarNonTerminals::Filter => false,
+            GrammarNonTerminals::Runtime => false,
             GrammarNonTerminals::GrammarLine => false,
             GrammarNonTerminals::Grammar => false,
             GrammarNonTerminals::error => false,
-            GrammarNonTerminals::_TokenMappedPlus31 => false,
-            GrammarNonTerminals::_TokenMappedStar32 => false,
-            GrammarNonTerminals::_PrecDefPlus33 => false,
-            GrammarNonTerminals::_PrecDefStar34 => false,
-            GrammarNonTerminals::_caretQuestion35 => false,
-            GrammarNonTerminals::_TerminalSetItemPlus36 => false,
-            GrammarNonTerminals::_TerminalSetItemStar37 => false,
-            GrammarNonTerminals::_PatternPlus38 => false,
-            GrammarNonTerminals::_TermSet39 => false,
-            GrammarNonTerminals::__TermSet39Plus40 => false,
-            GrammarNonTerminals::_IdentOrLiteralPlus41 => false,
-            GrammarNonTerminals::_identPlus42 => false,
-            GrammarNonTerminals::_identStar43 => false,
-            GrammarNonTerminals::_GrammarLinePlus44 => false,
+            GrammarNonTerminals::_TokenMappedPlus32 => false,
+            GrammarNonTerminals::_TokenMappedStar33 => false,
+            GrammarNonTerminals::_PrecDefPlus34 => false,
+            GrammarNonTerminals::_PrecDefStar35 => false,
+            GrammarNonTerminals::_caretQuestion36 => false,
+            GrammarNonTerminals::_TerminalSetItemPlus37 => false,
+            GrammarNonTerminals::_TerminalSetItemStar38 => false,
+            GrammarNonTerminals::_PatternPlus39 => false,
+            GrammarNonTerminals::_TermSet40 => false,
+            GrammarNonTerminals::__TermSet40Plus41 => false,
+            GrammarNonTerminals::_IdentOrLiteralPlus42 => false,
+            GrammarNonTerminals::_identPlus43 => false,
+            GrammarNonTerminals::_identStar44 => false,
+            GrammarNonTerminals::_GrammarLinePlus45 => false,
             GrammarNonTerminals::Augmented => false,
         }
     }
@@ -376,35 +382,36 @@ impl ::rusty_lr_core::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::Dense => None,
             GrammarNonTerminals::Trace => None,
             GrammarNonTerminals::Filter => None,
+            GrammarNonTerminals::Runtime => None,
             GrammarNonTerminals::GrammarLine => None,
             GrammarNonTerminals::Grammar => None,
             GrammarNonTerminals::error => Some(::rusty_lr_core::NonTerminalType::Error),
-            GrammarNonTerminals::_TokenMappedPlus31 => {
+            GrammarNonTerminals::_TokenMappedPlus32 => {
                 Some(::rusty_lr_core::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_TokenMappedStar32 => Some(::rusty_lr_core::NonTerminalType::Star),
-            GrammarNonTerminals::_PrecDefPlus33 => Some(::rusty_lr_core::NonTerminalType::PlusLeft),
-            GrammarNonTerminals::_PrecDefStar34 => Some(::rusty_lr_core::NonTerminalType::Star),
-            GrammarNonTerminals::_caretQuestion35 => {
+            GrammarNonTerminals::_TokenMappedStar33 => Some(::rusty_lr_core::NonTerminalType::Star),
+            GrammarNonTerminals::_PrecDefPlus34 => Some(::rusty_lr_core::NonTerminalType::PlusLeft),
+            GrammarNonTerminals::_PrecDefStar35 => Some(::rusty_lr_core::NonTerminalType::Star),
+            GrammarNonTerminals::_caretQuestion36 => {
                 Some(::rusty_lr_core::NonTerminalType::Optional)
             }
-            GrammarNonTerminals::_TerminalSetItemPlus36 => {
+            GrammarNonTerminals::_TerminalSetItemPlus37 => {
                 Some(::rusty_lr_core::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_TerminalSetItemStar37 => {
+            GrammarNonTerminals::_TerminalSetItemStar38 => {
                 Some(::rusty_lr_core::NonTerminalType::Star)
             }
-            GrammarNonTerminals::_PatternPlus38 => Some(::rusty_lr_core::NonTerminalType::PlusLeft),
-            GrammarNonTerminals::_TermSet39 => Some(::rusty_lr_core::NonTerminalType::TerminalSet),
-            GrammarNonTerminals::__TermSet39Plus40 => {
+            GrammarNonTerminals::_PatternPlus39 => Some(::rusty_lr_core::NonTerminalType::PlusLeft),
+            GrammarNonTerminals::_TermSet40 => Some(::rusty_lr_core::NonTerminalType::TerminalSet),
+            GrammarNonTerminals::__TermSet40Plus41 => {
                 Some(::rusty_lr_core::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_IdentOrLiteralPlus41 => {
+            GrammarNonTerminals::_IdentOrLiteralPlus42 => {
                 Some(::rusty_lr_core::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_identPlus42 => Some(::rusty_lr_core::NonTerminalType::PlusLeft),
-            GrammarNonTerminals::_identStar43 => Some(::rusty_lr_core::NonTerminalType::Star),
-            GrammarNonTerminals::_GrammarLinePlus44 => {
+            GrammarNonTerminals::_identPlus43 => Some(::rusty_lr_core::NonTerminalType::PlusLeft),
+            GrammarNonTerminals::_identStar44 => Some(::rusty_lr_core::NonTerminalType::Star),
+            GrammarNonTerminals::_GrammarLinePlus45 => {
                 Some(::rusty_lr_core::NonTerminalType::PlusRight)
             }
             GrammarNonTerminals::Augmented => Some(::rusty_lr_core::NonTerminalType::Augmented),
@@ -1577,9 +1584,23 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
+    #[doc = "GrammarLine -> Runtime"]
+    #[inline]
+    fn reduce_GrammarLine_16(
+        __rustylr_args: &mut Vec<Self>,
+        shift: &mut bool,
+        lookahead: &Lexed,
+        data: &mut GrammarArgs,
+    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
+        __rustylr_args.pop();
+        {
+            data.compiled = false;
+        }
+        Ok(GrammarTokenData::Empty)
+    }
     #[doc = "TokenMapped+ -> TokenMapped"]
     #[inline]
-    fn reduce__TokenMappedPlus31_0(
+    fn reduce__TokenMappedPlus32_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1592,7 +1613,7 @@ impl GrammarTokenData {
     }
     #[doc = "TokenMapped+ -> TokenMapped+ TokenMapped"]
     #[inline]
-    fn reduce__TokenMappedPlus31_1(
+    fn reduce__TokenMappedPlus32_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1611,7 +1632,7 @@ impl GrammarTokenData {
     }
     #[doc = "TokenMapped* -> "]
     #[inline]
-    fn reduce__TokenMappedStar32_1(
+    fn reduce__TokenMappedStar33_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1621,7 +1642,7 @@ impl GrammarTokenData {
     }
     #[doc = "PrecDef+ -> PrecDef"]
     #[inline]
-    fn reduce__PrecDefPlus33_0(
+    fn reduce__PrecDefPlus34_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1634,7 +1655,7 @@ impl GrammarTokenData {
     }
     #[doc = "PrecDef+ -> PrecDef+ PrecDef"]
     #[inline]
-    fn reduce__PrecDefPlus33_1(
+    fn reduce__PrecDefPlus34_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1653,7 +1674,7 @@ impl GrammarTokenData {
     }
     #[doc = "PrecDef* -> "]
     #[inline]
-    fn reduce__PrecDefStar34_1(
+    fn reduce__PrecDefStar35_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1663,7 +1684,7 @@ impl GrammarTokenData {
     }
     #[doc = "caret? -> caret"]
     #[inline]
-    fn reduce__caretQuestion35_0(
+    fn reduce__caretQuestion36_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1676,7 +1697,7 @@ impl GrammarTokenData {
     }
     #[doc = "caret? -> "]
     #[inline]
-    fn reduce__caretQuestion35_1(
+    fn reduce__caretQuestion36_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1686,7 +1707,7 @@ impl GrammarTokenData {
     }
     #[doc = "TerminalSetItem+ -> TerminalSetItem"]
     #[inline]
-    fn reduce__TerminalSetItemPlus36_0(
+    fn reduce__TerminalSetItemPlus37_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1699,7 +1720,7 @@ impl GrammarTokenData {
     }
     #[doc = "TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem"]
     #[inline]
-    fn reduce__TerminalSetItemPlus36_1(
+    fn reduce__TerminalSetItemPlus37_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1718,7 +1739,7 @@ impl GrammarTokenData {
     }
     #[doc = "TerminalSetItem* -> "]
     #[inline]
-    fn reduce__TerminalSetItemStar37_1(
+    fn reduce__TerminalSetItemStar38_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1728,7 +1749,7 @@ impl GrammarTokenData {
     }
     #[doc = "Pattern+ -> Pattern"]
     #[inline]
-    fn reduce__PatternPlus38_0(
+    fn reduce__PatternPlus39_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1741,7 +1762,7 @@ impl GrammarTokenData {
     }
     #[doc = "Pattern+ -> Pattern+ Pattern"]
     #[inline]
-    fn reduce__PatternPlus38_1(
+    fn reduce__PatternPlus39_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1760,7 +1781,7 @@ impl GrammarTokenData {
     }
     #[doc = "[^semicolon]+ -> [^semicolon]"]
     #[inline]
-    fn reduce___TermSet39Plus40_0(
+    fn reduce___TermSet40Plus41_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1773,7 +1794,7 @@ impl GrammarTokenData {
     }
     #[doc = "[^semicolon]+ -> [^semicolon]+ [^semicolon]"]
     #[inline]
-    fn reduce___TermSet39Plus40_1(
+    fn reduce___TermSet40Plus41_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1792,7 +1813,7 @@ impl GrammarTokenData {
     }
     #[doc = "IdentOrLiteral+ -> IdentOrLiteral"]
     #[inline]
-    fn reduce__IdentOrLiteralPlus41_0(
+    fn reduce__IdentOrLiteralPlus42_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1805,7 +1826,7 @@ impl GrammarTokenData {
     }
     #[doc = "IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral"]
     #[inline]
-    fn reduce__IdentOrLiteralPlus41_1(
+    fn reduce__IdentOrLiteralPlus42_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1824,7 +1845,7 @@ impl GrammarTokenData {
     }
     #[doc = "ident+ -> ident"]
     #[inline]
-    fn reduce__identPlus42_0(
+    fn reduce__identPlus43_0(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1837,7 +1858,7 @@ impl GrammarTokenData {
     }
     #[doc = "ident+ -> ident+ ident"]
     #[inline]
-    fn reduce__identPlus42_1(
+    fn reduce__identPlus43_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1856,7 +1877,7 @@ impl GrammarTokenData {
     }
     #[doc = "ident* -> "]
     #[inline]
-    fn reduce__identStar43_1(
+    fn reduce__identStar44_1(
         __rustylr_args: &mut Vec<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
@@ -1944,39 +1965,40 @@ impl ::rusty_lr_core::TokenData for GrammarTokenData {
             55usize => Self::reduce_GrammarLine_13(reduce_args, shift, lookahead, user_data),
             56usize => Self::reduce_GrammarLine_14(reduce_args, shift, lookahead, user_data),
             57usize => Self::reduce_GrammarLine_15(reduce_args, shift, lookahead, user_data),
-            58usize => Self::reduce__TokenMappedPlus31_0(reduce_args, shift, lookahead, user_data),
-            59usize => Self::reduce__TokenMappedPlus31_1(reduce_args, shift, lookahead, user_data),
-            60usize => Self::reduce__TokenMappedStar32_1(reduce_args, shift, lookahead, user_data),
-            61usize => Self::reduce__PrecDefPlus33_0(reduce_args, shift, lookahead, user_data),
-            62usize => Self::reduce__PrecDefPlus33_1(reduce_args, shift, lookahead, user_data),
-            63usize => Self::reduce__PrecDefStar34_1(reduce_args, shift, lookahead, user_data),
-            64usize => Self::reduce__caretQuestion35_0(reduce_args, shift, lookahead, user_data),
-            65usize => Self::reduce__caretQuestion35_1(reduce_args, shift, lookahead, user_data),
-            66usize => {
-                Self::reduce__TerminalSetItemPlus36_0(reduce_args, shift, lookahead, user_data)
-            }
+            58usize => Self::reduce_GrammarLine_16(reduce_args, shift, lookahead, user_data),
+            59usize => Self::reduce__TokenMappedPlus32_0(reduce_args, shift, lookahead, user_data),
+            60usize => Self::reduce__TokenMappedPlus32_1(reduce_args, shift, lookahead, user_data),
+            61usize => Self::reduce__TokenMappedStar33_1(reduce_args, shift, lookahead, user_data),
+            62usize => Self::reduce__PrecDefPlus34_0(reduce_args, shift, lookahead, user_data),
+            63usize => Self::reduce__PrecDefPlus34_1(reduce_args, shift, lookahead, user_data),
+            64usize => Self::reduce__PrecDefStar35_1(reduce_args, shift, lookahead, user_data),
+            65usize => Self::reduce__caretQuestion36_0(reduce_args, shift, lookahead, user_data),
+            66usize => Self::reduce__caretQuestion36_1(reduce_args, shift, lookahead, user_data),
             67usize => {
-                Self::reduce__TerminalSetItemPlus36_1(reduce_args, shift, lookahead, user_data)
+                Self::reduce__TerminalSetItemPlus37_0(reduce_args, shift, lookahead, user_data)
             }
             68usize => {
-                Self::reduce__TerminalSetItemStar37_1(reduce_args, shift, lookahead, user_data)
+                Self::reduce__TerminalSetItemPlus37_1(reduce_args, shift, lookahead, user_data)
             }
-            69usize => Self::reduce__PatternPlus38_0(reduce_args, shift, lookahead, user_data),
-            70usize => Self::reduce__PatternPlus38_1(reduce_args, shift, lookahead, user_data),
-            71usize => Self::reduce___TermSet39Plus40_0(reduce_args, shift, lookahead, user_data),
-            72usize => Self::reduce___TermSet39Plus40_1(reduce_args, shift, lookahead, user_data),
-            73usize => {
-                Self::reduce__IdentOrLiteralPlus41_0(reduce_args, shift, lookahead, user_data)
+            69usize => {
+                Self::reduce__TerminalSetItemStar38_1(reduce_args, shift, lookahead, user_data)
             }
+            70usize => Self::reduce__PatternPlus39_0(reduce_args, shift, lookahead, user_data),
+            71usize => Self::reduce__PatternPlus39_1(reduce_args, shift, lookahead, user_data),
+            72usize => Self::reduce___TermSet40Plus41_0(reduce_args, shift, lookahead, user_data),
+            73usize => Self::reduce___TermSet40Plus41_1(reduce_args, shift, lookahead, user_data),
             74usize => {
-                Self::reduce__IdentOrLiteralPlus41_1(reduce_args, shift, lookahead, user_data)
+                Self::reduce__IdentOrLiteralPlus42_0(reduce_args, shift, lookahead, user_data)
             }
-            75usize => Self::reduce__identPlus42_0(reduce_args, shift, lookahead, user_data),
-            76usize => Self::reduce__identPlus42_1(reduce_args, shift, lookahead, user_data),
-            77usize => Self::reduce__identStar43_1(reduce_args, shift, lookahead, user_data),
-            78usize..=119usize => Ok(Self::reduce_identity(reduce_args, 0usize)),
-            120usize..=121usize => Ok(Self::reduce_identity(reduce_args, 1usize)),
-            122usize..=129usize => Ok(Self::reduce_clear(reduce_args)),
+            75usize => {
+                Self::reduce__IdentOrLiteralPlus42_1(reduce_args, shift, lookahead, user_data)
+            }
+            76usize => Self::reduce__identPlus43_0(reduce_args, shift, lookahead, user_data),
+            77usize => Self::reduce__identPlus43_1(reduce_args, shift, lookahead, user_data),
+            78usize => Self::reduce__identStar44_1(reduce_args, shift, lookahead, user_data),
+            79usize..=121usize => Ok(Self::reduce_identity(reduce_args, 0usize)),
+            122usize..=123usize => Ok(Self::reduce_identity(reduce_args, 1usize)),
+            124usize..=132usize => Ok(Self::reduce_clear(reduce_args)),
             _ => {
                 unreachable!("Invalid Rule: {}", rule_index);
             }
@@ -2087,8 +2109,9 @@ impl ::rusty_lr_core::lr::Parser for GrammarParser {
             Lexed::Trace(_, _) => 35usize,
             Lexed::DPrec(_, _) => 36usize,
             Lexed::Filter(_, _) => 37usize,
-            Lexed::Semicolon(_) => 38usize,
-            Lexed::Eof => 39usize,
+            Lexed::Runtime(_, _) => 38usize,
+            Lexed::Semicolon(_) => 39usize,
+            Lexed::Eof => 40usize,
             _ => 1usize,
         }
     }
@@ -2116,7 +2139,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleType),
                     ::rusty_lr_core::Token::Term(2usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLines),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
@@ -2144,8 +2167,8 @@ impl GrammarParser {
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::RuleLine,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMappedStar32),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDefStar34),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMappedStar33),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDefStar35),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Action),
                 ],
             },
@@ -2205,8 +2228,8 @@ impl GrammarParser {
                 name: GrammarNonTerminals::TerminalSet,
                 rule: vec![
                     ::rusty_lr_core::Token::Term(18usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_caretQuestion35),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItemStar37),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_caretQuestion36),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItemStar38),
                     ::rusty_lr_core::Token::Term(19usize),
                 ],
             },
@@ -2264,7 +2287,7 @@ impl GrammarParser {
                 name: GrammarNonTerminals::Pattern,
                 rule: vec![
                     ::rusty_lr_core::Token::Term(16usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PatternPlus38),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PatternPlus39),
                     ::rusty_lr_core::Token::Term(17usize),
                 ],
             },
@@ -2294,13 +2317,13 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(22usize),
                     ::rusty_lr_core::Token::Term(0usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::RustCode,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::__TermSet39Plus40,
+                    GrammarNonTerminals::__TermSet40Plus41,
                 )],
             },
             ::rusty_lr_core::ProductionRule {
@@ -2308,7 +2331,7 @@ impl GrammarParser {
                 rule: vec![
                     ::rusty_lr_core::Token::Term(23usize),
                     ::rusty_lr_core::Token::Term(0usize),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
@@ -2316,7 +2339,7 @@ impl GrammarParser {
                 rule: vec![
                     ::rusty_lr_core::Token::Term(24usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
@@ -2324,7 +2347,7 @@ impl GrammarParser {
                 rule: vec![
                     ::rusty_lr_core::Token::Term(25usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
@@ -2332,7 +2355,7 @@ impl GrammarParser {
                 rule: vec![
                     ::rusty_lr_core::Token::Term(26usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
@@ -2355,8 +2378,8 @@ impl GrammarParser {
                 name: GrammarNonTerminals::ReduceDef,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::ReduceType),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus41),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus42),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
@@ -2364,7 +2387,7 @@ impl GrammarParser {
                 rule: vec![
                     ::rusty_lr_core::Token::Term(27usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
@@ -2372,15 +2395,15 @@ impl GrammarParser {
                 rule: vec![
                     ::rusty_lr_core::Token::Term(28usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::Trace,
                 rule: vec![
                     ::rusty_lr_core::Token::Term(35usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_identStar43),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_identStar44),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
@@ -2466,300 +2489,310 @@ impl GrammarParser {
                 rule: vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Filter)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TokenMappedPlus31,
+                name: GrammarNonTerminals::GrammarLine,
+                rule: vec![::rusty_lr_core::Token::NonTerm(
+                    GrammarNonTerminals::Runtime,
+                )],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: GrammarNonTerminals::_TokenMappedPlus32,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::TokenMapped,
                 )],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TokenMappedPlus31,
+                name: GrammarNonTerminals::_TokenMappedPlus32,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMappedPlus31),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMappedPlus32),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TokenMapped),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TokenMappedStar32,
+                name: GrammarNonTerminals::_TokenMappedStar33,
                 rule: vec![],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_PrecDefPlus33,
+                name: GrammarNonTerminals::_PrecDefPlus34,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::PrecDef,
                 )],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_PrecDefPlus33,
+                name: GrammarNonTerminals::_PrecDefPlus34,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDefPlus33),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDefPlus34),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::PrecDef),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_PrecDefStar34,
+                name: GrammarNonTerminals::_PrecDefStar35,
                 rule: vec![],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_caretQuestion35,
+                name: GrammarNonTerminals::_caretQuestion36,
                 rule: vec![::rusty_lr_core::Token::Term(9usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_caretQuestion35,
+                name: GrammarNonTerminals::_caretQuestion36,
                 rule: vec![],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TerminalSetItemPlus36,
+                name: GrammarNonTerminals::_TerminalSetItemPlus37,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::TerminalSetItem,
                 )],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TerminalSetItemPlus36,
+                name: GrammarNonTerminals::_TerminalSetItemPlus37,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItemPlus36),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItemPlus37),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalSetItem),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TerminalSetItemStar37,
+                name: GrammarNonTerminals::_TerminalSetItemStar38,
                 rule: vec![],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_PatternPlus38,
+                name: GrammarNonTerminals::_PatternPlus39,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::Pattern,
                 )],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_PatternPlus38,
+                name: GrammarNonTerminals::_PatternPlus39,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PatternPlus38),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PatternPlus39),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::__TermSet39Plus40,
+                name: GrammarNonTerminals::__TermSet40Plus41,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_TermSet39,
+                    GrammarNonTerminals::_TermSet40,
                 )],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::__TermSet39Plus40,
+                name: GrammarNonTerminals::__TermSet40Plus41,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet39Plus40),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TermSet39),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet40Plus41),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TermSet40),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_IdentOrLiteralPlus41,
+                name: GrammarNonTerminals::_IdentOrLiteralPlus42,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::IdentOrLiteral,
                 )],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_IdentOrLiteralPlus41,
+                name: GrammarNonTerminals::_IdentOrLiteralPlus42,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus41),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus42),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::IdentOrLiteral),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_identPlus42,
+                name: GrammarNonTerminals::_identPlus43,
                 rule: vec![::rusty_lr_core::Token::Term(0usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_identPlus42,
+                name: GrammarNonTerminals::_identPlus43,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_identPlus42),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_identPlus43),
                     ::rusty_lr_core::Token::Term(0usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_identStar43,
+                name: GrammarNonTerminals::_identStar44,
                 rule: vec![],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TokenMappedStar32,
+                name: GrammarNonTerminals::_TokenMappedStar33,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_TokenMappedPlus31,
+                    GrammarNonTerminals::_TokenMappedPlus32,
                 )],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_PrecDefStar34,
+                name: GrammarNonTerminals::_PrecDefStar35,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_PrecDefPlus33,
+                    GrammarNonTerminals::_PrecDefPlus34,
                 )],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TerminalSetItemStar37,
+                name: GrammarNonTerminals::_TerminalSetItemStar38,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_TerminalSetItemPlus36,
+                    GrammarNonTerminals::_TerminalSetItemPlus37,
                 )],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(0usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(2usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(3usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(1usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(4usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(5usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(6usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(7usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(9usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(10usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(8usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(11usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(12usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(13usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(14usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(15usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(16usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(17usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(18usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(19usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(20usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(21usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(22usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(23usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(24usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(25usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(26usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(27usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(28usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(29usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(30usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(31usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(32usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(33usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(34usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(35usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(36usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_TermSet39,
+                name: GrammarNonTerminals::_TermSet40,
                 rule: vec![::rusty_lr_core::Token::Term(37usize)],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_identStar43,
+                name: GrammarNonTerminals::_TermSet40,
+                rule: vec![::rusty_lr_core::Token::Term(38usize)],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: GrammarNonTerminals::_identStar44,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_identPlus42,
+                    GrammarNonTerminals::_identPlus43,
                 )],
             },
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::Precedence,
                 rule: vec![
                     ::rusty_lr_core::Token::Term(32usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus41),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus42),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
@@ -2767,61 +2800,68 @@ impl GrammarParser {
                 rule: vec![
                     ::rusty_lr_core::Token::Term(37usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::Glr,
                 rule: vec![
                     ::rusty_lr_core::Token::Term(30usize),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::Lalr,
                 rule: vec![
                     ::rusty_lr_core::Token::Term(29usize),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::NoOptim,
                 rule: vec![
                     ::rusty_lr_core::Token::Term(33usize),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::Dense,
                 rule: vec![
                     ::rusty_lr_core::Token::Term(34usize),
+                    ::rusty_lr_core::Token::Term(39usize),
+                ],
+            },
+            ::rusty_lr_core::ProductionRule {
+                name: GrammarNonTerminals::Runtime,
+                rule: vec![
                     ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::Term(39usize),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::Grammar,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_GrammarLinePlus44,
+                    GrammarNonTerminals::_GrammarLinePlus45,
                 )],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_GrammarLinePlus44,
+                name: GrammarNonTerminals::_GrammarLinePlus45,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::GrammarLine,
                 )],
             },
             ::rusty_lr_core::ProductionRule {
-                name: GrammarNonTerminals::_GrammarLinePlus44,
+                name: GrammarNonTerminals::_GrammarLinePlus45,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::GrammarLine),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_GrammarLinePlus44),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_GrammarLinePlus45),
                 ],
             },
             ::rusty_lr_core::ProductionRule {
                 name: GrammarNonTerminals::Augmented,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
-                    ::rusty_lr_core::Token::Term(39usize),
+                    ::rusty_lr_core::Token::Term(40usize),
                 ],
             },
         ];
@@ -2864,6 +2904,7 @@ impl GrammarParser {
             "trace",
             "dprec",
             "filter",
+            "runtime",
             "semicolon",
             "eof",
         ];
@@ -2878,41 +2919,43 @@ impl GrammarParser {
                     (20usize, 61usize),
                     (21usize, 62usize),
                     (22usize, 63usize),
-                    (23usize, 108usize),
-                    (24usize, 111usize),
-                    (25usize, 114usize),
-                    (26usize, 117usize),
-                    (27usize, 120usize),
-                    (28usize, 123usize),
-                    (29usize, 126usize),
-                    (30usize, 128usize),
-                    (32usize, 130usize),
-                    (33usize, 135usize),
-                    (34usize, 137usize),
-                    (35usize, 139usize),
-                    (37usize, 145usize),
+                    (23usize, 109usize),
+                    (24usize, 112usize),
+                    (25usize, 115usize),
+                    (26usize, 118usize),
+                    (27usize, 121usize),
+                    (28usize, 124usize),
+                    (29usize, 127usize),
+                    (30usize, 129usize),
+                    (32usize, 131usize),
+                    (33usize, 136usize),
+                    (34usize, 138usize),
+                    (35usize, 140usize),
+                    (37usize, 146usize),
+                    (38usize, 149usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::Rule, 148usize),
-                    (GrammarNonTerminals::TokenDef, 149usize),
-                    (GrammarNonTerminals::StartDef, 150usize),
-                    (GrammarNonTerminals::EofDef, 151usize),
-                    (GrammarNonTerminals::TokenTypeDef, 152usize),
-                    (GrammarNonTerminals::UserDataDef, 153usize),
-                    (GrammarNonTerminals::ReduceType, 154usize),
-                    (GrammarNonTerminals::ReduceDef, 157usize),
-                    (GrammarNonTerminals::ErrorDef, 158usize),
-                    (GrammarNonTerminals::ModulePrefixDef, 159usize),
-                    (GrammarNonTerminals::Glr, 160usize),
-                    (GrammarNonTerminals::Lalr, 161usize),
-                    (GrammarNonTerminals::Precedence, 162usize),
-                    (GrammarNonTerminals::NoOptim, 163usize),
-                    (GrammarNonTerminals::Dense, 164usize),
-                    (GrammarNonTerminals::Trace, 165usize),
-                    (GrammarNonTerminals::Filter, 166usize),
-                    (GrammarNonTerminals::GrammarLine, 167usize),
-                    (GrammarNonTerminals::Grammar, 169usize),
-                    (GrammarNonTerminals::_GrammarLinePlus44, 171usize),
+                    (GrammarNonTerminals::Rule, 151usize),
+                    (GrammarNonTerminals::TokenDef, 152usize),
+                    (GrammarNonTerminals::StartDef, 153usize),
+                    (GrammarNonTerminals::EofDef, 154usize),
+                    (GrammarNonTerminals::TokenTypeDef, 155usize),
+                    (GrammarNonTerminals::UserDataDef, 156usize),
+                    (GrammarNonTerminals::ReduceType, 157usize),
+                    (GrammarNonTerminals::ReduceDef, 160usize),
+                    (GrammarNonTerminals::ErrorDef, 161usize),
+                    (GrammarNonTerminals::ModulePrefixDef, 162usize),
+                    (GrammarNonTerminals::Glr, 163usize),
+                    (GrammarNonTerminals::Lalr, 164usize),
+                    (GrammarNonTerminals::Precedence, 165usize),
+                    (GrammarNonTerminals::NoOptim, 166usize),
+                    (GrammarNonTerminals::Dense, 167usize),
+                    (GrammarNonTerminals::Trace, 168usize),
+                    (GrammarNonTerminals::Filter, 169usize),
+                    (GrammarNonTerminals::Runtime, 170usize),
+                    (GrammarNonTerminals::GrammarLine, 171usize),
+                    (GrammarNonTerminals::Grammar, 173usize),
+                    (GrammarNonTerminals::_GrammarLinePlus45, 175usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([
@@ -3029,11 +3072,7 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 120usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 121usize,
+                        rule: 58usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3066,6 +3105,18 @@ impl GrammarParser {
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
                         rule: 129usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 130usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 131usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 132usize,
                         shifted: 0usize,
                     },
                 ]),
@@ -3130,15 +3181,15 @@ impl GrammarParser {
                     (GrammarNonTerminals::TokenMapped, 42usize),
                     (GrammarNonTerminals::TerminalSet, 25usize),
                     (GrammarNonTerminals::Pattern, 43usize),
-                    (GrammarNonTerminals::_TokenMappedPlus31, 44usize),
-                    (GrammarNonTerminals::_TokenMappedStar32, 46usize),
+                    (GrammarNonTerminals::_TokenMappedPlus32, 44usize),
+                    (GrammarNonTerminals::_TokenMappedStar33, 46usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (3usize, std::collections::BTreeSet::from([60usize])),
-                    (15usize, std::collections::BTreeSet::from([60usize])),
-                    (31usize, std::collections::BTreeSet::from([60usize])),
-                    (36usize, std::collections::BTreeSet::from([60usize])),
-                    (38usize, std::collections::BTreeSet::from([60usize])),
+                    (3usize, std::collections::BTreeSet::from([61usize])),
+                    (15usize, std::collections::BTreeSet::from([61usize])),
+                    (31usize, std::collections::BTreeSet::from([61usize])),
+                    (36usize, std::collections::BTreeSet::from([61usize])),
+                    (39usize, std::collections::BTreeSet::from([61usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3214,10 +3265,6 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 58usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
                         rule: 59usize,
                         shifted: 0usize,
                     },
@@ -3226,7 +3273,11 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 78usize,
+                        rule: 61usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 79usize,
                         shifted: 0usize,
                     },
                 ]),
@@ -3250,7 +3301,7 @@ impl GrammarParser {
                     (18usize, std::collections::BTreeSet::from([16usize])),
                     (31usize, std::collections::BTreeSet::from([16usize])),
                     (36usize, std::collections::BTreeSet::from([16usize])),
-                    (38usize, std::collections::BTreeSet::from([16usize])),
+                    (39usize, std::collections::BTreeSet::from([16usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3351,7 +3402,7 @@ impl GrammarParser {
                     (18usize, std::collections::BTreeSet::from([16usize])),
                     (31usize, std::collections::BTreeSet::from([16usize])),
                     (36usize, std::collections::BTreeSet::from([16usize])),
-                    (38usize, std::collections::BTreeSet::from([16usize])),
+                    (39usize, std::collections::BTreeSet::from([16usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 16usize,
@@ -3378,7 +3429,7 @@ impl GrammarParser {
                     (18usize, std::collections::BTreeSet::from([15usize])),
                     (31usize, std::collections::BTreeSet::from([15usize])),
                     (36usize, std::collections::BTreeSet::from([15usize])),
-                    (38usize, std::collections::BTreeSet::from([15usize])),
+                    (39usize, std::collections::BTreeSet::from([15usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 15usize,
@@ -3405,7 +3456,7 @@ impl GrammarParser {
                     (18usize, std::collections::BTreeSet::from([24usize])),
                     (31usize, std::collections::BTreeSet::from([24usize])),
                     (36usize, std::collections::BTreeSet::from([24usize])),
-                    (38usize, std::collections::BTreeSet::from([24usize])),
+                    (39usize, std::collections::BTreeSet::from([24usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 24usize,
@@ -3423,7 +3474,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::TerminalSet, 25usize),
                     (GrammarNonTerminals::Pattern, 26usize),
-                    (GrammarNonTerminals::_PatternPlus38, 35usize),
+                    (GrammarNonTerminals::_PatternPlus39, 35usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([
@@ -3480,11 +3531,11 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 69usize,
+                        rule: 70usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 70usize,
+                        rule: 71usize,
                         shifted: 0usize,
                     },
                 ]),
@@ -3492,13 +3543,13 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(9usize, 12usize)]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::_caretQuestion35,
+                    GrammarNonTerminals::_caretQuestion36,
                     13usize,
                 )]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([65usize])),
-                    (13usize, std::collections::BTreeSet::from([65usize])),
-                    (19usize, std::collections::BTreeSet::from([65usize])),
+                    (0usize, std::collections::BTreeSet::from([66usize])),
+                    (13usize, std::collections::BTreeSet::from([66usize])),
+                    (19usize, std::collections::BTreeSet::from([66usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3506,11 +3557,11 @@ impl GrammarParser {
                         shifted: 1usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 64usize,
+                        rule: 65usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 65usize,
+                        rule: 66usize,
                         shifted: 0usize,
                     },
                 ]),
@@ -3519,12 +3570,12 @@ impl GrammarParser {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([64usize])),
-                    (13usize, std::collections::BTreeSet::from([64usize])),
-                    (19usize, std::collections::BTreeSet::from([64usize])),
+                    (0usize, std::collections::BTreeSet::from([65usize])),
+                    (13usize, std::collections::BTreeSet::from([65usize])),
+                    (19usize, std::collections::BTreeSet::from([65usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 64usize,
+                    rule: 65usize,
                     shifted: 1usize,
                 }]),
             },
@@ -3535,12 +3586,12 @@ impl GrammarParser {
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::TerminalSetItem, 20usize),
-                    (GrammarNonTerminals::_TerminalSetItemPlus36, 21usize),
-                    (GrammarNonTerminals::_TerminalSetItemStar37, 23usize),
+                    (GrammarNonTerminals::_TerminalSetItemPlus37, 21usize),
+                    (GrammarNonTerminals::_TerminalSetItemStar38, 23usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([(
                     19usize,
-                    std::collections::BTreeSet::from([68usize]),
+                    std::collections::BTreeSet::from([69usize]),
                 )]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3564,10 +3615,6 @@ impl GrammarParser {
                         shifted: 2usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 66usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
                         rule: 67usize,
                         shifted: 0usize,
                     },
@@ -3576,7 +3623,11 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 80usize,
+                        rule: 69usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 81usize,
                         shifted: 0usize,
                     },
                 ]),
@@ -3667,12 +3718,12 @@ impl GrammarParser {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([66usize])),
-                    (13usize, std::collections::BTreeSet::from([66usize])),
-                    (19usize, std::collections::BTreeSet::from([66usize])),
+                    (0usize, std::collections::BTreeSet::from([67usize])),
+                    (13usize, std::collections::BTreeSet::from([67usize])),
+                    (19usize, std::collections::BTreeSet::from([67usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 66usize,
+                    rule: 67usize,
                     shifted: 1usize,
                 }]),
             },
@@ -3687,7 +3738,7 @@ impl GrammarParser {
                 )]),
                 reduce_map: std::collections::BTreeMap::from([(
                     19usize,
-                    std::collections::BTreeSet::from([80usize]),
+                    std::collections::BTreeSet::from([81usize]),
                 )]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3707,11 +3758,11 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 67usize,
+                        rule: 68usize,
                         shifted: 1usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 80usize,
+                        rule: 81usize,
                         shifted: 1usize,
                     },
                 ]),
@@ -3720,12 +3771,12 @@ impl GrammarParser {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([67usize])),
-                    (13usize, std::collections::BTreeSet::from([67usize])),
-                    (19usize, std::collections::BTreeSet::from([67usize])),
+                    (0usize, std::collections::BTreeSet::from([68usize])),
+                    (13usize, std::collections::BTreeSet::from([68usize])),
+                    (19usize, std::collections::BTreeSet::from([68usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 67usize,
+                    rule: 68usize,
                     shifted: 2usize,
                 }]),
             },
@@ -3758,7 +3809,7 @@ impl GrammarParser {
                     (18usize, std::collections::BTreeSet::from([14usize])),
                     (31usize, std::collections::BTreeSet::from([14usize])),
                     (36usize, std::collections::BTreeSet::from([14usize])),
-                    (38usize, std::collections::BTreeSet::from([14usize])),
+                    (39usize, std::collections::BTreeSet::from([14usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 14usize,
@@ -3785,7 +3836,7 @@ impl GrammarParser {
                     (18usize, std::collections::BTreeSet::from([21usize])),
                     (31usize, std::collections::BTreeSet::from([21usize])),
                     (36usize, std::collections::BTreeSet::from([21usize])),
-                    (38usize, std::collections::BTreeSet::from([21usize])),
+                    (39usize, std::collections::BTreeSet::from([21usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 21usize,
@@ -3803,12 +3854,12 @@ impl GrammarParser {
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([69usize])),
-                    (12usize, std::collections::BTreeSet::from([69usize])),
-                    (13usize, std::collections::BTreeSet::from([69usize])),
-                    (16usize, std::collections::BTreeSet::from([69usize])),
-                    (17usize, std::collections::BTreeSet::from([69usize])),
-                    (18usize, std::collections::BTreeSet::from([69usize])),
+                    (0usize, std::collections::BTreeSet::from([70usize])),
+                    (12usize, std::collections::BTreeSet::from([70usize])),
+                    (13usize, std::collections::BTreeSet::from([70usize])),
+                    (16usize, std::collections::BTreeSet::from([70usize])),
+                    (17usize, std::collections::BTreeSet::from([70usize])),
+                    (18usize, std::collections::BTreeSet::from([70usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -3836,7 +3887,7 @@ impl GrammarParser {
                         shifted: 1usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 69usize,
+                        rule: 70usize,
                         shifted: 1usize,
                     },
                 ]),
@@ -3861,7 +3912,7 @@ impl GrammarParser {
                     (18usize, std::collections::BTreeSet::from([17usize])),
                     (31usize, std::collections::BTreeSet::from([17usize])),
                     (36usize, std::collections::BTreeSet::from([17usize])),
-                    (38usize, std::collections::BTreeSet::from([17usize])),
+                    (39usize, std::collections::BTreeSet::from([17usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 17usize,
@@ -3888,7 +3939,7 @@ impl GrammarParser {
                     (18usize, std::collections::BTreeSet::from([18usize])),
                     (31usize, std::collections::BTreeSet::from([18usize])),
                     (36usize, std::collections::BTreeSet::from([18usize])),
-                    (38usize, std::collections::BTreeSet::from([18usize])),
+                    (39usize, std::collections::BTreeSet::from([18usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 18usize,
@@ -3915,7 +3966,7 @@ impl GrammarParser {
                     (18usize, std::collections::BTreeSet::from([19usize])),
                     (31usize, std::collections::BTreeSet::from([19usize])),
                     (36usize, std::collections::BTreeSet::from([19usize])),
-                    (38usize, std::collections::BTreeSet::from([19usize])),
+                    (39usize, std::collections::BTreeSet::from([19usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 19usize,
@@ -3942,7 +3993,7 @@ impl GrammarParser {
                     (18usize, std::collections::BTreeSet::from([20usize])),
                     (31usize, std::collections::BTreeSet::from([20usize])),
                     (36usize, std::collections::BTreeSet::from([20usize])),
-                    (38usize, std::collections::BTreeSet::from([20usize])),
+                    (39usize, std::collections::BTreeSet::from([20usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 20usize,
@@ -4038,7 +4089,7 @@ impl GrammarParser {
                     (18usize, std::collections::BTreeSet::from([25usize])),
                     (31usize, std::collections::BTreeSet::from([25usize])),
                     (36usize, std::collections::BTreeSet::from([25usize])),
-                    (38usize, std::collections::BTreeSet::from([25usize])),
+                    (39usize, std::collections::BTreeSet::from([25usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4156,7 +4207,7 @@ impl GrammarParser {
                     (18usize, std::collections::BTreeSet::from([22usize])),
                     (31usize, std::collections::BTreeSet::from([22usize])),
                     (36usize, std::collections::BTreeSet::from([22usize])),
-                    (38usize, std::collections::BTreeSet::from([22usize])),
+                    (39usize, std::collections::BTreeSet::from([22usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4249,7 +4300,7 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 70usize,
+                        rule: 71usize,
                         shifted: 1usize,
                     },
                 ]),
@@ -4274,7 +4325,7 @@ impl GrammarParser {
                     (18usize, std::collections::BTreeSet::from([23usize])),
                     (31usize, std::collections::BTreeSet::from([23usize])),
                     (36usize, std::collections::BTreeSet::from([23usize])),
-                    (38usize, std::collections::BTreeSet::from([23usize])),
+                    (39usize, std::collections::BTreeSet::from([23usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 23usize,
@@ -4292,12 +4343,12 @@ impl GrammarParser {
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([70usize])),
-                    (12usize, std::collections::BTreeSet::from([70usize])),
-                    (13usize, std::collections::BTreeSet::from([70usize])),
-                    (16usize, std::collections::BTreeSet::from([70usize])),
-                    (17usize, std::collections::BTreeSet::from([70usize])),
-                    (18usize, std::collections::BTreeSet::from([70usize])),
+                    (0usize, std::collections::BTreeSet::from([71usize])),
+                    (12usize, std::collections::BTreeSet::from([71usize])),
+                    (13usize, std::collections::BTreeSet::from([71usize])),
+                    (16usize, std::collections::BTreeSet::from([71usize])),
+                    (17usize, std::collections::BTreeSet::from([71usize])),
+                    (18usize, std::collections::BTreeSet::from([71usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4325,7 +4376,7 @@ impl GrammarParser {
                         shifted: 1usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 70usize,
+                        rule: 71usize,
                         shifted: 2usize,
                     },
                 ]),
@@ -4350,7 +4401,7 @@ impl GrammarParser {
                     (18usize, std::collections::BTreeSet::from([9usize])),
                     (31usize, std::collections::BTreeSet::from([9usize])),
                     (36usize, std::collections::BTreeSet::from([9usize])),
-                    (38usize, std::collections::BTreeSet::from([9usize])),
+                    (39usize, std::collections::BTreeSet::from([9usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4386,7 +4437,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
                     (3usize, 40usize),
-                    (38usize, 59usize),
+                    (39usize, 59usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([]),
@@ -4414,15 +4465,15 @@ impl GrammarParser {
                     (GrammarNonTerminals::TokenMapped, 42usize),
                     (GrammarNonTerminals::TerminalSet, 25usize),
                     (GrammarNonTerminals::Pattern, 43usize),
-                    (GrammarNonTerminals::_TokenMappedPlus31, 44usize),
-                    (GrammarNonTerminals::_TokenMappedStar32, 46usize),
+                    (GrammarNonTerminals::_TokenMappedPlus32, 44usize),
+                    (GrammarNonTerminals::_TokenMappedStar33, 46usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (3usize, std::collections::BTreeSet::from([60usize])),
-                    (15usize, std::collections::BTreeSet::from([60usize])),
-                    (31usize, std::collections::BTreeSet::from([60usize])),
-                    (36usize, std::collections::BTreeSet::from([60usize])),
-                    (38usize, std::collections::BTreeSet::from([60usize])),
+                    (3usize, std::collections::BTreeSet::from([61usize])),
+                    (15usize, std::collections::BTreeSet::from([61usize])),
+                    (31usize, std::collections::BTreeSet::from([61usize])),
+                    (36usize, std::collections::BTreeSet::from([61usize])),
+                    (39usize, std::collections::BTreeSet::from([61usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4490,10 +4541,6 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 58usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
                         rule: 59usize,
                         shifted: 0usize,
                     },
@@ -4502,7 +4549,11 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 78usize,
+                        rule: 61usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 79usize,
                         shifted: 0usize,
                     },
                 ]),
@@ -4512,7 +4563,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
                     (3usize, std::collections::BTreeSet::from([3usize])),
-                    (38usize, std::collections::BTreeSet::from([3usize])),
+                    (39usize, std::collections::BTreeSet::from([3usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 3usize,
@@ -4523,19 +4574,19 @@ impl GrammarParser {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([58usize])),
-                    (3usize, std::collections::BTreeSet::from([58usize])),
-                    (12usize, std::collections::BTreeSet::from([58usize])),
-                    (13usize, std::collections::BTreeSet::from([58usize])),
-                    (15usize, std::collections::BTreeSet::from([58usize])),
-                    (16usize, std::collections::BTreeSet::from([58usize])),
-                    (18usize, std::collections::BTreeSet::from([58usize])),
-                    (31usize, std::collections::BTreeSet::from([58usize])),
-                    (36usize, std::collections::BTreeSet::from([58usize])),
-                    (38usize, std::collections::BTreeSet::from([58usize])),
+                    (0usize, std::collections::BTreeSet::from([59usize])),
+                    (3usize, std::collections::BTreeSet::from([59usize])),
+                    (12usize, std::collections::BTreeSet::from([59usize])),
+                    (13usize, std::collections::BTreeSet::from([59usize])),
+                    (15usize, std::collections::BTreeSet::from([59usize])),
+                    (16usize, std::collections::BTreeSet::from([59usize])),
+                    (18usize, std::collections::BTreeSet::from([59usize])),
+                    (31usize, std::collections::BTreeSet::from([59usize])),
+                    (36usize, std::collections::BTreeSet::from([59usize])),
+                    (39usize, std::collections::BTreeSet::from([59usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 58usize,
+                    rule: 59usize,
                     shifted: 1usize,
                 }]),
             },
@@ -4559,7 +4610,7 @@ impl GrammarParser {
                     (18usize, std::collections::BTreeSet::from([8usize])),
                     (31usize, std::collections::BTreeSet::from([8usize])),
                     (36usize, std::collections::BTreeSet::from([8usize])),
-                    (38usize, std::collections::BTreeSet::from([8usize])),
+                    (39usize, std::collections::BTreeSet::from([8usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4606,11 +4657,11 @@ impl GrammarParser {
                     (GrammarNonTerminals::Pattern, 43usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (3usize, std::collections::BTreeSet::from([78usize])),
-                    (15usize, std::collections::BTreeSet::from([78usize])),
-                    (31usize, std::collections::BTreeSet::from([78usize])),
-                    (36usize, std::collections::BTreeSet::from([78usize])),
-                    (38usize, std::collections::BTreeSet::from([78usize])),
+                    (3usize, std::collections::BTreeSet::from([79usize])),
+                    (15usize, std::collections::BTreeSet::from([79usize])),
+                    (31usize, std::collections::BTreeSet::from([79usize])),
+                    (36usize, std::collections::BTreeSet::from([79usize])),
+                    (39usize, std::collections::BTreeSet::from([79usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4670,11 +4721,11 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 59usize,
+                        rule: 60usize,
                         shifted: 1usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 78usize,
+                        rule: 79usize,
                         shifted: 1usize,
                     },
                 ]),
@@ -4683,19 +4734,19 @@ impl GrammarParser {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([59usize])),
-                    (3usize, std::collections::BTreeSet::from([59usize])),
-                    (12usize, std::collections::BTreeSet::from([59usize])),
-                    (13usize, std::collections::BTreeSet::from([59usize])),
-                    (15usize, std::collections::BTreeSet::from([59usize])),
-                    (16usize, std::collections::BTreeSet::from([59usize])),
-                    (18usize, std::collections::BTreeSet::from([59usize])),
-                    (31usize, std::collections::BTreeSet::from([59usize])),
-                    (36usize, std::collections::BTreeSet::from([59usize])),
-                    (38usize, std::collections::BTreeSet::from([59usize])),
+                    (0usize, std::collections::BTreeSet::from([60usize])),
+                    (3usize, std::collections::BTreeSet::from([60usize])),
+                    (12usize, std::collections::BTreeSet::from([60usize])),
+                    (13usize, std::collections::BTreeSet::from([60usize])),
+                    (15usize, std::collections::BTreeSet::from([60usize])),
+                    (16usize, std::collections::BTreeSet::from([60usize])),
+                    (18usize, std::collections::BTreeSet::from([60usize])),
+                    (31usize, std::collections::BTreeSet::from([60usize])),
+                    (36usize, std::collections::BTreeSet::from([60usize])),
+                    (39usize, std::collections::BTreeSet::from([60usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 59usize,
+                    rule: 60usize,
                     shifted: 2usize,
                 }]),
             },
@@ -4706,13 +4757,13 @@ impl GrammarParser {
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::PrecDef, 53usize),
-                    (GrammarNonTerminals::_PrecDefPlus33, 54usize),
-                    (GrammarNonTerminals::_PrecDefStar34, 56usize),
+                    (GrammarNonTerminals::_PrecDefPlus34, 54usize),
+                    (GrammarNonTerminals::_PrecDefStar35, 56usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (3usize, std::collections::BTreeSet::from([63usize])),
-                    (15usize, std::collections::BTreeSet::from([63usize])),
-                    (38usize, std::collections::BTreeSet::from([63usize])),
+                    (3usize, std::collections::BTreeSet::from([64usize])),
+                    (15usize, std::collections::BTreeSet::from([64usize])),
+                    (39usize, std::collections::BTreeSet::from([64usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4728,10 +4779,6 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 61usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
                         rule: 62usize,
                         shifted: 0usize,
                     },
@@ -4740,7 +4787,11 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 79usize,
+                        rule: 64usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 80usize,
                         shifted: 0usize,
                     },
                 ]),
@@ -4780,7 +4831,7 @@ impl GrammarParser {
                     (15usize, std::collections::BTreeSet::from([34usize])),
                     (31usize, std::collections::BTreeSet::from([34usize])),
                     (36usize, std::collections::BTreeSet::from([34usize])),
-                    (38usize, std::collections::BTreeSet::from([34usize])),
+                    (39usize, std::collections::BTreeSet::from([34usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 34usize,
@@ -4797,7 +4848,7 @@ impl GrammarParser {
                     (15usize, std::collections::BTreeSet::from([35usize])),
                     (31usize, std::collections::BTreeSet::from([35usize])),
                     (36usize, std::collections::BTreeSet::from([35usize])),
-                    (38usize, std::collections::BTreeSet::from([35usize])),
+                    (39usize, std::collections::BTreeSet::from([35usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 35usize,
@@ -4812,7 +4863,7 @@ impl GrammarParser {
                     (15usize, std::collections::BTreeSet::from([6usize])),
                     (31usize, std::collections::BTreeSet::from([6usize])),
                     (36usize, std::collections::BTreeSet::from([6usize])),
-                    (38usize, std::collections::BTreeSet::from([6usize])),
+                    (39usize, std::collections::BTreeSet::from([6usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 6usize,
@@ -4836,7 +4887,7 @@ impl GrammarParser {
                     (15usize, std::collections::BTreeSet::from([7usize])),
                     (31usize, std::collections::BTreeSet::from([7usize])),
                     (36usize, std::collections::BTreeSet::from([7usize])),
-                    (38usize, std::collections::BTreeSet::from([7usize])),
+                    (39usize, std::collections::BTreeSet::from([7usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 7usize,
@@ -4847,14 +4898,14 @@ impl GrammarParser {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (3usize, std::collections::BTreeSet::from([61usize])),
-                    (15usize, std::collections::BTreeSet::from([61usize])),
-                    (31usize, std::collections::BTreeSet::from([61usize])),
-                    (36usize, std::collections::BTreeSet::from([61usize])),
-                    (38usize, std::collections::BTreeSet::from([61usize])),
+                    (3usize, std::collections::BTreeSet::from([62usize])),
+                    (15usize, std::collections::BTreeSet::from([62usize])),
+                    (31usize, std::collections::BTreeSet::from([62usize])),
+                    (36usize, std::collections::BTreeSet::from([62usize])),
+                    (39usize, std::collections::BTreeSet::from([62usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 61usize,
+                    rule: 62usize,
                     shifted: 1usize,
                 }]),
             },
@@ -4868,9 +4919,9 @@ impl GrammarParser {
                     55usize,
                 )]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (3usize, std::collections::BTreeSet::from([79usize])),
-                    (15usize, std::collections::BTreeSet::from([79usize])),
-                    (38usize, std::collections::BTreeSet::from([79usize])),
+                    (3usize, std::collections::BTreeSet::from([80usize])),
+                    (15usize, std::collections::BTreeSet::from([80usize])),
+                    (39usize, std::collections::BTreeSet::from([80usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4882,11 +4933,11 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 62usize,
+                        rule: 63usize,
                         shifted: 1usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 79usize,
+                        rule: 80usize,
                         shifted: 1usize,
                     },
                 ]),
@@ -4895,14 +4946,14 @@ impl GrammarParser {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (3usize, std::collections::BTreeSet::from([62usize])),
-                    (15usize, std::collections::BTreeSet::from([62usize])),
-                    (31usize, std::collections::BTreeSet::from([62usize])),
-                    (36usize, std::collections::BTreeSet::from([62usize])),
-                    (38usize, std::collections::BTreeSet::from([62usize])),
+                    (3usize, std::collections::BTreeSet::from([63usize])),
+                    (15usize, std::collections::BTreeSet::from([63usize])),
+                    (31usize, std::collections::BTreeSet::from([63usize])),
+                    (36usize, std::collections::BTreeSet::from([63usize])),
+                    (39usize, std::collections::BTreeSet::from([63usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 62usize,
+                    rule: 63usize,
                     shifted: 2usize,
                 }]),
             },
@@ -4914,7 +4965,7 @@ impl GrammarParser {
                 )]),
                 reduce_map: std::collections::BTreeMap::from([
                     (3usize, std::collections::BTreeSet::from([27usize])),
-                    (38usize, std::collections::BTreeSet::from([27usize])),
+                    (39usize, std::collections::BTreeSet::from([27usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -4936,7 +4987,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
                     (3usize, std::collections::BTreeSet::from([26usize])),
-                    (38usize, std::collections::BTreeSet::from([26usize])),
+                    (39usize, std::collections::BTreeSet::from([26usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 26usize,
@@ -4948,7 +4999,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
                     (3usize, std::collections::BTreeSet::from([5usize])),
-                    (38usize, std::collections::BTreeSet::from([5usize])),
+                    (39usize, std::collections::BTreeSet::from([5usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 5usize,
@@ -4976,7 +5027,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([0usize])),
                     (35usize, std::collections::BTreeSet::from([0usize])),
                     (37usize, std::collections::BTreeSet::from([0usize])),
-                    (39usize, std::collections::BTreeSet::from([0usize])),
+                    (38usize, std::collections::BTreeSet::from([0usize])),
+                    (40usize, std::collections::BTreeSet::from([0usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 0usize,
@@ -4988,7 +5040,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
                     (3usize, std::collections::BTreeSet::from([4usize])),
-                    (38usize, std::collections::BTreeSet::from([4usize])),
+                    (39usize, std::collections::BTreeSet::from([4usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 4usize,
@@ -5068,11 +5120,12 @@ impl GrammarParser {
                     (35usize, 100usize),
                     (36usize, 101usize),
                     (37usize, 102usize),
+                    (38usize, 103usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RustCode, 103usize),
-                    (GrammarNonTerminals::_TermSet39, 105usize),
-                    (GrammarNonTerminals::__TermSet39Plus40, 106usize),
+                    (GrammarNonTerminals::RustCode, 104usize),
+                    (GrammarNonTerminals::_TermSet40, 106usize),
+                    (GrammarNonTerminals::__TermSet40Plus41, 107usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([
@@ -5085,15 +5138,11 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 71usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
                         rule: 72usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 81usize,
+                        rule: 73usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -5244,105 +5293,15 @@ impl GrammarParser {
                         rule: 118usize,
                         shifted: 0usize,
                     },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 119usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 120usize,
+                        shifted: 0usize,
+                    },
                 ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([81usize])),
-                    (1usize, std::collections::BTreeSet::from([81usize])),
-                    (2usize, std::collections::BTreeSet::from([81usize])),
-                    (3usize, std::collections::BTreeSet::from([81usize])),
-                    (4usize, std::collections::BTreeSet::from([81usize])),
-                    (5usize, std::collections::BTreeSet::from([81usize])),
-                    (6usize, std::collections::BTreeSet::from([81usize])),
-                    (7usize, std::collections::BTreeSet::from([81usize])),
-                    (8usize, std::collections::BTreeSet::from([81usize])),
-                    (9usize, std::collections::BTreeSet::from([81usize])),
-                    (10usize, std::collections::BTreeSet::from([81usize])),
-                    (11usize, std::collections::BTreeSet::from([81usize])),
-                    (12usize, std::collections::BTreeSet::from([81usize])),
-                    (13usize, std::collections::BTreeSet::from([81usize])),
-                    (14usize, std::collections::BTreeSet::from([81usize])),
-                    (15usize, std::collections::BTreeSet::from([81usize])),
-                    (16usize, std::collections::BTreeSet::from([81usize])),
-                    (17usize, std::collections::BTreeSet::from([81usize])),
-                    (18usize, std::collections::BTreeSet::from([81usize])),
-                    (19usize, std::collections::BTreeSet::from([81usize])),
-                    (20usize, std::collections::BTreeSet::from([81usize])),
-                    (21usize, std::collections::BTreeSet::from([81usize])),
-                    (22usize, std::collections::BTreeSet::from([81usize])),
-                    (23usize, std::collections::BTreeSet::from([81usize])),
-                    (24usize, std::collections::BTreeSet::from([81usize])),
-                    (25usize, std::collections::BTreeSet::from([81usize])),
-                    (26usize, std::collections::BTreeSet::from([81usize])),
-                    (27usize, std::collections::BTreeSet::from([81usize])),
-                    (28usize, std::collections::BTreeSet::from([81usize])),
-                    (29usize, std::collections::BTreeSet::from([81usize])),
-                    (30usize, std::collections::BTreeSet::from([81usize])),
-                    (31usize, std::collections::BTreeSet::from([81usize])),
-                    (32usize, std::collections::BTreeSet::from([81usize])),
-                    (33usize, std::collections::BTreeSet::from([81usize])),
-                    (34usize, std::collections::BTreeSet::from([81usize])),
-                    (35usize, std::collections::BTreeSet::from([81usize])),
-                    (36usize, std::collections::BTreeSet::from([81usize])),
-                    (37usize, std::collections::BTreeSet::from([81usize])),
-                    (38usize, std::collections::BTreeSet::from([81usize])),
-                ]),
-                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 81usize,
-                    shifted: 1usize,
-                }]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([84usize])),
-                    (1usize, std::collections::BTreeSet::from([84usize])),
-                    (2usize, std::collections::BTreeSet::from([84usize])),
-                    (3usize, std::collections::BTreeSet::from([84usize])),
-                    (4usize, std::collections::BTreeSet::from([84usize])),
-                    (5usize, std::collections::BTreeSet::from([84usize])),
-                    (6usize, std::collections::BTreeSet::from([84usize])),
-                    (7usize, std::collections::BTreeSet::from([84usize])),
-                    (8usize, std::collections::BTreeSet::from([84usize])),
-                    (9usize, std::collections::BTreeSet::from([84usize])),
-                    (10usize, std::collections::BTreeSet::from([84usize])),
-                    (11usize, std::collections::BTreeSet::from([84usize])),
-                    (12usize, std::collections::BTreeSet::from([84usize])),
-                    (13usize, std::collections::BTreeSet::from([84usize])),
-                    (14usize, std::collections::BTreeSet::from([84usize])),
-                    (15usize, std::collections::BTreeSet::from([84usize])),
-                    (16usize, std::collections::BTreeSet::from([84usize])),
-                    (17usize, std::collections::BTreeSet::from([84usize])),
-                    (18usize, std::collections::BTreeSet::from([84usize])),
-                    (19usize, std::collections::BTreeSet::from([84usize])),
-                    (20usize, std::collections::BTreeSet::from([84usize])),
-                    (21usize, std::collections::BTreeSet::from([84usize])),
-                    (22usize, std::collections::BTreeSet::from([84usize])),
-                    (23usize, std::collections::BTreeSet::from([84usize])),
-                    (24usize, std::collections::BTreeSet::from([84usize])),
-                    (25usize, std::collections::BTreeSet::from([84usize])),
-                    (26usize, std::collections::BTreeSet::from([84usize])),
-                    (27usize, std::collections::BTreeSet::from([84usize])),
-                    (28usize, std::collections::BTreeSet::from([84usize])),
-                    (29usize, std::collections::BTreeSet::from([84usize])),
-                    (30usize, std::collections::BTreeSet::from([84usize])),
-                    (31usize, std::collections::BTreeSet::from([84usize])),
-                    (32usize, std::collections::BTreeSet::from([84usize])),
-                    (33usize, std::collections::BTreeSet::from([84usize])),
-                    (34usize, std::collections::BTreeSet::from([84usize])),
-                    (35usize, std::collections::BTreeSet::from([84usize])),
-                    (36usize, std::collections::BTreeSet::from([84usize])),
-                    (37usize, std::collections::BTreeSet::from([84usize])),
-                    (38usize, std::collections::BTreeSet::from([84usize])),
-                ]),
-                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 84usize,
-                    shifted: 1usize,
-                }]),
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -5387,58 +5346,10 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([82usize])),
                     (37usize, std::collections::BTreeSet::from([82usize])),
                     (38usize, std::collections::BTreeSet::from([82usize])),
+                    (39usize, std::collections::BTreeSet::from([82usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 82usize,
-                    shifted: 1usize,
-                }]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([83usize])),
-                    (1usize, std::collections::BTreeSet::from([83usize])),
-                    (2usize, std::collections::BTreeSet::from([83usize])),
-                    (3usize, std::collections::BTreeSet::from([83usize])),
-                    (4usize, std::collections::BTreeSet::from([83usize])),
-                    (5usize, std::collections::BTreeSet::from([83usize])),
-                    (6usize, std::collections::BTreeSet::from([83usize])),
-                    (7usize, std::collections::BTreeSet::from([83usize])),
-                    (8usize, std::collections::BTreeSet::from([83usize])),
-                    (9usize, std::collections::BTreeSet::from([83usize])),
-                    (10usize, std::collections::BTreeSet::from([83usize])),
-                    (11usize, std::collections::BTreeSet::from([83usize])),
-                    (12usize, std::collections::BTreeSet::from([83usize])),
-                    (13usize, std::collections::BTreeSet::from([83usize])),
-                    (14usize, std::collections::BTreeSet::from([83usize])),
-                    (15usize, std::collections::BTreeSet::from([83usize])),
-                    (16usize, std::collections::BTreeSet::from([83usize])),
-                    (17usize, std::collections::BTreeSet::from([83usize])),
-                    (18usize, std::collections::BTreeSet::from([83usize])),
-                    (19usize, std::collections::BTreeSet::from([83usize])),
-                    (20usize, std::collections::BTreeSet::from([83usize])),
-                    (21usize, std::collections::BTreeSet::from([83usize])),
-                    (22usize, std::collections::BTreeSet::from([83usize])),
-                    (23usize, std::collections::BTreeSet::from([83usize])),
-                    (24usize, std::collections::BTreeSet::from([83usize])),
-                    (25usize, std::collections::BTreeSet::from([83usize])),
-                    (26usize, std::collections::BTreeSet::from([83usize])),
-                    (27usize, std::collections::BTreeSet::from([83usize])),
-                    (28usize, std::collections::BTreeSet::from([83usize])),
-                    (29usize, std::collections::BTreeSet::from([83usize])),
-                    (30usize, std::collections::BTreeSet::from([83usize])),
-                    (31usize, std::collections::BTreeSet::from([83usize])),
-                    (32usize, std::collections::BTreeSet::from([83usize])),
-                    (33usize, std::collections::BTreeSet::from([83usize])),
-                    (34usize, std::collections::BTreeSet::from([83usize])),
-                    (35usize, std::collections::BTreeSet::from([83usize])),
-                    (36usize, std::collections::BTreeSet::from([83usize])),
-                    (37usize, std::collections::BTreeSet::from([83usize])),
-                    (38usize, std::collections::BTreeSet::from([83usize])),
-                ]),
-                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 83usize,
                     shifted: 1usize,
                 }]),
             },
@@ -5485,9 +5396,110 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([85usize])),
                     (37usize, std::collections::BTreeSet::from([85usize])),
                     (38usize, std::collections::BTreeSet::from([85usize])),
+                    (39usize, std::collections::BTreeSet::from([85usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 85usize,
+                    shifted: 1usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([
+                    (0usize, std::collections::BTreeSet::from([83usize])),
+                    (1usize, std::collections::BTreeSet::from([83usize])),
+                    (2usize, std::collections::BTreeSet::from([83usize])),
+                    (3usize, std::collections::BTreeSet::from([83usize])),
+                    (4usize, std::collections::BTreeSet::from([83usize])),
+                    (5usize, std::collections::BTreeSet::from([83usize])),
+                    (6usize, std::collections::BTreeSet::from([83usize])),
+                    (7usize, std::collections::BTreeSet::from([83usize])),
+                    (8usize, std::collections::BTreeSet::from([83usize])),
+                    (9usize, std::collections::BTreeSet::from([83usize])),
+                    (10usize, std::collections::BTreeSet::from([83usize])),
+                    (11usize, std::collections::BTreeSet::from([83usize])),
+                    (12usize, std::collections::BTreeSet::from([83usize])),
+                    (13usize, std::collections::BTreeSet::from([83usize])),
+                    (14usize, std::collections::BTreeSet::from([83usize])),
+                    (15usize, std::collections::BTreeSet::from([83usize])),
+                    (16usize, std::collections::BTreeSet::from([83usize])),
+                    (17usize, std::collections::BTreeSet::from([83usize])),
+                    (18usize, std::collections::BTreeSet::from([83usize])),
+                    (19usize, std::collections::BTreeSet::from([83usize])),
+                    (20usize, std::collections::BTreeSet::from([83usize])),
+                    (21usize, std::collections::BTreeSet::from([83usize])),
+                    (22usize, std::collections::BTreeSet::from([83usize])),
+                    (23usize, std::collections::BTreeSet::from([83usize])),
+                    (24usize, std::collections::BTreeSet::from([83usize])),
+                    (25usize, std::collections::BTreeSet::from([83usize])),
+                    (26usize, std::collections::BTreeSet::from([83usize])),
+                    (27usize, std::collections::BTreeSet::from([83usize])),
+                    (28usize, std::collections::BTreeSet::from([83usize])),
+                    (29usize, std::collections::BTreeSet::from([83usize])),
+                    (30usize, std::collections::BTreeSet::from([83usize])),
+                    (31usize, std::collections::BTreeSet::from([83usize])),
+                    (32usize, std::collections::BTreeSet::from([83usize])),
+                    (33usize, std::collections::BTreeSet::from([83usize])),
+                    (34usize, std::collections::BTreeSet::from([83usize])),
+                    (35usize, std::collections::BTreeSet::from([83usize])),
+                    (36usize, std::collections::BTreeSet::from([83usize])),
+                    (37usize, std::collections::BTreeSet::from([83usize])),
+                    (38usize, std::collections::BTreeSet::from([83usize])),
+                    (39usize, std::collections::BTreeSet::from([83usize])),
+                ]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 83usize,
+                    shifted: 1usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([
+                    (0usize, std::collections::BTreeSet::from([84usize])),
+                    (1usize, std::collections::BTreeSet::from([84usize])),
+                    (2usize, std::collections::BTreeSet::from([84usize])),
+                    (3usize, std::collections::BTreeSet::from([84usize])),
+                    (4usize, std::collections::BTreeSet::from([84usize])),
+                    (5usize, std::collections::BTreeSet::from([84usize])),
+                    (6usize, std::collections::BTreeSet::from([84usize])),
+                    (7usize, std::collections::BTreeSet::from([84usize])),
+                    (8usize, std::collections::BTreeSet::from([84usize])),
+                    (9usize, std::collections::BTreeSet::from([84usize])),
+                    (10usize, std::collections::BTreeSet::from([84usize])),
+                    (11usize, std::collections::BTreeSet::from([84usize])),
+                    (12usize, std::collections::BTreeSet::from([84usize])),
+                    (13usize, std::collections::BTreeSet::from([84usize])),
+                    (14usize, std::collections::BTreeSet::from([84usize])),
+                    (15usize, std::collections::BTreeSet::from([84usize])),
+                    (16usize, std::collections::BTreeSet::from([84usize])),
+                    (17usize, std::collections::BTreeSet::from([84usize])),
+                    (18usize, std::collections::BTreeSet::from([84usize])),
+                    (19usize, std::collections::BTreeSet::from([84usize])),
+                    (20usize, std::collections::BTreeSet::from([84usize])),
+                    (21usize, std::collections::BTreeSet::from([84usize])),
+                    (22usize, std::collections::BTreeSet::from([84usize])),
+                    (23usize, std::collections::BTreeSet::from([84usize])),
+                    (24usize, std::collections::BTreeSet::from([84usize])),
+                    (25usize, std::collections::BTreeSet::from([84usize])),
+                    (26usize, std::collections::BTreeSet::from([84usize])),
+                    (27usize, std::collections::BTreeSet::from([84usize])),
+                    (28usize, std::collections::BTreeSet::from([84usize])),
+                    (29usize, std::collections::BTreeSet::from([84usize])),
+                    (30usize, std::collections::BTreeSet::from([84usize])),
+                    (31usize, std::collections::BTreeSet::from([84usize])),
+                    (32usize, std::collections::BTreeSet::from([84usize])),
+                    (33usize, std::collections::BTreeSet::from([84usize])),
+                    (34usize, std::collections::BTreeSet::from([84usize])),
+                    (35usize, std::collections::BTreeSet::from([84usize])),
+                    (36usize, std::collections::BTreeSet::from([84usize])),
+                    (37usize, std::collections::BTreeSet::from([84usize])),
+                    (38usize, std::collections::BTreeSet::from([84usize])),
+                    (39usize, std::collections::BTreeSet::from([84usize])),
+                ]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 84usize,
                     shifted: 1usize,
                 }]),
             },
@@ -5534,6 +5546,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([86usize])),
                     (37usize, std::collections::BTreeSet::from([86usize])),
                     (38usize, std::collections::BTreeSet::from([86usize])),
+                    (39usize, std::collections::BTreeSet::from([86usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 86usize,
@@ -5583,6 +5596,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([87usize])),
                     (37usize, std::collections::BTreeSet::from([87usize])),
                     (38usize, std::collections::BTreeSet::from([87usize])),
+                    (39usize, std::collections::BTreeSet::from([87usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 87usize,
@@ -5632,58 +5646,10 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([88usize])),
                     (37usize, std::collections::BTreeSet::from([88usize])),
                     (38usize, std::collections::BTreeSet::from([88usize])),
+                    (39usize, std::collections::BTreeSet::from([88usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 88usize,
-                    shifted: 1usize,
-                }]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([91usize])),
-                    (1usize, std::collections::BTreeSet::from([91usize])),
-                    (2usize, std::collections::BTreeSet::from([91usize])),
-                    (3usize, std::collections::BTreeSet::from([91usize])),
-                    (4usize, std::collections::BTreeSet::from([91usize])),
-                    (5usize, std::collections::BTreeSet::from([91usize])),
-                    (6usize, std::collections::BTreeSet::from([91usize])),
-                    (7usize, std::collections::BTreeSet::from([91usize])),
-                    (8usize, std::collections::BTreeSet::from([91usize])),
-                    (9usize, std::collections::BTreeSet::from([91usize])),
-                    (10usize, std::collections::BTreeSet::from([91usize])),
-                    (11usize, std::collections::BTreeSet::from([91usize])),
-                    (12usize, std::collections::BTreeSet::from([91usize])),
-                    (13usize, std::collections::BTreeSet::from([91usize])),
-                    (14usize, std::collections::BTreeSet::from([91usize])),
-                    (15usize, std::collections::BTreeSet::from([91usize])),
-                    (16usize, std::collections::BTreeSet::from([91usize])),
-                    (17usize, std::collections::BTreeSet::from([91usize])),
-                    (18usize, std::collections::BTreeSet::from([91usize])),
-                    (19usize, std::collections::BTreeSet::from([91usize])),
-                    (20usize, std::collections::BTreeSet::from([91usize])),
-                    (21usize, std::collections::BTreeSet::from([91usize])),
-                    (22usize, std::collections::BTreeSet::from([91usize])),
-                    (23usize, std::collections::BTreeSet::from([91usize])),
-                    (24usize, std::collections::BTreeSet::from([91usize])),
-                    (25usize, std::collections::BTreeSet::from([91usize])),
-                    (26usize, std::collections::BTreeSet::from([91usize])),
-                    (27usize, std::collections::BTreeSet::from([91usize])),
-                    (28usize, std::collections::BTreeSet::from([91usize])),
-                    (29usize, std::collections::BTreeSet::from([91usize])),
-                    (30usize, std::collections::BTreeSet::from([91usize])),
-                    (31usize, std::collections::BTreeSet::from([91usize])),
-                    (32usize, std::collections::BTreeSet::from([91usize])),
-                    (33usize, std::collections::BTreeSet::from([91usize])),
-                    (34usize, std::collections::BTreeSet::from([91usize])),
-                    (35usize, std::collections::BTreeSet::from([91usize])),
-                    (36usize, std::collections::BTreeSet::from([91usize])),
-                    (37usize, std::collections::BTreeSet::from([91usize])),
-                    (38usize, std::collections::BTreeSet::from([91usize])),
-                ]),
-                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 91usize,
                     shifted: 1usize,
                 }]),
             },
@@ -5730,58 +5696,10 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([89usize])),
                     (37usize, std::collections::BTreeSet::from([89usize])),
                     (38usize, std::collections::BTreeSet::from([89usize])),
+                    (39usize, std::collections::BTreeSet::from([89usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 89usize,
-                    shifted: 1usize,
-                }]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([90usize])),
-                    (1usize, std::collections::BTreeSet::from([90usize])),
-                    (2usize, std::collections::BTreeSet::from([90usize])),
-                    (3usize, std::collections::BTreeSet::from([90usize])),
-                    (4usize, std::collections::BTreeSet::from([90usize])),
-                    (5usize, std::collections::BTreeSet::from([90usize])),
-                    (6usize, std::collections::BTreeSet::from([90usize])),
-                    (7usize, std::collections::BTreeSet::from([90usize])),
-                    (8usize, std::collections::BTreeSet::from([90usize])),
-                    (9usize, std::collections::BTreeSet::from([90usize])),
-                    (10usize, std::collections::BTreeSet::from([90usize])),
-                    (11usize, std::collections::BTreeSet::from([90usize])),
-                    (12usize, std::collections::BTreeSet::from([90usize])),
-                    (13usize, std::collections::BTreeSet::from([90usize])),
-                    (14usize, std::collections::BTreeSet::from([90usize])),
-                    (15usize, std::collections::BTreeSet::from([90usize])),
-                    (16usize, std::collections::BTreeSet::from([90usize])),
-                    (17usize, std::collections::BTreeSet::from([90usize])),
-                    (18usize, std::collections::BTreeSet::from([90usize])),
-                    (19usize, std::collections::BTreeSet::from([90usize])),
-                    (20usize, std::collections::BTreeSet::from([90usize])),
-                    (21usize, std::collections::BTreeSet::from([90usize])),
-                    (22usize, std::collections::BTreeSet::from([90usize])),
-                    (23usize, std::collections::BTreeSet::from([90usize])),
-                    (24usize, std::collections::BTreeSet::from([90usize])),
-                    (25usize, std::collections::BTreeSet::from([90usize])),
-                    (26usize, std::collections::BTreeSet::from([90usize])),
-                    (27usize, std::collections::BTreeSet::from([90usize])),
-                    (28usize, std::collections::BTreeSet::from([90usize])),
-                    (29usize, std::collections::BTreeSet::from([90usize])),
-                    (30usize, std::collections::BTreeSet::from([90usize])),
-                    (31usize, std::collections::BTreeSet::from([90usize])),
-                    (32usize, std::collections::BTreeSet::from([90usize])),
-                    (33usize, std::collections::BTreeSet::from([90usize])),
-                    (34usize, std::collections::BTreeSet::from([90usize])),
-                    (35usize, std::collections::BTreeSet::from([90usize])),
-                    (36usize, std::collections::BTreeSet::from([90usize])),
-                    (37usize, std::collections::BTreeSet::from([90usize])),
-                    (38usize, std::collections::BTreeSet::from([90usize])),
-                ]),
-                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 90usize,
                     shifted: 1usize,
                 }]),
             },
@@ -5828,9 +5746,110 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([92usize])),
                     (37usize, std::collections::BTreeSet::from([92usize])),
                     (38usize, std::collections::BTreeSet::from([92usize])),
+                    (39usize, std::collections::BTreeSet::from([92usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 92usize,
+                    shifted: 1usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([
+                    (0usize, std::collections::BTreeSet::from([90usize])),
+                    (1usize, std::collections::BTreeSet::from([90usize])),
+                    (2usize, std::collections::BTreeSet::from([90usize])),
+                    (3usize, std::collections::BTreeSet::from([90usize])),
+                    (4usize, std::collections::BTreeSet::from([90usize])),
+                    (5usize, std::collections::BTreeSet::from([90usize])),
+                    (6usize, std::collections::BTreeSet::from([90usize])),
+                    (7usize, std::collections::BTreeSet::from([90usize])),
+                    (8usize, std::collections::BTreeSet::from([90usize])),
+                    (9usize, std::collections::BTreeSet::from([90usize])),
+                    (10usize, std::collections::BTreeSet::from([90usize])),
+                    (11usize, std::collections::BTreeSet::from([90usize])),
+                    (12usize, std::collections::BTreeSet::from([90usize])),
+                    (13usize, std::collections::BTreeSet::from([90usize])),
+                    (14usize, std::collections::BTreeSet::from([90usize])),
+                    (15usize, std::collections::BTreeSet::from([90usize])),
+                    (16usize, std::collections::BTreeSet::from([90usize])),
+                    (17usize, std::collections::BTreeSet::from([90usize])),
+                    (18usize, std::collections::BTreeSet::from([90usize])),
+                    (19usize, std::collections::BTreeSet::from([90usize])),
+                    (20usize, std::collections::BTreeSet::from([90usize])),
+                    (21usize, std::collections::BTreeSet::from([90usize])),
+                    (22usize, std::collections::BTreeSet::from([90usize])),
+                    (23usize, std::collections::BTreeSet::from([90usize])),
+                    (24usize, std::collections::BTreeSet::from([90usize])),
+                    (25usize, std::collections::BTreeSet::from([90usize])),
+                    (26usize, std::collections::BTreeSet::from([90usize])),
+                    (27usize, std::collections::BTreeSet::from([90usize])),
+                    (28usize, std::collections::BTreeSet::from([90usize])),
+                    (29usize, std::collections::BTreeSet::from([90usize])),
+                    (30usize, std::collections::BTreeSet::from([90usize])),
+                    (31usize, std::collections::BTreeSet::from([90usize])),
+                    (32usize, std::collections::BTreeSet::from([90usize])),
+                    (33usize, std::collections::BTreeSet::from([90usize])),
+                    (34usize, std::collections::BTreeSet::from([90usize])),
+                    (35usize, std::collections::BTreeSet::from([90usize])),
+                    (36usize, std::collections::BTreeSet::from([90usize])),
+                    (37usize, std::collections::BTreeSet::from([90usize])),
+                    (38usize, std::collections::BTreeSet::from([90usize])),
+                    (39usize, std::collections::BTreeSet::from([90usize])),
+                ]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 90usize,
+                    shifted: 1usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([
+                    (0usize, std::collections::BTreeSet::from([91usize])),
+                    (1usize, std::collections::BTreeSet::from([91usize])),
+                    (2usize, std::collections::BTreeSet::from([91usize])),
+                    (3usize, std::collections::BTreeSet::from([91usize])),
+                    (4usize, std::collections::BTreeSet::from([91usize])),
+                    (5usize, std::collections::BTreeSet::from([91usize])),
+                    (6usize, std::collections::BTreeSet::from([91usize])),
+                    (7usize, std::collections::BTreeSet::from([91usize])),
+                    (8usize, std::collections::BTreeSet::from([91usize])),
+                    (9usize, std::collections::BTreeSet::from([91usize])),
+                    (10usize, std::collections::BTreeSet::from([91usize])),
+                    (11usize, std::collections::BTreeSet::from([91usize])),
+                    (12usize, std::collections::BTreeSet::from([91usize])),
+                    (13usize, std::collections::BTreeSet::from([91usize])),
+                    (14usize, std::collections::BTreeSet::from([91usize])),
+                    (15usize, std::collections::BTreeSet::from([91usize])),
+                    (16usize, std::collections::BTreeSet::from([91usize])),
+                    (17usize, std::collections::BTreeSet::from([91usize])),
+                    (18usize, std::collections::BTreeSet::from([91usize])),
+                    (19usize, std::collections::BTreeSet::from([91usize])),
+                    (20usize, std::collections::BTreeSet::from([91usize])),
+                    (21usize, std::collections::BTreeSet::from([91usize])),
+                    (22usize, std::collections::BTreeSet::from([91usize])),
+                    (23usize, std::collections::BTreeSet::from([91usize])),
+                    (24usize, std::collections::BTreeSet::from([91usize])),
+                    (25usize, std::collections::BTreeSet::from([91usize])),
+                    (26usize, std::collections::BTreeSet::from([91usize])),
+                    (27usize, std::collections::BTreeSet::from([91usize])),
+                    (28usize, std::collections::BTreeSet::from([91usize])),
+                    (29usize, std::collections::BTreeSet::from([91usize])),
+                    (30usize, std::collections::BTreeSet::from([91usize])),
+                    (31usize, std::collections::BTreeSet::from([91usize])),
+                    (32usize, std::collections::BTreeSet::from([91usize])),
+                    (33usize, std::collections::BTreeSet::from([91usize])),
+                    (34usize, std::collections::BTreeSet::from([91usize])),
+                    (35usize, std::collections::BTreeSet::from([91usize])),
+                    (36usize, std::collections::BTreeSet::from([91usize])),
+                    (37usize, std::collections::BTreeSet::from([91usize])),
+                    (38usize, std::collections::BTreeSet::from([91usize])),
+                    (39usize, std::collections::BTreeSet::from([91usize])),
+                ]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 91usize,
                     shifted: 1usize,
                 }]),
             },
@@ -5877,6 +5896,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([93usize])),
                     (37usize, std::collections::BTreeSet::from([93usize])),
                     (38usize, std::collections::BTreeSet::from([93usize])),
+                    (39usize, std::collections::BTreeSet::from([93usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 93usize,
@@ -5926,6 +5946,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([94usize])),
                     (37usize, std::collections::BTreeSet::from([94usize])),
                     (38usize, std::collections::BTreeSet::from([94usize])),
+                    (39usize, std::collections::BTreeSet::from([94usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 94usize,
@@ -5975,6 +5996,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([95usize])),
                     (37usize, std::collections::BTreeSet::from([95usize])),
                     (38usize, std::collections::BTreeSet::from([95usize])),
+                    (39usize, std::collections::BTreeSet::from([95usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 95usize,
@@ -6024,6 +6046,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([96usize])),
                     (37usize, std::collections::BTreeSet::from([96usize])),
                     (38usize, std::collections::BTreeSet::from([96usize])),
+                    (39usize, std::collections::BTreeSet::from([96usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 96usize,
@@ -6073,6 +6096,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([97usize])),
                     (37usize, std::collections::BTreeSet::from([97usize])),
                     (38usize, std::collections::BTreeSet::from([97usize])),
+                    (39usize, std::collections::BTreeSet::from([97usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 97usize,
@@ -6122,6 +6146,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([98usize])),
                     (37usize, std::collections::BTreeSet::from([98usize])),
                     (38usize, std::collections::BTreeSet::from([98usize])),
+                    (39usize, std::collections::BTreeSet::from([98usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 98usize,
@@ -6171,6 +6196,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([99usize])),
                     (37usize, std::collections::BTreeSet::from([99usize])),
                     (38usize, std::collections::BTreeSet::from([99usize])),
+                    (39usize, std::collections::BTreeSet::from([99usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 99usize,
@@ -6220,6 +6246,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([100usize])),
                     (37usize, std::collections::BTreeSet::from([100usize])),
                     (38usize, std::collections::BTreeSet::from([100usize])),
+                    (39usize, std::collections::BTreeSet::from([100usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 100usize,
@@ -6269,6 +6296,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([101usize])),
                     (37usize, std::collections::BTreeSet::from([101usize])),
                     (38usize, std::collections::BTreeSet::from([101usize])),
+                    (39usize, std::collections::BTreeSet::from([101usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 101usize,
@@ -6318,6 +6346,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([102usize])),
                     (37usize, std::collections::BTreeSet::from([102usize])),
                     (38usize, std::collections::BTreeSet::from([102usize])),
+                    (39usize, std::collections::BTreeSet::from([102usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 102usize,
@@ -6367,6 +6396,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([103usize])),
                     (37usize, std::collections::BTreeSet::from([103usize])),
                     (38usize, std::collections::BTreeSet::from([103usize])),
+                    (39usize, std::collections::BTreeSet::from([103usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 103usize,
@@ -6416,6 +6446,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([104usize])),
                     (37usize, std::collections::BTreeSet::from([104usize])),
                     (38usize, std::collections::BTreeSet::from([104usize])),
+                    (39usize, std::collections::BTreeSet::from([104usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 104usize,
@@ -6465,6 +6496,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([105usize])),
                     (37usize, std::collections::BTreeSet::from([105usize])),
                     (38usize, std::collections::BTreeSet::from([105usize])),
+                    (39usize, std::collections::BTreeSet::from([105usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 105usize,
@@ -6514,6 +6546,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([106usize])),
                     (37usize, std::collections::BTreeSet::from([106usize])),
                     (38usize, std::collections::BTreeSet::from([106usize])),
+                    (39usize, std::collections::BTreeSet::from([106usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 106usize,
@@ -6563,6 +6596,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([107usize])),
                     (37usize, std::collections::BTreeSet::from([107usize])),
                     (38usize, std::collections::BTreeSet::from([107usize])),
+                    (39usize, std::collections::BTreeSet::from([107usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 107usize,
@@ -6612,6 +6646,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([108usize])),
                     (37usize, std::collections::BTreeSet::from([108usize])),
                     (38usize, std::collections::BTreeSet::from([108usize])),
+                    (39usize, std::collections::BTreeSet::from([108usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 108usize,
@@ -6661,6 +6696,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([109usize])),
                     (37usize, std::collections::BTreeSet::from([109usize])),
                     (38usize, std::collections::BTreeSet::from([109usize])),
+                    (39usize, std::collections::BTreeSet::from([109usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 109usize,
@@ -6710,6 +6746,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([110usize])),
                     (37usize, std::collections::BTreeSet::from([110usize])),
                     (38usize, std::collections::BTreeSet::from([110usize])),
+                    (39usize, std::collections::BTreeSet::from([110usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 110usize,
@@ -6759,6 +6796,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([111usize])),
                     (37usize, std::collections::BTreeSet::from([111usize])),
                     (38usize, std::collections::BTreeSet::from([111usize])),
+                    (39usize, std::collections::BTreeSet::from([111usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 111usize,
@@ -6808,6 +6846,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([112usize])),
                     (37usize, std::collections::BTreeSet::from([112usize])),
                     (38usize, std::collections::BTreeSet::from([112usize])),
+                    (39usize, std::collections::BTreeSet::from([112usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 112usize,
@@ -6857,6 +6896,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([113usize])),
                     (37usize, std::collections::BTreeSet::from([113usize])),
                     (38usize, std::collections::BTreeSet::from([113usize])),
+                    (39usize, std::collections::BTreeSet::from([113usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 113usize,
@@ -6906,6 +6946,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([114usize])),
                     (37usize, std::collections::BTreeSet::from([114usize])),
                     (38usize, std::collections::BTreeSet::from([114usize])),
+                    (39usize, std::collections::BTreeSet::from([114usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 114usize,
@@ -6955,6 +6996,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([115usize])),
                     (37usize, std::collections::BTreeSet::from([115usize])),
                     (38usize, std::collections::BTreeSet::from([115usize])),
+                    (39usize, std::collections::BTreeSet::from([115usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 115usize,
@@ -7004,6 +7046,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([116usize])),
                     (37usize, std::collections::BTreeSet::from([116usize])),
                     (38usize, std::collections::BTreeSet::from([116usize])),
+                    (39usize, std::collections::BTreeSet::from([116usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 116usize,
@@ -7053,6 +7096,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([117usize])),
                     (37usize, std::collections::BTreeSet::from([117usize])),
                     (38usize, std::collections::BTreeSet::from([117usize])),
+                    (39usize, std::collections::BTreeSet::from([117usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 117usize,
@@ -7102,6 +7146,7 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([118usize])),
                     (37usize, std::collections::BTreeSet::from([118usize])),
                     (38usize, std::collections::BTreeSet::from([118usize])),
+                    (39usize, std::collections::BTreeSet::from([118usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 118usize,
@@ -7109,7 +7154,107 @@ impl GrammarParser {
                 }]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(38usize, 104usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([
+                    (0usize, std::collections::BTreeSet::from([119usize])),
+                    (1usize, std::collections::BTreeSet::from([119usize])),
+                    (2usize, std::collections::BTreeSet::from([119usize])),
+                    (3usize, std::collections::BTreeSet::from([119usize])),
+                    (4usize, std::collections::BTreeSet::from([119usize])),
+                    (5usize, std::collections::BTreeSet::from([119usize])),
+                    (6usize, std::collections::BTreeSet::from([119usize])),
+                    (7usize, std::collections::BTreeSet::from([119usize])),
+                    (8usize, std::collections::BTreeSet::from([119usize])),
+                    (9usize, std::collections::BTreeSet::from([119usize])),
+                    (10usize, std::collections::BTreeSet::from([119usize])),
+                    (11usize, std::collections::BTreeSet::from([119usize])),
+                    (12usize, std::collections::BTreeSet::from([119usize])),
+                    (13usize, std::collections::BTreeSet::from([119usize])),
+                    (14usize, std::collections::BTreeSet::from([119usize])),
+                    (15usize, std::collections::BTreeSet::from([119usize])),
+                    (16usize, std::collections::BTreeSet::from([119usize])),
+                    (17usize, std::collections::BTreeSet::from([119usize])),
+                    (18usize, std::collections::BTreeSet::from([119usize])),
+                    (19usize, std::collections::BTreeSet::from([119usize])),
+                    (20usize, std::collections::BTreeSet::from([119usize])),
+                    (21usize, std::collections::BTreeSet::from([119usize])),
+                    (22usize, std::collections::BTreeSet::from([119usize])),
+                    (23usize, std::collections::BTreeSet::from([119usize])),
+                    (24usize, std::collections::BTreeSet::from([119usize])),
+                    (25usize, std::collections::BTreeSet::from([119usize])),
+                    (26usize, std::collections::BTreeSet::from([119usize])),
+                    (27usize, std::collections::BTreeSet::from([119usize])),
+                    (28usize, std::collections::BTreeSet::from([119usize])),
+                    (29usize, std::collections::BTreeSet::from([119usize])),
+                    (30usize, std::collections::BTreeSet::from([119usize])),
+                    (31usize, std::collections::BTreeSet::from([119usize])),
+                    (32usize, std::collections::BTreeSet::from([119usize])),
+                    (33usize, std::collections::BTreeSet::from([119usize])),
+                    (34usize, std::collections::BTreeSet::from([119usize])),
+                    (35usize, std::collections::BTreeSet::from([119usize])),
+                    (36usize, std::collections::BTreeSet::from([119usize])),
+                    (37usize, std::collections::BTreeSet::from([119usize])),
+                    (38usize, std::collections::BTreeSet::from([119usize])),
+                    (39usize, std::collections::BTreeSet::from([119usize])),
+                ]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 119usize,
+                    shifted: 1usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([
+                    (0usize, std::collections::BTreeSet::from([120usize])),
+                    (1usize, std::collections::BTreeSet::from([120usize])),
+                    (2usize, std::collections::BTreeSet::from([120usize])),
+                    (3usize, std::collections::BTreeSet::from([120usize])),
+                    (4usize, std::collections::BTreeSet::from([120usize])),
+                    (5usize, std::collections::BTreeSet::from([120usize])),
+                    (6usize, std::collections::BTreeSet::from([120usize])),
+                    (7usize, std::collections::BTreeSet::from([120usize])),
+                    (8usize, std::collections::BTreeSet::from([120usize])),
+                    (9usize, std::collections::BTreeSet::from([120usize])),
+                    (10usize, std::collections::BTreeSet::from([120usize])),
+                    (11usize, std::collections::BTreeSet::from([120usize])),
+                    (12usize, std::collections::BTreeSet::from([120usize])),
+                    (13usize, std::collections::BTreeSet::from([120usize])),
+                    (14usize, std::collections::BTreeSet::from([120usize])),
+                    (15usize, std::collections::BTreeSet::from([120usize])),
+                    (16usize, std::collections::BTreeSet::from([120usize])),
+                    (17usize, std::collections::BTreeSet::from([120usize])),
+                    (18usize, std::collections::BTreeSet::from([120usize])),
+                    (19usize, std::collections::BTreeSet::from([120usize])),
+                    (20usize, std::collections::BTreeSet::from([120usize])),
+                    (21usize, std::collections::BTreeSet::from([120usize])),
+                    (22usize, std::collections::BTreeSet::from([120usize])),
+                    (23usize, std::collections::BTreeSet::from([120usize])),
+                    (24usize, std::collections::BTreeSet::from([120usize])),
+                    (25usize, std::collections::BTreeSet::from([120usize])),
+                    (26usize, std::collections::BTreeSet::from([120usize])),
+                    (27usize, std::collections::BTreeSet::from([120usize])),
+                    (28usize, std::collections::BTreeSet::from([120usize])),
+                    (29usize, std::collections::BTreeSet::from([120usize])),
+                    (30usize, std::collections::BTreeSet::from([120usize])),
+                    (31usize, std::collections::BTreeSet::from([120usize])),
+                    (32usize, std::collections::BTreeSet::from([120usize])),
+                    (33usize, std::collections::BTreeSet::from([120usize])),
+                    (34usize, std::collections::BTreeSet::from([120usize])),
+                    (35usize, std::collections::BTreeSet::from([120usize])),
+                    (36usize, std::collections::BTreeSet::from([120usize])),
+                    (37usize, std::collections::BTreeSet::from([120usize])),
+                    (38usize, std::collections::BTreeSet::from([120usize])),
+                    (39usize, std::collections::BTreeSet::from([120usize])),
+                ]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 120usize,
+                    shifted: 1usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([(39usize, 105usize)]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
@@ -7138,273 +7283,13 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([28usize])),
                     (35usize, std::collections::BTreeSet::from([28usize])),
                     (37usize, std::collections::BTreeSet::from([28usize])),
-                    (39usize, std::collections::BTreeSet::from([28usize])),
+                    (38usize, std::collections::BTreeSet::from([28usize])),
+                    (40usize, std::collections::BTreeSet::from([28usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 28usize,
                     shifted: 4usize,
                 }]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([71usize])),
-                    (1usize, std::collections::BTreeSet::from([71usize])),
-                    (2usize, std::collections::BTreeSet::from([71usize])),
-                    (3usize, std::collections::BTreeSet::from([71usize])),
-                    (4usize, std::collections::BTreeSet::from([71usize])),
-                    (5usize, std::collections::BTreeSet::from([71usize])),
-                    (6usize, std::collections::BTreeSet::from([71usize])),
-                    (7usize, std::collections::BTreeSet::from([71usize])),
-                    (8usize, std::collections::BTreeSet::from([71usize])),
-                    (9usize, std::collections::BTreeSet::from([71usize])),
-                    (10usize, std::collections::BTreeSet::from([71usize])),
-                    (11usize, std::collections::BTreeSet::from([71usize])),
-                    (12usize, std::collections::BTreeSet::from([71usize])),
-                    (13usize, std::collections::BTreeSet::from([71usize])),
-                    (14usize, std::collections::BTreeSet::from([71usize])),
-                    (15usize, std::collections::BTreeSet::from([71usize])),
-                    (16usize, std::collections::BTreeSet::from([71usize])),
-                    (17usize, std::collections::BTreeSet::from([71usize])),
-                    (18usize, std::collections::BTreeSet::from([71usize])),
-                    (19usize, std::collections::BTreeSet::from([71usize])),
-                    (20usize, std::collections::BTreeSet::from([71usize])),
-                    (21usize, std::collections::BTreeSet::from([71usize])),
-                    (22usize, std::collections::BTreeSet::from([71usize])),
-                    (23usize, std::collections::BTreeSet::from([71usize])),
-                    (24usize, std::collections::BTreeSet::from([71usize])),
-                    (25usize, std::collections::BTreeSet::from([71usize])),
-                    (26usize, std::collections::BTreeSet::from([71usize])),
-                    (27usize, std::collections::BTreeSet::from([71usize])),
-                    (28usize, std::collections::BTreeSet::from([71usize])),
-                    (29usize, std::collections::BTreeSet::from([71usize])),
-                    (30usize, std::collections::BTreeSet::from([71usize])),
-                    (31usize, std::collections::BTreeSet::from([71usize])),
-                    (32usize, std::collections::BTreeSet::from([71usize])),
-                    (33usize, std::collections::BTreeSet::from([71usize])),
-                    (34usize, std::collections::BTreeSet::from([71usize])),
-                    (35usize, std::collections::BTreeSet::from([71usize])),
-                    (36usize, std::collections::BTreeSet::from([71usize])),
-                    (37usize, std::collections::BTreeSet::from([71usize])),
-                    (38usize, std::collections::BTreeSet::from([71usize])),
-                ]),
-                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 71usize,
-                    shifted: 1usize,
-                }]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 65usize),
-                    (1usize, 66usize),
-                    (2usize, 67usize),
-                    (3usize, 68usize),
-                    (4usize, 69usize),
-                    (5usize, 70usize),
-                    (6usize, 71usize),
-                    (7usize, 72usize),
-                    (8usize, 73usize),
-                    (9usize, 74usize),
-                    (10usize, 75usize),
-                    (11usize, 76usize),
-                    (12usize, 77usize),
-                    (13usize, 78usize),
-                    (14usize, 79usize),
-                    (15usize, 80usize),
-                    (16usize, 81usize),
-                    (17usize, 82usize),
-                    (18usize, 83usize),
-                    (19usize, 84usize),
-                    (20usize, 85usize),
-                    (21usize, 86usize),
-                    (22usize, 87usize),
-                    (23usize, 88usize),
-                    (24usize, 89usize),
-                    (25usize, 90usize),
-                    (26usize, 91usize),
-                    (27usize, 92usize),
-                    (28usize, 93usize),
-                    (29usize, 94usize),
-                    (30usize, 95usize),
-                    (31usize, 96usize),
-                    (32usize, 97usize),
-                    (33usize, 98usize),
-                    (34usize, 99usize),
-                    (35usize, 100usize),
-                    (36usize, 101usize),
-                    (37usize, 102usize),
-                ]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::_TermSet39,
-                    107usize,
-                )]),
-                reduce_map: std::collections::BTreeMap::from([(
-                    38usize,
-                    std::collections::BTreeSet::from([29usize]),
-                )]),
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 72usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 81usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 82usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 83usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 84usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 85usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 86usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 87usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 88usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 89usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 90usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 91usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 92usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 93usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 94usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 95usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 96usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 97usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 98usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 99usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 100usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 101usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 102usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 103usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 104usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 105usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 106usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 107usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 108usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 109usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 110usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 111usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 112usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 113usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 114usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 115usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 116usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 117usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 118usize,
-                        shifted: 0usize,
-                    },
-                ]),
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -7449,14 +7334,282 @@ impl GrammarParser {
                     (36usize, std::collections::BTreeSet::from([72usize])),
                     (37usize, std::collections::BTreeSet::from([72usize])),
                     (38usize, std::collections::BTreeSet::from([72usize])),
+                    (39usize, std::collections::BTreeSet::from([72usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 72usize,
+                    shifted: 1usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([
+                    (0usize, 65usize),
+                    (1usize, 66usize),
+                    (2usize, 67usize),
+                    (3usize, 68usize),
+                    (4usize, 69usize),
+                    (5usize, 70usize),
+                    (6usize, 71usize),
+                    (7usize, 72usize),
+                    (8usize, 73usize),
+                    (9usize, 74usize),
+                    (10usize, 75usize),
+                    (11usize, 76usize),
+                    (12usize, 77usize),
+                    (13usize, 78usize),
+                    (14usize, 79usize),
+                    (15usize, 80usize),
+                    (16usize, 81usize),
+                    (17usize, 82usize),
+                    (18usize, 83usize),
+                    (19usize, 84usize),
+                    (20usize, 85usize),
+                    (21usize, 86usize),
+                    (22usize, 87usize),
+                    (23usize, 88usize),
+                    (24usize, 89usize),
+                    (25usize, 90usize),
+                    (26usize, 91usize),
+                    (27usize, 92usize),
+                    (28usize, 93usize),
+                    (29usize, 94usize),
+                    (30usize, 95usize),
+                    (31usize, 96usize),
+                    (32usize, 97usize),
+                    (33usize, 98usize),
+                    (34usize, 99usize),
+                    (35usize, 100usize),
+                    (36usize, 101usize),
+                    (37usize, 102usize),
+                    (38usize, 103usize),
+                ]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([(
+                    GrammarNonTerminals::_TermSet40,
+                    108usize,
+                )]),
+                reduce_map: std::collections::BTreeMap::from([(
+                    39usize,
+                    std::collections::BTreeSet::from([29usize]),
+                )]),
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 29usize,
+                        shifted: 1usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 73usize,
+                        shifted: 1usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 82usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 83usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 84usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 85usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 86usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 87usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 88usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 89usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 90usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 91usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 92usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 93usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 94usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 95usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 96usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 97usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 98usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 99usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 100usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 101usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 102usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 103usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 104usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 105usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 106usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 107usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 108usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 109usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 110usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 111usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 112usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 113usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 114usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 115usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 116usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 117usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 118usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 119usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 120usize,
+                        shifted: 0usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([
+                    (0usize, std::collections::BTreeSet::from([73usize])),
+                    (1usize, std::collections::BTreeSet::from([73usize])),
+                    (2usize, std::collections::BTreeSet::from([73usize])),
+                    (3usize, std::collections::BTreeSet::from([73usize])),
+                    (4usize, std::collections::BTreeSet::from([73usize])),
+                    (5usize, std::collections::BTreeSet::from([73usize])),
+                    (6usize, std::collections::BTreeSet::from([73usize])),
+                    (7usize, std::collections::BTreeSet::from([73usize])),
+                    (8usize, std::collections::BTreeSet::from([73usize])),
+                    (9usize, std::collections::BTreeSet::from([73usize])),
+                    (10usize, std::collections::BTreeSet::from([73usize])),
+                    (11usize, std::collections::BTreeSet::from([73usize])),
+                    (12usize, std::collections::BTreeSet::from([73usize])),
+                    (13usize, std::collections::BTreeSet::from([73usize])),
+                    (14usize, std::collections::BTreeSet::from([73usize])),
+                    (15usize, std::collections::BTreeSet::from([73usize])),
+                    (16usize, std::collections::BTreeSet::from([73usize])),
+                    (17usize, std::collections::BTreeSet::from([73usize])),
+                    (18usize, std::collections::BTreeSet::from([73usize])),
+                    (19usize, std::collections::BTreeSet::from([73usize])),
+                    (20usize, std::collections::BTreeSet::from([73usize])),
+                    (21usize, std::collections::BTreeSet::from([73usize])),
+                    (22usize, std::collections::BTreeSet::from([73usize])),
+                    (23usize, std::collections::BTreeSet::from([73usize])),
+                    (24usize, std::collections::BTreeSet::from([73usize])),
+                    (25usize, std::collections::BTreeSet::from([73usize])),
+                    (26usize, std::collections::BTreeSet::from([73usize])),
+                    (27usize, std::collections::BTreeSet::from([73usize])),
+                    (28usize, std::collections::BTreeSet::from([73usize])),
+                    (29usize, std::collections::BTreeSet::from([73usize])),
+                    (30usize, std::collections::BTreeSet::from([73usize])),
+                    (31usize, std::collections::BTreeSet::from([73usize])),
+                    (32usize, std::collections::BTreeSet::from([73usize])),
+                    (33usize, std::collections::BTreeSet::from([73usize])),
+                    (34usize, std::collections::BTreeSet::from([73usize])),
+                    (35usize, std::collections::BTreeSet::from([73usize])),
+                    (36usize, std::collections::BTreeSet::from([73usize])),
+                    (37usize, std::collections::BTreeSet::from([73usize])),
+                    (38usize, std::collections::BTreeSet::from([73usize])),
+                    (39usize, std::collections::BTreeSet::from([73usize])),
+                ]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 73usize,
                     shifted: 2usize,
                 }]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(0usize, 109usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(0usize, 110usize)]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
@@ -7465,7 +7618,7 @@ impl GrammarParser {
                 }]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(38usize, 110usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(39usize, 111usize)]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
@@ -7494,7 +7647,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([30usize])),
                     (35usize, std::collections::BTreeSet::from([30usize])),
                     (37usize, std::collections::BTreeSet::from([30usize])),
-                    (39usize, std::collections::BTreeSet::from([30usize])),
+                    (38usize, std::collections::BTreeSet::from([30usize])),
+                    (40usize, std::collections::BTreeSet::from([30usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 30usize,
@@ -7541,11 +7695,12 @@ impl GrammarParser {
                     (35usize, 100usize),
                     (36usize, 101usize),
                     (37usize, 102usize),
+                    (38usize, 103usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RustCode, 112usize),
-                    (GrammarNonTerminals::_TermSet39, 105usize),
-                    (GrammarNonTerminals::__TermSet39Plus40, 106usize),
+                    (GrammarNonTerminals::RustCode, 113usize),
+                    (GrammarNonTerminals::_TermSet40, 106usize),
+                    (GrammarNonTerminals::__TermSet40Plus41, 107usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([
@@ -7558,15 +7713,11 @@ impl GrammarParser {
                         shifted: 1usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 71usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
                         rule: 72usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 81usize,
+                        rule: 73usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -7717,10 +7868,18 @@ impl GrammarParser {
                         rule: 118usize,
                         shifted: 0usize,
                     },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 119usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 120usize,
+                        shifted: 0usize,
+                    },
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(38usize, 113usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(39usize, 114usize)]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
@@ -7749,7 +7908,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([31usize])),
                     (35usize, std::collections::BTreeSet::from([31usize])),
                     (37usize, std::collections::BTreeSet::from([31usize])),
-                    (39usize, std::collections::BTreeSet::from([31usize])),
+                    (38usize, std::collections::BTreeSet::from([31usize])),
+                    (40usize, std::collections::BTreeSet::from([31usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 31usize,
@@ -7796,11 +7956,12 @@ impl GrammarParser {
                     (35usize, 100usize),
                     (36usize, 101usize),
                     (37usize, 102usize),
+                    (38usize, 103usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RustCode, 115usize),
-                    (GrammarNonTerminals::_TermSet39, 105usize),
-                    (GrammarNonTerminals::__TermSet39Plus40, 106usize),
+                    (GrammarNonTerminals::RustCode, 116usize),
+                    (GrammarNonTerminals::_TermSet40, 106usize),
+                    (GrammarNonTerminals::__TermSet40Plus41, 107usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([
@@ -7813,15 +7974,11 @@ impl GrammarParser {
                         shifted: 1usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 71usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
                         rule: 72usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 81usize,
+                        rule: 73usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -7972,10 +8129,18 @@ impl GrammarParser {
                         rule: 118usize,
                         shifted: 0usize,
                     },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 119usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 120usize,
+                        shifted: 0usize,
+                    },
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(38usize, 116usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(39usize, 117usize)]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
@@ -8004,7 +8169,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([32usize])),
                     (35usize, std::collections::BTreeSet::from([32usize])),
                     (37usize, std::collections::BTreeSet::from([32usize])),
-                    (39usize, std::collections::BTreeSet::from([32usize])),
+                    (38usize, std::collections::BTreeSet::from([32usize])),
+                    (40usize, std::collections::BTreeSet::from([32usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 32usize,
@@ -8051,11 +8217,12 @@ impl GrammarParser {
                     (35usize, 100usize),
                     (36usize, 101usize),
                     (37usize, 102usize),
+                    (38usize, 103usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RustCode, 118usize),
-                    (GrammarNonTerminals::_TermSet39, 105usize),
-                    (GrammarNonTerminals::__TermSet39Plus40, 106usize),
+                    (GrammarNonTerminals::RustCode, 119usize),
+                    (GrammarNonTerminals::_TermSet40, 106usize),
+                    (GrammarNonTerminals::__TermSet40Plus41, 107usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([
@@ -8068,15 +8235,11 @@ impl GrammarParser {
                         shifted: 1usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 71usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
                         rule: 72usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 81usize,
+                        rule: 73usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8227,10 +8390,18 @@ impl GrammarParser {
                         rule: 118usize,
                         shifted: 0usize,
                     },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 119usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 120usize,
+                        shifted: 0usize,
+                    },
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(38usize, 119usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(39usize, 120usize)]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
@@ -8259,7 +8430,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([33usize])),
                     (35usize, std::collections::BTreeSet::from([33usize])),
                     (37usize, std::collections::BTreeSet::from([33usize])),
-                    (39usize, std::collections::BTreeSet::from([33usize])),
+                    (38usize, std::collections::BTreeSet::from([33usize])),
+                    (40usize, std::collections::BTreeSet::from([33usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 33usize,
@@ -8306,11 +8478,12 @@ impl GrammarParser {
                     (35usize, 100usize),
                     (36usize, 101usize),
                     (37usize, 102usize),
+                    (38usize, 103usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RustCode, 121usize),
-                    (GrammarNonTerminals::_TermSet39, 105usize),
-                    (GrammarNonTerminals::__TermSet39Plus40, 106usize),
+                    (GrammarNonTerminals::RustCode, 122usize),
+                    (GrammarNonTerminals::_TermSet40, 106usize),
+                    (GrammarNonTerminals::__TermSet40Plus41, 107usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([
@@ -8323,15 +8496,11 @@ impl GrammarParser {
                         shifted: 1usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 71usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
                         rule: 72usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 81usize,
+                        rule: 73usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8482,10 +8651,18 @@ impl GrammarParser {
                         rule: 118usize,
                         shifted: 0usize,
                     },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 119usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 120usize,
+                        shifted: 0usize,
+                    },
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(38usize, 122usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(39usize, 123usize)]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
@@ -8514,7 +8691,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([39usize])),
                     (35usize, std::collections::BTreeSet::from([39usize])),
                     (37usize, std::collections::BTreeSet::from([39usize])),
-                    (39usize, std::collections::BTreeSet::from([39usize])),
+                    (38usize, std::collections::BTreeSet::from([39usize])),
+                    (40usize, std::collections::BTreeSet::from([39usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 39usize,
@@ -8561,11 +8739,12 @@ impl GrammarParser {
                     (35usize, 100usize),
                     (36usize, 101usize),
                     (37usize, 102usize),
+                    (38usize, 103usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RustCode, 124usize),
-                    (GrammarNonTerminals::_TermSet39, 105usize),
-                    (GrammarNonTerminals::__TermSet39Plus40, 106usize),
+                    (GrammarNonTerminals::RustCode, 125usize),
+                    (GrammarNonTerminals::_TermSet40, 106usize),
+                    (GrammarNonTerminals::__TermSet40Plus41, 107usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([
@@ -8578,15 +8757,11 @@ impl GrammarParser {
                         shifted: 1usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 71usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
                         rule: 72usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 81usize,
+                        rule: 73usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -8737,10 +8912,18 @@ impl GrammarParser {
                         rule: 118usize,
                         shifted: 0usize,
                     },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 119usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 120usize,
+                        shifted: 0usize,
+                    },
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(38usize, 125usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(39usize, 126usize)]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
@@ -8769,7 +8952,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([40usize])),
                     (35usize, std::collections::BTreeSet::from([40usize])),
                     (37usize, std::collections::BTreeSet::from([40usize])),
-                    (39usize, std::collections::BTreeSet::from([40usize])),
+                    (38usize, std::collections::BTreeSet::from([40usize])),
+                    (40usize, std::collections::BTreeSet::from([40usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 40usize,
@@ -8777,235 +8961,7 @@ impl GrammarParser {
                 }]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(38usize, 127usize)]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: std::collections::BTreeMap::from([]),
-                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 123usize,
-                    shifted: 1usize,
-                }]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([123usize])),
-                    (20usize, std::collections::BTreeSet::from([123usize])),
-                    (21usize, std::collections::BTreeSet::from([123usize])),
-                    (22usize, std::collections::BTreeSet::from([123usize])),
-                    (23usize, std::collections::BTreeSet::from([123usize])),
-                    (24usize, std::collections::BTreeSet::from([123usize])),
-                    (25usize, std::collections::BTreeSet::from([123usize])),
-                    (26usize, std::collections::BTreeSet::from([123usize])),
-                    (27usize, std::collections::BTreeSet::from([123usize])),
-                    (28usize, std::collections::BTreeSet::from([123usize])),
-                    (29usize, std::collections::BTreeSet::from([123usize])),
-                    (30usize, std::collections::BTreeSet::from([123usize])),
-                    (32usize, std::collections::BTreeSet::from([123usize])),
-                    (33usize, std::collections::BTreeSet::from([123usize])),
-                    (34usize, std::collections::BTreeSet::from([123usize])),
-                    (35usize, std::collections::BTreeSet::from([123usize])),
-                    (37usize, std::collections::BTreeSet::from([123usize])),
-                    (39usize, std::collections::BTreeSet::from([123usize])),
-                ]),
-                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 123usize,
-                    shifted: 2usize,
-                }]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(38usize, 129usize)]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: std::collections::BTreeMap::from([]),
-                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 122usize,
-                    shifted: 1usize,
-                }]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([122usize])),
-                    (20usize, std::collections::BTreeSet::from([122usize])),
-                    (21usize, std::collections::BTreeSet::from([122usize])),
-                    (22usize, std::collections::BTreeSet::from([122usize])),
-                    (23usize, std::collections::BTreeSet::from([122usize])),
-                    (24usize, std::collections::BTreeSet::from([122usize])),
-                    (25usize, std::collections::BTreeSet::from([122usize])),
-                    (26usize, std::collections::BTreeSet::from([122usize])),
-                    (27usize, std::collections::BTreeSet::from([122usize])),
-                    (28usize, std::collections::BTreeSet::from([122usize])),
-                    (29usize, std::collections::BTreeSet::from([122usize])),
-                    (30usize, std::collections::BTreeSet::from([122usize])),
-                    (32usize, std::collections::BTreeSet::from([122usize])),
-                    (33usize, std::collections::BTreeSet::from([122usize])),
-                    (34usize, std::collections::BTreeSet::from([122usize])),
-                    (35usize, std::collections::BTreeSet::from([122usize])),
-                    (37usize, std::collections::BTreeSet::from([122usize])),
-                    (39usize, std::collections::BTreeSet::from([122usize])),
-                ]),
-                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 122usize,
-                    shifted: 2usize,
-                }]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 48usize),
-                    (13usize, 49usize),
-                ]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::IdentOrLiteral, 131usize),
-                    (GrammarNonTerminals::_IdentOrLiteralPlus41, 132usize),
-                ]),
-                reduce_map: std::collections::BTreeMap::from([]),
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 73usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 74usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 120usize,
-                        shifted: 1usize,
-                    },
-                ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([73usize])),
-                    (13usize, std::collections::BTreeSet::from([73usize])),
-                    (38usize, std::collections::BTreeSet::from([73usize])),
-                ]),
-                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 73usize,
-                    shifted: 1usize,
-                }]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 48usize),
-                    (13usize, 49usize),
-                    (38usize, 133usize),
-                ]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::IdentOrLiteral,
-                    134usize,
-                )]),
-                reduce_map: std::collections::BTreeMap::from([]),
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 74usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 120usize,
-                        shifted: 2usize,
-                    },
-                ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([120usize])),
-                    (20usize, std::collections::BTreeSet::from([120usize])),
-                    (21usize, std::collections::BTreeSet::from([120usize])),
-                    (22usize, std::collections::BTreeSet::from([120usize])),
-                    (23usize, std::collections::BTreeSet::from([120usize])),
-                    (24usize, std::collections::BTreeSet::from([120usize])),
-                    (25usize, std::collections::BTreeSet::from([120usize])),
-                    (26usize, std::collections::BTreeSet::from([120usize])),
-                    (27usize, std::collections::BTreeSet::from([120usize])),
-                    (28usize, std::collections::BTreeSet::from([120usize])),
-                    (29usize, std::collections::BTreeSet::from([120usize])),
-                    (30usize, std::collections::BTreeSet::from([120usize])),
-                    (32usize, std::collections::BTreeSet::from([120usize])),
-                    (33usize, std::collections::BTreeSet::from([120usize])),
-                    (34usize, std::collections::BTreeSet::from([120usize])),
-                    (35usize, std::collections::BTreeSet::from([120usize])),
-                    (37usize, std::collections::BTreeSet::from([120usize])),
-                    (39usize, std::collections::BTreeSet::from([120usize])),
-                ]),
-                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 120usize,
-                    shifted: 3usize,
-                }]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([74usize])),
-                    (13usize, std::collections::BTreeSet::from([74usize])),
-                    (38usize, std::collections::BTreeSet::from([74usize])),
-                ]),
-                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 74usize,
-                    shifted: 2usize,
-                }]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(38usize, 136usize)]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: std::collections::BTreeMap::from([]),
-                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 124usize,
-                    shifted: 1usize,
-                }]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([124usize])),
-                    (20usize, std::collections::BTreeSet::from([124usize])),
-                    (21usize, std::collections::BTreeSet::from([124usize])),
-                    (22usize, std::collections::BTreeSet::from([124usize])),
-                    (23usize, std::collections::BTreeSet::from([124usize])),
-                    (24usize, std::collections::BTreeSet::from([124usize])),
-                    (25usize, std::collections::BTreeSet::from([124usize])),
-                    (26usize, std::collections::BTreeSet::from([124usize])),
-                    (27usize, std::collections::BTreeSet::from([124usize])),
-                    (28usize, std::collections::BTreeSet::from([124usize])),
-                    (29usize, std::collections::BTreeSet::from([124usize])),
-                    (30usize, std::collections::BTreeSet::from([124usize])),
-                    (32usize, std::collections::BTreeSet::from([124usize])),
-                    (33usize, std::collections::BTreeSet::from([124usize])),
-                    (34usize, std::collections::BTreeSet::from([124usize])),
-                    (35usize, std::collections::BTreeSet::from([124usize])),
-                    (37usize, std::collections::BTreeSet::from([124usize])),
-                    (39usize, std::collections::BTreeSet::from([124usize])),
-                ]),
-                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 124usize,
-                    shifted: 2usize,
-                }]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(38usize, 138usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(39usize, 128usize)]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
@@ -9034,7 +8990,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([125usize])),
                     (35usize, std::collections::BTreeSet::from([125usize])),
                     (37usize, std::collections::BTreeSet::from([125usize])),
-                    (39usize, std::collections::BTreeSet::from([125usize])),
+                    (38usize, std::collections::BTreeSet::from([125usize])),
+                    (40usize, std::collections::BTreeSet::from([125usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 125usize,
@@ -9042,23 +8999,251 @@ impl GrammarParser {
                 }]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(0usize, 140usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(39usize, 130usize)]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 124usize,
+                    shifted: 1usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([
+                    (0usize, std::collections::BTreeSet::from([124usize])),
+                    (20usize, std::collections::BTreeSet::from([124usize])),
+                    (21usize, std::collections::BTreeSet::from([124usize])),
+                    (22usize, std::collections::BTreeSet::from([124usize])),
+                    (23usize, std::collections::BTreeSet::from([124usize])),
+                    (24usize, std::collections::BTreeSet::from([124usize])),
+                    (25usize, std::collections::BTreeSet::from([124usize])),
+                    (26usize, std::collections::BTreeSet::from([124usize])),
+                    (27usize, std::collections::BTreeSet::from([124usize])),
+                    (28usize, std::collections::BTreeSet::from([124usize])),
+                    (29usize, std::collections::BTreeSet::from([124usize])),
+                    (30usize, std::collections::BTreeSet::from([124usize])),
+                    (32usize, std::collections::BTreeSet::from([124usize])),
+                    (33usize, std::collections::BTreeSet::from([124usize])),
+                    (34usize, std::collections::BTreeSet::from([124usize])),
+                    (35usize, std::collections::BTreeSet::from([124usize])),
+                    (37usize, std::collections::BTreeSet::from([124usize])),
+                    (38usize, std::collections::BTreeSet::from([124usize])),
+                    (40usize, std::collections::BTreeSet::from([124usize])),
+                ]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 124usize,
+                    shifted: 2usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([
+                    (0usize, 48usize),
+                    (13usize, 49usize),
+                ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::_identPlus42, 141usize),
-                    (GrammarNonTerminals::_identStar43, 143usize),
+                    (GrammarNonTerminals::IdentOrLiteral, 132usize),
+                    (GrammarNonTerminals::_IdentOrLiteralPlus42, 133usize),
+                ]),
+                reduce_map: std::collections::BTreeMap::from([]),
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 34usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 35usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 74usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 75usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 122usize,
+                        shifted: 1usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([
+                    (0usize, std::collections::BTreeSet::from([74usize])),
+                    (13usize, std::collections::BTreeSet::from([74usize])),
+                    (39usize, std::collections::BTreeSet::from([74usize])),
+                ]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 74usize,
+                    shifted: 1usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([
+                    (0usize, 48usize),
+                    (13usize, 49usize),
+                    (39usize, 134usize),
+                ]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([(
+                    GrammarNonTerminals::IdentOrLiteral,
+                    135usize,
+                )]),
+                reduce_map: std::collections::BTreeMap::from([]),
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 34usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 35usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 75usize,
+                        shifted: 1usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 122usize,
+                        shifted: 2usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([
+                    (0usize, std::collections::BTreeSet::from([122usize])),
+                    (20usize, std::collections::BTreeSet::from([122usize])),
+                    (21usize, std::collections::BTreeSet::from([122usize])),
+                    (22usize, std::collections::BTreeSet::from([122usize])),
+                    (23usize, std::collections::BTreeSet::from([122usize])),
+                    (24usize, std::collections::BTreeSet::from([122usize])),
+                    (25usize, std::collections::BTreeSet::from([122usize])),
+                    (26usize, std::collections::BTreeSet::from([122usize])),
+                    (27usize, std::collections::BTreeSet::from([122usize])),
+                    (28usize, std::collections::BTreeSet::from([122usize])),
+                    (29usize, std::collections::BTreeSet::from([122usize])),
+                    (30usize, std::collections::BTreeSet::from([122usize])),
+                    (32usize, std::collections::BTreeSet::from([122usize])),
+                    (33usize, std::collections::BTreeSet::from([122usize])),
+                    (34usize, std::collections::BTreeSet::from([122usize])),
+                    (35usize, std::collections::BTreeSet::from([122usize])),
+                    (37usize, std::collections::BTreeSet::from([122usize])),
+                    (38usize, std::collections::BTreeSet::from([122usize])),
+                    (40usize, std::collections::BTreeSet::from([122usize])),
+                ]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 122usize,
+                    shifted: 3usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([
+                    (0usize, std::collections::BTreeSet::from([75usize])),
+                    (13usize, std::collections::BTreeSet::from([75usize])),
+                    (39usize, std::collections::BTreeSet::from([75usize])),
+                ]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 75usize,
+                    shifted: 2usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([(39usize, 137usize)]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 126usize,
+                    shifted: 1usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([
+                    (0usize, std::collections::BTreeSet::from([126usize])),
+                    (20usize, std::collections::BTreeSet::from([126usize])),
+                    (21usize, std::collections::BTreeSet::from([126usize])),
+                    (22usize, std::collections::BTreeSet::from([126usize])),
+                    (23usize, std::collections::BTreeSet::from([126usize])),
+                    (24usize, std::collections::BTreeSet::from([126usize])),
+                    (25usize, std::collections::BTreeSet::from([126usize])),
+                    (26usize, std::collections::BTreeSet::from([126usize])),
+                    (27usize, std::collections::BTreeSet::from([126usize])),
+                    (28usize, std::collections::BTreeSet::from([126usize])),
+                    (29usize, std::collections::BTreeSet::from([126usize])),
+                    (30usize, std::collections::BTreeSet::from([126usize])),
+                    (32usize, std::collections::BTreeSet::from([126usize])),
+                    (33usize, std::collections::BTreeSet::from([126usize])),
+                    (34usize, std::collections::BTreeSet::from([126usize])),
+                    (35usize, std::collections::BTreeSet::from([126usize])),
+                    (37usize, std::collections::BTreeSet::from([126usize])),
+                    (38usize, std::collections::BTreeSet::from([126usize])),
+                    (40usize, std::collections::BTreeSet::from([126usize])),
+                ]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 126usize,
+                    shifted: 2usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([(39usize, 139usize)]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 127usize,
+                    shifted: 1usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([
+                    (0usize, std::collections::BTreeSet::from([127usize])),
+                    (20usize, std::collections::BTreeSet::from([127usize])),
+                    (21usize, std::collections::BTreeSet::from([127usize])),
+                    (22usize, std::collections::BTreeSet::from([127usize])),
+                    (23usize, std::collections::BTreeSet::from([127usize])),
+                    (24usize, std::collections::BTreeSet::from([127usize])),
+                    (25usize, std::collections::BTreeSet::from([127usize])),
+                    (26usize, std::collections::BTreeSet::from([127usize])),
+                    (27usize, std::collections::BTreeSet::from([127usize])),
+                    (28usize, std::collections::BTreeSet::from([127usize])),
+                    (29usize, std::collections::BTreeSet::from([127usize])),
+                    (30usize, std::collections::BTreeSet::from([127usize])),
+                    (32usize, std::collections::BTreeSet::from([127usize])),
+                    (33usize, std::collections::BTreeSet::from([127usize])),
+                    (34usize, std::collections::BTreeSet::from([127usize])),
+                    (35usize, std::collections::BTreeSet::from([127usize])),
+                    (37usize, std::collections::BTreeSet::from([127usize])),
+                    (38usize, std::collections::BTreeSet::from([127usize])),
+                    (40usize, std::collections::BTreeSet::from([127usize])),
+                ]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 127usize,
+                    shifted: 2usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([(0usize, 141usize)]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([
+                    (GrammarNonTerminals::_identPlus43, 142usize),
+                    (GrammarNonTerminals::_identStar44, 144usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([(
-                    38usize,
-                    std::collections::BTreeSet::from([77usize]),
+                    39usize,
+                    std::collections::BTreeSet::from([78usize]),
                 )]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
                         rule: 41usize,
                         shifted: 1usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 75usize,
-                        shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
                         rule: 76usize,
@@ -9069,7 +9254,11 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 119usize,
+                        rule: 78usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 121usize,
                         shifted: 0usize,
                     },
                 ]),
@@ -9078,28 +9267,28 @@ impl GrammarParser {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([75usize])),
-                    (38usize, std::collections::BTreeSet::from([75usize])),
+                    (0usize, std::collections::BTreeSet::from([76usize])),
+                    (39usize, std::collections::BTreeSet::from([76usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 75usize,
+                    rule: 76usize,
                     shifted: 1usize,
                 }]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(0usize, 142usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(0usize, 143usize)]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([(
-                    38usize,
-                    std::collections::BTreeSet::from([119usize]),
+                    39usize,
+                    std::collections::BTreeSet::from([121usize]),
                 )]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 76usize,
+                        rule: 77usize,
                         shifted: 1usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 119usize,
+                        rule: 121usize,
                         shifted: 1usize,
                     },
                 ]),
@@ -9108,16 +9297,16 @@ impl GrammarParser {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([76usize])),
-                    (38usize, std::collections::BTreeSet::from([76usize])),
+                    (0usize, std::collections::BTreeSet::from([77usize])),
+                    (39usize, std::collections::BTreeSet::from([77usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 76usize,
+                    rule: 77usize,
                     shifted: 2usize,
                 }]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(38usize, 144usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(39usize, 145usize)]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
@@ -9146,7 +9335,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([41usize])),
                     (35usize, std::collections::BTreeSet::from([41usize])),
                     (37usize, std::collections::BTreeSet::from([41usize])),
-                    (39usize, std::collections::BTreeSet::from([41usize])),
+                    (38usize, std::collections::BTreeSet::from([41usize])),
+                    (40usize, std::collections::BTreeSet::from([41usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 41usize,
@@ -9193,11 +9383,12 @@ impl GrammarParser {
                     (35usize, 100usize),
                     (36usize, 101usize),
                     (37usize, 102usize),
+                    (38usize, 103usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RustCode, 146usize),
-                    (GrammarNonTerminals::_TermSet39, 105usize),
-                    (GrammarNonTerminals::__TermSet39Plus40, 106usize),
+                    (GrammarNonTerminals::RustCode, 147usize),
+                    (GrammarNonTerminals::_TermSet40, 106usize),
+                    (GrammarNonTerminals::__TermSet40Plus41, 107usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([
@@ -9206,15 +9397,11 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 71usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
                         rule: 72usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 81usize,
+                        rule: 73usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -9366,17 +9553,25 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 121usize,
+                        rule: 119usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 120usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 123usize,
                         shifted: 1usize,
                     },
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(38usize, 147usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(39usize, 148usize)]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 121usize,
+                    rule: 123usize,
                     shifted: 2usize,
                 }]),
             },
@@ -9384,28 +9579,67 @@ impl GrammarParser {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([
-                    (0usize, std::collections::BTreeSet::from([121usize])),
-                    (20usize, std::collections::BTreeSet::from([121usize])),
-                    (21usize, std::collections::BTreeSet::from([121usize])),
-                    (22usize, std::collections::BTreeSet::from([121usize])),
-                    (23usize, std::collections::BTreeSet::from([121usize])),
-                    (24usize, std::collections::BTreeSet::from([121usize])),
-                    (25usize, std::collections::BTreeSet::from([121usize])),
-                    (26usize, std::collections::BTreeSet::from([121usize])),
-                    (27usize, std::collections::BTreeSet::from([121usize])),
-                    (28usize, std::collections::BTreeSet::from([121usize])),
-                    (29usize, std::collections::BTreeSet::from([121usize])),
-                    (30usize, std::collections::BTreeSet::from([121usize])),
-                    (32usize, std::collections::BTreeSet::from([121usize])),
-                    (33usize, std::collections::BTreeSet::from([121usize])),
-                    (34usize, std::collections::BTreeSet::from([121usize])),
-                    (35usize, std::collections::BTreeSet::from([121usize])),
-                    (37usize, std::collections::BTreeSet::from([121usize])),
-                    (39usize, std::collections::BTreeSet::from([121usize])),
+                    (0usize, std::collections::BTreeSet::from([123usize])),
+                    (20usize, std::collections::BTreeSet::from([123usize])),
+                    (21usize, std::collections::BTreeSet::from([123usize])),
+                    (22usize, std::collections::BTreeSet::from([123usize])),
+                    (23usize, std::collections::BTreeSet::from([123usize])),
+                    (24usize, std::collections::BTreeSet::from([123usize])),
+                    (25usize, std::collections::BTreeSet::from([123usize])),
+                    (26usize, std::collections::BTreeSet::from([123usize])),
+                    (27usize, std::collections::BTreeSet::from([123usize])),
+                    (28usize, std::collections::BTreeSet::from([123usize])),
+                    (29usize, std::collections::BTreeSet::from([123usize])),
+                    (30usize, std::collections::BTreeSet::from([123usize])),
+                    (32usize, std::collections::BTreeSet::from([123usize])),
+                    (33usize, std::collections::BTreeSet::from([123usize])),
+                    (34usize, std::collections::BTreeSet::from([123usize])),
+                    (35usize, std::collections::BTreeSet::from([123usize])),
+                    (37usize, std::collections::BTreeSet::from([123usize])),
+                    (38usize, std::collections::BTreeSet::from([123usize])),
+                    (40usize, std::collections::BTreeSet::from([123usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 121usize,
+                    rule: 123usize,
                     shifted: 3usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([(39usize, 150usize)]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 128usize,
+                    shifted: 1usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([
+                    (0usize, std::collections::BTreeSet::from([128usize])),
+                    (20usize, std::collections::BTreeSet::from([128usize])),
+                    (21usize, std::collections::BTreeSet::from([128usize])),
+                    (22usize, std::collections::BTreeSet::from([128usize])),
+                    (23usize, std::collections::BTreeSet::from([128usize])),
+                    (24usize, std::collections::BTreeSet::from([128usize])),
+                    (25usize, std::collections::BTreeSet::from([128usize])),
+                    (26usize, std::collections::BTreeSet::from([128usize])),
+                    (27usize, std::collections::BTreeSet::from([128usize])),
+                    (28usize, std::collections::BTreeSet::from([128usize])),
+                    (29usize, std::collections::BTreeSet::from([128usize])),
+                    (30usize, std::collections::BTreeSet::from([128usize])),
+                    (32usize, std::collections::BTreeSet::from([128usize])),
+                    (33usize, std::collections::BTreeSet::from([128usize])),
+                    (34usize, std::collections::BTreeSet::from([128usize])),
+                    (35usize, std::collections::BTreeSet::from([128usize])),
+                    (37usize, std::collections::BTreeSet::from([128usize])),
+                    (38usize, std::collections::BTreeSet::from([128usize])),
+                    (40usize, std::collections::BTreeSet::from([128usize])),
+                ]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 128usize,
+                    shifted: 2usize,
                 }]),
             },
             ::rusty_lr_core::builder::State {
@@ -9429,7 +9663,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([42usize])),
                     (35usize, std::collections::BTreeSet::from([42usize])),
                     (37usize, std::collections::BTreeSet::from([42usize])),
-                    (39usize, std::collections::BTreeSet::from([42usize])),
+                    (38usize, std::collections::BTreeSet::from([42usize])),
+                    (40usize, std::collections::BTreeSet::from([42usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 42usize,
@@ -9457,7 +9692,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([43usize])),
                     (35usize, std::collections::BTreeSet::from([43usize])),
                     (37usize, std::collections::BTreeSet::from([43usize])),
-                    (39usize, std::collections::BTreeSet::from([43usize])),
+                    (38usize, std::collections::BTreeSet::from([43usize])),
+                    (40usize, std::collections::BTreeSet::from([43usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 43usize,
@@ -9485,7 +9721,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([44usize])),
                     (35usize, std::collections::BTreeSet::from([44usize])),
                     (37usize, std::collections::BTreeSet::from([44usize])),
-                    (39usize, std::collections::BTreeSet::from([44usize])),
+                    (38usize, std::collections::BTreeSet::from([44usize])),
+                    (40usize, std::collections::BTreeSet::from([44usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 44usize,
@@ -9513,7 +9750,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([45usize])),
                     (35usize, std::collections::BTreeSet::from([45usize])),
                     (37usize, std::collections::BTreeSet::from([45usize])),
-                    (39usize, std::collections::BTreeSet::from([45usize])),
+                    (38usize, std::collections::BTreeSet::from([45usize])),
+                    (40usize, std::collections::BTreeSet::from([45usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 45usize,
@@ -9541,7 +9779,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([46usize])),
                     (35usize, std::collections::BTreeSet::from([46usize])),
                     (37usize, std::collections::BTreeSet::from([46usize])),
-                    (39usize, std::collections::BTreeSet::from([46usize])),
+                    (38usize, std::collections::BTreeSet::from([46usize])),
+                    (40usize, std::collections::BTreeSet::from([46usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 46usize,
@@ -9569,7 +9808,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([47usize])),
                     (35usize, std::collections::BTreeSet::from([47usize])),
                     (37usize, std::collections::BTreeSet::from([47usize])),
-                    (39usize, std::collections::BTreeSet::from([47usize])),
+                    (38usize, std::collections::BTreeSet::from([47usize])),
+                    (40usize, std::collections::BTreeSet::from([47usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 47usize,
@@ -9582,8 +9822,8 @@ impl GrammarParser {
                     (13usize, 49usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::IdentOrLiteral, 131usize),
-                    (GrammarNonTerminals::_IdentOrLiteralPlus41, 155usize),
+                    (GrammarNonTerminals::IdentOrLiteral, 132usize),
+                    (GrammarNonTerminals::_IdentOrLiteralPlus42, 158usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([
@@ -9600,11 +9840,11 @@ impl GrammarParser {
                         shifted: 1usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 73usize,
+                        rule: 74usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 74usize,
+                        rule: 75usize,
                         shifted: 0usize,
                     },
                 ]),
@@ -9613,11 +9853,11 @@ impl GrammarParser {
                 shift_goto_map_term: std::collections::BTreeMap::from([
                     (0usize, 48usize),
                     (13usize, 49usize),
-                    (38usize, 156usize),
+                    (39usize, 159usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::IdentOrLiteral,
-                    134usize,
+                    135usize,
                 )]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([
@@ -9634,7 +9874,7 @@ impl GrammarParser {
                         shifted: 2usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 74usize,
+                        rule: 75usize,
                         shifted: 1usize,
                     },
                 ]),
@@ -9660,7 +9900,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([38usize])),
                     (35usize, std::collections::BTreeSet::from([38usize])),
                     (37usize, std::collections::BTreeSet::from([38usize])),
-                    (39usize, std::collections::BTreeSet::from([38usize])),
+                    (38usize, std::collections::BTreeSet::from([38usize])),
+                    (40usize, std::collections::BTreeSet::from([38usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 38usize,
@@ -9688,7 +9929,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([48usize])),
                     (35usize, std::collections::BTreeSet::from([48usize])),
                     (37usize, std::collections::BTreeSet::from([48usize])),
-                    (39usize, std::collections::BTreeSet::from([48usize])),
+                    (38usize, std::collections::BTreeSet::from([48usize])),
+                    (40usize, std::collections::BTreeSet::from([48usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 48usize,
@@ -9716,7 +9958,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([49usize])),
                     (35usize, std::collections::BTreeSet::from([49usize])),
                     (37usize, std::collections::BTreeSet::from([49usize])),
-                    (39usize, std::collections::BTreeSet::from([49usize])),
+                    (38usize, std::collections::BTreeSet::from([49usize])),
+                    (40usize, std::collections::BTreeSet::from([49usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 49usize,
@@ -9744,7 +9987,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([50usize])),
                     (35usize, std::collections::BTreeSet::from([50usize])),
                     (37usize, std::collections::BTreeSet::from([50usize])),
-                    (39usize, std::collections::BTreeSet::from([50usize])),
+                    (38usize, std::collections::BTreeSet::from([50usize])),
+                    (40usize, std::collections::BTreeSet::from([50usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 50usize,
@@ -9772,7 +10016,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([52usize])),
                     (35usize, std::collections::BTreeSet::from([52usize])),
                     (37usize, std::collections::BTreeSet::from([52usize])),
-                    (39usize, std::collections::BTreeSet::from([52usize])),
+                    (38usize, std::collections::BTreeSet::from([52usize])),
+                    (40usize, std::collections::BTreeSet::from([52usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 52usize,
@@ -9800,7 +10045,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([51usize])),
                     (35usize, std::collections::BTreeSet::from([51usize])),
                     (37usize, std::collections::BTreeSet::from([51usize])),
-                    (39usize, std::collections::BTreeSet::from([51usize])),
+                    (38usize, std::collections::BTreeSet::from([51usize])),
+                    (40usize, std::collections::BTreeSet::from([51usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 51usize,
@@ -9828,7 +10074,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([53usize])),
                     (35usize, std::collections::BTreeSet::from([53usize])),
                     (37usize, std::collections::BTreeSet::from([53usize])),
-                    (39usize, std::collections::BTreeSet::from([53usize])),
+                    (38usize, std::collections::BTreeSet::from([53usize])),
+                    (40usize, std::collections::BTreeSet::from([53usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 53usize,
@@ -9856,7 +10103,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([54usize])),
                     (35usize, std::collections::BTreeSet::from([54usize])),
                     (37usize, std::collections::BTreeSet::from([54usize])),
-                    (39usize, std::collections::BTreeSet::from([54usize])),
+                    (38usize, std::collections::BTreeSet::from([54usize])),
+                    (40usize, std::collections::BTreeSet::from([54usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 54usize,
@@ -9884,7 +10132,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([55usize])),
                     (35usize, std::collections::BTreeSet::from([55usize])),
                     (37usize, std::collections::BTreeSet::from([55usize])),
-                    (39usize, std::collections::BTreeSet::from([55usize])),
+                    (38usize, std::collections::BTreeSet::from([55usize])),
+                    (40usize, std::collections::BTreeSet::from([55usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 55usize,
@@ -9912,7 +10161,8 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([56usize])),
                     (35usize, std::collections::BTreeSet::from([56usize])),
                     (37usize, std::collections::BTreeSet::from([56usize])),
-                    (39usize, std::collections::BTreeSet::from([56usize])),
+                    (38usize, std::collections::BTreeSet::from([56usize])),
+                    (40usize, std::collections::BTreeSet::from([56usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 56usize,
@@ -9940,10 +10190,40 @@ impl GrammarParser {
                     (34usize, std::collections::BTreeSet::from([57usize])),
                     (35usize, std::collections::BTreeSet::from([57usize])),
                     (37usize, std::collections::BTreeSet::from([57usize])),
-                    (39usize, std::collections::BTreeSet::from([57usize])),
+                    (38usize, std::collections::BTreeSet::from([57usize])),
+                    (40usize, std::collections::BTreeSet::from([57usize])),
                 ]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
                     rule: 57usize,
+                    shifted: 1usize,
+                }]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: std::collections::BTreeMap::from([
+                    (0usize, std::collections::BTreeSet::from([58usize])),
+                    (20usize, std::collections::BTreeSet::from([58usize])),
+                    (21usize, std::collections::BTreeSet::from([58usize])),
+                    (22usize, std::collections::BTreeSet::from([58usize])),
+                    (23usize, std::collections::BTreeSet::from([58usize])),
+                    (24usize, std::collections::BTreeSet::from([58usize])),
+                    (25usize, std::collections::BTreeSet::from([58usize])),
+                    (26usize, std::collections::BTreeSet::from([58usize])),
+                    (27usize, std::collections::BTreeSet::from([58usize])),
+                    (28usize, std::collections::BTreeSet::from([58usize])),
+                    (29usize, std::collections::BTreeSet::from([58usize])),
+                    (30usize, std::collections::BTreeSet::from([58usize])),
+                    (32usize, std::collections::BTreeSet::from([58usize])),
+                    (33usize, std::collections::BTreeSet::from([58usize])),
+                    (34usize, std::collections::BTreeSet::from([58usize])),
+                    (35usize, std::collections::BTreeSet::from([58usize])),
+                    (37usize, std::collections::BTreeSet::from([58usize])),
+                    (38usize, std::collections::BTreeSet::from([58usize])),
+                    (40usize, std::collections::BTreeSet::from([58usize])),
+                ]),
+                ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
+                    rule: 58usize,
                     shifted: 1usize,
                 }]),
             },
@@ -9953,44 +10233,46 @@ impl GrammarParser {
                     (20usize, 61usize),
                     (21usize, 62usize),
                     (22usize, 63usize),
-                    (23usize, 108usize),
-                    (24usize, 111usize),
-                    (25usize, 114usize),
-                    (26usize, 117usize),
-                    (27usize, 120usize),
-                    (28usize, 123usize),
-                    (29usize, 126usize),
-                    (30usize, 128usize),
-                    (32usize, 130usize),
-                    (33usize, 135usize),
-                    (34usize, 137usize),
-                    (35usize, 139usize),
-                    (37usize, 145usize),
+                    (23usize, 109usize),
+                    (24usize, 112usize),
+                    (25usize, 115usize),
+                    (26usize, 118usize),
+                    (27usize, 121usize),
+                    (28usize, 124usize),
+                    (29usize, 127usize),
+                    (30usize, 129usize),
+                    (32usize, 131usize),
+                    (33usize, 136usize),
+                    (34usize, 138usize),
+                    (35usize, 140usize),
+                    (37usize, 146usize),
+                    (38usize, 149usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::Rule, 148usize),
-                    (GrammarNonTerminals::TokenDef, 149usize),
-                    (GrammarNonTerminals::StartDef, 150usize),
-                    (GrammarNonTerminals::EofDef, 151usize),
-                    (GrammarNonTerminals::TokenTypeDef, 152usize),
-                    (GrammarNonTerminals::UserDataDef, 153usize),
-                    (GrammarNonTerminals::ReduceType, 154usize),
-                    (GrammarNonTerminals::ReduceDef, 157usize),
-                    (GrammarNonTerminals::ErrorDef, 158usize),
-                    (GrammarNonTerminals::ModulePrefixDef, 159usize),
-                    (GrammarNonTerminals::Glr, 160usize),
-                    (GrammarNonTerminals::Lalr, 161usize),
-                    (GrammarNonTerminals::Precedence, 162usize),
-                    (GrammarNonTerminals::NoOptim, 163usize),
-                    (GrammarNonTerminals::Dense, 164usize),
-                    (GrammarNonTerminals::Trace, 165usize),
-                    (GrammarNonTerminals::Filter, 166usize),
-                    (GrammarNonTerminals::GrammarLine, 167usize),
-                    (GrammarNonTerminals::_GrammarLinePlus44, 168usize),
+                    (GrammarNonTerminals::Rule, 151usize),
+                    (GrammarNonTerminals::TokenDef, 152usize),
+                    (GrammarNonTerminals::StartDef, 153usize),
+                    (GrammarNonTerminals::EofDef, 154usize),
+                    (GrammarNonTerminals::TokenTypeDef, 155usize),
+                    (GrammarNonTerminals::UserDataDef, 156usize),
+                    (GrammarNonTerminals::ReduceType, 157usize),
+                    (GrammarNonTerminals::ReduceDef, 160usize),
+                    (GrammarNonTerminals::ErrorDef, 161usize),
+                    (GrammarNonTerminals::ModulePrefixDef, 162usize),
+                    (GrammarNonTerminals::Glr, 163usize),
+                    (GrammarNonTerminals::Lalr, 164usize),
+                    (GrammarNonTerminals::Precedence, 165usize),
+                    (GrammarNonTerminals::NoOptim, 166usize),
+                    (GrammarNonTerminals::Dense, 167usize),
+                    (GrammarNonTerminals::Trace, 168usize),
+                    (GrammarNonTerminals::Filter, 169usize),
+                    (GrammarNonTerminals::Runtime, 170usize),
+                    (GrammarNonTerminals::GrammarLine, 171usize),
+                    (GrammarNonTerminals::_GrammarLinePlus45, 172usize),
                 ]),
                 reduce_map: std::collections::BTreeMap::from([(
-                    39usize,
-                    std::collections::BTreeSet::from([127usize]),
+                    40usize,
+                    std::collections::BTreeSet::from([130usize]),
                 )]),
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -10106,11 +10388,7 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 120usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 121usize,
+                        rule: 58usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
@@ -10130,19 +10408,31 @@ impl GrammarParser {
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 127usize,
+                        rule: 126usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
                         rule: 127usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 128usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 130usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::ShiftedRuleRef {
+                        rule: 130usize,
                         shifted: 1usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 128usize,
+                        rule: 131usize,
                         shifted: 0usize,
                     },
                     ::rusty_lr_core::ShiftedRuleRef {
-                        rule: 128usize,
+                        rule: 131usize,
                         shifted: 1usize,
                     },
                 ]),
@@ -10151,20 +10441,20 @@ impl GrammarParser {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([(
-                    39usize,
-                    std::collections::BTreeSet::from([128usize]),
+                    40usize,
+                    std::collections::BTreeSet::from([131usize]),
                 )]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 128usize,
+                    rule: 131usize,
                     shifted: 2usize,
                 }]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(39usize, 170usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(40usize, 174usize)]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 129usize,
+                    rule: 132usize,
                     shifted: 1usize,
                 }]),
             },
@@ -10173,7 +10463,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 129usize,
+                    rule: 132usize,
                     shifted: 2usize,
                 }]),
             },
@@ -10181,11 +10471,11 @@ impl GrammarParser {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: std::collections::BTreeMap::from([(
-                    39usize,
-                    std::collections::BTreeSet::from([126usize]),
+                    40usize,
+                    std::collections::BTreeSet::from([129usize]),
                 )]),
                 ruleset: std::collections::BTreeSet::from([::rusty_lr_core::ShiftedRuleRef {
-                    rule: 126usize,
+                    rule: 129usize,
                     shifted: 1usize,
                 }]),
             },
@@ -10235,6 +10525,7 @@ impl GrammarParser {
                 vec!["trace"],
                 vec!["dprec"],
                 vec!["filter"],
+                vec!["runtime"],
                 vec!["semicolon"],
                 vec!["eof"],
             ],
