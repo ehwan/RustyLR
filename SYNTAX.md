@@ -22,6 +22,7 @@
  - [LALR parser - `%lalr`](#lalr-parser-generation)
  - [Disable Optimization - `%nooptim`](#no-optimization)
  - [Make dense parser table - `%dense`](#dense-parser-table)
+ - [Runtime table calculation - `%runtime`](#runtime-table-calculation)
 
 
 ## Overview
@@ -471,3 +472,15 @@ Disable grammar optimization.
 Normally, the generated code will use `HashMap` to store the parser table.
 This directive will force the parser to use `Vec` instead of `HashMap`.
 Be careful, this could increase the size of the memory usage a lot.
+
+## Runtime table calculation
+```
+%runtime;
+```
+RustyLR by default generates the parser table at compile time.
+This directive will switch the parser to runtime table calculation mode.
+
+Parser table is generally extremely huge, the generated code will be few 10-thousand lines of code,
+and most of them are for initializing the parser table.
+This directive will switch the parser table to be calculated at runtime,
+which will dramatically reduce the size of the generated code, but will increase the runtime overhead.
