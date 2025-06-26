@@ -297,6 +297,9 @@ impl Grammar {
         }
 
         let grammar_build_stream = if self.compiled {
+            // do not build at runtime
+            // write all parser tables and production rules directly here
+
             let mut production_rules_body_stream = TokenStream::new();
             for rule in &self.builder.rules {
                 let mut tokens_vec_body_stream = TokenStream::new();
@@ -387,6 +390,8 @@ impl Grammar {
                 #state_convert_stream
             }
         } else {
+            // build runtime
+
             // adding reduce types
             let mut add_reduce_type_stream = TokenStream::new();
             for (&op, &reduce_type) in self.builder.reduce_types.iter() {
