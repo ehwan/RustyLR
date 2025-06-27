@@ -372,26 +372,11 @@ impl<Data: TokenData> Node<Data> {
         }
     }
 
-    /// get expected terminal classes for current state.
-    pub fn expected_class<'a, P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
-        parser: &'a P,
-    ) -> impl Iterator<Item = usize> + 'a
-    where
-        P::Term: 'a,
-        P::NonTerm: 'a,
-    {
-        parser.get_states()[self.state].expected()
-    }
     /// get expected terminals for current state.
     pub fn expected<'a, P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &'a P,
-    ) -> impl Iterator<Item = P::TerminalClassElement> + 'a
-    where
-        P::Term: 'a,
-        P::NonTerm: 'a,
-    {
+    ) -> impl Iterator<Item = P::TerminalClassElement> + 'a {
         parser.get_states()[self.state]
             .expected()
             .flat_map(|class| parser.get_terminals(class).unwrap())
@@ -400,10 +385,9 @@ impl<Data: TokenData> Node<Data> {
     pub fn expected_nonterm<'a, P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &'a P,
-    ) -> impl Iterator<Item = &'a Data::NonTerm>
+    ) -> impl Iterator<Item = Data::NonTerm> + 'a
     where
-        P::Term: 'a,
-        P::NonTerm: 'a,
+        P::NonTerm: Copy,
     {
         parser.get_states()[self.state].expected_nonterm()
     }

@@ -23,9 +23,7 @@ pub trait State<NonTerm> {
     fn expected(&self) -> impl Iterator<Item = usize> + '_;
 
     /// Get the set of expected non-terminal symbols for this state
-    fn expected_nonterm<'a>(&'a self) -> impl Iterator<Item = &'a NonTerm> + 'a
-    where
-        NonTerm: 'a;
+    fn expected_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_;
 
     /// Get the set of rules that this state is trying to parse
     fn get_rules(&self) -> &[ShiftedRuleRef];
@@ -44,7 +42,7 @@ pub struct SparseState<NonTerm, RuleContainer> {
     pub(crate) ruleset: Vec<ShiftedRuleRef>,
 }
 
-impl<NonTerm, RuleIndex: crate::stackvec::ToUsizeList> State<NonTerm>
+impl<NonTerm: Copy, RuleIndex: crate::stackvec::ToUsizeList> State<NonTerm>
     for SparseState<NonTerm, RuleIndex>
 {
     fn shift_goto_class(&self, class: usize) -> Option<usize> {
@@ -72,11 +70,8 @@ impl<NonTerm, RuleIndex: crate::stackvec::ToUsizeList> State<NonTerm>
             .chain(self.reduce_map.keys())
             .copied()
     }
-    fn expected_nonterm<'a>(&'a self) -> impl Iterator<Item = &'a NonTerm> + 'a
-    where
-        NonTerm: 'a,
-    {
-        self.shift_goto_map_nonterm.keys()
+    fn expected_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_ {
+        self.shift_goto_map_nonterm.keys().copied()
     }
     fn get_rules(&self) -> &[ShiftedRuleRef] {
         &self.ruleset
@@ -95,7 +90,7 @@ pub struct DenseState<NonTerm, RuleContainer> {
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<ShiftedRuleRef>,
 }
-impl<NonTerm, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
+impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
     for DenseState<NonTerm, RuleContainer>
 {
     fn shift_goto_class(&self, class: usize) -> Option<usize> {
@@ -123,11 +118,8 @@ impl<NonTerm, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
         (0..self.shift_goto_map_class.len())
             .filter(|&i| self.shift_goto_map_class[i].is_some() || self.reduce_map[i].is_some())
     }
-    fn expected_nonterm<'a>(&'a self) -> impl Iterator<Item = &'a NonTerm> + 'a
-    where
-        NonTerm: 'a,
-    {
-        self.shift_goto_map_nonterm.keys()
+    fn expected_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_ {
+        self.shift_goto_map_nonterm.keys().copied()
     }
     fn get_rules(&self) -> &[ShiftedRuleRef] {
         &self.ruleset

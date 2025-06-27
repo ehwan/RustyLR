@@ -90,26 +90,11 @@ impl<Data: TokenData> Context<Data> {
         self.tree_stack
     }
 
-    /// Get expected terminal classes for next `feed()` call.
-    pub fn expected_class<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
-        parser: &'a P,
-    ) -> impl Iterator<Item = usize> + 'a
-    where
-        Data::Term: 'a,
-        Data::NonTerm: 'a,
-    {
-        parser.get_states()[*self.state_stack.last().unwrap()].expected()
-    }
     /// Get expected tokens for next `feed()` call.
     pub fn expected<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &'a P,
-    ) -> impl Iterator<Item = P::TerminalClassElement> + 'a
-    where
-        Data::Term: 'a,
-        Data::NonTerm: 'a,
-    {
+    ) -> impl Iterator<Item = P::TerminalClassElement> + 'a {
         parser.get_states()[*self.state_stack.last().unwrap()]
             .expected()
             .flat_map(|class| parser.get_terminals(class).unwrap())
@@ -118,10 +103,9 @@ impl<Data: TokenData> Context<Data> {
     pub fn expected_nonterm<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &'a P,
-    ) -> impl Iterator<Item = &'a Data::NonTerm>
+    ) -> impl Iterator<Item = Data::NonTerm> + 'a
     where
-        Data::Term: 'a,
-        Data::NonTerm: 'a,
+        Data::NonTerm: Copy,
     {
         parser.get_states()[*self.state_stack.last().unwrap()].expected_nonterm()
     }

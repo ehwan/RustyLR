@@ -135,14 +135,6 @@ impl<Data: TokenData> Context<Data> {
         })
     }
 
-    /// Get expected terminal classes for next `feed()` call.
-    /// This could contain duplicate tokens.
-    pub fn expected_class<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &'a self,
-        parser: &'a P,
-    ) -> impl Iterator<Item = usize> + 'a {
-        self.nodes().flat_map(|node| node.expected_class(parser))
-    }
     /// Get expected tokens for next `feed()` call.
     /// This could contain duplicate tokens.
     pub fn expected<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
@@ -156,7 +148,10 @@ impl<Data: TokenData> Context<Data> {
     pub fn expected_nonterm<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &'a self,
         parser: &'a P,
-    ) -> impl Iterator<Item = &'a Data::NonTerm> {
+    ) -> impl Iterator<Item = Data::NonTerm> + 'a
+    where
+        Data::NonTerm: Copy,
+    {
         self.nodes().flat_map(|node| node.expected_nonterm(parser))
     }
 
