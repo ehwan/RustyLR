@@ -67,6 +67,12 @@ impl<Data: TokenData> Context<Data> {
         self.data_stack.pop()?.try_into().ok()
     }
 
+    /// Get current state index
+    #[inline]
+    pub fn state(&self) -> usize {
+        *self.state_stack.last().unwrap()
+    }
+
     /// For debugging.
     /// Get `TreeList` that current context holds.
     #[cfg(feature = "tree")]

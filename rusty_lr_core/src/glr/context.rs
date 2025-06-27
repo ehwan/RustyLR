@@ -51,7 +51,7 @@ impl<Data: TokenData> Context<Data> {
         self.current_nodes.is_empty()
     }
 
-    /// Get index of states in parser for every diverged paths.
+    /// Get current index of states in every diverged paths.
     pub fn states(&self) -> impl Iterator<Item = usize> + '_ {
         self.current_nodes.keys().copied()
     }
