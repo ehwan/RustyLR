@@ -714,11 +714,78 @@ impl Grammar {
                     None
                 };
 
+                // rename all '@var_name' to '__rustylr_location_{var_name}'
+                let reduce_action = if let Some(reduce_action) = rule.reduce_action {
+                    let mut varnames: HashSet<Ident> = HashSet::default();
+                    for token in &tokens {
+                        if let Some(mapto) = &token.mapto {
+                            varnames.insert(mapto.clone());
+                        }
+                    }
+
+                    fn rename_tokenstream_recursive(
+                        ts: TokenStream,
+                        varnames: &HashSet<Ident>,
+                    ) -> TokenStream {
+                        let mut new_ts = TokenStream::new();
+                        let mut it = ts.into_iter().peekable();
+                        while let Some(token) = it.next() {
+                            match token {
+                                proc_macro2::TokenTree::Punct(punct) => {
+                                    if punct.as_char() == '@' {
+                                        println!("found '@' in reduce action, checking next token");
+                                        if let Some(proc_macro2::TokenTree::Ident(ident)) =
+                                            it.peek()
+                                        {
+                                            println!("found ident after '@': {}", ident);
+                                            if varnames.contains(ident) {
+                                                // rename to '__rustylr_location_{varname}'
+                                                let new_ident = Ident::new(
+                                                    &format!("__rustylr_location_{}", ident),
+                                                    ident.span(),
+                                                );
+                                                new_ts.extend([proc_macro2::TokenTree::Ident(
+                                                    new_ident,
+                                                )]);
+                                                it.next(); // consume the ident
+                                            } else {
+                                                // no match, just keep the punct
+                                                new_ts
+                                                    .extend([proc_macro2::TokenTree::Punct(punct)]);
+                                            }
+                                        } else {
+                                            // just a punct, no ident after it
+                                            new_ts.extend([proc_macro2::TokenTree::Punct(punct)]);
+                                        }
+                                    } else {
+                                        new_ts.extend([proc_macro2::TokenTree::Punct(punct)]);
+                                    }
+                                }
+                                proc_macro2::TokenTree::Group(group) => {
+                                    let new_group = proc_macro2::Group::new(
+                                        group.delimiter(),
+                                        rename_tokenstream_recursive(group.stream(), varnames),
+                                    );
+                                    let new_group = proc_macro2::TokenTree::Group(new_group);
+                                    new_ts.extend([new_group]);
+                                }
+                                token => {
+                                    new_ts.extend([token]);
+                                }
+                            }
+                        }
+                        new_ts
+                    }
+
+                    let new_reduce_action = rename_tokenstream_recursive(reduce_action, &varnames);
+                    Some(ReduceAction::Custom(new_reduce_action))
+                } else {
+                    None
+                };
+
                 rule_lines.push(Rule {
                     tokens,
-                    reduce_action: rule
-                        .reduce_action
-                        .map(|stream| ReduceAction::Custom(stream)),
+                    reduce_action,
                     separator_span: rule.separator_span,
                     lookaheads: None,
                     prec,
