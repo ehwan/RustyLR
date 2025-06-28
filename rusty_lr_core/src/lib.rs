@@ -20,10 +20,10 @@ pub use tree::TreeNonTerminal;
 /// module for build DFA tables from CFG
 pub mod builder;
 
-/// module for LR(1), LALR(1) parser
+/// module for deterministic LR(1), LALR(1) parser
 pub mod lr;
 
-/// module for GLR parser
+/// module for non-deterministic GLR parser
 pub mod glr;
 
 mod nonterminal;
@@ -35,9 +35,6 @@ pub use hashmap::HashMap;
 pub use hashmap::HashSet;
 
 pub use rule::ProductionRule;
-
-pub use rule::LookaheadRule;
-pub use rule::LookaheadRuleRefSet;
 pub use rule::ShiftedRule;
 pub use rule::ShiftedRuleRef;
 

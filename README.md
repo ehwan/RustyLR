@@ -3,9 +3,9 @@
 [![docs.rs](https://docs.rs/rusty_lr/badge.svg)](https://docs.rs/rusty_lr)
 
 ***A Bison-like, parser generator for Rust supporting IELR(1), LALR(1) parser tables, with deterministic LR and
-generalized LR parsing strategies.***
+non-deterministic LR (GLR) parsing strategies.***
 
-RustyLR is a parser generator that converts context-free grammars into IELR(1)/LALR(1) tables with deterministic LR and GLR parsing strategies. It supports custom reduce action in Rust, with beautiful diagnostics.
+RustyLR is a parser generator that converts context-free grammars into IELR(1)/LALR(1) tables with deterministic LR and non-deterministic GLR parsing strategies. It supports custom reduce action in Rust, with beautiful diagnostics.
 Highly inspired by tools like *bison*, it uses a similar syntax while integrating seamlessly with Rust's ecosystem.
 It constructs optimized state machine, ensuring efficient and reliable parsing.
 

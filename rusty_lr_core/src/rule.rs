@@ -206,22 +206,6 @@ impl<Term> LookaheadRuleRefSet<Term> {
         set.append(&mut lookaheads);
         changed || old != set.len()
     }
-
-    /// map terminal type to another type
-    pub fn map<NewTerm: Ord>(
-        self,
-        term_map: impl Fn(Term) -> NewTerm,
-    ) -> LookaheadRuleRefSet<NewTerm> {
-        LookaheadRuleRefSet {
-            rules: self
-                .rules
-                .into_iter()
-                .map(move |(rule, lookaheads)| {
-                    (rule, lookaheads.into_iter().map(&term_map).collect())
-                })
-                .collect(),
-        }
-    }
 }
 // impl<'a, Term: TermTraitBound + Display, NonTerm: NonTermTraitBound + Display> Display
 //     for LookaheadRuleRefSet<'a, Term, NonTerm>
