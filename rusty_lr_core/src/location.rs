@@ -6,3 +6,17 @@ pub trait Location: Clone + Default {
     /// create a new zero-length location that is next to the current location
     fn next_zero(&self) -> Self;
 }
+
+#[derive(Clone, Default, Debug, Copy)]
+pub struct DefaultLocation;
+impl Location for DefaultLocation {
+    /// returns the smallest range that covers both locations
+    fn merge(self, _: Self) -> Self {
+        DefaultLocation
+    }
+
+    /// create a new zero-length location that is next to the current location
+    fn next_zero(&self) -> Self {
+        DefaultLocation
+    }
+}

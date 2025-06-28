@@ -24,7 +24,7 @@ pub struct Context<Data: TokenData> {
 
     /// For temporary use. store arguments for calling `reduce_action`.
     /// But we don't want to reallocate every `feed` call
-    pub(crate) reduce_args: Vec<Data>,
+    pub(crate) reduce_args: Vec<(Data, Data::Location)>,
 
     /// For temporary use. store nodes for next reduce.
     pub(crate) nodes_pong: HashMap<usize, Vec<Rc<Node<Data>>>>,
@@ -87,7 +87,7 @@ impl<Data: TokenData> Context<Data> {
                 Ok(data_node) => data_node.data?,
                 Err(rc_data_node) => rc_data_node.data.as_ref()?.clone(),
             };
-            data_node.try_into().ok()
+            data_node.0.try_into().ok()
         })
     }
 
@@ -110,29 +110,6 @@ impl<Data: TokenData> Context<Data> {
         Data::NonTerm: Clone,
     {
         self.into_nodes().map(|node| node.to_tree_list())
-    }
-
-    /// Get all sequence of data (from root to current node) for every diverged path.
-    pub fn to_data_lists(&self) -> impl Iterator<Item = Vec<Data>> + '_
-    where
-        Data: Clone,
-    {
-        self.nodes().map(|node| {
-            node.iter()
-                .map(|node| node.data.as_ref().unwrap().clone())
-                .collect()
-        })
-    }
-    /// Get all sequence of data (from root to current node) for every diverged path.
-    pub fn into_data_lists(self) -> impl Iterator<Item = Vec<Data>>
-    where
-        Data: Clone,
-    {
-        self.into_nodes().map(|node| {
-            node.iter()
-                .map(|node| node.data.as_ref().unwrap().clone())
-                .collect()
-        })
     }
 
     /// Get expected tokens for next `feed()` call.
@@ -203,11 +180,12 @@ impl<Data: TokenData> Context<Data> {
 
     /// Feed one terminal to parser, and update state stack.
     /// For GLR parsing, this function will create multiple path if needed.
-    pub fn feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    pub fn feed_location<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &mut self,
         parser: &P,
         term: P::Term,
         userdata: &mut Data::UserData,
+        location: Data::Location,
     ) -> Result<(), ParseError<P::Term, Data::ReduceActionError>>
     where
         P::Term: Hash + Eq + Clone,
@@ -271,7 +249,10 @@ impl<Data: TokenData> Context<Data> {
                                 let next_node = Node {
                                     parent: Some(node),
                                     state: next_term_shift_state,
-                                    data: Some(term.clone().into()),
+                                    data: Some((
+                                        Data::new_terminal(term.clone()),
+                                        location.clone(),
+                                    )),
                                     #[cfg(feature = "tree")]
                                     tree: Some(Tree::new_terminal(term.clone())),
                                 };
@@ -294,7 +275,7 @@ impl<Data: TokenData> Context<Data> {
                         let next_node = Node {
                             parent: Some(node),
                             state: next_term_shift_state,
-                            data: Some(term.clone().into()),
+                            data: Some((Data::new_terminal(term.clone()), location.clone())),
                             #[cfg(feature = "tree")]
                             tree: Some(Tree::new_terminal(term.clone())),
                         };
@@ -346,7 +327,7 @@ impl<Data: TokenData> Context<Data> {
                         let next_node = Node {
                             parent: Some(Rc::new(error_node)),
                             state: next_state,
-                            data: Some(term.clone().into()),
+                            data: Some((Data::new_terminal(term.clone()), location.clone())),
                             #[cfg(feature = "tree")]
                             tree: Some(Tree::new_terminal(term.clone())),
                         };

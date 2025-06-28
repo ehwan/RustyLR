@@ -93,6 +93,25 @@ where
         current_node
     }
 }
+
+/// From `node`, merge last `len` locations into one location.
+/// if `len` is 0, returns the zero-length location right after the last len'th element in `stack`,
+/// if `stack` is empty at that point, returns the default location.
+fn merge_locations<Data: TokenData>(node: &Rc<Node<Data>>, len: usize) -> Data::Location {
+    use crate::Location;
+    if len == 0 {
+        node.data
+            .as_ref()
+            .map_or_else(Default::default, |(_, loc)| loc.next_zero())
+    } else {
+        node.iter()
+            .take(len)
+            .map(|node| node.data.as_ref().map(|(_, loc)| loc).unwrap().clone())
+            .reduce(|a, b| b.merge(a))
+            .unwrap()
+    }
+}
+
 /// give lookahead token to parser, and check if there is any reduce action.
 /// returns false if shift action is revoked
 pub(crate) fn reduce<P: Parser, Data: TokenData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
@@ -108,6 +127,8 @@ where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
+    let new_location = merge_locations(&node, parser.get_rules()[reduce_rule].rule.len());
+
     context.reduce_args.clear();
     let data_extracted = clone_pop_nodes(node, reduce_rule, parser, context);
 
@@ -130,7 +151,7 @@ where
             {
                 let new_node = Node {
                     parent: Some(parent),
-                    data: Some(new_data),
+                    data: Some((new_data, new_location)),
                     state: nonterm_shift_state,
                     #[cfg(feature = "tree")]
                     tree: Some(tree),

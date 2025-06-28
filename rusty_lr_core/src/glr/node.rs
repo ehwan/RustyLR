@@ -44,7 +44,7 @@ pub struct Node<Data: TokenData> {
     pub state: usize,
 
     /// token data for this node
-    pub data: Option<Data>,
+    pub data: Option<(Data, Data::Location)>,
     /// tree representation of this node
     #[cfg(feature = "tree")]
     pub tree: Option<Tree<Data::Term, Data::NonTerm>>,
@@ -98,13 +98,13 @@ impl<Data: TokenData> Node<Data> {
     /// This function should not be called from root node.
     pub fn to_data(&self) -> &Data {
         debug_assert!(self.parent.is_some());
-        self.data.as_ref().unwrap()
+        &self.data.as_ref().unwrap().0
     }
     /// Get data for this node.
     /// This function should not be called from root node.
     pub fn into_data(self) -> Data {
         debug_assert!(self.parent.is_some());
-        self.data.unwrap()
+        self.data.unwrap().0
     }
     /// Get list of data from root to this node.
     /// Unlike other [`Iterator`] functions, the order of returned data is from root to this node.
@@ -399,13 +399,16 @@ impl<Data: TokenData> Node<Data> {
     where
         Data::NonTerm: std::hash::Hash + Eq,
     {
+        let node0 = node;
         let error_nonterm = parser.get_error_nonterm()?;
+        let mut popped_count = 0;
         loop {
             let last_state = &parser.get_states()[node.state];
             if let Some(error_state) = last_state.shift_goto_nonterm(&error_nonterm) {
+                let new_location = super::merge_locations(node0, popped_count);
                 // pop all states and data above this state
                 let child_node = Node {
-                    data: Some(Data::new_error_nonterm()),
+                    data: Some((Data::new_error_nonterm(), new_location)),
                     parent: Some(Rc::clone(node)),
                     state: error_state,
                     #[cfg(feature = "tree")]
@@ -416,6 +419,7 @@ impl<Data: TokenData> Node<Data> {
             }
 
             if let Some(parent) = node.parent.as_ref() {
+                popped_count += 1;
                 node = parent;
             } else {
                 break;
@@ -495,6 +499,6 @@ impl<Data: TokenData> Deref for Node<Data> {
 }
 impl<Data: TokenData> DerefMut for Node<Data> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        self.data.as_mut().unwrap()
+        &mut self.data.as_mut().unwrap().0
     }
 }
