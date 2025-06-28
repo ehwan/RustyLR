@@ -16,10 +16,10 @@ pub struct Context<Data: TokenData> {
     pub state_stack: Vec<usize>,
 
     /// Data stack holds the values associated with each symbol.
-    pub(crate) data_stack: Vec<Data>,
+    pub(crate) data_stack: Vec<(Data, Data::Location)>,
 
     /// temporary data stack for reduce action.
-    pub(crate) reduce_args: Vec<Data>,
+    pub(crate) reduce_args: Vec<(Data, Data::Location)>,
 
     /// Tree stack for tree representation of the parse.
     #[cfg(feature = "tree")]
@@ -64,7 +64,7 @@ impl<Data: TokenData> Context<Data> {
     {
         // data_stack must be <Start> <EOF> in this point
         self.data_stack.pop();
-        self.data_stack.pop()?.try_into().ok()
+        self.data_stack.pop()?.0.try_into().ok()
     }
 
     /// Get current state index
@@ -110,13 +110,34 @@ impl<Data: TokenData> Context<Data> {
         parser.get_states()[*self.state_stack.last().unwrap()].expected_nonterm()
     }
 
+    /// From `stack`, merge last `len` locations into one location.
+    /// if `len` is 0, returns the zero-length location right after the last len'th element in `stack`,
+    /// if `stack` is empty at that point, returns the default location.
+    fn merge_locations(stack: &Vec<(Data, Data::Location)>, len: usize) -> Data::Location {
+        use crate::Location;
+        if len == 0 {
+            stack
+                .last()
+                .map_or_else(Default::default, |(_, loc)| loc.next_zero())
+        } else {
+            stack
+                .iter()
+                .rev()
+                .take(len)
+                .map(|(_, loc)| loc.clone())
+                .reduce(|a, b| b.merge(a))
+                .unwrap()
+        }
+    }
+
     /// Feed one terminal to parser, and update state stack.
     /// This automatically enters panic mode if needed.
-    pub fn feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    pub fn feed_location<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &mut self,
         parser: &P,
         term: Data::Term,
         userdata: &mut Data::UserData,
+        location: Data::Location,
     ) -> Result<(), ParseError<Data::Term, Data::ReduceActionError>>
     where
         Data::Term: Hash + Eq + Clone,
@@ -132,14 +153,16 @@ impl<Data: TokenData> Context<Data> {
             parser.get_states()[*self.state_stack.last().unwrap()].reduce(class)
         {
             let rule = &parser.get_rules()[reduce_rule];
+            let len = rule.rule.len();
             // pop state stack
-            self.state_stack
-                .truncate(self.state_stack.len() - rule.rule.len());
+            self.state_stack.truncate(self.state_stack.len() - len);
 
             let mut shift = false;
 
+            let new_location = Self::merge_locations(&self.data_stack, len);
+
             self.reduce_args.clear();
-            self.reduce_args.reserve(rule.rule.len());
+            self.reduce_args.reserve(len);
             for _ in 0..rule.rule.len() {
                 self.reduce_args.push(
                     self.data_stack
@@ -157,7 +180,7 @@ impl<Data: TokenData> Context<Data> {
                 userdata,
             )
             .map_err(ParseError::ReduceAction)?;
-            self.data_stack.push(new_data);
+            self.data_stack.push((new_data, new_location));
 
             // construct tree
             #[cfg(feature = "tree")]
@@ -192,7 +215,7 @@ impl<Data: TokenData> Context<Data> {
             #[cfg(feature = "tree")]
             self.tree_stack.push(Tree::new_terminal(term.clone()));
 
-            self.data_stack.push(term.into());
+            self.data_stack.push((Data::new_terminal(term), location));
 
             Ok(())
         } else {
@@ -207,7 +230,7 @@ impl<Data: TokenData> Context<Data> {
                     #[cfg(feature = "tree")]
                     self.tree_stack.push(Tree::new_terminal(term.clone()));
 
-                    self.data_stack.push(term.into());
+                    self.data_stack.push((Data::new_terminal(term), location));
                 }
                 Ok(())
             } else {
@@ -398,6 +421,9 @@ impl<Data: TokenData> Context<Data> {
             if let Some(error_state) = last_state.shift_goto_nonterm(&error_nonterm) {
                 // pop all states above this state
                 self.state_stack.truncate(stack_idx + 1);
+
+                let new_location = Self::merge_locations(&self.data_stack, popped_token);
+
                 // pop all data
                 {
                     let new_len = self.data_stack.len() - popped_token;
@@ -411,7 +437,8 @@ impl<Data: TokenData> Context<Data> {
 
                 // shift to error state
                 self.state_stack.push(error_state);
-                self.data_stack.push(Data::new_error_nonterm());
+                self.data_stack
+                    .push((Data::new_error_nonterm(), new_location));
                 #[cfg(feature = "tree")]
                 {
                     // push error tree
