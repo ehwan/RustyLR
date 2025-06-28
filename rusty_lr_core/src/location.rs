@@ -7,6 +7,7 @@ pub trait Location: Clone + Default {
     fn next_zero(&self) -> Self;
 }
 
+/// Default location type that does nothing.
 #[derive(Clone, Default, Debug, Copy)]
 pub struct DefaultLocation;
 impl Location for DefaultLocation {
