@@ -178,8 +178,22 @@ impl<Data: TokenData> Context<Data> {
         }
     }
 
-    /// Feed one terminal to parser, and update state stack.
-    /// For GLR parsing, this function will create multiple path if needed.
+    /// Feed one terminal to parser, and update stacks.
+    /// This will use `Default::default()` for location.
+    pub fn feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &mut self,
+        parser: &P,
+        term: Data::Term,
+        userdata: &mut Data::UserData,
+    ) -> Result<(), ParseError<Data::Term, Data::ReduceActionError>>
+    where
+        P::Term: Hash + Eq + Clone,
+        P::NonTerm: Hash + Eq + Clone,
+        Data: Clone,
+    {
+        self.feed_location(parser, term, userdata, Default::default())
+    }
+    /// Feed one terminal with location to parser, and update state stack.
     pub fn feed_location<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &mut self,
         parser: &P,
@@ -190,7 +204,7 @@ impl<Data: TokenData> Context<Data> {
     where
         P::Term: Hash + Eq + Clone,
         P::NonTerm: Hash + Eq + Clone,
-        Data: Clone + From<P::Term>,
+        Data: Clone,
     {
         #[cfg(feature = "tree")]
         use crate::Tree;

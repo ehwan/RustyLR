@@ -130,8 +130,21 @@ impl<Data: TokenData> Context<Data> {
         }
     }
 
-    /// Feed one terminal to parser, and update state stack.
-    /// This automatically enters panic mode if needed.
+    /// Feed one terminal to parser, and update stacks.
+    /// This will use `Default::default()` for location.
+    pub fn feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &mut self,
+        parser: &P,
+        term: Data::Term,
+        userdata: &mut Data::UserData,
+    ) -> Result<(), ParseError<Data::Term, Data::ReduceActionError>>
+    where
+        Data::Term: Hash + Eq + Clone,
+        Data::NonTerm: Hash + Eq + Copy,
+    {
+        self.feed_location(parser, term, userdata, Default::default())
+    }
+    /// Feed one terminal with location to parser, and update stacks.
     pub fn feed_location<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &mut self,
         parser: &P,
@@ -142,7 +155,6 @@ impl<Data: TokenData> Context<Data> {
     where
         Data::Term: Hash + Eq + Clone,
         Data::NonTerm: Hash + Eq + Copy,
-        Data: From<Data::Term>,
     {
         #[cfg(feature = "tree")]
         use crate::Tree;
