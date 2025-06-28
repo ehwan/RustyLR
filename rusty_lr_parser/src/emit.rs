@@ -920,11 +920,12 @@ impl Grammar {
             match &rule.reduce_action {
                 Some(ReduceAction::Custom(reduce_action)) => {
                     let mut extract_token_data_from_args = TokenStream::new();
-                    for (token_idx, token) in rule.tokens.iter().enumerate() {
-                        let location_varname = format_ident!("__rustylr_location{}", token_idx);
+                    for token in rule.tokens.iter() {
                         match &token.token {
                             Token::Term(_) => match &token.mapto {
                                 Some(mapto) => {
+                                    let location_varname =
+                                        format_ident!("__rustylr_location_{}", mapto);
                                     extract_token_data_from_args.extend(quote! {
                                     let (#token_data_typename::#terminal_variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
                                         unreachable!()
@@ -943,6 +944,8 @@ impl Grammar {
                                         let variant_name = &variant_names_for_nonterm[*nonterm_idx];
                                         match &token.mapto {
                                             Some(mapto) => {
+                                                let location_varname =
+                                                    format_ident!("__rustylr_location_{}", mapto);
                                                 extract_token_data_from_args.extend(quote! {
                                                     let (#token_data_typename::#variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
                                                         unreachable!()
