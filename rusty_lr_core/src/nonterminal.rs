@@ -62,6 +62,8 @@ pub trait TokenData: Sized {
     type ReduceActionError;
     /// The value of the start symbol
     type StartType;
+    /// Type for location of the token
+    type Location: crate::Location;
 
     /// performs a reduce action with the given rule index
     fn reduce_action(
@@ -72,7 +74,7 @@ pub trait TokenData: Sized {
         // the order must be in reverse order. That is,
         // if the rule is A -> B C D,
         // this must be in the order of [D, C, B]
-        reduce_args: &mut Vec<Self>,
+        reduce_args: &mut Vec<(Self, Self::Location)>,
         // for runtime-conflict-resolve.
         // if this variable is set to false in the action, the shift action will not be performed. (GLR parser)
         shift: &mut bool,
@@ -84,4 +86,7 @@ pub trait TokenData: Sized {
 
     /// create new non-terminal for error recovery
     fn new_error_nonterm() -> Self;
+
+    /// create new terminal variant
+    fn new_terminal(term: Self::Term) -> Self;
 }
