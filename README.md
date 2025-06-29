@@ -147,6 +147,7 @@ let result:i32 = context.accept().unwrap(); // get value of start 'E'
 ```
 
 ### Using `rustylr` Executable
+[![crates.io](https://img.shields.io/crates/v/rustylr.svg)](https://crates.io/crates/rustylr)
 ```
 cargo install rustylr
 
