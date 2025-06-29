@@ -6,6 +6,7 @@
 %start Json;
 %eof '\0';
 %dense;
+%location std::ops::Range<usize>;
 
 Json: Element;
 
@@ -20,7 +21,12 @@ Value: Object
 
 Object: '{' WS '}'
       | '{' Members '}'
-      | '{' error '}' { println!("Error recovered with '}}'"); }
+      | '{' error '}' { 
+        // @error is Range<usize> at this point
+        let start = @error.start;
+        let end = @error.end;
+        println!("Error recovered with '}}' at {start}..{end}"); 
+      }
       ;
 
 Members: Member

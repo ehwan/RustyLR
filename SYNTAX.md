@@ -507,3 +507,5 @@ Expr: exp1=Expr '+' exp2=Expr {
     exp1 + exp2
 };
 ```
+
+Default location type is `rusty_lr::DefaultLocation`. This does not hold any data.

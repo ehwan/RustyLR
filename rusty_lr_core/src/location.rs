@@ -21,3 +21,19 @@ impl Location for DefaultLocation {
         DefaultLocation
     }
 }
+
+impl<T> Location for std::ops::Range<T>
+where
+    T: Clone + Default + Ord,
+{
+    fn merge(self, other: Self) -> Self {
+        let start = self.start;
+        let end = other.end;
+        start..end
+    }
+
+    fn next_zero(&self) -> Self {
+        let end = self.end.clone();
+        end.clone()..end
+    }
+}
