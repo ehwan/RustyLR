@@ -17,6 +17,7 @@ It constructs optimized state machine, ensuring efficient and reliable parsing.
  - **Automatic Optimization:**: Reduces parser table size and improves performance by grouping terminals with identical behavior across parser states.
  - **Multiple Parsing Strategies:** Supports minimal-LR(1), LALR(1) parser table, and GLR parsing strategy.
  - **Detailed Diagnostics:** Detect grammar conflicts, verbose conflicts resolving stages, and optimization stages.
+ - **Location Tracking:** Track the location of every tokens in the parse tree, useful for error reporting and debugging.
 
  ## Installation & How to Use
  Add RustyLR to your `Cargo.toml`:
@@ -203,6 +204,22 @@ RustyLR provides a mechanism for handling semantic errors during parsing.
  - return `Err` from the reduce action
 
 See [SYNTAX.md - Resolving Conflicts](SYNTAX.md#resolving-conflicts) for details.
+
+## Location Tracking
+```rust
+Expr: exp1=Expr '+' exp2=Expr {
+    println!( "Location of exp1: {:?}", @exp1 );
+    println!( "Location of exp2: {:?}", @exp2 );
+    println!( "Location of this expression: {:?}", @$ ); // @$ is the location of the non-terminal itself
+    exp1 + exp2
+}
+| Expr error Expr {
+    println!( "Error at: {:?}", @error ); // @error is the location of the error token
+    0 // return a default value
+}
+```
+
+See [SYNTAX.md - Location Tracking](SYNTAX.md#location-tracking) for details.
 
 ## Examples
  - [Calculator (enum version)](examples/calculator/src/parser.rs): A numeric expression parser

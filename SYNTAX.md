@@ -23,6 +23,7 @@
  - [Disable Optimization - `%nooptim`](#no-optimization)
  - [Make dense parser table - `%dense`](#dense-parser-table)
  - [Runtime table calculation - `%runtime`](#runtime-table-calculation)
+ - [Location tracking - `%location`](#location-tracking)
 
 
 ## Overview
@@ -336,7 +337,7 @@ fn main() {
 ### Panic Mode Error Recovery
 ```
 JsonObject: '{' JsonKeyValue* '}'
-          | '{' error '}'          { println!("recovering with '}}'"); }
+          | '{' error '}'          { println!("recovering with '}}' at {}", @error); }
           ;
 ```
 The `error` token is a reserved non-terminal symbol that can be matched with **any tokens**.
@@ -484,3 +485,25 @@ Parser table is generally extremely huge, the generated code will be few 10-thou
 and most of them are for initializing the parser table.
 This directive will switch the parser table to be calculated at runtime,
 which will dramatically reduce the size of the generated code, but will increase the runtime overhead.
+
+## Location tracking
+```
+%location <Typename for location> ;
+```
+The location type must implement `rusty_lr::Location` trait.
+
+User must explicitly feed the location data to the parser.
+```rust
+context.feed_location( parser, terminal, user_data, terminal_location );
+context.feed( parser, terminal, user_data ); // this is equivalent to using `Location::default()` for the location
+```
+
+And the location data can be accessed in the reduce action by `@name` syntax.
+```rust
+Expr: exp1=Expr '+' exp2=Expr {
+    println!( "Location of exp1: {:?}", @exp1 );
+    println!( "Location of exp2: {:?}", @exp2 );
+    println!( "Location of this expression: {:?}", @$ ); // @$ is the location of the non-terminal itself
+    exp1 + exp2
+};
+```
