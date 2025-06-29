@@ -65,15 +65,30 @@ pub struct PatternToToken {
 }
 
 impl Pattern {
-    /// get rule for the pattern
-    /// make new rule if not exists
+    /// Cache wrapper for `to_token_impl`.
+    pub(crate) fn to_token(
+        &self,
+        grammar: &mut Grammar,
+        pattern_cache: &mut rusty_lr_core::hash::HashMap<Pattern, PatternToToken>,
+        root_span_pair: (Span, Span),
+    ) -> Result<PatternToToken, ParseError> {
+        if let Some(existing) = pattern_cache.get(self) {
+            return Ok(existing.clone());
+        }
+        let ret = self.to_token_impl(grammar, pattern_cache, root_span_pair)?;
+        pattern_cache.insert(self.clone(), ret.clone());
+        Ok(ret)
+    }
+    /// Converts the `Pattern` to a `Token`.
+    /// This generates a new non-terminal if needed,
+    /// and returns a `PatternToToken` which contains the token's ruletype, variable name, and the token itself.
     ///
     /// *Note*
     /// When converting `PatternArgs` to `Pattern`,
     /// if any exclamation mark `!` is present,
     /// it will be put in the innermost pattern.
     /// e.g. Pattern like `A+?!` will be converted to `A!+?`
-    pub(crate) fn to_token(
+    fn to_token_impl(
         &self,
         grammar: &mut Grammar,
         pattern_cache: &mut rusty_lr_core::hash::HashMap<Pattern, PatternToToken>,
@@ -82,9 +97,6 @@ impl Pattern {
         use crate::nonterminal_info::ReduceAction;
         use rusty_lr_core::nonterminal::NonTerminalType;
 
-        if let Some(existing) = pattern_cache.get(self) {
-            return Ok(existing.clone());
-        }
         match &self.internal {
             PatternInternal::Ident(ident) => {
                 // check if this ident is either name of terminal or nonterminal
@@ -179,14 +191,12 @@ impl Pattern {
                         .nonterminals_index
                         .insert(newrule_name.clone(), newrule_idx);
 
-                    let res = PatternToToken {
+                    Ok(PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         mapto: base_rule.mapto.clone(),
-                    };
-                    pattern_cache.insert(self.clone(), res.clone());
-                    Ok(res)
+                    })
                 } else {
                     // typename not exist, make new rule with typename ()
                     // A+ -> A Ap
@@ -241,14 +251,12 @@ impl Pattern {
                         .nonterminals_index
                         .insert(newrule_name.clone(), newrule_idx);
 
-                    let res = PatternToToken {
+                    Ok(PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
                         ruletype: None,
                         mapto: base_rule.mapto.clone(),
-                    };
-                    pattern_cache.insert(self.clone(), res.clone());
-                    Ok(res)
+                    })
                 }
             }
             PatternInternal::Star(pattern) => {
@@ -309,14 +317,12 @@ impl Pattern {
                         .nonterminals_index
                         .insert(newrule_name.clone(), newrule_idx);
 
-                    let res = PatternToToken {
+                    Ok(PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         mapto: base_rule.mapto.clone(),
-                    };
-                    pattern_cache.insert(self.clone(), res.clone());
-                    Ok(res)
+                    })
                 } else {
                     // typename not exist, make new rule with typename ()
                     // A* -> A+
@@ -357,14 +363,12 @@ impl Pattern {
                         .nonterminals_index
                         .insert(newrule_name.clone(), newrule_idx);
 
-                    let res = PatternToToken {
+                    Ok(PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
                         ruletype: None,
                         mapto: base_rule.mapto.clone(),
-                    };
-                    pattern_cache.insert(self.clone(), res.clone());
-                    Ok(res)
+                    })
                 }
             }
             PatternInternal::Question(pattern) => {
@@ -418,14 +422,12 @@ impl Pattern {
                         .nonterminals_index
                         .insert(newrule_name.clone(), newrule_idx);
 
-                    let res = PatternToToken {
+                    Ok(PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
                         ruletype: Some(quote! {Option<#base_typename>}),
                         mapto: base_rule.mapto.clone(),
-                    };
-                    pattern_cache.insert(self.clone(), res.clone());
-                    Ok(res)
+                    })
                 } else {
                     // typename not exist, make new rule with typename ()
                     // A? -> A { Some(A) }
@@ -467,14 +469,12 @@ impl Pattern {
                         .nonterminals_index
                         .insert(newrule_name.clone(), newrule_idx);
 
-                    let res = PatternToToken {
+                    Ok(PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
                         ruletype: None,
                         mapto: base_rule.mapto.clone(),
-                    };
-                    pattern_cache.insert(self.clone(), res.clone());
-                    Ok(res)
+                    })
                 }
             }
 
@@ -535,14 +535,12 @@ impl Pattern {
                     .nonterminals_index
                     .insert(newrule_name.clone(), newrule_idx);
 
-                let res = PatternToToken {
+                Ok(PatternToToken {
                     name: newrule_name,
                     token: Token::NonTerm(newrule_idx),
                     ruletype: Some(grammar.token_typename.clone()),
                     mapto: None,
-                };
-                pattern_cache.insert(self.clone(), res.clone());
-                Ok(res)
+                })
             }
             PatternInternal::Lookaheads(pattern, negate, lookaheads) => {
                 let lookaheads = if *negate {
@@ -588,14 +586,12 @@ impl Pattern {
                         .nonterminals_index
                         .insert(newrule_name.clone(), newrule_idx);
 
-                    let res = PatternToToken {
+                    Ok(PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
                         ruletype: Some(base_typename.clone()),
                         mapto: base_rule.mapto.clone(),
-                    };
-                    pattern_cache.insert(self.clone(), res.clone());
-                    Ok(res)
+                    })
                 } else {
                     let rule = Rule {
                         tokens: vec![TokenMapped {
@@ -626,14 +622,12 @@ impl Pattern {
                         .nonterminals_index
                         .insert(newrule_name.clone(), newrule_idx);
 
-                    let res = PatternToToken {
+                    Ok(PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
                         ruletype: None,
                         mapto: base_rule.mapto.clone(),
-                    };
-                    pattern_cache.insert(self.clone(), res.clone());
-                    Ok(res)
+                    })
                 }
             }
 
@@ -691,14 +685,12 @@ impl Pattern {
                             .nonterminals_index
                             .insert(newrule_name.clone(), newrule_idx);
 
-                        let res = PatternToToken {
+                        Ok(PatternToToken {
                             name: newrule_name,
                             token: Token::NonTerm(newrule_idx),
                             ruletype: None,
                             mapto: None,
-                        };
-                        pattern_cache.insert(self.clone(), res.clone());
-                        Ok(res)
+                        })
                     }
 
                     1 => {
@@ -728,14 +720,12 @@ impl Pattern {
                             .nonterminals_index
                             .insert(newrule_name.clone(), newrule_idx);
 
-                        let res = PatternToToken {
+                        Ok(PatternToToken {
                             name: newrule_name,
                             token: Token::NonTerm(newrule_idx),
                             ruletype: elements[unique_child_idx].ruletype.clone(),
                             mapto: elements[unique_child_idx].mapto.clone(),
-                        };
-                        pattern_cache.insert(self.clone(), res.clone());
-                        Ok(res)
+                        })
                     }
 
                     _ => {
@@ -773,14 +763,12 @@ impl Pattern {
                             .nonterminals_index
                             .insert(newrule_name.clone(), newrule_idx);
 
-                        let res = PatternToToken {
+                        Ok(PatternToToken {
                             name: newrule_name,
                             token: Token::NonTerm(newrule_idx),
                             ruletype: Some(typename),
                             mapto: None,
-                        };
-                        pattern_cache.insert(self.clone(), res.clone());
-                        Ok(res)
+                        })
                     }
                 }
             }
@@ -850,14 +838,12 @@ impl Pattern {
                         .nonterminals_index
                         .insert(newrule_name.clone(), newrule_idx);
 
-                    let res = PatternToToken {
+                    Ok(PatternToToken {
                         name: newrule_name.clone(),
                         token: Token::NonTerm(newrule_idx),
                         ruletype: Some(quote! { &'static str }),
                         mapto: None,
-                    };
-                    pattern_cache.insert(self.clone(), res.clone());
-                    Ok(res)
+                    })
                 }
                 syn::Lit::ByteStr(s) => {
                     let newrule_idx = grammar.nonterminals.len();
@@ -901,14 +887,12 @@ impl Pattern {
                         .nonterminals_index
                         .insert(newrule_name.clone(), newrule_idx);
 
-                    let res = PatternToToken {
+                    Ok(PatternToToken {
                         name: newrule_name.clone(),
                         token: Token::NonTerm(newrule_idx),
                         ruletype: Some(quote! { &'static [u8] }),
                         mapto: None,
-                    };
-                    pattern_cache.insert(self.clone(), res.clone());
-                    Ok(res)
+                    })
                 }
                 _ => unreachable!("Only char, byte, str and bytes are supported"),
             },
