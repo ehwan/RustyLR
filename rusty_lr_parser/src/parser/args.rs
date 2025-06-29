@@ -6,8 +6,6 @@ use quote::ToTokens;
 
 use std::collections::BTreeSet;
 
-use rusty_lr_core::ReduceType;
-
 use crate::error::ParseError;
 use crate::grammar::Grammar;
 use crate::pattern::Pattern;
@@ -492,7 +490,7 @@ pub struct GrammarArgs {
     pub eof: Vec<(Span, TokenStream)>,
     pub error_typename: Vec<(Span, TokenStream)>,
     pub terminals: Vec<(Ident, TokenStream)>,
-    pub reduce_types: Vec<(ReduceType, Vec<IdentOrLiteral>)>,
+    pub reduce_types: Vec<(rusty_lr_core::builder::ReduceType, Vec<IdentOrLiteral>)>,
     pub precedences: Vec<Vec<IdentOrLiteral>>,
     pub rules: Vec<RuleDefArgs>,
     pub lalr: bool,

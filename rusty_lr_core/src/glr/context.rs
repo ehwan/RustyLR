@@ -6,11 +6,8 @@ use super::ParseError;
 use super::Parser;
 use super::State;
 
-use crate::HashMap;
-use crate::TokenData;
-
-#[cfg(feature = "tree")]
-use crate::TreeList;
+use crate::hash::HashMap;
+use crate::nonterminal::TokenData;
 
 /// A struct that maintains the current state and the values associated with each symbol.
 /// This handles the divergence and merging of the parser.
@@ -94,7 +91,9 @@ impl<Data: TokenData> Context<Data> {
     /// For debugging.
     /// Get all sequence of token trees (from root to current node) for every diverged path.
     #[cfg(feature = "tree")]
-    pub fn to_tree_lists(&self) -> impl Iterator<Item = TreeList<Data::Term, Data::NonTerm>> + '_
+    pub fn to_tree_lists(
+        &self,
+    ) -> impl Iterator<Item = crate::tree::TreeList<Data::Term, Data::NonTerm>> + '_
     where
         Data::Term: Clone,
         Data::NonTerm: Clone,
@@ -104,7 +103,9 @@ impl<Data: TokenData> Context<Data> {
     /// For debugging.
     /// Get all sequence of token trees (from root to current node) for every diverged path.
     #[cfg(feature = "tree")]
-    pub fn into_tree_lists(self) -> impl Iterator<Item = TreeList<Data::Term, Data::NonTerm>>
+    pub fn into_tree_lists(
+        self,
+    ) -> impl Iterator<Item = crate::tree::TreeList<Data::Term, Data::NonTerm>>
     where
         Data::Term: Clone,
         Data::NonTerm: Clone,
@@ -144,11 +145,11 @@ impl<Data: TokenData> Context<Data> {
     pub fn trace<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> crate::HashSet<Data::NonTerm>
+    ) -> crate::hash::HashSet<Data::NonTerm>
     where
-        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::NonTerminal,
+        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::nonterminal::NonTerminal,
     {
-        let mut ret: crate::HashSet<Data::NonTerm> = Default::default();
+        let mut ret: crate::hash::HashSet<Data::NonTerm> = Default::default();
         for node in self.nodes() {
             let set = node.trace(parser);
             ret.extend(set.into_iter());
@@ -206,9 +207,6 @@ impl<Data: TokenData> Context<Data> {
         P::NonTerm: Hash + Eq + Clone,
         Data: Clone,
     {
-        #[cfg(feature = "tree")]
-        use crate::Tree;
-
         // current_nodes <-> nodes_pong <-> nodes_pong2
         // cycle for no unnecessary heap allocation
         let mut reduce_nodes = std::mem::take(&mut self.current_nodes);
@@ -268,7 +266,7 @@ impl<Data: TokenData> Context<Data> {
                                         location.clone(),
                                     )),
                                     #[cfg(feature = "tree")]
-                                    tree: Some(Tree::new_terminal(term.clone())),
+                                    tree: Some(crate::tree::Tree::new_terminal(term.clone())),
                                 };
 
                                 self.current_nodes
@@ -291,7 +289,7 @@ impl<Data: TokenData> Context<Data> {
                             state: next_term_shift_state,
                             data: Some((Data::new_terminal(term.clone()), location.clone())),
                             #[cfg(feature = "tree")]
-                            tree: Some(Tree::new_terminal(term.clone())),
+                            tree: Some(crate::tree::Tree::new_terminal(term.clone())),
                         };
 
                         self.current_nodes
@@ -343,7 +341,7 @@ impl<Data: TokenData> Context<Data> {
                             state: next_state,
                             data: Some((Data::new_terminal(term.clone()), location.clone())),
                             #[cfg(feature = "tree")]
-                            tree: Some(Tree::new_terminal(term.clone())),
+                            tree: Some(crate::tree::Tree::new_terminal(term.clone())),
                         };
                         self.current_nodes
                             .entry(next_state)
@@ -532,7 +530,7 @@ impl<Data: TokenData> Clone for Context<Data> {
 impl<Data: TokenData> std::fmt::Display for Context<Data>
 where
     Data::Term: std::fmt::Display + Clone,
-    Data::NonTerm: std::fmt::Display + Clone + crate::NonTerminal,
+    Data::NonTerm: std::fmt::Display + Clone + crate::nonterminal::NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (i, path) in self.to_tree_lists().enumerate() {
@@ -546,7 +544,7 @@ where
 impl<Data: TokenData> std::fmt::Debug for Context<Data>
 where
     Data::Term: std::fmt::Debug + Clone,
-    Data::NonTerm: std::fmt::Debug + Clone + crate::NonTerminal,
+    Data::NonTerm: std::fmt::Debug + Clone + crate::nonterminal::NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (i, path) in self.to_tree_lists().enumerate() {

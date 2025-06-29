@@ -7,7 +7,8 @@ use proc_macro2::TokenStream;
 use quote::format_ident;
 use quote::quote;
 use quote::ToTokens;
-use rusty_lr_core::HashSet;
+use rusty_lr_core::hash::HashMap;
+use rusty_lr_core::hash::HashSet;
 use rusty_lr_core::Token;
 
 use crate::error::ArgError;
@@ -30,8 +31,6 @@ use crate::terminal_info::TerminalInfo;
 use crate::terminal_info::TerminalName;
 use crate::token::TokenMapped;
 use crate::utils;
-
-use rusty_lr_core::HashMap;
 
 pub struct PrecDefinition {
     pub ident: Ident,
@@ -653,7 +652,7 @@ impl Grammar {
                 regex_span: None,
                 trace: false,
                 protected: true,
-                nonterm_type: Some(rusty_lr_core::NonTerminalType::Error),
+                nonterm_type: Some(rusty_lr_core::nonterminal::NonTerminalType::Error),
             };
 
             let rule_idx = grammar.nonterminals.len();
@@ -883,7 +882,7 @@ impl Grammar {
                 rules: vec![augmented_rule],
                 trace: false,
                 protected: true,
-                nonterm_type: Some(rusty_lr_core::NonTerminalType::Augmented),
+                nonterm_type: Some(rusty_lr_core::nonterminal::NonTerminalType::Augmented),
             };
             // start rule is protected
             grammar.nonterminals[*start_idx].protected = true;

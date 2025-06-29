@@ -6,23 +6,6 @@ use std::fmt::Display;
 
 use crate::token::Token;
 
-/// for resolving shift/reduce conflict
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum ReduceType {
-    /// reduce to the left, i.e. reduce first
-    Left,
-    /// reduce to the right, i.e. shift first
-    Right,
-}
-impl Display for ReduceType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ReduceType::Left => write!(f, "Left"),
-            ReduceType::Right => write!(f, "Right"),
-        }
-    }
-}
-
 /// Production rule.
 ///
 /// name -> Token0 Token1 Token2 ...

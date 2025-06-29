@@ -5,10 +5,7 @@ use super::ParseError;
 use super::Parser;
 use super::State;
 
-#[cfg(feature = "tree")]
-use crate::TreeList;
-
-use crate::TokenData;
+use crate::nonterminal::TokenData;
 
 /// A struct that maintains the current state and the values associated with each symbol.
 pub struct Context<Data: TokenData> {
@@ -23,7 +20,7 @@ pub struct Context<Data: TokenData> {
 
     /// Tree stack for tree representation of the parse.
     #[cfg(feature = "tree")]
-    pub(crate) tree_stack: TreeList<Data::Term, Data::NonTerm>,
+    pub(crate) tree_stack: crate::tree::TreeList<Data::Term, Data::NonTerm>,
 }
 
 impl<Data: TokenData> Context<Data> {
@@ -37,7 +34,7 @@ impl<Data: TokenData> Context<Data> {
             reduce_args: Vec::new(),
 
             #[cfg(feature = "tree")]
-            tree_stack: TreeList::new(),
+            tree_stack: crate::tree::TreeList::new(),
         }
     }
     /// Create a new context with given capacity of `state_stack` and `data_stack`.
@@ -52,7 +49,7 @@ impl<Data: TokenData> Context<Data> {
             reduce_args: Vec::new(),
 
             #[cfg(feature = "tree")]
-            tree_stack: TreeList::new(),
+            tree_stack: crate::tree::TreeList::new(),
         }
     }
     /// Pops the value of the start symbol from the data stack.
@@ -76,7 +73,7 @@ impl<Data: TokenData> Context<Data> {
     /// For debugging.
     /// Get `TreeList` that current context holds.
     #[cfg(feature = "tree")]
-    pub fn to_tree_list(&self) -> TreeList<Data::Term, Data::NonTerm>
+    pub fn to_tree_list(&self) -> crate::tree::TreeList<Data::Term, Data::NonTerm>
     where
         Data::Term: Clone,
         Data::NonTerm: Clone,
@@ -86,7 +83,7 @@ impl<Data: TokenData> Context<Data> {
     /// For debugging.
     /// Get `TreeList` that current context holds.
     #[cfg(feature = "tree")]
-    pub fn into_tree_list(self) -> TreeList<Data::Term, Data::NonTerm> {
+    pub fn into_tree_list(self) -> crate::tree::TreeList<Data::Term, Data::NonTerm> {
         self.tree_stack
     }
 
@@ -156,9 +153,6 @@ impl<Data: TokenData> Context<Data> {
         Data::Term: Hash + Eq + Clone,
         Data::NonTerm: Hash + Eq + Copy,
     {
-        #[cfg(feature = "tree")]
-        use crate::Tree;
-
         let class = parser.to_terminal_class(&term);
         // check if there is any reduce action with given terminal
         while let Some(reduce_rule) =
@@ -205,8 +199,10 @@ impl<Data: TokenData> Context<Data> {
                 }
                 children.reverse();
 
-                self.tree_stack
-                    .push(Tree::new_nonterminal(rule.name.clone(), children));
+                self.tree_stack.push(crate::tree::Tree::new_nonterminal(
+                    rule.name.clone(),
+                    children,
+                ));
             }
 
             // shift with reduced nonterminal
@@ -226,7 +222,8 @@ impl<Data: TokenData> Context<Data> {
             self.state_stack.push(next_state_id);
 
             #[cfg(feature = "tree")]
-            self.tree_stack.push(Tree::new_terminal(term.clone()));
+            self.tree_stack
+                .push(crate::tree::Tree::new_terminal(term.clone()));
 
             self.data_stack.push((Data::new_terminal(term), location));
 
@@ -241,7 +238,8 @@ impl<Data: TokenData> Context<Data> {
                     self.state_stack.push(next_state_id);
 
                     #[cfg(feature = "tree")]
-                    self.tree_stack.push(Tree::new_terminal(term.clone()));
+                    self.tree_stack
+                        .push(crate::tree::Tree::new_terminal(term.clone()));
 
                     self.data_stack.push((Data::new_terminal(term), location));
                 }
@@ -327,13 +325,13 @@ impl<Data: TokenData> Context<Data> {
     pub fn trace<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> crate::HashSet<Data::NonTerm>
+    ) -> crate::hash::HashSet<Data::NonTerm>
     where
-        Data::NonTerm: Copy + Eq + Hash + crate::NonTerminal,
+        Data::NonTerm: Copy + Eq + Hash + crate::nonterminal::NonTerminal,
     {
+        use crate::hash::HashSet;
+        use crate::nonterminal::NonTerminal;
         use crate::token::Token;
-        use crate::HashSet;
-        use crate::NonTerminal;
 
         let rules = parser.get_rules();
         let states = parser.get_states();
@@ -455,8 +453,10 @@ impl<Data: TokenData> Context<Data> {
                 #[cfg(feature = "tree")]
                 {
                     // push error tree
-                    self.tree_stack
-                        .push(crate::Tree::new_nonterminal(error_nonterm, Vec::new()));
+                    self.tree_stack.push(crate::tree::Tree::new_nonterminal(
+                        error_nonterm,
+                        Vec::new(),
+                    ));
                 }
                 return true;
             }
@@ -476,10 +476,10 @@ impl<Data: TokenData> Context<Data> {
         Data::Term: Clone,
         Data::NonTerm: Hash + Eq + Clone,
     {
+        use crate::hash::HashSet;
+        use crate::rule::ShiftedRule;
+        use crate::rule::ShiftedRuleRef;
         use crate::Backtrace;
-        use crate::HashSet;
-        use crate::ShiftedRule;
-        use crate::ShiftedRuleRef;
         use crate::Token;
         use std::collections::BTreeSet;
 
@@ -594,7 +594,7 @@ where
 impl<Data: TokenData> std::fmt::Display for Context<Data>
 where
     Data::Term: std::fmt::Display + Clone,
-    Data::NonTerm: std::fmt::Display + Clone + crate::NonTerminal,
+    Data::NonTerm: std::fmt::Display + Clone + crate::nonterminal::NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.to_tree_list())
@@ -604,7 +604,7 @@ where
 impl<Data: TokenData> std::fmt::Debug for Context<Data>
 where
     Data::Term: std::fmt::Debug + Clone,
-    Data::NonTerm: std::fmt::Debug + Clone + crate::NonTerminal,
+    Data::NonTerm: std::fmt::Debug + Clone + crate::nonterminal::NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.to_tree_list())
@@ -613,7 +613,7 @@ where
 
 #[cfg(feature = "tree")]
 impl<Data: TokenData> std::ops::Deref for Context<Data> {
-    type Target = TreeList<Data::Term, Data::NonTerm>;
+    type Target = crate::tree::TreeList<Data::Term, Data::NonTerm>;
     fn deref(&self) -> &Self::Target {
         &self.tree_stack
     }

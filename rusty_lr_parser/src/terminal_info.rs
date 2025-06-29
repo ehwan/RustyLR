@@ -3,7 +3,7 @@ use proc_macro2::Span;
 
 use proc_macro2::TokenStream;
 use quote::ToTokens;
-use rusty_lr_core::ReduceType;
+use rusty_lr_core::builder::ReduceType;
 
 pub struct ReduceTypeInfo {
     pub reduce_type: ReduceType,

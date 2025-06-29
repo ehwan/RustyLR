@@ -16,7 +16,7 @@ use quote::ToTokens;
 
 use std::boxed::Box;
 
-use rusty_lr_core::ReduceType;
+use rusty_lr_core::builder::ReduceType;
 
 // bootstrap the parser for the grammar
 // this define the actual parser for proc-macro line parsing

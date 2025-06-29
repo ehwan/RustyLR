@@ -7,9 +7,10 @@ use std::vec::Vec;
 
 use super::BuildError;
 use super::DiagnosticCollector;
+use super::ReduceType;
 use super::State;
 use super::States;
-use crate::hashmap::HashMap;
+use crate::hash::HashMap;
 use crate::rule::*;
 use crate::token::Token;
 

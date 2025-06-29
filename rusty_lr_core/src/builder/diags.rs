@@ -1,4 +1,4 @@
-use crate::ShiftedRuleRef;
+use crate::rule::ShiftedRuleRef;
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;

@@ -69,7 +69,7 @@ pub struct NonTerminalInfo {
     pub(crate) protected: bool,
 
     /// if this non-terminal is auto-generated, the pattern that generated this rule
-    pub(crate) nonterm_type: Option<rusty_lr_core::NonTerminalType>,
+    pub(crate) nonterm_type: Option<rusty_lr_core::nonterminal::NonTerminalType>,
 }
 
 impl NonTerminalInfo {

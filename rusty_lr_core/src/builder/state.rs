@@ -1,5 +1,3 @@
-use crate::ShiftedRuleRef;
-
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::hash::Hash;
@@ -10,7 +8,7 @@ pub struct State<Term, NonTerm> {
     pub shift_goto_map_term: BTreeMap<Term, usize>,
     pub shift_goto_map_nonterm: BTreeMap<NonTerm, usize>,
     pub reduce_map: BTreeMap<Term, BTreeSet<usize>>,
-    pub ruleset: BTreeSet<ShiftedRuleRef>,
+    pub ruleset: BTreeSet<crate::rule::ShiftedRuleRef>,
 }
 impl<Term, NonTerm> State<Term, NonTerm> {
     pub fn new() -> Self {
@@ -23,7 +21,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
     }
 
     /// shift -= 1 for all rules in the ruleset
-    pub fn unshifted_ruleset(&self) -> impl Iterator<Item = ShiftedRuleRef> + '_ {
+    pub fn unshifted_ruleset(&self) -> impl Iterator<Item = crate::rule::ShiftedRuleRef> + '_ {
         self.ruleset
             .iter()
             .filter(|rule| rule.shifted > 0)

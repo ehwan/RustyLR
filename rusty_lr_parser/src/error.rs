@@ -5,9 +5,6 @@ use proc_macro2::TokenStream;
 
 use quote::quote_spanned;
 
-use rusty_lr_core::ProductionRule;
-use rusty_lr_core::ShiftedRule;
-
 use crate::parser::args::IdentOrLiteral;
 
 /// failed to feed() the token
@@ -51,14 +48,14 @@ pub enum ConflictError {
     /// error building given CFG
     ShiftReduceConflict {
         term: String,
-        reduce_rule: (usize, ProductionRule<String, String>),
-        shift_rules: Vec<(usize, ShiftedRule<String, String>)>,
+        reduce_rule: (usize, rusty_lr_core::rule::ProductionRule<String, String>),
+        shift_rules: Vec<(usize, rusty_lr_core::rule::ShiftedRule<String, String>)>,
     },
     /// error building given CFG
     ReduceReduceConflict {
         lookahead: String,
-        rule1: (usize, ProductionRule<String, String>),
-        rule2: (usize, ProductionRule<String, String>),
+        rule1: (usize, rusty_lr_core::rule::ProductionRule<String, String>),
+        rule2: (usize, rusty_lr_core::rule::ProductionRule<String, String>),
     },
 }
 
@@ -70,8 +67,8 @@ pub enum ParseError {
     /// different reduce type applied to the same terminal symbol
     MultipleReduceDefinition {
         terminal: String,
-        old: (Span, rusty_lr_core::ReduceType),
-        new: (Span, rusty_lr_core::ReduceType),
+        old: (Span, rusty_lr_core::builder::ReduceType),
+        new: (Span, rusty_lr_core::builder::ReduceType),
     },
 
     /// multiple %token definition

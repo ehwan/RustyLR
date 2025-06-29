@@ -5,7 +5,6 @@ use proc_macro2::TokenStream;
 use quote::format_ident;
 use quote::quote;
 
-use rusty_lr_core::HashMap;
 use rusty_lr_core::Token;
 
 use crate::grammar::Grammar;
@@ -53,7 +52,7 @@ impl Grammar {
                 pub type #context_struct_name = #module_prefix::glr::Context<#token_data_typename>;
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #rule_typename = #module_prefix::ProductionRule<&'static str, #enum_name>;
+                pub type #rule_typename = #module_prefix::rule::ProductionRule<&'static str, #enum_name>;
                 /// type alias for DFA state
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #state_typename = #module_prefix::glr::#state_structname<#enum_name, #rule_container_type>;
@@ -76,7 +75,7 @@ impl Grammar {
                 pub type #context_struct_name = #module_prefix::lr::Context<#token_data_typename>;
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #rule_typename = #module_prefix::ProductionRule<&'static str, #enum_name>;
+                pub type #rule_typename = #module_prefix::rule::ProductionRule<&'static str, #enum_name>;
                 /// type alias for DFA state
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #state_typename = #module_prefix::lr::#state_structname<#enum_name>;
@@ -129,7 +128,7 @@ impl Grammar {
                 let enum_name = format!("{:?}", enum_name);
                 let enum_name = Ident::new(&enum_name, Span::call_site());
                 nonterm_type_case.extend(quote! {
-                    #enum_typename::#name => Some(#module_prefix::NonTerminalType::#enum_name),
+                    #enum_typename::#name => Some(#module_prefix::nonterminal::NonTerminalType::#enum_name),
                 });
             } else {
                 nonterm_type_case.extend(quote! {
@@ -148,18 +147,18 @@ impl Grammar {
             }
             impl std::fmt::Display for #enum_typename {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                    use #module_prefix::NonTerminal;
+                    use #module_prefix::nonterminal::NonTerminal;
                     write!(f, "{}", self.as_str())
                 }
             }
             impl std::fmt::Debug for #enum_typename {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                    use #module_prefix::NonTerminal;
+                    use #module_prefix::nonterminal::NonTerminal;
                     write!(f, "{}", self.as_str())
                 }
             }
 
-            impl #module_prefix::NonTerminal for #enum_typename{
+            impl #module_prefix::nonterminal::NonTerminal for #enum_typename{
                 fn as_str(&self) -> &'static str {
                     match self {
                         #case_as_str
@@ -170,7 +169,7 @@ impl Grammar {
                         #nonterm_trait_is_trace_case
                     }
                 }
-                fn nonterm_type(&self) -> Option<#module_prefix::NonTerminalType> {
+                fn nonterm_type(&self) -> Option<#module_prefix::nonterminal::NonTerminalType> {
                     match self {
                         #nonterm_type_case
                     }
@@ -197,13 +196,13 @@ impl Grammar {
         // building grammar
         // ======================
         use rusty_lr_core::builder::Operator;
-        use rusty_lr_core::ReduceType;
+        use rusty_lr_core::builder::ReduceType;
         use rusty_lr_core::Token;
 
         let reduce_type_to_stream = |reduce_type: ReduceType| -> TokenStream {
             match reduce_type {
-                ReduceType::Left => quote! { #module_prefix::ReduceType::Left },
-                ReduceType::Right => quote! { #module_prefix::ReduceType::Right },
+                ReduceType::Left => quote! { #module_prefix::builder::ReduceType::Left },
+                ReduceType::Right => quote! { #module_prefix::builder::ReduceType::Right },
             }
         };
         let operator_to_stream = |op: Operator<usize>| -> TokenStream {
@@ -313,7 +312,7 @@ impl Grammar {
 
                 // lookaheads
                 production_rules_body_stream.extend(quote! {
-                #module_prefix::ProductionRule{ name: #name, rule: vec![ #tokens_vec_body_stream ] },
+                #module_prefix::rule::ProductionRule{ name: #name, rule: vec![ #tokens_vec_body_stream ] },
             });
             }
             let mut states_body_stream = TokenStream::new();
@@ -351,7 +350,7 @@ impl Grammar {
                     let shifted = rule.shifted;
                     let rule = rule.rule;
                     ruleset_body_stream.extend(quote! {
-                        #module_prefix::ShiftedRuleRef {
+                        #module_prefix::rule::ShiftedRuleRef {
                             rule: #rule,
                             shifted: #shifted,
                         },
@@ -867,7 +866,8 @@ impl Grammar {
         let mut variant_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
 
         // (<RuleType as ToString>, variant_name) map
-        let mut ruletype_variant_map: HashMap<String, Ident> = HashMap::default();
+        let mut ruletype_variant_map: rusty_lr_core::hash::HashMap<String, Ident> =
+            Default::default();
 
         // (variant_name, TokenStream for typename) sorted in insertion order
         // for consistent output
@@ -1161,7 +1161,7 @@ impl Grammar {
 
 
         #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types, unused_variables)]
-        impl #module_prefix::TokenData for #token_data_typename {
+        impl #module_prefix::nonterminal::TokenData for #token_data_typename {
             type Term = #token_typename;
             type NonTerm = #nonterminals_enum_name;
             type ReduceActionError = #reduce_error_typename;

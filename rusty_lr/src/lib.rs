@@ -1,8 +1,17 @@
 //! # rusty_lr
-//! ***A Yacc-like, procedural macro-based parser generator for Rust supporting LR(1), LALR(1), and GLR parsing strategies.***
+//! ***A Bison-like, parser generator for Rust supporting IELR(1), LALR(1) parser tables, with deterministic LR and
+//! non-deterministic LR (GLR) parsing strategies.***
 //!
-//! RustyLR enables you to define context-free grammars (CFGs) directly in Rust using macros or build scripts.
-//! It constructs deterministic finite automata (DFA) at compile time, ensuring efficient and reliable parsing.​
+//! RustyLR is a parser generator that converts context-free grammars into IELR(1)/LALR(1) tables with deterministic LR and non-deterministic GLR parsing strategies. It supports custom reduce action in Rust, with beautiful diagnostics.
+//! Highly inspired by tools like *bison*, it uses a similar syntax while integrating seamlessly with Rust's ecosystem.
+//! It constructs optimized state machine, ensuring efficient and reliable parsing.
+//!
+//! ## Features
+//!  - **Custom Reduce Actions:** Define custom actions in Rust, allowing you to build into custom data structures easily.
+//!  - **Automatic Optimization:**: Reduces parser table size and improves performance by grouping terminals with identical behavior across parser states.
+//!  - **Multiple Parsing Strategies:** Supports minimal-LR(1), LALR(1) parser table, and GLR parsing strategy.
+//!  - **Detailed Diagnostics:** Detect grammar conflicts, verbose conflicts resolving stages, and optimization stages.
+//!  - **Location Tracking:** Track the location of every tokens in the parse tree, useful for error reporting and debugging.
 //!
 // re-exports
 

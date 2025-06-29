@@ -14,10 +14,7 @@ pub use state::DenseState;
 pub use state::SparseState;
 pub use state::State;
 
-#[cfg(feature = "tree")]
-use crate::Tree;
-
-use crate::TokenData;
+use crate::nonterminal::TokenData;
 
 use std::hash::Hash;
 use std::rc::Rc;
@@ -25,7 +22,7 @@ use std::rc::Rc;
 #[cfg(feature = "tree")]
 type ReduceArgs<Data> = (
     Rc<Node<Data>>,
-    Tree<<Data as TokenData>::Term, <Data as TokenData>::NonTerm>,
+    crate::tree::Tree<<Data as TokenData>::Term, <Data as TokenData>::NonTerm>,
 );
 
 #[cfg(not(feature = "tree"))]
@@ -84,7 +81,7 @@ where
         trees.reverse();
         (
             current_node,
-            Tree::new_nonterminal(rule.name.clone(), trees),
+            crate::tree::Tree::new_nonterminal(rule.name.clone(), trees),
         )
     }
 

@@ -6,7 +6,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
 
-/// Build a LR(1) Deterministic Finite Automaton (DFA) parser.
+/// Build a parser table from a grammar definition.
 ///
 /// This macro will generate a `Parser` and `Context` structs.
 #[proc_macro]

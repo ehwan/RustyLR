@@ -4,12 +4,7 @@ use std::rc::Rc;
 
 use super::State;
 
-#[cfg(feature = "tree")]
-use crate::Tree;
-#[cfg(feature = "tree")]
-use crate::TreeList;
-
-use crate::TokenData;
+use crate::nonterminal::TokenData;
 
 /// Iterator for traverse node to root.
 /// Note that root node is not included in this iterator.
@@ -47,7 +42,7 @@ pub struct Node<Data: TokenData> {
     pub data: Option<(Data, Data::Location)>,
     /// tree representation of this node
     #[cfg(feature = "tree")]
-    pub tree: Option<Tree<Data::Term, Data::NonTerm>>,
+    pub tree: Option<crate::tree::Tree<Data::Term, Data::NonTerm>>,
 }
 
 impl<Data: TokenData> Node<Data> {
@@ -66,14 +61,14 @@ impl<Data: TokenData> Node<Data> {
     /// Get token tree for this node.
     /// This function should not be called from root node.
     #[cfg(feature = "tree")]
-    pub fn to_tree(&self) -> &Tree<Data::Term, Data::NonTerm> {
+    pub fn to_tree(&self) -> &crate::tree::Tree<Data::Term, Data::NonTerm> {
         debug_assert!(self.parent.is_some());
         self.tree.as_ref().unwrap()
     }
     /// Get token tree for this node.
     /// This function should not be called from root node.
     #[cfg(feature = "tree")]
-    pub fn into_tree(self) -> Tree<Data::Term, Data::NonTerm> {
+    pub fn into_tree(self) -> crate::tree::Tree<Data::Term, Data::NonTerm> {
         debug_assert!(self.parent.is_some());
         self.tree.unwrap()
     }
@@ -83,15 +78,15 @@ impl<Data: TokenData> Node<Data> {
     /// This function is not *lazy*.
     /// If you don't want expensive operation (`clone()` or `reverse()`), use `iter()` and `to_tree()` instead.
     #[cfg(feature = "tree")]
-    pub fn to_tree_list(&self) -> TreeList<Data::Term, Data::NonTerm>
+    pub fn to_tree_list(&self) -> crate::tree::TreeList<Data::Term, Data::NonTerm>
     where
         Data::Term: Clone,
         Data::NonTerm: Clone,
     {
-        let mut trees: Vec<Tree<Data::Term, Data::NonTerm>> =
+        let mut trees: Vec<crate::tree::Tree<Data::Term, Data::NonTerm>> =
             self.iter().map(|node| node.to_tree().clone()).collect();
         trees.reverse();
-        TreeList { trees }
+        crate::tree::TreeList { trees }
     }
 
     /// Get data for this node.
@@ -137,13 +132,13 @@ impl<Data: TokenData> Node<Data> {
     pub fn trace<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> crate::HashSet<Data::NonTerm>
+    ) -> crate::hash::HashSet<Data::NonTerm>
     where
-        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::NonTerminal,
+        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::nonterminal::NonTerminal,
     {
+        use crate::hash::HashSet;
+        use crate::nonterminal::NonTerminal;
         use crate::token::Token;
-        use crate::HashSet;
-        use crate::NonTerminal;
         use std::collections::BTreeSet;
 
         let rules = parser.get_rules();
@@ -243,10 +238,10 @@ impl<Data: TokenData> Node<Data> {
         Data::Term: Clone,
         Data::NonTerm: std::hash::Hash + Eq + Clone,
     {
+        use crate::hash::HashSet;
+        use crate::rule::ShiftedRule;
+        use crate::rule::ShiftedRuleRef;
         use crate::Backtrace;
-        use crate::HashSet;
-        use crate::ShiftedRule;
-        use crate::ShiftedRuleRef;
         use crate::Token;
         use std::collections::BTreeSet;
 
@@ -412,7 +407,10 @@ impl<Data: TokenData> Node<Data> {
                     parent: Some(Rc::clone(node)),
                     state: error_state,
                     #[cfg(feature = "tree")]
-                    tree: Some(crate::Tree::new_nonterminal(error_nonterm, Vec::new())),
+                    tree: Some(crate::tree::Tree::new_nonterminal(
+                        error_nonterm,
+                        Vec::new(),
+                    )),
                 };
 
                 return Some(child_node);
@@ -455,7 +453,7 @@ impl<Data: TokenData> Node<Data> {
 }
 
 #[cfg(feature = "tree")]
-impl<Data: TokenData> From<Node<Data>> for Tree<Data::Term, Data::NonTerm> {
+impl<Data: TokenData> From<Node<Data>> for crate::tree::Tree<Data::Term, Data::NonTerm> {
     fn from(node: Node<Data>) -> Self {
         node.into_tree()
     }
@@ -465,7 +463,7 @@ impl<Data: TokenData> From<Node<Data>> for Tree<Data::Term, Data::NonTerm> {
 impl<Data: TokenData> std::fmt::Display for Node<Data>
 where
     Data::Term: std::fmt::Display,
-    Data::NonTerm: std::fmt::Display + crate::NonTerminal,
+    Data::NonTerm: std::fmt::Display + crate::nonterminal::NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.parent.is_none() {
@@ -479,7 +477,7 @@ where
 impl<Data: TokenData> std::fmt::Debug for Node<Data>
 where
     Data::Term: std::fmt::Debug,
-    Data::NonTerm: std::fmt::Debug + crate::NonTerminal,
+    Data::NonTerm: std::fmt::Debug + crate::nonterminal::NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.parent.is_none() {

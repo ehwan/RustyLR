@@ -480,13 +480,13 @@ impl Builder {
                     ParseError::MultipleReduceDefinition { terminal, old, new } => {
                         let old_range = old.0.byte_range();
                         let old_string = match old.1 {
-                            rusty_lr_core::ReduceType::Left => "%left",
-                            rusty_lr_core::ReduceType::Right => "%right",
+                            rusty_lr_core::builder::ReduceType::Left => "%left",
+                            rusty_lr_core::builder::ReduceType::Right => "%right",
                         };
                         let new_range = new.0.byte_range();
                         let new_string = match new.1 {
-                            rusty_lr_core::ReduceType::Left => "%left",
-                            rusty_lr_core::ReduceType::Right => "%right",
+                            rusty_lr_core::builder::ReduceType::Left => "%left",
+                            rusty_lr_core::builder::ReduceType::Right => "%right",
                         };
 
                         Diagnostic::error()

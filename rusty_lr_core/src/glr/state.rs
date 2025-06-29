@@ -1,7 +1,6 @@
 use std::hash::Hash;
 
-use crate::HashMap;
-use crate::ShiftedRuleRef;
+use crate::hash::HashMap;
 
 /// A trait representing a parser state.
 pub trait State<NonTerm> {
@@ -26,7 +25,7 @@ pub trait State<NonTerm> {
     fn expected_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_;
 
     /// Get the set of rules that this state is trying to parse
-    fn get_rules(&self) -> &[ShiftedRuleRef];
+    fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef];
 }
 
 /// `State` implementation for a sparse state representation using HashMap
@@ -39,7 +38,7 @@ pub struct SparseState<NonTerm, RuleContainer> {
     /// terminal symbol -> reduce rule index
     pub(crate) reduce_map: HashMap<usize, RuleContainer>,
     /// set of rules that this state is trying to parse
-    pub(crate) ruleset: Vec<ShiftedRuleRef>,
+    pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
 }
 
 impl<NonTerm: Copy, RuleIndex: crate::stackvec::ToUsizeList> State<NonTerm>
@@ -73,7 +72,7 @@ impl<NonTerm: Copy, RuleIndex: crate::stackvec::ToUsizeList> State<NonTerm>
     fn expected_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_ {
         self.shift_goto_map_nonterm.keys().copied()
     }
-    fn get_rules(&self) -> &[ShiftedRuleRef] {
+    fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
         &self.ruleset
     }
 }
@@ -88,7 +87,7 @@ pub struct DenseState<NonTerm, RuleContainer> {
     /// terminal symbol -> reduce rule index
     pub(crate) reduce_map: Vec<Option<RuleContainer>>,
     /// set of rules that this state is trying to parse
-    pub(crate) ruleset: Vec<ShiftedRuleRef>,
+    pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
 }
 impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
     for DenseState<NonTerm, RuleContainer>
@@ -121,7 +120,7 @@ impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
     fn expected_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_ {
         self.shift_goto_map_nonterm.keys().copied()
     }
-    fn get_rules(&self) -> &[ShiftedRuleRef] {
+    fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
         &self.ruleset
     }
 }

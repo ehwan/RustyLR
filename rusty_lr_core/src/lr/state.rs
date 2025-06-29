@@ -1,7 +1,6 @@
 use std::hash::Hash;
 
-use crate::HashMap;
-use crate::ShiftedRuleRef;
+use crate::hash::HashMap;
 
 /// A trait representing a parser state.
 pub trait State<NonTerm> {
@@ -26,7 +25,7 @@ pub trait State<NonTerm> {
     fn expected_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_;
 
     /// Get the set of rules that this state is trying to parse
-    fn get_rules(&self) -> &[ShiftedRuleRef];
+    fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef];
 }
 
 /// `State` implementation for a sparse state representation using HashMap
@@ -39,7 +38,7 @@ pub struct SparseState<NonTerm> {
     /// terminal symbol -> reduce rule index
     pub(crate) reduce_map: HashMap<usize, usize>,
     /// set of rules that this state is trying to parse
-    pub(crate) ruleset: Vec<ShiftedRuleRef>,
+    pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
 }
 impl<NonTerm: Copy> State<NonTerm> for SparseState<NonTerm> {
     fn shift_goto_class(&self, class: usize) -> Option<usize> {
@@ -71,7 +70,7 @@ impl<NonTerm: Copy> State<NonTerm> for SparseState<NonTerm> {
         self.shift_goto_map_nonterm.keys().copied()
     }
 
-    fn get_rules(&self) -> &[ShiftedRuleRef] {
+    fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
         &self.ruleset
     }
 }
@@ -86,7 +85,7 @@ pub struct DenseState<NonTerm> {
     /// terminal symbol -> reduce rule index
     pub(crate) reduce_map: Vec<Option<usize>>,
     /// set of rules that this state is trying to parse
-    pub(crate) ruleset: Vec<ShiftedRuleRef>,
+    pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
 }
 impl<NonTerm: Copy> State<NonTerm> for DenseState<NonTerm> {
     fn shift_goto_class(&self, class: usize) -> Option<usize> {
@@ -116,7 +115,7 @@ impl<NonTerm: Copy> State<NonTerm> for DenseState<NonTerm> {
         self.shift_goto_map_nonterm.keys().copied()
     }
 
-    fn get_rules(&self) -> &[ShiftedRuleRef] {
+    fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
         &self.ruleset
     }
 }

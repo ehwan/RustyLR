@@ -3,25 +3,21 @@
 //! This crate is private and not intended to be used directly.
 //! Please use the [`rusty_lr`](https://crates.io/crates/rusty_lr) crate instead.
 
-pub(crate) mod hashmap;
-pub(crate) mod rule;
-pub mod stackvec;
-pub(crate) mod token;
+/// FxHash for fast and non-cryptographic hashing
+pub mod hash;
 
+/// stack allocated vector for small data
+pub mod stackvec;
+
+/// module for tree representation of parse results (feature `tree`).
 #[cfg(feature = "tree")]
-pub(crate) mod tree;
-#[cfg(feature = "tree")]
-pub use tree::Tree;
-#[cfg(feature = "tree")]
-pub use tree::TreeList;
-#[cfg(feature = "tree")]
-pub use tree::TreeNonTerminal;
+pub mod tree;
 
 pub(crate) mod location;
 pub use location::DefaultLocation;
 pub use location::Location;
 
-/// module for build DFA tables from CFG
+/// module for build parser tables from CFG
 pub mod builder;
 
 /// module for deterministic LR(1), LALR(1) parser
@@ -30,19 +26,13 @@ pub mod lr;
 /// module for non-deterministic GLR parser
 pub mod glr;
 
-mod nonterminal;
-pub use nonterminal::NonTerminal;
-pub use nonterminal::NonTerminalType;
-pub use nonterminal::TokenData;
+/// module for auto-generated types of non-terminals representation
+pub mod nonterminal;
 
-pub use hashmap::HashMap;
-pub use hashmap::HashSet;
+/// module for production rules representation
+pub mod rule;
 
-pub use rule::ProductionRule;
-pub use rule::ShiftedRule;
-pub use rule::ShiftedRuleRef;
-
-pub use rule::ReduceType;
+pub(crate) mod token;
 pub use token::Token;
 
 pub(crate) mod backtrace;
