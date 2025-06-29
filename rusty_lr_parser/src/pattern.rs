@@ -11,6 +11,7 @@ use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
+use quote::format_ident;
 use quote::{quote, ToTokens};
 
 use rusty_lr_core::HashMap;
@@ -58,8 +59,10 @@ pub struct PatternToToken {
     name: Ident,
     /// actual token for the pattern
     pub token: Token<usize, usize>,
-    /// if this pattern has a ruletype, a typename and variable name that holds the value
-    pub ruletype_map: Option<(TokenStream, Ident)>,
+    /// ruletype for this pattern
+    pub ruletype: Option<TokenStream>,
+    /// implicit mapto derived from its parent pattern (e.g. 'A' from A+, 'A' from A*!)
+    pub mapto: Option<Ident>,
 }
 
 impl Pattern {
@@ -83,24 +86,27 @@ impl Pattern {
         }
         match &self.internal {
             PatternInternal::Ident(ident) => {
+                // check if this ident is either name of terminal or nonterminal
+
                 if let Some(term_idx) = grammar
                     .terminals_index
                     .get(&TerminalName::Ident(ident.clone()))
                 {
+                    // terminal
                     Ok(PatternToToken {
                         name: ident.clone(),
                         token: Token::Term(*term_idx),
-                        ruletype_map: Some((grammar.token_typename.clone(), ident.clone())),
+                        ruletype: Some(grammar.token_typename.clone()),
+                        mapto: Some(ident.clone()),
                     })
                 } else if let Some(nonterm_idx) = grammar.nonterminals_index.get(ident) {
+                    // nonterminal
                     let nonterminal = &grammar.nonterminals[*nonterm_idx];
                     Ok(PatternToToken {
                         name: ident.clone(),
                         token: Token::NonTerm(*nonterm_idx),
-                        ruletype_map: nonterminal
-                            .ruletype
-                            .as_ref()
-                            .map(|ruletype| (ruletype.clone(), ident.clone())),
+                        ruletype: nonterminal.ruletype.clone(),
+                        mapto: Some(ident.clone()),
                     })
                 } else {
                     Err(ParseError::TerminalNotDefined(ident.clone()))
@@ -114,7 +120,7 @@ impl Pattern {
                     root_span_pair.0,
                 );
 
-                if let Some((base_typename, base_mapto)) = &base_rule.ruletype_map {
+                if let Some(base_typename) = &base_rule.ruletype {
                     // typename exist, make new rule with typename Vec<base_typename>
                     // A+ -> A+ A { Ap.push(A); Ap }
                     //     | A    { vec![A] }
@@ -175,7 +181,8 @@ impl Pattern {
                     let res = PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
-                        ruletype_map: Some((quote! { Vec<#base_typename> }, base_mapto.clone())),
+                        ruletype: Some(quote! { Vec<#base_typename> }),
+                        mapto: base_rule.mapto.clone(),
                     };
                     pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
@@ -236,7 +243,8 @@ impl Pattern {
                     let res = PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
-                        ruletype_map: None,
+                        ruletype: None,
+                        mapto: base_rule.mapto.clone(),
                     };
                     pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
@@ -257,7 +265,7 @@ impl Pattern {
                     root_span_pair.0,
                 );
 
-                if let Some((base_typename, base_mapto)) = &base_rule.ruletype_map {
+                if let Some(base_typename) = &base_rule.ruletype {
                     // typename exist, make new rule with typename Vec<base_typename>
                     // A* -> A+ { Ap }
                     //     |    { vec![] }
@@ -303,7 +311,8 @@ impl Pattern {
                     let res = PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
-                        ruletype_map: Some((quote! { Vec<#base_typename> }, base_mapto.clone())),
+                        ruletype: Some(quote! { Vec<#base_typename> }),
+                        mapto: base_rule.mapto.clone(),
                     };
                     pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
@@ -350,7 +359,8 @@ impl Pattern {
                     let res = PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
-                        ruletype_map: None,
+                        ruletype: None,
+                        mapto: base_rule.mapto.clone(),
                     };
                     pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
@@ -364,7 +374,7 @@ impl Pattern {
                     root_span_pair.0,
                 );
 
-                if let Some((base_typename, base_mapto)) = &base_rule.ruletype_map {
+                if let Some(base_typename) = &base_rule.ruletype {
                     // typename exist, make new rule with typename Option<base_typename>
                     // A? -> A { Some(A) }
                     //     |   { None }
@@ -410,7 +420,8 @@ impl Pattern {
                     let res = PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
-                        ruletype_map: Some((quote! {Option<#base_typename>}, base_mapto.clone())),
+                        ruletype: Some(quote! {Option<#base_typename>}),
+                        mapto: base_rule.mapto.clone(),
                     };
                     pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
@@ -458,7 +469,8 @@ impl Pattern {
                     let res = PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
-                        ruletype_map: None,
+                        ruletype: None,
+                        mapto: base_rule.mapto.clone(),
                     };
                     pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
@@ -467,7 +479,7 @@ impl Pattern {
 
             PatternInternal::Exclamation(pattern) => {
                 let mut base_rule = pattern.to_token(grammar, pattern_cache, root_span_pair)?;
-                base_rule.ruletype_map = None;
+                base_rule.ruletype = None;
                 Ok(base_rule)
             }
             PatternInternal::TerminalSet(negate, terminal_set) => {
@@ -482,10 +494,8 @@ impl Pattern {
                     return Ok(PatternToToken {
                         name: term_info.name.clone().name(),
                         token: Token::Term(terminal),
-                        ruletype_map: Some((
-                            grammar.token_typename.clone(),
-                            Ident::new("__terminal00", Span::call_site()),
-                        )),
+                        ruletype: Some(grammar.token_typename.clone()),
+                        mapto: None,
                     });
                 }
 
@@ -527,13 +537,8 @@ impl Pattern {
                 let res = PatternToToken {
                     name: newrule_name,
                     token: Token::NonTerm(newrule_idx),
-                    ruletype_map: Some((
-                        grammar.token_typename.clone(),
-                        Ident::new(
-                            format!("__terminal{newrule_idx}").as_str(),
-                            Span::call_site(),
-                        ),
-                    )),
+                    ruletype: Some(grammar.token_typename.clone()),
+                    mapto: None,
                 };
                 pattern_cache.insert(self.clone(), res.clone());
                 Ok(res)
@@ -552,7 +557,7 @@ impl Pattern {
                     root_span_pair.0,
                 );
 
-                if let Some((base_typename, base_mapto)) = &base_rule.ruletype_map {
+                if let Some(base_typename) = &base_rule.ruletype {
                     let rule = Rule {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
@@ -585,7 +590,8 @@ impl Pattern {
                     let res = PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
-                        ruletype_map: Some((base_typename.clone(), base_mapto.clone())),
+                        ruletype: Some(base_typename.clone()),
+                        mapto: base_rule.mapto.clone(),
                     };
                     pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
@@ -622,7 +628,8 @@ impl Pattern {
                     let res = PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
-                        ruletype_map: None,
+                        ruletype: None,
+                        mapto: base_rule.mapto.clone(),
                     };
                     pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
@@ -637,28 +644,20 @@ impl Pattern {
                 // otherwise, the RuleType of the group is (T1, T2, T3, ...) where T1 T2 T3 ... are the RuleType of the patterns holding a value
 
                 let mut elements = Vec::with_capacity(group.len());
-                for (child_idx, child) in group.iter().enumerate() {
-                    let mut child_rule = child.to_token(grammar, pattern_cache, root_span_pair)?;
-                    if let Some((_, mapto)) = &mut child_rule.ruletype_map {
-                        *mapto =
-                            Ident::new(format!("__token{}", child_idx).as_str(), Span::call_site());
-                    }
-                    elements.push(child_rule);
+                for child in group.iter() {
+                    elements.push(child.to_token(grammar, pattern_cache, root_span_pair)?);
                 }
                 let mut tokens = Vec::with_capacity(group.len());
-                for child in elements.iter() {
+                // indices of children that have ruletype
+                let mut ruletype_child_idxs = Vec::with_capacity(group.len());
+                for (child_idx, child) in elements.iter().enumerate() {
                     tokens.push(TokenMapped {
                         token: child.token,
-                        mapto: child.ruletype_map.as_ref().map(|(_, ident)| ident.clone()),
+                        mapto: Some(format_ident!("__token{child_idx}")),
                         begin_span: Span::call_site(),
                         end_span: Span::call_site(),
                     });
-                }
-
-                // unique child with ruletype
-                let mut ruletype_child_idxs = Vec::with_capacity(group.len());
-                for (child_idx, child) in elements.iter().enumerate() {
-                    if child.ruletype_map.is_some() {
+                    if child.ruletype.is_some() {
                         ruletype_child_idxs.push(child_idx);
                     }
                 }
@@ -694,7 +693,8 @@ impl Pattern {
                         let res = PatternToToken {
                             name: newrule_name,
                             token: Token::NonTerm(newrule_idx),
-                            ruletype_map: None,
+                            ruletype: None,
+                            mapto: None,
                         };
                         pattern_cache.insert(self.clone(), res.clone());
                         Ok(res)
@@ -702,8 +702,8 @@ impl Pattern {
 
                     1 => {
                         let unique_child_idx = ruletype_child_idxs[0];
-                        let (typename, mapto) =
-                            &elements[unique_child_idx].ruletype_map.as_ref().unwrap();
+                        // let (typename, mapto) =
+                        //     &elements[unique_child_idx].ruletype_map.as_ref().unwrap();
                         let rule = Rule {
                             tokens,
                             reduce_action: Some(ReduceAction::Identity(unique_child_idx)),
@@ -715,7 +715,7 @@ impl Pattern {
                         let nonterm_info = NonTerminalInfo {
                             name: newrule_name.clone(),
                             pretty_name: self.pretty_name.clone(),
-                            ruletype: Some(typename.clone()),
+                            ruletype: elements[unique_child_idx].ruletype.clone(),
                             rules: vec![rule],
                             regex_span: Some(root_span_pair),
                             trace: false,
@@ -730,7 +730,8 @@ impl Pattern {
                         let res = PatternToToken {
                             name: newrule_name,
                             token: Token::NonTerm(newrule_idx),
-                            ruletype_map: Some((typename.clone(), mapto.clone())),
+                            ruletype: elements[unique_child_idx].ruletype.clone(),
+                            mapto: elements[unique_child_idx].mapto.clone(),
                         };
                         pattern_cache.insert(self.clone(), res.clone());
                         Ok(res)
@@ -740,10 +741,10 @@ impl Pattern {
                         let mut typename = TokenStream::new();
                         let mut initializer = TokenStream::new();
 
-                        for child_idx in ruletype_child_idxs.into_iter() {
-                            let (child_typename, child_mapto) =
-                                &elements[child_idx].ruletype_map.as_ref().unwrap();
-                            typename.extend(quote! {#child_typename,});
+                        for child_idx in ruletype_child_idxs {
+                            let child_typename = elements[child_idx].ruletype.as_ref().unwrap();
+                            let child_mapto = format_ident!("__token{child_idx}");
+                            typename.extend(quote! { #child_typename, });
                             initializer.extend(quote! { #child_mapto, });
                         }
                         let typename = quote! {(#typename)};
@@ -774,13 +775,8 @@ impl Pattern {
                         let res = PatternToToken {
                             name: newrule_name,
                             token: Token::NonTerm(newrule_idx),
-                            ruletype_map: Some((
-                                typename,
-                                Ident::new(
-                                    format!("__group{newrule_idx}").as_str(),
-                                    Span::call_site(),
-                                ),
-                            )),
+                            ruletype: Some(typename),
+                            mapto: None,
                         };
                         pattern_cache.insert(self.clone(), res.clone());
                         Ok(res)
@@ -796,10 +792,8 @@ impl Pattern {
                     Ok(PatternToToken {
                         name: info.name.clone().name(),
                         token: Token::Term(idx),
-                        ruletype_map: Some((
-                            grammar.token_typename.clone(),
-                            info.name.clone().name(),
-                        )),
+                        ruletype: Some(grammar.token_typename.clone()),
+                        mapto: None,
                     })
                 }
                 syn::Lit::Byte(ch) => {
@@ -809,10 +803,8 @@ impl Pattern {
                     Ok(PatternToToken {
                         name: info.name.clone().name(),
                         token: Token::Term(idx),
-                        ruletype_map: Some((
-                            grammar.token_typename.clone(),
-                            info.name.clone().name(),
-                        )),
+                        ruletype: Some(grammar.token_typename.clone()),
+                        mapto: None,
                     })
                 }
                 syn::Lit::Str(s) => {
@@ -860,7 +852,8 @@ impl Pattern {
                     let res = PatternToToken {
                         name: newrule_name.clone(),
                         token: Token::NonTerm(newrule_idx),
-                        ruletype_map: Some((quote! { &'static str }, newrule_name)),
+                        ruletype: Some(quote! { &'static str }),
+                        mapto: None,
                     };
                     pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)
@@ -910,7 +903,8 @@ impl Pattern {
                     let res = PatternToToken {
                         name: newrule_name.clone(),
                         token: Token::NonTerm(newrule_idx),
-                        ruletype_map: Some((quote! { &'static [u8] }, newrule_name)),
+                        ruletype: Some(quote! { &'static [u8] }),
+                        mapto: None,
                     };
                     pattern_cache.insert(self.clone(), res.clone());
                     Ok(res)

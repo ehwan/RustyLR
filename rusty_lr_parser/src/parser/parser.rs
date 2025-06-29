@@ -73,6 +73,7 @@ use rusty_lr_core::ReduceType;
 %token dprec Lexed::DPrec(_,_);
 %token filter Lexed::Filter(_,_);
 %token runtime Lexed::Runtime(_,_);
+%token location Lexed::Location(_,_);
 
 %eof Lexed::Eof;
 
@@ -364,6 +365,8 @@ Filter(TokenStream): filter! RustCode semicolon! ;
 
 Runtime: runtime semicolon ;
 
+Location(TokenStream): location! RustCode semicolon!;
+
 GrammarLine : Rule { data.rules.push(Rule); }
 | TokenDef  { data.terminals.push(TokenDef); }
 | StartDef  { data.start_rule_name.push(StartDef); }
@@ -381,6 +384,7 @@ GrammarLine : Rule { data.rules.push(Rule); }
 | Trace { data.traces.extend(Trace); }
 | Filter { data.filter = Some(Filter); }
 | Runtime { data.compiled = false; }
+| Location { data.location_typename = Some(Location); }
 ;
 
 Grammar: GrammarLine+;

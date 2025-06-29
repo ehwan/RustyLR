@@ -4,6 +4,7 @@ use std::collections::BTreeSet;
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
+use quote::format_ident;
 use quote::quote;
 use quote::ToTokens;
 use rusty_lr_core::HashSet;
@@ -145,6 +146,9 @@ pub struct Grammar {
 
     /// switch between compile-time and runtime table generation
     pub compiled: bool,
+
+    /// type for location
+    pub location_typename: Option<TokenStream>,
 }
 
 impl Grammar {
@@ -386,6 +390,7 @@ impl Grammar {
             rules_sorted: Vec::new(),
 
             compiled: grammar_args.compiled,
+            location_typename: grammar_args.location_typename,
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";
@@ -664,23 +669,20 @@ impl Grammar {
             let mut rule_lines = Vec::new();
             for rule in rules.rule_lines.into_iter() {
                 let mut tokens = Vec::with_capacity(rule.tokens.len());
+                let mut patterns = Vec::with_capacity(rule.tokens.len());
                 for (mapto, pattern) in rule.tokens.into_iter() {
                     let (begin_span, end_span) = pattern.span_pair();
                     let pattern = pattern.into_pattern(&mut grammar, false)?;
                     let pattern_rule =
                         pattern.to_token(&mut grammar, &mut pattern_map, (begin_span, end_span))?;
 
-                    let mapto = match &pattern_rule.ruletype_map {
-                        Some((_, mapto_)) => mapto.or(Some(mapto_.clone())),
-                        None => None,
-                    };
-
                     tokens.push(TokenMapped {
                         token: pattern_rule.token,
-                        mapto,
+                        mapto: mapto.or_else(|| pattern_rule.mapto.clone()),
                         begin_span,
                         end_span,
                     });
+                    patterns.push(pattern_rule);
                 }
 
                 let prec = if let Some(prec) = rule.prec {
@@ -714,11 +716,115 @@ impl Grammar {
                     None
                 };
 
+                // rename all '@var_name' to '__rustylr_location_{var_name}'
+                // if reduce_action is not defined, check if it can be auto-generated
+                let reduce_action = if let Some(reduce_action) = rule.reduce_action {
+                    fn rename_tokenstream_recursive(ts: TokenStream) -> TokenStream {
+                        let mut new_ts = TokenStream::new();
+                        let mut it = ts.into_iter().peekable();
+                        while let Some(token) = it.next() {
+                            match token {
+                                proc_macro2::TokenTree::Punct(punct) => {
+                                    if punct.as_char() == '@' {
+                                        // found '@', check next token
+                                        match it.peek() {
+                                            Some(proc_macro2::TokenTree::Ident(ident)) => {
+                                                // rename to '__rustylr_location_{varname}'
+                                                let new_ident =
+                                                    format_ident!("__rustylr_location_{}", ident);
+                                                new_ts.extend([proc_macro2::TokenTree::Ident(
+                                                    new_ident,
+                                                )]);
+                                                it.next(); // consume the ident
+                                            }
+                                            Some(proc_macro2::TokenTree::Punct(next_punct)) => {
+                                                if next_punct.as_char() == '$' {
+                                                    // found '@$', rename to '__rustylr_location0'
+                                                    new_ts.extend([proc_macro2::TokenTree::Ident(
+                                                        format_ident!("__rustylr_location0"),
+                                                    )]);
+                                                    it.next(); // consume the next punct
+                                                } else {
+                                                    // just a punct
+                                                    new_ts.extend([proc_macro2::TokenTree::Punct(
+                                                        punct,
+                                                    )]);
+                                                }
+                                            }
+                                            _ => {
+                                                // just a punct, no ident after it
+                                                new_ts
+                                                    .extend([proc_macro2::TokenTree::Punct(punct)]);
+                                            }
+                                        }
+                                    } else {
+                                        new_ts.extend([proc_macro2::TokenTree::Punct(punct)]);
+                                    }
+                                }
+                                proc_macro2::TokenTree::Group(group) => {
+                                    let new_group = proc_macro2::Group::new(
+                                        group.delimiter(),
+                                        rename_tokenstream_recursive(group.stream()),
+                                    );
+                                    let new_group = proc_macro2::TokenTree::Group(new_group);
+                                    new_ts.extend([new_group]);
+                                }
+                                token => {
+                                    new_ts.extend([token]);
+                                }
+                            }
+                        }
+                        new_ts
+                    }
+
+                    let new_reduce_action = rename_tokenstream_recursive(reduce_action);
+                    Some(ReduceAction::Custom(new_reduce_action))
+                } else {
+                    // reduce action is not defined,
+
+                    // if ruletype is defined, reduce action must be defined too
+                    if rules.typename.is_some() {
+                        // check for special case:
+                        // only one token in this rule have <RuleType> defined (include terminal)
+                        // for example,
+                        // rule: A B C D
+                        // and only B has <RuleType> defined,
+                        // auto-generated reduce action { B } will be used.
+                        let mut unique_token_idx = None;
+                        for (idx, pattern) in patterns.iter().enumerate() {
+                            if pattern.ruletype.is_some() {
+                                if unique_token_idx.is_some() {
+                                    unique_token_idx = None;
+                                    break;
+                                } else {
+                                    unique_token_idx = Some(idx);
+                                }
+                            }
+                        }
+                        if let Some(unique_mapto_idx) = unique_token_idx {
+                            Some(ReduceAction::Identity(unique_mapto_idx))
+                        } else {
+                            let span = if tokens.is_empty() {
+                                (rule.separator_span, rule.separator_span)
+                            } else {
+                                let first = rule.separator_span;
+                                let last = tokens.last().unwrap().end_span;
+                                (first, last)
+                            };
+
+                            return Err(ParseError::RuleTypeDefinedButActionNotDefined {
+                                name: rules.name.clone(),
+                                span,
+                            });
+                        }
+                    } else {
+                        None
+                    }
+                };
+
                 rule_lines.push(Rule {
                     tokens,
-                    reduce_action: rule
-                        .reduce_action
-                        .map(|stream| ReduceAction::Custom(stream)),
+                    reduce_action,
                     separator_span: rule.separator_span,
                     lookaheads: None,
                     prec,
@@ -800,48 +906,6 @@ impl Grammar {
             }
         }
 
-        // check reduce action
-        for nonterm in &mut grammar.nonterminals {
-            if nonterm.ruletype.is_some() {
-                // typename is defined, reduce action must be defined
-                for rule in nonterm.rules.iter_mut() {
-                    if rule.reduce_action.is_none() {
-                        // action is not defined,
-
-                        // check for special case:
-                        // only one token in this rule have <RuleType> defined (include terminal)
-                        // the unique value will be pushed to stack
-                        let mut unique_mapto_idx = None;
-                        for (idx, token) in rule.tokens.iter().enumerate() {
-                            if token.mapto.is_some() {
-                                if unique_mapto_idx.is_some() {
-                                    unique_mapto_idx = None;
-                                    break;
-                                } else {
-                                    unique_mapto_idx = Some(idx);
-                                }
-                            }
-                        }
-                        if let Some(unique_mapto_idx) = unique_mapto_idx {
-                            rule.reduce_action = Some(ReduceAction::Identity(unique_mapto_idx));
-                        } else {
-                            let span = if rule.tokens.is_empty() {
-                                (rule.separator_span, rule.separator_span)
-                            } else {
-                                let first = rule.separator_span;
-                                let last = rule.tokens.last().unwrap().end_span;
-                                (first, last)
-                            };
-
-                            return Err(ParseError::RuleTypeDefinedButActionNotDefined {
-                                name: nonterm.name.clone(),
-                                span,
-                            });
-                        }
-                    }
-                }
-            }
-        }
         // set operator for each rule
         for nonterm in &mut grammar.nonterminals {
             use rusty_lr_core::builder::Operator;

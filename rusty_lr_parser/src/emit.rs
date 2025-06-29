@@ -855,6 +855,11 @@ impl Grammar {
         let user_data_parameter_name =
             Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
         let user_data_typename = &self.userdata_typename;
+        let location_typename = self
+            .location_typename
+            .as_ref()
+            .cloned()
+            .unwrap_or_else(|| quote! { #module_prefix::DefaultLocation });
 
         // variant name for terminal symbol
         let terminal_variant_name = Ident::new("Terminals", Span::call_site());
@@ -923,11 +928,13 @@ impl Grammar {
                         match &token.token {
                             Token::Term(_) => match &token.mapto {
                                 Some(mapto) => {
+                                    let location_varname =
+                                        format_ident!("__rustylr_location_{}", mapto);
                                     extract_token_data_from_args.extend(quote! {
-                                    let #token_data_typename::#terminal_variant_name(mut #mapto) = __rustylr_args.pop().unwrap() else {
-                                        unreachable!()
-                                    };
-                                });
+                                        let (#token_data_typename::#terminal_variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
+                                            unreachable!()
+                                        };
+                                    });
                                 }
                                 None => {
                                     extract_token_data_from_args.extend(quote! {
@@ -936,22 +943,22 @@ impl Grammar {
                                 }
                             },
                             Token::NonTerm(nonterm_idx) => {
-                                match &self.nonterminals[*nonterm_idx].ruletype {
-                                    Some(_) => {
+                                match &token.mapto {
+                                    Some(mapto) => {
+                                        let location_varname =
+                                            format_ident!("__rustylr_location_{}", mapto);
                                         let variant_name = &variant_names_for_nonterm[*nonterm_idx];
-                                        match &token.mapto {
-                                            Some(mapto) => {
-                                                extract_token_data_from_args.extend(quote! {
-                                            let #token_data_typename::#variant_name(mut #mapto) = __rustylr_args.pop().unwrap() else {
-                                                unreachable!()
-                                            };
+                                        if variant_name == &empty_ruletype_variant_name {
+                                            extract_token_data_from_args.extend(quote! {
+                                                let (_, #location_varname) = __rustylr_args.pop().unwrap();
                                             });
-                                            }
-                                            None => {
-                                                extract_token_data_from_args.extend(quote! {
-                                                    __rustylr_args.pop();
-                                                });
-                                            }
+                                        } else {
+                                            // extract token data from args
+                                            extract_token_data_from_args.extend(quote! {
+                                                let (#token_data_typename::#variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
+                                                    unreachable!()
+                                                };
+                                            });
                                         }
                                     }
                                     None => {
@@ -983,7 +990,7 @@ impl Grammar {
 
                     case_streams.extend(quote! {
                         #rule_index => {
-                            Self::#reduce_fn_ident( reduce_args, shift, lookahead, user_data )
+                            Self::#reduce_fn_ident( reduce_args, shift, lookahead, user_data, location0 )
                         }
                     });
 
@@ -996,10 +1003,11 @@ impl Grammar {
                             #[doc = #rule_debug_str]
                             #[inline]
                             fn #reduce_fn_ident(
-                                __rustylr_args: &mut Vec<Self>,
+                                __rustylr_args: &mut Vec<(Self, #location_typename)>,
                                 shift: &mut bool,
                                 lookahead: &#token_typename,
-                                #user_data_parameter_name: &mut #user_data_typename
+                                #user_data_parameter_name: &mut #user_data_typename,
+                                __rustylr_location0: &mut #location_typename,
                             ) -> Result<#token_data_typename, #reduce_error_typename> {
                                 #extract_token_data_from_args
 
@@ -1015,10 +1023,11 @@ impl Grammar {
                             #[doc = #rule_debug_str]
                             #[inline]
                             fn #reduce_fn_ident(
-                                __rustylr_args: &mut Vec<Self>,
+                                __rustylr_args: &mut Vec<(Self, #location_typename)>,
                                 shift: &mut bool,
                                 lookahead: &#token_typename,
-                                #user_data_parameter_name: &mut #user_data_typename
+                                #user_data_parameter_name: &mut #user_data_typename,
+                                __rustylr_location0: &mut #location_typename,
                             ) -> Result<#token_data_typename, #reduce_error_typename> {
                                 #extract_token_data_from_args
                                 #reduce_action
@@ -1133,15 +1142,15 @@ impl Grammar {
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
         impl #token_data_typename {
             fn #identity_reduce_fn_name(
-                args: &mut Vec<Self>,
+                args: &mut Vec<(Self, #location_typename)>,
                 idx: usize,
             ) -> Self {
-                let value = args.swap_remove(idx);
+                let value = args.swap_remove(idx).0;
                 args.clear();
                 value
             }
             fn #clear_reduce_fn_name(
-                args: &mut Vec<Self>,
+                args: &mut Vec<(Self, #location_typename)>,
             ) -> Self {
                 args.clear();
                 #token_data_typename::#empty_ruletype_variant_name
@@ -1158,13 +1167,15 @@ impl Grammar {
             type ReduceActionError = #reduce_error_typename;
             type UserData = #user_data_typename;
             type StartType = #start_typename;
+            type Location = #location_typename;
 
             fn reduce_action(
                 rule_index: usize,
-                reduce_args: &mut Vec<Self>,
+                reduce_args: &mut Vec<(Self, Self::Location)>,
                 shift: &mut bool,
                 lookahead: &Self::Term,
                 user_data: &mut Self::UserData,
+                location0: &mut Self::Location,
             ) -> Result<Self, Self::ReduceActionError> {
                 match rule_index {
                     #case_streams
@@ -1176,12 +1187,8 @@ impl Grammar {
             fn new_error_nonterm() -> Self {
                 #token_data_typename::#empty_ruletype_variant_name
             }
-        }
-
-        #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types, unused_variables)]
-        impl From<#token_typename> for #token_data_typename {
-            fn from(token: #token_typename) -> Self {
-                #token_data_typename::#terminal_variant_name(token)
+            fn new_terminal(term: #token_typename) -> Self {
+                #token_data_typename::#terminal_variant_name(term)
             }
         }
 

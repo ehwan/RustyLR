@@ -17,6 +17,10 @@ pub use tree::TreeList;
 #[cfg(feature = "tree")]
 pub use tree::TreeNonTerminal;
 
+pub(crate) mod location;
+pub use location::DefaultLocation;
+pub use location::Location;
+
 /// module for build DFA tables from CFG
 pub mod builder;
 
