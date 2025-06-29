@@ -82,6 +82,8 @@ pub trait TokenData: Sized {
         lookahead: &Self::Term,
         // user input data
         userdata: &mut Self::UserData,
+        // location of this non-terminal, e.g. `@$`
+        location0: &mut Self::Location,
     ) -> Result<Self, Self::ReduceActionError>;
 
     /// create new non-terminal for error recovery

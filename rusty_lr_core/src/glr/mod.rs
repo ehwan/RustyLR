@@ -127,7 +127,7 @@ where
     P::Term: Hash + Eq + Clone,
     P::NonTerm: Hash + Eq + Clone,
 {
-    let new_location = merge_locations(&node, parser.get_rules()[reduce_rule].rule.len());
+    let mut new_location = merge_locations(&node, parser.get_rules()[reduce_rule].rule.len());
 
     context.reduce_args.clear();
     let data_extracted = clone_pop_nodes(node, reduce_rule, parser, context);
@@ -144,6 +144,7 @@ where
         &mut do_shift,
         term,
         userdata,
+        &mut new_location,
     ) {
         Ok(new_data) => {
             if let Some(nonterm_shift_state) = parser.get_states()[parent.state]

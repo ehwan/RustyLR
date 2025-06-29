@@ -476,6 +476,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut ident), __rustylr_location_ident) =
             __rustylr_args.pop().unwrap()
@@ -527,6 +528,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut parengroup), __rustylr_location_parengroup) =
             __rustylr_args.pop().unwrap()
@@ -547,6 +549,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         Ok(GrammarTokenData::Variant3({ None }))
     }
@@ -557,6 +560,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant4(mut RuleLines), __rustylr_location_RuleLines) =
             __rustylr_args.pop().unwrap()
@@ -589,6 +593,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant5(mut RuleLine), __rustylr_location_RuleLine) =
             __rustylr_args.pop().unwrap()
@@ -604,6 +609,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant20(mut TokenMapped), __rustylr_location_TokenMapped) =
             __rustylr_args.pop().unwrap()
@@ -638,6 +644,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut prec), __rustylr_location_prec) =
             __rustylr_args.pop().unwrap()
@@ -660,6 +667,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut dprec), __rustylr_location_dprec) =
             __rustylr_args.pop().unwrap()
@@ -685,6 +693,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant10(mut Pattern), __rustylr_location_Pattern) =
             __rustylr_args.pop().unwrap()
@@ -700,6 +709,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut ident), __rustylr_location_ident) =
             __rustylr_args.pop().unwrap()
@@ -730,6 +740,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut ident), __rustylr_location_ident) =
             __rustylr_args.pop().unwrap()
@@ -750,6 +761,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut first), __rustylr_location_first) =
             __rustylr_args.pop().unwrap()
@@ -783,6 +795,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut literal), __rustylr_location_literal) =
             __rustylr_args.pop().unwrap()
@@ -803,6 +816,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut first), __rustylr_location_first) =
             __rustylr_args.pop().unwrap()
@@ -836,6 +850,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut lbracket), __rustylr_location_lbracket) =
             __rustylr_args.pop().unwrap()
@@ -879,6 +894,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut dot), __rustylr_location_dot) =
             __rustylr_args.pop().unwrap()
@@ -902,6 +918,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut ident), __rustylr_location_ident) =
             __rustylr_args.pop().unwrap()
@@ -922,6 +939,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant10(mut Pattern), __rustylr_location_Pattern) =
             __rustylr_args.pop().unwrap()
@@ -947,6 +965,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant10(mut Pattern), __rustylr_location_Pattern) =
             __rustylr_args.pop().unwrap()
@@ -972,6 +991,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant10(mut Pattern), __rustylr_location_Pattern) =
             __rustylr_args.pop().unwrap()
@@ -997,6 +1017,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant10(mut Pattern), __rustylr_location_Pattern) =
             __rustylr_args.pop().unwrap()
@@ -1022,6 +1043,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant9(mut TerminalSet), __rustylr_location_TerminalSet) =
             __rustylr_args.pop().unwrap()
@@ -1039,6 +1061,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant10(mut p1), __rustylr_location_p1) =
             __rustylr_args.pop().unwrap()
@@ -1066,6 +1089,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut lparen), __rustylr_location_lparen) =
             __rustylr_args.pop().unwrap()
@@ -1099,6 +1123,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut literal), __rustylr_location_literal) =
             __rustylr_args.pop().unwrap()
@@ -1119,6 +1144,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant10(mut p1), __rustylr_location_p1) =
             __rustylr_args.pop().unwrap()
@@ -1146,6 +1172,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut bracegroup), __rustylr_location_bracegroup) =
             __rustylr_args.pop().unwrap()
@@ -1166,6 +1193,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         Ok(GrammarTokenData::Variant3({ None }))
     }
@@ -1176,6 +1204,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut token), __rustylr_location_token) =
             __rustylr_args.pop().unwrap()
@@ -1211,6 +1240,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant25(mut t), __rustylr_location_t) =
             __rustylr_args.pop().unwrap()
@@ -1232,6 +1262,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut start), __rustylr_location_start) =
             __rustylr_args.pop().unwrap()
@@ -1262,6 +1293,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut eofdef), __rustylr_location_eofdef) =
             __rustylr_args.pop().unwrap()
@@ -1287,6 +1319,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut tokentype), __rustylr_location_tokentype) =
             __rustylr_args.pop().unwrap()
@@ -1314,6 +1347,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut userdata), __rustylr_location_userdata) =
             __rustylr_args.pop().unwrap()
@@ -1339,6 +1373,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut ident), __rustylr_location_ident) =
             __rustylr_args.pop().unwrap()
@@ -1359,6 +1394,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut literal), __rustylr_location_literal) =
             __rustylr_args.pop().unwrap()
@@ -1379,6 +1415,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut left), __rustylr_location_left) =
             __rustylr_args.pop().unwrap()
@@ -1394,6 +1431,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut right), __rustylr_location_right) =
             __rustylr_args.pop().unwrap()
@@ -1409,6 +1447,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant16(mut reducetype), __rustylr_location_reducetype) =
             __rustylr_args.pop().unwrap()
@@ -1436,6 +1475,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut errortype), __rustylr_location_errortype) =
             __rustylr_args.pop().unwrap()
@@ -1463,6 +1503,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut moduleprefix), __rustylr_location_moduleprefix) =
             __rustylr_args.pop().unwrap()
@@ -1490,6 +1531,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut trace), __rustylr_location_trace) =
             __rustylr_args.pop().unwrap()
@@ -1525,6 +1567,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant2(mut Rule), __rustylr_location_Rule) =
             __rustylr_args.pop().unwrap()
@@ -1543,6 +1586,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant11(mut TokenDef), __rustylr_location_TokenDef) =
             __rustylr_args.pop().unwrap()
@@ -1561,6 +1605,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant13(mut StartDef), __rustylr_location_StartDef) =
             __rustylr_args.pop().unwrap()
@@ -1579,6 +1624,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant14(mut EofDef), __rustylr_location_EofDef) =
             __rustylr_args.pop().unwrap()
@@ -1597,6 +1643,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant14(mut TokenTypeDef), __rustylr_location_TokenTypeDef) =
             __rustylr_args.pop().unwrap()
@@ -1615,6 +1662,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant14(mut UserDataDef), __rustylr_location_UserDataDef) =
             __rustylr_args.pop().unwrap()
@@ -1633,6 +1681,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant17(mut ReduceDef), __rustylr_location_ReduceDef) =
             __rustylr_args.pop().unwrap()
@@ -1652,6 +1701,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant14(mut ErrorDef), __rustylr_location_ErrorDef) =
             __rustylr_args.pop().unwrap()
@@ -1670,6 +1720,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant14(mut ModulePrefixDef), __rustylr_location_ModulePrefixDef) =
             __rustylr_args.pop().unwrap()
@@ -1688,6 +1739,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (_, __rustylr_location_Lalr) = __rustylr_args.pop().unwrap();
         {
@@ -1702,6 +1754,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (_, __rustylr_location_Glr) = __rustylr_args.pop().unwrap();
         {
@@ -1716,6 +1769,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant18(mut Precedence), __rustylr_location_Precedence) =
             __rustylr_args.pop().unwrap()
@@ -1734,6 +1788,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (_, __rustylr_location_NoOptim) = __rustylr_args.pop().unwrap();
         {
@@ -1748,6 +1803,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (_, __rustylr_location_Dense) = __rustylr_args.pop().unwrap();
         {
@@ -1762,6 +1818,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant19(mut Trace), __rustylr_location_Trace) =
             __rustylr_args.pop().unwrap()
@@ -1780,6 +1837,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant12(mut Filter), __rustylr_location_Filter) =
             __rustylr_args.pop().unwrap()
@@ -1798,6 +1856,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (_, __rustylr_location_Runtime) = __rustylr_args.pop().unwrap();
         {
@@ -1812,6 +1871,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant7(mut A), __rustylr_location_A) =
             __rustylr_args.pop().unwrap()
@@ -1827,6 +1887,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant20(mut Ap), __rustylr_location_Ap) =
             __rustylr_args.pop().unwrap()
@@ -1850,6 +1911,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         Ok(GrammarTokenData::Variant20({ vec![] }))
     }
@@ -1860,6 +1922,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant6(mut A), __rustylr_location_A) =
             __rustylr_args.pop().unwrap()
@@ -1875,6 +1938,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant21(mut Ap), __rustylr_location_Ap) =
             __rustylr_args.pop().unwrap()
@@ -1898,6 +1962,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         Ok(GrammarTokenData::Variant21({ vec![] }))
     }
@@ -1908,6 +1973,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut A), __rustylr_location_A) =
             __rustylr_args.pop().unwrap()
@@ -1923,6 +1989,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         Ok(GrammarTokenData::Variant22({ None }))
     }
@@ -1933,6 +2000,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant8(mut A), __rustylr_location_A) =
             __rustylr_args.pop().unwrap()
@@ -1948,6 +2016,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant23(mut Ap), __rustylr_location_Ap) =
             __rustylr_args.pop().unwrap()
@@ -1971,6 +2040,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         Ok(GrammarTokenData::Variant23({ vec![] }))
     }
@@ -1981,6 +2051,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant10(mut A), __rustylr_location_A) =
             __rustylr_args.pop().unwrap()
@@ -1996,6 +2067,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant24(mut Ap), __rustylr_location_Ap) =
             __rustylr_args.pop().unwrap()
@@ -2019,6 +2091,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut A), __rustylr_location_A) =
             __rustylr_args.pop().unwrap()
@@ -2034,6 +2107,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant25(mut Ap), __rustylr_location_Ap) =
             __rustylr_args.pop().unwrap()
@@ -2057,6 +2131,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant15(mut A), __rustylr_location_A) =
             __rustylr_args.pop().unwrap()
@@ -2072,6 +2147,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant18(mut Ap), __rustylr_location_Ap) =
             __rustylr_args.pop().unwrap()
@@ -2095,6 +2171,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Terminals(mut A), __rustylr_location_A) =
             __rustylr_args.pop().unwrap()
@@ -2110,6 +2187,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         let (GrammarTokenData::Variant25(mut Ap), __rustylr_location_Ap) =
             __rustylr_args.pop().unwrap()
@@ -2133,6 +2211,7 @@ impl GrammarTokenData {
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
+        __rustylr_location0: &mut ::rusty_lr_core::DefaultLocation,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         Ok(GrammarTokenData::Variant25({ vec![] }))
     }
@@ -2157,97 +2236,234 @@ impl ::rusty_lr_core::TokenData for GrammarTokenData {
         shift: &mut bool,
         lookahead: &Self::Term,
         user_data: &mut Self::UserData,
+        location0: &mut Self::Location,
     ) -> Result<Self, Self::ReduceActionError> {
         match rule_index {
-            0usize => Self::reduce_Rule_0(reduce_args, shift, lookahead, user_data),
-            1usize => Self::reduce_RuleType_0(reduce_args, shift, lookahead, user_data),
-            2usize => Self::reduce_RuleType_1(reduce_args, shift, lookahead, user_data),
-            3usize => Self::reduce_RuleLines_0(reduce_args, shift, lookahead, user_data),
-            4usize => Self::reduce_RuleLines_1(reduce_args, shift, lookahead, user_data),
-            5usize => Self::reduce_RuleLine_0(reduce_args, shift, lookahead, user_data),
-            6usize => Self::reduce_PrecDef_0(reduce_args, shift, lookahead, user_data),
-            7usize => Self::reduce_PrecDef_1(reduce_args, shift, lookahead, user_data),
-            8usize => Self::reduce_TokenMapped_0(reduce_args, shift, lookahead, user_data),
-            9usize => Self::reduce_TokenMapped_1(reduce_args, shift, lookahead, user_data),
-            10usize => Self::reduce_TerminalSetItem_0(reduce_args, shift, lookahead, user_data),
-            11usize => Self::reduce_TerminalSetItem_1(reduce_args, shift, lookahead, user_data),
-            12usize => Self::reduce_TerminalSetItem_2(reduce_args, shift, lookahead, user_data),
-            13usize => Self::reduce_TerminalSetItem_3(reduce_args, shift, lookahead, user_data),
-            14usize => Self::reduce_TerminalSet_0(reduce_args, shift, lookahead, user_data),
-            15usize => Self::reduce_TerminalSet_1(reduce_args, shift, lookahead, user_data),
-            16usize => Self::reduce_Pattern_0(reduce_args, shift, lookahead, user_data),
-            17usize => Self::reduce_Pattern_1(reduce_args, shift, lookahead, user_data),
-            18usize => Self::reduce_Pattern_2(reduce_args, shift, lookahead, user_data),
-            19usize => Self::reduce_Pattern_3(reduce_args, shift, lookahead, user_data),
-            20usize => Self::reduce_Pattern_4(reduce_args, shift, lookahead, user_data),
-            21usize => Self::reduce_Pattern_5(reduce_args, shift, lookahead, user_data),
-            22usize => Self::reduce_Pattern_6(reduce_args, shift, lookahead, user_data),
-            23usize => Self::reduce_Pattern_7(reduce_args, shift, lookahead, user_data),
-            24usize => Self::reduce_Pattern_8(reduce_args, shift, lookahead, user_data),
-            25usize => Self::reduce_Pattern_9(reduce_args, shift, lookahead, user_data),
-            26usize => Self::reduce_Action_0(reduce_args, shift, lookahead, user_data),
-            27usize => Self::reduce_Action_1(reduce_args, shift, lookahead, user_data),
-            28usize => Self::reduce_TokenDef_0(reduce_args, shift, lookahead, user_data),
-            29usize => Self::reduce_RustCode_0(reduce_args, shift, lookahead, user_data),
-            30usize => Self::reduce_StartDef_0(reduce_args, shift, lookahead, user_data),
-            31usize => Self::reduce_EofDef_0(reduce_args, shift, lookahead, user_data),
-            32usize => Self::reduce_TokenTypeDef_0(reduce_args, shift, lookahead, user_data),
-            33usize => Self::reduce_UserDataDef_0(reduce_args, shift, lookahead, user_data),
-            34usize => Self::reduce_IdentOrLiteral_0(reduce_args, shift, lookahead, user_data),
-            35usize => Self::reduce_IdentOrLiteral_1(reduce_args, shift, lookahead, user_data),
-            36usize => Self::reduce_ReduceType_0(reduce_args, shift, lookahead, user_data),
-            37usize => Self::reduce_ReduceType_1(reduce_args, shift, lookahead, user_data),
-            38usize => Self::reduce_ReduceDef_0(reduce_args, shift, lookahead, user_data),
-            39usize => Self::reduce_ErrorDef_0(reduce_args, shift, lookahead, user_data),
-            40usize => Self::reduce_ModulePrefixDef_0(reduce_args, shift, lookahead, user_data),
-            41usize => Self::reduce_Trace_0(reduce_args, shift, lookahead, user_data),
-            42usize => Self::reduce_GrammarLine_0(reduce_args, shift, lookahead, user_data),
-            43usize => Self::reduce_GrammarLine_1(reduce_args, shift, lookahead, user_data),
-            44usize => Self::reduce_GrammarLine_2(reduce_args, shift, lookahead, user_data),
-            45usize => Self::reduce_GrammarLine_3(reduce_args, shift, lookahead, user_data),
-            46usize => Self::reduce_GrammarLine_4(reduce_args, shift, lookahead, user_data),
-            47usize => Self::reduce_GrammarLine_5(reduce_args, shift, lookahead, user_data),
-            48usize => Self::reduce_GrammarLine_6(reduce_args, shift, lookahead, user_data),
-            49usize => Self::reduce_GrammarLine_7(reduce_args, shift, lookahead, user_data),
-            50usize => Self::reduce_GrammarLine_8(reduce_args, shift, lookahead, user_data),
-            51usize => Self::reduce_GrammarLine_9(reduce_args, shift, lookahead, user_data),
-            52usize => Self::reduce_GrammarLine_10(reduce_args, shift, lookahead, user_data),
-            53usize => Self::reduce_GrammarLine_11(reduce_args, shift, lookahead, user_data),
-            54usize => Self::reduce_GrammarLine_12(reduce_args, shift, lookahead, user_data),
-            55usize => Self::reduce_GrammarLine_13(reduce_args, shift, lookahead, user_data),
-            56usize => Self::reduce_GrammarLine_14(reduce_args, shift, lookahead, user_data),
-            57usize => Self::reduce_GrammarLine_15(reduce_args, shift, lookahead, user_data),
-            58usize => Self::reduce_GrammarLine_16(reduce_args, shift, lookahead, user_data),
-            59usize => Self::reduce__TokenMappedPlus32_0(reduce_args, shift, lookahead, user_data),
-            60usize => Self::reduce__TokenMappedPlus32_1(reduce_args, shift, lookahead, user_data),
-            61usize => Self::reduce__TokenMappedStar33_1(reduce_args, shift, lookahead, user_data),
-            62usize => Self::reduce__PrecDefPlus34_0(reduce_args, shift, lookahead, user_data),
-            63usize => Self::reduce__PrecDefPlus34_1(reduce_args, shift, lookahead, user_data),
-            64usize => Self::reduce__PrecDefStar35_1(reduce_args, shift, lookahead, user_data),
-            65usize => Self::reduce__caretQuestion36_0(reduce_args, shift, lookahead, user_data),
-            66usize => Self::reduce__caretQuestion36_1(reduce_args, shift, lookahead, user_data),
-            67usize => {
-                Self::reduce__TerminalSetItemPlus37_0(reduce_args, shift, lookahead, user_data)
+            0usize => Self::reduce_Rule_0(reduce_args, shift, lookahead, user_data, location0),
+            1usize => Self::reduce_RuleType_0(reduce_args, shift, lookahead, user_data, location0),
+            2usize => Self::reduce_RuleType_1(reduce_args, shift, lookahead, user_data, location0),
+            3usize => Self::reduce_RuleLines_0(reduce_args, shift, lookahead, user_data, location0),
+            4usize => Self::reduce_RuleLines_1(reduce_args, shift, lookahead, user_data, location0),
+            5usize => Self::reduce_RuleLine_0(reduce_args, shift, lookahead, user_data, location0),
+            6usize => Self::reduce_PrecDef_0(reduce_args, shift, lookahead, user_data, location0),
+            7usize => Self::reduce_PrecDef_1(reduce_args, shift, lookahead, user_data, location0),
+            8usize => {
+                Self::reduce_TokenMapped_0(reduce_args, shift, lookahead, user_data, location0)
             }
-            68usize => {
-                Self::reduce__TerminalSetItemPlus37_1(reduce_args, shift, lookahead, user_data)
+            9usize => {
+                Self::reduce_TokenMapped_1(reduce_args, shift, lookahead, user_data, location0)
             }
-            69usize => {
-                Self::reduce__TerminalSetItemStar38_1(reduce_args, shift, lookahead, user_data)
+            10usize => {
+                Self::reduce_TerminalSetItem_0(reduce_args, shift, lookahead, user_data, location0)
             }
-            70usize => Self::reduce__PatternPlus39_0(reduce_args, shift, lookahead, user_data),
-            71usize => Self::reduce__PatternPlus39_1(reduce_args, shift, lookahead, user_data),
-            72usize => Self::reduce___TermSet40Plus41_0(reduce_args, shift, lookahead, user_data),
-            73usize => Self::reduce___TermSet40Plus41_1(reduce_args, shift, lookahead, user_data),
-            74usize => {
-                Self::reduce__IdentOrLiteralPlus42_0(reduce_args, shift, lookahead, user_data)
+            11usize => {
+                Self::reduce_TerminalSetItem_1(reduce_args, shift, lookahead, user_data, location0)
             }
-            75usize => {
-                Self::reduce__IdentOrLiteralPlus42_1(reduce_args, shift, lookahead, user_data)
+            12usize => {
+                Self::reduce_TerminalSetItem_2(reduce_args, shift, lookahead, user_data, location0)
             }
-            76usize => Self::reduce__identPlus43_0(reduce_args, shift, lookahead, user_data),
-            77usize => Self::reduce__identPlus43_1(reduce_args, shift, lookahead, user_data),
-            78usize => Self::reduce__identStar44_1(reduce_args, shift, lookahead, user_data),
+            13usize => {
+                Self::reduce_TerminalSetItem_3(reduce_args, shift, lookahead, user_data, location0)
+            }
+            14usize => {
+                Self::reduce_TerminalSet_0(reduce_args, shift, lookahead, user_data, location0)
+            }
+            15usize => {
+                Self::reduce_TerminalSet_1(reduce_args, shift, lookahead, user_data, location0)
+            }
+            16usize => Self::reduce_Pattern_0(reduce_args, shift, lookahead, user_data, location0),
+            17usize => Self::reduce_Pattern_1(reduce_args, shift, lookahead, user_data, location0),
+            18usize => Self::reduce_Pattern_2(reduce_args, shift, lookahead, user_data, location0),
+            19usize => Self::reduce_Pattern_3(reduce_args, shift, lookahead, user_data, location0),
+            20usize => Self::reduce_Pattern_4(reduce_args, shift, lookahead, user_data, location0),
+            21usize => Self::reduce_Pattern_5(reduce_args, shift, lookahead, user_data, location0),
+            22usize => Self::reduce_Pattern_6(reduce_args, shift, lookahead, user_data, location0),
+            23usize => Self::reduce_Pattern_7(reduce_args, shift, lookahead, user_data, location0),
+            24usize => Self::reduce_Pattern_8(reduce_args, shift, lookahead, user_data, location0),
+            25usize => Self::reduce_Pattern_9(reduce_args, shift, lookahead, user_data, location0),
+            26usize => Self::reduce_Action_0(reduce_args, shift, lookahead, user_data, location0),
+            27usize => Self::reduce_Action_1(reduce_args, shift, lookahead, user_data, location0),
+            28usize => Self::reduce_TokenDef_0(reduce_args, shift, lookahead, user_data, location0),
+            29usize => Self::reduce_RustCode_0(reduce_args, shift, lookahead, user_data, location0),
+            30usize => Self::reduce_StartDef_0(reduce_args, shift, lookahead, user_data, location0),
+            31usize => Self::reduce_EofDef_0(reduce_args, shift, lookahead, user_data, location0),
+            32usize => {
+                Self::reduce_TokenTypeDef_0(reduce_args, shift, lookahead, user_data, location0)
+            }
+            33usize => {
+                Self::reduce_UserDataDef_0(reduce_args, shift, lookahead, user_data, location0)
+            }
+            34usize => {
+                Self::reduce_IdentOrLiteral_0(reduce_args, shift, lookahead, user_data, location0)
+            }
+            35usize => {
+                Self::reduce_IdentOrLiteral_1(reduce_args, shift, lookahead, user_data, location0)
+            }
+            36usize => {
+                Self::reduce_ReduceType_0(reduce_args, shift, lookahead, user_data, location0)
+            }
+            37usize => {
+                Self::reduce_ReduceType_1(reduce_args, shift, lookahead, user_data, location0)
+            }
+            38usize => {
+                Self::reduce_ReduceDef_0(reduce_args, shift, lookahead, user_data, location0)
+            }
+            39usize => Self::reduce_ErrorDef_0(reduce_args, shift, lookahead, user_data, location0),
+            40usize => {
+                Self::reduce_ModulePrefixDef_0(reduce_args, shift, lookahead, user_data, location0)
+            }
+            41usize => Self::reduce_Trace_0(reduce_args, shift, lookahead, user_data, location0),
+            42usize => {
+                Self::reduce_GrammarLine_0(reduce_args, shift, lookahead, user_data, location0)
+            }
+            43usize => {
+                Self::reduce_GrammarLine_1(reduce_args, shift, lookahead, user_data, location0)
+            }
+            44usize => {
+                Self::reduce_GrammarLine_2(reduce_args, shift, lookahead, user_data, location0)
+            }
+            45usize => {
+                Self::reduce_GrammarLine_3(reduce_args, shift, lookahead, user_data, location0)
+            }
+            46usize => {
+                Self::reduce_GrammarLine_4(reduce_args, shift, lookahead, user_data, location0)
+            }
+            47usize => {
+                Self::reduce_GrammarLine_5(reduce_args, shift, lookahead, user_data, location0)
+            }
+            48usize => {
+                Self::reduce_GrammarLine_6(reduce_args, shift, lookahead, user_data, location0)
+            }
+            49usize => {
+                Self::reduce_GrammarLine_7(reduce_args, shift, lookahead, user_data, location0)
+            }
+            50usize => {
+                Self::reduce_GrammarLine_8(reduce_args, shift, lookahead, user_data, location0)
+            }
+            51usize => {
+                Self::reduce_GrammarLine_9(reduce_args, shift, lookahead, user_data, location0)
+            }
+            52usize => {
+                Self::reduce_GrammarLine_10(reduce_args, shift, lookahead, user_data, location0)
+            }
+            53usize => {
+                Self::reduce_GrammarLine_11(reduce_args, shift, lookahead, user_data, location0)
+            }
+            54usize => {
+                Self::reduce_GrammarLine_12(reduce_args, shift, lookahead, user_data, location0)
+            }
+            55usize => {
+                Self::reduce_GrammarLine_13(reduce_args, shift, lookahead, user_data, location0)
+            }
+            56usize => {
+                Self::reduce_GrammarLine_14(reduce_args, shift, lookahead, user_data, location0)
+            }
+            57usize => {
+                Self::reduce_GrammarLine_15(reduce_args, shift, lookahead, user_data, location0)
+            }
+            58usize => {
+                Self::reduce_GrammarLine_16(reduce_args, shift, lookahead, user_data, location0)
+            }
+            59usize => Self::reduce__TokenMappedPlus32_0(
+                reduce_args,
+                shift,
+                lookahead,
+                user_data,
+                location0,
+            ),
+            60usize => Self::reduce__TokenMappedPlus32_1(
+                reduce_args,
+                shift,
+                lookahead,
+                user_data,
+                location0,
+            ),
+            61usize => Self::reduce__TokenMappedStar33_1(
+                reduce_args,
+                shift,
+                lookahead,
+                user_data,
+                location0,
+            ),
+            62usize => {
+                Self::reduce__PrecDefPlus34_0(reduce_args, shift, lookahead, user_data, location0)
+            }
+            63usize => {
+                Self::reduce__PrecDefPlus34_1(reduce_args, shift, lookahead, user_data, location0)
+            }
+            64usize => {
+                Self::reduce__PrecDefStar35_1(reduce_args, shift, lookahead, user_data, location0)
+            }
+            65usize => {
+                Self::reduce__caretQuestion36_0(reduce_args, shift, lookahead, user_data, location0)
+            }
+            66usize => {
+                Self::reduce__caretQuestion36_1(reduce_args, shift, lookahead, user_data, location0)
+            }
+            67usize => Self::reduce__TerminalSetItemPlus37_0(
+                reduce_args,
+                shift,
+                lookahead,
+                user_data,
+                location0,
+            ),
+            68usize => Self::reduce__TerminalSetItemPlus37_1(
+                reduce_args,
+                shift,
+                lookahead,
+                user_data,
+                location0,
+            ),
+            69usize => Self::reduce__TerminalSetItemStar38_1(
+                reduce_args,
+                shift,
+                lookahead,
+                user_data,
+                location0,
+            ),
+            70usize => {
+                Self::reduce__PatternPlus39_0(reduce_args, shift, lookahead, user_data, location0)
+            }
+            71usize => {
+                Self::reduce__PatternPlus39_1(reduce_args, shift, lookahead, user_data, location0)
+            }
+            72usize => Self::reduce___TermSet40Plus41_0(
+                reduce_args,
+                shift,
+                lookahead,
+                user_data,
+                location0,
+            ),
+            73usize => Self::reduce___TermSet40Plus41_1(
+                reduce_args,
+                shift,
+                lookahead,
+                user_data,
+                location0,
+            ),
+            74usize => Self::reduce__IdentOrLiteralPlus42_0(
+                reduce_args,
+                shift,
+                lookahead,
+                user_data,
+                location0,
+            ),
+            75usize => Self::reduce__IdentOrLiteralPlus42_1(
+                reduce_args,
+                shift,
+                lookahead,
+                user_data,
+                location0,
+            ),
+            76usize => {
+                Self::reduce__identPlus43_0(reduce_args, shift, lookahead, user_data, location0)
+            }
+            77usize => {
+                Self::reduce__identPlus43_1(reduce_args, shift, lookahead, user_data, location0)
+            }
+            78usize => {
+                Self::reduce__identStar44_1(reduce_args, shift, lookahead, user_data, location0)
+            }
             79usize..=121usize => Ok(Self::reduce_identity(reduce_args, 0usize)),
             122usize..=123usize => Ok(Self::reduce_identity(reduce_args, 1usize)),
             124usize..=132usize => Ok(Self::reduce_clear(reduce_args)),

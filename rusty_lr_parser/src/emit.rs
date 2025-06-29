@@ -986,7 +986,7 @@ impl Grammar {
 
                     case_streams.extend(quote! {
                         #rule_index => {
-                            Self::#reduce_fn_ident( reduce_args, shift, lookahead, user_data )
+                            Self::#reduce_fn_ident( reduce_args, shift, lookahead, user_data, location0 )
                         }
                     });
 
@@ -1002,7 +1002,8 @@ impl Grammar {
                                 __rustylr_args: &mut Vec<(Self, #location_typename)>,
                                 shift: &mut bool,
                                 lookahead: &#token_typename,
-                                #user_data_parameter_name: &mut #user_data_typename
+                                #user_data_parameter_name: &mut #user_data_typename,
+                                __rustylr_location0: &mut #location_typename,
                             ) -> Result<#token_data_typename, #reduce_error_typename> {
                                 #extract_token_data_from_args
 
@@ -1021,7 +1022,8 @@ impl Grammar {
                                 __rustylr_args: &mut Vec<(Self, #location_typename)>,
                                 shift: &mut bool,
                                 lookahead: &#token_typename,
-                                #user_data_parameter_name: &mut #user_data_typename
+                                #user_data_parameter_name: &mut #user_data_typename,
+                                __rustylr_location0: &mut #location_typename,
                             ) -> Result<#token_data_typename, #reduce_error_typename> {
                                 #extract_token_data_from_args
                                 #reduce_action
@@ -1169,6 +1171,7 @@ impl Grammar {
                 shift: &mut bool,
                 lookahead: &Self::Term,
                 user_data: &mut Self::UserData,
+                location0: &mut Self::Location,
             ) -> Result<Self, Self::ReduceActionError> {
                 match rule_index {
                     #case_streams

@@ -171,7 +171,7 @@ impl<Data: TokenData> Context<Data> {
 
             let mut shift = false;
 
-            let new_location = Self::merge_locations(&self.data_stack, len);
+            let mut new_location = Self::merge_locations(&self.data_stack, len);
 
             self.reduce_args.clear();
             self.reduce_args.reserve(len);
@@ -190,6 +190,7 @@ impl<Data: TokenData> Context<Data> {
                 &mut shift,
                 &term,
                 userdata,
+                &mut new_location,
             )
             .map_err(ParseError::ReduceAction)?;
             self.data_stack.push((new_data, new_location));
