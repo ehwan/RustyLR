@@ -4,6 +4,7 @@ use std::collections::BTreeSet;
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
+use quote::format_ident;
 use quote::quote;
 use quote::ToTokens;
 use rusty_lr_core::HashSet;
@@ -714,17 +715,7 @@ impl Grammar {
                 // rename all '@var_name' to '__rustylr_location_{var_name}'
                 // if reduce_action is not defined, check if it can be auto-generated
                 let reduce_action = if let Some(reduce_action) = rule.reduce_action {
-                    let mut varnames: HashSet<Ident> = HashSet::default();
-                    for token in &tokens {
-                        if let Some(mapto) = &token.mapto {
-                            varnames.insert(mapto.clone());
-                        }
-                    }
-
-                    fn rename_tokenstream_recursive(
-                        ts: TokenStream,
-                        varnames: &HashSet<Ident>,
-                    ) -> TokenStream {
+                    fn rename_tokenstream_recursive(ts: TokenStream) -> TokenStream {
                         let mut new_ts = TokenStream::new();
                         let mut it = ts.into_iter().peekable();
                         while let Some(token) = it.next() {
@@ -732,28 +723,35 @@ impl Grammar {
                                 proc_macro2::TokenTree::Punct(punct) => {
                                     if punct.as_char() == '@' {
                                         // found '@', check next token
-                                        if let Some(proc_macro2::TokenTree::Ident(ident)) =
-                                            it.peek()
-                                        {
-                                            // check if this ident is in varnames
-                                            if varnames.contains(ident) {
+                                        match it.peek() {
+                                            Some(proc_macro2::TokenTree::Ident(ident)) => {
                                                 // rename to '__rustylr_location_{varname}'
-                                                let new_ident = Ident::new(
-                                                    &format!("__rustylr_location_{}", ident),
-                                                    ident.span(),
-                                                );
+                                                let new_ident =
+                                                    format_ident!("__rustylr_location_{}", ident);
                                                 new_ts.extend([proc_macro2::TokenTree::Ident(
                                                     new_ident,
                                                 )]);
                                                 it.next(); // consume the ident
-                                            } else {
-                                                // no match, just keep the punct
+                                            }
+                                            Some(proc_macro2::TokenTree::Punct(next_punct)) => {
+                                                if next_punct.as_char() == '$' {
+                                                    // found '@$', rename to '__rustylr_location0'
+                                                    new_ts.extend([proc_macro2::TokenTree::Ident(
+                                                        format_ident!("__rustylr_location0"),
+                                                    )]);
+                                                    it.next(); // consume the next punct
+                                                } else {
+                                                    // just a punct
+                                                    new_ts.extend([proc_macro2::TokenTree::Punct(
+                                                        punct,
+                                                    )]);
+                                                }
+                                            }
+                                            _ => {
+                                                // just a punct, no ident after it
                                                 new_ts
                                                     .extend([proc_macro2::TokenTree::Punct(punct)]);
                                             }
-                                        } else {
-                                            // just a punct, no ident after it
-                                            new_ts.extend([proc_macro2::TokenTree::Punct(punct)]);
                                         }
                                     } else {
                                         new_ts.extend([proc_macro2::TokenTree::Punct(punct)]);
@@ -762,7 +760,7 @@ impl Grammar {
                                 proc_macro2::TokenTree::Group(group) => {
                                     let new_group = proc_macro2::Group::new(
                                         group.delimiter(),
-                                        rename_tokenstream_recursive(group.stream(), varnames),
+                                        rename_tokenstream_recursive(group.stream()),
                                     );
                                     let new_group = proc_macro2::TokenTree::Group(new_group);
                                     new_ts.extend([new_group]);
@@ -775,7 +773,7 @@ impl Grammar {
                         new_ts
                     }
 
-                    let new_reduce_action = rename_tokenstream_recursive(reduce_action, &varnames);
+                    let new_reduce_action = rename_tokenstream_recursive(reduce_action);
                     Some(ReduceAction::Custom(new_reduce_action))
                 } else {
                     // reduce action is not defined,
