@@ -733,11 +733,11 @@ impl Grammar {
                             match token {
                                 proc_macro2::TokenTree::Punct(punct) => {
                                     if punct.as_char() == '@' {
-                                        println!("found '@' in reduce action, checking next token");
+                                        // found '@', check next token
                                         if let Some(proc_macro2::TokenTree::Ident(ident)) =
                                             it.peek()
                                         {
-                                            println!("found ident after '@': {}", ident);
+                                            // check if this ident is in varnames
                                             if varnames.contains(ident) {
                                                 // rename to '__rustylr_location_{varname}'
                                                 let new_ident = Ident::new(

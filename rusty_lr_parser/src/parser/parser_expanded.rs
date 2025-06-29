@@ -477,19 +477,29 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut ident) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut ident), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant3(mut RuleType) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant3(mut RuleType), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut colon) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut colon), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant4(mut RuleLines) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant4(mut RuleLines), __rustylr_location3) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location4) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant2({
@@ -518,7 +528,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut parengroup) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut parengroup), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant3({
@@ -546,13 +558,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant4(mut RuleLines) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant4(mut RuleLines), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut pipe) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut pipe), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant5(mut RuleLine) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant5(mut RuleLine), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant4({
@@ -572,7 +590,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant5(mut RuleLine) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant5(mut RuleLine), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant4({ vec![RuleLine] }))
@@ -585,13 +605,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant20(mut TokenMapped) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant20(mut TokenMapped), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant21(mut PrecDef) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant21(mut PrecDef), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant3(mut Action) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant3(mut Action), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant5({
@@ -614,7 +640,8 @@ impl GrammarTokenData {
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         __rustylr_args.pop();
-        let GrammarTokenData::Variant15(mut IdentOrLiteral) = __rustylr_args.pop().unwrap().0
+        let (GrammarTokenData::Variant15(mut IdentOrLiteral), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
         else {
             unreachable!()
         };
@@ -631,7 +658,9 @@ impl GrammarTokenData {
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
         __rustylr_args.pop();
-        let GrammarTokenData::Terminals(mut literal) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut literal), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant6({
@@ -649,7 +678,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant10(mut Pattern) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant10(mut Pattern), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant7({ (None, Pattern) }))
@@ -662,13 +693,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut ident) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut ident), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut equal) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut equal), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant10(mut Pattern) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant10(mut Pattern), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant7({
@@ -686,7 +723,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut ident) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut ident), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant8({
@@ -704,13 +743,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut first) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut first), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut minus) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut minus), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut last) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut last), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant8({
@@ -731,7 +776,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut literal) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut literal), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant8({
@@ -749,13 +796,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut first) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut first), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut minus) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut minus), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut last) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut last), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant8({
@@ -776,17 +829,24 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut lbracket) = __rustylr_args.pop().unwrap().0 else {
-            unreachable!()
-        };
-        let GrammarTokenData::Variant22(mut caret) = __rustylr_args.pop().unwrap().0 else {
-            unreachable!()
-        };
-        let GrammarTokenData::Variant23(mut TerminalSetItem) = __rustylr_args.pop().unwrap().0
+        let (GrammarTokenData::Terminals(mut lbracket), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
         else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut rbracket) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant22(mut caret), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
+        let (GrammarTokenData::Variant23(mut TerminalSetItem), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
+        let (GrammarTokenData::Terminals(mut rbracket), __rustylr_location3) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant9({
@@ -812,7 +872,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut dot) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut dot), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant9({
@@ -833,7 +895,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut ident) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut ident), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
@@ -851,10 +915,14 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant10(mut Pattern) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant10(mut Pattern), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut plus) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut plus), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
@@ -872,10 +940,14 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant10(mut Pattern) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant10(mut Pattern), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut star) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut star), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
@@ -893,10 +965,14 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant10(mut Pattern) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant10(mut Pattern), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut question) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut question), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
@@ -914,10 +990,14 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant10(mut Pattern) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant10(mut Pattern), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut exclamation) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut exclamation), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
@@ -935,7 +1015,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant9(mut TerminalSet) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant9(mut TerminalSet), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
@@ -950,13 +1032,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant10(mut p1) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant10(mut p1), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut slash) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut slash), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant10(mut lh) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant10(mut lh), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
@@ -971,13 +1059,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut lparen) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut lparen), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant24(mut Pattern) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant24(mut Pattern), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut rparen) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut rparen), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
@@ -998,7 +1092,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut literal) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut literal), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
@@ -1016,13 +1112,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant10(mut p1) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant10(mut p1), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut minus) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut minus), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant10(mut p2) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant10(mut p2), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant10({
@@ -1037,7 +1139,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut bracegroup) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut bracegroup), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant3({
@@ -1065,16 +1169,24 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut token) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut token), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut ident) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut ident), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant12(mut RustCode) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant12(mut RustCode), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location3) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant11({
@@ -1092,7 +1204,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant25(mut t) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant25(mut t), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant12({
@@ -1111,13 +1225,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut start) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut start), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut ident) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut ident), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant13({
@@ -1135,13 +1255,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut eofdef) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut eofdef), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant12(mut RustCode) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant12(mut RustCode), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant14({ (eofdef.span(), RustCode) }))
@@ -1154,13 +1280,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut tokentype) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut tokentype), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant12(mut RustCode) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant12(mut RustCode), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant14({
@@ -1175,13 +1307,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut userdata) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut userdata), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant12(mut RustCode) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant12(mut RustCode), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant14({ (userdata.span(), RustCode) }))
@@ -1194,7 +1332,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut ident) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut ident), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant15({
@@ -1212,7 +1352,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut literal) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut literal), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant15({
@@ -1230,7 +1372,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut left) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut left), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant16({ ReduceType::Left }))
@@ -1243,7 +1387,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut right) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut right), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant16({ ReduceType::Right }))
@@ -1256,14 +1402,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant16(mut reducetype) = __rustylr_args.pop().unwrap().0 else {
-            unreachable!()
-        };
-        let GrammarTokenData::Variant18(mut IdentOrLiteral) = __rustylr_args.pop().unwrap().0
+        let (GrammarTokenData::Variant16(mut reducetype), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
         else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant18(mut IdentOrLiteral), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
+        let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant17({
@@ -1278,13 +1429,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut errortype) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut errortype), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant12(mut RustCode) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant12(mut RustCode), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant14({
@@ -1299,13 +1456,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut moduleprefix) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut moduleprefix), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant12(mut RustCode) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant12(mut RustCode), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant14({
@@ -1320,13 +1483,19 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut trace) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut trace), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant25(mut ident) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant25(mut ident), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut semicolon) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location2) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant19({
@@ -1349,7 +1518,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant2(mut Rule) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant2(mut Rule), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         {
@@ -1365,7 +1536,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant11(mut TokenDef) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant11(mut TokenDef), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         {
@@ -1381,7 +1554,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant13(mut StartDef) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant13(mut StartDef), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         {
@@ -1397,7 +1572,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant14(mut EofDef) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant14(mut EofDef), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         {
@@ -1413,7 +1590,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant14(mut TokenTypeDef) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant14(mut TokenTypeDef), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         {
@@ -1429,7 +1608,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant14(mut UserDataDef) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant14(mut UserDataDef), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         {
@@ -1445,7 +1626,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant17(mut ReduceDef) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant17(mut ReduceDef), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         {
@@ -1462,7 +1645,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant14(mut ErrorDef) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant14(mut ErrorDef), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         {
@@ -1478,7 +1663,8 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant14(mut ModulePrefixDef) = __rustylr_args.pop().unwrap().0
+        let (GrammarTokenData::Variant14(mut ModulePrefixDef), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
         else {
             unreachable!()
         };
@@ -1523,7 +1709,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant18(mut Precedence) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant18(mut Precedence), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         {
@@ -1567,7 +1755,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant19(mut Trace) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant19(mut Trace), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         {
@@ -1583,7 +1773,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant12(mut Filter) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant12(mut Filter), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         {
@@ -1613,7 +1805,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant7(mut A) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant7(mut A), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant20({ vec![A] }))
@@ -1626,10 +1820,14 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant20(mut Ap) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant20(mut Ap), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant7(mut A) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant7(mut A), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant20({
@@ -1655,7 +1853,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant6(mut A) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant6(mut A), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant21({ vec![A] }))
@@ -1668,10 +1868,14 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant21(mut Ap) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant21(mut Ap), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant6(mut A) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant6(mut A), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant21({
@@ -1697,7 +1901,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut A) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut A), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant22(Some(A)))
@@ -1720,7 +1926,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant8(mut A) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant8(mut A), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant23({ vec![A] }))
@@ -1733,10 +1941,14 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant23(mut Ap) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant23(mut Ap), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant8(mut A) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant8(mut A), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant23({
@@ -1762,7 +1974,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant10(mut A) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant10(mut A), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant24({ vec![A] }))
@@ -1775,10 +1989,14 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant24(mut Ap) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant24(mut Ap), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant10(mut A) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant10(mut A), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant24({
@@ -1794,7 +2012,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut A) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut A), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant25({ vec![A] }))
@@ -1807,10 +2027,14 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant25(mut Ap) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant25(mut Ap), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut A) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut A), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant25({
@@ -1826,7 +2050,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant15(mut A) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant15(mut A), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant18({ vec![A] }))
@@ -1839,10 +2065,14 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant18(mut Ap) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant18(mut Ap), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Variant15(mut A) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant15(mut A), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant18({
@@ -1858,7 +2088,9 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut A) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut A), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant25({ vec![A] }))
@@ -1871,10 +2103,14 @@ impl GrammarTokenData {
         lookahead: &Lexed,
         data: &mut GrammarArgs,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant25(mut Ap) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Variant25(mut Ap), __rustylr_location0) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
-        let GrammarTokenData::Terminals(mut A) = __rustylr_args.pop().unwrap().0 else {
+        let (GrammarTokenData::Terminals(mut A), __rustylr_location1) =
+            __rustylr_args.pop().unwrap()
+        else {
             unreachable!()
         };
         Ok(GrammarTokenData::Variant25({
