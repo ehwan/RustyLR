@@ -664,6 +664,7 @@ impl Grammar {
             let mut rule_lines = Vec::new();
             for rule in rules.rule_lines.into_iter() {
                 let mut tokens = Vec::with_capacity(rule.tokens.len());
+                let mut patterns = Vec::with_capacity(rule.tokens.len());
                 for (mapto, pattern) in rule.tokens.into_iter() {
                     let (begin_span, end_span) = pattern.span_pair();
                     let pattern = pattern.into_pattern(&mut grammar, false)?;
@@ -676,6 +677,7 @@ impl Grammar {
                         begin_span,
                         end_span,
                     });
+                    patterns.push(pattern_rule);
                 }
 
                 let prec = if let Some(prec) = rule.prec {
@@ -710,6 +712,7 @@ impl Grammar {
                 };
 
                 // rename all '@var_name' to '__rustylr_location_{var_name}'
+                // if reduce_action is not defined, check if it can be auto-generated
                 let reduce_action = if let Some(reduce_action) = rule.reduce_action {
                     let mut varnames: HashSet<Ident> = HashSet::default();
                     for token in &tokens {
@@ -775,7 +778,46 @@ impl Grammar {
                     let new_reduce_action = rename_tokenstream_recursive(reduce_action, &varnames);
                     Some(ReduceAction::Custom(new_reduce_action))
                 } else {
-                    None
+                    // reduce action is not defined,
+
+                    // if ruletype is defined, reduce action must be defined too
+                    if rules.typename.is_some() {
+                        // check for special case:
+                        // only one token in this rule have <RuleType> defined (include terminal)
+                        // for example,
+                        // rule: A B C D
+                        // and only B has <RuleType> defined,
+                        // auto-generated reduce action { B } will be used.
+                        let mut unique_token_idx = None;
+                        for (idx, pattern) in patterns.iter().enumerate() {
+                            if pattern.ruletype.is_some() {
+                                if unique_token_idx.is_some() {
+                                    unique_token_idx = None;
+                                    break;
+                                } else {
+                                    unique_token_idx = Some(idx);
+                                }
+                            }
+                        }
+                        if let Some(unique_mapto_idx) = unique_token_idx {
+                            Some(ReduceAction::Identity(unique_mapto_idx))
+                        } else {
+                            let span = if tokens.is_empty() {
+                                (rule.separator_span, rule.separator_span)
+                            } else {
+                                let first = rule.separator_span;
+                                let last = tokens.last().unwrap().end_span;
+                                (first, last)
+                            };
+
+                            return Err(ParseError::RuleTypeDefinedButActionNotDefined {
+                                name: rules.name.clone(),
+                                span,
+                            });
+                        }
+                    } else {
+                        None
+                    }
                 };
 
                 rule_lines.push(Rule {
@@ -862,48 +904,6 @@ impl Grammar {
             }
         }
 
-        // check reduce action
-        for nonterm in &mut grammar.nonterminals {
-            if nonterm.ruletype.is_some() {
-                // typename is defined, reduce action must be defined
-                for rule in nonterm.rules.iter_mut() {
-                    if rule.reduce_action.is_none() {
-                        // action is not defined,
-
-                        // check for special case:
-                        // only one token in this rule have <RuleType> defined (include terminal)
-                        // the unique value will be pushed to stack
-                        let mut unique_mapto_idx = None;
-                        for (idx, token) in rule.tokens.iter().enumerate() {
-                            if token.mapto.is_some() {
-                                if unique_mapto_idx.is_some() {
-                                    unique_mapto_idx = None;
-                                    break;
-                                } else {
-                                    unique_mapto_idx = Some(idx);
-                                }
-                            }
-                        }
-                        if let Some(unique_mapto_idx) = unique_mapto_idx {
-                            rule.reduce_action = Some(ReduceAction::Identity(unique_mapto_idx));
-                        } else {
-                            let span = if rule.tokens.is_empty() {
-                                (rule.separator_span, rule.separator_span)
-                            } else {
-                                let first = rule.separator_span;
-                                let last = rule.tokens.last().unwrap().end_span;
-                                (first, last)
-                            };
-
-                            return Err(ParseError::RuleTypeDefinedButActionNotDefined {
-                                name: nonterm.name.clone(),
-                                span,
-                            });
-                        }
-                    }
-                }
-            }
-        }
         // set operator for each rule
         for nonterm in &mut grammar.nonterminals {
             use rusty_lr_core::builder::Operator;
