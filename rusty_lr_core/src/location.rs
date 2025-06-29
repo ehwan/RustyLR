@@ -1,6 +1,7 @@
 /// trait for token location in the input stream
 pub trait Location: Clone + Default {
-    /// returns the smallest range that covers both locations
+    /// merge two locations and return the smallest range that covers both locations.
+    /// `self` is guaranteed to be left side of `other`.
     fn merge(self, other: Self) -> Self;
 
     /// create a new zero-length location that is next to the current location
