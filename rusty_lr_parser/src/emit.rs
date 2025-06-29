@@ -855,7 +855,11 @@ impl Grammar {
         let user_data_parameter_name =
             Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
         let user_data_typename = &self.userdata_typename;
-        let location_typename = quote! { #module_prefix::DefaultLocation };
+        let location_typename = self
+            .location_typename
+            .as_ref()
+            .cloned()
+            .unwrap_or_else(|| quote! { #module_prefix::DefaultLocation });
 
         // variant name for terminal symbol
         let terminal_variant_name = Ident::new("Terminals", Span::call_site());

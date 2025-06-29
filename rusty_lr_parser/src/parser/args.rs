@@ -502,6 +502,7 @@ pub struct GrammarArgs {
     pub traces: Vec<Ident>,
     pub filter: Option<TokenStream>,
     pub compiled: bool,
+    pub location_typename: Option<TokenStream>,
 }
 
 impl Default for GrammarArgs {
@@ -524,6 +525,7 @@ impl Default for GrammarArgs {
             traces: Vec::new(),
             filter: None,
             compiled: true,
+            location_typename: None,
         }
     }
 }

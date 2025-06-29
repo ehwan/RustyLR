@@ -146,6 +146,9 @@ pub struct Grammar {
 
     /// switch between compile-time and runtime table generation
     pub compiled: bool,
+
+    /// type for location
+    pub location_typename: Option<TokenStream>,
 }
 
 impl Grammar {
@@ -387,6 +390,7 @@ impl Grammar {
             rules_sorted: Vec::new(),
 
             compiled: grammar_args.compiled,
+            location_typename: grammar_args.location_typename,
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";
