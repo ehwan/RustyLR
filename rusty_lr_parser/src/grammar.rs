@@ -670,14 +670,9 @@ impl Grammar {
                     let pattern_rule =
                         pattern.to_token(&mut grammar, &mut pattern_map, (begin_span, end_span))?;
 
-                    let mapto = match &pattern_rule.ruletype_map {
-                        Some((_, mapto_)) => mapto.or(Some(mapto_.clone())),
-                        None => None,
-                    };
-
                     tokens.push(TokenMapped {
                         token: pattern_rule.token,
-                        mapto,
+                        mapto: mapto.or_else(|| pattern_rule.mapto.clone()),
                         begin_span,
                         end_span,
                     });
