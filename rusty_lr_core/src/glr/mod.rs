@@ -97,7 +97,10 @@ where
 /// From `node`, merge last `len` locations into one location.
 /// if `len` is 0, returns the zero-length location right after the last len'th element in `stack`,
 /// if `stack` is empty at that point, returns the default location.
-fn merge_locations<Data: TokenData>(node: &Rc<Node<Data>>, len: usize) -> Data::Location {
+pub(crate) fn merge_locations<Data: TokenData>(
+    node: &Rc<Node<Data>>,
+    len: usize,
+) -> Data::Location {
     use crate::Location;
     if len == 0 {
         node.data
