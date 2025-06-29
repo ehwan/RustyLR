@@ -927,10 +927,10 @@ impl Grammar {
                                     let location_varname =
                                         format_ident!("__rustylr_location_{}", mapto);
                                     extract_token_data_from_args.extend(quote! {
-                                    let (#token_data_typename::#terminal_variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
-                                        unreachable!()
-                                    };
-                                });
+                                        let (#token_data_typename::#terminal_variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
+                                            unreachable!()
+                                        };
+                                    });
                                 }
                                 None => {
                                     extract_token_data_from_args.extend(quote! {
@@ -939,31 +939,22 @@ impl Grammar {
                                 }
                             },
                             Token::NonTerm(nonterm_idx) => {
-                                match &self.nonterminals[*nonterm_idx].ruletype {
-                                    Some(_) => {
+                                match &token.mapto {
+                                    Some(mapto) => {
+                                        let location_varname =
+                                            format_ident!("__rustylr_location_{}", mapto);
                                         let variant_name = &variant_names_for_nonterm[*nonterm_idx];
-                                        match &token.mapto {
-                                            Some(mapto) => {
-                                                let location_varname =
-                                                    format_ident!("__rustylr_location_{}", mapto);
-                                                if variant_name == &empty_ruletype_variant_name {
-                                                    extract_token_data_from_args.extend(quote! {
-                                                        let (_, #location_varname) = __rustylr_args.pop().unwrap();
-                                                    });
-                                                } else {
-                                                    // extract token data from args
-                                                    extract_token_data_from_args.extend(quote! {
-                                                        let (#token_data_typename::#variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
-                                                            unreachable!()
-                                                        };
-                                                    });
-                                                }
-                                            }
-                                            None => {
-                                                extract_token_data_from_args.extend(quote! {
-                                                    __rustylr_args.pop();
-                                                });
-                                            }
+                                        if variant_name == &empty_ruletype_variant_name {
+                                            extract_token_data_from_args.extend(quote! {
+                                                let (_, #location_varname) = __rustylr_args.pop().unwrap();
+                                            });
+                                        } else {
+                                            // extract token data from args
+                                            extract_token_data_from_args.extend(quote! {
+                                                let (#token_data_typename::#variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
+                                                    unreachable!()
+                                                };
+                                            });
                                         }
                                     }
                                     None => {
