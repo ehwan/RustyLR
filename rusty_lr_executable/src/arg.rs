@@ -41,4 +41,16 @@ pub struct Args {
     /// do not print the backtrace rules in current state when a conflict occurs
     #[arg(short = 'b', long, default_value = "false")]
     pub no_backtrace: bool,
+
+    /// override the written code and set generated parser use GLR parsing algorithm
+    #[arg(long)]
+    pub glr: Option<bool>,
+
+    /// override the written code and set parser table to be runtime-calculated
+    #[arg(long)]
+    pub runtime: Option<bool>,
+
+    /// override the written code and set generated parser table to use dense arrays
+    #[arg(long)]
+    pub dense: Option<bool>,
 }

@@ -64,6 +64,11 @@ pub struct Builder {
 
     /// if true, an executable called this function
     pub is_executable: bool,
+
+    /// if Some, override the settings with these values
+    glr: Option<bool>,
+    runtime: Option<bool>,
+    dense: Option<bool>,
 }
 
 impl Builder {
@@ -76,7 +81,27 @@ impl Builder {
             verbose_optimization: false,
             print_backtrace: true,
             is_executable: false,
+
+            glr: None,
+            runtime: None,
+            dense: None,
         }
+    }
+
+    /// override the settings
+    pub fn glr(&mut self, glr: bool) -> &mut Self {
+        self.glr = Some(glr);
+        self
+    }
+    /// override the settings
+    pub fn runtime(&mut self, runtime: bool) -> &mut Self {
+        self.runtime = Some(runtime);
+        self
+    }
+    /// override the settings
+    pub fn dense(&mut self, dense: bool) -> &mut Self {
+        self.dense = Some(dense);
+        self
     }
 
     /// set input file
@@ -457,6 +482,16 @@ impl Builder {
                     .expect("Failed to write to stderr");
                 return Err(diag.message);
             }
+        }
+
+        if let Some(glr) = self.glr {
+            grammar_args.glr = glr;
+        }
+        if let Some(runtime) = self.runtime {
+            grammar_args.compiled = !runtime;
+        }
+        if let Some(dense) = self.dense {
+            grammar_args.dense = dense;
         }
 
         // parse lines
