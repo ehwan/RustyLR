@@ -32,6 +32,15 @@ fn main() {
     if args.no_backtrace {
         builder.no_print_backtrace();
     }
+    if let Some(glr) = args.glr {
+        builder.glr(glr);
+    }
+    if let Some(runtime) = args.runtime {
+        builder.runtime(runtime);
+    }
+    if let Some(dense) = args.dense {
+        builder.dense(dense);
+    }
 
     let out = match builder.build_impl() {
         Ok(out) => out,
