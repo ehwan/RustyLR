@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Booststrap rusty_lr_parser/src/parser/parser.rs with different configurations
+# Bootstrap rusty_lr_parser/src/parser/parser.rs with different configurations
 # and check if the output files are identical.
 
 compare_files() {
