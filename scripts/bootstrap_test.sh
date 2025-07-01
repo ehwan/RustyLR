@@ -39,30 +39,27 @@ compare_files() {
 script_dir="$(dirname "$0")"
 rustylr_path="$(realpath "$script_dir/..")"
 
+process_and_compare() {
+    local config="$1"
+    cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs $config > /dev/null
+    mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
+    cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs $config > /dev/null
+    compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
+}
+
 echo "RustyLR path: $rustylr_path"
 
 echo "Setting GLR = true"
-cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --glr true > /dev/null
-mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
-cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --glr true > /dev/null
-compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
-if [ $? -ne 0 ]; then
-    exit 1
-fi
+process_and_compare "--glr true"
 
 echo "Setting GLR = false"
-cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --glr false > /dev/null
-mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
-cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --glr false > /dev/null
-compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
-if [ $? -ne 0 ]; then
-    exit 1
-fi
+process_and_compare "--glr false"
 
 echo "Setting Runtime = true"
-cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --runtime true > /dev/null
-mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
-cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --runtime true > /dev/null
+process_and_compare "--runtime true"
 compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
 if [ $? -ne 0 ]; then
     exit 1
