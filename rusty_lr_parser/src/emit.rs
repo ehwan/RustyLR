@@ -26,6 +26,12 @@ impl Grammar {
         let context_struct_name = format_ident!("{}Context", start_rule_name);
         let token_data_typename = format_ident!("{}TokenData", start_rule_name);
 
+        let state_structname = if self.emit_dense {
+            format_ident!("DenseState")
+        } else {
+            format_ident!("SparseState")
+        };
+
         if self.glr {
             // count the number of rules
             // and calculate the integral type for rule index -> u8, u16, u32, usize ...
@@ -37,12 +43,6 @@ impl Grammar {
                 quote! { #module_prefix::stackvec::SmallVecU32 }
             } else {
                 quote! { #module_prefix::stackvec::SmallVecUsize }
-            };
-
-            let state_structname = if self.emit_dense {
-                format_ident!("DenseState")
-            } else {
-                format_ident!("SparseState")
             };
 
             stream.extend(
@@ -62,12 +62,6 @@ impl Grammar {
             }
             );
         } else {
-            let state_structname = if self.emit_dense {
-                format_ident!("DenseState")
-            } else {
-                format_ident!("SparseState")
-            };
-
             stream.extend(
         quote! {
                 /// type alias for `Context`
