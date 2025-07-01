@@ -60,44 +60,16 @@ process_and_compare "--glr false"
 
 echo "Setting Runtime = true"
 process_and_compare "--runtime true"
-compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
-if [ $? -ne 0 ]; then
-    exit 1
-fi
 
 echo "Setting Runtime = false"
-cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --runtime false > /dev/null
-mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
-cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --runtime false > /dev/null
-compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
-if [ $? -ne 0 ]; then
-    exit 1
-fi
+process_and_compare "--runtime false"
 
 echo "Setting Dense = true"
-cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --dense true > /dev/null
-mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
-cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --dense true > /dev/null
-compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
-if [ $? -ne 0 ]; then
-    exit 1
-fi
+process_and_compare "--dense true"
 
 echo "Setting Dense = false"
-cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --dense false > /dev/null
-mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
-cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --dense false > /dev/null
-compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
-if [ $? -ne 0 ]; then
-    exit 1
-fi
+process_and_compare "--dense false"
 
-# boostrap itself with normal configuration
-cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs > /dev/null
-mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
-cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs > /dev/null
-compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
-if [ $? -ne 0 ]; then
-    exit 1
-fi
+echo "Normal configuration"
+process_and_compare ""
 mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
