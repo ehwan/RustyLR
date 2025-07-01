@@ -1,4 +1,5 @@
 name: Bootstrap Test
+description: Tests parser bootstrapping with different configurations to ensure output consistency
 
 on:
   pull_request:
@@ -16,8 +17,9 @@ jobs:
 
     - name: Run bootstrap test
       run: |
-        chmod +x scripts/bootstrap_test.sh
-        ./scripts/bootstrap_test.sh
+        cd scripts
+        chmod +x ./bootstrap_test.sh
+        ./bootstrap_test.sh
         if [ $? -ne 0 ]; then
             exit 1
         fi
