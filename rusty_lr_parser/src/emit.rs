@@ -40,7 +40,7 @@ impl Grammar {
             };
 
             let state_structname = if self.emit_dense {
-                format_ident!("DenseState")
+                format_ident!("enseState")
             } else {
                 format_ident!("SparseState")
             };
