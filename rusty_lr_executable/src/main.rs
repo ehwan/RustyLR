@@ -62,8 +62,6 @@ fn main() {
 // This generated code is targeting rusty_lr version {major}.{minor}.{patch}.
 // There might be a build error if the version is not matched.
 //
-// Input file: {}
-// Output file: {}
 // {:=^80}
 {}
 // {:=^80}
@@ -76,8 +74,6 @@ fn main() {
         "#,
         this_name,
         this_version,
-        args.input_file,
-        args.output_file.clone(),
         "User Codes Begin",
         out.user_stream,
         "User Codes End",
