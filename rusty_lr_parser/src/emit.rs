@@ -27,7 +27,7 @@ impl Grammar {
         let token_data_typename = format_ident!("{}TokenData", start_rule_name);
 
         let state_structname = if self.emit_dense {
-            format_ident!("enseState")
+            format_ident!("DenseState")
         } else {
             format_ident!("SparseState")
         };
