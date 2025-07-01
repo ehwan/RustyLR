@@ -46,37 +46,61 @@ cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" 
 mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
 cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --glr true > /dev/null
 compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 
 echo "Setting GLR = false"
 cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --glr false > /dev/null
 mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
 cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --glr false > /dev/null
 compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 
 echo "Setting Runtime = true"
 cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --runtime true > /dev/null
 mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
 cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --runtime true > /dev/null
 compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 
 echo "Setting Runtime = false"
 cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --runtime false > /dev/null
 mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
 cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --runtime false > /dev/null
 compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 
 echo "Setting Dense = true"
 cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --dense true > /dev/null
 mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
 cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --dense true > /dev/null
 compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 
 echo "Setting Dense = false"
 cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --dense false > /dev/null
 mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
 cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs --dense false > /dev/null
 compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 
 # boostrap itself with normal configuration
 cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs > /dev/null
+mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
+cargo run --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs > /dev/null
+compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
