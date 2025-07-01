@@ -2,8 +2,6 @@
 // This generated code is targeting rusty_lr version 3.21.0.
 // There might be a build error if the version is not matched.
 //
-// Input file: ../rusty_lr_parser/src/parser/parser.rs
-// Output file: out.tab.rs
 // ================================User Codes Begin================================
 use crate::parser::args::GrammarArgs;
 use crate::parser::args::IdentOrLiteral;

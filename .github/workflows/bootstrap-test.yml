@@ -1,0 +1,24 @@
+name: Bootstrap Test
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  bootstrap-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run bootstrap test
+      run: |
+        chmod +x scripts/bootstrap_test.sh
+        ./scripts/bootstrap_test.sh
+        if [ $? -ne 0 ]; then
+            exit 1
+        fi
+      working-directory: ${{ github.workspace }}
