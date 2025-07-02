@@ -30,6 +30,14 @@ fn main() {
                 return;
             }
         }
+
+        let (terms, nonterms) = context.expected_token_str(&parser);
+        let terms = terms.map(String::from).collect::<Vec<_>>().join(", ");
+        let nonterms = nonterms.map(String::from).collect::<Vec<_>>().join(", ");
+        println!(
+            "Expected tokens: [{}], non-terminals: [{}]",
+            terms, nonterms
+        );
     }
     // res = value of start symbol ( E(i32) )
     let res = context.accept().unwrap();
