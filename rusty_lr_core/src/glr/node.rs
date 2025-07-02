@@ -373,7 +373,6 @@ impl<Data: TokenData> Node<Data> {
         parser: &P,
         ret: &mut std::collections::BTreeSet<crate::Token<usize, Data::NonTerm>>,
     ) where
-        Data::Term: Ord + Copy,
         Data::NonTerm: Ord + Copy + std::hash::Hash,
     {
         Self::expected_token_impl(self, parser, ret);
@@ -384,7 +383,6 @@ impl<Data: TokenData> Node<Data> {
         parser: &'a P,
         ret: &mut std::collections::BTreeSet<crate::Token<usize, Data::NonTerm>>,
     ) where
-        Data::Term: Ord + Copy,
         Data::NonTerm: Ord + Copy + std::hash::Hash,
     {
         let s = self.state;

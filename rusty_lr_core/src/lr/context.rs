@@ -93,7 +93,6 @@ impl<Data: TokenData> Context<Data> {
         parser: &P,
     ) -> BTreeSet<crate::Token<usize, Data::NonTerm>>
     where
-        Data::Term: Ord + Copy,
         Data::NonTerm: Ord + Copy + Hash,
     {
         let mut ret = BTreeSet::new();
@@ -110,7 +109,6 @@ impl<Data: TokenData> Context<Data> {
         Item = crate::Token<impl IntoIterator<Item = P::TerminalClassElement> + 'a, &'static str>,
     > + 'a
     where
-        Data::Term: Ord + Copy,
         Data::NonTerm: Ord + Copy + Hash + crate::nonterminal::NonTerminal + 'a,
     {
         use crate::nonterminal::NonTerminal;
@@ -128,7 +126,6 @@ impl<Data: TokenData> Context<Data> {
         states: &mut Vec<usize>,
         ret: &mut BTreeSet<crate::Token<usize, Data::NonTerm>>,
     ) where
-        Data::Term: Ord + Copy,
         Data::NonTerm: Ord + Copy + Hash,
     {
         let s = *states.last().unwrap();
