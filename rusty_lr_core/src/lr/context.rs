@@ -87,6 +87,54 @@ impl<Data: TokenData> Context<Data> {
         self.tree_stack
     }
 
+    pub fn expected_token<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &'a P,
+    ) -> BTreeSet<crate::Token<&'static str, Data::NonTerm>>
+    where
+        Data::Term: Ord + Copy,
+        Data::NonTerm: Ord + Copy + Hash,
+    {
+        let mut ret = BTreeSet::new();
+        let mut states = self.state_stack.clone();
+        self.expected_token_impl(parser, &mut states, &mut ret);
+
+        ret
+    }
+
+    fn expected_token_impl<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &'a P,
+        states: &mut Vec<usize>,
+        ret: &mut BTreeSet<crate::Token<&'static str, Data::NonTerm>>,
+    ) where
+        Data::Term: Ord + Copy,
+        Data::NonTerm: Ord + Copy + Hash,
+    {
+        let s = *states.last().unwrap();
+        let rules = parser.get_states()[s].get_rules();
+        let mut reduce_nonterms = BTreeSet::new();
+        for rule in rules.iter() {
+            let prod_rule = &parser.get_rules()[rule.rule];
+            if let Some(&next_token) = prod_rule.rule.get(rule.shifted) {
+                ret.insert(next_token);
+            } else {
+                reduce_nonterms.insert((prod_rule.name, prod_rule.rule.len()));
+            }
+        }
+
+        for &(nonterm, len) in reduce_nonterms.iter() {
+            let mut popped_states = states.drain(states.len() - len..).collect::<Vec<_>>();
+            let last_state = *states.last().unwrap();
+            if let Some(next_state) = parser.get_states()[last_state].shift_goto_nonterm(&nonterm) {
+                states.push(next_state);
+                self.expected_token_impl(parser, states, ret);
+                states.pop();
+            }
+            states.append(&mut popped_states);
+        }
+    }
+
     /// Get expected tokens for next `feed()` call.
     pub fn expected<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
