@@ -113,24 +113,40 @@ impl<Data: TokenData> Context<Data> {
         self.into_nodes().map(|node| node.to_tree_list())
     }
 
-    /// Get expected tokens for next `feed()` call.
-    /// This could contain duplicate tokens.
-    pub fn expected<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &'a self,
-        parser: &'a P,
-    ) -> impl Iterator<Item = P::TerminalClassElement> + 'a {
-        self.nodes().flat_map(|node| node.expected(parser))
-    }
-    /// Get expected non-terminal tokens for next `feed()` call.
-    /// This could contain duplicate tokens.
-    pub fn expected_nonterm<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &'a self,
-        parser: &'a P,
-    ) -> impl Iterator<Item = Data::NonTerm> + 'a
+    /// Simulate parser and get next expected tokens for current context.
+    pub fn expected_token<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &P,
+    ) -> std::collections::BTreeSet<crate::Token<usize, Data::NonTerm>>
     where
-        Data::NonTerm: Copy,
+        Data::Term: Ord + Copy,
+        Data::NonTerm: Ord + Copy + Hash,
     {
-        self.nodes().flat_map(|node| node.expected_nonterm(parser))
+        let mut ret = std::collections::BTreeSet::new();
+        for node in self.nodes() {
+            Node::expected_token(node, parser, &mut ret);
+        }
+
+        ret
+    }
+    /// Same as `expected_token()`, but returns as printable set.
+    pub fn expected_token_str<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &'a P,
+    ) -> impl Iterator<
+        Item = crate::Token<impl IntoIterator<Item = P::TerminalClassElement> + 'a, &'static str>,
+    > + 'a
+    where
+        Data::Term: Ord + Copy,
+        Data::NonTerm: Ord + Copy + Hash + crate::nonterminal::NonTerminal + 'a,
+    {
+        use crate::nonterminal::NonTerminal;
+        self.expected_token(parser)
+            .into_iter()
+            .map(|token| match token {
+                crate::Token::Term(term) => crate::Token::Term(parser.get_terminals(term).unwrap()),
+                crate::Token::NonTerm(nonterm) => crate::Token::NonTerm(nonterm.as_str()),
+            })
     }
 
     /// Get set of `%trace` non-terminal symbols that current context is trying to parse.
