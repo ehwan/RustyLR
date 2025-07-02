@@ -87,56 +87,56 @@ impl<Data: TokenData> Context<Data> {
         self.tree_stack
     }
 
-    /// Simulate parser and get next expected tokens for current context.
+    /// Simulate parser and get next expected (terminals, non-terminals) for current context.
     pub fn expected_token<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> BTreeSet<crate::Token<usize, Data::NonTerm>>
+    ) -> (BTreeSet<usize>, BTreeSet<Data::NonTerm>)
     where
         Data::NonTerm: Ord + Copy + Hash,
     {
-        let mut ret = BTreeSet::new();
+        let mut terms = BTreeSet::new();
+        let mut nonterms = BTreeSet::new();
         let mut states = self.state_stack.clone();
-        self.expected_token_impl(parser, &mut states, &mut ret);
+        self.expected_token_impl(parser, &mut states, &mut terms, &mut nonterms);
 
-        ret
+        (terms, nonterms)
     }
-    /// Same as `expected_token()`, but returns as printable set.
+    /// Same as `expected_token()`, but returns as printable type.
     pub fn expected_token_str<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &'a P,
-    ) -> impl Iterator<
-        Item = crate::Token<impl IntoIterator<Item = P::TerminalClassElement> + 'a, &'static str>,
-    > + 'a
+    ) -> (
+        impl Iterator<Item = P::TerminalClassElement> + 'a,
+        impl Iterator<Item = &'static str> + 'a,
+    )
     where
         Data::NonTerm: Ord + Copy + Hash + crate::nonterminal::NonTerminal + 'a,
     {
         use crate::nonterminal::NonTerminal;
-        self.expected_token(parser)
-            .into_iter()
-            .map(|token| match token {
-                crate::Token::Term(term) => crate::Token::Term(parser.get_terminals(term).unwrap()),
-                crate::Token::NonTerm(nonterm) => crate::Token::NonTerm(nonterm.as_str()),
-            })
+        let (terms, nonterms) = self.expected_token(parser);
+        (
+            terms
+                .into_iter()
+                .flat_map(|term| parser.get_terminals(term).unwrap()),
+            nonterms.into_iter().map(|nonterm| nonterm.as_str()),
+        )
     }
 
     fn expected_token_impl<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &'a P,
         states: &mut Vec<usize>,
-        ret: &mut BTreeSet<crate::Token<usize, Data::NonTerm>>,
+        terms: &mut BTreeSet<usize>,
+        nonterms: &mut BTreeSet<Data::NonTerm>,
     ) where
         Data::NonTerm: Ord + Copy + Hash,
     {
         let s = *states.last().unwrap();
         let s = parser.get_states().get(s).expect("state must exist");
 
-        for term in s.expected_shift_term() {
-            ret.insert(crate::Token::Term(term));
-        }
-        for nonterm in s.expected_shift_nonterm() {
-            ret.insert(crate::Token::NonTerm(nonterm));
-        }
+        terms.extend(s.expected_shift_term());
+        nonterms.extend(s.expected_shift_nonterm());
 
         let mut reduce_nonterms = BTreeSet::new();
         for reduce_rule in s.expected_reduce_rule() {
@@ -148,7 +148,7 @@ impl<Data: TokenData> Context<Data> {
             let last_state = *states.last().unwrap();
             if let Some(next_state) = parser.get_states()[last_state].shift_goto_nonterm(&nonterm) {
                 states.push(next_state);
-                self.expected_token_impl(parser, states, ret);
+                self.expected_token_impl(parser, states, terms, nonterms);
                 states.pop();
             }
             states.append(&mut popped_states);

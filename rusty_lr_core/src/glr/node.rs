@@ -367,33 +367,20 @@ impl<Data: TokenData> Node<Data> {
         }
     }
 
-    /// Simulate parser and get next expected tokens for current context.
-    pub fn expected_token<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        self: &Rc<Self>,
-        parser: &P,
-        ret: &mut std::collections::BTreeSet<crate::Token<usize, Data::NonTerm>>,
-    ) where
-        Data::NonTerm: Ord + Copy + std::hash::Hash,
-    {
-        Self::expected_token_impl(self, parser, ret);
-    }
-
-    fn expected_token_impl<'a, P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    /// Simulate parser and get next expected (terminals, non-terminals) for current context.
+    pub fn expected_token<'a, P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         self: &Rc<Self>,
         parser: &'a P,
-        ret: &mut std::collections::BTreeSet<crate::Token<usize, Data::NonTerm>>,
+        terms: &mut std::collections::BTreeSet<usize>,
+        nonterms: &mut std::collections::BTreeSet<Data::NonTerm>,
     ) where
         Data::NonTerm: Ord + Copy + std::hash::Hash,
     {
         let s = self.state;
         let s = parser.get_states().get(s).expect("state must exist");
 
-        for term in s.expected_shift_term() {
-            ret.insert(crate::Token::Term(term));
-        }
-        for nonterm in s.expected_shift_nonterm() {
-            ret.insert(crate::Token::NonTerm(nonterm));
-        }
+        terms.extend(s.expected_shift_term());
+        nonterms.extend(s.expected_shift_nonterm());
 
         let mut reduce_nonterms = std::collections::BTreeSet::new();
         for reduce_rule in s.expected_reduce_rule() {
@@ -415,7 +402,7 @@ impl<Data: TokenData> Node<Data> {
                     tree: None,
                 };
                 let next_node = Rc::new(next_node);
-                Self::expected_token_impl(&next_node, parser, ret);
+                Self::expected_token(&next_node, parser, terms, nonterms);
             }
         }
     }

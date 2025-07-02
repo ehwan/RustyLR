@@ -113,38 +113,44 @@ impl<Data: TokenData> Context<Data> {
         self.into_nodes().map(|node| node.to_tree_list())
     }
 
-    /// Simulate parser and get next expected tokens for current context.
+    /// Simulate parser and get next expected (terminals, non-terminals) for current context.
     pub fn expected_token<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> std::collections::BTreeSet<crate::Token<usize, Data::NonTerm>>
+    ) -> (
+        std::collections::BTreeSet<usize>,
+        std::collections::BTreeSet<Data::NonTerm>,
+    )
     where
         Data::NonTerm: Ord + Copy + Hash,
     {
-        let mut ret = std::collections::BTreeSet::new();
+        let mut terms = std::collections::BTreeSet::new();
+        let mut nonterms = std::collections::BTreeSet::new();
         for node in self.nodes() {
-            Node::expected_token(node, parser, &mut ret);
+            Node::expected_token(node, parser, &mut terms, &mut nonterms);
         }
 
-        ret
+        (terms, nonterms)
     }
-    /// Same as `expected_token()`, but returns as printable set.
+    /// Same as `expected_token()`, but returns as printable type.
     pub fn expected_token_str<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &'a P,
-    ) -> impl Iterator<
-        Item = crate::Token<impl IntoIterator<Item = P::TerminalClassElement> + 'a, &'static str>,
-    > + 'a
+    ) -> (
+        impl Iterator<Item = P::TerminalClassElement> + 'a,
+        impl Iterator<Item = &'static str> + 'a,
+    )
     where
         Data::NonTerm: Ord + Copy + Hash + crate::nonterminal::NonTerminal + 'a,
     {
         use crate::nonterminal::NonTerminal;
-        self.expected_token(parser)
-            .into_iter()
-            .map(|token| match token {
-                crate::Token::Term(term) => crate::Token::Term(parser.get_terminals(term).unwrap()),
-                crate::Token::NonTerm(nonterm) => crate::Token::NonTerm(nonterm.as_str()),
-            })
+        let (terms, nonterms) = self.expected_token(parser);
+        (
+            terms
+                .into_iter()
+                .flat_map(|term| parser.get_terminals(term).unwrap()),
+            nonterms.into_iter().map(|nonterm| nonterm.as_str()),
+        )
     }
 
     /// Get set of `%trace` non-terminal symbols that current context is trying to parse.
