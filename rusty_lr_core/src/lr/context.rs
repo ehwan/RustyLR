@@ -87,10 +87,11 @@ impl<Data: TokenData> Context<Data> {
         self.tree_stack
     }
 
-    pub fn expected_token<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    /// Simulate parser and get next expected tokens for current context.
+    pub fn expected_token<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
-        parser: &'a P,
-    ) -> BTreeSet<crate::Token<&'static str, Data::NonTerm>>
+        parser: &P,
+    ) -> BTreeSet<crate::Token<usize, Data::NonTerm>>
     where
         Data::Term: Ord + Copy,
         Data::NonTerm: Ord + Copy + Hash,
@@ -101,28 +102,50 @@ impl<Data: TokenData> Context<Data> {
 
         ret
     }
+    /// Same as `expected_token()`, but returns as printable set.
+    pub fn expected_token_str<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &'a P,
+    ) -> impl Iterator<
+        Item = crate::Token<impl IntoIterator<Item = P::TerminalClassElement> + 'a, &'static str>,
+    > + 'a
+    where
+        Data::Term: Ord + Copy,
+        Data::NonTerm: Ord + Copy + Hash + crate::nonterminal::NonTerminal + 'a,
+    {
+        use crate::nonterminal::NonTerminal;
+        self.expected_token(parser)
+            .into_iter()
+            .map(|token| match token {
+                crate::Token::Term(term) => crate::Token::Term(parser.get_terminals(term).unwrap()),
+                crate::Token::NonTerm(nonterm) => crate::Token::NonTerm(nonterm.as_str()),
+            })
+    }
 
     fn expected_token_impl<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &'a P,
         states: &mut Vec<usize>,
-        ret: &mut BTreeSet<crate::Token<&'static str, Data::NonTerm>>,
+        ret: &mut BTreeSet<crate::Token<usize, Data::NonTerm>>,
     ) where
         Data::Term: Ord + Copy,
         Data::NonTerm: Ord + Copy + Hash,
     {
         let s = *states.last().unwrap();
-        let rules = parser.get_states()[s].get_rules();
-        let mut reduce_nonterms = BTreeSet::new();
-        for rule in rules.iter() {
-            let prod_rule = &parser.get_rules()[rule.rule];
-            if let Some(&next_token) = prod_rule.rule.get(rule.shifted) {
-                ret.insert(next_token);
-            } else {
-                reduce_nonterms.insert((prod_rule.name, prod_rule.rule.len()));
-            }
+        let s = parser.get_states().get(s).expect("state must exist");
+
+        for term in s.expected_shift_term() {
+            ret.insert(crate::Token::Term(term));
+        }
+        for nonterm in s.expected_shift_nonterm() {
+            ret.insert(crate::Token::NonTerm(nonterm));
         }
 
+        let mut reduce_nonterms = BTreeSet::new();
+        for reduce_rule in s.expected_reduce_rule() {
+            let prod_rule = &parser.get_rules()[reduce_rule];
+            reduce_nonterms.insert((prod_rule.name, prod_rule.rule.len()));
+        }
         for &(nonterm, len) in reduce_nonterms.iter() {
             let mut popped_states = states.drain(states.len() - len..).collect::<Vec<_>>();
             let last_state = *states.last().unwrap();
@@ -133,26 +156,6 @@ impl<Data: TokenData> Context<Data> {
             }
             states.append(&mut popped_states);
         }
-    }
-
-    /// Get expected tokens for next `feed()` call.
-    pub fn expected<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
-        parser: &'a P,
-    ) -> impl Iterator<Item = P::TerminalClassElement> + 'a {
-        parser.get_states()[*self.state_stack.last().unwrap()]
-            .expected()
-            .flat_map(|class| parser.get_terminals(class).unwrap())
-    }
-    /// Get expected non-terminal tokens for next `feed()` call.
-    pub fn expected_nonterm<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
-        parser: &'a P,
-    ) -> impl Iterator<Item = Data::NonTerm> + 'a
-    where
-        Data::NonTerm: Copy,
-    {
-        parser.get_states()[*self.state_stack.last().unwrap()].expected_nonterm()
     }
 
     /// From `stack`, merge last `len` locations into one location.
