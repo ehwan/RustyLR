@@ -367,24 +367,44 @@ impl<Data: TokenData> Node<Data> {
         }
     }
 
-    /// get expected terminals for current state.
-    pub fn expected<'a, P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
+    /// Simulate parser and get next expected (terminals, non-terminals) for current context.
+    pub fn expected_token<'a, P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        self: &Rc<Self>,
         parser: &'a P,
-    ) -> impl Iterator<Item = P::TerminalClassElement> + 'a {
-        parser.get_states()[self.state]
-            .expected()
-            .flat_map(|class| parser.get_terminals(class).unwrap())
-    }
-    /// get expected non-terminals for current state.
-    pub fn expected_nonterm<'a, P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
-        parser: &'a P,
-    ) -> impl Iterator<Item = Data::NonTerm> + 'a
-    where
-        P::NonTerm: Copy,
+        terms: &mut std::collections::BTreeSet<usize>,
+        nonterms: &mut std::collections::BTreeSet<Data::NonTerm>,
+    ) where
+        Data::NonTerm: Ord + Copy + std::hash::Hash,
     {
-        parser.get_states()[self.state].expected_nonterm()
+        let s = self.state;
+        let s = parser.get_states().get(s).expect("state must exist");
+
+        terms.extend(s.expected_shift_term());
+        nonterms.extend(s.expected_shift_nonterm());
+
+        let mut reduce_nonterms = std::collections::BTreeSet::new();
+        for reduce_rule in s.expected_reduce_rule() {
+            let prod_rule = &parser.get_rules()[reduce_rule];
+            reduce_nonterms.insert((prod_rule.name, prod_rule.rule.len()));
+        }
+        for &(nonterm, len) in reduce_nonterms.iter() {
+            let mut node = self;
+            for _ in 0..len {
+                node = node.parent.as_ref().unwrap();
+            }
+            let last_state = node.state;
+            if let Some(next_state) = parser.get_states()[last_state].shift_goto_nonterm(&nonterm) {
+                let next_node = Self {
+                    parent: Some(Rc::clone(node)),
+                    state: next_state,
+                    data: None,
+                    #[cfg(feature = "tree")]
+                    tree: None,
+                };
+                let next_node = Rc::new(next_node);
+                Self::expected_token(&next_node, parser, terms, nonterms);
+            }
+        }
     }
 
     pub fn panic_mode<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(

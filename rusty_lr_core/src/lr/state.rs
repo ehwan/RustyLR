@@ -18,11 +18,17 @@ pub trait State<NonTerm> {
     /// Check if this state is an accept state.
     fn is_accept(&self) -> bool;
 
-    /// Get the set of expected classes for this state
-    fn expected(&self) -> impl Iterator<Item = usize> + '_;
+    /// Get the set of expected terminal classes for shift in this state
+    fn expected_shift_term(&self) -> impl Iterator<Item = usize> + '_;
 
-    /// Get the set of expected non-terminal symbols for this state
-    fn expected_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_;
+    /// Get the set of expected non-terminal symbols for shift in this state
+    fn expected_shift_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_;
+
+    /// Get the set of expected terminal classes for reduce in this state
+    fn expected_reduce_term(&self) -> impl Iterator<Item = usize> + '_;
+
+    /// Get the set of production rules for reduce in this state
+    fn expected_reduce_rule(&self) -> impl Iterator<Item = usize> + '_;
 
     /// Get the set of rules that this state is trying to parse
     fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef];
@@ -60,14 +66,17 @@ impl<NonTerm: Copy> State<NonTerm> for SparseState<NonTerm> {
             && self.shift_goto_map_nonterm.is_empty()
     }
 
-    fn expected(&self) -> impl Iterator<Item = usize> + '_ {
-        self.shift_goto_map_class
-            .keys()
-            .chain(self.reduce_map.keys())
-            .copied()
+    fn expected_shift_term(&self) -> impl Iterator<Item = usize> + '_ {
+        self.shift_goto_map_class.keys().copied()
     }
-    fn expected_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_ {
+    fn expected_shift_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_ {
         self.shift_goto_map_nonterm.keys().copied()
+    }
+    fn expected_reduce_term(&self) -> impl Iterator<Item = usize> + '_ {
+        self.reduce_map.keys().copied()
+    }
+    fn expected_reduce_rule(&self) -> impl Iterator<Item = usize> + '_ {
+        self.reduce_map.values().copied()
     }
 
     fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
@@ -107,12 +116,17 @@ impl<NonTerm: Copy> State<NonTerm> for DenseState<NonTerm> {
             && self.shift_goto_map_nonterm.is_empty()
     }
 
-    fn expected(&self) -> impl Iterator<Item = usize> + '_ {
-        (0..self.shift_goto_map_class.len())
-            .filter(|&i| self.shift_goto_map_class[i].is_some() || self.reduce_map[i].is_some())
+    fn expected_shift_term(&self) -> impl Iterator<Item = usize> + '_ {
+        (0..self.shift_goto_map_class.len()).filter(|&i| self.shift_goto_map_class[i].is_some())
     }
-    fn expected_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_ {
+    fn expected_shift_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_ {
         self.shift_goto_map_nonterm.keys().copied()
+    }
+    fn expected_reduce_term(&self) -> impl Iterator<Item = usize> + '_ {
+        (0..self.shift_goto_map_class.len()).filter(|&i| self.reduce_map[i].is_some())
+    }
+    fn expected_reduce_rule(&self) -> impl Iterator<Item = usize> + '_ {
+        self.reduce_map.iter().filter_map(|&r| r)
     }
 
     fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
