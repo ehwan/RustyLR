@@ -52,29 +52,29 @@ process_and_compare() {
 
 echo "RustyLR path: $rustylr_path"
 
-echo "Setting GLR = true"
-process_and_compare "--glr true"
+echo "Setting Dense = false, GLR = false, Runtime = false"
+process_and_compare "--dense false --glr false --runtime false"
 
-echo "Setting GLR = false"
-process_and_compare "--glr false"
+echo "Setting Dense = false, GLR = false, Runtime = true"
+process_and_compare "--dense false --glr false --runtime true"
 
-echo "Setting Runtime = true"
-process_and_compare "--runtime true"
+echo "Setting Dense = false, GLR = true, Runtime = false"
+process_and_compare "--dense false --glr true --runtime false"
 
-echo "Setting Runtime = false"
-process_and_compare "--runtime false"
+echo "Setting Dense = false, GLR = true, Runtime = true"
+process_and_compare "--dense false --glr true --runtime true"
 
-echo "Setting Dense = true, GLR = false"
-process_and_compare "--dense true --glr false"
+echo "Setting Dense = true, GLR = false, Runtime = false"
+process_and_compare "--dense true --glr false --runtime false"
 
-echo "Setting Dense = true, GLR = true"
-process_and_compare "--dense true --glr true"
+echo "Setting Dense = true, GLR = false, Runtime = true"
+process_and_compare "--dense true --glr false --runtime true"
 
-echo "Setting Dense = false, GLR = false"
-process_and_compare "--dense false --glr false"
+echo "Setting Dense = true, GLR = true, Runtime = false"
+process_and_compare "--dense true --glr true --runtime false"
 
-echo "Setting Dense = false, GLR = true"
-process_and_compare "--dense false --glr true"
+echo "Setting Dense = true, GLR = true, Runtime = true"
+process_and_compare "--dense true --glr true --runtime true"
 
 echo "Normal configuration"
 process_and_compare ""
