@@ -3,11 +3,10 @@ use std::rc::Rc;
 
 use super::Node;
 use super::ParseError;
-use super::Parser;
-use super::State;
 
 use crate::hash::HashMap;
 use crate::nonterminal::TokenData;
+use crate::parser::Parser;
 
 /// A struct that maintains the current state and the values associated with each symbol.
 /// This handles the divergence and merging of the parser.
@@ -227,6 +226,8 @@ impl<Data: TokenData> Context<Data> {
         P::NonTerm: Hash + Eq + Clone,
         Data: Clone,
     {
+        use crate::parser::State;
+
         // current_nodes <-> nodes_pong <-> nodes_pong2
         // cycle for no unnecessary heap allocation
         let mut reduce_nodes = std::mem::take(&mut self.current_nodes);
@@ -414,6 +415,8 @@ impl<Data: TokenData> Context<Data> {
         P::Term: Hash + Eq,
         P::NonTerm: Hash + Eq,
     {
+        use crate::parser::State;
+
         let mut nodes = self.current_nodes.clone();
         let mut nodes_pong: HashMap<usize, Vec<Rc<Node<Data>>>> = HashMap::default();
         let class = parser.to_terminal_class(term);
@@ -480,6 +483,8 @@ impl<Data: TokenData> Context<Data> {
     where
         Data::NonTerm: std::hash::Hash + Eq,
     {
+        use crate::parser::State;
+
         let Some(error_nonterm) = parser.get_error_nonterm() else {
             return false;
         };
