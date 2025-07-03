@@ -1,6 +1,7 @@
 mod parser_expanded;
 
 use parser_expanded as parser;
+use rusty_lr::parser::Parser;
 
 const TEST_JSON: &'static str = r#"
 {
@@ -40,8 +41,6 @@ const TEST_JSON: &'static str = r#"
     "metadata": null
 }
 "#;
-
-use rusty_lr::lr::Parser;
 
 fn main() {
     let parser = parser::JsonParser::new();
