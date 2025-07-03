@@ -2,9 +2,8 @@ use std::ops::Deref;
 use std::ops::DerefMut;
 use std::rc::Rc;
 
-use super::State;
-
 use crate::nonterminal::TokenData;
+use crate::parser::State;
 
 /// Iterator for traverse node to root.
 /// Note that root node is not included in this iterator.

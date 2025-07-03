@@ -167,17 +167,20 @@ Augmented -> Grammar eof
 // =============================Generated Codes Begin==============================
 #[doc = r" type alias for `Context`"]
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarContext = ::rusty_lr_core::lr::Context<GrammarTokenData>;
+pub type GrammarContext = ::rusty_lr_core::parser::deterministic::Context<GrammarTokenData>;
 #[doc = r" type alias for CFG production rule"]
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarRule = ::rusty_lr_core::rule::ProductionRule<&'static str, GrammarNonTerminals>;
 #[doc = r" type alias for DFA state"]
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarState = ::rusty_lr_core::lr::SparseState<GrammarNonTerminals>;
+pub type GrammarState =
+    ::rusty_lr_core::parser::deterministic::state::SparseState<GrammarNonTerminals>;
 #[doc = r" type alias for `ParseError`"]
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarParseError =
-    ::rusty_lr_core::lr::ParseError<Lexed, ::rusty_lr_core::DefaultReduceActionError>;
+pub type GrammarParseError = ::rusty_lr_core::parser::deterministic::ParseError<
+    Lexed,
+    ::rusty_lr_core::DefaultReduceActionError,
+>;
 #[doc = r" An enum that represents non-terminal symbols"]
 #[allow(non_camel_case_types, dead_code)]
 #[derive(
@@ -2556,7 +2559,7 @@ pub struct GrammarParser {
     #[doc = r" terminal classes"]
     pub classes: Vec<Vec<&'static str>>,
 }
-impl ::rusty_lr_core::lr::Parser for GrammarParser {
+impl ::rusty_lr_core::parser::Parser for GrammarParser {
     type Term = Lexed;
     type NonTerm = GrammarNonTerminals;
     type State = GrammarState;
@@ -11763,10 +11766,7 @@ impl GrammarParser {
                 ]),
             },
         ];
-        let states: Vec<_> = states
-            .into_iter()
-            .map(|state| state.into_lr_sparse_state(|x| x, |x| x))
-            .collect();
+        let states: Vec<GrammarState> = states.into_iter().map(|state| state.into()).collect();
         Self {
             rules,
             states,

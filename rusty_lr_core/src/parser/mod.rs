@@ -1,10 +1,20 @@
-use super::State;
+/// Core parser functionality for deterministic parsers
+pub mod deterministic;
+
+/// Core parser functionality for non-deterministic parsers
+pub mod nondeterministic;
+
+mod state;
+pub use state::State;
 
 /// A trait for Parser that holds the entire parser table.
 /// This trait will be automatically implemented by rusty_lr
 pub trait Parser {
+    /// The type of terminal symbols.
     type Term;
+    /// The type of non-terminal symbols.
     type NonTerm;
+    /// The type of the parser state.
     type State: State<Self::NonTerm>;
 
     /// A type to represent single element in a terminal class.
@@ -25,5 +35,6 @@ pub trait Parser {
     /// Get the terminal class of the given terminal
     fn to_terminal_class(&self, terminal: &Self::Term) -> usize;
 
+    /// get non-terminal symbol for `error` in panic-recovery
     fn get_error_nonterm(&self) -> Option<Self::NonTerm>;
 }

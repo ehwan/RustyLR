@@ -2,38 +2,6 @@ use std::hash::Hash;
 
 use crate::hash::HashMap;
 
-/// A trait representing a parser state.
-pub trait State<NonTerm> {
-    /// Get the next state for a given terminal symbol.
-    fn shift_goto_class(&self, class: usize) -> Option<usize>;
-
-    /// Get the next state for a given non-terminal symbol.
-    fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
-    where
-        NonTerm: Hash + Eq;
-
-    /// Get the reduce rule index for a given terminal symbol.
-    fn reduce(&self, class: usize) -> Option<usize>;
-
-    /// Check if this state is an accept state.
-    fn is_accept(&self) -> bool;
-
-    /// Get the set of expected terminal classes for shift in this state
-    fn expected_shift_term(&self) -> impl Iterator<Item = usize> + '_;
-
-    /// Get the set of expected non-terminal symbols for shift in this state
-    fn expected_shift_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_;
-
-    /// Get the set of expected terminal classes for reduce in this state
-    fn expected_reduce_term(&self) -> impl Iterator<Item = usize> + '_;
-
-    /// Get the set of production rules for reduce in this state
-    fn expected_reduce_rule(&self) -> impl Iterator<Item = usize> + '_;
-
-    /// Get the set of rules that this state is trying to parse
-    fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef];
-}
-
 /// `State` implementation for a sparse state representation using HashMap
 #[derive(Debug, Clone)]
 pub struct SparseState<NonTerm> {
@@ -46,7 +14,7 @@ pub struct SparseState<NonTerm> {
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
 }
-impl<NonTerm: Copy> State<NonTerm> for SparseState<NonTerm> {
+impl<NonTerm: Copy> crate::parser::State<NonTerm> for SparseState<NonTerm> {
     fn shift_goto_class(&self, class: usize) -> Option<usize> {
         self.shift_goto_map_class.get(&class).copied()
     }
@@ -56,8 +24,8 @@ impl<NonTerm: Copy> State<NonTerm> for SparseState<NonTerm> {
     {
         self.shift_goto_map_nonterm.get(nonterm).copied()
     }
-    fn reduce(&self, class: usize) -> Option<usize> {
-        self.reduce_map.get(&class).copied()
+    fn reduce(&self, class: usize) -> Option<impl Iterator<Item = usize> + Clone + '_> {
+        self.reduce_map.get(&class).copied().map(std::iter::once)
     }
 
     fn is_accept(&self) -> bool {
@@ -84,6 +52,24 @@ impl<NonTerm: Copy> State<NonTerm> for SparseState<NonTerm> {
     }
 }
 
+impl<NonTerm> From<crate::builder::State<usize, NonTerm>> for SparseState<NonTerm>
+where
+    NonTerm: Hash + Eq,
+{
+    fn from(builder_state: crate::builder::State<usize, NonTerm>) -> Self {
+        crate::parser::deterministic::state::SparseState {
+            shift_goto_map_class: builder_state.shift_goto_map_term.into_iter().collect(),
+            shift_goto_map_nonterm: builder_state.shift_goto_map_nonterm.into_iter().collect(),
+            reduce_map: builder_state
+                .reduce_map
+                .into_iter()
+                .map(|(term, rule)| (term, rule.into_iter().next().unwrap()))
+                .collect(),
+            ruleset: builder_state.ruleset.into_iter().collect(),
+        }
+    }
+}
+
 /// `State` implementation for a dense state representation using Vec
 #[derive(Debug, Clone)]
 pub struct DenseState<NonTerm> {
@@ -96,9 +82,9 @@ pub struct DenseState<NonTerm> {
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
 }
-impl<NonTerm: Copy> State<NonTerm> for DenseState<NonTerm> {
+impl<NonTerm: Copy> crate::parser::State<NonTerm> for DenseState<NonTerm> {
     fn shift_goto_class(&self, class: usize) -> Option<usize> {
-        self.shift_goto_map_class[class]
+        self.shift_goto_map_class.get(class).copied().flatten()
     }
     fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
     where
@@ -106,8 +92,12 @@ impl<NonTerm: Copy> State<NonTerm> for DenseState<NonTerm> {
     {
         self.shift_goto_map_nonterm.get(nonterm).copied()
     }
-    fn reduce(&self, class: usize) -> Option<usize> {
-        self.reduce_map[class]
+    fn reduce(&self, class: usize) -> Option<impl Iterator<Item = usize> + Clone + '_> {
+        self.reduce_map
+            .get(class)
+            .copied()
+            .flatten()
+            .map(std::iter::once)
     }
 
     fn is_accept(&self) -> bool {
@@ -131,5 +121,41 @@ impl<NonTerm: Copy> State<NonTerm> for DenseState<NonTerm> {
 
     fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
         &self.ruleset
+    }
+}
+impl<NonTerm> From<crate::builder::State<usize, NonTerm>> for DenseState<NonTerm>
+where
+    NonTerm: Hash + Eq,
+{
+    fn from(builder_state: crate::builder::State<usize, NonTerm>) -> Self {
+        let shift_term_len = builder_state
+            .shift_goto_map_term
+            .keys()
+            .next_back()
+            .copied()
+            .map(|x| x + 1)
+            .unwrap_or(0);
+        let mut shift_goto_map_class = vec![None; shift_term_len];
+
+        let reduce_term_len = builder_state
+            .reduce_map
+            .keys()
+            .next_back()
+            .copied()
+            .map(|x| x + 1)
+            .unwrap_or(0);
+        let mut reduce_map = vec![None; reduce_term_len];
+        for (term, state) in builder_state.shift_goto_map_term {
+            shift_goto_map_class[term] = Some(state);
+        }
+        for (term, rule) in builder_state.reduce_map {
+            reduce_map[term] = Some(rule.into_iter().next().unwrap());
+        }
+        crate::parser::deterministic::state::DenseState {
+            shift_goto_map_class,
+            shift_goto_map_nonterm: builder_state.shift_goto_map_nonterm.into_iter().collect(),
+            reduce_map,
+            ruleset: builder_state.ruleset.into_iter().collect(),
+        }
     }
 }

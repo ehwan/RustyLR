@@ -1,22 +1,15 @@
-pub(crate) mod context;
-pub(crate) mod error;
-pub(crate) mod parser;
-pub(crate) mod state;
-
-pub(crate) mod node;
+mod context;
+mod error;
+mod node;
+pub mod state;
 
 pub use context::Context;
 pub use error::ParseError;
 pub use node::Node;
 pub use node::NodeRefIterator;
-pub use parser::Parser;
-pub use state::DenseState;
-pub use state::SparseState;
-pub use state::State;
 
 use crate::nonterminal::TokenData;
-
-use std::hash::Hash;
+use crate::parser::Parser;
 use std::rc::Rc;
 
 #[cfg(feature = "tree")]
@@ -124,8 +117,8 @@ pub(crate) fn reduce<P: Parser, Data: TokenData<Term = P::Term, NonTerm = P::Non
     userdata: &mut Data::UserData,
 ) -> bool
 where
-    P::Term: Hash + Eq + Clone,
-    P::NonTerm: Hash + Eq + Clone,
+    P::Term: std::hash::Hash + Eq + Clone,
+    P::NonTerm: std::hash::Hash + Eq + Clone,
 {
     let mut new_location = merge_locations(&node, parser.get_rules()[reduce_rule].rule.len());
 
@@ -136,6 +129,8 @@ where
     let (parent, tree) = data_extracted;
     #[cfg(not(feature = "tree"))]
     let parent = data_extracted;
+
+    use crate::parser::State;
 
     let mut do_shift = has_shift;
     match Data::reduce_action(

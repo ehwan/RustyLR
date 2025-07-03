@@ -20,11 +20,8 @@ pub use location::Location;
 /// module for build parser tables from CFG
 pub mod builder;
 
-/// module for deterministic LR(1), LALR(1) parser
-pub mod lr;
-
-/// module for non-deterministic GLR parser
-pub mod glr;
+/// module for core parser functionality
+pub mod parser;
 
 /// module for auto-generated types of non-terminals representation
 pub mod nonterminal;
