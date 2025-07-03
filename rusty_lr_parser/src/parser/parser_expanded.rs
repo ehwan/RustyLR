@@ -11766,10 +11766,7 @@ impl GrammarParser {
                 ]),
             },
         ];
-        let states: Vec<_> = states
-            .into_iter()
-            .map(|state| state.into_lr_sparse_state(|x| x, |x| x))
-            .collect();
+        let states: Vec<_> = states.into_iter().map(|state| state.into()).collect();
         Self {
             rules,
             states,

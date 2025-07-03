@@ -223,60 +223,6 @@ impl Grammar {
             }
         };
 
-        // count the number of rules
-        // and calculate the integral type for rule index -> u8, u16, u32, usize ...
-        let rule_index_type = if self.builder.rules.len() <= u8::MAX as usize {
-            quote! { u8 }
-        } else if self.builder.rules.len() <= u16::MAX as usize {
-            quote! { u16 }
-        } else if self.builder.rules.len() <= u32::MAX as usize {
-            quote! { u32 }
-        } else {
-            quote! { usize }
-        };
-
-        let state_convert_stream = if self.glr {
-            if self.emit_dense {
-                let convert_fn_name = format_ident!("into_glr_dense_state_{rule_index_type}");
-                let classes_len = self.terminal_classes.len();
-                quote! {
-                    let states:Vec<_> = states.into_iter().map(
-                        |state| {
-                            state.#convert_fn_name(|x| x, |x| x, #classes_len)
-                        },
-                    ).collect();
-                }
-            } else {
-                let convert_fn_name = format_ident!("into_glr_sparse_state_{rule_index_type}");
-                quote! {
-                    let states:Vec<_> = states.into_iter().map(
-                        |state| {
-                            state.#convert_fn_name(|x| x, |x| x)
-                        },
-                    ).collect();
-                }
-            }
-        } else {
-            if self.emit_dense {
-                let classes_len = self.terminal_classes.len();
-                quote! {
-                    let states:Vec<_> = states.into_iter().map(
-                        |state| {
-                            state.into_lr_dense_state(|x| x, |x| x, #classes_len)
-                        },
-                    ).collect();
-                }
-            } else {
-                quote! {
-                    let states:Vec<_> = states.into_iter().map(
-                        |state| {
-                            state.into_lr_sparse_state(|x| x, |x| x)
-                        },
-                    ).collect();
-                }
-            }
-        };
-
         let mut terminal_class_names_stream = TokenStream::new();
         for class in 0..self.terminal_classes.len() {
             let name = self.class_pretty_name_list(class, 4);
@@ -376,7 +322,9 @@ impl Grammar {
                 let states = vec![
                     #states_body_stream
                 ];
-                #state_convert_stream
+                let states:Vec<#state_typename> = states.into_iter().map(
+                    |state| state.into(),
+                ).collect();
             }
         } else {
             // build runtime
@@ -507,7 +455,10 @@ impl Grammar {
                         )
                     }
                 ).collect();
-                #state_convert_stream
+
+                let states:Vec<#state_typename> = states.into_iter().map(
+                    |state| state.into(),
+                ).collect();
             }
         };
 
