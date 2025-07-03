@@ -180,7 +180,6 @@ impl Grammar {
         let state_typename = format_ident!("{}State", self.start_rule_name);
         let parser_struct_name = format_ident!("{}Parser", self.start_rule_name);
         let token_typename = &self.token_typename;
-        let parser_trait_name = quote! { #module_prefix::parser::Parser };
 
         // ======================
         // building grammar
@@ -567,7 +566,7 @@ impl Grammar {
                 /// terminal classes
                 pub classes: Vec<Vec<::std::ops::RangeInclusive<#token_typename>>>,
             }
-            impl #parser_trait_name for #parser_struct_name {
+            impl #module_prefix::parser::Parser for #parser_struct_name {
                 type Term = #token_typename;
                 type NonTerm = #nonterminals_enum_name;
                 type State = #state_typename;
@@ -738,7 +737,7 @@ impl Grammar {
                 /// terminal classes
                 pub classes: Vec<Vec<&'static str>>,
             }
-            impl #parser_trait_name for #parser_struct_name {
+            impl #module_prefix::parser::Parser for #parser_struct_name {
                 type Term = #token_typename;
                 type NonTerm = #nonterminals_enum_name;
                 type State = #state_typename;
