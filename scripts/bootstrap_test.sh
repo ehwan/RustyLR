@@ -64,11 +64,17 @@ process_and_compare "--runtime true"
 echo "Setting Runtime = false"
 process_and_compare "--runtime false"
 
-echo "Setting Dense = true"
-process_and_compare "--dense true"
+echo "Setting Dense = true, GLR = false"
+process_and_compare "--dense true --glr false"
 
-echo "Setting Dense = false"
-process_and_compare "--dense false"
+echo "Setting Dense = true, GLR = true"
+process_and_compare "--dense true --glr true"
+
+echo "Setting Dense = false, GLR = false"
+process_and_compare "--dense false --glr false"
+
+echo "Setting Dense = false, GLR = true"
+process_and_compare "--dense false --glr true"
 
 echo "Normal configuration"
 process_and_compare ""
