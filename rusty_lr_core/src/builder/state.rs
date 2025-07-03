@@ -36,11 +36,11 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         self,
         term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
-    ) -> crate::lr::SparseState<NewNonTerm>
+    ) -> crate::parser::deterministic::state::SparseState<NewNonTerm>
     where
         NewNonTerm: Hash + Eq,
     {
-        crate::lr::SparseState {
+        crate::parser::deterministic::state::SparseState {
             shift_goto_map_class: self
                 .shift_goto_map_term
                 .into_iter()
@@ -64,7 +64,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
         terms_len: usize,
-    ) -> crate::lr::DenseState<NewNonTerm>
+    ) -> crate::parser::deterministic::state::DenseState<NewNonTerm>
     where
         NewNonTerm: Hash + Eq,
     {
@@ -76,7 +76,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         for (term, rule) in self.reduce_map {
             reduce_map[term_map(term)] = Some(rule.into_iter().next().unwrap());
         }
-        crate::lr::DenseState {
+        crate::parser::deterministic::state::DenseState {
             shift_goto_map_class,
             shift_goto_map_nonterm: self
                 .shift_goto_map_nonterm
@@ -93,11 +93,11 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
         rule_vec_map: impl Fn(BTreeSet<usize>) -> RuleContainer,
-    ) -> crate::glr::SparseState<NewNonTerm, RuleContainer>
+    ) -> crate::parser::nondeterministic::state::SparseState<NewNonTerm, RuleContainer>
     where
         NewNonTerm: Hash + Eq,
     {
-        crate::glr::SparseState {
+        crate::parser::nondeterministic::state::SparseState {
             shift_goto_map_class: self
                 .shift_goto_map_term
                 .into_iter()
@@ -121,7 +121,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         self,
         term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
-    ) -> crate::glr::SparseState<NewNonTerm, crate::stackvec::SmallVecU8>
+    ) -> crate::parser::nondeterministic::state::SparseState<NewNonTerm, crate::stackvec::SmallVecU8>
     where
         NewNonTerm: Hash + Eq,
     {
@@ -133,7 +133,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         self,
         term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
-    ) -> crate::glr::SparseState<NewNonTerm, crate::stackvec::SmallVecU16>
+    ) -> crate::parser::nondeterministic::state::SparseState<NewNonTerm, crate::stackvec::SmallVecU16>
     where
         NewNonTerm: Hash + Eq,
     {
@@ -145,7 +145,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         self,
         term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
-    ) -> crate::glr::SparseState<NewNonTerm, crate::stackvec::SmallVecU32>
+    ) -> crate::parser::nondeterministic::state::SparseState<NewNonTerm, crate::stackvec::SmallVecU32>
     where
         NewNonTerm: Hash + Eq,
     {
@@ -157,7 +157,10 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         self,
         term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
-    ) -> crate::glr::SparseState<NewNonTerm, crate::stackvec::SmallVecUsize>
+    ) -> crate::parser::nondeterministic::state::SparseState<
+        NewNonTerm,
+        crate::stackvec::SmallVecUsize,
+    >
     where
         NewNonTerm: Hash + Eq,
     {
@@ -174,7 +177,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
         terms_len: usize,
         rule_vec_map: impl Fn(BTreeSet<usize>) -> RuleContainer,
-    ) -> crate::glr::DenseState<NewNonTerm, RuleContainer>
+    ) -> crate::parser::nondeterministic::state::DenseState<NewNonTerm, RuleContainer>
     where
         NewNonTerm: Hash + Eq,
     {
@@ -186,7 +189,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         for (term, rule) in self.reduce_map {
             reduce_map[term_map(term)] = Some(rule_vec_map(rule));
         }
-        crate::glr::DenseState {
+        crate::parser::nondeterministic::state::DenseState {
             shift_goto_map_class,
             shift_goto_map_nonterm: self
                 .shift_goto_map_nonterm
@@ -202,7 +205,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
         terms_len: usize,
-    ) -> crate::glr::DenseState<NewNonTerm, crate::stackvec::SmallVecU8>
+    ) -> crate::parser::nondeterministic::state::DenseState<NewNonTerm, crate::stackvec::SmallVecU8>
     where
         NewNonTerm: Hash + Eq,
     {
@@ -215,7 +218,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
         terms_len: usize,
-    ) -> crate::glr::DenseState<NewNonTerm, crate::stackvec::SmallVecU16>
+    ) -> crate::parser::nondeterministic::state::DenseState<NewNonTerm, crate::stackvec::SmallVecU16>
     where
         NewNonTerm: Hash + Eq,
     {
@@ -228,7 +231,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
         terms_len: usize,
-    ) -> crate::glr::DenseState<NewNonTerm, crate::stackvec::SmallVecU32>
+    ) -> crate::parser::nondeterministic::state::DenseState<NewNonTerm, crate::stackvec::SmallVecU32>
     where
         NewNonTerm: Hash + Eq,
     {
@@ -241,7 +244,10 @@ impl<Term, NonTerm> State<Term, NonTerm> {
         term_map: impl Fn(Term) -> usize,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
         terms_len: usize,
-    ) -> crate::glr::DenseState<NewNonTerm, crate::stackvec::SmallVecUsize>
+    ) -> crate::parser::nondeterministic::state::DenseState<
+        NewNonTerm,
+        crate::stackvec::SmallVecUsize,
+    >
     where
         NewNonTerm: Hash + Eq,
     {
