@@ -52,6 +52,24 @@ impl<NonTerm: Copy> crate::parser::State<NonTerm> for SparseState<NonTerm> {
     }
 }
 
+impl<NonTerm> From<crate::builder::State<usize, NonTerm>> for SparseState<NonTerm>
+where
+    NonTerm: Hash + Eq,
+{
+    fn from(builder_state: crate::builder::State<usize, NonTerm>) -> Self {
+        crate::parser::deterministic::state::SparseState {
+            shift_goto_map_class: builder_state.shift_goto_map_term.into_iter().collect(),
+            shift_goto_map_nonterm: builder_state.shift_goto_map_nonterm.into_iter().collect(),
+            reduce_map: builder_state
+                .reduce_map
+                .into_iter()
+                .map(|(term, rule)| (term, rule.into_iter().next().unwrap()))
+                .collect(),
+            ruleset: builder_state.ruleset.into_iter().collect(),
+        }
+    }
+}
+
 /// `State` implementation for a dense state representation using Vec
 #[derive(Debug, Clone)]
 pub struct DenseState<NonTerm> {
@@ -99,5 +117,33 @@ impl<NonTerm: Copy> crate::parser::State<NonTerm> for DenseState<NonTerm> {
 
     fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
         &self.ruleset
+    }
+}
+impl<NonTerm> From<crate::builder::State<usize, NonTerm>> for DenseState<NonTerm>
+where
+    NonTerm: Hash + Eq,
+{
+    fn from(builder_state: crate::builder::State<usize, NonTerm>) -> Self {
+        let term_len = builder_state
+            .shift_goto_map_term
+            .keys()
+            .next_back()
+            .copied()
+            .map(|x| x + 1)
+            .unwrap_or(0);
+        let mut shift_goto_map_class = vec![None; term_len];
+        let mut reduce_map = vec![None; term_len];
+        for (term, state) in builder_state.shift_goto_map_term {
+            shift_goto_map_class[term] = Some(state);
+        }
+        for (term, rule) in builder_state.reduce_map {
+            reduce_map[term] = Some(rule.into_iter().next().unwrap());
+        }
+        crate::parser::deterministic::state::DenseState {
+            shift_goto_map_class,
+            shift_goto_map_nonterm: builder_state.shift_goto_map_nonterm.into_iter().collect(),
+            reduce_map,
+            ruleset: builder_state.ruleset.into_iter().collect(),
+        }
     }
 }
