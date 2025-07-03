@@ -2,10 +2,10 @@ use std::collections::BTreeSet;
 use std::hash::Hash;
 
 use super::ParseError;
-use super::Parser;
-use super::State;
 
 use crate::nonterminal::TokenData;
+use crate::parser::Parser;
+use crate::parser::State;
 
 /// A struct that maintains the current state and the values associated with each symbol.
 pub struct Context<Data: TokenData> {
@@ -203,9 +203,10 @@ impl<Data: TokenData> Context<Data> {
     {
         let class = parser.to_terminal_class(&term);
         // check if there is any reduce action with given terminal
-        while let Some(reduce_rule) =
+        while let Some(mut reduce_rule) =
             parser.get_states()[*self.state_stack.last().unwrap()].reduce(class)
         {
+            let reduce_rule = reduce_rule.next().unwrap();
             let rule = &parser.get_rules()[reduce_rule];
             let len = rule.rule.len();
             // pop state stack
@@ -321,9 +322,10 @@ impl<Data: TokenData> Context<Data> {
         }
 
         let mut state_stack = self.state_stack.clone();
-        while let Some(reduce_rule) =
+        while let Some(mut reduce_rule) =
             parser.get_states()[*state_stack.last().unwrap()].reduce(class)
         {
+            let reduce_rule = reduce_rule.next().unwrap();
             let rule = &parser.get_rules()[reduce_rule];
             let new_len = state_stack.len() - rule.rule.len();
             state_stack.truncate(new_len);
