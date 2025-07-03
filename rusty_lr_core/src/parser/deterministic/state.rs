@@ -84,7 +84,7 @@ pub struct DenseState<NonTerm> {
 }
 impl<NonTerm: Copy> crate::parser::State<NonTerm> for DenseState<NonTerm> {
     fn shift_goto_class(&self, class: usize) -> Option<usize> {
-        self.shift_goto_map_class[class]
+        self.shift_goto_map_class.get(class).copied().flatten()
     }
     fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
     where
@@ -93,7 +93,11 @@ impl<NonTerm: Copy> crate::parser::State<NonTerm> for DenseState<NonTerm> {
         self.shift_goto_map_nonterm.get(nonterm).copied()
     }
     fn reduce(&self, class: usize) -> Option<impl Iterator<Item = usize> + Clone + '_> {
-        self.reduce_map[class].map(std::iter::once)
+        self.reduce_map
+            .get(class)
+            .copied()
+            .flatten()
+            .map(std::iter::once)
     }
 
     fn is_accept(&self) -> bool {
@@ -124,15 +128,23 @@ where
     NonTerm: Hash + Eq,
 {
     fn from(builder_state: crate::builder::State<usize, NonTerm>) -> Self {
-        let term_len = builder_state
+        let shift_term_len = builder_state
             .shift_goto_map_term
             .keys()
             .next_back()
             .copied()
             .map(|x| x + 1)
             .unwrap_or(0);
-        let mut shift_goto_map_class = vec![None; term_len];
-        let mut reduce_map = vec![None; term_len];
+        let mut shift_goto_map_class = vec![None; shift_term_len];
+
+        let reduce_term_len = builder_state
+            .reduce_map
+            .keys()
+            .next_back()
+            .copied()
+            .map(|x| x + 1)
+            .unwrap_or(0);
+        let mut reduce_map = vec![None; reduce_term_len];
         for (term, state) in builder_state.shift_goto_map_term {
             shift_goto_map_class[term] = Some(state);
         }

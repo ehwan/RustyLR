@@ -11766,7 +11766,7 @@ impl GrammarParser {
                 ]),
             },
         ];
-        let states: Vec<_> = states.into_iter().map(|state| state.into()).collect();
+        let states: Vec<GrammarState> = states.into_iter().map(|state| state.into()).collect();
         Self {
             rules,
             states,
