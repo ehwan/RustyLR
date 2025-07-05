@@ -1,5 +1,5 @@
 /// trait for token location in the input stream
-pub trait Location: Clone + Default {
+pub trait Location: Clone {
     /// Create a new merged location from `len` elements in the stack.
     /// The `stack` iterator should yield child locations in reverse order.
     /// That is, if the input [a, b, c, ..., z] is fed and `len` is 3,

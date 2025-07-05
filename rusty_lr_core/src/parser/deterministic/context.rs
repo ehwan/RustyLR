@@ -166,6 +166,7 @@ impl<Data: TokenData> Context<Data> {
     where
         Data::Term: Hash + Eq + Clone,
         Data::NonTerm: Hash + Eq + Copy,
+        Data::Location: Default,
     {
         self.feed_location(parser, term, userdata, Default::default())
     }

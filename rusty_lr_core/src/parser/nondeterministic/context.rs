@@ -210,6 +210,7 @@ impl<Data: TokenData> Context<Data> {
         P::Term: Hash + Eq + Clone,
         P::NonTerm: Hash + Eq + Clone,
         Data: Clone,
+        Data::Location: Default,
     {
         self.feed_location(parser, term, userdata, Default::default())
     }
