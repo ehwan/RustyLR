@@ -84,27 +84,6 @@ where
     }
 }
 
-/// From `node`, merge last `len` locations into one location.
-/// if `len` is 0, returns the zero-length location right after the last len'th element in `stack`,
-/// if `stack` is empty at that point, returns the default location.
-pub(crate) fn merge_locations<Data: TokenData>(
-    node: &Rc<Node<Data>>,
-    len: usize,
-) -> Data::Location {
-    use crate::Location;
-    if len == 0 {
-        node.data
-            .as_ref()
-            .map_or_else(Default::default, |(_, loc)| loc.next_zero())
-    } else {
-        node.iter()
-            .take(len)
-            .map(|node| node.data.as_ref().map(|(_, loc)| loc).unwrap().clone())
-            .reduce(|a, b| b.merge(a))
-            .unwrap()
-    }
-}
-
 /// give lookahead token to parser, and check if there is any reduce action.
 /// returns false if shift action is revoked
 pub(crate) fn reduce<P: Parser, Data: TokenData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
@@ -120,7 +99,11 @@ where
     P::Term: std::hash::Hash + Eq + Clone,
     P::NonTerm: std::hash::Hash + Eq + Clone,
 {
-    let mut new_location = merge_locations(&node, parser.get_rules()[reduce_rule].rule.len());
+    use crate::Location;
+    let mut new_location = Data::Location::new(
+        node.iter().map(|node| &node.data.as_ref().unwrap().1),
+        parser.get_rules()[reduce_rule].rule.len(),
+    );
 
     context.reduce_args.clear();
     let data_extracted = clone_pop_nodes(node, reduce_rule, parser, context);

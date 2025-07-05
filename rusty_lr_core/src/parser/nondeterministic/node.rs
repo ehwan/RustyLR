@@ -413,13 +413,17 @@ impl<Data: TokenData> Node<Data> {
     where
         Data::NonTerm: std::hash::Hash + Eq,
     {
+        use crate::Location;
         let node0 = node;
         let error_nonterm = parser.get_error_nonterm()?;
         let mut popped_count = 0;
         loop {
             let last_state = &parser.get_states()[node.state];
             if let Some(error_state) = last_state.shift_goto_nonterm(&error_nonterm) {
-                let new_location = super::merge_locations(node0, popped_count);
+                let new_location = Data::Location::new(
+                    node0.iter().map(|node| &node.data.as_ref().unwrap().1),
+                    popped_count,
+                );
                 // pop all states and data above this state
                 let child_node = Node {
                     data: Some((Data::new_error_nonterm(), new_location)),

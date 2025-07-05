@@ -155,26 +155,6 @@ impl<Data: TokenData> Context<Data> {
         }
     }
 
-    /// From `stack`, merge last `len` locations into one location.
-    /// if `len` is 0, returns the zero-length location right after the last len'th element in `stack`,
-    /// if `stack` is empty at that point, returns the default location.
-    fn merge_locations(stack: &Vec<(Data, Data::Location)>, len: usize) -> Data::Location {
-        use crate::Location;
-        if len == 0 {
-            stack
-                .last()
-                .map_or_else(Default::default, |(_, loc)| loc.next_zero())
-        } else {
-            stack
-                .iter()
-                .rev()
-                .take(len)
-                .map(|(_, loc)| loc.clone())
-                .reduce(|a, b| b.merge(a))
-                .unwrap()
-        }
-    }
-
     /// Feed one terminal to parser, and update stacks.
     /// This will use `Default::default()` for location.
     pub fn feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
@@ -201,6 +181,7 @@ impl<Data: TokenData> Context<Data> {
         Data::Term: Hash + Eq + Clone,
         Data::NonTerm: Hash + Eq + Copy,
     {
+        use crate::Location;
         let class = parser.to_terminal_class(&term);
         // check if there is any reduce action with given terminal
         while let Some(mut reduce_rule) =
@@ -214,7 +195,8 @@ impl<Data: TokenData> Context<Data> {
 
             let mut shift = false;
 
-            let mut new_location = Self::merge_locations(&self.data_stack, len);
+            let mut new_location =
+                Data::Location::new(self.data_stack.iter().map(|(_, loc)| loc).rev(), len);
 
             self.reduce_args.clear();
             self.reduce_args.reserve(len);
@@ -473,6 +455,7 @@ impl<Data: TokenData> Context<Data> {
     where
         Data::NonTerm: Hash + Eq + Copy,
     {
+        use crate::Location;
         let Some(error_nonterm) = parser.get_error_nonterm() else {
             return false;
         };
@@ -483,7 +466,10 @@ impl<Data: TokenData> Context<Data> {
                 // pop all states above this state
                 self.state_stack.truncate(stack_idx + 1);
 
-                let new_location = Self::merge_locations(&self.data_stack, popped_token);
+                let new_location = Data::Location::new(
+                    self.data_stack.iter().map(|(_, loc)| loc).rev(),
+                    popped_token,
+                );
 
                 // pop all data
                 {
