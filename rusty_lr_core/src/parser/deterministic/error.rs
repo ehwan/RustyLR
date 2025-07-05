@@ -1,21 +1,27 @@
 use std::fmt::Debug;
 use std::fmt::Display;
 
+use crate::nonterminal::TokenData;
+
 /// Error type for feed()
 #[derive(Clone)]
-pub enum ParseError<Term, ReduceActionError> {
+pub enum ParseError<Data: TokenData> {
     /// No action defined for the given terminal in the parser table
-    NoAction(Term),
+    NoAction(Data::Term, Data::Location),
 
     /// Error from reduce action
-    ReduceAction(ReduceActionError),
+    ReduceAction(Data::ReduceActionError),
 }
 
-impl<Term: Display, ReduceActionError: Display> Display for ParseError<Term, ReduceActionError> {
+impl<Data: TokenData> Display for ParseError<Data>
+where
+    Data::Term: Display,
+    Data::ReduceActionError: Display,
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ParseError::NoAction(err) => {
-                write!(f, "NoAction: {}", err)
+            ParseError::NoAction(term, _location) => {
+                write!(f, "NoAction: {}", term)
             }
             ParseError::ReduceAction(err) => {
                 write!(f, "ReduceAction: {}", err)
@@ -24,11 +30,15 @@ impl<Term: Display, ReduceActionError: Display> Display for ParseError<Term, Red
     }
 }
 
-impl<Term: Debug, ReduceActionError: Debug> Debug for ParseError<Term, ReduceActionError> {
+impl<Data: TokenData> Debug for ParseError<Data>
+where
+    Data::Term: Debug,
+    Data::ReduceActionError: Debug,
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ParseError::NoAction(err) => {
-                write!(f, "{:?}", err)
+            ParseError::NoAction(term, _location) => {
+                write!(f, "{:?}", term)
             }
             ParseError::ReduceAction(err) => {
                 write!(f, "{:?}", err)

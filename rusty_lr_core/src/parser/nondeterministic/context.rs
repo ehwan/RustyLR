@@ -205,7 +205,7 @@ impl<Data: TokenData> Context<Data> {
         parser: &P,
         term: Data::Term,
         userdata: &mut Data::UserData,
-    ) -> Result<(), ParseError<Data::Term, Data::ReduceActionError>>
+    ) -> Result<(), ParseError<Data>>
     where
         P::Term: Clone,
         P::NonTerm: Hash + Eq + Clone,
@@ -221,7 +221,7 @@ impl<Data: TokenData> Context<Data> {
         term: P::Term,
         userdata: &mut Data::UserData,
         location: Data::Location,
-    ) -> Result<(), ParseError<P::Term, Data::ReduceActionError>>
+    ) -> Result<(), ParseError<Data>>
     where
         P::Term: Clone,
         P::NonTerm: Hash + Eq + Clone,
@@ -347,7 +347,7 @@ impl<Data: TokenData> Context<Data> {
                 self.fallback_nodes.clear();
 
                 if self.reduce_errors.is_empty() {
-                    Err(ParseError::NoAction(term))
+                    Err(ParseError::NoAction(term, location))
                 } else {
                     Err(ParseError::ReduceAction(std::mem::take(
                         &mut self.reduce_errors,
