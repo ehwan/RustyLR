@@ -96,7 +96,7 @@ pub(crate) fn reduce<P: Parser, Data: TokenData<Term = P::Term, NonTerm = P::Non
     userdata: &mut Data::UserData,
 ) -> bool
 where
-    P::Term: std::hash::Hash + Eq + Clone,
+    P::Term: Clone,
     P::NonTerm: std::hash::Hash + Eq + Clone,
 {
     use crate::Location;

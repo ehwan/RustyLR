@@ -164,7 +164,7 @@ impl<Data: TokenData> Context<Data> {
         userdata: &mut Data::UserData,
     ) -> Result<(), ParseError<Data::Term, Data::ReduceActionError>>
     where
-        Data::Term: Hash + Eq + Clone,
+        Data::Term: Clone,
         Data::NonTerm: Hash + Eq + Copy,
         Data::Location: Default,
     {
@@ -179,7 +179,7 @@ impl<Data: TokenData> Context<Data> {
         location: Data::Location,
     ) -> Result<(), ParseError<Data::Term, Data::ReduceActionError>>
     where
-        Data::Term: Hash + Eq + Clone,
+        Data::Term: Clone,
         Data::NonTerm: Hash + Eq + Copy,
     {
         use crate::Location;
@@ -293,7 +293,6 @@ impl<Data: TokenData> Context<Data> {
         term: &Data::Term,
     ) -> bool
     where
-        Data::Term: Hash + Eq,
         Data::NonTerm: Hash + Eq,
     {
         let class = parser.to_terminal_class(term);

@@ -207,7 +207,7 @@ impl<Data: TokenData> Context<Data> {
         userdata: &mut Data::UserData,
     ) -> Result<(), ParseError<Data::Term, Data::ReduceActionError>>
     where
-        P::Term: Hash + Eq + Clone,
+        P::Term: Clone,
         P::NonTerm: Hash + Eq + Clone,
         Data: Clone,
         Data::Location: Default,
@@ -223,7 +223,7 @@ impl<Data: TokenData> Context<Data> {
         location: Data::Location,
     ) -> Result<(), ParseError<P::Term, Data::ReduceActionError>>
     where
-        P::Term: Hash + Eq + Clone,
+        P::Term: Clone,
         P::NonTerm: Hash + Eq + Clone,
         Data: Clone,
     {
@@ -384,24 +384,6 @@ impl<Data: TokenData> Context<Data> {
         }
     }
 
-    /*
-    /// feed multiple terminal symbols to the context.
-    /// This tries to feed all symbols at the same time, to the same state.
-    pub fn feed_multiple<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &mut self,
-        parser: &P,
-        terms: impl Iterator<Item = P::Term>,
-        userdata: &mut Data::UserData,
-    ) -> Result<(), Vec<InvalidTerminalError<Data::Term, Data::NonTerm, Data::ReduceActionError>>>
-    where
-        Data: Clone,
-        P::Term: Hash + Eq + Clone,
-        P::NonTerm: Hash + Eq + Clone,
-    {
-        super::feed_multiple(parser, self, terms, userdata)
-    }
-    */
-
     /// Check if `term` can be feeded to current state.
     /// This does not check for reduce action error, nor the panic mode.
     /// You should call `can_panic_mode()` after this fails to check if panic mode can accept this term.
@@ -413,7 +395,6 @@ impl<Data: TokenData> Context<Data> {
         term: &P::Term,
     ) -> bool
     where
-        P::Term: Hash + Eq,
         P::NonTerm: Hash + Eq,
     {
         use crate::parser::State;
@@ -507,27 +488,6 @@ impl<Data: TokenData> Context<Data> {
         }
         false
     }
-
-    /*
-    /// Search for the shortest path that can be accepted and represented as CurrentState -> Terms^N -> Tails.
-    /// Where Terms is set of terminals `terms`, and Tails is a sequence of terminals `tails`.
-    /// Returns true if there is a alive path.
-    pub fn complete<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &mut self,
-        parser: &P,
-        terms: impl Iterator<Item = P::Term> + Clone,
-        userdata: &mut Data::UserData,
-        tails: impl Iterator<Item = P::Term> + Clone,
-        max_depth: usize,
-    ) -> bool
-    where
-        Data: Clone,
-        P::Term: Clone + Hash + Eq,
-        P::NonTerm: Clone + Hash + Eq,
-    {
-        super::completion::complete(parser, self, terms, userdata, tails, max_depth)
-    }
-    */
 }
 
 impl<Data: TokenData> Default for Context<Data> {
