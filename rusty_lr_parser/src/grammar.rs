@@ -184,7 +184,7 @@ impl Grammar {
             Err(err) => {
                 let message = err.to_string();
                 let span = match err {
-                    GrammarParseError::NoAction(term, _location) => term.span(),
+                    GrammarParseError::NoAction(_term, location) => location.span_first,
                     _ => unreachable!("feed error"),
                 };
                 return Err(ParseArgError::MacroLineParse { span, message });

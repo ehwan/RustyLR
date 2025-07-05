@@ -5,6 +5,7 @@ use crate::parser::args::RuleLineArgs;
 use crate::parser::args::IdentOrLiteral;
 use crate::parser::args::PrecDPrecArgs;
 use crate::parser::lexer::Lexed;
+use crate::parser::span_pair::SpanPair;
 use crate::terminalset::TerminalSet;
 use crate::terminalset::TerminalSetItem;
 
@@ -28,6 +29,8 @@ use rusty_lr_core::builder::ReduceType;
 
 %userdata GrammarArgs;
 
+%location SpanPair;
+
 %tokentype Lexed;
 %token ident Lexed::Ident(_);
 %token colon Lexed::Colon(_);
@@ -49,31 +52,31 @@ use rusty_lr_core::builder::ReduceType;
 %token parengroup Lexed::ParenGroup(_);
 %token bracegroup Lexed::BraceGroup(_);
 
-%token lparen Lexed::LParen(_);
-%token rparen Lexed::RParen(_);
-%token lbracket Lexed::LBracket(_);
-%token rbracket Lexed::RBracket(_);
+%token lparen Lexed::LParen;
+%token rparen Lexed::RParen;
+%token lbracket Lexed::LBracket;
+%token rbracket Lexed::RBracket;
 
-%token left Lexed::Left(_,_);
-%token right Lexed::Right(_,_);
-%token token Lexed::Token(_,_);
-%token start Lexed::Start(_,_);
-%token eofdef Lexed::EofDef(_,_);
-%token tokentype Lexed::TokenType(_,_);
-%token userdata Lexed::UserData(_,_);
-%token errortype Lexed::ErrorType(_,_);
-%token moduleprefix Lexed::ModulePrefix(_,_);
-%token lalr Lexed::Lalr(_,_);
-%token glr Lexed::Glr(_,_);
-%token prec Lexed::Prec(_,_);
-%token precedence Lexed::Precedence(_,_);
-%token nooptim Lexed::NoOptim(_,_);
-%token dense Lexed::Dense(_,_);
-%token trace Lexed::Trace(_,_);
-%token dprec Lexed::DPrec(_,_);
-%token filter Lexed::Filter(_,_);
-%token runtime Lexed::Runtime(_,_);
-%token location Lexed::Location(_,_);
+%token left Lexed::Left(_);
+%token right Lexed::Right(_);
+%token token Lexed::Token(_);
+%token start Lexed::Start(_);
+%token eofdef Lexed::EofDef(_);
+%token tokentype Lexed::TokenType(_);
+%token userdata Lexed::UserData(_);
+%token errortype Lexed::ErrorType(_);
+%token moduleprefix Lexed::ModulePrefix(_);
+%token lalr Lexed::Lalr(_);
+%token glr Lexed::Glr(_);
+%token prec Lexed::Prec(_);
+%token precedence Lexed::Precedence(_);
+%token nooptim Lexed::NoOptim(_);
+%token dense Lexed::Dense(_);
+%token trace Lexed::Trace(_);
+%token dprec Lexed::DPrec(_);
+%token filter Lexed::Filter(_);
+%token runtime Lexed::Runtime(_);
+%token location Lexed::Location(_);
 
 %eof Lexed::Eof;
 
@@ -83,10 +86,7 @@ Rule(RuleDefArgs) : ident RuleType colon RuleLines semicolon {
     let Lexed::Ident(ident) = ident else {
         unreachable!( "Rule-Ident" );
     };
-    let Lexed::Colon(colon) = colon else {
-        unreachable!( "Rule-Colon2" );
-    };
-    let span = colon.span();
+    let span = @colon.span();
     if let Some(fisrt) = RuleLines.first_mut() {
         fisrt.separator_span = span;
     }
@@ -110,10 +110,7 @@ RuleType(Option<Group>): parengroup {
 ;
 
 RuleLines(Vec<RuleLineArgs>): RuleLines pipe RuleLine {
-    let Lexed::Pipe(punct) = pipe else {
-        unreachable!( "RuleLines-Pipe" );
-    };
-    RuleLine.separator_span = punct.span();
+    RuleLine.separator_span = @pipe.span();
     RuleLines.push( RuleLine );
     RuleLines
 }
@@ -135,8 +132,8 @@ RuleLine(RuleLineArgs): TokenMapped* PrecDef* Action
 }
 ;
 
-PrecDef(PrecDPrecArgs): prec! IdentOrLiteral { PrecDPrecArgs::Prec(IdentOrLiteral) }
-| dprec! literal { 
+PrecDef(PrecDPrecArgs): percent! prec! IdentOrLiteral { PrecDPrecArgs::Prec(IdentOrLiteral) }
+| percent! dprec! literal {
     let Lexed::Literal(literal) = literal else {
         unreachable!( "PrecDPrecArgs-DPrec" );
     };
@@ -189,21 +186,15 @@ TerminalSetItem(TerminalSetItem): ident {
 ;
 
 TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
-    let Lexed::LBracket(open_span) = lbracket else {
-        unreachable!( "TerminalSet-Open" );
-    };
-    let Lexed::RBracket(close_span) = rbracket else {
-        unreachable!( "TerminalSet-Close" );
-    };
     TerminalSet {
-      negate: caret.is_some(),
-      items: TerminalSetItem,
-      open_span,
-      close_span,
+        negate: caret.is_some(),
+        items: TerminalSetItem,
+        open_span: @lbracket.span(),
+        close_span: @rbracket.span(),
     }
 }
 | dot {
-    let span = dot.span();
+    let span = @dot.span();
     TerminalSet {
         negate: true,
         items: vec![],
@@ -227,25 +218,16 @@ Pattern(PatternArgs): ident {
     let Lexed::Plus(plus) = plus else {
         unreachable!( "Pattern-Plus" );
     };
-    PatternArgs::Plus( Box::new(Pattern), plus.span() )
+    PatternArgs::Plus( Box::new(Pattern), @plus.span() )
 }
 | Pattern star {
-    let Lexed::Star(star) = star else {
-        unreachable!( "Pattern-Star" );
-    };
-    PatternArgs::Star( Box::new(Pattern), star.span() )
+    PatternArgs::Star( Box::new(Pattern), @star.span() )
 }
 | Pattern question {
-    let Lexed::Question(question) = question else {
-        unreachable!( "Pattern-Question" );
-    };
-    PatternArgs::Question( Box::new(Pattern), question.span() )
+    PatternArgs::Question( Box::new(Pattern), @question.span() )
 }
 | Pattern exclamation {
-    let Lexed::Exclamation(exclamation) = exclamation else {
-        unreachable!( "Pattern-Exclamation" );
-    };
-    PatternArgs::Exclamation( Box::new(Pattern), exclamation.span() )
+    PatternArgs::Exclamation( Box::new(Pattern), @exclamation.span() )
 }
 | TerminalSet {
     PatternArgs::TerminalSet( TerminalSet )
@@ -254,13 +236,7 @@ Pattern(PatternArgs): ident {
     PatternArgs::Lookaheads( Box::new(p1), Box::new(lh) )
 }
 | lparen Pattern+ rparen {
-    let Lexed::LParen(open) = lparen else {
-        unreachable!( "Pattern-Group-Open" );
-    };
-    let Lexed::RParen(close) = rparen else {
-        unreachable!( "Pattern-Group-Close" );
-    };
-    PatternArgs::Group(Pattern, open, close)
+    PatternArgs::Group(Pattern, @lparen.span(), @rparen.span())
 }
 | literal {
     let Lexed::Literal(literal) = literal else {
@@ -273,7 +249,6 @@ Pattern(PatternArgs): ident {
 }
 ;
 
-
 Action(Option<Group>): bracegroup {
     let Lexed::BraceGroup(group) = bracegroup else {
         unreachable!( "Action0" );
@@ -281,37 +256,6 @@ Action(Option<Group>): bracegroup {
     Some(group)
 }
 | { None }
-;
-
-TokenDef((Ident, TokenStream)): token ident RustCode semicolon
-{
-    let Lexed::Ident(ident) = ident else {
-        unreachable!( "TokenDef-Ident" );
-    };
-    ( ident, RustCode )
-}
-;
-
-RustCode(TokenStream): t=[^semicolon]+ {
-    let mut tokens = TokenStream::new();
-    for token in t.into_iter() {
-        token.append_to_stream(&mut tokens);
-    }
-    tokens
-};
-
-StartDef(Ident): start ident semicolon {
-    let Lexed::Ident(ident) = ident else {
-        unreachable!( "StartDef-Ident" );
-    };
-    ident
-}
-;
-EofDef((Span,TokenStream)): eofdef RustCode semicolon { (eofdef.span(), RustCode) }
-;
-TokenTypeDef((Span,TokenStream)): tokentype RustCode semicolon { (tokentype.span(), RustCode) }
-;
-UserDataDef((Span,TokenStream)): userdata RustCode semicolon { (userdata.span(),RustCode) }
 ;
 
 IdentOrLiteral(IdentOrLiteral): ident {
@@ -327,64 +271,90 @@ IdentOrLiteral(IdentOrLiteral): ident {
     IdentOrLiteral::Literal( literal )
 };
 
-ReduceType(ReduceType): left { ReduceType::Left }
-| right { ReduceType::Right }
-;
+RustCode(TokenStream): t=[^semicolon]+ {
+    let mut tokens = TokenStream::new();
+    for token in t.into_iter() {
+        token.append_to_stream(&mut tokens);
+    }
+    tokens
+};
 
-ReduceDef((ReduceType, Vec<IdentOrLiteral>)): reducetype=ReduceType IdentOrLiteral+ semicolon {
-    ( reducetype, IdentOrLiteral )
-}
-;
-
-ErrorDef((Span,TokenStream)): errortype RustCode semicolon { (errortype.span(), RustCode) }
-;
-
-ModulePrefixDef((Span,TokenStream)): moduleprefix RustCode semicolon { (moduleprefix.span(), RustCode) };
-
-Glr: glr semicolon;
-
-Lalr: lalr semicolon;
-
-Precedence(Vec<IdentOrLiteral>): precedence! IdentOrLiteral+ semicolon!;
-
-NoOptim: nooptim semicolon;
-
-Dense: dense semicolon;
-
-Trace(Vec<Ident>): trace ident* semicolon {
-    ident.into_iter().map(|t| {
-        let Lexed::Ident(ident) = t else {
-            unreachable!( "Trace-Ident" );
+Directive
+    : percent token ident RustCode semicolon {
+        let Lexed::Ident(ident) = ident else {
+            unreachable!( "TokenDef-Ident" );
         };
-        ident
-    }).collect()
-}
-;
+        data.terminals.push( (ident, RustCode) );
+    }
+    | percent start ident semicolon {
+        let Lexed::Ident(ident) = ident else {
+            unreachable!( "StartDef-Ident" );
+        };
+        data.start_rule_name.push(ident);
+    }
+    | percent eofdef RustCode semicolon {
+        data.eof.push( (@eofdef.span(), RustCode) );
+    }
+    | percent tokentype RustCode semicolon {
+        data.token_typename.push( (@tokentype.span(), RustCode) );
+    }
+    | percent userdata RustCode semicolon {
+        data.userdata_typename.push( (@userdata.span(),RustCode) );
+    }
+    | percent left IdentOrLiteral+ semicolon {
+        data.precedences.push( IdentOrLiteral.clone() );
+        data.reduce_types.push( (ReduceType::Left, IdentOrLiteral) );
+    }
+    | percent right IdentOrLiteral+ semicolon {
+        data.precedences.push( IdentOrLiteral.clone() );
+        data.reduce_types.push( (ReduceType::Right, IdentOrLiteral) );
+    }
+    | percent precedence IdentOrLiteral+ semicolon {
+        data.precedences.push( IdentOrLiteral );
+    }
+    | percent errortype RustCode semicolon {
+        data.error_typename.push( (@errortype.span(), RustCode) );
+    }
+    | percent moduleprefix RustCode semicolon {
+        data.module_prefix.push( (@moduleprefix.span(), RustCode) );
+    }
+    | percent glr semicolon {
+        data.glr = true;
+    }
+    | percent lalr semicolon {
+        data.lalr = true;
+    }
+    | percent nooptim semicolon {
+        data.no_optim = true;
+    }
+    | percent dense semicolon {
+        data.dense = true;
+    }
+    | percent trace ident* semicolon {
+        let idents = ident.into_iter().map(|t| {
+            let Lexed::Ident(ident) = t else {
+                unreachable!( "Trace-Ident" );
+            };
+            ident
+        });
+        data.traces.extend( idents );
+    }
+    | percent filter! RustCode semicolon! {
+        data.filter = Some(RustCode);
+    }
+    | percent runtime semicolon {
+        data.compiled = false;
+    }
+    | percent location! RustCode semicolon! {
+        data.location_typename = Some(RustCode);
+    }
+    ;
 
-Filter(TokenStream): filter! RustCode semicolon! ;
 
-Runtime: runtime semicolon ;
 
-Location(TokenStream): location! RustCode semicolon!;
 
 GrammarLine : Rule { data.rules.push(Rule); }
-| TokenDef  { data.terminals.push(TokenDef); }
-| StartDef  { data.start_rule_name.push(StartDef); }
-| EofDef    { data.eof.push(EofDef); }
-| TokenTypeDef  { data.token_typename.push(TokenTypeDef); }
-| UserDataDef  { data.userdata_typename.push(UserDataDef); }
-| ReduceDef  { data.precedences.push(ReduceDef.1.clone()); data.reduce_types.push(ReduceDef); }
-| ErrorDef   { data.error_typename.push(ErrorDef); }
-| ModulePrefixDef { data.module_prefix.push(ModulePrefixDef); }
-| Lalr { data.lalr = true; }
-| Glr { data.glr = true; }
-| Precedence { data.precedences.push(Precedence); }
-| NoOptim { data.no_optim = true; }
-| Dense { data.dense = true; }
-| Trace { data.traces.extend(Trace); }
-| Filter { data.filter = Some(Filter); }
-| Runtime { data.compiled = false; }
-| Location { data.location_typename = Some(Location); }
-;
+    | Directive
+    ;
 
 Grammar: GrammarLine+;
