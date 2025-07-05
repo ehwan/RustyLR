@@ -19,9 +19,7 @@ impl Grammar {
         let start_rule_name = &self.start_rule_name;
         let rule_typename = format_ident!("{}Rule", start_rule_name);
         let state_typename = format_ident!("{}State", start_rule_name);
-        let token_typename = &self.token_typename;
         let enum_name = format_ident!("{}NonTerminals", start_rule_name);
-        let reduce_error_typename = &self.error_typename;
         let parse_error_typename = format_ident!("{}ParseError", start_rule_name);
         let context_struct_name = format_ident!("{}Context", start_rule_name);
         let token_data_typename = format_ident!("{}TokenData", start_rule_name);
@@ -58,7 +56,7 @@ impl Grammar {
                 pub type #state_typename = #module_prefix::parser::nondeterministic::state::#state_structname<#enum_name, #rule_container_type>;
                 /// type alias for `InvalidTerminalError`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_typename, #reduce_error_typename>;
+                pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_data_typename>;
             }
             );
         } else {
@@ -75,7 +73,7 @@ impl Grammar {
                 pub type #state_typename = #module_prefix::parser::deterministic::state::#state_structname<#enum_name>;
                 /// type alias for `ParseError`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_typename, #reduce_error_typename>;
+                pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_data_typename>;
             }
             );
         }

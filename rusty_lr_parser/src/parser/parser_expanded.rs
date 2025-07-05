@@ -177,10 +177,7 @@ pub type GrammarState =
     ::rusty_lr_core::parser::deterministic::state::SparseState<GrammarNonTerminals>;
 #[doc = r" type alias for `ParseError`"]
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarParseError = ::rusty_lr_core::parser::deterministic::ParseError<
-    Lexed,
-    ::rusty_lr_core::DefaultReduceActionError,
->;
+pub type GrammarParseError = ::rusty_lr_core::parser::deterministic::ParseError<GrammarTokenData>;
 #[doc = r" An enum that represents non-terminal symbols"]
 #[allow(non_camel_case_types, dead_code)]
 #[derive(
