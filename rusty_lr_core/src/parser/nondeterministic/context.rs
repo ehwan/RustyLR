@@ -228,6 +228,7 @@ impl<Data: TokenData> Context<Data> {
         Data: Clone,
     {
         use crate::parser::State;
+        use crate::Location;
 
         // current_nodes <-> nodes_pong <-> nodes_pong2
         // cycle for no unnecessary heap allocation
@@ -355,9 +356,13 @@ impl<Data: TokenData> Context<Data> {
                 }
             } else {
                 // try shift term to error state
-                for error_node in error_nodes {
-                    let next_state = parser.get_states()[error_node.state].shift_goto_class(class);
-                    if let Some(next_state) = next_state {
+                for mut error_node in error_nodes {
+                    if let Some(next_state) =
+                        parser.get_states()[error_node.state].shift_goto_class(class)
+                    {
+                        // A -> a . error b
+                        // and b is fed, shift error and b
+
                         let next_node = Node {
                             parent: Some(Rc::new(error_node)),
                             state: next_state,
@@ -370,6 +375,17 @@ impl<Data: TokenData> Context<Data> {
                             .or_default()
                             .push(Rc::new(next_node));
                     } else {
+                        // here, fed token is in `error` non-terminal
+                        // so merge location with previous
+
+                        let new_location = Data::Location::new(
+                            std::iter::once(&location).chain(
+                                error_node.iter().map(|node| &node.data.as_ref().unwrap().1),
+                            ),
+                            2, // error node + fed token
+                        );
+                        error_node.data.as_mut().unwrap().1 = new_location;
+
                         self.current_nodes
                             .entry(error_node.state)
                             .or_default()

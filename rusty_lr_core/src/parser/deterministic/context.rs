@@ -267,6 +267,8 @@ impl<Data: TokenData> Context<Data> {
                 if let Some(next_state_id) =
                     parser.get_states()[*self.state_stack.last().unwrap()].shift_goto_class(class)
                 {
+                    // A -> a . error b
+                    // and b is fed, shift error and b
                     self.state_stack.push(next_state_id);
 
                     #[cfg(feature = "tree")]
@@ -274,6 +276,16 @@ impl<Data: TokenData> Context<Data> {
                         .push(crate::tree::Tree::new_terminal(term.clone()));
 
                     self.data_stack.push((Data::new_terminal(term), location));
+                } else {
+                    // here, fed token is in `error` non-terminal
+                    // so merge location with previous
+
+                    let new_location = Data::Location::new(
+                        std::iter::once(&location)
+                            .chain(self.data_stack.iter().map(|(_, loc)| loc).rev()),
+                        2, // error node + fed token
+                    );
+                    self.data_stack.last_mut().unwrap().1 = new_location;
                 }
                 Ok(())
             } else {
