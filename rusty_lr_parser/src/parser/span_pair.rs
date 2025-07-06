@@ -34,7 +34,7 @@ impl SpanPair {
     }
 }
 impl rusty_lr_core::Location for SpanPair {
-    fn new<'a>(stack: impl Iterator<Item = &'a Self>, len: usize) -> Self
+    fn new<'a>(stack: impl Iterator<Item = &'a Self> + Clone, len: usize) -> Self
     where
         Self: 'a,
     {

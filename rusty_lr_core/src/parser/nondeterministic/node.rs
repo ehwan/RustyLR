@@ -26,6 +26,11 @@ impl<'a, Data: TokenData> Iterator for NodeRefIterator<'a, Data> {
         }
     }
 }
+impl<'a, Data: TokenData> Clone for NodeRefIterator<'a, Data> {
+    fn clone(&self) -> Self {
+        NodeRefIterator { node: self.node }
+    }
+}
 
 /// Node represents single token in the parse tree.
 /// To handle multiple paths in the GLR parsing,
