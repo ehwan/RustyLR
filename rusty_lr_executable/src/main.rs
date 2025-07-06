@@ -44,14 +44,13 @@ fn main() {
 
     let out = match builder.build_impl() {
         Ok(out) => out,
-        Err(e) => {
-            eprintln!("{}", e);
+        Err(_) => {
             return;
         }
     };
 
     let (major, minor, patch) = rusty_lr_buildscript::target_rusty_lr_version();
-    println!(">> The generated code is targeting rusty_lr version {major}.{minor}.{patch}.");
+    println!(">> The generated code is targeting rusty_lr version {major}.{minor}.x.");
     println!(">> There might be a build error if the version is not matched.");
 
     let this_name = env!("CARGO_PKG_NAME");

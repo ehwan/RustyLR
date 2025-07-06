@@ -273,7 +273,7 @@ that current context is trying to parse.
  - Tracing non-terminals will not be automatically removed from the grammar by the optimization.
 
 ```
-%trace NonTerm1, NonTerm2, ...;
+%trace NonTerm1 NonTerm2 ...;
 ```
 
 

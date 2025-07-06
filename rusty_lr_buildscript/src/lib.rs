@@ -334,6 +334,31 @@ impl Builder {
                 return Err(diag.message);
             }
         };
+
+        for error in &grammar_args.error_recovered {
+            let range = if let Some((first, last)) = error.span.pair {
+                let first_range = first.byte_range();
+                let last_range = last.byte_range();
+                first_range.start..last_range.end
+            } else {
+                0..1 // default range if span is not defined
+            };
+            let diag = Diagnostic::error()
+                .with_message("Syntax error in grammar")
+                .with_labels(vec![
+                    Label::primary(file_id, range).with_message(error.message.clone())
+                ])
+                .with_notes(vec![format!("refer to: {}", error.link)]);
+            let writer = StandardStream::stderr(ColorChoice::Auto);
+            let config = codespan_reporting::term::Config::default();
+            term::emit(&mut writer.lock(), &config, &files, &diag)
+                .expect("Failed to write to stderr");
+        }
+
+        if !grammar_args.error_recovered.is_empty() {
+            return Err("Syntax error in grammar".to_string());
+        }
+
         match rusty_lr_parser::grammar::Grammar::arg_check_error(&mut grammar_args) {
             Ok(_) => {}
             Err(e) => {

@@ -8,6 +8,7 @@ use std::collections::BTreeSet;
 
 use crate::error::ParseError;
 use crate::grammar::Grammar;
+use crate::parser::span_pair::SpanPair;
 use crate::pattern::Pattern;
 use crate::pattern::PatternInternal;
 use crate::terminal_info::TerminalName;
@@ -471,6 +472,7 @@ pub struct RuleLineArgs {
 pub enum PrecDPrecArgs {
     Prec(IdentOrLiteral),
     DPrec(Literal),
+    None,
 }
 
 /// parsed arguments for multiple lines of a rule
@@ -479,6 +481,12 @@ pub struct RuleDefArgs {
     pub name: Ident,
     pub typename: Option<TokenStream>,
     pub rule_lines: Vec<RuleLineArgs>,
+}
+
+pub struct RecoveredError {
+    pub message: String,
+    pub link: String,
+    pub span: SpanPair,
 }
 
 /// parsed arguments for the grammar
@@ -501,6 +509,8 @@ pub struct GrammarArgs {
     pub filter: Option<TokenStream>,
     pub compiled: bool,
     pub location_typename: Option<TokenStream>,
+
+    pub error_recovered: Vec<RecoveredError>,
 }
 
 impl Default for GrammarArgs {
@@ -524,6 +534,7 @@ impl Default for GrammarArgs {
             filter: None,
             compiled: true,
             location_typename: None,
+            error_recovered: Vec::new(),
         }
     }
 }

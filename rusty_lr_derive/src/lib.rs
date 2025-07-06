@@ -21,6 +21,21 @@ pub fn lr1(input: TokenStream) -> TokenStream {
         Ok(_) => {}
         Err(e) => return e.to_compile_error().into(),
     }
+
+    // If there are any errors in the grammar arguments, emit compile errors.
+    if !grammar_args.error_recovered.is_empty() {
+        let mut output = proc_macro2::TokenStream::new();
+        for error in &grammar_args.error_recovered {
+            let span = error.span.span();
+            let message = format!("{}\n >>> refer to: {}", error.message, error.link,);
+            output.extend(quote::quote_spanned! {
+                span=>
+                compile_error!(#message);
+            });
+        }
+        return output.into();
+    }
+
     let mut grammar = match Grammar::from_grammar_args(grammar_args) {
         Ok(grammar) => grammar,
         Err(e) => return e.to_compile_error().into(),

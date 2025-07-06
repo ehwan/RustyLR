@@ -5,32 +5,30 @@ use proc_macro2::Span;
 /// we collect the first and last span pair of the token in the parsing tree.
 #[derive(Clone, Debug, Copy)]
 pub struct SpanPair {
-    pub span_first: Span,
-    pub span_last: Span,
+    /// `None` if this is a zero-length span
+    pub pair: Option<(Span, Span)>,
 }
 impl Default for SpanPair {
     fn default() -> Self {
-        SpanPair {
-            span_first: Span::call_site(),
-            span_last: Span::call_site(),
-        }
+        SpanPair { pair: None }
     }
 }
 impl SpanPair {
-    pub fn new(span_first: Span, span_last: Span) -> Self {
-        SpanPair {
-            span_first,
-            span_last,
-        }
-    }
     pub fn new_single(span: Span) -> Self {
         SpanPair {
-            span_first: span,
-            span_last: span,
+            pair: Some((span, span)),
         }
     }
     pub fn span(&self) -> Span {
-        self.span_first
+        self.pair
+            .as_ref()
+            .map_or(Span::call_site(), |(first, last)| {
+                if let Some(joined) = first.join(*last) {
+                    joined
+                } else {
+                    *first
+                }
+            })
     }
 }
 impl rusty_lr_core::Location for SpanPair {
@@ -38,25 +36,14 @@ impl rusty_lr_core::Location for SpanPair {
     where
         Self: 'a,
     {
-        if len == 0 {
-            SpanPair {
-                span_first: Span::call_site(),
-                span_last: Span::call_site(),
-            }
+        let mut take = stack.take(len).filter_map(|x| x.pair);
+        let pair = if let Some(last) = take.next() {
+            let first = take.last().unwrap_or(last);
+
+            Some((first.0, last.1))
         } else {
-            let mut stack = stack.take(len);
-            let first = stack.next().unwrap();
-            if let Some(last) = stack.last() {
-                SpanPair {
-                    span_first: first.span_first,
-                    span_last: last.span_last,
-                }
-            } else {
-                SpanPair {
-                    span_first: first.span_first,
-                    span_last: first.span_last,
-                }
-            }
-        }
+            None
+        };
+        SpanPair { pair }
     }
 }

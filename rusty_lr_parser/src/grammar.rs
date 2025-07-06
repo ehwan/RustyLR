@@ -184,7 +184,7 @@ impl Grammar {
             Err(err) => {
                 let message = err.to_string();
                 let span = match err {
-                    GrammarParseError::NoAction(_term, location) => location.span_first,
+                    GrammarParseError::NoAction(_term, location) => location.pair.unwrap().0,
                     _ => unreachable!("feed error"),
                 };
                 return Err(ParseArgError::MacroLineParse { span, message });
@@ -273,6 +273,9 @@ impl Grammar {
                                 return Err(ArgError::MultipleDPrecDefinition(d.span()));
                             }
                             unique_dprec = Some(d);
+                        }
+                        _ => {
+                            unreachable!("unexpected PrecDPrecArgs variant");
                         }
                     }
                 }
@@ -1622,8 +1625,11 @@ impl Grammar {
         } else {
             self.builder.build(augmented_idx, &mut collector)
         };
-        let Ok(states) = states else {
-            unreachable!("grammar build error");
+        let states = match states {
+            Ok(states) => states,
+            Err(err) => {
+                unreachable!("Error building grammar: {:?}", err);
+            }
         };
         self.states = states.states;
 

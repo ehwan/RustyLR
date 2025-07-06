@@ -55,6 +55,9 @@ pub struct Grammar<Term, NonTerm> {
     /// rules for each nonterminals
     rules_map: HashMap<NonTerm, Vec<usize>>,
 
+    /// the name of the nonterminal that is used for `error` token
+    error_name: Option<NonTerm>,
+
     expand_cache: HashMap<NonTerm, Vec<ExpandCache<Term>>>,
 
     pub precedence_map: HashMap<Operator<Term>, usize>,
@@ -69,6 +72,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             rules_map: Default::default(),
             expand_cache: Default::default(),
             precedence_map: Default::default(),
+            error_name: None,
         }
     }
 
@@ -101,6 +105,10 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         NonTerm: Copy + Hash + Eq,
     {
         self.rules_map.insert(name, Vec::new());
+        if self.error_name.is_some() {
+            unreachable!("error_name already set");
+        }
+        self.error_name = Some(name);
     }
 
     /// false if precedence already exists and different
@@ -203,6 +211,10 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             if !changed {
                 break;
             }
+        }
+
+        if let Some(error) = self.error_name {
+            self.firsts.insert(error, (BTreeSet::new(), true));
         }
     }
 

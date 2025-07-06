@@ -4,6 +4,7 @@ use crate::parser::args::RuleDefArgs;
 use crate::parser::args::RuleLineArgs;
 use crate::parser::args::IdentOrLiteral;
 use crate::parser::args::PrecDPrecArgs;
+use crate::parser::args::RecoveredError;
 use crate::parser::lexer::Lexed;
 use crate::parser::span_pair::SpanPair;
 use crate::terminalset::TerminalSet;
@@ -14,6 +15,7 @@ use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
+use quote::format_ident;
 
 use std::boxed::Box;
 
@@ -132,14 +134,41 @@ RuleLine(RuleLineArgs): TokenMapped* PrecDef* Action
 }
 ;
 
-PrecDef(PrecDPrecArgs): percent! prec! IdentOrLiteral { PrecDPrecArgs::Prec(IdentOrLiteral) }
-| percent! dprec! literal {
-    let Lexed::Literal(literal) = literal else {
-        unreachable!( "PrecDPrecArgs-DPrec" );
-    };
-    PrecDPrecArgs::DPrec(literal) 
-}
-;
+PrecDef(PrecDPrecArgs)
+    : percent! prec! IdentOrLiteral {
+        PrecDPrecArgs::Prec(IdentOrLiteral)
+    }
+    | percent! prec! error {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected <ident> to token or <literal>".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence".to_string(),
+            span: @error,
+        });
+        PrecDPrecArgs::None
+    }
+    | percent! dprec! literal {
+        let Lexed::Literal(literal) = literal else {
+            unreachable!( "PrecDPrecArgs-DPrec" );
+        };
+        PrecDPrecArgs::DPrec(literal) 
+    }
+    | percent! dprec! error {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected integer literal".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#rule-priority".to_string(),
+            span: @error,
+        });
+        PrecDPrecArgs::None
+    }
+    | percent! error {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected %prec or %dprec".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence".to_string(),
+            span: @error,
+        });
+        PrecDPrecArgs::None
+    }
+    ;
 
 TokenMapped((Option<Ident>, PatternArgs)): Pattern {
     ( None, Pattern )
@@ -168,6 +197,14 @@ TerminalSetItem(TerminalSetItem): ident {
 
     TerminalSetItem::Range( first, last )
 }
+| ident minus error {
+    data.error_recovered.push( RecoveredError {
+        message: "Expected ident for terminal set".to_string(),
+        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
+        span: @error,
+    });
+    TerminalSetItem::Terminal( format_ident!("dummy") )
+}
 | literal {
     let Lexed::Literal(literal) = literal else {
         unreachable!( "TerminalSetItem-Literal" );
@@ -182,6 +219,14 @@ TerminalSetItem(TerminalSetItem): ident {
         unreachable!( "TerminalSetItem-Range3" );
     };
     TerminalSetItem::LiteralRange( first, last )
+}
+| literal minus error {
+    data.error_recovered.push( RecoveredError {
+        message: "Expected literal for terminal set".to_string(),
+        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
+        span: @error,
+    });
+    TerminalSetItem::Terminal( format_ident!("dummy") )
 }
 ;
 
@@ -247,6 +292,14 @@ Pattern(PatternArgs): ident {
 | p1=Pattern minus p2=Pattern {
     PatternArgs::Minus( Box::new(p1), Box::new(p2) )
 }
+// | Pattern error {
+//     data.error_recovered.push( RecoveredError {
+//         message: "Wrong pattern combination".to_string(),
+//         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
+//         span: @error,
+//     });
+//     Pattern
+// }
 ;
 
 Action(Option<Group>): bracegroup {
@@ -286,49 +339,154 @@ Directive
         };
         data.terminals.push( (ident, RustCode) );
     }
+    | percent token ident semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected token definition".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#token-definition-must-defined".to_string(),
+            span: @ident
+        });
+    }
+    | percent token error semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected token name".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#token-definition-must-defined".to_string(),
+            span: @error
+        });
+    }
     | percent start ident semicolon {
         let Lexed::Ident(ident) = ident else {
             unreachable!( "StartDef-Ident" );
         };
         data.start_rule_name.push(ident);
     }
+    | percent start error semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected start rule name".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#start-symbol-must-defined".to_string(),
+            span: @error
+        });
+    }
     | percent eofdef RustCode semicolon {
         data.eof.push( (@eofdef.span(), RustCode) );
+    }
+    | percent eofdef semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected EOF definition".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#eof-symbol-must-defined".to_string(),
+            span: @eofdef
+        });
     }
     | percent tokentype RustCode semicolon {
         data.token_typename.push( (@tokentype.span(), RustCode) );
     }
+    | percent tokentype semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected token type definition".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#token-type-must-defined".to_string(),
+            span: @tokentype
+        });
+    }
     | percent userdata RustCode semicolon {
         data.userdata_typename.push( (@userdata.span(),RustCode) );
+    }
+    | percent userdata semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected userdata definition".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#userdata-type-optional".to_string(),
+            span: @userdata
+        });
     }
     | percent left IdentOrLiteral+ semicolon {
         data.precedences.push( IdentOrLiteral.clone() );
         data.reduce_types.push( (ReduceType::Left, IdentOrLiteral) );
     }
+    | percent left error semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected <ident> to token or <literal>".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence".to_string(),
+            span: @error
+        });
+    }
     | percent right IdentOrLiteral+ semicolon {
         data.precedences.push( IdentOrLiteral.clone() );
         data.reduce_types.push( (ReduceType::Right, IdentOrLiteral) );
     }
+    | percent right error semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected <ident> to token or <literal>".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence".to_string(),
+            span: @error
+        });
+    }
     | percent precedence IdentOrLiteral+ semicolon {
         data.precedences.push( IdentOrLiteral );
+    }
+    | percent precedence error semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected <ident> to token or <literal>".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence".to_string(),
+            span: @error
+        });
     }
     | percent errortype RustCode semicolon {
         data.error_typename.push( (@errortype.span(), RustCode) );
     }
+    | percent errortype semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected error type definition".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#error-type-optional".to_string(),
+            span: @errortype
+        });
+    }
     | percent moduleprefix RustCode semicolon {
         data.module_prefix.push( (@moduleprefix.span(), RustCode) );
+    }
+    | percent moduleprefix semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected moduleprefix definition".to_string(),
+            link: "This is hidden directive, user must not use this explicitly".to_string(),
+            span: @moduleprefix
+        });
     }
     | percent glr semicolon {
         data.glr = true;
     }
+    | percent glr error semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected semicolon".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#glr-parser-generation".to_string(),
+            span: @error,
+        });
+    }
     | percent lalr semicolon {
         data.lalr = true;
+    }
+    | percent lalr error semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected semicolon".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#lalr-parser-generation".to_string(),
+            span: @error,
+        });
     }
     | percent nooptim semicolon {
         data.no_optim = true;
     }
+    | percent nooptim error semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected semicolon".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#no-optimization".to_string(),
+            span: @error,
+        });
+    }
     | percent dense semicolon {
         data.dense = true;
+    }
+    | percent dense error semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected semicolon".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#dense-parser-table".to_string(),
+            span: @error,
+        });
     }
     | percent trace ident* semicolon {
         let idents = ident.into_iter().map(|t| {
@@ -339,17 +497,51 @@ Directive
         });
         data.traces.extend( idents );
     }
+    | percent trace error semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected ident".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#tracing-non-terminals".to_string(),
+            span: @error,
+        });
+    }
     | percent filter! RustCode semicolon! {
         data.filter = Some(RustCode);
+    }
+    | percent filter! semicolon! {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected filter definition".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#filter-directive".to_string(),
+            span: @filter,
+        });
     }
     | percent runtime semicolon {
         data.compiled = false;
     }
+    | percent runtime error semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected semicolon".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#runtime-table-calculation".to_string(),
+            span: @error,
+        });
+    }
     | percent location! RustCode semicolon! {
         data.location_typename = Some(RustCode);
     }
+    | percent location! semicolon! {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected location type definition".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#location-tracking".to_string(),
+            span: @location,
+        });
+    }
+    | percent error semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected directive, e.g. %token, %start, %eof, ...".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#syntax".to_string(),
+            span: @error,
+        });
+    }
     ;
-
 
 
 
