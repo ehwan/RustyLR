@@ -4,15 +4,15 @@
  - [Defining tokens - `%token`](#token-definition-must-defined)
  - [`%filter`](#filter-directive)
  - [Production rules](#production-rules)
- - [Regex pattern](#regex-pattern)
+ - [Regex patterns](#regex-pattern)
  - [RuleType](#ruletype-optional)
  - [ReduceAction](#reduceaction-optional)
  - [Accessing token data in ReduceAction](#accessing-token-data-in-reduceaction)
  - [Exclamation mark `!`](#exclamation-mark-)
- - [Tracable Non-Terminals - `%trace`](#tracing-non-terminals)
+ - [Traceable Non-Terminals - `%trace`](#tracing-non-terminals)
  - [Start symbol - `%start`](#start-symbol-must-defined)
- - [Eof token - `%eof`](#eof-symbol-must-defined)
- - [UserData type - `%userdata`](#userdata-type-optional)
+ - [EOF token - `%eof`](#eof-symbol-must-defined)
+ - [User data type - `%userdata`](#userdata-type-optional)
  - [Resolving Conflicts](#resolving-conflicts)
     - [Panic Mode Error Recovery - `error`](#panic-mode-error-recovery)
     - [Shift/Reduce conflicts - `%left`, `%right`, `%precedence`, `%prec`](#operator-precedence)
@@ -60,7 +60,7 @@ lr! {
 %token name <MatchPattern> ;
 ```
 Defines the terminal symbol `name` for further use in the grammar,
-and `<MatchPattern>` will be used in the terminal classification `match` statement
+and `<MatchPattern>` will be used in the terminal classification `match` statement:
 ```rust
 match terminal_symbol {
     <MatchPattern> => { classification }
@@ -68,6 +68,7 @@ match terminal_symbol {
 }
 ```
 
+**Example:**
 ```rust
 %tokentype MyToken;
 
@@ -76,23 +77,25 @@ match terminal_symbol {
 %token minus MyToken::Punct('-');
 ...
 
-E: num plus num ;
- | num minus num ;
+E: num plus num 
+ | num minus num 
+ ;
 ```
-Note: If `%tokentype` is either `char` or `u8`, you can't use this directive. You must use literal value in the grammar directly.
 
-Note: This directive is not for defining the *Whole Token Space*. Any token not defined here could also be captured by [^ term1 ...]-like negation pattern.
+**Notes:**
+- If `%tokentype` is either `char` or `u8`, you can't use this directive. You must use literal values in the grammar directly.
+- This directive is not for defining the *complete token space*. Any token not defined here can also be captured by `[^ term1 ...]`-like negation patterns.
 
 
 ## `%filter` directive
-For %tokentype that can not be used in `match` statement directly,
-you can define filter function using `%filter` directive.
+For `%tokentype` that cannot be used in `match` statement directly,
+you can define a filter function using the `%filter` directive.
 ```rust
 %filter ::my::filter_fn ;
 ```
 Now the `match` statement will be generated as follows:
 ```rust
-match ::my::filter_fn( terminal_symbol ) {
+match ::my::filter_fn(terminal_symbol) {
     <MatchPattern> => { classification }
     ...
 }
@@ -101,7 +104,7 @@ match ::my::filter_fn( terminal_symbol ) {
 The signature of the filter function must be `fn (&Terminal) -> MatchType`.
 
 
-## Production rules
+## Production Rules
 Each production rule defines how a non-terminal symbol can be derived from a sequence of patterns.
 ```
 NonTerminalName
@@ -110,30 +113,31 @@ NonTerminalName
    ...
     ;
 ```
- - **NonTerminalName:** The name of the non-terminal symbol being defined.​
- - **PatternX:** A terminal or non-terminal symbol, or a pattern as defined below.​
- - **ReduceAction:** Optional Rust code executed when the rule is reduced.​
- - **OpName:** Use this symbol as an operator for this production rule. `OpName` could be defined `%token` or literal, or any unique identifier just for this rule. See [ReduceType](#reduce-type-optional) for more details.
+**Components:**
+ - **NonTerminalName:** The name of the non-terminal symbol being defined
+ - **PatternX:** A terminal or non-terminal symbol, or a pattern as defined below
+ - **ReduceAction:** Optional Rust code executed when the rule is reduced
+ - **OpName:** Use this symbol as an operator for this production rule. `OpName` can be defined with `%token` or literal, or any unique identifier just for this rule. See [RuleType](#ruletype-optional) for more details.
 
 ## Patterns
 Patterns define the structure of the input that matches a production rule.
 
- - `.` : Any single terminal symbol.
- - `name` : Non-terminal or terminal symbol `name` defined in the grammar.
- - `[term1 term_start-term_last]`, `[^term1 term_start-term_last]` : Set of terminal symbols. [`eof`](#eof-symbol-must-defined) will be automatically removed from the terminal set.
- - `P*` : Zero or more repetition of `P`.
- - `P+` : One or more repetition of `P`.
- - `P?` : Zero or one repetition of `P`.
- - `(P1 P2 P3)` : Grouping of patterns.
- - `P / term` or `P / [term1 term_start-term_last]`: Pattern `P` followed by a lookaheads. lookaheads will not be consumed.
- - `'a'` or `b'a'`: Single character literal or byte literal. This is only supported if the `%tokentype` is `char` or `u8`.
- - `"abcd"` or `b"abcd"`: String literal or byte string literal. This is only supported if the `%tokentype` is `char` or `u8`.
- - `P - TerminalSet`: `P` must be a subset of terminal symbols. This pattern matches `P` but not any of the terminal symbols in `TerminalSet`.
+ - `.` : Any single terminal symbol
+ - `name` : Non-terminal or terminal symbol `name` defined in the grammar
+ - `[term1 term_start-term_last]`, `[^term1 term_start-term_last]` : Set of terminal symbols. [`eof`](#eof-symbol-must-defined) will be automatically removed from the terminal set
+ - `P*` : Zero or more repetitions of `P`
+ - `P+` : One or more repetitions of `P`
+ - `P?` : Zero or one repetition of `P`
+ - `(P1 P2 P3)` : Grouping of patterns
+ - `P / term` or `P / [term1 term_start-term_last]`: Pattern `P` followed by lookaheads. Lookaheads will not be consumed
+ - `'a'` or `b'a'`: Single character literal or byte literal. This is only supported if the `%tokentype` is `char` or `u8`
+ - `"abcd"` or `b"abcd"`: String literal or byte string literal. This is only supported if the `%tokentype` is `char` or `u8`
+ - `P - TerminalSet`: `P` must be a subset of terminal symbols. This pattern matches `P` but not any of the terminal symbols in `TerminalSet`
 
-Note: When using range patterns like [first-last],
-the range is determined by the order of %token directives,
-not by the actual values of the tokens.
+**Important Note about Range Patterns:**
+When using range patterns like `[first-last]`, the range is determined by the order of `%token` directives, not by the actual values of the tokens.
 
+**Example:**
 If you define tokens in the following order:
 ```
 %token one '1';
@@ -157,19 +161,21 @@ Assigning a type to a non-terminal allows the parser to carry semantic informati
 ```
 E(MyType): ... ;
 ```
-- `MyType`: The Rust type associated with the non-terminal E.
+- `MyType`: The Rust type associated with the non-terminal `E`
 
-The actual value of E is evaluated by the result of the ReduceAction.
+The actual value of `E` is evaluated by the result of the ReduceAction.
 
 
 ## ReduceAction <sub><sup>(optional)</sup></sub>
-A ReduceAction is Rust code executed when a production rule is reduced.​
+A ReduceAction is Rust code executed when a production rule is reduced.
 
-- If a `RuleType` is defined, the ReduceAction must evaluate to that type.​
-- If no `RuleType` is defined and only one token holds a value, the ReduceAction can be omitted.​
-- Reduce action can return Result<(), ErrorType> to handle errors during parsing.
-- Reduce action can be written in Rust code. It is executed when the rule is matched and reduced.
+**Rules:**
+- If a `RuleType` is defined, the ReduceAction must evaluate to that type
+- If no `RuleType` is defined and only one token holds a value, the ReduceAction can be omitted
+- Reduce actions can return `Result<(), ErrorType>` to handle errors during parsing
+- Reduce actions can be written in Rust code. They are executed when the rule is matched and reduced
 
+**Example:**
 ```rust
 %err String;
 
@@ -181,37 +187,42 @@ E(i32): A div a2=A {
 };
 ```
 
-## Accessing token data in ReduceAction
+## Accessing Token Data in ReduceAction
 Within a ReduceAction, you can access the data associated with tokens and non-terminals:
 
-- **Named Patterns:** Assign names to patterns to access their values.
+**Named Patterns:** Assign names to patterns to access their values.
 ```rust
 E(i32): left=A '+' right=A { left + right };
 ```
-- Or using their default names if obvious.
+
+**Default Names:** Use default names when obvious.
 ```rust
 E(i32): A '+' right=A { A + right }; // use A directly
 ```
-- **User Data:** Access mutable user-defined data passed to the parser.
+
+**User Data:** Access mutable user-defined data passed to the parser.
 ```rust
 E(i32): A '+' right=A { 
     *data += 1; // data: &mut UserData
     A + right 
 };
 ```
-- **Lookahead Token:** Inspect the next token without consuming it.
+
+**Lookahead Token:** Inspect the next token without consuming it.
 ```rust
 match *lookahead { // lookahead: &TerminalType
     '+' => { /* ... */ },
     _ => { /* ... */ },
 }
 ```
-- Shift Control: Control whether to perform a shift operation. (for GLR parser)
+
+**Shift Control:** Control whether to perform a shift operation (for GLR parser).
 ```rust
 *shift = false; // Prevent shift action
 ```
 
-For some regex pattern, the type of variable will be modified as follows:
+### Variable Types for Regex Patterns
+For some regex patterns, the type of variable will be modified as follows:
  - `P*` : `Vec<P>`
  - `P+` : `Vec<P>`
  - `P?` : `Option<P>`
@@ -219,22 +230,23 @@ For some regex pattern, the type of variable will be modified as follows:
 You can still access the `Vec` or `Option` by using the base name of the pattern.
 ```rust
 E(i32) : A* {
-    println!( "Value of A: {:?}", A ); // Vec<A>
+    println!("Value of A: {:?}", A); // Vec<A>
 };
 ```
 
+### Terminal Sets
 For terminal set `[term1 term_start-term_end]`, `[^term1 term_start-term_end]`, there is no predefined variable name. You must explicitly define the variable name.
 ```rust
 E: digit=[zero-nine] {
-    println!( "Value of digit: {:?}", digit ); // %tokentype
+    println!("Value of digit: {:?}", digit); // %tokentype
 };
 ```
 
+### Pattern Groups
 For group `(P1 P2 P3)`:
- - If none of the patterns hold value, the group itself will not hold any value.
- - If only one of the patterns holds value, the group will hold the value of the very pattern. And the variable name will be same as the pattern.
- (i.e. If `P1` holds value, and others don't, then `(P1 P2 P3)` will hold the value of `P1`, and can be accessed via name `P1`)
- - If there are multiple patterns holding value, the group will hold `Tuple` of the values. There is no default variable name for the group, you must define the variable name explicitly by `=` operator.
+ - If none of the patterns hold value, the group itself will not hold any value
+ - If only one of the patterns holds value, the group will hold the value of that pattern. The variable name will be the same as the pattern (i.e. If `P1` holds value, and others don't, then `(P1 P2 P3)` will hold the value of `P1`, and can be accessed via name `P1`)
+ - If there are multiple patterns holding value, the group will hold a `Tuple` of the values. There is no default variable name for the group, you must define the variable name explicitly with the `=` operator
 
  ```rust
  NoRuleType: ... ;
@@ -243,18 +255,18 @@ For group `(P1 P2 P3)`:
 
  // I will be chosen
  A: (NoRuleType I NoRuleType) {
-     println!( "Value of I: {:?}", I ); // can access by 'I'
+     println!("Value of I: {:?}", I); // can access by 'I'
      I
  };
 
  // ( i32, i32 )
  B: i2=( I NoRuleType I ) {
-     println!( "Value of I: {:?}", i2 ); // must explicitly define the variable name
+     println!("Value of I: {:?}", i2); // must explicitly define the variable name
  };
 
  ```
 
-## Exclamation mark `!`
+## Exclamation Mark `!`
 An exclamation mark `!` can be used right after the token to ignore the value of the token.
 The token will be treated as if it is not holding any value.
 
@@ -268,9 +280,9 @@ E(i32) : A! A A!;
 ## Tracing Non-Terminals
 Putting non-terminals in `%trace` directive will enable tracing for that non-terminal.
 By calling `context.trace(): HashSet<NonTerminals>`, you can get the set of tracing non-terminals
-that current context is trying to parse.
+that the current context is trying to parse.
 
- - Tracing non-terminals will not be automatically removed from the grammar by the optimization.
+ - Tracing non-terminals will not be automatically removed from the grammar by optimization.
 
 ```
 %trace NonTerm1 NonTerm2 ...;
@@ -285,7 +297,7 @@ Set the start symbol of the grammar as `NonTerminalName`.
 
 ```rust
 %start E;
-// this internally generate augmented rule <Augmented> -> E eof
+// This internally generates augmented rule <Augmented> -> E eof
 
 E: ... ;
 ```
@@ -298,12 +310,12 @@ E: ... ;
 ```
 Define the `eof` terminal symbol.
 `<RustExpr>` must be accessible at the point where the macro is called.
-'eof' terminal symbol will be automatically added to the grammar.
+The `eof` terminal symbol will be automatically added to the grammar.
 
-
+**Example:**
 ```rust
 %eof b'\0';
-// you can access eof terminal symbol by 'eof' in the grammar
+// You can access eof terminal symbol by 'eof' in the grammar
 // without %token eof ...;
 ```
 
@@ -312,9 +324,9 @@ Define the `eof` terminal symbol.
 ```
 %userdata <RustType> ;
 ```
-Define the type of userdata passed to `feed()` function.
+Define the type of user data passed to the `feed()` function.
 
-
+**Example:**
 ```rust
 struct MyUserData { ... }
 
@@ -327,7 +339,7 @@ struct MyUserData { ... }
 fn main() {
     ...
     let mut userdata = MyUserData { ... };
-    parser.feed( ..., token, &mut userdata); // <-- userdata feed here
+    parser.feed(..., token, &mut userdata); // <-- userdata fed here
 }
 ```
 
@@ -343,13 +355,13 @@ JsonObject: '{' JsonKeyValue* '}'
 The `error` token is a reserved non-terminal symbol that can be matched with **any tokens**.
 In the above example, if the parser encounters an invalid token while parsing a JSON object, it will enter panic mode and discard all tokens until it finds a closing brace `}`.
 
-When an invalid token is encountered,
-the parser enters panic mode and starts discarding symbols from the parsing stack until it finds a point where the special `error` token is allowed by the grammar.
-At that point, it shifts the invalid fed token as the `error` token,
-respectively trying to complete the rule that contains the `error` token.
+**How it works:**
+When an invalid token is encountered, the parser enters panic mode and starts discarding symbols from the parsing stack until it finds a point where the special `error` token is allowed by the grammar.
+At that point, it shifts the invalid fed token as the `error` token, then tries to complete the rule that contains the `error` token.
 
-- The `error` token does not have any value, no associated rule-type.
-- In the GLR parsing, the `error` path will be ignored if there are any other valid paths. In other words, it enters panic-mode only if there is no other way to feed the terminal symbol.
+**Important notes:**
+- The `error` token does not have any value, no associated rule-type
+- In GLR parsing, the `error` path will be ignored if there are any other valid paths. In other words, it enters panic-mode only if there is no other way to feed the terminal symbol
 
 ### Operator Precedence
 ```
@@ -366,13 +378,15 @@ For shift/reduce conflicts, the `%left`, `%right`, and `%precedence` directives 
 These directives define the associativity and precedence of operators.
 As in `bison`, the order of precedence is determined by the order in which `%left`, `%right`, or `%precedence` directives appear.
 
+**Conflict Resolution:**
 When a conflict occurs, the parser will compare the precedence of the shift terminal and the *operator* in the reduce rule. If both precedences are defined, either the shift or reduce will be chosen based on the precedence of the operator.
- - If the shift terminal has a higher precedence than the reduce operator, the shift will be chosen.
- - If the reduce operator has a higher precedence than the shift terminal, the reduce will be chosen.
- - If both have the same precedence, the `%left` or `%right` directive will be used to determine the resolving process.
+ - If the shift terminal has a higher precedence than the reduce operator, the shift will be chosen
+ - If the reduce operator has a higher precedence than the shift terminal, the reduce will be chosen
+ - If both have the same precedence, the `%left` or `%right` directive will be used to determine the resolving process
 
-The *operator* of the reduce rule is the rightmost terminal symbol in the production rule, that has a precedence defined by `%left`, `%right`, or `%precedence` directive. In other way, the operator of the reduce rule can be defined explicitly by using `%prec` directive.
+The *operator* of the reduce rule is the rightmost terminal symbol in the production rule that has a precedence defined by `%left`, `%right`, or `%precedence` directive. Alternatively, the operator of the reduce rule can be defined explicitly by using the `%prec` directive.
 
+**Examples:**
 ```rust
 // left reduction for binary operator '+'
 %left '+';
@@ -410,7 +424,7 @@ The priority is defined by the `%dprec` directive. Default priority is `0`.
 ```
 Define the type of `Err` variant in `Result<(), Err>` returned from [`ReduceAction`](#reduceaction-optional). If not defined, `DefaultReduceActionError` will be used.
 
-
+**Example:**
 ```rust
 enum MyErrorType<T> {
     ErrVar1,
@@ -419,7 +433,6 @@ enum MyErrorType<T> {
 }
 
 ...
-
 
 %err MyErrorType<GenericType> ;
 
@@ -452,12 +465,12 @@ By default, the parser will be generated as minimal-LR(1) parser.
 ```
 %glr;
 ```
-Swith to GLR parser generation.
+Switch to GLR parser generation.
 
-If you want to generate GLR parser, add `%glr;` directive in the grammar.
+If you want to generate a GLR parser, add the `%glr;` directive to your grammar.
 With this directive, any Shift/Reduce, Reduce/Reduce conflicts will not be treated as errors.
 
-See [GLR Parser](#glr-parser) section for more details.
+See [GLR Parser](GLR.md) section for more details.
 
 ## No optimization
 ```
@@ -472,7 +485,7 @@ Disable grammar optimization.
 
 Normally, the generated code will use `HashMap` to store the parser table.
 This directive will force the parser to use `Vec` instead of `HashMap`.
-Be careful, this could increase the size of the memory usage a lot.
+**Be careful:** this could increase memory usage significantly.
 
 ## Runtime table calculation
 ```
@@ -481,7 +494,7 @@ Be careful, this could increase the size of the memory usage a lot.
 RustyLR by default generates the parser table at compile time.
 This directive will switch the parser to runtime table calculation mode.
 
-Parser table is generally extremely huge, the generated code will be few 10-thousand lines of code,
+Parser tables are generally extremely large, the generated code will be tens of thousands of lines of code,
 and most of them are for initializing the parser table.
 This directive will switch the parser table to be calculated at runtime,
 which will dramatically reduce the size of the generated code, but will increase the runtime overhead.
@@ -494,16 +507,16 @@ The location type must implement `rusty_lr::Location` trait.
 
 User must explicitly feed the location data to the parser.
 ```rust
-context.feed_location( parser, terminal, user_data, terminal_location );
-context.feed( parser, terminal, user_data ); // this is equivalent to using `Location::default()` for the location
+context.feed_location(parser, terminal, user_data, terminal_location);
+context.feed(parser, terminal, user_data); // this is equivalent to using `Location::default()` for the location
 ```
 
 And the location data can be accessed in the reduce action by `@name` syntax.
 ```rust
 Expr: exp1=Expr '+' exp2=Expr {
-    println!( "Location of exp1: {:?}", @exp1 );
-    println!( "Location of exp2: {:?}", @exp2 );
-    println!( "Location of this expression: {:?}", @$ ); // @$ is the location of the non-terminal itself
+    println!("Location of exp1: {:?}", @exp1);
+    println!("Location of exp2: {:?}", @exp2);
+    println!("Location of this expression: {:?}", @$); // @$ is the location of the non-terminal itself
     exp1 + exp2
 };
 ```

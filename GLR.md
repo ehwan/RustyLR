@@ -6,14 +6,17 @@ it forks the current parsing state into multiple branches,
 each representing a different possible interpretation of the input.
 These branches are processed in parallel, and invalid paths are pruned as parsing progresses.
 
-## Enabling GLR Parsing in RustyLR
-To utilize GLR parsing in RustyLR, include the %glr; directive in your grammar definition.
+## Enabling GLR Parsing
+To use GLR parsing in RustyLR, include the `%glr;` directive in your grammar definition.
 This directive instructs RustyLR to generate a GLR parser,
 which can handle ambiguous grammars by exploring multiple parsing paths.
 
-Once `%glr` directive is added, any conflicts in the grammar will not be reported as errors.
-It's important to be aware of points in your grammar where shift/reduce or reduce/reduce conflicts occur, as each divergence increases computational complexity.​
-If you are using executable `rustylr`, you can use `--verbose` option to see any conflicts in the grammar and their divergent paths.
+Once the `%glr` directive is added, any conflicts in the grammar will not be reported as errors.
+It's important to be aware of points in your grammar where shift/reduce or reduce/reduce conflicts occur, as each divergence increases computational complexity.
+
+**Tip:** If you are using the `rustylr` executable, you can use the `--verbose` option to see any conflicts in the grammar and their divergent paths.
+
+## Example: Ambiguous Grammar
 
 ```rust
 %glr;
@@ -28,7 +31,7 @@ E(i32): E '+' E { E + E }
       | Digit { Digit.to_digit(10).unwrap() as i32 };
 ```
 
-In this grammar, the expression 1 + 2 * 3 + 4 has multiple valid parse trees due to the ambiguity in operator precedence and associativity.
+In this grammar, the expression `1 + 2 * 3 + 4` has multiple valid parse trees due to the ambiguity in operator precedence and associativity:
  - `((1 + 2) * 3) + 4`
  - `(1 + (2 * 3)) + 4`
  - `1 + ((2 * 3) + 4)`
@@ -42,47 +45,51 @@ RustyLR allows you to resolve ambiguities dynamically within reduce actions.
 Simply returning `Err` from a reduce action will prune the current branch of the parse tree.
 By inspecting the lookahead token or other context, you can decide whether to proceed with a particular reduction.
 
-For example, to enforce operator precedence (e.g., * has higher precedence than +), you can modify the reduce actions as follows:
+For example, to enforce operator precedence (e.g., `*` has higher precedence than `+`), you can modify the reduce actions as follows:
 
 ```rust
 E : E '+' E {
       match *lookahead {
           '*' => {
-              // no reduce if the next token is '*'
-              // this prevent
+              // Don't reduce if the next token is '*'
+              // This prevents:
               // E + E   /   *
               //             ^ lookahead
-              // to be  E *  ...
-              //        ^ (E + E)
+              // from becoming:  E *  ...
+              //                 ^ (E + E)
               return Err("".to_string());
           }
           _ => {
-              // revoke the shift action
-              // this prevent
+              // Revoke the shift action
+              // This prevents:
               // E + E   /  +
               //            ^ lookahead
-              // to be E + E +  ...
-              // and enforce only the reduce action takes place
+              // from becoming: E + E +  ...
+              // and enforces only the reduce action:
               // E + ...
               // ^ (E + E)
               *shift = false;
           }
-
       }
+      E + E  // Return the result of the addition
 }
 ```
-`lookahead: TokenType` and `shift: &mut bool` are predefined variable and can be used in the reduce action.
-- `lookahead` refers to the next token in the input stream.​
-- Returning `Err` from the reduce action will discard the current parsing path.​
-- Setting `*shift = false;` prevents the parser from performing a shift action, enforcing the desired reduction.
+
+### Predefined Variables in Reduce Actions
+- `lookahead: &TokenType` - refers to the next token in the input stream
+- `shift: &mut bool` - controls whether a shift action should be performed
+
+### Ambiguity Resolution Rules
+- Returning `Err` from the reduce action will discard the current parsing path
+- Setting `*shift = false;` prevents the parser from performing a shift action, enforcing the desired reduction
 
 ## Parsing with the GLR Parser
 RustyLR provides a consistent parsing interface for both deterministic and GLR parsers.
 After generating the parser, you can feed tokens to the parser context and retrieve the parsing results.
 
 ```rust
-let parser = EParser::new(); // <StartSymbol>Parser class
-let mut context = EContext::new(); // <StartSymbol>Context class
+let parser = EParser::new();        // Create <StartSymbol>Parser instance
+let mut context = EContext::new();  // Create <StartSymbol>Context instance
 
 for token in input_sequence {
     match context.feed(&parser, token) {
@@ -99,9 +106,9 @@ for result in context.accept() {
     println!("Parse result: {:?}", result.unwrap());
 }
 ```
-In this code:​
 
-- `EParser::new()` creates a new parser instance.​
-- `EContext::new()` initializes the parsing context.​
-- `context.feed(&parser, token)` feeds tokens to the parser.​
-- `context.accept()` Gets all of the value of `%start` symbol from every parse paths.
+### Key Components:
+- `EParser::new()` - Creates a new parser instance
+- `EContext::new()` - Initializes the parsing context
+- `context.feed(&parser, token)` - Feeds tokens to the parser
+- `context.accept()` - Returns all possible values of the `%start` symbol from every parse path

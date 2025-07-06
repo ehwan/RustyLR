@@ -1,13 +1,14 @@
 # rustylr
-Converts a context-free grammar into a state automaton tables,
-and generates a Rust code that can be used as a parser for that grammar.
+A command-line tool that converts context-free grammars into state automaton tables
+and generates Rust code that can be used as a parser for that grammar.
 
-```
+## Installation
+```bash
 cargo install rustylr
 ```
 
 ## Usage
-```
+```bash
 $ rustylr --help
 Usage: rustylr [OPTIONS] <INPUT_FILE> [OUTPUT_FILE]
 
@@ -16,8 +17,7 @@ Arguments:
           input_file to read
 
   [OUTPUT_FILE]
-          output_file to write
-
+          Output file for generated Rust code
           [default: out.tab.rs]
 
 Options:
@@ -25,18 +25,17 @@ Options:
           do not rustfmt the output
 
   -v, --verbose
-          turns on all verbose options
+          Enable all verbose options
 
   -c, --verbose-conflict
-          verbose output for any shift/reduce or reduce/reduce conflicts.
-
-          This option is for GLR parser. Since such conflicts are not treated as errors, this option is useful for debugging.
+          Show verbose output for any shift/reduce or reduce/reduce conflicts.
+          This option is useful for GLR parsers where conflicts are not treated as errors.
 
   -r, --verbose-conflict-resolve
-          verbose output for the conflict resolution process, by '%left' or '%right' directive
+          Show verbose output for the conflict resolution process using '%left' or '%right' directives
 
-  -r, --verbose-optimization
-          verbose output for the terminal class optimization process
+      --verbose-optimization
+          Show verbose output for the terminal class optimization process
 
   -h, --help
           Print help (see a summary with '-h')
@@ -44,42 +43,90 @@ Options:
   -V, --version
           Print version
 ```
-This program searches for '%%' in the input file.
 
-The contents before '%%' will be copied into the output file as it is.
-Context-free grammar must be followed by '%%'.
-Each line must follow the [SYNTAX](../SYNTAX.md).
+## Grammar File Format
+The program searches for `%%` in the input file to separate Rust code from grammar definitions.
 
+- **Before `%%`**: Regular Rust code (imports, type definitions, etc.) that will be copied to the output file as-is
+- **After `%%`**: Context-free grammar definition that must follow the [RustyLR syntax](../SYNTAX.md)
+
+## Example
+
+Here's a simple example showing how to create a grammar file and generate a parser:
+
+**Input file** (`my_grammar.rs`):
 ```rust
-// my_grammar.rs
-use some_crate::some_module::SomeStruct;
+// Rust imports and type definitions
+use std::collections::HashMap;
 
-enum SomeTypeDef {
-    A,
-    B,
-    C,
+#[derive(Debug, Clone)]
+pub enum Token {
+    Identifier(String),
+    Number(i32),
+    Punct(char),
+    EOF,
 }
 
-%% // <-- input file splitted here
+%% // Grammar definition starts here
 
-%tokentype u8;
+%tokentype Token;
 %start E;
-%eof b'\0';
+%eof Token::EOF;
 
-%token a b'a';
-%token lparen b'(';
-%token rparen b')';
+%token id Token::Identifier(_);
+%token num Token::Number(_);
+%token lparen Token::Punct('(');
+%token rparen Token::Punct(')');
 
-E: lparen E rparen
- | P
+E: lparen E rparen { E }
+ | id { 
+     if let Token::Identifier(name) = id {
+         println!("Found identifier: {}", name);
+     }
+ }
+ | num {
+     if let Token::Number(value) = num {
+         println!("Found number: {}", value);
+     }
+ }
  ;
-
-P: a;
 ```
 
-Calling the command will generate a Rust code `my_parser.rs`.
-```
+**Generate the parser:**
+```bash
 $ rustylr my_grammar.rs my_parser.rs
 ```
 
-For usage of the generated code, please refer to the documents [Quick Start](../README.md#quick-start).
+This will create `my_parser.rs` containing the generated parser code.
+
+**Using the generated parser:**
+```rust
+include!("my_parser.rs");
+
+fn main() {
+    let parser = EParser::new();
+    let mut context = EContext::new();
+    
+    // Parse some tokens
+    let tokens = vec![
+        Token::Punct('('),
+        Token::Identifier("hello".to_string()),
+        Token::Punct(')'),
+        Token::EOF,
+    ];
+    
+    for token in tokens {
+        match context.feed(&parser, token, &mut ()) {
+            Ok(_) => println!("Token accepted"),
+            Err(e) => println!("Parse error: {}", e),
+        }
+    }
+    
+    // Get the final result
+    if let Some(result) = context.accept() {
+        println!("Parse successful: {:?}", result);
+    }
+}
+```
+
+For more usage examples and detailed documentation, see the [main README](../README.md).
