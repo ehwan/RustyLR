@@ -255,6 +255,7 @@ impl Grammar {
             ));
         }
 
+        // %prec and %dprec in each production rules
         for rules in grammar_args.rules.iter_mut() {
             use crate::parser::args::PrecDPrecArgs;
             for rule in rules.rule_lines.iter_mut() {
@@ -528,6 +529,36 @@ impl Grammar {
             grammar.terminals_index.insert(name, idx);
         }
 
+        // insert rule typenames first, since it will be used when inserting rule definitions below
+        for (rule_idx, rules_arg) in grammar_args.rules.iter().enumerate() {
+            // check reserved name
+            utils::check_reserved_name(&rules_arg.name)?;
+
+            let nonterminal = NonTerminalInfo {
+                name: rules_arg.name.clone(),
+                pretty_name: rules_arg.name.to_string(),
+                ruletype: rules_arg.typename.clone(),
+                rules: Vec::new(), // production rules will be added later
+                regex_span: None,
+                trace: false,
+                protected: false,
+                nonterm_type: None,
+            };
+
+            grammar.nonterminals.push(nonterminal);
+
+            // check duplicate
+            if let Some(old) = grammar
+                .nonterminals_index
+                .insert(rules_arg.name.clone(), rule_idx)
+            {
+                return Err(ParseError::MultipleRuleDefinition(
+                    grammar.nonterminals[old].name.clone(),
+                    rules_arg.name.clone(),
+                ));
+            }
+        }
+
         // add precedence identifier from %prec definition in each rule
         for rules_arg in grammar_args.rules.iter() {
             for rule in rules_arg.rule_lines.iter() {
@@ -611,36 +642,6 @@ impl Grammar {
                         });
                     }
                 }
-            }
-        }
-
-        // insert rule typenames first, since it will be used when inserting rule definitions below
-        for (rule_idx, rules_arg) in grammar_args.rules.iter().enumerate() {
-            // check reserved name
-            utils::check_reserved_name(&rules_arg.name)?;
-
-            let nonterminal = NonTerminalInfo {
-                name: rules_arg.name.clone(),
-                pretty_name: rules_arg.name.to_string(),
-                ruletype: rules_arg.typename.clone(),
-                rules: Vec::new(), // production rules will be added later
-                regex_span: None,
-                trace: false,
-                protected: false,
-                nonterm_type: None,
-            };
-
-            grammar.nonterminals.push(nonterminal);
-
-            // check duplicate
-            if let Some(old) = grammar
-                .nonterminals_index
-                .insert(rules_arg.name.clone(), rule_idx)
-            {
-                return Err(ParseError::MultipleRuleDefinition(
-                    grammar.nonterminals[old].name.clone(),
-                    rules_arg.name.clone(),
-                ));
             }
         }
 
