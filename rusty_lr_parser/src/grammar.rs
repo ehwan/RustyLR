@@ -148,6 +148,9 @@ pub struct Grammar {
 
     /// type for location
     pub location_typename: Option<TokenStream>,
+
+    /// name of non-terminals that are used in %prec
+    pub prec_nonterminals: HashSet<Ident>,
 }
 
 impl Grammar {
@@ -394,6 +397,8 @@ impl Grammar {
 
             compiled: grammar_args.compiled,
             location_typename: grammar_args.location_typename,
+
+            prec_nonterminals: Default::default(),
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";
@@ -558,13 +563,36 @@ impl Grammar {
                 ));
             }
         }
+        // insert `error` nonterminal
+        // 'error' must be inserted after all other non-terminals,
+        // other codes are depending on it.
+        {
+            let name = Ident::new(utils::ERROR_NAME, Span::call_site());
+            let nonterminal = NonTerminalInfo {
+                name: name.clone(),
+                pretty_name: "'error'".to_string(),
+                ruletype: None,
+                rules: Vec::new(), // empty rules
+                regex_span: None,
+                trace: false,
+                protected: true,
+                nonterm_type: Some(rusty_lr_core::nonterminal::NonTerminalType::Error),
+            };
 
-        // add precedence identifier from %prec definition in each rule
+            let rule_idx = grammar.nonterminals.len();
+            grammar.nonterminals.push(nonterminal);
+            grammar.nonterminals_index.insert(name, rule_idx);
+        }
+
+        // add new idents from %prec
         for rules_arg in grammar_args.rules.iter() {
             for rule in rules_arg.rule_lines.iter() {
+                // check if ident in %prec is not terminal nor non-terminal
                 if let Some(IdentOrLiteral::Ident(prec_ident)) = &rule.prec {
                     let term_name = TerminalName::Ident(prec_ident.clone());
-                    if !grammar.terminals_index.contains_key(&term_name) {
+                    if !grammar.terminals_index.contains_key(&term_name)
+                        && !grammar.nonterminals_index.contains_key(prec_ident)
+                    {
                         // check reserved name
                         utils::check_reserved_name(prec_ident)?;
 
@@ -643,25 +671,6 @@ impl Grammar {
                     }
                 }
             }
-        }
-
-        // insert `error` nonterminal
-        {
-            let name = Ident::new(utils::ERROR_NAME, Span::call_site());
-            let nonterminal = NonTerminalInfo {
-                name: name.clone(),
-                pretty_name: "'error'".to_string(),
-                ruletype: None,
-                rules: Vec::new(), // empty rules
-                regex_span: None,
-                trace: false,
-                protected: true,
-                nonterm_type: Some(rusty_lr_core::nonterminal::NonTerminalType::Error),
-            };
-
-            let rule_idx = grammar.nonterminals.len();
-            grammar.nonterminals.push(nonterminal);
-            grammar.nonterminals_index.insert(name, rule_idx);
         }
 
         // pattern map for auto-generated rules
