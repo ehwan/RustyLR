@@ -30,7 +30,7 @@ pub struct Rule {
     /// force lookahead tokens for this pattern.
     pub lookaheads: Option<BTreeSet<usize>>,
     /// %prec definition
-    pub prec: Option<(rusty_lr_core::builder::Operator<usize>, Span)>,
+    pub prec: Option<(rusty_lr_core::builder::Operator, Span)>,
     /// %dprec definition
     pub dprec: Option<(usize, Span)>,
 }

@@ -182,7 +182,6 @@ impl Grammar {
         // ======================
         // building grammar
         // ======================
-        use rusty_lr_core::builder::Operator;
         use rusty_lr_core::builder::ReduceType;
         use rusty_lr_core::Token;
 
@@ -192,10 +191,14 @@ impl Grammar {
                 ReduceType::Right => quote! { #module_prefix::builder::ReduceType::Right },
             }
         };
-        let operator_to_stream = |op: Operator<usize>| -> TokenStream {
+        let operator_to_stream = |op: rusty_lr_core::builder::Operator| -> TokenStream {
             match op {
-                Operator::Prec(prec) => quote! { #module_prefix::builder::Operator::Prec(#prec) },
-                Operator::Term(term) => quote! { #module_prefix::builder::Operator::Term(#term) },
+                rusty_lr_core::builder::Operator::Fixed(level) => {
+                    quote! { #module_prefix::builder::Operator::Fixed(#level) }
+                }
+                rusty_lr_core::builder::Operator::Dynamic(idx) => {
+                    quote! { #module_prefix::builder::Operator::Dynamic(#idx) }
+                }
             }
         };
         let nonterminals_token: Vec<_> = self
@@ -226,6 +229,23 @@ impl Grammar {
             terminal_class_names_stream.extend(quote! {
                 #name,
             });
+        }
+
+        let prec_cap = self.builder.precedence_types.len();
+        let mut precedence_types_stream = quote! {
+            let mut precedence_types = Vec::with_capacity(#prec_cap);
+        };
+        for &reduce_type in self.builder.precedence_types.iter() {
+            if let Some(reduce_type) = reduce_type {
+                let reduce_type = reduce_type_to_stream(reduce_type);
+                precedence_types_stream.extend(quote! {
+                    precedence_types.push(Some(#reduce_type));
+                });
+            } else {
+                precedence_types_stream.extend(quote! {
+                    precedence_types.push(None);
+                });
+            }
         }
 
         let grammar_build_stream = if self.compiled {
@@ -326,22 +346,11 @@ impl Grammar {
         } else {
             // build runtime
 
-            // adding reduce types
-            let mut add_reduce_type_stream = TokenStream::new();
-            for (&op, &reduce_type) in self.builder.reduce_types.iter() {
-                let reduce_type_stream = reduce_type_to_stream(reduce_type);
-                let op_stream = operator_to_stream(op);
-                add_reduce_type_stream.extend(quote! {
-                    builder.add_reduce_type( #op_stream, #reduce_type_stream );
-                });
-            }
-
-            // adding precedence orders
-            let mut add_precedence_stream = TokenStream::new();
-            for (&op, &level) in self.builder.precedence_map.iter() {
-                let op_stream = operator_to_stream(op);
-                add_precedence_stream.extend(quote! {
-                    builder.add_precedence(#op_stream, #level);
+            // adding precedence levels
+            let mut add_precedence_levels_stream = TokenStream::new();
+            for (&term, &level) in self.builder.precedence_levels.iter() {
+                add_precedence_levels_stream.extend(quote! {
+                    builder.add_precedence(#term, #level);
                 });
             }
 
@@ -430,10 +439,11 @@ impl Grammar {
                 let mut builder = #module_prefix::builder::Grammar::new();
 
                 // add reduce types
-                #add_reduce_type_stream
+                #add_precedence_levels_stream
 
                 // add precedences
-                #add_precedence_stream
+                #precedence_types_stream
+                builder.set_precedence_types(precedence_types);
 
                 // production rules
                 #add_rules_stream
@@ -472,6 +482,64 @@ impl Grammar {
         } else {
             quote! { None }
         };
+
+        // generate `Parser::class_precedence()` terminal class -> precedence level match body
+        // if class forms a consecutive range, convert it to `s..=e` syntax
+        let mut class_level_match_body_stream = TokenStream::new();
+        {
+            let mut level_classes = Vec::new();
+            level_classes.resize(
+                self.builder.precedence_types.len(),
+                std::collections::BTreeSet::new(),
+            );
+            for (&class, &level) in self.builder.precedence_levels.iter() {
+                level_classes[level].insert(class);
+            }
+
+            for (level, classes) in level_classes.into_iter().enumerate() {
+                if classes.is_empty() {
+                    continue;
+                } else if classes.len() == 1 {
+                    let val = *classes.first().unwrap();
+                    class_level_match_body_stream.extend(quote! {
+                        #val => Some(#level),
+                    });
+                } else {
+                    let mut consecutive_ranges: Vec<(usize, usize)> = Vec::new();
+                    for class in classes {
+                        if let Some(last) = consecutive_ranges.last_mut() {
+                            if class == last.1 + 1 {
+                                last.1 = class; // extend the range
+                            } else {
+                                consecutive_ranges.push((class, class)); // new range
+                            }
+                        } else {
+                            consecutive_ranges.push((class, class)); // first range
+                        }
+                    }
+
+                    let mut case_stream = TokenStream::new();
+                    for (idx, &(s, e)) in consecutive_ranges.iter().enumerate() {
+                        if idx > 0 {
+                            case_stream.extend(quote! { | });
+                        }
+                        if s == e {
+                            case_stream.extend(quote! {
+                                #s
+                            });
+                        } else {
+                            case_stream.extend(quote! {
+                                #s..=#e
+                            });
+                        }
+                    }
+
+                    class_level_match_body_stream.extend(quote! {
+                        #case_stream => Some(#level),
+                    });
+                }
+            }
+        }
 
         // building terminal-class_id map
         if use_range_based_optimization {
@@ -563,6 +631,8 @@ impl Grammar {
                 pub states: Vec<#state_typename>,
                 /// terminal classes
                 pub classes: Vec<Vec<::std::ops::RangeInclusive<#token_typename>>>,
+                /// precedence types
+                pub precedence_types: Vec<Option<#module_prefix::builder::ReduceType>>,
             }
             impl #module_prefix::parser::Parser for #parser_struct_name {
                 type Term = #token_typename;
@@ -570,6 +640,16 @@ impl Grammar {
                 type State = #state_typename;
                 type TerminalClassElement = ::std::ops::RangeInclusive<#token_typename>;
 
+                fn class_precedence(&self, class: usize) -> Option<usize> {
+                    #[allow(unreachable_patterns)]
+                    match class {
+                        #class_level_match_body_stream
+                        _ => None,
+                    }
+                }
+                fn precedence_types(&self) -> &[Option<#module_prefix::builder::ReduceType>] {
+                    &self.precedence_types
+                }
                 fn get_rules(&self) -> &[#rule_typename] {
                     &self.rules
                 }
@@ -601,10 +681,13 @@ impl Grammar {
                 pub fn new() -> Self {
                     #grammar_build_stream
 
+                    #precedence_types_stream
+
                     Self {
                         rules,
                         states,
                         classes: vec![ #classes_body ],
+                        precedence_types,
                     }
                 }
             }
@@ -734,6 +817,8 @@ impl Grammar {
                 pub states: Vec<#state_typename>,
                 /// terminal classes
                 pub classes: Vec<Vec<&'static str>>,
+                /// precedence types
+                pub precedence_types: Vec<Option<#module_prefix::builder::ReduceType>>,
             }
             impl #module_prefix::parser::Parser for #parser_struct_name {
                 type Term = #token_typename;
@@ -741,6 +826,16 @@ impl Grammar {
                 type State = #state_typename;
                 type TerminalClassElement = &'static str;
 
+                fn class_precedence(&self, class: usize) -> Option<usize> {
+                    #[allow(unreachable_patterns)]
+                    match class {
+                        #class_level_match_body_stream
+                        _ => None,
+                    }
+                }
+                fn precedence_types(&self) -> &[Option<#module_prefix::builder::ReduceType>] {
+                    &self.precedence_types
+                }
                 fn get_rules(&self) -> &[#rule_typename] {
                     &self.rules
                 }
@@ -771,10 +866,13 @@ impl Grammar {
                 pub fn new() -> Self {
                     #grammar_build_stream
 
+                    #precedence_types_stream
+
                     Self {
                         rules,
                         states,
                         classes: vec![#classes_body],
+                        precedence_types,
                     }
                 }
             }
