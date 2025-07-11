@@ -3428,6 +3428,12 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
     fn get_error_nonterm(&self) -> Option<Self::NonTerm> {
         Some(GrammarNonTerminals::error)
     }
+    fn precedence_types(&self) -> &[Option<rusty_lr_core::builder::ReduceType>] {
+        &[]
+    }
+    fn class_precedence(&self, class: usize) -> Option<usize> {
+        Some(0)
+    }
 }
 #[doc = r" A struct that holds the whole parser table."]
 #[allow(
