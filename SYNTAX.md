@@ -406,6 +406,32 @@ E: E '+' E { E + E }
  ;
 ```
 
+You can also set the precedence of a rule by referencing a non-terminal symbol with `%prec`.
+This is useful when an operator is represented by a non-terminal that produces different actual operators.
+
+**Example:**
+```rust
+%left '+';
+%left '*';
+
+E: E op=BinOp E %prec op { ... }
+ | ...
+ ;
+
+// The precedence of `BinOp` is determined by the production rule that `BinOp` was derived from.
+BinOp: '+'
+     | '*'
+     ;
+```
+In this example, the `E: E op=BinOp E` rule's precedence is determined by the `BinOp` non-terminal.
+When the parser needs to resolve a conflict involving this rule, it will look at what `BinOp` was reduced from.
+If `BinOp` was reduced from `+`, the precedence of `BinOp` will be the precedence of `+`, which is defined by `%left '+'`.
+otherwise, if `BinOp` was reduced from `*`, the precedence of `BinOp` will be the precedence of `*`, which is defined by `%left '*'`.
+
+If any non-terminal symbol was referenced in the `%prec` directive,
+every production rules in that non-terminal must have operator precedence.
+
+
 ### Rule priority
 ```
 E:
