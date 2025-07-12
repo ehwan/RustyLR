@@ -31,7 +31,7 @@ use crate::terminal_info::TerminalName;
 use crate::token::TokenMapped;
 use crate::utils;
 
-pub struct TerminalClassDefinintion {
+pub struct TerminalClassDefinition {
     pub terminals: Vec<usize>,
     /// counter for only terminal clasas (have more than 1 terminal)
     /// dummy if it is single-terminal class
@@ -103,7 +103,7 @@ pub struct Grammar {
     pub states: Vec<rusty_lr_core::builder::State<ClassIndex, usize>>,
 
     /// set of terminals for each terminal class
-    pub terminal_classes: Vec<TerminalClassDefinintion>,
+    pub terminal_classes: Vec<TerminalClassDefinition>,
     /// id of teminal class for each terminal
     pub terminal_class_id: Vec<TerminalIndex>,
     /// class id for terminal that does not belong to any class
@@ -949,7 +949,7 @@ impl Grammar {
                     ranges.push((*start as u32, *last as u32));
                 }
             }
-            grammar.terminal_classes.push(TerminalClassDefinintion {
+            grammar.terminal_classes.push(TerminalClassDefinition {
                 terminals: vec![i],
                 multiterm_counter,
                 ranges,
@@ -1152,7 +1152,7 @@ impl Grammar {
             if len > 1 {
                 multiterm_counter += 1;
             }
-            let class_def = TerminalClassDefinintion {
+            let class_def = TerminalClassDefinition {
                 terminals: terms,
                 multiterm_counter,
                 ranges: Vec::new(),
