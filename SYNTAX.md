@@ -429,7 +429,7 @@ If `BinOp` was reduced from `+`, the precedence of `BinOp` will be the precedenc
 otherwise, if `BinOp` was reduced from `*`, the precedence of `BinOp` will be the precedence of `*`, which is defined by `%left '*'`.
 
 If any non-terminal symbol was referenced in the `%prec` directive,
-every production rules in that non-terminal must have operator precedence.
+every production rule in that non-terminal must have operator precedence.
 
 
 ### Rule priority
