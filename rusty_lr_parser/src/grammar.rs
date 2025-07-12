@@ -636,8 +636,7 @@ impl Grammar {
                         if let Token::Term(term_idx) = tokens[from_token].token {
                             if let Some((level, _)) = grammar.terminals[term_idx].precedence {
                                 let span = tokens[from_token].begin_span;
-                                Some((Precedence::Fixed(level), span));
-                                break;
+                                Some((Precedence::Fixed(level), span))
                             } else {
                                 return Err(ParseError::PrecedenceNotDefined(prec));
                             }
