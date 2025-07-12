@@ -668,9 +668,6 @@ impl Grammar {
                     op
                 };
 
-                // TODO
-                // check for all `Dynamic` precedence has precedences defined
-
                 // parse %dprec literal value
                 let dprec = if let Some(dprec) = rule.dprec {
                     let lit = match syn::parse2::<syn::Lit>(dprec.to_token_stream()) {
