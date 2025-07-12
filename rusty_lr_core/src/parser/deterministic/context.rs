@@ -421,7 +421,7 @@ impl<Data: TokenData> Context<Data> {
                                 }
                                 None => {
                                     // error
-                                    // TODO
+                                    return false;
                                 }
                             }
                         }
