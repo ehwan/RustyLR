@@ -459,29 +459,296 @@ impl<Data: TokenData> Node<Data> {
         None
     }
 
-    pub fn can_panic_mode<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        mut node: &Rc<Node<Data>>,
+    /// Feed one terminal with location to parser, and update state stack.
+    pub fn feed_location<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        self: Rc<Self>,
+        context: &mut super::Context<Data>,
         parser: &P,
+        term: P::Term,
+        class: usize,
+        shift_prec: Option<usize>,
+        userdata: &mut Data::UserData,
+        location: Data::Location,
+    ) -> Result<(), Rc<Self>>
+    where
+        P::Term: Clone,
+        P::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug,
+        Data: Clone,
+    {
+        use crate::parser::State;
+        use crate::rule::Precedence;
+
+        let shift_state = parser.get_states()[self.state].shift_goto_class(class);
+        if let Some(reduce_rules) = parser.get_states()[self.state].reduce(class) {
+            let mut shift = None;
+            let reduces: smallvec::SmallVec<[_; 2]> = reduce_rules
+                .clone()
+                .filter_map(|reduce_rule| {
+                    // runtime shift/reduce precedence check
+
+                    let rule = &parser.get_rules()[reduce_rule];
+                    let reduce_prec = match rule.precedence {
+                        Some(Precedence::Fixed(level)) => Some(level),
+                        Some(Precedence::Dynamic(token_index)) => {
+                            // fix the value to the offset from current node
+                            let ith = rule.rule.len() - token_index - 1;
+                            let mut node = &self;
+                            for _ in 0..ith {
+                                node = node.parent.as_ref().unwrap();
+                            }
+                            node.precedence_level
+                        }
+                        None => None,
+                    };
+
+                    // if there is shift/reduce conflict, check for reduce rule's precedence and shift terminal's precedence
+                    match (shift_state.is_some(), shift_prec, reduce_prec) {
+                        (true, Some(shift_prec_), Some(reduce_prec_)) => {
+                            match reduce_prec_.cmp(&shift_prec_) {
+                                std::cmp::Ordering::Less => {
+                                    // no reduce
+                                    shift = shift_state;
+                                    None
+                                }
+                                std::cmp::Ordering::Equal => {
+                                    // check for reduce_type
+                                    use crate::builder::ReduceType;
+                                    match parser.precedence_types(reduce_prec_) {
+                                        Some(ReduceType::Left) => {
+                                            // no shift
+                                            Some((reduce_rule, reduce_prec))
+                                        }
+                                        Some(ReduceType::Right) => {
+                                            // no reduce
+                                            shift = shift_state;
+                                            None
+                                        }
+                                        None => {
+                                            // TODO error
+                                            panic!("Unknown precedence type: {:?}", reduce_prec);
+                                        }
+                                    }
+                                }
+                                std::cmp::Ordering::Greater => {
+                                    // no shift
+                                    Some((reduce_rule, reduce_prec))
+                                }
+                            }
+                        }
+                        _ => {
+                            // nothing; go for both reduce and shift
+                            shift = shift_state;
+                            Some((reduce_rule, reduce_prec))
+                        }
+                    }
+                })
+                .collect();
+
+            let mut shifted = false;
+            if !reduces.is_empty() {
+                // call every reduce action
+                // and check if every reduce action revoked shift
+                let mut shift_ = false;
+                for (reduce_rule, precedence) in reduces {
+                    let mut pass = shift.is_some();
+                    match super::reduce(
+                        parser,
+                        reduce_rule,
+                        precedence,
+                        Rc::clone(&self),
+                        context,
+                        &term,
+                        &mut pass,
+                        userdata,
+                    ) {
+                        Ok(next_node) => {
+                            shift_ |= pass;
+                            // reduce recursively
+                            shifted |= Self::feed_location(
+                                next_node,
+                                context,
+                                parser,
+                                term.clone(),
+                                class,
+                                shift_prec,
+                                userdata,
+                                location.clone(),
+                            )
+                            .is_ok();
+                        }
+                        Err(err) => {
+                            shift_ |= pass;
+                            context.reduce_errors.push(err);
+                        }
+                    }
+                }
+                // if every reduce action revoked shift,
+                // then reset shift to None
+                if !shift_ {
+                    shift = None;
+                }
+            }
+            if let Some(shift) = shift {
+                // some shift action was performed; remove fallback_nodes immediately
+                // to avoid cloned Rc nodes
+                context.fallback_nodes.clear();
+
+                let next_node = Node {
+                    parent: Some(self),
+                    state: shift,
+                    precedence_level: shift_prec,
+                    #[cfg(feature = "tree")]
+                    tree: Some(crate::tree::Tree::new_terminal(term.clone())),
+                    data: Some((Data::new_terminal(term), location)),
+                };
+
+                context.next_nodes.push(Rc::new(next_node));
+                Ok(())
+            } else {
+                if shifted {
+                    Ok(())
+                } else {
+                    Err(self)
+                }
+            }
+        } else if let Some(shift) = shift_state {
+            // some shift action was performed; remove fallback_nodes immediately
+            // to avoid cloned Rc nodes
+            context.fallback_nodes.clear();
+
+            let next_node = Node {
+                parent: Some(self),
+                state: shift,
+                precedence_level: shift_prec,
+                #[cfg(feature = "tree")]
+                tree: Some(crate::tree::Tree::new_terminal(term.clone())),
+                data: Some((Data::new_terminal(term), location)),
+            };
+
+            context.next_nodes.push(Rc::new(next_node));
+            Ok(())
+        } else {
+            // no reduce, no shift
+            // add to fallback_nodes to restore if any shift action was performed
+            Err(self)
+        }
+    }
+    /// Feed one terminal with location to parser, and update state stack.
+    pub fn can_feed<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        self: &Rc<Self>,
+        parser: &P,
+        term: &P::Term,
+        class: usize,
+        shift_prec: Option<usize>,
     ) -> bool
     where
-        Data::NonTerm: std::hash::Hash + Eq,
+        P::NonTerm: std::hash::Hash + Eq,
     {
-        let Some(error_nonterm) = parser.get_error_nonterm() else {
-            return false;
-        };
-        loop {
-            let last_state = &parser.get_states()[node.state];
-            if last_state.shift_goto_nonterm(&error_nonterm).is_some() {
+        use crate::parser::State;
+        use crate::rule::Precedence;
+
+        let shift_state = parser.get_states()[self.state].shift_goto_class(class);
+        if let Some(reduce_rules) = parser.get_states()[self.state].reduce(class) {
+            let mut shift = None;
+            let reduces: smallvec::SmallVec<[_; 2]> = reduce_rules
+                .clone()
+                .filter_map(|reduce_rule| {
+                    // runtime shift/reduce precedence check
+
+                    let rule = &parser.get_rules()[reduce_rule];
+                    let reduce_prec = match rule.precedence {
+                        Some(Precedence::Fixed(level)) => Some(level),
+                        Some(Precedence::Dynamic(token_index)) => {
+                            // fix the value to the offset from current node
+                            let ith = rule.rule.len() - token_index - 1;
+                            let mut node = self;
+                            for _ in 0..ith {
+                                node = node.parent.as_ref().unwrap();
+                            }
+                            node.precedence_level
+                        }
+                        None => None,
+                    };
+
+                    // if there is shift/reduce conflict, check for reduce rule's precedence and shift terminal's precedence
+                    match (shift_state.is_some(), shift_prec, reduce_prec) {
+                        (true, Some(shift_prec_), Some(reduce_prec_)) => {
+                            match reduce_prec_.cmp(&shift_prec_) {
+                                std::cmp::Ordering::Less => {
+                                    // no reduce
+                                    shift = shift_state;
+                                    None
+                                }
+                                std::cmp::Ordering::Equal => {
+                                    // check for reduce_type
+                                    use crate::builder::ReduceType;
+                                    match parser.precedence_types(reduce_prec_) {
+                                        Some(ReduceType::Left) => {
+                                            // no shift
+                                            Some((reduce_rule, reduce_prec))
+                                        }
+                                        Some(ReduceType::Right) => {
+                                            // no reduce
+                                            shift = shift_state;
+                                            None
+                                        }
+                                        None => {
+                                            // TODO error
+                                            panic!("Unknown precedence type: {:?}", reduce_prec);
+                                        }
+                                    }
+                                }
+                                std::cmp::Ordering::Greater => {
+                                    // no shift
+                                    Some((reduce_rule, reduce_prec))
+                                }
+                            }
+                        }
+                        _ => {
+                            // nothing; go for both reduce and shift
+                            shift = shift_state;
+                            Some((reduce_rule, reduce_prec))
+                        }
+                    }
+                })
+                .collect();
+            if shift.is_some() {
                 return true;
             }
 
-            if let Some(parent) = node.parent.as_ref() {
-                node = parent;
-            } else {
-                break;
+            if !reduces.is_empty() {
+                for (reduce_rule, precedence) in reduces {
+                    let rule = &parser.get_rules()[reduce_rule];
+                    let mut node = self;
+                    for _ in 0..rule.rule.len() {
+                        node = node.parent.as_ref().unwrap();
+                    }
+                    if let Some(next_shift_nonterm) =
+                        parser.get_states()[node.state].shift_goto_nonterm(&rule.name)
+                    {
+                        let next_node = Node {
+                            parent: Some(Rc::clone(node)),
+                            state: next_shift_nonterm,
+                            precedence_level: precedence,
+                            #[cfg(feature = "tree")]
+                            tree: None,
+                            data: None,
+                        };
+                        if Node::can_feed(&Rc::new(next_node), parser, term, class, shift_prec) {
+                            return true;
+                        }
+                    } else {
+                        unreachable!(
+                            "Shift non-terminal must exist for reduce rule: {:?}",
+                            reduce_rule
+                        );
+                    }
+                }
             }
+            false
+        } else {
+            shift_state.is_some()
         }
-        false
     }
 }
 
