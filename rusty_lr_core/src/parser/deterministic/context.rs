@@ -15,6 +15,8 @@ pub struct Context<Data: TokenData> {
     /// Data stack holds the values associated with each symbol.
     pub(crate) data_stack: Vec<(Data, Data::Location)>,
 
+    pub(crate) precedence_stack: Vec<Option<usize>>,
+
     /// temporary data stack for reduce action.
     pub(crate) reduce_args: Vec<(Data, Data::Location)>,
 
@@ -31,6 +33,7 @@ impl<Data: TokenData> Context<Data> {
             state_stack: vec![0],
 
             data_stack: Vec::new(),
+            precedence_stack: Vec::new(),
             reduce_args: Vec::new(),
 
             #[cfg(feature = "tree")]
@@ -46,6 +49,7 @@ impl<Data: TokenData> Context<Data> {
             state_stack,
 
             data_stack: Vec::with_capacity(capacity),
+            precedence_stack: Vec::with_capacity(capacity),
             reduce_args: Vec::new(),
 
             #[cfg(feature = "tree")]
@@ -184,6 +188,7 @@ impl<Data: TokenData> Context<Data> {
     {
         use crate::Location;
         let class = parser.to_terminal_class(&term);
+        let prec = parser.class_precedence(class);
         // check if there is any reduce action with given terminal
         while let Some(mut reduce_rule) =
             parser.get_states()[*self.state_stack.last().unwrap()].reduce(class)
@@ -207,6 +212,7 @@ impl<Data: TokenData> Context<Data> {
                         .pop()
                         .expect("data stack must have at least one element"),
                 );
+                self.precedence_stack.pop();
             }
 
             // call reduce action
@@ -258,6 +264,7 @@ impl<Data: TokenData> Context<Data> {
                 .push(crate::tree::Tree::new_terminal(term.clone()));
 
             self.data_stack.push((Data::new_terminal(term), location));
+            self.precedence_stack.push(prec);
 
             Ok(())
         } else {
@@ -630,6 +637,7 @@ where
         Context {
             state_stack: self.state_stack.clone(),
             data_stack: self.data_stack.clone(),
+            precedence_stack: self.precedence_stack.clone(),
             reduce_args: Vec::new(),
 
             #[cfg(feature = "tree")]

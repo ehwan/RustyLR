@@ -7,9 +7,9 @@ use proc_macro2::TokenStream;
 use quote::format_ident;
 use quote::quote;
 use quote::ToTokens;
-use rusty_lr_core::builder::Operator;
 use rusty_lr_core::hash::HashMap;
 use rusty_lr_core::hash::HashSet;
+use rusty_lr_core::rule::Precedence;
 use rusty_lr_core::Token;
 
 use crate::error::ArgError;
@@ -640,16 +640,16 @@ impl Grammar {
                         if let Token::Term(term_idx) = tokens[from_token].token {
                             if let Some((level, _)) = grammar.terminals[term_idx].precedence {
                                 let span = tokens[from_token].begin_span;
-                                Some((Operator::Fixed(level), span));
+                                Some((Precedence::Fixed(level), span));
                                 break;
                             } else {
                                 return Err(ParseError::PrecedenceNotDefined(prec));
                             }
                         } else {
-                            Some((Operator::Dynamic(from_token), span))
+                            Some((Precedence::Dynamic(from_token), span))
                         }
                     } else if let Some(&(level, _)) = grammar.precedence_levels.get(&precu) {
-                        Some((Operator::Fixed(level), span))
+                        Some((Precedence::Fixed(level), span))
                     } else {
                         return Err(ParseError::PrecedenceNotDefined(prec));
                     }
@@ -660,7 +660,7 @@ impl Grammar {
                     for token in tokens.iter().rev() {
                         if let Token::Term(term_idx) = token.token {
                             if let Some((level, _)) = grammar.terminals[term_idx].precedence {
-                                op = Some((Operator::Fixed(level), token.end_span));
+                                op = Some((Precedence::Fixed(level), token.end_span));
                                 break;
                             }
                         }
@@ -832,7 +832,7 @@ impl Grammar {
                     if rule.prec.is_none() {
                         return false;
                     }
-                    if let Some((Operator::Dynamic(token_idx), _)) = &rule.prec {
+                    if let Some((Precedence::Dynamic(token_idx), _)) = &rule.prec {
                         if let Token::NonTerm(nonterm_idx) = rule.tokens[*token_idx].token {
                             if !visited.contains(&nonterm_idx) {
                                 if !check_prec_defined_for_all_production_rules(
@@ -850,7 +850,7 @@ impl Grammar {
             }
             for nonterm in &grammar.nonterminals {
                 for rule in &nonterm.rules {
-                    if let Some((Operator::Dynamic(token_idx), span)) = &rule.prec {
+                    if let Some((Precedence::Dynamic(token_idx), span)) = &rule.prec {
                         if let Token::NonTerm(nonterm_idx) = rule.tokens[*token_idx].token {
                             let mut visited = Default::default();
                             if !check_prec_defined_for_all_production_rules(

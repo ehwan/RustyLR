@@ -3472,14 +3472,17 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLines),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::RuleType,
                 rule: vec![::rusty_lr_core::Token::Term(15usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::RuleType,
                 rule: vec![],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::RuleLines,
@@ -3488,12 +3491,14 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(3usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLine),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::RuleLines,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::RuleLine,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::RuleLine,
@@ -3502,6 +3507,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDefStar19),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Action),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::PrecDef,
@@ -3510,6 +3516,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(32usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::IdentOrLiteral),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::PrecDef,
@@ -3518,6 +3525,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(32usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::PrecDef,
@@ -3526,6 +3534,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(37usize),
                     ::rusty_lr_core::Token::Term(14usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::PrecDef,
@@ -3534,6 +3543,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(37usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::PrecDef,
@@ -3541,12 +3551,14 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(4usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TokenMapped,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::Pattern,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TokenMapped,
@@ -3555,10 +3567,12 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(5usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSetItem,
                 rule: vec![::rusty_lr_core::Token::Term(0usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSetItem,
@@ -3567,6 +3581,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(10usize),
                     ::rusty_lr_core::Token::Term(0usize),
                 ],
+                precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSetItem,
@@ -3575,10 +3590,12 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(10usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                 ],
+                precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSetItem,
                 rule: vec![::rusty_lr_core::Token::Term(14usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSetItem,
@@ -3587,6 +3604,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(10usize),
                     ::rusty_lr_core::Token::Term(14usize),
                 ],
+                precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSetItem,
@@ -3595,6 +3613,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(10usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                 ],
+                precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSet,
@@ -3604,14 +3623,17 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItemStar22),
                     ::rusty_lr_core::Token::Term(20usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSet,
                 rule: vec![::rusty_lr_core::Token::Term(13usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Pattern,
                 rule: vec![::rusty_lr_core::Token::Term(0usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Pattern,
@@ -3619,6 +3641,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
                     ::rusty_lr_core::Token::Term(6usize),
                 ],
+                precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(2usize)),
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Pattern,
@@ -3626,6 +3649,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
                     ::rusty_lr_core::Token::Term(7usize),
                 ],
+                precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(2usize)),
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Pattern,
@@ -3633,6 +3657,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
                     ::rusty_lr_core::Token::Term(8usize),
                 ],
+                precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(2usize)),
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Pattern,
@@ -3640,12 +3665,14 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
                     ::rusty_lr_core::Token::Term(11usize),
                 ],
+                precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(2usize)),
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Pattern,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::TerminalSet,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Pattern,
@@ -3654,6 +3681,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(12usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
                 ],
+                precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(1usize)),
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Pattern,
@@ -3662,10 +3690,12 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PatternPlus23),
                     ::rusty_lr_core::Token::Term(18usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Pattern,
                 rule: vec![::rusty_lr_core::Token::Term(14usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Pattern,
@@ -3674,28 +3704,34 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(10usize),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
                 ],
+                precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Action,
                 rule: vec![::rusty_lr_core::Token::Term(16usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Action,
                 rule: vec![],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::IdentOrLiteral,
                 rule: vec![::rusty_lr_core::Token::Term(0usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::IdentOrLiteral,
                 rule: vec![::rusty_lr_core::Token::Term(14usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::RustCode,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::__TermSet24Plus25,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3706,6 +3742,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3715,6 +3752,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(0usize),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3724,6 +3762,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3733,6 +3772,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(0usize),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3742,6 +3782,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3751,6 +3792,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3759,6 +3801,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(25usize),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3768,6 +3811,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3776,6 +3820,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(26usize),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3785,6 +3830,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3793,6 +3839,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(27usize),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3802,6 +3849,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus26),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3811,6 +3859,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3820,6 +3869,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus26),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3829,6 +3879,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3838,6 +3889,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus26),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3847,6 +3899,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3856,6 +3909,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3864,6 +3918,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(28usize),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3873,6 +3928,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3881,6 +3937,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(29usize),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3889,6 +3946,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(31usize),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3898,6 +3956,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3906,6 +3965,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(30usize),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3915,6 +3975,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3923,6 +3984,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(34usize),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3932,6 +3994,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3940,6 +4003,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(35usize),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3949,6 +4013,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3958,6 +4023,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_identStar28),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3967,6 +4033,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3976,6 +4043,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3984,6 +4052,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(38usize),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -3992,6 +4061,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(39usize),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -4001,6 +4071,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -4010,6 +4081,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -4018,6 +4090,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(40usize),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
@@ -4026,16 +4099,19 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
                     ::rusty_lr_core::Token::Term(2usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::GrammarLine,
                 rule: vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Rule)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TokenMappedPlus16,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::TokenMapped,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TokenMappedPlus16,
@@ -4043,16 +4119,19 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMappedPlus16),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TokenMapped),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TokenMappedStar17,
                 rule: vec![],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_PrecDefPlus18,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::PrecDef,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_PrecDefPlus18,
@@ -4060,24 +4139,29 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDefPlus18),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::PrecDef),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_PrecDefStar19,
                 rule: vec![],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_caretQuestion20,
                 rule: vec![::rusty_lr_core::Token::Term(9usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_caretQuestion20,
                 rule: vec![],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TerminalSetItemPlus21,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::TerminalSetItem,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TerminalSetItemPlus21,
@@ -4085,16 +4169,19 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItemPlus21),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalSetItem),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TerminalSetItemStar22,
                 rule: vec![],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_PatternPlus23,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::Pattern,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_PatternPlus23,
@@ -4102,12 +4189,14 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PatternPlus23),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::__TermSet24Plus25,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::_TermSet24,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::__TermSet24Plus25,
@@ -4115,12 +4204,14 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet24Plus25),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TermSet24),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_IdentOrLiteralPlus26,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::IdentOrLiteral,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_IdentOrLiteralPlus26,
@@ -4128,10 +4219,12 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus26),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::IdentOrLiteral),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_identPlus27,
                 rule: vec![::rusty_lr_core::Token::Term(0usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_identPlus27,
@@ -4139,216 +4232,266 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_identPlus27),
                     ::rusty_lr_core::Token::Term(0usize),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_identStar28,
                 rule: vec![],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TokenMappedStar17,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::_TokenMappedPlus16,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_PrecDefStar19,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::_PrecDefPlus18,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TerminalSetItemStar22,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::_TerminalSetItemPlus21,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(0usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(1usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(3usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(4usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(5usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(6usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(7usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(8usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(9usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(10usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(11usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(12usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(13usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(14usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(15usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(16usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(17usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(18usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(19usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(20usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(21usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(22usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(23usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(24usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(25usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(26usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(27usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(28usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(29usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(30usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(31usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(32usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(33usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(34usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(35usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(36usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(37usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(38usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(39usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(40usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_TermSet24,
                 rule: vec![::rusty_lr_core::Token::Term(42usize)],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_identStar28,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::_identPlus27,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::GrammarLine,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::Directive,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Grammar,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::_GrammarLinePlus29,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_GrammarLinePlus29,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::GrammarLine,
                 )],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::_GrammarLinePlus29,
@@ -4356,6 +4499,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::GrammarLine),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_GrammarLinePlus29),
                 ],
+                precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Augmented,
@@ -4363,6 +4507,7 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
                     ::rusty_lr_core::Token::Term(41usize),
                 ],
+                precedence: None,
             },
         ];
         let terminal_class_names = vec![

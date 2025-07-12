@@ -191,13 +191,13 @@ impl Grammar {
                 ReduceType::Right => quote! { #module_prefix::builder::ReduceType::Right },
             }
         };
-        let operator_to_stream = |op: rusty_lr_core::builder::Operator| -> TokenStream {
+        let precedence_to_stream = |op: rusty_lr_core::rule::Precedence| -> TokenStream {
             match op {
-                rusty_lr_core::builder::Operator::Fixed(level) => {
-                    quote! { #module_prefix::builder::Operator::Fixed(#level) }
+                rusty_lr_core::rule::Precedence::Fixed(level) => {
+                    quote! { #module_prefix::rule::Precedence::Fixed(#level) }
                 }
-                rusty_lr_core::builder::Operator::Dynamic(idx) => {
-                    quote! { #module_prefix::builder::Operator::Dynamic(#idx) }
+                rusty_lr_core::rule::Precedence::Dynamic(idx) => {
+                    quote! { #module_prefix::rule::Precedence::Dynamic(#idx) }
                 }
             }
         };
@@ -262,11 +262,21 @@ impl Grammar {
                     });
                 }
                 let name = &nonterminals_token[rule.rule.name];
+                let precedence_stream = if let Some(precedence) = rule.rule.precedence {
+                    let s = precedence_to_stream(precedence);
+                    quote! { Some(#s) }
+                } else {
+                    quote! { None }
+                };
 
                 // lookaheads
                 production_rules_body_stream.extend(quote! {
-                #module_prefix::rule::ProductionRule{ name: #name, rule: vec![ #tokens_vec_body_stream ] },
-            });
+                    #module_prefix::rule::ProductionRule{
+                        name: #name,
+                        rule: vec![ #tokens_vec_body_stream ],
+                        precedence: #precedence_stream,
+                    },
+                });
             }
             let mut states_body_stream = TokenStream::new();
             for state in &self.states {
@@ -381,10 +391,10 @@ impl Grammar {
                 };
 
                 // calculate operator
-                let op_stream = match rule.operator {
+                let prec_stream = match rule.rule.precedence {
                     None => quote! { None },
                     Some(op) => {
-                        let op_stream = operator_to_stream(op);
+                        let op_stream = precedence_to_stream(op);
                         quote! {Some(#op_stream)}
                     }
                 };
@@ -398,7 +408,7 @@ impl Grammar {
                         #nonterm_name,
                         vec![ #tokens_vec_body_stream ],
                         #lookaheads_stream,
-                        #op_stream,
+                        #prec_stream,
                         #dprec_stream
                     );
                 });

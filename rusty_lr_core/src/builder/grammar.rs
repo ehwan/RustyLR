@@ -22,20 +22,10 @@ struct ExpandCache<Term> {
     include_origin_lookaheads: bool,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Operator {
-    /// operator that has fixed precedence
-    Fixed(usize), // precedence level
-
-    /// operator that gets precedence from it's child token; runtime conflict resolution
-    Dynamic(usize), // token index
-}
-
 #[derive(Debug, Clone)]
 pub struct Rule<Term, NonTerm> {
     pub rule: ProductionRule<Term, NonTerm>,
     pub lookaheads: Option<BTreeSet<Term>>,
-    pub operator: Option<Operator>,
     /// for reduce/reduce conflict resolving
     pub priority: usize,
 }
@@ -85,7 +75,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         name: NonTerm,
         rule: Vec<Token<Term, NonTerm>>,
         lookaheads: Option<BTreeSet<Term>>,
-        operator: Option<Operator>,
+        precedence: Option<Precedence>,
         priority: usize,
     ) -> usize
     where
@@ -94,9 +84,12 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         let index = self.rules.len();
         self.rules_map.entry(name).or_default().push(index);
         let rule = Rule {
-            rule: ProductionRule { name, rule },
+            rule: ProductionRule {
+                name,
+                rule,
+                precedence,
+            },
             lookaheads,
-            operator,
             priority,
         };
         self.rules.push(rule);
@@ -845,12 +838,12 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 let mut remove_shift = true;
 
                 for &reduce_rule in reduce_rules.iter() {
-                    let Some(reduce_op) = self.rules[reduce_rule].operator else {
+                    let Some(reduce_op) = self.rules[reduce_rule].rule.precedence else {
                         // no operator for this reduce rule
                         remove_shift = false;
                         continue;
                     };
-                    let Operator::Fixed(reduce_prec) = reduce_op else {
+                    let Precedence::Fixed(reduce_prec) = reduce_op else {
                         // not fixed operator, so no precedence
                         remove_shift = false;
                         continue;
@@ -1045,12 +1038,12 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             let mut remove_shift = true;
 
             for &reduce_rule in reduce_rules.iter() {
-                let Some(reduce_op) = self.rules[reduce_rule].operator else {
+                let Some(reduce_op) = self.rules[reduce_rule].rule.precedence else {
                     // no operator for this reduce rule
                     remove_shift = false;
                     continue;
                 };
-                let Operator::Fixed(reduce_prec) = reduce_op else {
+                let Precedence::Fixed(reduce_prec) = reduce_op else {
                     // not fixed operator, so no precedence
                     remove_shift = false;
                     continue;
