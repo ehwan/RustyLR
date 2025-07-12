@@ -20,17 +20,20 @@ lr1! {
     | WS0 '(' E ')' WS0 { E }
     ;
 
-    E(f32) : E '+' e2=E {
+    E(f32) : E Op e2=E %prec Op {
         *data += 1; // access userdata by `data`
-        println!( "{:?} {:?}", E, e2 );
-        E + e2
-    }
-    | E '*' e2=E {
-        E * e2
+        println!( "{:?} {:?} {:?}", E, Op, e2 );
+        match Op {
+            '+' => E + e2,
+            '*' => E * e2,
+            _ => panic!("Unknown operator: {:?}", Op),
+        }
     }
     | WS0 '-' E %prec UMINUS {
         -E
     }
     | P
     ;
+
+    Op(char): '+' | '*' ;
 }

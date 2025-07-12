@@ -14,6 +14,12 @@ use crate::pattern::PatternInternal;
 use crate::terminal_info::TerminalName;
 use crate::terminalset::TerminalSet;
 
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub enum IdentOrU32 {
+    Ident(Ident),
+    U32(u32),
+}
+
 #[derive(Debug, Clone)]
 pub enum IdentOrLiteral {
     Ident(Ident),
@@ -26,34 +32,14 @@ impl IdentOrLiteral {
             IdentOrLiteral::Literal(literal) => literal.span(),
         }
     }
-    pub fn to_terminal(
-        &self,
-        grammar: &mut Grammar,
-    ) -> Result<rusty_lr_core::builder::Operator<usize>, ParseError> {
+    pub fn into_ident_or_u32(self, grammar: &Grammar) -> Result<IdentOrU32, ParseError> {
         match self {
-            Self::Ident(ident) => {
-                if let Some(&idx) = grammar
-                    .terminals_index
-                    .get(&TerminalName::Ident(ident.clone()))
-                {
-                    Ok(rusty_lr_core::builder::Operator::Term(idx))
-                } else {
-                    // check %prec definitions
-                    if let Some(idx) = grammar.find_prec_definition(ident) {
-                        return Ok(rusty_lr_core::builder::Operator::Prec(idx));
-                    }
-
-                    // unknown ident
-                    Err(ParseError::TerminalNotDefined(ident.clone()))
-                }
-            }
+            Self::Ident(ident) => Ok(IdentOrU32::Ident(ident)),
             Self::Literal(literal) => {
                 let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
                     .expect("failed on syn::parse2::<syn::Lit>");
                 let val = grammar.get_char_value(&lit)?;
-                let name: TerminalName = (val, val).into();
-                let idx = *grammar.terminals_index.get(&name).unwrap();
-                Ok(rusty_lr_core::builder::Operator::Term(idx))
+                Ok(IdentOrU32::U32(val))
             }
         }
     }
@@ -498,8 +484,11 @@ pub struct GrammarArgs {
     pub eof: Vec<(Span, TokenStream)>,
     pub error_typename: Vec<(Span, TokenStream)>,
     pub terminals: Vec<(Ident, TokenStream)>,
-    pub reduce_types: Vec<(rusty_lr_core::builder::ReduceType, Vec<IdentOrLiteral>)>,
-    pub precedences: Vec<Vec<IdentOrLiteral>>,
+    pub precedences: Vec<(
+        Span,                                       // span of %left, %right, %precedence
+        Option<rusty_lr_core::builder::ReduceType>, // actual definition of precedence type
+        Vec<IdentOrLiteral>,                        // items
+    )>,
     pub rules: Vec<RuleDefArgs>,
     pub lalr: bool,
     pub glr: bool,
@@ -523,7 +512,6 @@ impl Default for GrammarArgs {
             eof: Vec::new(),
             error_typename: Vec::new(),
             terminals: Vec::new(),
-            reduce_types: Vec::new(),
             precedences: Vec::new(),
             rules: Vec::new(),
             lalr: false,

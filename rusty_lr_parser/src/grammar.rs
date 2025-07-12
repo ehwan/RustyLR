@@ -9,6 +9,7 @@ use quote::quote;
 use quote::ToTokens;
 use rusty_lr_core::hash::HashMap;
 use rusty_lr_core::hash::HashSet;
+use rusty_lr_core::rule::Precedence;
 use rusty_lr_core::Token;
 
 use crate::error::ArgError;
@@ -18,26 +19,19 @@ use crate::nonterminal_info::NonTerminalInfo;
 use crate::nonterminal_info::ReduceAction;
 use crate::nonterminal_info::Rule;
 use crate::parser::args::GrammarArgs;
-use crate::parser::args::IdentOrLiteral;
+use crate::parser::args::IdentOrU32;
 use crate::parser::lexer::Lexed;
 use crate::parser::parser_expanded::GrammarContext;
-use crate::parser::parser_expanded::GrammarParseError;
 use crate::parser::parser_expanded::GrammarParser;
 use crate::pattern::Pattern;
 use crate::pattern::PatternToToken;
 use crate::rangeresolver::RangeResolver;
-use crate::terminal_info::ReduceTypeInfo;
 use crate::terminal_info::TerminalInfo;
 use crate::terminal_info::TerminalName;
 use crate::token::TokenMapped;
 use crate::utils;
 
-pub struct PrecDefinition {
-    pub ident: Ident,
-    pub reduce_type: Option<ReduceTypeInfo>,
-}
-
-pub struct TerminalClassDefinintion {
+pub struct TerminalClassDefinition {
     pub terminals: Vec<usize>,
     /// counter for only terminal clasas (have more than 1 terminal)
     /// dummy if it is single-terminal class
@@ -82,11 +76,11 @@ pub struct Grammar {
     /// ident -> index map for terminals
     pub terminals_index: HashMap<TerminalName, TerminalIndex>,
 
-    /// precedence orders
-    pub precedences: HashMap<rusty_lr_core::builder::Operator<TerminalIndex>, (Span, usize)>,
+    /// %left, %right, or %precedence for each precedence level
+    pub precedence_types: Vec<(Option<rusty_lr_core::builder::ReduceType>, Span)>,
 
-    /// %prec definitions
-    pub prec_defeinitions: Vec<PrecDefinition>,
+    /// precedence levels; line number of %left, %right, or %precedence directive
+    pub precedence_levels: HashMap<IdentOrU32, (usize, Span)>,
 
     /// rule definitions
     pub nonterminals: Vec<NonTerminalInfo>,
@@ -109,7 +103,7 @@ pub struct Grammar {
     pub states: Vec<rusty_lr_core::builder::State<ClassIndex, usize>>,
 
     /// set of terminals for each terminal class
-    pub terminal_classes: Vec<TerminalClassDefinintion>,
+    pub terminal_classes: Vec<TerminalClassDefinition>,
     /// id of teminal class for each terminal
     pub terminal_class_id: Vec<TerminalIndex>,
     /// class id for terminal that does not belong to any class
@@ -157,15 +151,6 @@ impl Grammar {
         Some((&self.nonterminals[nonterm_idx], rule_local_id))
     }
 
-    pub(crate) fn find_prec_definition(&self, ident: &Ident) -> Option<usize> {
-        for (idx, prec) in self.prec_defeinitions.iter().enumerate() {
-            if ident == &prec.ident {
-                return Some(idx);
-            }
-        }
-        None
-    }
-
     pub(crate) fn negate_terminal_set(&self, terminalset: &BTreeSet<usize>) -> BTreeSet<usize> {
         (0..self.terminals.len())
             .filter(|&i| !terminalset.contains(&i))
@@ -183,10 +168,7 @@ impl Grammar {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();
-                let span = match err {
-                    GrammarParseError::NoAction(_term, location) => location.pair.unwrap().0,
-                    _ => unreachable!("feed error"),
-                };
+                let span = err.location().pair.unwrap().0;
                 return Err(ParseArgError::MacroLineParse { span, message });
             }
         }
@@ -255,6 +237,7 @@ impl Grammar {
             ));
         }
 
+        // %prec and %dprec in each production rules
         for rules in grammar_args.rules.iter_mut() {
             use crate::parser::args::PrecDPrecArgs;
             for rule in rules.rule_lines.iter_mut() {
@@ -360,8 +343,8 @@ impl Grammar {
 
             terminals: Default::default(),
             terminals_index: Default::default(),
-            precedences: Default::default(),
-            prec_defeinitions: Default::default(),
+            precedence_types: Default::default(),
+            precedence_levels: Default::default(),
 
             nonterminals: Default::default(),
             nonterminals_index: Default::default(),
@@ -425,17 +408,10 @@ impl Grammar {
                 }
             }
 
-            // reduce types
-            for (_, terminals_arg) in grammar_args.reduce_types.iter() {
-                for terminal_arg in terminals_arg {
-                    terminal_arg.range_resolve(&mut grammar)?;
-                }
-            }
-
             // precedence orders
-            for orders in grammar_args.precedences.iter() {
-                for term_arg in orders {
-                    term_arg.range_resolve(&mut grammar)?;
+            for (_, _, orders) in grammar_args.precedences.iter() {
+                for item in orders {
+                    item.range_resolve(&mut grammar)?;
                 }
             }
 
@@ -458,7 +434,7 @@ impl Grammar {
                 let name = TerminalName::CharRange(start, last);
                 let terminal_info = TerminalInfo {
                     name: name.clone(),
-                    reduce_type: None,
+                    precedence: None,
                     body: quote! { range_term },
                 };
                 let index = grammar.terminals.len();
@@ -490,7 +466,7 @@ impl Grammar {
 
                 let terminal_info = TerminalInfo {
                     name: name.clone(),
-                    reduce_type: None,
+                    precedence: None,
                     body: token_expr,
                 };
                 grammar.terminals.push(terminal_info);
@@ -503,7 +479,7 @@ impl Grammar {
 
             let terminal_info = TerminalInfo {
                 name: name.clone(),
-                reduce_type: None,
+                precedence: None,
                 body: eof_body,
             };
             let idx = grammar.terminals.len();
@@ -519,99 +495,13 @@ impl Grammar {
 
             let terminal_info = TerminalInfo {
                 name: name.clone(),
-                reduce_type: None,
+                precedence: None,
                 body: TokenStream::new(),
             };
             let idx = grammar.terminals.len();
             grammar.other_terminal_index = idx;
             grammar.terminals.push(terminal_info);
             grammar.terminals_index.insert(name, idx);
-        }
-
-        // add precedence identifier from %prec definition in each rule
-        for rules_arg in grammar_args.rules.iter() {
-            for rule in rules_arg.rule_lines.iter() {
-                if let Some(IdentOrLiteral::Ident(prec_ident)) = &rule.prec {
-                    let term_name = TerminalName::Ident(prec_ident.clone());
-                    if !grammar.terminals_index.contains_key(&term_name) {
-                        // check reserved name
-                        utils::check_reserved_name(prec_ident)?;
-
-                        // add to prec definition
-                        grammar.prec_defeinitions.push(PrecDefinition {
-                            ident: prec_ident.clone(),
-                            reduce_type: None,
-                        });
-                    }
-                }
-            }
-        }
-
-        // reduce types
-        for (reduce_type, terminals_arg) in grammar_args.reduce_types.into_iter() {
-            for terminal_arg in terminals_arg {
-                let span = terminal_arg.span();
-                let terminal = terminal_arg.to_terminal(&mut grammar)?;
-
-                match terminal {
-                    rusty_lr_core::builder::Operator::Term(term_idx) => {
-                        let terminal_name = grammar.terminals[term_idx].name.clone();
-                        if let Some(old) = &mut grammar.terminals[term_idx].reduce_type {
-                            if old.reduce_type != reduce_type {
-                                return Err(ParseError::MultipleReduceDefinition {
-                                    terminal: terminal_name
-                                        .pretty_name(grammar.is_char, grammar.is_u8),
-                                    old: (old.source, old.reduce_type),
-                                    new: (span, reduce_type),
-                                });
-                            } else {
-                                old.source = span;
-                            }
-                        } else {
-                            grammar.terminals[term_idx].reduce_type = Some(ReduceTypeInfo {
-                                reduce_type,
-                                source: span,
-                            });
-                        }
-                    }
-                    rusty_lr_core::builder::Operator::Prec(prec) => {
-                        let prec_ident = grammar.prec_defeinitions[prec].ident.clone();
-                        if let Some(old) = &mut grammar.prec_defeinitions[prec].reduce_type {
-                            if old.reduce_type != reduce_type {
-                                return Err(ParseError::MultipleReduceDefinition {
-                                    terminal: prec_ident.to_string(),
-                                    old: (old.source, old.reduce_type),
-                                    new: (span, reduce_type),
-                                });
-                            } else {
-                                old.source = span;
-                            }
-                        } else {
-                            grammar.prec_defeinitions[prec].reduce_type = Some(ReduceTypeInfo {
-                                reduce_type,
-                                source: span,
-                            });
-                        }
-                    }
-                }
-            }
-        }
-
-        // precedence orders
-        for (idx, orders) in grammar_args.precedences.into_iter().enumerate() {
-            for term_arg in orders {
-                let span = term_arg.span();
-                let terminal = term_arg.to_terminal(&mut grammar)?;
-                if let Some((old_span, old_idx)) = grammar.precedences.insert(terminal, (span, idx))
-                {
-                    if old_idx != idx {
-                        return Err(ParseError::MultiplePrecedenceOrderDefinition {
-                            cur: term_arg,
-                            old: old_span,
-                        });
-                    }
-                }
-            }
         }
 
         // insert rule typenames first, since it will be used when inserting rule definitions below
@@ -643,8 +533,9 @@ impl Grammar {
                 ));
             }
         }
-
         // insert `error` nonterminal
+        // 'error' must be inserted after all other non-terminals,
+        // other codes are depending on it.
         {
             let name = Ident::new(utils::ERROR_NAME, Span::call_site());
             let nonterminal = NonTerminalInfo {
@@ -661,6 +552,41 @@ impl Grammar {
             let rule_idx = grammar.nonterminals.len();
             grammar.nonterminals.push(nonterminal);
             grammar.nonterminals_index.insert(name, rule_idx);
+        }
+
+        // precedence orders
+        for (level, (span, reduce_type, items)) in grammar_args.precedences.into_iter().enumerate()
+        {
+            grammar.precedence_types.push((reduce_type, span)); // set i'th level's precedence type
+            for item in items {
+                let span = item.span();
+                let itemu = item.clone().into_ident_or_u32(&grammar)?;
+                match &itemu {
+                    IdentOrU32::Ident(ident) => {
+                        if let Some(&term_idx) = grammar.terminals_index.get(&ident.clone().into())
+                        {
+                            grammar.terminals[term_idx].precedence = Some((level, span));
+                        }
+                    }
+                    &IdentOrU32::U32(ch) => {
+                        let ch = unsafe { char::from_u32_unchecked(ch) };
+                        if let Some(&term_idx) = grammar
+                            .terminals_index
+                            .get(&TerminalName::CharRange(ch, ch))
+                        {
+                            grammar.terminals[term_idx].precedence = Some((level, span));
+                        } else {
+                            unreachable!("unexpected char type in precedence order");
+                        }
+                    }
+                }
+                if let Some(old) = grammar.precedence_levels.insert(itemu, (level, span)) {
+                    return Err(ParseError::MultiplePrecedenceOrderDefinition {
+                        cur: item,
+                        old: old.1,
+                    });
+                }
+            }
         }
 
         // pattern map for auto-generated rules
@@ -687,11 +613,54 @@ impl Grammar {
                     patterns.push(pattern_rule);
                 }
 
+                // parse %prec definition
                 let prec = if let Some(prec) = rule.prec {
-                    let prec_op = prec.to_terminal(&mut grammar)?;
-                    Some((prec_op, prec.span()))
+                    let span = prec.span();
+                    let precu = prec.clone().into_ident_or_u32(&grammar)?;
+                    // check if this ident exists in tokens
+                    let from_token = match &precu {
+                        IdentOrU32::Ident(ident) => {
+                            let mut prec = None;
+                            for (idx, token) in tokens.iter().enumerate() {
+                                if token.mapto.as_ref() == Some(ident) {
+                                    prec = Some(idx);
+                                    break;
+                                }
+                            }
+                            prec
+                        }
+                        IdentOrU32::U32(_) => None,
+                    };
+                    if let Some(from_token) = from_token {
+                        // check if from_token'th token is terminal symbol
+                        if let Token::Term(term_idx) = tokens[from_token].token {
+                            if let Some((level, _)) = grammar.terminals[term_idx].precedence {
+                                let span = tokens[from_token].begin_span;
+                                Some((Precedence::Fixed(level), span))
+                            } else {
+                                return Err(ParseError::PrecedenceNotDefined(prec));
+                            }
+                        } else {
+                            Some((Precedence::Dynamic(from_token), span))
+                        }
+                    } else if let Some(&(level, _)) = grammar.precedence_levels.get(&precu) {
+                        Some((Precedence::Fixed(level), span))
+                    } else {
+                        return Err(ParseError::PrecedenceNotDefined(prec));
+                    }
                 } else {
-                    None
+                    // not defined,
+                    // choose the last terminal symbol that has precedence
+                    let mut op = None;
+                    for token in tokens.iter().rev() {
+                        if let Token::Term(term_idx) = token.token {
+                            if let Some((level, _)) = grammar.terminals[term_idx].precedence {
+                                op = Some((Precedence::Fixed(level), token.end_span));
+                                break;
+                            }
+                        }
+                    }
+                    op
                 };
 
                 // parse %dprec literal value
@@ -839,6 +808,60 @@ impl Grammar {
         }
         drop(pattern_map);
 
+        // check for nonterminals in %prec,
+        // all production rules in that nonterminal must have precedence defined.
+        //
+        // construct a directed graph, where node is nonterminal,
+        // and edge of (A -> B) means one of A's production rules has %prec to B, so B must have precedence defined.
+        {
+            fn check_prec_defined_for_all_production_rules(
+                grammar: &Grammar,
+                nonterm_idx: usize,
+                visited: &mut HashSet<usize>,
+            ) -> bool {
+                visited.insert(nonterm_idx);
+                for rule in &grammar.nonterminals[nonterm_idx].rules {
+                    if rule.prec.is_none() {
+                        return false;
+                    }
+                    if let Some((Precedence::Dynamic(token_idx), _)) = &rule.prec {
+                        if let Token::NonTerm(nonterm_idx) = rule.tokens[*token_idx].token {
+                            if !visited.contains(&nonterm_idx) {
+                                if !check_prec_defined_for_all_production_rules(
+                                    grammar,
+                                    nonterm_idx,
+                                    visited,
+                                ) {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+                true
+            }
+            for nonterm in &grammar.nonterminals {
+                for rule in &nonterm.rules {
+                    if let Some((Precedence::Dynamic(token_idx), span)) = &rule.prec {
+                        if let Token::NonTerm(nonterm_idx) = rule.tokens[*token_idx].token {
+                            let mut visited = Default::default();
+                            if !check_prec_defined_for_all_production_rules(
+                                &grammar,
+                                nonterm_idx,
+                                &mut visited,
+                            ) {
+                                // this nonterminal has production rules that do not have precedence defined
+                                return Err(ParseError::NonTerminalPrecedenceNotDefined(
+                                    *span, // but this nonterminal is used as %prec here
+                                    nonterm_idx,
+                                ));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // check start rule is valid
         if !grammar
             .nonterminals_index
@@ -908,26 +931,6 @@ impl Grammar {
             }
         }
 
-        // set operator for each rule
-        for nonterm in &mut grammar.nonterminals {
-            use rusty_lr_core::builder::Operator;
-            for rule in &mut nonterm.rules {
-                // if this rule has no explicit %prec operator
-                if rule.prec.is_none() {
-                    // choose the last terminal symbol that has precedence
-                    let mut op = None;
-                    for token in &rule.tokens {
-                        if let Token::Term(term_idx) = token.token {
-                            if grammar.precedences.contains_key(&Operator::Term(term_idx)) {
-                                op = Some((Operator::Term(term_idx), token.end_span));
-                                break;
-                            }
-                        }
-                    }
-                    rule.prec = op;
-                }
-            }
-        }
         // initialize terminal classes with one-terminal-one-class
         grammar.terminal_class_id.reserve(grammar.terminals.len());
         grammar.terminal_classes.reserve(grammar.terminals.len());
@@ -946,7 +949,7 @@ impl Grammar {
                     ranges.push((*start as u32, *last as u32));
                 }
             }
-            grammar.terminal_classes.push(TerminalClassDefinintion {
+            grammar.terminal_classes.push(TerminalClassDefinition {
                 terminals: vec![i],
                 multiterm_counter,
                 ranges,
@@ -1027,13 +1030,11 @@ impl Grammar {
 
         // collect precedence orders
         // all terminals in one class must have same precedence order
-        use rusty_lr_core::builder::Operator;
         let mut precedence_sets: BTreeMap<_, BTreeSet<usize>> = Default::default();
-        for (&op, (_, level)) in &self.precedences {
-            if let Operator::Term(term) = op {
-                let class = self.terminal_class_id[term];
-                precedence_sets.entry(*level).or_default().insert(class);
-            }
+        for (term_idx, term) in self.terminals.iter().enumerate() {
+            let class = self.terminal_class_id[term_idx];
+            let level = term.precedence.map(|(op, _)| op);
+            precedence_sets.entry(level).or_default().insert(class);
         }
         term_sets.extend(precedence_sets.into_values());
 
@@ -1076,8 +1077,9 @@ impl Grammar {
                             .map(|token| token.token)
                             .collect::<Vec<_>>();
                         let lookaheads = &rule.lookaheads;
+                        let prec = rule.prec.map(|(op, _)| op);
                         let dprec = rule.dprec.map_or(0, |(val, _)| val);
-                        let token_index =
+                        let reduce_action_token_index =
                             rule.reduce_action
                                 .as_ref()
                                 .map(|reduce_action| match reduce_action {
@@ -1086,7 +1088,14 @@ impl Grammar {
                                 });
 
                         if !same_ruleset
-                            .entry((prefix, suffix, lookaheads, dprec, token_index))
+                            .entry((
+                                prefix,
+                                suffix,
+                                lookaheads,
+                                prec,
+                                dprec,
+                                reduce_action_token_index,
+                            ))
                             .or_insert_with(BTreeSet::new)
                             .insert(term)
                         {
@@ -1143,7 +1152,7 @@ impl Grammar {
             if len > 1 {
                 multiterm_counter += 1;
             }
-            let class_def = TerminalClassDefinintion {
+            let class_def = TerminalClassDefinition {
                 terminals: terms,
                 multiterm_counter,
                 ranges: Vec::new(),
@@ -1241,17 +1250,6 @@ impl Grammar {
                         })
                         .collect();
                     *lookaheads = new_lookaheads;
-                }
-                // precedence in the rule
-                if let Some((prec, span)) = rule.prec {
-                    use rusty_lr_core::builder::Operator;
-                    if let Operator::Term(old_class) = prec {
-                        let new_class = old_class_to_new_class[old_class];
-                        if new_class == self.other_terminal_class_id {
-                            other_was_used = true;
-                        }
-                        rule.prec = Some((Operator::Term(new_class), span));
-                    }
                 }
                 new_rules.push(rule);
             }
@@ -1551,41 +1549,15 @@ impl Grammar {
         });
         self.rules_sorted = rules;
 
-        // reduce types
-        use rusty_lr_core::builder::Operator;
         for (term_idx, term_info) in self.terminals.iter().enumerate() {
-            if let Some(reduce_type) = &term_info.reduce_type {
+            if let Some((level, _)) = &term_info.precedence {
                 let class = self.terminal_class_id[term_idx];
-                if !grammar.add_reduce_type(Operator::Term(class), reduce_type.reduce_type) {
+                if !grammar.add_precedence(class, *level) {
                     unreachable!("set_reduce_type error");
                 }
             }
         }
-        for (prec_idx, prec_def) in self.prec_defeinitions.iter().enumerate() {
-            if let Some(reduce_type) = &prec_def.reduce_type {
-                if !grammar.add_reduce_type(Operator::Prec(prec_idx), reduce_type.reduce_type) {
-                    unreachable!("set_reduce_type error");
-                }
-            }
-        }
-
-        // precedence orders
-        for (&op, &level) in self.precedences.iter() {
-            let level = level.1;
-            match op {
-                Operator::Prec(_) => {
-                    if !grammar.add_precedence(op, level) {
-                        unreachable!("add_precedence error");
-                    }
-                }
-                Operator::Term(term) => {
-                    let class = self.terminal_class_id[term];
-                    if !grammar.add_precedence(Operator::Term(class), level) {
-                        unreachable!("add_precedence error");
-                    }
-                }
-            }
-        }
+        grammar.set_precedence_types(self.precedence_types.iter().map(|(op, _)| *op).collect());
 
         // add rules
         for &(nonterm_id, rule_id) in self.rules_sorted.iter() {

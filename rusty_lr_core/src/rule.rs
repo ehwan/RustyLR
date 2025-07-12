@@ -6,13 +6,24 @@ use std::fmt::Display;
 
 use crate::token::Token;
 
-/// Production rule.
-///
-/// name -> Token0 Token1 Token2 ...
+/// Operator precedence for production rules
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Precedence {
+    /// fixed precedence level
+    Fixed(usize), // precedence level
+
+    /// get precedence from it's child token; for runtime conflict resolution
+    Dynamic(usize), // token index
+}
+
+// Production rule.
+//
+// name -> Token0 Token1 Token2 ...
 #[derive(Clone, Default)]
 pub struct ProductionRule<Term, NonTerm> {
     pub name: NonTerm,
     pub rule: Vec<Token<Term, NonTerm>>,
+    pub precedence: Option<Precedence>,
 }
 impl<Term: Display, NonTerm: Display> Display for ProductionRule<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -34,6 +45,10 @@ impl<Term: Debug, NonTerm: Debug> Debug for ProductionRule<Term, NonTerm> {
             if id < self.rule.len() - 1 {
                 write!(f, " ")?;
             }
+        }
+
+        if let Some(prec) = self.precedence {
+            write!(f, " [prec: {:?}]", prec)?;
         }
         Ok(())
     }
@@ -57,6 +72,7 @@ impl<Term, NonTerm> ProductionRule<Term, NonTerm> {
                     Token::NonTerm(nonterm) => Token::NonTerm(nonterm_map(nonterm)),
                 })
                 .collect(),
+            precedence: self.precedence,
         }
     }
 
@@ -104,6 +120,10 @@ impl<Term: Display, NonTerm: Display> Display for ShiftedRule<Term, NonTerm> {
         }
         if self.shifted == self.rule.rule.len() {
             write!(f, " •")?;
+        }
+
+        if let Some(prec) = self.rule.precedence {
+            write!(f, " [prec: {:?}]", prec)?;
         }
         Ok(())
     }

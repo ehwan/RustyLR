@@ -101,10 +101,17 @@ pub enum ParseError {
     /// TokenType in Literal mode is not supported
     TokenInLiteralMode(Span),
 
+    /// conflicts in precedence definition
     MultiplePrecedenceOrderDefinition {
         cur: IdentOrLiteral,
         old: Span,
     },
+
+    /// Precedence not defined for the given token
+    PrecedenceNotDefined(IdentOrLiteral),
+
+    /// All production rules in this non-terminal must have %prec defined
+    NonTerminalPrecedenceNotDefined(Span, usize),
 
     /// ReduceAction must be defined but not defined
     RuleTypeDefinedButActionNotDefined {
@@ -262,6 +269,8 @@ impl ParseError {
             ParseError::TokenInLiteralMode(open_span) => *open_span,
 
             ParseError::MultiplePrecedenceOrderDefinition { cur, old } => cur.span(),
+            ParseError::PrecedenceNotDefined(name) => name.span(),
+            ParseError::NonTerminalPrecedenceNotDefined(span, _) => *span,
 
             ParseError::RuleTypeDefinedButActionNotDefined { name, span } => span.0,
             ParseError::OnlyTerminalSet(span_begin, span_end) => *span_begin,
@@ -329,6 +338,12 @@ impl ParseError {
 
             ParseError::MultiplePrecedenceOrderDefinition { cur, old } => {
                 format!("Conflicts with precedence definition: {}", cur)
+            }
+            ParseError::PrecedenceNotDefined(name) => {
+                format!("Precedence not defined for the given token: {}", name)
+            }
+            ParseError::NonTerminalPrecedenceNotDefined(span, nonterm_idx) => {
+                "All production rules in this non-terminal must have %prec defined".into()
             }
 
             ParseError::RuleTypeDefinedButActionNotDefined { name, span } => {

@@ -397,8 +397,7 @@ Directive
         });
     }
     | percent left IdentOrLiteral+ semicolon {
-        data.precedences.push( IdentOrLiteral.clone() );
-        data.reduce_types.push( (ReduceType::Left, IdentOrLiteral) );
+        data.precedences.push( (@left.span(), Some(ReduceType::Left), IdentOrLiteral) );
     }
     | percent left error semicolon {
         data.error_recovered.push( RecoveredError {
@@ -408,8 +407,7 @@ Directive
         });
     }
     | percent right IdentOrLiteral+ semicolon {
-        data.precedences.push( IdentOrLiteral.clone() );
-        data.reduce_types.push( (ReduceType::Right, IdentOrLiteral) );
+        data.precedences.push( (@right.span(), Some(ReduceType::Right), IdentOrLiteral) );
     }
     | percent right error semicolon {
         data.error_recovered.push( RecoveredError {
@@ -419,7 +417,7 @@ Directive
         });
     }
     | percent precedence IdentOrLiteral+ semicolon {
-        data.precedences.push( IdentOrLiteral );
+        data.precedences.push( (@precedence.span(), None, IdentOrLiteral) );
     }
     | percent precedence error semicolon {
         data.error_recovered.push( RecoveredError {

@@ -7,7 +7,6 @@ mod state;
 pub use diags::DiagnosticCollector;
 pub use error::BuildError;
 pub use grammar::Grammar;
-pub use grammar::Operator;
 pub use reduce_type::ReduceType;
 pub use state::State;
 

@@ -22,19 +22,10 @@ struct ExpandCache<Term> {
     include_origin_lookaheads: bool,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub enum Operator<Term> {
-    /// defined as normal terminal symbol
-    Term(Term),
-    /// defined as %prec
-    Prec(Term),
-}
-
 #[derive(Debug, Clone)]
 pub struct Rule<Term, NonTerm> {
     pub rule: ProductionRule<Term, NonTerm>,
     pub lookaheads: Option<BTreeSet<Term>>,
-    pub operator: Option<Operator<Term>>,
     /// for reduce/reduce conflict resolving
     pub priority: usize,
 }
@@ -49,9 +40,6 @@ pub struct Grammar<Term, NonTerm> {
     /// true if it can be empty
     pub firsts: HashMap<NonTerm, (BTreeSet<Term>, bool)>,
 
-    /// reduce type for each terminal symbols for resolving shift/reduce conflict
-    pub reduce_types: HashMap<Operator<Term>, ReduceType>,
-
     /// rules for each nonterminals
     rules_map: HashMap<NonTerm, Vec<usize>>,
 
@@ -60,7 +48,11 @@ pub struct Grammar<Term, NonTerm> {
 
     expand_cache: HashMap<NonTerm, Vec<ExpandCache<Term>>>,
 
-    pub precedence_map: HashMap<Operator<Term>, usize>,
+    /// precedence level for each terminal symbol
+    pub precedence_levels: HashMap<Term, usize>,
+
+    /// precedence type for each precedence level
+    pub precedence_types: Vec<Option<ReduceType>>,
 }
 
 impl<Term, NonTerm> Grammar<Term, NonTerm> {
@@ -68,11 +60,12 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         Grammar {
             rules: Vec::new(),
             firsts: Default::default(),
-            reduce_types: Default::default(),
             rules_map: Default::default(),
             expand_cache: Default::default(),
-            precedence_map: Default::default(),
             error_name: None,
+
+            precedence_levels: Default::default(),
+            precedence_types: Vec::new(),
         }
     }
 
@@ -82,7 +75,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         name: NonTerm,
         rule: Vec<Token<Term, NonTerm>>,
         lookaheads: Option<BTreeSet<Term>>,
-        operator: Option<Operator<Term>>,
+        precedence: Option<Precedence>,
         priority: usize,
     ) -> usize
     where
@@ -91,9 +84,12 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         let index = self.rules.len();
         self.rules_map.entry(name).or_default().push(index);
         let rule = Rule {
-            rule: ProductionRule { name, rule },
+            rule: ProductionRule {
+                name,
+                rule,
+                precedence,
+            },
             lookaheads,
-            operator,
             priority,
         };
         self.rules.push(rule);
@@ -112,12 +108,12 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     }
 
     /// false if precedence already exists and different
-    pub fn add_precedence(&mut self, term: Operator<Term>, precedence: usize) -> bool
+    pub fn add_precedence(&mut self, term: Term, level: usize) -> bool
     where
         Term: Hash + Eq,
     {
-        if let Some(old) = self.precedence_map.insert(term, precedence) {
-            if old != precedence {
+        if let Some(old) = self.precedence_levels.insert(term, level) {
+            if old != level {
                 return false;
             }
         }
@@ -125,16 +121,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     }
 
     /// error if different reduce type is assigned to same terminal symbol
-    pub fn add_reduce_type(&mut self, op: Operator<Term>, reduce_type: ReduceType) -> bool
-    where
-        Term: Hash + Eq,
-    {
-        if let Some(old) = self.reduce_types.insert(op, reduce_type) {
-            if old != reduce_type {
-                return false;
-            }
-        }
-        true
+    pub fn set_precedence_types(&mut self, types: Vec<Option<ReduceType>>) {
+        self.precedence_types = types;
     }
 
     /// search for every production rules with name 'name'
@@ -425,7 +413,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         states: &[State<Term, NonTerm>],
         diags: &mut DiagnosticCollector<Term>,
     ) where
-        Term: Ord + Copy,
+        Term: Ord + Copy + Hash,
         NonTerm: Copy + PartialEq + Ord,
     {
         if !diags.enabled {
@@ -444,6 +432,15 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         for (state_id, state) in states.iter().enumerate() {
             for (&term, reduce_rules) in state.reduce_map.iter() {
                 if let Some(&next_shift_state) = state.shift_goto_map_term.get(&term) {
+                    // check if this can be resolved by operator precedence
+                    if self.precedence_levels.contains_key(&term)
+                        && reduce_rules
+                            .iter()
+                            .all(|&rule| self.rules[rule].rule.precedence.is_some())
+                    {
+                        continue;
+                    }
+
                     // shift/reduce conflict
                     let shift_rules: Vec<_> =
                         states[next_shift_state].unshifted_ruleset().collect();
@@ -840,7 +837,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 if !state.shift_goto_map_term.contains_key(&term) {
                     continue;
                 };
-                let Some(&shift_prec) = self.precedence_map.get(&Operator::Term(term)) else {
+                let Some(&shift_prec) = self.precedence_levels.get(&term) else {
                     // no precedence for this shift rule
                     continue;
                 };
@@ -850,13 +847,13 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                 let mut remove_shift = true;
 
                 for &reduce_rule in reduce_rules.iter() {
-                    let Some(reduce_op) = self.rules[reduce_rule].operator else {
+                    let Some(reduce_op) = self.rules[reduce_rule].rule.precedence else {
                         // no operator for this reduce rule
                         remove_shift = false;
                         continue;
                     };
-                    let Some(&reduce_prec) = self.precedence_map.get(&reduce_op) else {
-                        // no precedence for this reduce rule
+                    let Precedence::Fixed(reduce_prec) = reduce_op else {
+                        // not fixed operator, so no precedence known at this time
                         remove_shift = false;
                         continue;
                     };
@@ -874,7 +871,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                         }
                         Ordering::Equal => {
                             // reduce == shift => check reduce type
-                            match self.reduce_types.get(&reduce_op) {
+                            match self.precedence_types[reduce_prec] {
                                 Some(ReduceType::Left) => {
                                     // reduce first => remove shift
                                     reduces.insert(reduce_rule, reduce_prec);
@@ -1039,7 +1036,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             if !next_rules_term.contains_key(&term) {
                 continue;
             };
-            let Some(&shift_prec) = self.precedence_map.get(&Operator::Term(term)) else {
+            let Some(&shift_prec) = self.precedence_levels.get(&term) else {
                 // no precedence for this shift rule
                 continue;
             };
@@ -1050,13 +1047,13 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             let mut remove_shift = true;
 
             for &reduce_rule in reduce_rules.iter() {
-                let Some(reduce_op) = self.rules[reduce_rule].operator else {
+                let Some(reduce_op) = self.rules[reduce_rule].rule.precedence else {
                     // no operator for this reduce rule
                     remove_shift = false;
                     continue;
                 };
-                let Some(&reduce_prec) = self.precedence_map.get(&reduce_op) else {
-                    // no precedence for this reduce rule
+                let Precedence::Fixed(reduce_prec) = reduce_op else {
+                    // not fixed operator, so no precedence known at this time
                     remove_shift = false;
                     continue;
                 };
@@ -1074,7 +1071,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                     }
                     Ordering::Equal => {
                         // reduce == shift => check reduce type
-                        match self.reduce_types.get(&reduce_op) {
+                        match self.precedence_types[reduce_prec] {
                             Some(ReduceType::Left) => {
                                 // reduce first => remove shift
                                 reduces.insert(reduce_rule, reduce_prec);

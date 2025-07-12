@@ -3,14 +3,6 @@ use proc_macro2::Span;
 
 use proc_macro2::TokenStream;
 use quote::ToTokens;
-use rusty_lr_core::builder::ReduceType;
-
-pub struct ReduceTypeInfo {
-    pub reduce_type: ReduceType,
-
-    // the span of this reduce type definition
-    pub source: Span,
-}
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum TerminalName {
@@ -108,8 +100,8 @@ impl From<(u32, u32)> for TerminalName {
 pub struct TerminalInfo {
     pub name: TerminalName,
 
-    /// any %left of %right set for this terminal
-    pub reduce_type: Option<ReduceTypeInfo>,
+    /// the precedence level of this terminal
+    pub precedence: Option<(usize, Span)>,
 
     /// the actual Rust expr to be emitted
     pub body: TokenStream,

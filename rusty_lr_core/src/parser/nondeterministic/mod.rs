@@ -89,15 +89,16 @@ where
 pub(crate) fn reduce<P: Parser, Data: TokenData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
     parser: &P,
     reduce_rule: usize,
+    precedence: Option<usize>,
     node: Rc<Node<Data>>,
     context: &mut Context<Data>,
     term: &P::Term,
-    has_shift: bool,
+    shift: &mut bool,
     userdata: &mut Data::UserData,
-) -> bool
+) -> Result<Rc<Node<Data>>, Data::ReduceActionError>
 where
     P::Term: Clone,
-    P::NonTerm: std::hash::Hash + Eq + Clone,
+    P::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug,
 {
     use crate::Location;
     let mut new_location = Data::Location::new(
@@ -115,11 +116,10 @@ where
 
     use crate::parser::State;
 
-    let mut do_shift = has_shift;
     match Data::reduce_action(
         reduce_rule,
         &mut context.reduce_args,
-        &mut do_shift,
+        shift,
         term,
         userdata,
         &mut new_location,
@@ -128,26 +128,21 @@ where
             if let Some(nonterm_shift_state) = parser.get_states()[parent.state]
                 .shift_goto_nonterm(&parser.get_rules()[reduce_rule].name)
             {
-                let new_node = Node {
+                Ok(Rc::new(Node {
                     parent: Some(parent),
                     data: Some((new_data, new_location)),
+                    precedence_level: precedence,
                     state: nonterm_shift_state,
                     #[cfg(feature = "tree")]
                     tree: Some(tree),
-                };
-
-                context
-                    .nodes_pong
-                    .entry(nonterm_shift_state)
-                    .or_default()
-                    .push(Rc::new(new_node));
+                }))
+            } else {
+                unreachable!(
+                    "no shift state for non-terminal: {:?}",
+                    parser.get_rules()[reduce_rule].name
+                );
             }
         }
-        Err(err) => {
-            if context.current_nodes.is_empty() {
-                context.reduce_errors.push(err);
-            }
-        }
+        Err(err) => Err(err),
     }
-    do_shift
 }

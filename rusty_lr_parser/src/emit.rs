@@ -182,7 +182,6 @@ impl Grammar {
         // ======================
         // building grammar
         // ======================
-        use rusty_lr_core::builder::Operator;
         use rusty_lr_core::builder::ReduceType;
         use rusty_lr_core::Token;
 
@@ -192,10 +191,14 @@ impl Grammar {
                 ReduceType::Right => quote! { #module_prefix::builder::ReduceType::Right },
             }
         };
-        let operator_to_stream = |op: Operator<usize>| -> TokenStream {
+        let precedence_to_stream = |op: rusty_lr_core::rule::Precedence| -> TokenStream {
             match op {
-                Operator::Prec(prec) => quote! { #module_prefix::builder::Operator::Prec(#prec) },
-                Operator::Term(term) => quote! { #module_prefix::builder::Operator::Term(#term) },
+                rusty_lr_core::rule::Precedence::Fixed(level) => {
+                    quote! { #module_prefix::rule::Precedence::Fixed(#level) }
+                }
+                rusty_lr_core::rule::Precedence::Dynamic(idx) => {
+                    quote! { #module_prefix::rule::Precedence::Dynamic(#idx) }
+                }
             }
         };
         let nonterminals_token: Vec<_> = self
@@ -228,6 +231,101 @@ impl Grammar {
             });
         }
 
+        // helper function to generate case stream.
+        // convert integer list to `a | b..=c | d` syntax
+        fn usize_list_to_stream(list: impl Iterator<Item = usize>) -> TokenStream {
+            let mut stream = TokenStream::new();
+            let mut prev = None;
+            for val in list {
+                if let Some((prev_start, prev_last)) = prev {
+                    if prev_last + 1 == val {
+                        // extend the range
+                        prev = Some((prev_start, val));
+                    } else {
+                        // push the previous range
+                        if !stream.is_empty() {
+                            stream.extend(quote! { | });
+                        }
+                        if prev_start == prev_last {
+                            stream.extend(quote! { #prev_start });
+                        } else {
+                            stream.extend(quote! { #prev_start..=#prev_last });
+                        }
+
+                        prev = Some((val, val));
+                    }
+                } else {
+                    prev = Some((val, val));
+                }
+            }
+            // push the previous range
+            if let Some((prev_start, prev_last)) = prev {
+                if !stream.is_empty() {
+                    stream.extend(quote! { | });
+                }
+                if prev_start == prev_last {
+                    stream.extend(quote! { #prev_start });
+                } else {
+                    stream.extend(quote! { #prev_start..=#prev_last });
+                }
+            }
+
+            stream
+        }
+
+        // generate precedence level -> reduce type match stream
+        // match level {
+        //     0 => Left,
+        //     1 => Right,
+        //     ...
+        // }
+        let precedence_types_match_body_stream = {
+            let lefts = usize_list_to_stream(
+                self.builder
+                    .precedence_types
+                    .iter()
+                    .copied()
+                    .enumerate()
+                    .filter_map(|(level, reduce_type)| {
+                        if reduce_type == Some(ReduceType::Left) {
+                            Some(level)
+                        } else {
+                            None
+                        }
+                    }),
+            );
+            let rights = usize_list_to_stream(
+                self.builder
+                    .precedence_types
+                    .iter()
+                    .copied()
+                    .enumerate()
+                    .filter_map(|(level, reduce_type)| {
+                        if reduce_type == Some(ReduceType::Right) {
+                            Some(level)
+                        } else {
+                            None
+                        }
+                    }),
+            );
+
+            let mut stream = TokenStream::new();
+            if !lefts.is_empty() {
+                stream.extend(quote! {
+                    #lefts => Some(#module_prefix::builder::ReduceType::Left),
+                });
+            }
+            if !rights.is_empty() {
+                stream.extend(quote! {
+                    #rights => Some(#module_prefix::builder::ReduceType::Right),
+                });
+            }
+            stream.extend(quote! {
+                _ => None,
+            });
+            stream
+        };
+
         let grammar_build_stream = if self.compiled {
             // do not build at runtime
             // write all parser tables and production rules directly here
@@ -242,11 +340,21 @@ impl Grammar {
                     });
                 }
                 let name = &nonterminals_token[rule.rule.name];
+                let precedence_stream = if let Some(precedence) = rule.rule.precedence {
+                    let s = precedence_to_stream(precedence);
+                    quote! { Some(#s) }
+                } else {
+                    quote! { None }
+                };
 
                 // lookaheads
                 production_rules_body_stream.extend(quote! {
-                #module_prefix::rule::ProductionRule{ name: #name, rule: vec![ #tokens_vec_body_stream ] },
-            });
+                    #module_prefix::rule::ProductionRule{
+                        name: #name,
+                        rule: vec![ #tokens_vec_body_stream ],
+                        precedence: #precedence_stream,
+                    },
+                });
             }
             let mut states_body_stream = TokenStream::new();
             for state in &self.states {
@@ -326,22 +434,11 @@ impl Grammar {
         } else {
             // build runtime
 
-            // adding reduce types
-            let mut add_reduce_type_stream = TokenStream::new();
-            for (&op, &reduce_type) in self.builder.reduce_types.iter() {
-                let reduce_type_stream = reduce_type_to_stream(reduce_type);
-                let op_stream = operator_to_stream(op);
-                add_reduce_type_stream.extend(quote! {
-                    builder.add_reduce_type( #op_stream, #reduce_type_stream );
-                });
-            }
-
-            // adding precedence orders
-            let mut add_precedence_stream = TokenStream::new();
-            for (&op, &level) in self.builder.precedence_map.iter() {
-                let op_stream = operator_to_stream(op);
-                add_precedence_stream.extend(quote! {
-                    builder.add_precedence(#op_stream, #level);
+            // adding precedence levels
+            let mut add_precedence_levels_stream = TokenStream::new();
+            for (&term, &level) in self.builder.precedence_levels.iter() {
+                add_precedence_levels_stream.extend(quote! {
+                    builder.add_precedence(#term, #level);
                 });
             }
 
@@ -372,10 +469,10 @@ impl Grammar {
                 };
 
                 // calculate operator
-                let op_stream = match rule.operator {
+                let prec_stream = match rule.rule.precedence {
                     None => quote! { None },
                     Some(op) => {
-                        let op_stream = operator_to_stream(op);
+                        let op_stream = precedence_to_stream(op);
                         quote! {Some(#op_stream)}
                     }
                 };
@@ -389,7 +486,7 @@ impl Grammar {
                         #nonterm_name,
                         vec![ #tokens_vec_body_stream ],
                         #lookaheads_stream,
-                        #op_stream,
+                        #prec_stream,
                         #dprec_stream
                     );
                 });
@@ -399,6 +496,26 @@ impl Grammar {
                 builder.add_empty_rule(
                     #nonterminals_enum_name::error
                 );
+            });
+
+            let prec_cap = self.builder.precedence_types.len();
+            let mut precedence_types_stream = quote! {
+                let mut precedence_types = Vec::with_capacity(#prec_cap);
+            };
+            for &reduce_type in self.builder.precedence_types.iter() {
+                if let Some(reduce_type) = reduce_type {
+                    let reduce_type = reduce_type_to_stream(reduce_type);
+                    precedence_types_stream.extend(quote! {
+                        precedence_types.push(Some(#reduce_type));
+                    });
+                } else {
+                    precedence_types_stream.extend(quote! {
+                        precedence_types.push(None);
+                    });
+                }
+            }
+            precedence_types_stream.extend(quote! {
+                builder.set_precedence_types(precedence_types);
             });
 
             // building grammar
@@ -430,10 +547,10 @@ impl Grammar {
                 let mut builder = #module_prefix::builder::Grammar::new();
 
                 // add reduce types
-                #add_reduce_type_stream
+                #add_precedence_levels_stream
 
                 // add precedences
-                #add_precedence_stream
+                #precedence_types_stream
 
                 // production rules
                 #add_rules_stream
@@ -471,6 +588,32 @@ impl Grammar {
             quote! { Some(#nonterminals_enum_name::error) }
         } else {
             quote! { None }
+        };
+
+        // generate `Parser::class_precedence()` terminal class -> precedence level match body
+        let class_level_match_body_stream = {
+            let mut stream = TokenStream::new();
+
+            let mut level_classes = Vec::new();
+            level_classes.resize(
+                self.builder.precedence_types.len(),
+                std::collections::BTreeSet::new(),
+            );
+            for (&class, &level) in self.builder.precedence_levels.iter() {
+                level_classes[level].insert(class);
+            }
+
+            for (level, classes) in level_classes.into_iter().enumerate() {
+                if classes.is_empty() {
+                    continue;
+                } else if classes.len() == 1 {
+                    let case_stream = usize_list_to_stream(classes.into_iter());
+                    stream.extend(quote! {
+                        #case_stream => Some(#level),
+                    });
+                }
+            }
+            stream
         };
 
         // building terminal-class_id map
@@ -570,6 +713,19 @@ impl Grammar {
                 type State = #state_typename;
                 type TerminalClassElement = ::std::ops::RangeInclusive<#token_typename>;
 
+                fn class_precedence(&self, class: usize) -> Option<usize> {
+                    #[allow(unreachable_patterns)]
+                    match class {
+                        #class_level_match_body_stream
+                        _ => None,
+                    }
+                }
+                fn precedence_types(&self, level: usize) -> Option<#module_prefix::builder::ReduceType> {
+                    #[allow(unreachable_patterns)]
+                    match level {
+                        #precedence_types_match_body_stream
+                    }
+                }
                 fn get_rules(&self) -> &[#rule_typename] {
                     &self.rules
                 }
@@ -741,6 +897,19 @@ impl Grammar {
                 type State = #state_typename;
                 type TerminalClassElement = &'static str;
 
+                fn class_precedence(&self, class: usize) -> Option<usize> {
+                    #[allow(unreachable_patterns)]
+                    match class {
+                        #class_level_match_body_stream
+                        _ => None,
+                    }
+                }
+                fn precedence_types(&self, level: usize) -> Option<#module_prefix::builder::ReduceType> {
+                    #[allow(unreachable_patterns)]
+                    match level {
+                        #precedence_types_match_body_stream
+                    }
+                }
                 fn get_rules(&self) -> &[#rule_typename] {
                     &self.rules
                 }

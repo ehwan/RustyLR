@@ -15,6 +15,8 @@ pub struct Context<Data: TokenData> {
     /// Data stack holds the values associated with each symbol.
     pub(crate) data_stack: Vec<(Data, Data::Location)>,
 
+    pub(crate) precedence_stack: Vec<Option<usize>>,
+
     /// temporary data stack for reduce action.
     pub(crate) reduce_args: Vec<(Data, Data::Location)>,
 
@@ -31,6 +33,7 @@ impl<Data: TokenData> Context<Data> {
             state_stack: vec![0],
 
             data_stack: Vec::new(),
+            precedence_stack: Vec::new(),
             reduce_args: Vec::new(),
 
             #[cfg(feature = "tree")]
@@ -46,6 +49,7 @@ impl<Data: TokenData> Context<Data> {
             state_stack,
 
             data_stack: Vec::with_capacity(capacity),
+            precedence_stack: Vec::with_capacity(capacity),
             reduce_args: Vec::new(),
 
             #[cfg(feature = "tree")]
@@ -184,73 +188,140 @@ impl<Data: TokenData> Context<Data> {
     {
         use crate::Location;
         let class = parser.to_terminal_class(&term);
-        // check if there is any reduce action with given terminal
-        while let Some(mut reduce_rule) =
-            parser.get_states()[*self.state_stack.last().unwrap()].reduce(class)
-        {
-            let reduce_rule = reduce_rule.next().unwrap();
-            let rule = &parser.get_rules()[reduce_rule];
-            let len = rule.rule.len();
-            // pop state stack
-            self.state_stack.truncate(self.state_stack.len() - len);
+        let shift_prec = parser.class_precedence(class);
 
-            let mut shift = false;
+        let shift_to = loop {
+            let state = &parser.get_states()[*self.state_stack.last().unwrap()];
 
-            let mut new_location =
-                Data::Location::new(self.data_stack.iter().map(|(_, loc)| loc).rev(), len);
+            let shift = state.shift_goto_class(class);
+            if let Some(mut reduce_rule) = state.reduce(class) {
+                let reduce_rule = reduce_rule.next().unwrap();
+                let rule = &parser.get_rules()[reduce_rule];
+                let tokens_len = rule.rule.len();
 
-            self.reduce_args.clear();
-            self.reduce_args.reserve(len);
-            for _ in 0..rule.rule.len() {
-                self.reduce_args.push(
-                    self.data_stack
-                        .pop()
-                        .expect("data stack must have at least one element"),
-                );
-            }
+                let reduce_prec = match rule.precedence {
+                    Some(crate::rule::Precedence::Fixed(level)) => Some(level),
+                    Some(crate::rule::Precedence::Dynamic(token_idx)) => {
+                        // get token_idx'th precedence from back of precedence stack
+                        let idx = self.precedence_stack.len() - tokens_len + token_idx;
+                        self.precedence_stack[idx]
+                    }
+                    None => None,
+                };
 
-            // call reduce action
-            let new_data = Data::reduce_action(
-                reduce_rule,
-                &mut self.reduce_args,
-                &mut shift,
-                &term,
-                userdata,
-                &mut new_location,
-            )
-            .map_err(ParseError::ReduceAction)?;
-            self.data_stack.push((new_data, new_location));
-
-            // construct tree
-            #[cfg(feature = "tree")]
-            {
-                let mut children = Vec::with_capacity(rule.rule.len());
-                for _ in 0..rule.rule.len() {
-                    let tree = self.tree_stack.pop().unwrap();
-                    children.push(tree);
+                // resolve shift/reduce conflict by precedence
+                if shift.is_some() {
+                    let shift_prec = shift_prec.unwrap();
+                    let reduce_prec = reduce_prec.unwrap();
+                    use std::cmp::Ordering;
+                    match reduce_prec.cmp(&shift_prec) {
+                        Ordering::Less => {
+                            // no reduce
+                            break shift;
+                        }
+                        Ordering::Equal => {
+                            // check for reduce type
+                            use crate::builder::ReduceType;
+                            match parser.precedence_types(reduce_prec) {
+                                Some(ReduceType::Left) => {
+                                    // no shift
+                                    // shift = None;
+                                }
+                                Some(ReduceType::Right) => {
+                                    // no reduce
+                                    break shift;
+                                }
+                                None => {
+                                    // error
+                                    return Err(ParseError::NoPrecedence(
+                                        term,
+                                        location,
+                                        reduce_rule,
+                                    ));
+                                }
+                            }
+                        }
+                        Ordering::Greater => {
+                            // no shift
+                            // shift = None;
+                        }
+                    }
                 }
-                children.reverse();
 
-                self.tree_stack.push(crate::tree::Tree::new_nonterminal(
-                    rule.name.clone(),
-                    children,
-                ));
-            }
+                // if the code reaches here, it proceed to reduce, without shifting
 
-            // shift with reduced nonterminal
-            if let Some(next_state_id) = parser.get_states()[*self.state_stack.last().unwrap()]
-                .shift_goto_nonterm(&rule.name)
-            {
-                self.state_stack.push(next_state_id);
+                // pop state stack
+                self.state_stack
+                    .truncate(self.state_stack.len() - tokens_len);
+                // pop precedence stack
+                self.precedence_stack
+                    .truncate(self.precedence_stack.len() - tokens_len);
+                self.precedence_stack.push(reduce_prec);
+
+                let mut shift = false;
+
+                let mut new_location = Data::Location::new(
+                    self.data_stack.iter().map(|(_, loc)| loc).rev(),
+                    tokens_len,
+                );
+
+                self.reduce_args.clear();
+                self.reduce_args.reserve(tokens_len);
+                for _ in 0..tokens_len {
+                    self.reduce_args.push(
+                        self.data_stack
+                            .pop()
+                            .expect("data stack must have at least one element"),
+                    );
+                }
+
+                // call reduce action
+                let new_data = match Data::reduce_action(
+                    reduce_rule,
+                    &mut self.reduce_args,
+                    &mut shift,
+                    &term,
+                    userdata,
+                    &mut new_location,
+                ) {
+                    Ok(new_data) => new_data,
+                    Err(err) => {
+                        return Err(ParseError::ReduceAction(term, location, err));
+                    }
+                };
+                self.data_stack.push((new_data, new_location));
+
+                // construct tree
+                #[cfg(feature = "tree")]
+                {
+                    let mut children = Vec::with_capacity(rule.rule.len());
+                    for _ in 0..rule.rule.len() {
+                        let tree = self.tree_stack.pop().unwrap();
+                        children.push(tree);
+                    }
+                    children.reverse();
+
+                    self.tree_stack.push(crate::tree::Tree::new_nonterminal(
+                        rule.name.clone(),
+                        children,
+                    ));
+                }
+
+                // shift with reduced nonterminal
+                if let Some(next_state_id) = parser.get_states()[*self.state_stack.last().unwrap()]
+                    .shift_goto_nonterm(&rule.name)
+                {
+                    self.state_stack.push(next_state_id);
+                } else {
+                    unreachable!("shift nonterm failed");
+                }
             } else {
-                unreachable!("shift nonterm failed");
+                break shift;
             }
-        }
-
-        let state = &parser.get_states()[*self.state_stack.last().unwrap()];
+        };
 
         // shift with terminal
-        if let Some(next_state_id) = state.shift_goto_class(class) {
+        if let Some(next_state_id) = shift_to {
             self.state_stack.push(next_state_id);
 
             #[cfg(feature = "tree")]
@@ -258,6 +329,7 @@ impl<Data: TokenData> Context<Data> {
                 .push(crate::tree::Tree::new_terminal(term.clone()));
 
             self.data_stack.push((Data::new_terminal(term), location));
+            self.precedence_stack.push(shift_prec);
 
             Ok(())
         } else {
@@ -276,6 +348,7 @@ impl<Data: TokenData> Context<Data> {
                         .push(crate::tree::Tree::new_terminal(term.clone()));
 
                     self.data_stack.push((Data::new_terminal(term), location));
+                    self.precedence_stack.push(shift_prec);
                 } else {
                     // here, fed token is in `error` non-terminal
                     // so merge location with previous
@@ -307,35 +380,88 @@ impl<Data: TokenData> Context<Data> {
     where
         Data::NonTerm: Hash + Eq,
     {
-        let class = parser.to_terminal_class(term);
-        if parser.get_states()[*self.state_stack.last().unwrap()]
-            .shift_goto_class(class)
-            .is_some()
-        {
-            return true;
-        }
-
         let mut state_stack = self.state_stack.clone();
-        while let Some(mut reduce_rule) =
-            parser.get_states()[*state_stack.last().unwrap()].reduce(class)
-        {
-            let reduce_rule = reduce_rule.next().unwrap();
-            let rule = &parser.get_rules()[reduce_rule];
-            let new_len = state_stack.len() - rule.rule.len();
-            state_stack.truncate(new_len);
+        let mut precedence_stack = self.precedence_stack.clone();
+        let class = parser.to_terminal_class(&term);
+        let shift_prec = parser.class_precedence(class);
 
-            if let Some(next_state) =
-                parser.get_states()[*state_stack.last().unwrap()].shift_goto_nonterm(&rule.name)
-            {
-                state_stack.push(next_state);
+        let shift_to = loop {
+            let state = &parser.get_states()[*state_stack.last().unwrap()];
+
+            let shift = state.shift_goto_class(class);
+            if let Some(mut reduce_rule) = state.reduce(class) {
+                let reduce_rule = reduce_rule.next().unwrap();
+                let rule = &parser.get_rules()[reduce_rule];
+                let tokens_len = rule.rule.len();
+
+                let reduce_prec = match rule.precedence {
+                    Some(crate::rule::Precedence::Fixed(level)) => Some(level),
+                    Some(crate::rule::Precedence::Dynamic(token_idx)) => {
+                        // get token_idx'th precedence from back of precedence stack
+                        let idx = precedence_stack.len() - tokens_len + token_idx;
+                        precedence_stack[idx]
+                    }
+                    None => None,
+                };
+
+                // resolve shift/reduce conflict by precedence
+                if shift.is_some() {
+                    let shift_prec = shift_prec.unwrap();
+                    let reduce_prec = reduce_prec.unwrap();
+                    use std::cmp::Ordering;
+                    match reduce_prec.cmp(&shift_prec) {
+                        Ordering::Less => {
+                            // no reduce
+                            break shift;
+                        }
+                        Ordering::Equal => {
+                            // check for reduce type
+                            use crate::builder::ReduceType;
+                            match parser.precedence_types(reduce_prec) {
+                                Some(ReduceType::Left) => {
+                                    // no shift
+                                    // shift = None;
+                                }
+                                Some(ReduceType::Right) => {
+                                    // no reduce
+                                    break shift;
+                                }
+                                None => {
+                                    // error
+                                    return false;
+                                }
+                            }
+                        }
+                        Ordering::Greater => {
+                            // no shift
+                            // shift = None;
+                        }
+                    }
+                }
+
+                // if the code reaches here, it proceed to reduce, without shifting
+
+                // pop state stack
+                state_stack.truncate(self.state_stack.len() - tokens_len);
+                // pop precedence stack
+                precedence_stack.truncate(self.precedence_stack.len() - tokens_len);
+                precedence_stack.push(reduce_prec);
+
+                // shift with reduced nonterminal
+                if let Some(next_state_id) =
+                    parser.get_states()[*state_stack.last().unwrap()].shift_goto_nonterm(&rule.name)
+                {
+                    state_stack.push(next_state_id);
+                } else {
+                    unreachable!("shift nonterm failed");
+                }
             } else {
-                return false;
+                break shift;
             }
-        }
+        };
 
-        parser.get_states()[*state_stack.last().unwrap()]
-            .shift_goto_class(class)
-            .is_some()
+        // shift with terminal
+        shift_to.is_some()
     }
     /// Check if current context can enter panic mode.
     pub fn can_panic_mode<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
@@ -493,11 +619,16 @@ impl<Data: TokenData> Context<Data> {
                     let new_len = self.tree_stack.len() - popped_token;
                     self.tree_stack.truncate(new_len);
                 }
+                {
+                    let new_len = self.precedence_stack.len() - popped_token;
+                    self.precedence_stack.truncate(new_len);
+                }
 
                 // shift to error state
                 self.state_stack.push(error_state);
                 self.data_stack
                     .push((Data::new_error_nonterm(), new_location));
+                self.precedence_stack.push(None);
                 #[cfg(feature = "tree")]
                 {
                     // push error tree
@@ -630,6 +761,7 @@ where
         Context {
             state_stack: self.state_stack.clone(),
             data_stack: self.data_stack.clone(),
+            precedence_stack: self.precedence_stack.clone(),
             reduce_args: Vec::new(),
 
             #[cfg(feature = "tree")]

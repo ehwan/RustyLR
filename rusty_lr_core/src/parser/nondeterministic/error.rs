@@ -5,12 +5,25 @@ use crate::nonterminal::TokenData;
 
 /// Error type for feed()
 #[derive(Clone)]
-pub enum ParseError<Data: TokenData> {
-    /// No action defined for the given terminal in the parser table
-    NoAction(Data::Term, Data::Location),
-
+pub struct ParseError<Data: TokenData> {
+    /// The terminal symbol that caused the error.
+    pub term: Data::Term,
+    /// Location of the terminal symbol
+    pub location: Data::Location,
     /// Error from reduce action (from every diverged paths)
-    ReduceAction(Vec<Data::ReduceActionError>),
+    pub reduce_action_errors: Vec<Data::ReduceActionError>,
+    /// Rule indices when shift/reduce conflict occur with no shift/reduce precedence defined.
+    /// This is same as when setting %nonassoc in Bison.
+    pub no_precedences: Vec<usize>,
+}
+
+impl<Data: TokenData> ParseError<Data> {
+    pub fn location(&self) -> &Data::Location {
+        &self.location
+    }
+    pub fn term(&self) -> &Data::Term {
+        &self.term
+    }
 }
 
 impl<Data: TokenData> Display for ParseError<Data>
@@ -19,21 +32,7 @@ where
     Data::ReduceActionError: Display,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ParseError::NoAction(term, _location) => {
-                write!(f, "NoAction: {}", term)
-            }
-            ParseError::ReduceAction(err) => {
-                write!(
-                    f,
-                    "ReduceAction: {}",
-                    err.iter()
-                        .map(|e| e.to_string())
-                        .collect::<Vec<_>>()
-                        .join(", ")
-                )
-            }
-        }
+        write!(f, "ParseError error: {}", self.term)
     }
 }
 
@@ -43,13 +42,6 @@ where
     Data::ReduceActionError: Debug,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ParseError::NoAction(term, _location) => {
-                write!(f, "{:?}", term)
-            }
-            ParseError::ReduceAction(err) => {
-                write!(f, "{:?}", err)
-            }
-        }
+        write!(f, "ParseError error: {:?}", self.term)
     }
 }
