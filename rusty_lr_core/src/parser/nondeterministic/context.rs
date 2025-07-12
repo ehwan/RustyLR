@@ -7,6 +7,7 @@ use super::ParseError;
 use crate::hash::HashMap;
 use crate::nonterminal::TokenData;
 use crate::parser::Parser;
+use crate::rule::Precedence;
 
 /// A struct that maintains the current state and the values associated with each symbol.
 /// This handles the divergence and merging of the parser.
@@ -241,41 +242,105 @@ impl<Data: TokenData> Context<Data> {
         self.fallback_nodes.clear();
 
         let class = parser.to_terminal_class(&term);
+        let shift_prec = parser.class_precedence(class);
 
         // BFS reduce
         while !reduce_nodes.is_empty() {
             for (state, nodes) in reduce_nodes.drain() {
                 let next_term_shift_state = parser.get_states()[state].shift_goto_class(class);
                 if let Some(reduce_rules) = parser.get_states()[state].reduce(class) {
+                    let reduce_rules = reduce_rules.map(|reduce_rule| {
+                        let rule = &parser.get_rules()[reduce_rule];
+                        match rule.precedence {
+                            Some(Precedence::Fixed(prec)) => {
+                                (reduce_rule, Some(Precedence::Fixed(prec)))
+                            }
+                            Some(Precedence::Dynamic(token_index)) => {
+                                // fix the value to the offset from current node
+                                let ith = rule.rule.len() - token_index - 1;
+                                (reduce_rule, Some(Precedence::Dynamic(ith)))
+                            }
+                            None => (reduce_rule, None),
+                        }
+                    });
                     for node in nodes.into_iter() {
+                        let mut shift = next_term_shift_state;
+                        let reduce_rules = reduce_rules.clone().map(|(reduce_rule, precedence)| {
+                            let reduce_prec = match precedence {
+                                Some(Precedence::Fixed(reduce_prec)) => Some(reduce_prec),
+                                Some(Precedence::Dynamic(ith)) => {
+                                    let mut node = &node;
+                                    for _ in 0..ith {
+                                        node = node.parent.as_ref().unwrap();
+                                    }
+                                    node.precedence_level
+                                }
+                                None => None,
+                            };
+                            (reduce_rule, reduce_prec)
+                        });
+                        let reduces = Vec::from_iter(reduce_rules.filter_map(
+                            |(reduce_rule, reduce_prec)| {
+                                match (next_term_shift_state.is_some(), shift_prec, reduce_prec) {
+                                    (true, Some(shift_prec_), Some(reduce_prec_)) => {
+                                        match reduce_prec_.cmp(&shift_prec_) {
+                                            std::cmp::Ordering::Less => {
+                                                // no reduce
+                                                shift = next_term_shift_state;
+                                                None
+                                            }
+                                            std::cmp::Ordering::Equal => {
+                                                // check for reduce_type
+                                                use crate::builder::ReduceType;
+                                                match parser.precedence_types(reduce_prec_) {
+                                                    Some(ReduceType::Left) => {
+                                                        // no shift
+                                                        Some((reduce_rule, reduce_prec))
+                                                    }
+                                                    Some(ReduceType::Right) => {
+                                                        // no reduce
+                                                        shift = next_term_shift_state;
+                                                        None
+                                                    }
+                                                    None => {
+                                                        // TODO error
+                                                        panic!(
+                                                            "Unknown precedence type: {:?}",
+                                                            reduce_prec
+                                                        );
+                                                    }
+                                                }
+                                            }
+                                            std::cmp::Ordering::Greater => {
+                                                // no shift
+                                                Some((reduce_rule, reduce_prec))
+                                            }
+                                        }
+                                    }
+                                    _ => {
+                                        shift = next_term_shift_state;
+                                        Some((reduce_rule, reduce_prec))
+                                    }
+                                }
+                            },
+                        ));
+
                         let mut shift_for_this_node = false;
-
-                        let mut reduce_rules = reduce_rules.clone();
-                        let reduce0 = reduce_rules.next().unwrap();
-
                         // In reduce action, we call `Rc::try_unwrap` to avoid `clone()` data if possible.
                         // So we need to avoid `Rc::clone()` if possible.
-                        for reduce_rule in reduce_rules {
+                        for (reduce_rule, precedence) in reduces {
                             shift_for_this_node |= super::reduce(
                                 parser,
                                 reduce_rule,
+                                precedence,
                                 Rc::clone(&node),
                                 self,
                                 &term,
-                                next_term_shift_state.is_some(),
+                                shift.is_some(),
                                 userdata,
                             );
                         }
-                        if let Some(next_term_shift_state) = next_term_shift_state {
-                            shift_for_this_node |= super::reduce(
-                                parser,
-                                reduce0,
-                                Rc::clone(&node),
-                                self,
-                                &term,
-                                true,
-                                userdata,
-                            );
+                        if let Some(shift) = shift {
                             if shift_for_this_node {
                                 // some shift action was performed; remove fallback_nodes immediately
                                 // to avoid cloned Rc nodes
@@ -283,7 +348,8 @@ impl<Data: TokenData> Context<Data> {
 
                                 let next_node = Node {
                                     parent: Some(node),
-                                    state: next_term_shift_state,
+                                    state: shift,
+                                    precedence_level: shift_prec,
                                     data: Some((
                                         Data::new_terminal(term.clone()),
                                         location.clone(),
@@ -293,12 +359,10 @@ impl<Data: TokenData> Context<Data> {
                                 };
 
                                 self.current_nodes
-                                    .entry(next_term_shift_state)
+                                    .entry(shift)
                                     .or_default()
                                     .push(Rc::new(next_node));
                             }
-                        } else {
-                            super::reduce(parser, reduce0, node, self, &term, false, userdata);
                         }
                     }
                 } else if let Some(next_term_shift_state) = next_term_shift_state {
@@ -311,6 +375,7 @@ impl<Data: TokenData> Context<Data> {
                             parent: Some(node),
                             state: next_term_shift_state,
                             data: Some((Data::new_terminal(term.clone()), location.clone())),
+                            precedence_level: shift_prec,
                             #[cfg(feature = "tree")]
                             tree: Some(crate::tree::Tree::new_terminal(term.clone())),
                         };
@@ -367,6 +432,7 @@ impl<Data: TokenData> Context<Data> {
                             parent: Some(Rc::new(error_node)),
                             state: next_state,
                             data: Some((Data::new_terminal(term.clone()), location.clone())),
+                            precedence_level: shift_prec,
                             #[cfg(feature = "tree")]
                             tree: Some(crate::tree::Tree::new_terminal(term.clone())),
                         };
@@ -411,65 +477,136 @@ impl<Data: TokenData> Context<Data> {
         term: &P::Term,
     ) -> bool
     where
+        P::Term: Clone,
         P::NonTerm: Hash + Eq,
     {
         use crate::parser::State;
 
-        let mut nodes = self.current_nodes.clone();
-        let mut nodes_pong: HashMap<usize, Vec<Rc<Node<Data>>>> = HashMap::default();
-        let class = parser.to_terminal_class(term);
+        // current_nodes <-> nodes_pong <-> nodes_pong2
+        // cycle for no unnecessary heap allocation
+        let mut reduce_nodes = self.current_nodes.clone();
+        let mut nodes_pong: HashMap<usize, Vec<_>> = HashMap::default();
 
-        loop {
-            if nodes.is_empty() {
-                break;
-            }
+        let class = parser.to_terminal_class(&term);
+        let shift_prec = parser.class_precedence(class);
 
-            nodes_pong.clear();
-            for (state, nodes) in nodes.drain() {
-                let state = &parser.get_states()[state];
-                if state.shift_goto_class(class).is_some() {
-                    return true;
-                }
-
-                if let Some(reduce_rules) = state.reduce(class) {
-                    for reduce_rule in reduce_rules {
-                        let reduce_rule = &parser.get_rules()[reduce_rule];
-                        let reduce_len = reduce_rule.rule.len();
-
-                        for p in nodes.iter() {
-                            let mut parent = Rc::clone(p);
-                            for _ in 0..reduce_len {
-                                parent = Rc::clone(parent.parent.as_ref().unwrap());
+        // BFS reduce
+        while !reduce_nodes.is_empty() {
+            for (state, nodes) in reduce_nodes.drain() {
+                let next_term_shift_state = parser.get_states()[state].shift_goto_class(class);
+                if let Some(reduce_rules) = parser.get_states()[state].reduce(class) {
+                    let reduce_rules = reduce_rules.map(|reduce_rule| {
+                        let rule = &parser.get_rules()[reduce_rule];
+                        match rule.precedence {
+                            Some(Precedence::Fixed(prec)) => {
+                                (reduce_rule, Some(Precedence::Fixed(prec)))
                             }
-                            if let Some(nonterm_shift_state) = parser.get_states()[parent.state]
-                                .shift_goto_nonterm(&reduce_rule.name)
-                            {
-                                if parser.get_states()[nonterm_shift_state]
-                                    .shift_goto_class(class)
-                                    .is_some()
-                                {
-                                    return true;
+                            Some(Precedence::Dynamic(token_index)) => {
+                                // fix the value to the offset from current node
+                                let ith = rule.rule.len() - token_index - 1;
+                                (reduce_rule, Some(Precedence::Dynamic(ith)))
+                            }
+                            None => (reduce_rule, None),
+                        }
+                    });
+                    for node in nodes.into_iter() {
+                        let mut shift = next_term_shift_state;
+                        let reduce_rules = reduce_rules.clone().map(|(reduce_rule, precedence)| {
+                            let reduce_prec = match precedence {
+                                Some(Precedence::Fixed(reduce_prec)) => Some(reduce_prec),
+                                Some(Precedence::Dynamic(ith)) => {
+                                    let mut node = &node;
+                                    for _ in 0..ith {
+                                        node = node.parent.as_ref().unwrap();
+                                    }
+                                    node.precedence_level
                                 }
+                                None => None,
+                            };
+                            (reduce_rule, reduce_prec)
+                        });
+                        let reduces = Vec::from_iter(reduce_rules.filter_map(
+                            |(reduce_rule, reduce_prec)| {
+                                match (next_term_shift_state.is_some(), shift_prec, reduce_prec) {
+                                    (true, Some(shift_prec_), Some(reduce_prec_)) => {
+                                        match reduce_prec_.cmp(&shift_prec_) {
+                                            std::cmp::Ordering::Less => {
+                                                // no reduce
+                                                shift = next_term_shift_state;
+                                                None
+                                            }
+                                            std::cmp::Ordering::Equal => {
+                                                // check for reduce_type
+                                                use crate::builder::ReduceType;
+                                                match parser.precedence_types(reduce_prec_) {
+                                                    Some(ReduceType::Left) => {
+                                                        // no shift
+                                                        Some((reduce_rule, reduce_prec))
+                                                    }
+                                                    Some(ReduceType::Right) => {
+                                                        // no reduce
+                                                        shift = next_term_shift_state;
+                                                        None
+                                                    }
+                                                    None => {
+                                                        // TODO error
+                                                        panic!(
+                                                            "Unknown precedence type: {:?}",
+                                                            reduce_prec
+                                                        );
+                                                    }
+                                                }
+                                            }
+                                            std::cmp::Ordering::Greater => {
+                                                // no shift
+                                                Some((reduce_rule, reduce_prec))
+                                            }
+                                        }
+                                    }
+                                    _ => {
+                                        shift = next_term_shift_state;
+                                        Some((reduce_rule, reduce_prec))
+                                    }
+                                }
+                            },
+                        ));
+                        if shift.is_some() {
+                            return true;
+                        }
 
-                                let nonterm_node = Rc::new(Node {
-                                    parent: Some(parent),
-                                    state: nonterm_shift_state,
+                        for (reduce_rule, precedence) in reduces {
+                            let rule = &parser.get_rules()[reduce_rule];
+                            let len = rule.rule.len();
+                            let mut n = &node;
+                            for _ in 0..len {
+                                n = n.parent.as_ref().unwrap();
+                            }
+                            if let Some(nonterm_shift) =
+                                parser.get_states()[n.state].shift_goto_nonterm(&rule.name)
+                            {
+                                let new_node = Node {
+                                    parent: Some(Rc::clone(n)),
                                     data: None,
+                                    precedence_level: precedence,
+                                    state: nonterm_shift,
                                     #[cfg(feature = "tree")]
                                     tree: None,
-                                });
+                                };
                                 nodes_pong
-                                    .entry(nonterm_shift_state)
+                                    .entry(nonterm_shift)
                                     .or_default()
-                                    .push(nonterm_node);
+                                    .push(Rc::new(new_node));
                             }
                         }
                     }
+                } else if next_term_shift_state.is_some() {
+                    return true;
+                } else {
+                    return false;
                 }
             }
-            std::mem::swap(&mut nodes, &mut nodes_pong);
+            std::mem::swap(&mut reduce_nodes, &mut nodes_pong);
         }
-
         false
     }
 

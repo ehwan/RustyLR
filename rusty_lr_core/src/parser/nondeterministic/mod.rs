@@ -89,6 +89,7 @@ where
 pub(crate) fn reduce<P: Parser, Data: TokenData<Term = P::Term, NonTerm = P::NonTerm> + Clone>(
     parser: &P,
     reduce_rule: usize,
+    precedence: Option<usize>,
     node: Rc<Node<Data>>,
     context: &mut Context<Data>,
     term: &P::Term,
@@ -131,6 +132,7 @@ where
                 let new_node = Node {
                     parent: Some(parent),
                     data: Some((new_data, new_location)),
+                    precedence_level: precedence,
                     state: nonterm_shift_state,
                     #[cfg(feature = "tree")]
                     tree: Some(tree),

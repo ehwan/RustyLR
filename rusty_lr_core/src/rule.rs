@@ -6,9 +6,10 @@ use std::fmt::Display;
 
 use crate::token::Token;
 
+/// Operator precedence for production rules
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Precedence {
-    /// fixed precedence
+    /// fixed precedence level
     Fixed(usize), // precedence level
 
     /// get precedence from it's child token; for runtime conflict resolution

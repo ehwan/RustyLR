@@ -44,6 +44,8 @@ pub struct Node<Data: TokenData> {
 
     /// token data for this node
     pub data: Option<(Data, Data::Location)>,
+    pub precedence_level: Option<usize>,
+
     /// tree representation of this node
     #[cfg(feature = "tree")]
     pub tree: Option<crate::tree::Tree<Data::Term, Data::NonTerm>>,
@@ -57,6 +59,7 @@ impl<Data: TokenData> Node<Data> {
             state: 0,
 
             data: None,
+            precedence_level: None,
             #[cfg(feature = "tree")]
             tree: None,
         }
@@ -400,6 +403,7 @@ impl<Data: TokenData> Node<Data> {
             if let Some(next_state) = parser.get_states()[last_state].shift_goto_nonterm(&nonterm) {
                 let next_node = Self {
                     parent: Some(Rc::clone(node)),
+                    precedence_level: None,
                     state: next_state,
                     data: None,
                     #[cfg(feature = "tree")]
@@ -432,6 +436,7 @@ impl<Data: TokenData> Node<Data> {
                 // pop all states and data above this state
                 let child_node = Node {
                     data: Some((Data::new_error_nonterm(), new_location)),
+                    precedence_level: None,
                     parent: Some(Rc::clone(node)),
                     state: error_state,
                     #[cfg(feature = "tree")]
