@@ -28,6 +28,10 @@ pub struct Context<Data: TokenData> {
     /// For temporary use. store reduce errors returned from `reduce_action`.
     /// But we don't want to reallocate every `feed` call
     pub(crate) reduce_errors: Vec<Data::ReduceActionError>,
+
+    /// For temporary use.
+    /// store rule indices where shift/reduce conflicts occured with no precedence defined.
+    pub(crate) no_precedences: Vec<usize>,
 }
 
 impl<Data: TokenData> Context<Data> {
@@ -261,13 +265,12 @@ impl<Data: TokenData> Context<Data> {
             if error_nodes.is_empty() {
                 std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
 
-                if self.reduce_errors.is_empty() {
-                    Err(ParseError::NoAction(term, location))
-                } else {
-                    Err(ParseError::ReduceAction(std::mem::take(
-                        &mut self.reduce_errors,
-                    )))
-                }
+                Err(ParseError {
+                    term,
+                    location,
+                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                    no_precedences: std::mem::take(&mut self.no_precedences),
+                })
             } else {
                 self.fallback_nodes.clear();
 
@@ -370,6 +373,7 @@ impl<Data: TokenData> Default for Context<Data> {
             reduce_errors: Default::default(),
             reduce_args: Default::default(),
             fallback_nodes: Default::default(),
+            no_precedences: Default::default(),
         }
     }
 }

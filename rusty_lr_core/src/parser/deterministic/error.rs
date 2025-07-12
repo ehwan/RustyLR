@@ -10,7 +10,29 @@ pub enum ParseError<Data: TokenData> {
     NoAction(Data::Term, Data::Location),
 
     /// Error from reduce action
-    ReduceAction(Data::ReduceActionError),
+    ReduceAction(Data::Term, Data::Location, Data::ReduceActionError),
+
+    /// Rule index when shift/reduce conflict occur with no shift/reduce precedence defined.
+    /// This is same as when setting %nonassoc in Bison.
+    NoPrecedence(Data::Term, Data::Location, usize),
+}
+
+impl<Data: TokenData> ParseError<Data> {
+    pub fn location(&self) -> &Data::Location {
+        match self {
+            ParseError::NoAction(_, location) => location,
+            ParseError::ReduceAction(_, location, _) => location,
+            ParseError::NoPrecedence(_, location, _) => location,
+        }
+    }
+
+    pub fn term(&self) -> &Data::Term {
+        match self {
+            ParseError::NoAction(term, _) => term,
+            ParseError::ReduceAction(term, _, _) => term,
+            ParseError::NoPrecedence(term, _, _) => term,
+        }
+    }
 }
 
 impl<Data: TokenData> Display for ParseError<Data>
@@ -23,8 +45,11 @@ where
             ParseError::NoAction(term, _location) => {
                 write!(f, "NoAction: {}", term)
             }
-            ParseError::ReduceAction(err) => {
+            ParseError::ReduceAction(_term, _location, err) => {
                 write!(f, "ReduceAction: {}", err)
+            }
+            ParseError::NoPrecedence(_term, _location, rule) => {
+                write!(f, "NoPrecedence: {}", rule)
             }
         }
     }
@@ -40,8 +65,11 @@ where
             ParseError::NoAction(term, _location) => {
                 write!(f, "{:?}", term)
             }
-            ParseError::ReduceAction(err) => {
+            ParseError::ReduceAction(_term, _location, err) => {
                 write!(f, "{:?}", err)
+            }
+            ParseError::NoPrecedence(_term, _location, rule) => {
+                write!(f, "{}", rule)
             }
         }
     }

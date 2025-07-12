@@ -22,7 +22,6 @@ use crate::parser::args::GrammarArgs;
 use crate::parser::args::IdentOrU32;
 use crate::parser::lexer::Lexed;
 use crate::parser::parser_expanded::GrammarContext;
-use crate::parser::parser_expanded::GrammarParseError;
 use crate::parser::parser_expanded::GrammarParser;
 use crate::pattern::Pattern;
 use crate::pattern::PatternToToken;
@@ -169,10 +168,7 @@ impl Grammar {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();
-                let span = match err {
-                    GrammarParseError::NoAction(_term, location) => location.pair.unwrap().0,
-                    _ => unreachable!("feed error"),
-                };
+                let span = err.location().pair.unwrap().0;
                 return Err(ParseArgError::MacroLineParse { span, message });
             }
         }

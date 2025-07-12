@@ -481,68 +481,63 @@ impl<Data: TokenData> Node<Data> {
         let shift_state = parser.get_states()[self.state].shift_goto_class(class);
         if let Some(reduce_rules) = parser.get_states()[self.state].reduce(class) {
             let mut shift = None;
-            let reduces: smallvec::SmallVec<[_; 2]> = reduce_rules
-                .clone()
-                .filter_map(|reduce_rule| {
-                    // runtime shift/reduce precedence check
+            let mut reduces: smallvec::SmallVec<[_; 2]> = Default::default();
 
-                    let rule = &parser.get_rules()[reduce_rule];
-                    let reduce_prec = match rule.precedence {
-                        Some(Precedence::Fixed(level)) => Some(level),
-                        Some(Precedence::Dynamic(token_index)) => {
-                            // fix the value to the offset from current node
-                            let ith = rule.rule.len() - token_index - 1;
-                            let mut node = &self;
-                            for _ in 0..ith {
-                                node = node.parent.as_ref().unwrap();
-                            }
-                            node.precedence_level
+            for reduce_rule in reduce_rules {
+                let rule = &parser.get_rules()[reduce_rule];
+                let reduce_prec = match rule.precedence {
+                    Some(Precedence::Fixed(level)) => Some(level),
+                    Some(Precedence::Dynamic(token_index)) => {
+                        // fix the value to the offset from current node
+                        let ith = rule.rule.len() - token_index - 1;
+                        let mut node = &self;
+                        for _ in 0..ith {
+                            node = node.parent.as_ref().unwrap();
                         }
-                        None => None,
-                    };
+                        node.precedence_level
+                    }
+                    None => None,
+                };
 
-                    // if there is shift/reduce conflict, check for reduce rule's precedence and shift terminal's precedence
-                    match (shift_state.is_some(), shift_prec, reduce_prec) {
-                        (true, Some(shift_prec_), Some(reduce_prec_)) => {
-                            match reduce_prec_.cmp(&shift_prec_) {
-                                std::cmp::Ordering::Less => {
-                                    // no reduce
-                                    shift = shift_state;
-                                    None
-                                }
-                                std::cmp::Ordering::Equal => {
-                                    // check for reduce_type
-                                    use crate::builder::ReduceType;
-                                    match parser.precedence_types(reduce_prec_) {
-                                        Some(ReduceType::Left) => {
-                                            // no shift
-                                            Some((reduce_rule, reduce_prec))
-                                        }
-                                        Some(ReduceType::Right) => {
-                                            // no reduce
-                                            shift = shift_state;
-                                            None
-                                        }
-                                        None => {
-                                            // TODO error
-                                            panic!("Unknown precedence type: {:?}", reduce_prec);
-                                        }
+                // if there is shift/reduce conflict, check for reduce rule's precedence and shift terminal's precedence
+                match (shift_state.is_some(), shift_prec, reduce_prec) {
+                    (true, Some(shift_prec_), Some(reduce_prec_)) => {
+                        match reduce_prec_.cmp(&shift_prec_) {
+                            std::cmp::Ordering::Less => {
+                                // no reduce
+                                shift = shift_state;
+                            }
+                            std::cmp::Ordering::Equal => {
+                                // check for reduce_type
+                                use crate::builder::ReduceType;
+                                match parser.precedence_types(reduce_prec_) {
+                                    Some(ReduceType::Left) => {
+                                        // no shift
+                                        reduces.push((reduce_rule, reduce_prec));
+                                    }
+                                    Some(ReduceType::Right) => {
+                                        // no reduce
+                                        shift = shift_state;
+                                    }
+                                    None => {
+                                        // TODO error
+                                        context.no_precedences.push(reduce_rule);
                                     }
                                 }
-                                std::cmp::Ordering::Greater => {
-                                    // no shift
-                                    Some((reduce_rule, reduce_prec))
-                                }
+                            }
+                            std::cmp::Ordering::Greater => {
+                                // no shift
+                                reduces.push((reduce_rule, reduce_prec));
                             }
                         }
-                        _ => {
-                            // nothing; go for both reduce and shift
-                            shift = shift_state;
-                            Some((reduce_rule, reduce_prec))
-                        }
                     }
-                })
-                .collect();
+                    _ => {
+                        // nothing; go for both reduce and shift
+                        shift = shift_state;
+                        reduces.push((reduce_rule, reduce_prec));
+                    }
+                }
+            }
 
             let mut shifted = false;
             if !reduces.is_empty() {
@@ -650,7 +645,7 @@ impl<Data: TokenData> Node<Data> {
         let shift_state = parser.get_states()[self.state].shift_goto_class(class);
         if let Some(reduce_rules) = parser.get_states()[self.state].reduce(class) {
             let mut shift = None;
-            let mut reduces: smallvec::SmallVec<[_; 3]> = Default::default();
+            let mut reduces: smallvec::SmallVec<[_; 2]> = Default::default();
 
             for reduce_rule in reduce_rules {
                 // runtime shift/reduce precedence check

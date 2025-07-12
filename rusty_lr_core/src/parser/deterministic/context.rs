@@ -233,8 +233,11 @@ impl<Data: TokenData> Context<Data> {
                                 }
                                 None => {
                                     // error
-                                    // TODO
-                                    panic!("Runtime error: precedence type is None for reduce rule: {reduce_rule}");
+                                    return Err(ParseError::NoPrecedence(
+                                        term,
+                                        location,
+                                        reduce_rule,
+                                    ));
                                 }
                             }
                         }
@@ -273,15 +276,19 @@ impl<Data: TokenData> Context<Data> {
                 }
 
                 // call reduce action
-                let new_data = Data::reduce_action(
+                let new_data = match Data::reduce_action(
                     reduce_rule,
                     &mut self.reduce_args,
                     &mut shift,
                     &term,
                     userdata,
                     &mut new_location,
-                )
-                .map_err(ParseError::ReduceAction)?;
+                ) {
+                    Ok(new_data) => new_data,
+                    Err(err) => {
+                        return Err(ParseError::ReduceAction(term, location, err));
+                    }
+                };
                 self.data_stack.push((new_data, new_location));
 
                 // construct tree

@@ -327,19 +327,13 @@ pub fn feed_recursive(
             },
             TokenTree::Group(group) => match group.delimiter() {
                 Delimiter::Parenthesis => {
-                    if let Err(err) = context.feed_location(
-                        parser,
-                        Lexed::ParenGroup(group),
-                        grammar_args,
-                        location,
-                    ) {
-                        let GrammarParseError::NoAction(term, _) = err else {
+                    let token = Lexed::ParenGroup(group);
+                    if context.can_feed(parser, &token) {
+                        context.feed_location(parser, token, grammar_args, location)?;
+                    } else {
+                        let Lexed::ParenGroup(group) = token else {
                             unreachable!();
                         };
-                        let Lexed::ParenGroup(group) = term else {
-                            unreachable!();
-                        };
-
                         // feed the splitted tokens
                         context.feed_location(
                             parser,
@@ -366,19 +360,13 @@ pub fn feed_recursive(
                     )?;
                 }
                 Delimiter::Bracket => {
-                    if let Err(err) = context.feed_location(
-                        parser,
-                        Lexed::BracketGroup(group),
-                        grammar_args,
-                        location,
-                    ) {
-                        let GrammarParseError::NoAction(term, _) = err else {
+                    let token = Lexed::BracketGroup(group);
+                    if context.can_feed(parser, &token) {
+                        context.feed_location(parser, token, grammar_args, location)?;
+                    } else {
+                        let Lexed::BracketGroup(group) = token else {
                             unreachable!();
                         };
-                        let Lexed::BracketGroup(group) = term else {
-                            unreachable!();
-                        };
-
                         // feed the splitted tokens
                         context.feed_location(
                             parser,
