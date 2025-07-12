@@ -3366,8 +3366,6 @@ pub struct GrammarParser {
     pub states: Vec<GrammarState>,
     #[doc = r" terminal classes"]
     pub classes: Vec<Vec<&'static str>>,
-    #[doc = r" precedence types"]
-    pub precedence_types: Vec<Option<::rusty_lr_core::builder::ReduceType>>,
 }
 impl ::rusty_lr_core::parser::Parser for GrammarParser {
     type Term = Lexed;
@@ -3379,12 +3377,15 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
         match class {
             10usize => Some(0usize),
             12usize => Some(1usize),
-            6usize..=8usize | 11usize => Some(2usize),
             _ => None,
         }
     }
-    fn precedence_types(&self) -> &[Option<::rusty_lr_core::builder::ReduceType>] {
-        &self.precedence_types
+    fn precedence_types(&self, level: usize) -> Option<::rusty_lr_core::builder::ReduceType> {
+        #[allow(unreachable_patterns)]
+        match level {
+            0usize..=2usize => Some(::rusty_lr_core::builder::ReduceType::Left),
+            _ => None,
+        }
     }
     fn get_rules(&self) -> &[GrammarRule] {
         &self.rules
@@ -13060,10 +13061,6 @@ impl GrammarParser {
             },
         ];
         let states: Vec<GrammarState> = states.into_iter().map(|state| state.into()).collect();
-        let mut precedence_types = Vec::with_capacity(3usize);
-        precedence_types.push(Some(::rusty_lr_core::builder::ReduceType::Left));
-        precedence_types.push(Some(::rusty_lr_core::builder::ReduceType::Left));
-        precedence_types.push(Some(::rusty_lr_core::builder::ReduceType::Left));
         Self {
             rules,
             states,
@@ -13111,7 +13108,6 @@ impl GrammarParser {
                 vec!["location"],
                 vec!["eof"],
             ],
-            precedence_types,
         }
     }
 }

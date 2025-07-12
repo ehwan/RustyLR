@@ -39,7 +39,7 @@ pub trait Parser {
     fn get_error_nonterm(&self) -> Option<Self::NonTerm>;
 
     /// Get the type of precedence for i'th level
-    fn precedence_types(&self) -> &[Option<crate::builder::ReduceType>];
+    fn precedence_types(&self, level: usize) -> Option<crate::builder::ReduceType>;
 
     /// Get the precedence level (priority) of the given terminal class
     fn class_precedence(&self, class: usize) -> Option<usize>;

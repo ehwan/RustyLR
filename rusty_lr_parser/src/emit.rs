@@ -231,22 +231,100 @@ impl Grammar {
             });
         }
 
-        let prec_cap = self.builder.precedence_types.len();
-        let mut precedence_types_stream = quote! {
-            let mut precedence_types = Vec::with_capacity(#prec_cap);
-        };
-        for &reduce_type in self.builder.precedence_types.iter() {
-            if let Some(reduce_type) = reduce_type {
-                let reduce_type = reduce_type_to_stream(reduce_type);
-                precedence_types_stream.extend(quote! {
-                    precedence_types.push(Some(#reduce_type));
-                });
-            } else {
-                precedence_types_stream.extend(quote! {
-                    precedence_types.push(None);
+        // helper function to generate case stream.
+        // convert integer list to `a | b..=c | d` syntax
+        fn usize_list_to_stream(list: impl Iterator<Item = usize>) -> TokenStream {
+            let mut stream = TokenStream::new();
+            let mut prev = None;
+            for val in list {
+                if let Some((prev_start, prev_last)) = prev {
+                    if prev_last + 1 == val {
+                        // extend the range
+                        prev = Some((prev_start, val));
+                    } else {
+                        // push the previous range
+                        if !stream.is_empty() {
+                            stream.extend(quote! { | });
+                        }
+                        if prev_start == prev_last {
+                            stream.extend(quote! { #prev_start });
+                        } else {
+                            stream.extend(quote! { #prev_start..=#prev_last });
+                        }
+
+                        prev = Some((val, val));
+                    }
+                } else {
+                    prev = Some((val, val));
+                }
+            }
+            // push the previous range
+            if let Some((prev_start, prev_last)) = prev {
+                if !stream.is_empty() {
+                    stream.extend(quote! { | });
+                }
+                if prev_start == prev_last {
+                    stream.extend(quote! { #prev_start });
+                } else {
+                    stream.extend(quote! { #prev_start..=#prev_last });
+                }
+            }
+
+            stream
+        }
+
+        // generate precedence level -> reduce type match stream
+        // match level {
+        //     0 => Left,
+        //     1 => Right,
+        //     ...
+        // }
+        let precedence_types_match_body_stream = {
+            let lefts = usize_list_to_stream(
+                self.builder
+                    .precedence_types
+                    .iter()
+                    .copied()
+                    .enumerate()
+                    .filter_map(|(level, reduce_type)| {
+                        if reduce_type == Some(ReduceType::Left) {
+                            Some(level)
+                        } else {
+                            None
+                        }
+                    }),
+            );
+            let rights = usize_list_to_stream(
+                self.builder
+                    .precedence_types
+                    .iter()
+                    .copied()
+                    .enumerate()
+                    .filter_map(|(level, reduce_type)| {
+                        if reduce_type == Some(ReduceType::Right) {
+                            Some(level)
+                        } else {
+                            None
+                        }
+                    }),
+            );
+
+            let mut stream = TokenStream::new();
+            if !lefts.is_empty() {
+                stream.extend(quote! {
+                    #lefts => Some(#module_prefix::builder::ReduceType::Left),
                 });
             }
-        }
+            if !rights.is_empty() {
+                stream.extend(quote! {
+                    #rights => Some(#module_prefix::builder::ReduceType::Right),
+                });
+            }
+            stream.extend(quote! {
+                _ => None,
+            });
+            stream
+        };
 
         let grammar_build_stream = if self.compiled {
             // do not build at runtime
@@ -420,6 +498,26 @@ impl Grammar {
                 );
             });
 
+            let prec_cap = self.builder.precedence_types.len();
+            let mut precedence_types_stream = quote! {
+                let mut precedence_types = Vec::with_capacity(#prec_cap);
+            };
+            for &reduce_type in self.builder.precedence_types.iter() {
+                if let Some(reduce_type) = reduce_type {
+                    let reduce_type = reduce_type_to_stream(reduce_type);
+                    precedence_types_stream.extend(quote! {
+                        precedence_types.push(Some(#reduce_type));
+                    });
+                } else {
+                    precedence_types_stream.extend(quote! {
+                        precedence_types.push(None);
+                    });
+                }
+            }
+            precedence_types_stream.extend(quote! {
+                builder.set_precedence_types(precedence_types);
+            });
+
             // building grammar
             let augmented_name = Ident::new(utils::AUGMENTED_NAME, Span::call_site());
             let build_stream = if self.lalr {
@@ -453,7 +551,6 @@ impl Grammar {
 
                 // add precedences
                 #precedence_types_stream
-                builder.set_precedence_types(precedence_types);
 
                 // production rules
                 #add_rules_stream
@@ -494,9 +591,9 @@ impl Grammar {
         };
 
         // generate `Parser::class_precedence()` terminal class -> precedence level match body
-        // if class forms a consecutive range, convert it to `s..=e` syntax
-        let mut class_level_match_body_stream = TokenStream::new();
-        {
+        let class_level_match_body_stream = {
+            let mut stream = TokenStream::new();
+
             let mut level_classes = Vec::new();
             level_classes.resize(
                 self.builder.precedence_types.len(),
@@ -510,46 +607,14 @@ impl Grammar {
                 if classes.is_empty() {
                     continue;
                 } else if classes.len() == 1 {
-                    let val = *classes.first().unwrap();
-                    class_level_match_body_stream.extend(quote! {
-                        #val => Some(#level),
-                    });
-                } else {
-                    let mut consecutive_ranges: Vec<(usize, usize)> = Vec::new();
-                    for class in classes {
-                        if let Some(last) = consecutive_ranges.last_mut() {
-                            if class == last.1 + 1 {
-                                last.1 = class; // extend the range
-                            } else {
-                                consecutive_ranges.push((class, class)); // new range
-                            }
-                        } else {
-                            consecutive_ranges.push((class, class)); // first range
-                        }
-                    }
-
-                    let mut case_stream = TokenStream::new();
-                    for (idx, &(s, e)) in consecutive_ranges.iter().enumerate() {
-                        if idx > 0 {
-                            case_stream.extend(quote! { | });
-                        }
-                        if s == e {
-                            case_stream.extend(quote! {
-                                #s
-                            });
-                        } else {
-                            case_stream.extend(quote! {
-                                #s..=#e
-                            });
-                        }
-                    }
-
-                    class_level_match_body_stream.extend(quote! {
+                    let case_stream = usize_list_to_stream(classes.into_iter());
+                    stream.extend(quote! {
                         #case_stream => Some(#level),
                     });
                 }
             }
-        }
+            stream
+        };
 
         // building terminal-class_id map
         if use_range_based_optimization {
@@ -641,8 +706,6 @@ impl Grammar {
                 pub states: Vec<#state_typename>,
                 /// terminal classes
                 pub classes: Vec<Vec<::std::ops::RangeInclusive<#token_typename>>>,
-                /// precedence types
-                pub precedence_types: Vec<Option<#module_prefix::builder::ReduceType>>,
             }
             impl #module_prefix::parser::Parser for #parser_struct_name {
                 type Term = #token_typename;
@@ -657,8 +720,11 @@ impl Grammar {
                         _ => None,
                     }
                 }
-                fn precedence_types(&self) -> &[Option<#module_prefix::builder::ReduceType>] {
-                    &self.precedence_types
+                fn precedence_types(&self, level: usize) -> Option<#module_prefix::builder::ReduceType> {
+                    #[allow(unreachable_patterns)]
+                    match level {
+                        #precedence_types_match_body_stream
+                    }
                 }
                 fn get_rules(&self) -> &[#rule_typename] {
                     &self.rules
@@ -691,13 +757,10 @@ impl Grammar {
                 pub fn new() -> Self {
                     #grammar_build_stream
 
-                    #precedence_types_stream
-
                     Self {
                         rules,
                         states,
                         classes: vec![ #classes_body ],
-                        precedence_types,
                     }
                 }
             }
@@ -827,8 +890,6 @@ impl Grammar {
                 pub states: Vec<#state_typename>,
                 /// terminal classes
                 pub classes: Vec<Vec<&'static str>>,
-                /// precedence types
-                pub precedence_types: Vec<Option<#module_prefix::builder::ReduceType>>,
             }
             impl #module_prefix::parser::Parser for #parser_struct_name {
                 type Term = #token_typename;
@@ -843,8 +904,11 @@ impl Grammar {
                         _ => None,
                     }
                 }
-                fn precedence_types(&self) -> &[Option<#module_prefix::builder::ReduceType>] {
-                    &self.precedence_types
+                fn precedence_types(&self, level: usize) -> Option<#module_prefix::builder::ReduceType> {
+                    #[allow(unreachable_patterns)]
+                    match level {
+                        #precedence_types_match_body_stream
+                    }
                 }
                 fn get_rules(&self) -> &[#rule_typename] {
                     &self.rules
@@ -876,13 +940,10 @@ impl Grammar {
                 pub fn new() -> Self {
                     #grammar_build_stream
 
-                    #precedence_types_stream
-
                     Self {
                         rules,
                         states,
                         classes: vec![#classes_body],
-                        precedence_types,
                     }
                 }
             }
