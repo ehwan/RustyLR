@@ -36,8 +36,8 @@ where
             }
         } else {
             let mut stack = stack.take(len);
-            let first = stack.next().unwrap();
-            let last = stack.last().unwrap_or(first);
+            let last = stack.next().unwrap();
+            let first = stack.last().unwrap_or(last);
             first.start.clone()..last.end.clone()
         }
     }
