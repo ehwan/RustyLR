@@ -45,6 +45,10 @@ impl<Term: Debug, NonTerm: Debug> Debug for ProductionRule<Term, NonTerm> {
                 write!(f, " ")?;
             }
         }
+
+        if let Some(prec) = self.precedence {
+            write!(f, " [prec: {:?}]", prec)?;
+        }
         Ok(())
     }
 }
@@ -115,6 +119,10 @@ impl<Term: Display, NonTerm: Display> Display for ShiftedRule<Term, NonTerm> {
         }
         if self.shifted == self.rule.rule.len() {
             write!(f, " •")?;
+        }
+
+        if let Some(prec) = self.rule.precedence {
+            write!(f, " [prec: {:?}]", prec)?;
         }
         Ok(())
     }

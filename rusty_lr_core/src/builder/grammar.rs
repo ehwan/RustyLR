@@ -413,7 +413,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         states: &[State<Term, NonTerm>],
         diags: &mut DiagnosticCollector<Term>,
     ) where
-        Term: Ord + Copy,
+        Term: Ord + Copy + Hash,
         NonTerm: Copy + PartialEq + Ord,
     {
         if !diags.enabled {
@@ -432,6 +432,15 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         for (state_id, state) in states.iter().enumerate() {
             for (&term, reduce_rules) in state.reduce_map.iter() {
                 if let Some(&next_shift_state) = state.shift_goto_map_term.get(&term) {
+                    // check if this can be resolved by operator precedence
+                    if self.precedence_levels.contains_key(&term)
+                        && reduce_rules
+                            .iter()
+                            .all(|&rule| self.rules[rule].rule.precedence.is_some())
+                    {
+                        continue;
+                    }
+
                     // shift/reduce conflict
                     let shift_rules: Vec<_> =
                         states[next_shift_state].unshifted_ruleset().collect();
@@ -844,7 +853,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                         continue;
                     };
                     let Precedence::Fixed(reduce_prec) = reduce_op else {
-                        // not fixed operator, so no precedence
+                        // not fixed operator, so no precedence known at this time
                         remove_shift = false;
                         continue;
                     };
@@ -1044,7 +1053,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                     continue;
                 };
                 let Precedence::Fixed(reduce_prec) = reduce_op else {
-                    // not fixed operator, so no precedence
+                    // not fixed operator, so no precedence known at this time
                     remove_shift = false;
                     continue;
                 };
