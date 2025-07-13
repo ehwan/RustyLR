@@ -23,7 +23,7 @@ pub struct Context<Data: TokenData> {
 
     /// For temporary use. store arguments for calling `reduce_action`.
     /// But we don't want to reallocate every `feed` call
-    pub(crate) reduce_args: Vec<(Data, Data::Location)>,
+    pub(crate) reduce_args: crate::nonterminal::ReduceArgsStack<Data>,
 
     /// For temporary use. store reduce errors returned from `reduce_action`.
     /// But we don't want to reallocate every `feed` call

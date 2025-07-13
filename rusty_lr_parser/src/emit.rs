@@ -1143,7 +1143,7 @@ impl Grammar {
                             #[doc = #rule_debug_str]
                             #[inline]
                             fn #reduce_fn_ident(
-                                __rustylr_args: &mut Vec<(Self, #location_typename)>,
+                                __rustylr_args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
                                 shift: &mut bool,
                                 lookahead: &#token_typename,
                                 #user_data_parameter_name: &mut #user_data_typename,
@@ -1163,7 +1163,7 @@ impl Grammar {
                             #[doc = #rule_debug_str]
                             #[inline]
                             fn #reduce_fn_ident(
-                                __rustylr_args: &mut Vec<(Self, #location_typename)>,
+                                __rustylr_args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
                                 shift: &mut bool,
                                 lookahead: &#token_typename,
                                 #user_data_parameter_name: &mut #user_data_typename,
@@ -1282,7 +1282,7 @@ impl Grammar {
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
         impl #token_data_typename {
             fn #identity_reduce_fn_name(
-                args: &mut Vec<(Self, #location_typename)>,
+                args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
                 idx: usize,
             ) -> Self {
                 let value = args.swap_remove(idx).0;
@@ -1290,7 +1290,7 @@ impl Grammar {
                 value
             }
             fn #clear_reduce_fn_name(
-                args: &mut Vec<(Self, #location_typename)>,
+                args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
             ) -> Self {
                 args.clear();
                 #token_data_typename::#empty_ruletype_variant_name
@@ -1311,7 +1311,7 @@ impl Grammar {
 
             fn reduce_action(
                 rule_index: usize,
-                reduce_args: &mut Vec<(Self, Self::Location)>,
+                reduce_args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
                 shift: &mut bool,
                 lookahead: &Self::Term,
                 user_data: &mut Self::UserData,

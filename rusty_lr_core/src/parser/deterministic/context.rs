@@ -18,7 +18,7 @@ pub struct Context<Data: TokenData> {
     pub(crate) precedence_stack: Vec<Option<usize>>,
 
     /// temporary data stack for reduce action.
-    pub(crate) reduce_args: Vec<(Data, Data::Location)>,
+    pub(crate) reduce_args: crate::nonterminal::ReduceArgsStack<Data>,
 
     /// Tree stack for tree representation of the parse.
     #[cfg(feature = "tree")]
@@ -34,7 +34,7 @@ impl<Data: TokenData> Context<Data> {
 
             data_stack: Vec::new(),
             precedence_stack: Vec::new(),
-            reduce_args: Vec::new(),
+            reduce_args: Default::default(),
 
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
@@ -50,7 +50,7 @@ impl<Data: TokenData> Context<Data> {
 
             data_stack: Vec::with_capacity(capacity),
             precedence_stack: Vec::with_capacity(capacity),
-            reduce_args: Vec::new(),
+            reduce_args: Default::default(),
 
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
@@ -762,7 +762,7 @@ where
             state_stack: self.state_stack.clone(),
             data_stack: self.data_stack.clone(),
             precedence_stack: self.precedence_stack.clone(),
-            reduce_args: Vec::new(),
+            reduce_args: Default::default(),
 
             #[cfg(feature = "tree")]
             tree_stack: self.tree_stack.clone(),

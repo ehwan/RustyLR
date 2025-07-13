@@ -49,6 +49,9 @@ pub enum NonTerminalType {
     LiteralString,
 }
 
+#[allow(type_alias_bounds)]
+pub type ReduceArgsStack<T: TokenData> = smallvec::SmallVec<[(T, T::Location); 3]>;
+
 /// A trait for token that holds data.
 /// This will be used for data stack in the parser.
 pub trait TokenData: Sized {
@@ -74,7 +77,7 @@ pub trait TokenData: Sized {
         // the order must be in reverse order. That is,
         // if the rule is A -> B C D,
         // this must be in the order of [D, C, B]
-        reduce_args: &mut Vec<(Self, Self::Location)>,
+        reduce_args: &mut ReduceArgsStack<Self>,
         // for runtime-conflict-resolve.
         // if this variable is set to false in the action, the shift action will not be performed. (GLR parser)
         shift: &mut bool,

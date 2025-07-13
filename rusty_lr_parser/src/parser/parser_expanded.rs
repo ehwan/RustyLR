@@ -418,19 +418,22 @@ pub enum GrammarTokenData {
     dead_code
 )]
 impl GrammarTokenData {
-    fn reduce_identity(args: &mut Vec<(Self, SpanPair)>, idx: usize) -> Self {
+    fn reduce_identity(
+        args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
+        idx: usize,
+    ) -> Self {
         let value = args.swap_remove(idx).0;
         args.clear();
         value
     }
-    fn reduce_clear(args: &mut Vec<(Self, SpanPair)>) -> Self {
+    fn reduce_clear(args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>) -> Self {
         args.clear();
         GrammarTokenData::Empty
     }
     #[doc = "Rule -> ident RuleType colon RuleLines semicolon"]
     #[inline]
     fn reduce_Rule_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -479,7 +482,7 @@ impl GrammarTokenData {
     #[doc = "RuleType -> parengroup"]
     #[inline]
     fn reduce_RuleType_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -500,7 +503,7 @@ impl GrammarTokenData {
     #[doc = "RuleType -> "]
     #[inline]
     fn reduce_RuleType_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -511,7 +514,7 @@ impl GrammarTokenData {
     #[doc = "RuleLines -> RuleLines pipe RuleLine"]
     #[inline]
     fn reduce_RuleLines_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -541,7 +544,7 @@ impl GrammarTokenData {
     #[doc = "RuleLines -> RuleLine"]
     #[inline]
     fn reduce_RuleLines_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -557,7 +560,7 @@ impl GrammarTokenData {
     #[doc = "RuleLine -> TokenMapped* PrecDef* Action"]
     #[inline]
     fn reduce_RuleLine_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -592,7 +595,7 @@ impl GrammarTokenData {
     #[doc = "PrecDef -> percent prec IdentOrLiteral"]
     #[inline]
     fn reduce_PrecDef_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -620,7 +623,7 @@ impl GrammarTokenData {
     #[doc = "PrecDef -> percent prec 'error'"]
     #[inline]
     fn reduce_PrecDef_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -650,7 +653,7 @@ impl GrammarTokenData {
     #[doc = "PrecDef -> percent dprec literal"]
     #[inline]
     fn reduce_PrecDef_2(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -681,7 +684,7 @@ impl GrammarTokenData {
     #[doc = "PrecDef -> percent dprec 'error'"]
     #[inline]
     fn reduce_PrecDef_3(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -711,7 +714,7 @@ impl GrammarTokenData {
     #[doc = "PrecDef -> percent 'error'"]
     #[inline]
     fn reduce_PrecDef_4(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -736,7 +739,7 @@ impl GrammarTokenData {
     #[doc = "TokenMapped -> Pattern"]
     #[inline]
     fn reduce_TokenMapped_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -752,7 +755,7 @@ impl GrammarTokenData {
     #[doc = "TokenMapped -> ident equal Pattern"]
     #[inline]
     fn reduce_TokenMapped_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -783,7 +786,7 @@ impl GrammarTokenData {
     #[doc = "TerminalSetItem -> ident"]
     #[inline]
     fn reduce_TerminalSetItem_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -804,7 +807,7 @@ impl GrammarTokenData {
     #[doc = "TerminalSetItem -> ident minus ident"]
     #[inline]
     fn reduce_TerminalSetItem_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -838,7 +841,7 @@ impl GrammarTokenData {
     #[doc = "TerminalSetItem -> ident minus 'error'"]
     #[inline]
     fn reduce_TerminalSetItem_2(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -867,7 +870,7 @@ impl GrammarTokenData {
     #[doc = "TerminalSetItem -> literal"]
     #[inline]
     fn reduce_TerminalSetItem_3(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -888,7 +891,7 @@ impl GrammarTokenData {
     #[doc = "TerminalSetItem -> literal minus literal"]
     #[inline]
     fn reduce_TerminalSetItem_4(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -922,7 +925,7 @@ impl GrammarTokenData {
     #[doc = "TerminalSetItem -> literal minus 'error'"]
     #[inline]
     fn reduce_TerminalSetItem_5(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -951,7 +954,7 @@ impl GrammarTokenData {
     #[doc = "TerminalSet -> lbracket caret? TerminalSetItem* rbracket"]
     #[inline]
     fn reduce_TerminalSet_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -989,7 +992,7 @@ impl GrammarTokenData {
     #[doc = "TerminalSet -> dot"]
     #[inline]
     fn reduce_TerminalSet_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1013,7 +1016,7 @@ impl GrammarTokenData {
     #[doc = "Pattern -> ident"]
     #[inline]
     fn reduce_Pattern_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1034,7 +1037,7 @@ impl GrammarTokenData {
     #[doc = "Pattern -> Pattern plus"]
     #[inline]
     fn reduce_Pattern_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1060,7 +1063,7 @@ impl GrammarTokenData {
     #[doc = "Pattern -> Pattern star"]
     #[inline]
     fn reduce_Pattern_2(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1083,7 +1086,7 @@ impl GrammarTokenData {
     #[doc = "Pattern -> Pattern question"]
     #[inline]
     fn reduce_Pattern_3(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1106,7 +1109,7 @@ impl GrammarTokenData {
     #[doc = "Pattern -> Pattern exclamation"]
     #[inline]
     fn reduce_Pattern_4(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1129,7 +1132,7 @@ impl GrammarTokenData {
     #[doc = "Pattern -> TerminalSet"]
     #[inline]
     fn reduce_Pattern_5(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1147,7 +1150,7 @@ impl GrammarTokenData {
     #[doc = "Pattern -> Pattern slash Pattern"]
     #[inline]
     fn reduce_Pattern_6(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1175,7 +1178,7 @@ impl GrammarTokenData {
     #[doc = "Pattern -> lparen Pattern+ rparen"]
     #[inline]
     fn reduce_Pattern_7(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1207,7 +1210,7 @@ impl GrammarTokenData {
     #[doc = "Pattern -> literal"]
     #[inline]
     fn reduce_Pattern_8(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1228,7 +1231,7 @@ impl GrammarTokenData {
     #[doc = "Pattern -> Pattern minus Pattern"]
     #[inline]
     fn reduce_Pattern_9(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1256,7 +1259,7 @@ impl GrammarTokenData {
     #[doc = "Action -> bracegroup"]
     #[inline]
     fn reduce_Action_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1277,7 +1280,7 @@ impl GrammarTokenData {
     #[doc = "Action -> "]
     #[inline]
     fn reduce_Action_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1288,7 +1291,7 @@ impl GrammarTokenData {
     #[doc = "IdentOrLiteral -> ident"]
     #[inline]
     fn reduce_IdentOrLiteral_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1309,7 +1312,7 @@ impl GrammarTokenData {
     #[doc = "IdentOrLiteral -> literal"]
     #[inline]
     fn reduce_IdentOrLiteral_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1330,7 +1333,7 @@ impl GrammarTokenData {
     #[doc = "RustCode -> [^semicolon]+"]
     #[inline]
     fn reduce_RustCode_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1352,7 +1355,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent token ident RustCode semicolon"]
     #[inline]
     fn reduce_Directive_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1394,7 +1397,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent token ident semicolon"]
     #[inline]
     fn reduce_Directive_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1428,7 +1431,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent token 'error' semicolon"]
     #[inline]
     fn reduce_Directive_2(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1458,7 +1461,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent start ident semicolon"]
     #[inline]
     fn reduce_Directive_3(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1495,7 +1498,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent start 'error' semicolon"]
     #[inline]
     fn reduce_Directive_4(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1531,7 +1534,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent eofdef RustCode semicolon"]
     #[inline]
     fn reduce_Directive_5(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1565,7 +1568,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent eofdef semicolon"]
     #[inline]
     fn reduce_Directive_6(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1600,7 +1603,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent tokentype RustCode semicolon"]
     #[inline]
     fn reduce_Directive_7(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1635,7 +1638,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent tokentype semicolon"]
     #[inline]
     fn reduce_Directive_8(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1670,7 +1673,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent userdata RustCode semicolon"]
     #[inline]
     fn reduce_Directive_9(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1705,7 +1708,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent userdata semicolon"]
     #[inline]
     fn reduce_Directive_10(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1739,7 +1742,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent left IdentOrLiteral+ semicolon"]
     #[inline]
     fn reduce_Directive_11(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1777,7 +1780,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent left 'error' semicolon"]
     #[inline]
     fn reduce_Directive_12(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1812,7 +1815,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent right IdentOrLiteral+ semicolon"]
     #[inline]
     fn reduce_Directive_13(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1850,7 +1853,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent right 'error' semicolon"]
     #[inline]
     fn reduce_Directive_14(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1885,7 +1888,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent precedence IdentOrLiteral+ semicolon"]
     #[inline]
     fn reduce_Directive_15(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1920,7 +1923,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent precedence 'error' semicolon"]
     #[inline]
     fn reduce_Directive_16(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1955,7 +1958,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent errortype RustCode semicolon"]
     #[inline]
     fn reduce_Directive_17(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -1990,7 +1993,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent errortype semicolon"]
     #[inline]
     fn reduce_Directive_18(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2024,7 +2027,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent moduleprefix RustCode semicolon"]
     #[inline]
     fn reduce_Directive_19(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2059,7 +2062,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent moduleprefix semicolon"]
     #[inline]
     fn reduce_Directive_20(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2092,7 +2095,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent glr semicolon"]
     #[inline]
     fn reduce_Directive_21(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2121,7 +2124,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent glr 'error' semicolon"]
     #[inline]
     fn reduce_Directive_22(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2156,7 +2159,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent lalr semicolon"]
     #[inline]
     fn reduce_Directive_23(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2185,7 +2188,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent lalr 'error' semicolon"]
     #[inline]
     fn reduce_Directive_24(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2220,7 +2223,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent nooptim semicolon"]
     #[inline]
     fn reduce_Directive_25(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2249,7 +2252,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent nooptim 'error' semicolon"]
     #[inline]
     fn reduce_Directive_26(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2284,7 +2287,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent dense semicolon"]
     #[inline]
     fn reduce_Directive_27(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2313,7 +2316,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent dense 'error' semicolon"]
     #[inline]
     fn reduce_Directive_28(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2348,7 +2351,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent trace ident* semicolon"]
     #[inline]
     fn reduce_Directive_29(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2388,7 +2391,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent trace 'error' semicolon"]
     #[inline]
     fn reduce_Directive_30(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2423,7 +2426,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent filter RustCode semicolon"]
     #[inline]
     fn reduce_Directive_31(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2457,7 +2460,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent filter semicolon"]
     #[inline]
     fn reduce_Directive_32(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2491,7 +2494,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent runtime semicolon"]
     #[inline]
     fn reduce_Directive_33(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2520,7 +2523,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent runtime 'error' semicolon"]
     #[inline]
     fn reduce_Directive_34(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2556,7 +2559,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent location RustCode semicolon"]
     #[inline]
     fn reduce_Directive_35(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2590,7 +2593,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent location semicolon"]
     #[inline]
     fn reduce_Directive_36(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2624,7 +2627,7 @@ impl GrammarTokenData {
     #[doc = "Directive -> percent 'error' semicolon"]
     #[inline]
     fn reduce_Directive_37(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2653,7 +2656,7 @@ impl GrammarTokenData {
     #[doc = "GrammarLine -> Rule"]
     #[inline]
     fn reduce_GrammarLine_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2672,7 +2675,7 @@ impl GrammarTokenData {
     #[doc = "TokenMapped+ -> TokenMapped"]
     #[inline]
     fn reduce__TokenMappedPlus16_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2688,7 +2691,7 @@ impl GrammarTokenData {
     #[doc = "TokenMapped+ -> TokenMapped+ TokenMapped"]
     #[inline]
     fn reduce__TokenMappedPlus16_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2712,7 +2715,7 @@ impl GrammarTokenData {
     #[doc = "TokenMapped* -> "]
     #[inline]
     fn reduce__TokenMappedStar17_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2723,7 +2726,7 @@ impl GrammarTokenData {
     #[doc = "PrecDef+ -> PrecDef"]
     #[inline]
     fn reduce__PrecDefPlus18_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2739,7 +2742,7 @@ impl GrammarTokenData {
     #[doc = "PrecDef+ -> PrecDef+ PrecDef"]
     #[inline]
     fn reduce__PrecDefPlus18_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2763,7 +2766,7 @@ impl GrammarTokenData {
     #[doc = "PrecDef* -> "]
     #[inline]
     fn reduce__PrecDefStar19_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2774,7 +2777,7 @@ impl GrammarTokenData {
     #[doc = "caret? -> caret"]
     #[inline]
     fn reduce__caretQuestion20_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2790,7 +2793,7 @@ impl GrammarTokenData {
     #[doc = "caret? -> "]
     #[inline]
     fn reduce__caretQuestion20_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2801,7 +2804,7 @@ impl GrammarTokenData {
     #[doc = "TerminalSetItem+ -> TerminalSetItem"]
     #[inline]
     fn reduce__TerminalSetItemPlus21_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2817,7 +2820,7 @@ impl GrammarTokenData {
     #[doc = "TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem"]
     #[inline]
     fn reduce__TerminalSetItemPlus21_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2841,7 +2844,7 @@ impl GrammarTokenData {
     #[doc = "TerminalSetItem* -> "]
     #[inline]
     fn reduce__TerminalSetItemStar22_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2852,7 +2855,7 @@ impl GrammarTokenData {
     #[doc = "Pattern+ -> Pattern"]
     #[inline]
     fn reduce__PatternPlus23_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2868,7 +2871,7 @@ impl GrammarTokenData {
     #[doc = "Pattern+ -> Pattern+ Pattern"]
     #[inline]
     fn reduce__PatternPlus23_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2892,7 +2895,7 @@ impl GrammarTokenData {
     #[doc = "[^semicolon]+ -> [^semicolon]"]
     #[inline]
     fn reduce___TermSet24Plus25_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2908,7 +2911,7 @@ impl GrammarTokenData {
     #[doc = "[^semicolon]+ -> [^semicolon]+ [^semicolon]"]
     #[inline]
     fn reduce___TermSet24Plus25_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2932,7 +2935,7 @@ impl GrammarTokenData {
     #[doc = "IdentOrLiteral+ -> IdentOrLiteral"]
     #[inline]
     fn reduce__IdentOrLiteralPlus26_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2948,7 +2951,7 @@ impl GrammarTokenData {
     #[doc = "IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral"]
     #[inline]
     fn reduce__IdentOrLiteralPlus26_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2972,7 +2975,7 @@ impl GrammarTokenData {
     #[doc = "ident+ -> ident"]
     #[inline]
     fn reduce__identPlus27_0(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -2988,7 +2991,7 @@ impl GrammarTokenData {
     #[doc = "ident+ -> ident+ ident"]
     #[inline]
     fn reduce__identPlus27_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -3012,7 +3015,7 @@ impl GrammarTokenData {
     #[doc = "ident* -> "]
     #[inline]
     fn reduce__identStar28_1(
-        __rustylr_args: &mut Vec<(Self, SpanPair)>,
+        __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Lexed,
         data: &mut GrammarArgs,
@@ -3037,7 +3040,7 @@ impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
     type Location = SpanPair;
     fn reduce_action(
         rule_index: usize,
-        reduce_args: &mut Vec<(Self, Self::Location)>,
+        reduce_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &Self::Term,
         user_data: &mut Self::UserData,
