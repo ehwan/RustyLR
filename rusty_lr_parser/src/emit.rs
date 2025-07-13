@@ -233,7 +233,7 @@ impl Grammar {
 
         // helper function to generate case stream.
         // convert integer list to `a | b..=c | d` syntax
-        fn usize_list_to_stream(list: impl Iterator<Item = usize>) -> TokenStream {
+        fn usize_list_to_case_stream(list: impl Iterator<Item = usize>) -> TokenStream {
             let mut stream = TokenStream::new();
             let mut prev = None;
             for val in list {
@@ -280,7 +280,7 @@ impl Grammar {
         //     ...
         // }
         let precedence_types_match_body_stream = {
-            let lefts = usize_list_to_stream(
+            let lefts = usize_list_to_case_stream(
                 self.builder
                     .precedence_types
                     .iter()
@@ -294,7 +294,7 @@ impl Grammar {
                         }
                     }),
             );
-            let rights = usize_list_to_stream(
+            let rights = usize_list_to_case_stream(
                 self.builder
                     .precedence_types
                     .iter()
@@ -357,6 +357,14 @@ impl Grammar {
                 });
             }
             let mut states_body_stream = TokenStream::new();
+            let mut usize_sets_name_map = std::collections::BTreeMap::new();
+            let mut get_or_insert_usize_set = |set: std::collections::BTreeSet<usize>| -> Ident {
+                let new_index = usize_sets_name_map.len();
+                usize_sets_name_map
+                    .entry(set)
+                    .or_insert_with(|| format_ident!("__rustylr_uset{new_index}"))
+                    .clone()
+            };
             for state in &self.states {
                 let mut shift_term_body_stream = TokenStream::new();
                 for (&term, &next_state) in &state.shift_goto_map_term {
@@ -374,15 +382,22 @@ impl Grammar {
                 }
 
                 let mut reduce_body_stream = TokenStream::new();
+                let mut reduce_rules_terms_map = std::collections::BTreeMap::new();
                 for (&term, rules) in &state.reduce_map {
-                    let mut rules_body_stream = TokenStream::new();
-                    for &rule in rules {
-                        rules_body_stream.extend(quote! {
-                            #rule,
-                        });
-                    }
+                    reduce_rules_terms_map
+                        .entry(rules)
+                        .or_insert_with(std::collections::BTreeSet::new)
+                        .insert(term);
+                }
+                for (rules, terms) in reduce_rules_terms_map {
+                    let terms_set_name = get_or_insert_usize_set(terms);
+                    let rules_set_name = get_or_insert_usize_set(rules.clone());
                     reduce_body_stream.extend(quote! {
-                        (#term, std::collections::BTreeSet::from([#rules_body_stream])),
+                        __reduce_map.extend(
+                            #terms_set_name.iter().map(
+                                |term| (*term, #rules_set_name.clone())
+                            )
+                        );
                     });
                 }
 
@@ -399,13 +414,30 @@ impl Grammar {
                 }
 
                 states_body_stream.extend(quote! {
-                #module_prefix::builder::State {
-                    shift_goto_map_term: std::collections::BTreeMap::from([#shift_term_body_stream]),
-                    shift_goto_map_nonterm: std::collections::BTreeMap::from([#shift_nonterm_body_stream]),
-                    reduce_map: std::collections::BTreeMap::from([#reduce_body_stream]),
-                    ruleset: std::collections::BTreeSet::from([#ruleset_body_stream]),
-                },
-            });
+                    #module_prefix::builder::State {
+                        shift_goto_map_term: std::collections::BTreeMap::from([#shift_term_body_stream]),
+                        shift_goto_map_nonterm: std::collections::BTreeMap::from([#shift_nonterm_body_stream]),
+                        reduce_map: {
+                            let mut __reduce_map = std::collections::BTreeMap::new();
+                            #reduce_body_stream
+                            __reduce_map
+                        },
+                        ruleset: std::collections::BTreeSet::from([#ruleset_body_stream]),
+                    },
+                });
+            }
+
+            let mut uset_initialize_stream = TokenStream::new();
+            for (set, name) in usize_sets_name_map {
+                let mut set_body_stream = TokenStream::new();
+                for val in set {
+                    set_body_stream.extend(quote! {
+                        #val,
+                    });
+                }
+                uset_initialize_stream.extend(quote! {
+                    let #name = std::collections::BTreeSet::from([#set_body_stream]);
+                });
             }
 
             quote! {
@@ -424,6 +456,7 @@ impl Grammar {
                     }
                 ).collect();
 
+                #uset_initialize_stream
                 let states = vec![
                     #states_body_stream
                 ];
@@ -607,7 +640,7 @@ impl Grammar {
                 if classes.is_empty() {
                     continue;
                 } else if classes.len() == 1 {
-                    let case_stream = usize_list_to_stream(classes.into_iter());
+                    let case_stream = usize_list_to_case_stream(classes.into_iter());
                     stream.extend(quote! {
                         #case_stream => Some(#level),
                     });
