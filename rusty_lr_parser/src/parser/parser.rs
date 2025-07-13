@@ -49,6 +49,7 @@ use rusty_lr_core::builder::ReduceType;
 %token slash Lexed::Slash(_);
 %token dot Lexed::Dot(_);
 %token dollar Lexed::Dollar(_);
+%token comma Lexed::Comma(_);
 
 %token literal Lexed::Literal(_);
 
@@ -292,6 +293,39 @@ Pattern(PatternArgs): ident {
 }
 | p1=Pattern minus p2=Pattern {
     PatternArgs::Minus( Box::new(p1), Box::new(p2) )
+}
+| dollar ident lparen base=Pattern comma del=Pattern comma? rparen {
+    PatternArgs::Sep(
+        Box::new(base),
+        Box::new(del),
+        false, // default is '*'
+        *@$
+    )
+}
+| dollar ident lparen base=Pattern comma del=Pattern comma plus rparen {
+    PatternArgs::Sep(
+        Box::new(base),
+        Box::new(del),
+        true,
+        *@$
+    )
+}
+| dollar ident lparen base=Pattern comma del=Pattern comma star rparen {
+    PatternArgs::Sep(
+        Box::new(base),
+        Box::new(del),
+        false,
+        *@$
+    )
+}
+| dollar ident lparen base=Pattern comma del=Pattern error rparen {
+    // TODO error recovery
+    PatternArgs::Sep(
+        Box::new(base),
+        Box::new(del),
+        false,
+        *@$
+    )
 }
 // | Pattern error {
 //     data.error_recovered.push( RecoveredError {

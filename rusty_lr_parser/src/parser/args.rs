@@ -94,6 +94,8 @@ pub enum PatternArgs {
 
     /// Pattern - Terminals exclusion
     Minus(Box<PatternArgs>, Box<PatternArgs>),
+
+    Sep(Box<PatternArgs>, Box<PatternArgs>, bool, SpanPair),
 }
 
 impl std::fmt::Display for PatternArgs {
@@ -124,6 +126,9 @@ impl std::fmt::Display for PatternArgs {
             }
             PatternArgs::Minus(base, terminal_set) => {
                 write!(f, "{}-{}", base, terminal_set)
+            }
+            PatternArgs::Sep(base, del, one, _) => {
+                write!(f, "$sep({base}, {del}, {}", if *one { '+' } else { '*' })
             }
         }
     }
@@ -276,6 +281,27 @@ impl PatternArgs {
                     Ok(pattern)
                 }
             }
+            PatternArgs::Sep(base, del, one, _) => {
+                unimplemented!("$sep is not implemented yet");
+                // let base_pattern = base.into_pattern(grammar, put_exclamation)?;
+                // let del_pattern = del.into_pattern(grammar, put_exclamation)?;
+                // let pattern = Pattern {
+                //     internal: PatternInternal::Sep(
+                //         Box::new(base_pattern),
+                //         Box::new(del_pattern),
+                //         *one,
+                //     ),
+                //     pretty_name: pretty_name.clone(),
+                // };
+                // if put_exclamation {
+                //     Ok(Pattern {
+                //         internal: PatternInternal::Exclamation(Box::new(pattern)),
+                //         pretty_name,
+                //     })
+                // } else {
+                //     Ok(pattern)
+                // }
+            }
         }
     }
 
@@ -346,6 +372,10 @@ impl PatternArgs {
                     (true, true) => Ok((false, rhs_set.difference(&lhs_set).copied().collect())),
                 }
             }
+            PatternArgs::Sep(_, _, _, span) => {
+                let (first, last) = span.pair.unwrap();
+                Err(ParseError::OnlyTerminalSet(first, last))
+            }
         }
     }
     pub fn span_pair(&self) -> (Span, Span) {
@@ -372,6 +402,7 @@ impl PatternArgs {
             PatternArgs::Minus(base, terminal_set) => {
                 (base.span_pair().0, terminal_set.span_pair().1)
             }
+            PatternArgs::Sep(_, _, _, span) => span.pair.unwrap(),
         }
     }
 
@@ -430,6 +461,11 @@ impl PatternArgs {
             PatternArgs::Minus(base, terminal_set) => {
                 base.range_resolve(grammar)?;
                 terminal_set.range_resolve(grammar)?;
+                Ok(())
+            }
+            PatternArgs::Sep(base, del, _, _) => {
+                base.range_resolve(grammar)?;
+                del.range_resolve(grammar)?;
                 Ok(())
             }
         }
