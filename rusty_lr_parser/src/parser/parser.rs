@@ -48,6 +48,7 @@ use rusty_lr_core::builder::ReduceType;
 %token exclamation Lexed::Exclamation(_);
 %token slash Lexed::Slash(_);
 %token dot Lexed::Dot(_);
+%token dollar Lexed::Dollar(_);
 
 %token literal Lexed::Literal(_);
 
