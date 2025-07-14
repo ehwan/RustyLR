@@ -6,6 +6,7 @@ use super::ParseError;
 use crate::nonterminal::TokenData;
 use crate::parser::Parser;
 use crate::parser::State;
+use crate::TerminalSymbol;
 
 /// A struct that maintains the current state and the values associated with each symbol.
 pub struct Context<Data: TokenData> {
@@ -178,7 +179,7 @@ impl<Data: TokenData> Context<Data> {
     pub fn feed_location<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &mut self,
         parser: &P,
-        term: Data::Term,
+        mut term: Data::Term,
         userdata: &mut Data::UserData,
         location: Data::Location,
     ) -> Result<(), ParseError<Data>>
@@ -193,8 +194,8 @@ impl<Data: TokenData> Context<Data> {
         let shift_to = loop {
             let state = &parser.get_states()[*self.state_stack.last().unwrap()];
 
-            let shift = state.shift_goto_class(class);
-            if let Some(mut reduce_rule) = state.reduce(class) {
+            let shift = state.shift_goto_class(TerminalSymbol::Term(class));
+            if let Some(mut reduce_rule) = state.reduce(TerminalSymbol::Term(class)) {
                 let reduce_rule = reduce_rule.next().unwrap();
                 let rule = &parser.get_rules()[reduce_rule];
                 let tokens_len = rule.rule.len();
@@ -276,19 +277,21 @@ impl<Data: TokenData> Context<Data> {
                 }
 
                 // call reduce action
+                let term_ = TerminalSymbol::Term(term);
                 let new_data = match Data::reduce_action(
                     reduce_rule,
                     &mut self.reduce_args,
                     &mut shift,
-                    &term,
+                    &term_,
                     userdata,
                     &mut new_location,
                 ) {
                     Ok(new_data) => new_data,
                     Err(err) => {
-                        return Err(ParseError::ReduceAction(term, location, err));
+                        return Err(ParseError::ReduceAction(term_, location, err));
                     }
                 };
+                term = term_.into_term().unwrap();
                 self.data_stack.push((new_data, new_location));
 
                 // construct tree
@@ -326,7 +329,9 @@ impl<Data: TokenData> Context<Data> {
 
             #[cfg(feature = "tree")]
             self.tree_stack
-                .push(crate::tree::Tree::new_terminal(term.clone()));
+                .push(crate::tree::Tree::new_terminal(TerminalSymbol::Term(
+                    term.clone(),
+                )));
 
             self.data_stack.push((Data::new_terminal(term), location));
             self.precedence_stack.push(shift_prec);
@@ -334,10 +339,10 @@ impl<Data: TokenData> Context<Data> {
             Ok(())
         } else {
             // enters panic mode
-            if self.panic_mode(parser) {
+            if self.panic_mode(parser, userdata)? {
                 // check for shift terminal again
-                if let Some(next_state_id) =
-                    parser.get_states()[*self.state_stack.last().unwrap()].shift_goto_class(class)
+                if let Some(next_state_id) = parser.get_states()[*self.state_stack.last().unwrap()]
+                    .shift_goto_class(TerminalSymbol::Term(class))
                 {
                     // A -> a . error b
                     // and b is fed, shift error and b
@@ -345,7 +350,9 @@ impl<Data: TokenData> Context<Data> {
 
                     #[cfg(feature = "tree")]
                     self.tree_stack
-                        .push(crate::tree::Tree::new_terminal(term.clone()));
+                        .push(crate::tree::Tree::new_terminal(TerminalSymbol::Term(
+                            term.clone(),
+                        )));
 
                     self.data_stack.push((Data::new_terminal(term), location));
                     self.precedence_stack.push(shift_prec);
@@ -388,8 +395,8 @@ impl<Data: TokenData> Context<Data> {
         let shift_to = loop {
             let state = &parser.get_states()[*state_stack.last().unwrap()];
 
-            let shift = state.shift_goto_class(class);
-            if let Some(mut reduce_rule) = state.reduce(class) {
+            let shift = state.shift_goto_class(TerminalSymbol::Term(class));
+            if let Some(mut reduce_rule) = state.reduce(TerminalSymbol::Term(class)) {
                 let reduce_rule = reduce_rule.next().unwrap();
                 let rule = &parser.get_rules()[reduce_rule];
                 let tokens_len = rule.rule.len();
@@ -471,12 +478,30 @@ impl<Data: TokenData> Context<Data> {
     where
         Data::NonTerm: Hash + Eq,
     {
-        let Some(error_nonterm) = parser.get_error_nonterm() else {
-            return false;
-        };
+        let mut state_stack = self.state_stack.clone();
+        while let Some(mut reduce_rule) =
+            parser.get_states()[*state_stack.last().unwrap()].reduce(TerminalSymbol::Error)
+        {
+            let reduce_rule = reduce_rule.next().unwrap();
+            let rule = &parser.get_rules()[reduce_rule];
+            let tokens_len = rule.rule.len();
+
+            state_stack.truncate(state_stack.len() - tokens_len);
+            if let Some(next_state) =
+                parser.get_states()[*state_stack.last().unwrap()].shift_goto_nonterm(&rule.name)
+            {
+                state_stack.push(next_state);
+            }
+        }
+        if parser.get_states()[*state_stack.last().unwrap()]
+            .shift_goto_class(TerminalSymbol::Error)
+            .is_some()
+        {
+            return true;
+        }
         for &last_state in self.state_stack.iter().rev() {
             let last_state = &parser.get_states()[last_state];
-            if last_state.shift_goto_nonterm(&error_nonterm).is_some() {
+            if last_state.shift_goto_class(TerminalSymbol::Error).is_some() {
                 return true;
             }
         }
@@ -589,18 +614,119 @@ impl<Data: TokenData> Context<Data> {
     fn panic_mode<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &mut self,
         parser: &P,
-    ) -> bool
+        userdata: &mut Data::UserData,
+    ) -> Result<bool, ParseError<Data>>
     where
         Data::NonTerm: Hash + Eq + Copy,
     {
         use crate::Location;
-        let Some(error_nonterm) = parser.get_error_nonterm() else {
-            return false;
-        };
+        // check if it can reduce with error token
+        while let Some(mut reduce_rule) =
+            parser.get_states()[*self.state_stack.last().unwrap()].reduce(TerminalSymbol::Error)
+        {
+            let reduce_rule = reduce_rule.next().unwrap();
+            let rule = &parser.get_rules()[reduce_rule];
+            let tokens_len = rule.rule.len();
+
+            let reduce_prec = match rule.precedence {
+                Some(crate::rule::Precedence::Fixed(level)) => Some(level),
+                Some(crate::rule::Precedence::Dynamic(token_idx)) => {
+                    // get token_idx'th precedence from back of precedence stack
+                    let idx = self.precedence_stack.len() - tokens_len + token_idx;
+                    self.precedence_stack[idx]
+                }
+                None => None,
+            };
+
+            // pop state stack
+            self.state_stack
+                .truncate(self.state_stack.len() - tokens_len);
+            // pop precedence stack
+            self.precedence_stack
+                .truncate(self.precedence_stack.len() - tokens_len);
+            self.precedence_stack.push(reduce_prec);
+
+            let mut shift = false;
+
+            let mut new_location =
+                Data::Location::new(self.data_stack.iter().map(|(_, loc)| loc).rev(), tokens_len);
+
+            let error_location =
+                Data::Location::new(self.data_stack.iter().map(|(_, loc)| loc).rev(), 0);
+
+            self.reduce_args.clear();
+            self.reduce_args.reserve(tokens_len);
+            for _ in 0..tokens_len {
+                self.reduce_args.push(
+                    self.data_stack
+                        .pop()
+                        .expect("data stack must have at least one element"),
+                );
+            }
+
+            // call reduce action
+            let new_data = match Data::reduce_action(
+                reduce_rule,
+                &mut self.reduce_args,
+                &mut shift,
+                &TerminalSymbol::Error,
+                userdata,
+                &mut new_location,
+            ) {
+                Ok(new_data) => new_data,
+                Err(err) => {
+                    return Err(ParseError::ReduceAction(
+                        TerminalSymbol::Error,
+                        error_location,
+                        err,
+                    ));
+                }
+            };
+            self.data_stack.push((new_data, new_location));
+
+            // construct tree
+            #[cfg(feature = "tree")]
+            {
+                let mut children = Vec::with_capacity(rule.rule.len());
+                for _ in 0..rule.rule.len() {
+                    let tree = self.tree_stack.pop().unwrap();
+                    children.push(tree);
+                }
+                children.reverse();
+
+                self.tree_stack.push(crate::tree::Tree::new_nonterminal(
+                    rule.name.clone(),
+                    children,
+                ));
+            }
+
+            // shift with reduced nonterminal
+            if let Some(next_state_id) = parser.get_states()[*self.state_stack.last().unwrap()]
+                .shift_goto_nonterm(&rule.name)
+            {
+                self.state_stack.push(next_state_id);
+            } else {
+                unreachable!("shift nonterm failed");
+            }
+        }
+        if let Some(next_state_id) = parser.get_states()[*self.state_stack.last().unwrap()]
+            .shift_goto_class(TerminalSymbol::Error)
+        {
+            self.state_stack.push(next_state_id);
+            let error_location =
+                Data::Location::new(self.data_stack.iter().map(|(_, loc)| loc).rev(), 0);
+            self.data_stack.push((Data::new_error(), error_location));
+            #[cfg(feature = "tree")]
+            self.tree_stack
+                .push(crate::tree::Tree::new_terminal(TerminalSymbol::Error));
+
+            return Ok(true);
+        }
+
         let mut popped_token = 0;
         for (stack_idx, &last_state) in self.state_stack.iter().enumerate().rev() {
             let last_state = &parser.get_states()[last_state];
-            if let Some(error_state) = last_state.shift_goto_nonterm(&error_nonterm) {
+            if let Some(error_state) = last_state.shift_goto_class(TerminalSymbol::Error) {
                 // pop all states above this state
                 self.state_stack.truncate(stack_idx + 1);
 
@@ -626,23 +752,20 @@ impl<Data: TokenData> Context<Data> {
 
                 // shift to error state
                 self.state_stack.push(error_state);
-                self.data_stack
-                    .push((Data::new_error_nonterm(), new_location));
+                self.data_stack.push((Data::new_error(), new_location));
                 self.precedence_stack.push(None);
                 #[cfg(feature = "tree")]
                 {
                     // push error tree
-                    self.tree_stack.push(crate::tree::Tree::new_nonterminal(
-                        error_nonterm,
-                        Vec::new(),
-                    ));
+                    self.tree_stack
+                        .push(crate::tree::Tree::new_terminal(TerminalSymbol::Error));
                 }
-                return true;
+                return Ok(true);
             }
 
             popped_token += 1;
         }
-        false
+        Ok(false)
     }
 
     /// Get backtrace information for current state.

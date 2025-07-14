@@ -2,6 +2,7 @@ use std::fmt::Debug;
 use std::fmt::Display;
 
 use crate::nonterminal::TokenData;
+use crate::TerminalSymbol;
 
 /// Error type for feed()
 #[derive(Clone)]
@@ -10,7 +11,11 @@ pub enum ParseError<Data: TokenData> {
     NoAction(Data::Term, Data::Location),
 
     /// Error from reduce action
-    ReduceAction(Data::Term, Data::Location, Data::ReduceActionError),
+    ReduceAction(
+        TerminalSymbol<Data::Term>,
+        Data::Location,
+        Data::ReduceActionError,
+    ),
 
     /// Rule index when shift/reduce conflict occur with no shift/reduce precedence defined.
     /// This is same as when setting %nonassoc in Bison.
@@ -29,7 +34,7 @@ impl<Data: TokenData> ParseError<Data> {
     pub fn term(&self) -> &Data::Term {
         match self {
             ParseError::NoAction(term, _) => term,
-            ParseError::ReduceAction(term, _, _) => term,
+            ParseError::ReduceAction(term, _, _) => term.to_term().unwrap(),
             ParseError::NoPrecedence(term, _, _) => term,
         }
     }

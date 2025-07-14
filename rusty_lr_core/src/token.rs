@@ -5,18 +5,36 @@ use std::hash::Hash;
 /// Custom type for terminal symbols,
 /// just because we have to take care of the `error` token specially
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub enum TerminalSymbol {
-    Term(usize), // index in the terminals vector
-    Error,       // error token
+pub enum TerminalSymbol<Term> {
+    Term(Term), // index in the terminals vector
+    Error,      // error token
 }
-impl TerminalSymbol {
+impl<Term> TerminalSymbol<Term> {
     pub fn is_error(&self) -> bool {
         matches!(self, TerminalSymbol::Error)
     }
-    pub fn to_term(&self) -> Option<usize> {
+    pub fn is_term(&self) -> bool {
+        matches!(self, TerminalSymbol::Term(_))
+    }
+    pub fn to_term(&self) -> Option<&Term> {
         match self {
-            TerminalSymbol::Term(term) => Some(*term),
+            TerminalSymbol::Term(term) => Some(term),
             TerminalSymbol::Error => None,
+        }
+    }
+    pub fn into_term(self) -> Option<Term> {
+        match self {
+            TerminalSymbol::Term(term) => Some(term),
+            TerminalSymbol::Error => None,
+        }
+    }
+}
+
+impl<Term: Display> std::fmt::Display for TerminalSymbol<Term> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TerminalSymbol::Term(term) => write!(f, "{}", term),
+            TerminalSymbol::Error => write!(f, "error"),
         }
     }
 }

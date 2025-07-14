@@ -7,6 +7,7 @@ use termtree::Tree as TermTree;
 
 use crate::nonterminal::NonTerminal;
 use crate::nonterminal::NonTerminalType;
+use crate::TerminalSymbol;
 
 /// Tree represention of single non-terminal token.
 /// User must enable feature `tree` to use this.
@@ -27,7 +28,7 @@ impl<Term, NonTerm> TreeNonTerminal<Term, NonTerm> {
     /// convert this tree to termtree::Tree using Display trait
     pub(crate) fn to_term_tree<D: Display>(
         &self,
-        term_to_display: &impl Fn(&Term) -> D,
+        term_to_display: &impl Fn(&TerminalSymbol<Term>) -> D,
         nonterm_to_display: &impl Fn(&NonTerm) -> D,
     ) -> Vec<TermTree<D>>
     where
@@ -158,12 +159,12 @@ impl<Term, NonTerm> TreeNonTerminal<Term, NonTerm> {
 /// User must enable feature `tree` to use this.
 #[derive(Clone)]
 pub enum Tree<Term, NonTerm> {
-    Terminal(Term),
+    Terminal(TerminalSymbol<Term>),
     NonTerminal(TreeNonTerminal<Term, NonTerm>),
 }
 
 impl<Term, NonTerm> Tree<Term, NonTerm> {
-    pub fn new_terminal(term: Term) -> Self {
+    pub fn new_terminal(term: TerminalSymbol<Term>) -> Self {
         Tree::Terminal(term)
     }
     pub fn new_nonterminal(nonterm: NonTerm, tokens: Vec<Tree<Term, NonTerm>>) -> Self {
@@ -173,7 +174,7 @@ impl<Term, NonTerm> Tree<Term, NonTerm> {
     /// convert this tree to termtree::Tree using Display trait
     pub(crate) fn to_term_tree<D: Display>(
         &self,
-        term_to_display: &impl Fn(&Term) -> D,
+        term_to_display: &impl Fn(&TerminalSymbol<Term>) -> D,
         nonterm_to_display: &impl Fn(&NonTerm) -> D,
     ) -> Vec<TermTree<D>>
     where
