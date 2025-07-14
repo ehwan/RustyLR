@@ -128,7 +128,7 @@ impl std::fmt::Display for PatternArgs {
                 write!(f, "{}-{}", base, terminal_set)
             }
             PatternArgs::Sep(base, del, one, _) => {
-                write!(f, "$sep({base}, {del}, {}", if *one { '+' } else { '*' })
+                write!(f, "$sep({base}, {del}, {})", if *one { '+' } else { '*' })
             }
         }
     }
@@ -282,25 +282,13 @@ impl PatternArgs {
                 }
             }
             PatternArgs::Sep(base, del, one, _) => {
-                unimplemented!("$sep is not implemented yet");
-                // let base_pattern = base.into_pattern(grammar, put_exclamation)?;
-                // let del_pattern = del.into_pattern(grammar, put_exclamation)?;
-                // let pattern = Pattern {
-                //     internal: PatternInternal::Sep(
-                //         Box::new(base_pattern),
-                //         Box::new(del_pattern),
-                //         *one,
-                //     ),
-                //     pretty_name: pretty_name.clone(),
-                // };
-                // if put_exclamation {
-                //     Ok(Pattern {
-                //         internal: PatternInternal::Exclamation(Box::new(pattern)),
-                //         pretty_name,
-                //     })
-                // } else {
-                //     Ok(pattern)
-                // }
+                let base = base.into_pattern(grammar, put_exclamation)?;
+                let del = del.into_pattern(grammar, false)?;
+                let pattern = Pattern {
+                    internal: PatternInternal::Sep(Box::new(base), Box::new(del), one),
+                    pretty_name: pretty_name.clone(),
+                };
+                Ok(pattern)
             }
         }
     }
