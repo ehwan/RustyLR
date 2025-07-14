@@ -1464,7 +1464,7 @@ impl Grammar {
     /// returns either 'term' or '[term1, term2, ...]'
     pub fn class_pretty_name_list(&self, class: TerminalSymbol<usize>, max_len: usize) -> String {
         match class {
-            TerminalSymbol::Error => return "<Error>".to_string(),
+            TerminalSymbol::Error => return "error".to_string(),
             TerminalSymbol::Term(class_idx) => {
                 let class = &self.terminal_classes[class_idx];
                 let len: usize = class
