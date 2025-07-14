@@ -91,7 +91,7 @@ pub(crate) fn reduce<P: Parser, Data: TokenData<Term = P::Term, NonTerm = P::Non
     precedence: Option<usize>,
     node: Rc<Node<Data>>,
     context: &mut Context<Data>,
-    term: &P::Term,
+    term: &crate::TerminalSymbol<P::Term>,
     shift: &mut bool,
     userdata: &mut Data::UserData,
 ) -> Result<Rc<Node<Data>>, Data::ReduceActionError>

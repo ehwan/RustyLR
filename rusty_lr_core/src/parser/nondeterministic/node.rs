@@ -4,6 +4,7 @@ use std::rc::Rc;
 
 use crate::nonterminal::TokenData;
 use crate::parser::State;
+use crate::TerminalSymbol;
 
 /// Iterator for traverse node to root.
 /// Note that root node is not included in this iterator.
@@ -416,47 +417,211 @@ impl<Data: TokenData> Node<Data> {
     }
 
     pub fn panic_mode<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        mut node: &Rc<Node<Data>>,
+        self: Rc<Node<Data>>,
+        context: &mut super::Context<Data>,
         parser: &P,
-    ) -> Option<Self>
+        userdata: &mut Data::UserData,
+    ) -> bool
     where
-        Data::NonTerm: std::hash::Hash + Eq,
+        Data: Clone,
+        Data::Term: Clone,
+        Data::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug,
     {
+        use crate::parser::State;
+        use crate::rule::Precedence;
         use crate::Location;
-        let node0 = node;
-        let error_nonterm = parser.get_error_nonterm()?;
+
+        let mut has_shift = parser.get_states()[self.state].shift_goto_class(TerminalSymbol::Error);
+        if let Some(reduce_rules) = parser.get_states()[self.state].reduce(TerminalSymbol::Error) {
+            let mut shifted = false;
+            let mut shift_ = false;
+            for reduce_rule in reduce_rules {
+                let rule = &parser.get_rules()[reduce_rule];
+                let reduce_prec = match rule.precedence {
+                    Some(Precedence::Fixed(level)) => Some(level),
+                    Some(Precedence::Dynamic(token_index)) => {
+                        // fix the value to the offset from current node
+                        let ith = rule.rule.len() - token_index - 1;
+                        let mut node = &self;
+                        for _ in 0..ith {
+                            node = node.parent.as_ref().unwrap();
+                        }
+                        node.precedence_level
+                    }
+                    None => None,
+                };
+
+                let mut pass = has_shift.is_some();
+                match super::reduce(
+                    parser,
+                    reduce_rule,
+                    reduce_prec,
+                    Rc::clone(&self),
+                    context,
+                    &TerminalSymbol::Error,
+                    &mut pass,
+                    userdata,
+                ) {
+                    Ok(next_node) => {
+                        shift_ |= pass;
+                        // reduce recursively
+                        shifted |= Self::panic_mode(next_node, context, parser, userdata);
+                    }
+                    Err(err) => {
+                        shift_ |= pass;
+                        context.reduce_errors.push(err);
+                    }
+                }
+            }
+            if !shift_ {
+                has_shift = None;
+            }
+
+            if let Some(shift) = has_shift {
+                let error_location =
+                    Data::Location::new(self.iter().map(|node| &node.data.as_ref().unwrap().1), 0);
+
+                let next_node = Node {
+                    parent: Some(self),
+                    state: shift,
+                    precedence_level: None,
+                    #[cfg(feature = "tree")]
+                    tree: Some(crate::tree::Tree::new_terminal(TerminalSymbol::Error)),
+                    data: Some((Data::new_error(), error_location)),
+                };
+
+                context.error_nodes.push(next_node);
+
+                true
+            } else {
+                shifted
+            }
+        } else if let Some(shift) = has_shift {
+            let error_location =
+                Data::Location::new(self.iter().map(|node| &node.data.as_ref().unwrap().1), 0);
+            let next_node = Node {
+                parent: Some(self),
+                state: shift,
+                precedence_level: None,
+                #[cfg(feature = "tree")]
+                tree: Some(crate::tree::Tree::new_terminal(TerminalSymbol::Error)),
+                data: Some((Data::new_error(), error_location)),
+            };
+
+            context.error_nodes.push(next_node);
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn panic_mode_pop<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        self: &Rc<Node<Data>>,
+        context: &mut super::Context<Data>,
+        parser: &P,
+    ) -> bool {
+        use crate::parser::State;
+        use crate::Location;
+        let node0 = self;
+        let mut node = self;
         let mut popped_count = 0;
         loop {
             let last_state = &parser.get_states()[node.state];
-            if let Some(error_state) = last_state.shift_goto_nonterm(&error_nonterm) {
+            if let Some(error_state) = last_state.shift_goto_class(TerminalSymbol::Error) {
                 let new_location = Data::Location::new(
                     node0.iter().map(|node| &node.data.as_ref().unwrap().1),
                     popped_count,
                 );
                 // pop all states and data above this state
                 let child_node = Node {
-                    data: Some((Data::new_error_nonterm(), new_location)),
+                    data: Some((Data::new_error(), new_location)),
                     precedence_level: None,
                     parent: Some(Rc::clone(node)),
                     state: error_state,
                     #[cfg(feature = "tree")]
-                    tree: Some(crate::tree::Tree::new_nonterminal(
-                        error_nonterm,
-                        Vec::new(),
-                    )),
+                    tree: Some(crate::tree::Tree::new_terminal(TerminalSymbol::Error)),
                 };
 
-                return Some(child_node);
+                context.error_nodes.push(child_node);
+                return true;
             }
 
             if let Some(parent) = node.parent.as_ref() {
                 popped_count += 1;
                 node = parent;
             } else {
+                break false;
+            }
+        }
+    }
+
+    pub fn can_panic_mode<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        self: &Rc<Node<Data>>,
+        parser: &P,
+    ) -> bool
+    where
+        Data::NonTerm: std::hash::Hash + Eq,
+    {
+        use crate::parser::State;
+        use crate::rule::Precedence;
+
+        let mut node = self;
+        loop {
+            let last_state = &parser.get_states()[node.state];
+            if last_state.shift_goto_class(TerminalSymbol::Error).is_some() {
+                return true;
+            }
+
+            if let Some(parent) = self.parent.as_ref() {
+                node = parent;
+            } else {
                 break;
             }
         }
-        None
+        if let Some(reduce_rules) = parser.get_states()[self.state].reduce(TerminalSymbol::Error) {
+            for reduce_rule in reduce_rules {
+                let rule = &parser.get_rules()[reduce_rule];
+                let reduce_prec = match rule.precedence {
+                    Some(Precedence::Fixed(level)) => Some(level),
+                    Some(Precedence::Dynamic(token_index)) => {
+                        // fix the value to the offset from current node
+                        let ith = rule.rule.len() - token_index - 1;
+                        let mut node = self;
+                        for _ in 0..ith {
+                            node = node.parent.as_ref().unwrap();
+                        }
+                        node.precedence_level
+                    }
+                    None => None,
+                };
+
+                let mut node = self;
+                for _ in 0..rule.rule.len() {
+                    node = node.parent.as_ref().unwrap();
+                }
+                if let Some(next_shift_nonterm) =
+                    parser.get_states()[node.state].shift_goto_nonterm(&rule.name)
+                {
+                    let next_node = Node {
+                        parent: Some(Rc::clone(node)),
+                        state: next_shift_nonterm,
+                        precedence_level: reduce_prec,
+                        #[cfg(feature = "tree")]
+                        tree: None,
+                        data: None,
+                    };
+                    if Self::can_panic_mode(&Rc::new(next_node), parser) {
+                        return true;
+                    }
+                } else {
+                    unreachable!(
+                        "Shift non-terminal must exist for reduce rule: {:?}",
+                        reduce_rule
+                    );
+                }
+            }
+        }
+        false
     }
 
     /// Feed one terminal with location to parser, and update state stack.
@@ -464,7 +629,7 @@ impl<Data: TokenData> Node<Data> {
         self: Rc<Self>,
         context: &mut super::Context<Data>,
         parser: &P,
-        term: P::Term,
+        mut term: P::Term,
         class: usize,
         shift_prec: Option<usize>,
         userdata: &mut Data::UserData,
@@ -478,8 +643,11 @@ impl<Data: TokenData> Node<Data> {
         use crate::parser::State;
         use crate::rule::Precedence;
 
-        let shift_state = parser.get_states()[self.state].shift_goto_class(class);
-        if let Some(reduce_rules) = parser.get_states()[self.state].reduce(class) {
+        let shift_state =
+            parser.get_states()[self.state].shift_goto_class(TerminalSymbol::Term(class));
+        if let Some(reduce_rules) =
+            parser.get_states()[self.state].reduce(TerminalSymbol::Term(class))
+        {
             let mut shift = None;
             let mut reduces: smallvec::SmallVec<[_; 2]> = Default::default();
 
@@ -546,13 +714,14 @@ impl<Data: TokenData> Node<Data> {
                 let mut shift_ = false;
                 for (reduce_rule, precedence) in reduces {
                     let mut pass = shift.is_some();
+                    let term_ = TerminalSymbol::Term(term);
                     match super::reduce(
                         parser,
                         reduce_rule,
                         precedence,
                         Rc::clone(&self),
                         context,
-                        &term,
+                        &term_,
                         &mut pass,
                         userdata,
                     ) {
@@ -563,7 +732,7 @@ impl<Data: TokenData> Node<Data> {
                                 next_node,
                                 context,
                                 parser,
-                                term.clone(),
+                                term_.to_term().unwrap().clone(),
                                 class,
                                 shift_prec,
                                 userdata,
@@ -576,6 +745,7 @@ impl<Data: TokenData> Node<Data> {
                             context.reduce_errors.push(err);
                         }
                     }
+                    term = term_.into_term().unwrap();
                 }
                 // if every reduce action revoked shift,
                 // then reset shift to None
@@ -593,7 +763,9 @@ impl<Data: TokenData> Node<Data> {
                     state: shift,
                     precedence_level: shift_prec,
                     #[cfg(feature = "tree")]
-                    tree: Some(crate::tree::Tree::new_terminal(term.clone())),
+                    tree: Some(crate::tree::Tree::new_terminal(TerminalSymbol::Term(
+                        term.clone(),
+                    ))),
                     data: Some((Data::new_terminal(term), location)),
                 };
 
@@ -616,7 +788,9 @@ impl<Data: TokenData> Node<Data> {
                 state: shift,
                 precedence_level: shift_prec,
                 #[cfg(feature = "tree")]
-                tree: Some(crate::tree::Tree::new_terminal(term.clone())),
+                tree: Some(crate::tree::Tree::new_terminal(TerminalSymbol::Term(
+                    term.clone(),
+                ))),
                 data: Some((Data::new_terminal(term), location)),
             };
 
@@ -642,8 +816,11 @@ impl<Data: TokenData> Node<Data> {
         use crate::parser::State;
         use crate::rule::Precedence;
 
-        let shift_state = parser.get_states()[self.state].shift_goto_class(class);
-        if let Some(reduce_rules) = parser.get_states()[self.state].reduce(class) {
+        let shift_state =
+            parser.get_states()[self.state].shift_goto_class(TerminalSymbol::Term(class));
+        if let Some(reduce_rules) =
+            parser.get_states()[self.state].reduce(TerminalSymbol::Term(class))
+        {
             let mut shift = None;
             let mut reduces: smallvec::SmallVec<[_; 2]> = Default::default();
 

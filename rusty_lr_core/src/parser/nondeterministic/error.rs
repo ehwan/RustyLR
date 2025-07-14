@@ -7,7 +7,7 @@ use crate::nonterminal::TokenData;
 #[derive(Clone)]
 pub struct ParseError<Data: TokenData> {
     /// The terminal symbol that caused the error.
-    pub term: Data::Term,
+    pub term: crate::TerminalSymbol<Data::Term>,
     /// Location of the terminal symbol
     pub location: Data::Location,
     /// Error from reduce action (from every diverged paths)
@@ -22,7 +22,7 @@ impl<Data: TokenData> ParseError<Data> {
         &self.location
     }
     pub fn term(&self) -> &Data::Term {
-        &self.term
+        self.term.to_term().unwrap()
     }
 }
 
