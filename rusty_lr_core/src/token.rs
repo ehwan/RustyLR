@@ -2,6 +2,14 @@ use std::fmt::Debug;
 use std::fmt::Display;
 use std::hash::Hash;
 
+/// Custom type for terminal symbols,
+/// just because we have to take care of the `error` token specially
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum TerminalSymbol {
+    Term(usize), // index in the terminals vector
+    Error,       // error token
+}
+
 /// Token represents a terminal or non-terminal symbol in the grammar.
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Token<Term, NonTerm> {

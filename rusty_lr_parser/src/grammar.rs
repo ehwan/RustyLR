@@ -10,6 +10,7 @@ use quote::ToTokens;
 use rusty_lr_core::hash::HashMap;
 use rusty_lr_core::hash::HashSet;
 use rusty_lr_core::rule::Precedence;
+use rusty_lr_core::TerminalSymbol;
 use rusty_lr_core::Token;
 
 use crate::error::ArgError;
@@ -533,26 +534,6 @@ impl Grammar {
                 ));
             }
         }
-        // insert `error` nonterminal
-        // 'error' must be inserted after all other non-terminals,
-        // other codes are depending on it.
-        {
-            let name = Ident::new(utils::ERROR_NAME, Span::call_site());
-            let nonterminal = NonTerminalInfo {
-                name: name.clone(),
-                pretty_name: "'error'".to_string(),
-                ruletype: None,
-                rules: Vec::new(), // empty rules
-                regex_span: None,
-                trace: false,
-                protected: true,
-                nonterm_type: Some(rusty_lr_core::nonterminal::NonTerminalType::Error),
-            };
-
-            let rule_idx = grammar.nonterminals.len();
-            grammar.nonterminals.push(nonterminal);
-            grammar.nonterminals_index.insert(name, rule_idx);
-        }
 
         // precedence orders
         for (level, (span, reduce_type, items)) in grammar_args.precedences.into_iter().enumerate()
@@ -633,12 +614,20 @@ impl Grammar {
                     };
                     if let Some(from_token) = from_token {
                         // check if from_token'th token is terminal symbol
-                        if let Token::Term(term_idx) = tokens[from_token].token {
-                            if let Some((level, _)) = grammar.terminals[term_idx].precedence {
-                                let span = tokens[from_token].begin_span;
-                                Some((Precedence::Fixed(level), span))
-                            } else {
-                                return Err(ParseError::PrecedenceNotDefined(prec));
+                        if let Token::Term(term) = tokens[from_token].token {
+                            match term {
+                                TerminalSymbol::Term(term_idx) => {
+                                    if let Some((level, _)) = grammar.terminals[term_idx].precedence
+                                    {
+                                        let span = tokens[from_token].begin_span;
+                                        Some((Precedence::Fixed(level), span))
+                                    } else {
+                                        return Err(ParseError::PrecedenceNotDefined(prec));
+                                    }
+                                }
+                                TerminalSymbol::Error => {
+                                    return Err(ParseError::PrecedenceNotDefined(prec));
+                                }
                             }
                         } else {
                             Some((Precedence::Dynamic(from_token), span))
@@ -653,7 +642,7 @@ impl Grammar {
                     // choose the last terminal symbol that has precedence
                     let mut op = None;
                     for token in tokens.iter().rev() {
-                        if let Token::Term(term_idx) = token.token {
+                        if let Token::Term(TerminalSymbol::Term(term_idx)) = token.token {
                             if let Some((level, _)) = grammar.terminals[term_idx].precedence {
                                 op = Some((Precedence::Fixed(level), token.end_span));
                                 break;
@@ -888,7 +877,7 @@ impl Grammar {
                         end_span: Span::call_site(),
                     },
                     TokenMapped {
-                        token: Token::Term(grammar.eof_index),
+                        token: Token::Term(TerminalSymbol::Term(grammar.eof_index)),
                         mapto: None,
                         begin_span: Span::call_site(),
                         end_span: Span::call_site(),
@@ -957,10 +946,6 @@ impl Grammar {
         }
         grammar.other_terminal_class_id = grammar.terminal_class_id[grammar.other_terminal_index];
 
-        let error_nonterm_idx = *grammar
-            .nonterminals_index
-            .get(&Ident::new(utils::ERROR_NAME, Span::call_site()))
-            .unwrap();
         // check other, error terminals used
         for nonterm in &grammar.nonterminals {
             for rule in &nonterm.rules {
@@ -970,10 +955,12 @@ impl Grammar {
                     }
                 }
                 for token in &rule.tokens {
-                    if token.token == Token::Term(grammar.other_terminal_index) {
+                    if token.token
+                        == Token::Term(TerminalSymbol::Term(grammar.other_terminal_index))
+                    {
                         grammar.other_used = true;
                     }
-                    if token.token == Token::NonTerm(error_nonterm_idx) {
+                    if token.token == Token::Term(TerminalSymbol::Error) {
                         grammar.error_used = true;
                     }
                 }
@@ -1051,7 +1038,7 @@ impl Grammar {
             let mut same_ruleset = BTreeMap::new();
             for rule in &nonterm_def.rules {
                 for (token_idx, term) in rule.tokens.iter().enumerate() {
-                    if let Token::Term(term) = term.token {
+                    if let Token::Term(TerminalSymbol::Term(term)) = term.token {
                         // if this rule has reduce action, and it is not auto-generated,
                         // this terminal should be completely distinct from others (for user-defined inspection action)
                         // so put this terminal into separate class
@@ -1165,8 +1152,6 @@ impl Grammar {
         self.other_terminal_class_id = self.terminal_class_id[self.other_terminal_index];
         // terminal class optimization ends
 
-        use rusty_lr_core::Token;
-
         let mut removed_rules_diag = Vec::new();
 
         // check for unused non-terminals
@@ -1207,7 +1192,7 @@ impl Grammar {
                 // check if this rule contains any terminal that is not the first terminal in the class
                 let mut remove_this_rule = false;
                 for token in &rule.tokens {
-                    if let Token::Term(old_class) = token.token {
+                    if let Token::Term(TerminalSymbol::Term(old_class)) = token.token {
                         if !is_first_oldclass_in_newclass[old_class] {
                             remove_this_rule = true;
                             break;
@@ -1227,17 +1212,18 @@ impl Grammar {
                 }
 
                 // change any terminal to its class id
-                // tokens in the rule
+                //
+                //  - tokens in the rule
                 for token in &mut rule.tokens {
-                    if let Token::Term(old_class) = token.token {
+                    if let Token::Term(TerminalSymbol::Term(old_class)) = token.token {
                         let new_class = old_class_to_new_class[old_class];
                         if new_class == self.other_terminal_class_id {
                             other_was_used = true;
                         }
-                        token.token = Token::Term(new_class);
+                        token.token = Token::Term(TerminalSymbol::Term(new_class));
                     }
                 }
-                // lookaheads in the rule
+                //  - lookaheads in the rule
                 if let Some(lookaheads) = &mut rule.lookaheads {
                     let new_lookaheads = std::mem::take(lookaheads)
                         .into_iter()
@@ -1258,8 +1244,10 @@ impl Grammar {
 
         // remove rules that have single production rule and single token
         // e.g. A -> B, then fix all occurrences of A to B
-        let mut nonterm_replace: HashMap<Token<usize, usize>, Token<usize, usize>> =
-            Default::default();
+        let mut nonterm_replace: HashMap<
+            Token<TerminalSymbol, usize>,
+            Token<TerminalSymbol, usize>,
+        > = Default::default();
         for (nonterm_id, nonterm) in self.nonterminals.iter_mut().enumerate() {
             // do not delete protected non-terminals
             if nonterm.is_protected() {
@@ -1293,13 +1281,13 @@ impl Grammar {
         }
 
         // ensure that from -> to map does not create a cycle, and reaches to the leaf
-        let mut cycles: HashSet<Token<usize, usize>> = Default::default();
-        let mut next_replace: HashMap<Token<usize, usize>, Token<usize, usize>> =
+        let mut cycles: HashSet<Token<TerminalSymbol, usize>> = Default::default();
+        let mut next_replace: HashMap<Token<TerminalSymbol, usize>, Token<TerminalSymbol, usize>> =
             Default::default();
         // calculate cycle
         for &from in nonterm_replace.keys() {
             let mut cur = from;
-            let mut chains: HashSet<Token<usize, usize>> = Default::default();
+            let mut chains: HashSet<Token<TerminalSymbol, usize>> = Default::default();
             while let Some(&next) = nonterm_replace.get(&cur) {
                 if cycles.contains(&next) {
                     cycles.insert(from);
@@ -1559,27 +1547,13 @@ impl Grammar {
         }
         grammar.set_precedence_types(self.precedence_types.iter().map(|(op, _)| *op).collect());
 
-        let error_index = *self
-            .nonterminals_index
-            .get(&Ident::new(utils::ERROR_NAME, Span::call_site()))
-            .unwrap();
-
         // add rules
         for &(nonterm_id, rule_id) in self.rules_sorted.iter() {
             let rule = &self.nonterminals[nonterm_id].rules[rule_id];
             let tokens = rule
                 .tokens
                 .iter()
-                .map(|token_mapped| match token_mapped.token {
-                    Token::NonTerm(nonterm) => {
-                        if nonterm == error_index {
-                            Token::Term(TerminalSymbol::Error)
-                        } else {
-                            Token::NonTerm(nonterm)
-                        }
-                    }
-                    Token::Term(term) => Token::Term(TerminalSymbol::Term(term)),
-                })
+                .map(|token_mapped| token_mapped.token)
                 .collect();
 
             grammar.add_rule(
@@ -1620,12 +1594,4 @@ impl Grammar {
 
         collector
     }
-}
-
-/// Custom type for terminal symbols,
-/// just because we have to take care of the `error` token specially
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub enum TerminalSymbol {
-    Term(usize), // index in the terminals vector
-    Error,       // error token
 }

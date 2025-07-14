@@ -5,8 +5,6 @@ use proc_macro2::TokenStream;
 use quote::format_ident;
 use quote::quote;
 
-use rusty_lr_core::Token;
-
 use crate::grammar::Grammar;
 use crate::terminal_info::TerminalName;
 use crate::utils;
@@ -183,6 +181,7 @@ impl Grammar {
         // building grammar
         // ======================
         use rusty_lr_core::builder::ReduceType;
+        use rusty_lr_core::TerminalSymbol;
         use rusty_lr_core::Token;
 
         let reduce_type_to_stream = |reduce_type: ReduceType| -> TokenStream {
@@ -211,9 +210,20 @@ impl Grammar {
                 }
             })
             .collect();
-        let token_to_stream = |token: Token<usize, usize>| -> TokenStream {
+        let terminal_symbol_to_stream = |term: TerminalSymbol| -> TokenStream {
+            match term {
+                TerminalSymbol::Term(term) => {
+                    quote! { #module_prefix::TerminalSymbol::Term(#term) }
+                }
+                TerminalSymbol::Error => {
+                    quote! { #module_prefix::TerminalSymbol::Error }
+                }
+            }
+        };
+        let token_to_stream = |token: Token<TerminalSymbol, usize>| -> TokenStream {
             match token {
                 Token::Term(term) => {
+                    let term = terminal_symbol_to_stream(term);
                     quote! { #module_prefix::Token::Term(#term) }
                 }
                 Token::NonTerm(nonterm) => {
