@@ -99,8 +99,8 @@ pub struct Grammar {
 
     /// do terminal classificate optimization
     pub optimize: bool,
-    pub builder: rusty_lr_core::builder::Grammar<ClassIndex, usize>,
-    pub states: Vec<rusty_lr_core::builder::State<ClassIndex, usize>>,
+    pub builder: rusty_lr_core::builder::Grammar<TerminalSymbol, usize>,
+    pub states: Vec<rusty_lr_core::builder::State<TerminalSymbol, usize>>,
 
     /// set of terminals for each terminal class
     pub terminal_classes: Vec<TerminalClassDefinition>,
@@ -1510,8 +1510,8 @@ impl Grammar {
     }
 
     /// create the rusty_lr_core::Grammar from the parsed CFGs
-    pub fn create_builder(&mut self) -> rusty_lr_core::builder::Grammar<ClassIndex, usize> {
-        let mut grammar: rusty_lr_core::builder::Grammar<ClassIndex, usize> =
+    pub fn create_builder(&mut self) -> rusty_lr_core::builder::Grammar<TerminalSymbol, usize> {
+        let mut grammar: rusty_lr_core::builder::Grammar<TerminalSymbol, usize> =
             rusty_lr_core::builder::Grammar::new();
 
         let mut rules = Vec::new();
@@ -1552,12 +1552,17 @@ impl Grammar {
         for (term_idx, term_info) in self.terminals.iter().enumerate() {
             if let Some((level, _)) = &term_info.precedence {
                 let class = self.terminal_class_id[term_idx];
-                if !grammar.add_precedence(class, *level) {
+                if !grammar.add_precedence(TerminalSymbol::Term(class), *level) {
                     unreachable!("set_reduce_type error");
                 }
             }
         }
         grammar.set_precedence_types(self.precedence_types.iter().map(|(op, _)| *op).collect());
+
+        let error_index = *self
+            .nonterminals_index
+            .get(&Ident::new(utils::ERROR_NAME, Span::call_site()))
+            .unwrap();
 
         // add rules
         for &(nonterm_id, rule_id) in self.rules_sorted.iter() {
@@ -1565,28 +1570,36 @@ impl Grammar {
             let tokens = rule
                 .tokens
                 .iter()
-                .map(|token_mapped| token_mapped.token)
+                .map(|token_mapped| match token_mapped.token {
+                    Token::NonTerm(nonterm) => {
+                        if nonterm == error_index {
+                            Token::Term(TerminalSymbol::Error)
+                        } else {
+                            Token::NonTerm(nonterm)
+                        }
+                    }
+                    Token::Term(term) => Token::Term(TerminalSymbol::Term(term)),
+                })
                 .collect();
 
             grammar.add_rule(
                 nonterm_id,
                 tokens,
-                rule.lookaheads.clone(),
+                rule.lookaheads.as_ref().map(|lookaheads| {
+                    lookaheads
+                        .iter()
+                        .map(|&t| TerminalSymbol::Term(t))
+                        .collect()
+                }),
                 rule.prec.map(|(op, _)| op),
                 rule.dprec.map_or(0, |(p, _)| p),
             );
         }
-        // add special `error` nonterminal
-        let error_idx = *self
-            .nonterminals_index
-            .get(&Ident::new(utils::ERROR_NAME, Span::call_site()))
-            .unwrap();
-        grammar.add_empty_rule(error_idx);
 
         grammar
     }
 
-    pub fn build_grammar(&mut self) -> rusty_lr_core::builder::DiagnosticCollector<usize> {
+    pub fn build_grammar(&mut self) -> rusty_lr_core::builder::DiagnosticCollector<TerminalSymbol> {
         let augmented_idx = *self
             .nonterminals_index
             .get(&Ident::new(utils::AUGMENTED_NAME, Span::call_site()))
