@@ -9,6 +9,17 @@ pub enum TerminalSymbol {
     Term(usize), // index in the terminals vector
     Error,       // error token
 }
+impl TerminalSymbol {
+    pub fn is_error(&self) -> bool {
+        matches!(self, TerminalSymbol::Error)
+    }
+    pub fn to_term(&self) -> Option<usize> {
+        match self {
+            TerminalSymbol::Term(term) => Some(*term),
+            TerminalSymbol::Error => None,
+        }
+    }
+}
 
 /// Token represents a terminal or non-terminal symbol in the grammar.
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
