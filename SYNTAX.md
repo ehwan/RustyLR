@@ -359,7 +359,7 @@ JsonObject: '{' JsonKeyValue* '}'
           | '{' error '}'          { println!("recovering with '}}' at {}", @error); }
           ;
 ```
-The `error` token is a reserved non-terminal symbol that can be matched with **any tokens**.
+The `error` token is a reserved terminal symbol that can be matched with **any zero or more tokens**.
 In the above example, if the parser encounters an invalid token while parsing a JSON object, it will enter panic mode and discard all tokens until it finds a closing brace `}`.
 
 **How it works:**
