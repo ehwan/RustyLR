@@ -30,7 +30,7 @@ pub enum Lexed {
     Exclamation(Punct),
     Slash(Punct),
     Dot(Punct),
-    At(Punct),
+    Dollar(Punct),
     Comma(Punct),
     OtherPunct(Punct),
 
@@ -86,7 +86,7 @@ impl Lexed {
             Lexed::Exclamation(punct) => stream.append(punct),
             Lexed::Slash(punct) => stream.append(punct),
             Lexed::Dot(punct) => stream.append(punct),
-            Lexed::At(punct) => stream.append(punct),
+            Lexed::Dollar(punct) => stream.append(punct),
             Lexed::Comma(punct) => stream.append(punct),
             Lexed::OtherPunct(punct) => stream.append(punct),
 
@@ -187,7 +187,7 @@ impl std::fmt::Display for Lexed {
             Lexed::Exclamation(_) => write!(f, "'!'"),
             Lexed::Slash(_) => write!(f, "'/'"),
             Lexed::Dot(_) => write!(f, "'.'"),
-            Lexed::At(_) => write!(f, "'@'"),
+            Lexed::Dollar(_) => write!(f, "'$'"),
             Lexed::Comma(_) => write!(f, "','"),
             Lexed::OtherPunct(p) => write!(f, "'{}'", p.as_char()),
 
@@ -324,7 +324,9 @@ pub fn feed_recursive(
                 '%' => {
                     context.feed_location(parser, Lexed::Percent(punct), grammar_args, location)?
                 }
-                '@' => context.feed_location(parser, Lexed::At(punct), grammar_args, location)?,
+                '$' => {
+                    context.feed_location(parser, Lexed::Dollar(punct), grammar_args, location)?
+                }
                 ',' => {
                     context.feed_location(parser, Lexed::Comma(punct), grammar_args, location)?
                 }
