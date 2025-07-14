@@ -48,7 +48,7 @@ use rusty_lr_core::builder::ReduceType;
 %token exclamation Lexed::Exclamation(_);
 %token slash Lexed::Slash(_);
 %token dot Lexed::Dot(_);
-%token dollar Lexed::Dollar(_);
+%token at Lexed::At(_);
 %token comma Lexed::Comma(_);
 
 %token literal Lexed::Literal(_);
@@ -294,7 +294,7 @@ Pattern(PatternArgs): ident {
 | p1=Pattern minus p2=Pattern {
     PatternArgs::Minus( Box::new(p1), Box::new(p2) )
 }
-| dollar ident lparen base=Pattern comma del=Pattern comma? rparen {
+| at ident lparen base=Pattern comma del=Pattern comma? rparen {
     PatternArgs::Sep(
         Box::new(base),
         Box::new(del),
@@ -302,7 +302,7 @@ Pattern(PatternArgs): ident {
         *@$
     )
 }
-| dollar ident lparen base=Pattern comma del=Pattern comma plus rparen {
+| at ident lparen base=Pattern comma del=Pattern comma plus rparen {
     PatternArgs::Sep(
         Box::new(base),
         Box::new(del),
@@ -310,7 +310,7 @@ Pattern(PatternArgs): ident {
         *@$
     )
 }
-| dollar ident lparen base=Pattern comma del=Pattern comma star rparen {
+| at ident lparen base=Pattern comma del=Pattern comma star rparen {
     PatternArgs::Sep(
         Box::new(base),
         Box::new(del),
@@ -318,7 +318,7 @@ Pattern(PatternArgs): ident {
         *@$
     )
 }
-| dollar ident lparen base=Pattern comma del=Pattern error rparen {
+| at ident lparen base=Pattern comma del=Pattern error rparen {
     // TODO error recovery
     PatternArgs::Sep(
         Box::new(base),

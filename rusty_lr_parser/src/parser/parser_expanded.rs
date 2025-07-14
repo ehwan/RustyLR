@@ -60,10 +60,10 @@ Pattern -> Pattern slash Pattern
 Pattern -> lparen Pattern+ rparen
 Pattern -> literal
 Pattern -> Pattern minus Pattern
-Pattern -> dollar ident lparen Pattern comma Pattern comma? rparen
-Pattern -> dollar ident lparen Pattern comma Pattern comma plus rparen
-Pattern -> dollar ident lparen Pattern comma Pattern comma star rparen
-Pattern -> dollar ident lparen Pattern comma Pattern 'error' rparen
+Pattern -> at ident lparen Pattern comma Pattern comma? rparen
+Pattern -> at ident lparen Pattern comma Pattern comma plus rparen
+Pattern -> at ident lparen Pattern comma Pattern comma star rparen
+Pattern -> at ident lparen Pattern comma Pattern 'error' rparen
 Action -> bracegroup
 Action ->
 IdentOrLiteral -> ident
@@ -146,7 +146,7 @@ TerminalSetItem* -> TerminalSetItem+
 [^semicolon] -> exclamation
 [^semicolon] -> slash
 [^semicolon] -> dot
-[^semicolon] -> dollar
+[^semicolon] -> at
 [^semicolon] -> comma
 [^semicolon] -> literal
 [^semicolon] -> parengroup
@@ -1270,7 +1270,7 @@ impl GrammarTokenData {
             PatternArgs::Minus(Box::new(p1), Box::new(p2))
         }))
     }
-    #[doc = "Pattern -> dollar ident lparen Pattern comma Pattern comma? rparen"]
+    #[doc = "Pattern -> at ident lparen Pattern comma Pattern comma? rparen"]
     #[inline]
     fn reduce_Pattern_10(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -1279,7 +1279,7 @@ impl GrammarTokenData {
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let (GrammarTokenData::Terminals(mut dollar), __rustylr_location_dollar) =
+        let (GrammarTokenData::Terminals(mut at), __rustylr_location_at) =
             __rustylr_args.pop().unwrap()
         else {
             unreachable!()
@@ -1323,7 +1323,7 @@ impl GrammarTokenData {
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         }))
     }
-    #[doc = "Pattern -> dollar ident lparen Pattern comma Pattern comma plus rparen"]
+    #[doc = "Pattern -> at ident lparen Pattern comma Pattern comma plus rparen"]
     #[inline]
     fn reduce_Pattern_11(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -1332,7 +1332,7 @@ impl GrammarTokenData {
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let (GrammarTokenData::Terminals(mut dollar), __rustylr_location_dollar) =
+        let (GrammarTokenData::Terminals(mut at), __rustylr_location_at) =
             __rustylr_args.pop().unwrap()
         else {
             unreachable!()
@@ -1381,7 +1381,7 @@ impl GrammarTokenData {
             PatternArgs::Sep(Box::new(base), Box::new(del), true, *__rustylr_location0)
         }))
     }
-    #[doc = "Pattern -> dollar ident lparen Pattern comma Pattern comma star rparen"]
+    #[doc = "Pattern -> at ident lparen Pattern comma Pattern comma star rparen"]
     #[inline]
     fn reduce_Pattern_12(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -1390,7 +1390,7 @@ impl GrammarTokenData {
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let (GrammarTokenData::Terminals(mut dollar), __rustylr_location_dollar) =
+        let (GrammarTokenData::Terminals(mut at), __rustylr_location_at) =
             __rustylr_args.pop().unwrap()
         else {
             unreachable!()
@@ -1439,7 +1439,7 @@ impl GrammarTokenData {
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         }))
     }
-    #[doc = "Pattern -> dollar ident lparen Pattern comma Pattern 'error' rparen"]
+    #[doc = "Pattern -> at ident lparen Pattern comma Pattern 'error' rparen"]
     #[inline]
     fn reduce_Pattern_13(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -1448,7 +1448,7 @@ impl GrammarTokenData {
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let (GrammarTokenData::Terminals(mut dollar), __rustylr_location_dollar) =
+        let (GrammarTokenData::Terminals(mut at), __rustylr_location_at) =
             __rustylr_args.pop().unwrap()
         else {
             unreachable!()
@@ -3688,7 +3688,7 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
             Lexed::Exclamation(_) => 11usize,
             Lexed::Slash(_) => 12usize,
             Lexed::Dot(_) => 13usize,
-            Lexed::Dollar(_) => 14usize,
+            Lexed::At(_) => 14usize,
             Lexed::Comma(_) => 15usize,
             Lexed::Literal(_) => 16usize,
             Lexed::ParenGroup(_) => 17usize,
@@ -4878,7 +4878,7 @@ impl GrammarParser {
             "exclamation",
             "slash",
             "dot",
-            "dollar",
+            "at",
             "comma",
             "literal",
             "parengroup",
@@ -13332,7 +13332,7 @@ impl GrammarParser {
                 vec!["exclamation"],
                 vec!["slash"],
                 vec!["dot"],
-                vec!["dollar"],
+                vec!["at"],
                 vec!["comma"],
                 vec!["literal"],
                 vec!["parengroup"],
