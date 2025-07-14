@@ -35,12 +35,10 @@ Members: Member
 
 Member: WS String WS ':' Element;
 
-Array: '[' WS ']'
-     | '[' Elements ']'
+Array: '[' Elements ']'
      ;
 
-Elements: Element
-        | Element ',' Elements
+Elements: $sep(Element, ',', *)
         ;
 
 Element: WS Value WS;
