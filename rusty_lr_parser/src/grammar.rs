@@ -110,8 +110,8 @@ pub struct Grammar {
     /// class id for terminal that does not belong to any class
     pub other_terminal_class_id: ClassIndex,
 
-    /// whether the `other` terminal class is used
     pub other_used: bool,
+    pub error_used: bool,
 
     /// terminal index of eof
     pub eof_index: TerminalIndex,
@@ -364,6 +364,7 @@ impl Grammar {
             terminal_classes: Vec::new(),
             other_terminal_class_id: 0,
             other_used: false,
+            error_used: false,
 
             eof_index: 0,
             other_terminal_index: 0,
@@ -958,6 +959,9 @@ impl Grammar {
                         == Token::Term(TerminalSymbol::Term(grammar.other_terminal_index))
                     {
                         grammar.other_used = true;
+                    }
+                    if token.token == Token::Term(TerminalSymbol::Error) {
+                        grammar.error_used = true;
                     }
                 }
             }
