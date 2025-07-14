@@ -129,7 +129,7 @@ impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
 {
     fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<usize> {
         match class {
-            TerminalSymbol::Term(class) => self.shift_goto_map_class[class],
+            TerminalSymbol::Term(class) => self.shift_goto_map_class.get(class).copied().flatten(),
             TerminalSymbol::Error => self.error_shift,
         }
     }
@@ -147,8 +147,8 @@ impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
             TerminalSymbol::Term(class) => self
                 .reduce_map
                 .get(class)
-                .unwrap()
-                .as_ref()
+                .map(|r| r.as_ref())
+                .flatten()
                 .map(crate::stackvec::ToUsizeList::to_usize_list),
             TerminalSymbol::Error => self
                 .error_reduce

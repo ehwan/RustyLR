@@ -469,7 +469,14 @@ impl Grammar {
                 let rules = rules.into_iter().map(
                     move |rule| {
                         rule.map(
-                            |term| terminal_class_names[term],
+                            |term| match term {
+                                #module_prefix::TerminalSymbol::Term(term) => {
+                                    terminal_class_names[term]
+                                }
+                                #module_prefix::TerminalSymbol::Error => {
+                                    "error"
+                                }
+                            },
                             |nonterm| nonterm,
                         )
                     }
@@ -545,12 +552,6 @@ impl Grammar {
                     );
                 });
             }
-            // add `error` non-terminal
-            add_rules_stream.extend(quote! {
-                builder.add_empty_rule(
-                    #nonterminals_enum_name::error
-                );
-            });
 
             let prec_cap = self.builder.precedence_types.len();
             let mut precedence_types_stream = quote! {
@@ -618,7 +619,14 @@ impl Grammar {
                 let rules = builder.rules.into_iter().map(
                     move |rule| {
                         rule.rule.map(
-                            |term| terminal_class_names[term],
+                            |term| match term {
+                                #module_prefix::TerminalSymbol::Term(term) => {
+                                    terminal_class_names[term]
+                                }
+                                #module_prefix::TerminalSymbol::Error => {
+                                    "error"
+                                }
+                            },
                             |nonterm| nonterm,
                         )
                     }

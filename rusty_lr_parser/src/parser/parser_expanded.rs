@@ -22,7 +22,6 @@ use quote::format_ident;
 use quote::ToTokens;
 use rusty_lr_core::builder::ReduceType;
 use std::boxed::Box;
-use std::collections::BTreeMap;
 // =================================User Codes End=================================
 /*
 ====================================Grammar=====================================
@@ -37,18 +36,18 @@ RuleLines -> RuleLines pipe RuleLine
 RuleLines -> RuleLine
 RuleLine -> TokenMapped* PrecDef* Action
 PrecDef -> percent prec IdentOrLiteral
-PrecDef -> percent prec 'error'
+PrecDef -> percent prec <Error>
 PrecDef -> percent dprec literal
-PrecDef -> percent dprec 'error'
-PrecDef -> percent 'error'
+PrecDef -> percent dprec <Error>
+PrecDef -> percent <Error>
 TokenMapped -> Pattern
 TokenMapped -> ident equal Pattern
 TerminalSetItem -> ident
 TerminalSetItem -> ident minus ident
-TerminalSetItem -> ident minus 'error'
+TerminalSetItem -> ident minus <Error>
 TerminalSetItem -> literal
 TerminalSetItem -> literal minus literal
-TerminalSetItem -> literal minus 'error'
+TerminalSetItem -> literal minus <Error>
 TerminalSet -> lbracket caret? TerminalSetItem* rbracket
 TerminalSet -> dot
 Pattern -> ident
@@ -68,9 +67,9 @@ IdentOrLiteral -> literal
 RustCode -> [^semicolon]+
 Directive -> percent token ident RustCode semicolon
 Directive -> percent token ident semicolon
-Directive -> percent token 'error' semicolon
+Directive -> percent token <Error> semicolon
 Directive -> percent start ident semicolon
-Directive -> percent start 'error' semicolon
+Directive -> percent start <Error> semicolon
 Directive -> percent eofdef RustCode semicolon
 Directive -> percent eofdef semicolon
 Directive -> percent tokentype RustCode semicolon
@@ -78,32 +77,32 @@ Directive -> percent tokentype semicolon
 Directive -> percent userdata RustCode semicolon
 Directive -> percent userdata semicolon
 Directive -> percent left IdentOrLiteral+ semicolon
-Directive -> percent left 'error' semicolon
+Directive -> percent left <Error> semicolon
 Directive -> percent right IdentOrLiteral+ semicolon
-Directive -> percent right 'error' semicolon
+Directive -> percent right <Error> semicolon
 Directive -> percent precedence IdentOrLiteral+ semicolon
-Directive -> percent precedence 'error' semicolon
+Directive -> percent precedence <Error> semicolon
 Directive -> percent errortype RustCode semicolon
 Directive -> percent errortype semicolon
 Directive -> percent moduleprefix RustCode semicolon
 Directive -> percent moduleprefix semicolon
 Directive -> percent glr semicolon
-Directive -> percent glr 'error' semicolon
+Directive -> percent glr <Error> semicolon
 Directive -> percent lalr semicolon
-Directive -> percent lalr 'error' semicolon
+Directive -> percent lalr <Error> semicolon
 Directive -> percent nooptim semicolon
-Directive -> percent nooptim 'error' semicolon
+Directive -> percent nooptim <Error> semicolon
 Directive -> percent dense semicolon
-Directive -> percent dense 'error' semicolon
+Directive -> percent dense <Error> semicolon
 Directive -> percent trace ident* semicolon
-Directive -> percent trace 'error' semicolon
+Directive -> percent trace <Error> semicolon
 Directive -> percent filter RustCode semicolon
 Directive -> percent filter semicolon
 Directive -> percent runtime semicolon
-Directive -> percent runtime 'error' semicolon
+Directive -> percent runtime <Error> semicolon
 Directive -> percent location RustCode semicolon
 Directive -> percent location semicolon
-Directive -> percent 'error' semicolon
+Directive -> percent <Error> semicolon
 GrammarLine -> Rule
 TokenMapped+ -> TokenMapped
 TokenMapped+ -> TokenMapped+ TokenMapped
@@ -217,21 +216,20 @@ pub enum GrammarNonTerminals {
     Directive,
     GrammarLine,
     Grammar,
-    error,
-    _TokenMappedPlus16,
-    _TokenMappedStar17,
-    _PrecDefPlus18,
-    _PrecDefStar19,
-    _caretQuestion20,
-    _TerminalSetItemPlus21,
-    _TerminalSetItemStar22,
-    _PatternPlus23,
-    _TermSet24,
-    __TermSet24Plus25,
-    _IdentOrLiteralPlus26,
-    _identPlus27,
-    _identStar28,
-    _GrammarLinePlus29,
+    _TokenMappedPlus15,
+    _TokenMappedStar16,
+    _PrecDefPlus17,
+    _PrecDefStar18,
+    _caretQuestion19,
+    _TerminalSetItemPlus20,
+    _TerminalSetItemStar21,
+    _PatternPlus22,
+    _TermSet23,
+    __TermSet23Plus24,
+    _IdentOrLiteralPlus25,
+    _identPlus26,
+    _identStar27,
+    _GrammarLinePlus28,
     Augmented,
 }
 impl std::fmt::Display for GrammarNonTerminals {
@@ -264,21 +262,20 @@ impl ::rusty_lr_core::nonterminal::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::Directive => "Directive",
             GrammarNonTerminals::GrammarLine => "GrammarLine",
             GrammarNonTerminals::Grammar => "Grammar",
-            GrammarNonTerminals::error => "'error'",
-            GrammarNonTerminals::_TokenMappedPlus16 => "TokenMapped+",
-            GrammarNonTerminals::_TokenMappedStar17 => "TokenMapped*",
-            GrammarNonTerminals::_PrecDefPlus18 => "PrecDef+",
-            GrammarNonTerminals::_PrecDefStar19 => "PrecDef*",
-            GrammarNonTerminals::_caretQuestion20 => "caret?",
-            GrammarNonTerminals::_TerminalSetItemPlus21 => "TerminalSetItem+",
-            GrammarNonTerminals::_TerminalSetItemStar22 => "TerminalSetItem*",
-            GrammarNonTerminals::_PatternPlus23 => "Pattern+",
-            GrammarNonTerminals::_TermSet24 => "[^semicolon]",
-            GrammarNonTerminals::__TermSet24Plus25 => "[^semicolon]+",
-            GrammarNonTerminals::_IdentOrLiteralPlus26 => "IdentOrLiteral+",
-            GrammarNonTerminals::_identPlus27 => "ident+",
-            GrammarNonTerminals::_identStar28 => "ident*",
-            GrammarNonTerminals::_GrammarLinePlus29 => "GrammarLine+",
+            GrammarNonTerminals::_TokenMappedPlus15 => "TokenMapped+",
+            GrammarNonTerminals::_TokenMappedStar16 => "TokenMapped*",
+            GrammarNonTerminals::_PrecDefPlus17 => "PrecDef+",
+            GrammarNonTerminals::_PrecDefStar18 => "PrecDef*",
+            GrammarNonTerminals::_caretQuestion19 => "caret?",
+            GrammarNonTerminals::_TerminalSetItemPlus20 => "TerminalSetItem+",
+            GrammarNonTerminals::_TerminalSetItemStar21 => "TerminalSetItem*",
+            GrammarNonTerminals::_PatternPlus22 => "Pattern+",
+            GrammarNonTerminals::_TermSet23 => "[^semicolon]",
+            GrammarNonTerminals::__TermSet23Plus24 => "[^semicolon]+",
+            GrammarNonTerminals::_IdentOrLiteralPlus25 => "IdentOrLiteral+",
+            GrammarNonTerminals::_identPlus26 => "ident+",
+            GrammarNonTerminals::_identStar27 => "ident*",
+            GrammarNonTerminals::_GrammarLinePlus28 => "GrammarLine+",
             GrammarNonTerminals::Augmented => "Augmented",
         }
     }
@@ -299,21 +296,20 @@ impl ::rusty_lr_core::nonterminal::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::Directive => false,
             GrammarNonTerminals::GrammarLine => false,
             GrammarNonTerminals::Grammar => false,
-            GrammarNonTerminals::error => false,
-            GrammarNonTerminals::_TokenMappedPlus16 => false,
-            GrammarNonTerminals::_TokenMappedStar17 => false,
-            GrammarNonTerminals::_PrecDefPlus18 => false,
-            GrammarNonTerminals::_PrecDefStar19 => false,
-            GrammarNonTerminals::_caretQuestion20 => false,
-            GrammarNonTerminals::_TerminalSetItemPlus21 => false,
-            GrammarNonTerminals::_TerminalSetItemStar22 => false,
-            GrammarNonTerminals::_PatternPlus23 => false,
-            GrammarNonTerminals::_TermSet24 => false,
-            GrammarNonTerminals::__TermSet24Plus25 => false,
-            GrammarNonTerminals::_IdentOrLiteralPlus26 => false,
-            GrammarNonTerminals::_identPlus27 => false,
-            GrammarNonTerminals::_identStar28 => false,
-            GrammarNonTerminals::_GrammarLinePlus29 => false,
+            GrammarNonTerminals::_TokenMappedPlus15 => false,
+            GrammarNonTerminals::_TokenMappedStar16 => false,
+            GrammarNonTerminals::_PrecDefPlus17 => false,
+            GrammarNonTerminals::_PrecDefStar18 => false,
+            GrammarNonTerminals::_caretQuestion19 => false,
+            GrammarNonTerminals::_TerminalSetItemPlus20 => false,
+            GrammarNonTerminals::_TerminalSetItemStar21 => false,
+            GrammarNonTerminals::_PatternPlus22 => false,
+            GrammarNonTerminals::_TermSet23 => false,
+            GrammarNonTerminals::__TermSet23Plus24 => false,
+            GrammarNonTerminals::_IdentOrLiteralPlus25 => false,
+            GrammarNonTerminals::_identPlus26 => false,
+            GrammarNonTerminals::_identStar27 => false,
+            GrammarNonTerminals::_GrammarLinePlus28 => false,
             GrammarNonTerminals::Augmented => false,
         }
     }
@@ -334,49 +330,46 @@ impl ::rusty_lr_core::nonterminal::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::Directive => None,
             GrammarNonTerminals::GrammarLine => None,
             GrammarNonTerminals::Grammar => None,
-            GrammarNonTerminals::error => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::Error)
-            }
-            GrammarNonTerminals::_TokenMappedPlus16 => {
+            GrammarNonTerminals::_TokenMappedPlus15 => {
                 Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_TokenMappedStar17 => {
+            GrammarNonTerminals::_TokenMappedStar16 => {
                 Some(::rusty_lr_core::nonterminal::NonTerminalType::Star)
             }
-            GrammarNonTerminals::_PrecDefPlus18 => {
+            GrammarNonTerminals::_PrecDefPlus17 => {
                 Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_PrecDefStar19 => {
+            GrammarNonTerminals::_PrecDefStar18 => {
                 Some(::rusty_lr_core::nonterminal::NonTerminalType::Star)
             }
-            GrammarNonTerminals::_caretQuestion20 => {
+            GrammarNonTerminals::_caretQuestion19 => {
                 Some(::rusty_lr_core::nonterminal::NonTerminalType::Optional)
             }
-            GrammarNonTerminals::_TerminalSetItemPlus21 => {
+            GrammarNonTerminals::_TerminalSetItemPlus20 => {
                 Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_TerminalSetItemStar22 => {
+            GrammarNonTerminals::_TerminalSetItemStar21 => {
                 Some(::rusty_lr_core::nonterminal::NonTerminalType::Star)
             }
-            GrammarNonTerminals::_PatternPlus23 => {
+            GrammarNonTerminals::_PatternPlus22 => {
                 Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_TermSet24 => {
+            GrammarNonTerminals::_TermSet23 => {
                 Some(::rusty_lr_core::nonterminal::NonTerminalType::TerminalSet)
             }
-            GrammarNonTerminals::__TermSet24Plus25 => {
+            GrammarNonTerminals::__TermSet23Plus24 => {
                 Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_IdentOrLiteralPlus26 => {
+            GrammarNonTerminals::_IdentOrLiteralPlus25 => {
                 Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_identPlus27 => {
+            GrammarNonTerminals::_identPlus26 => {
                 Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_identStar28 => {
+            GrammarNonTerminals::_identStar27 => {
                 Some(::rusty_lr_core::nonterminal::NonTerminalType::Star)
             }
-            GrammarNonTerminals::_GrammarLinePlus29 => {
+            GrammarNonTerminals::_GrammarLinePlus28 => {
                 Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusRight)
             }
             GrammarNonTerminals::Augmented => {
@@ -620,7 +613,7 @@ impl GrammarTokenData {
             PrecDPrecArgs::Prec(IdentOrLiteral)
         }))
     }
-    #[doc = "PrecDef -> percent prec 'error'"]
+    #[doc = "PrecDef -> percent prec <Error>"]
     #[inline]
     fn reduce_PrecDef_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -639,7 +632,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         Ok(GrammarTokenData::Variant6({
             data.error_recovered.push(RecoveredError {
                 message: "Expected <ident> to token or <literal>".to_string(),
@@ -681,7 +678,7 @@ impl GrammarTokenData {
             PrecDPrecArgs::DPrec(literal)
         }))
     }
-    #[doc = "PrecDef -> percent dprec 'error'"]
+    #[doc = "PrecDef -> percent dprec <Error>"]
     #[inline]
     fn reduce_PrecDef_3(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -700,7 +697,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         Ok(GrammarTokenData::Variant6({
             data.error_recovered.push(RecoveredError {
                 message: "Expected integer literal".to_string(),
@@ -711,7 +712,7 @@ impl GrammarTokenData {
             PrecDPrecArgs::None
         }))
     }
-    #[doc = "PrecDef -> percent 'error'"]
+    #[doc = "PrecDef -> percent <Error>"]
     #[inline]
     fn reduce_PrecDef_4(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -725,7 +726,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         Ok(GrammarTokenData::Variant6({
             data.error_recovered.push(RecoveredError {
                 message: "Expected %prec or %dprec".to_string(),
@@ -838,7 +843,7 @@ impl GrammarTokenData {
             TerminalSetItem::Range(first, last)
         }))
     }
-    #[doc = "TerminalSetItem -> ident minus 'error'"]
+    #[doc = "TerminalSetItem -> ident minus <Error>"]
     #[inline]
     fn reduce_TerminalSetItem_2(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -857,7 +862,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         Ok(GrammarTokenData::Variant8({
             data.error_recovered.push(RecoveredError {
                 message: "Expected ident for terminal set".to_string(),
@@ -922,7 +931,7 @@ impl GrammarTokenData {
             TerminalSetItem::LiteralRange(first, last)
         }))
     }
-    #[doc = "TerminalSetItem -> literal minus 'error'"]
+    #[doc = "TerminalSetItem -> literal minus <Error>"]
     #[inline]
     fn reduce_TerminalSetItem_5(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -941,7 +950,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         Ok(GrammarTokenData::Variant8({
             data.error_recovered.push(RecoveredError {
                 message: "Expected literal for terminal set".to_string(),
@@ -1428,7 +1441,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent token 'error' semicolon"]
+    #[doc = "Directive -> percent token <Error> semicolon"]
     #[inline]
     fn reduce_Directive_2(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -1447,7 +1460,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -1495,7 +1512,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent start 'error' semicolon"]
+    #[doc = "Directive -> percent start <Error> semicolon"]
     #[inline]
     fn reduce_Directive_4(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -1514,7 +1531,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -1777,7 +1798,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent left 'error' semicolon"]
+    #[doc = "Directive -> percent left <Error> semicolon"]
     #[inline]
     fn reduce_Directive_12(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -1796,7 +1817,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -1850,7 +1875,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent right 'error' semicolon"]
+    #[doc = "Directive -> percent right <Error> semicolon"]
     #[inline]
     fn reduce_Directive_14(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -1869,7 +1894,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -1920,7 +1949,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent precedence 'error' semicolon"]
+    #[doc = "Directive -> percent precedence <Error> semicolon"]
     #[inline]
     fn reduce_Directive_16(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -1939,7 +1968,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -2121,7 +2154,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent glr 'error' semicolon"]
+    #[doc = "Directive -> percent glr <Error> semicolon"]
     #[inline]
     fn reduce_Directive_22(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -2140,7 +2173,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -2185,7 +2222,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent lalr 'error' semicolon"]
+    #[doc = "Directive -> percent lalr <Error> semicolon"]
     #[inline]
     fn reduce_Directive_24(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -2204,7 +2241,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -2249,7 +2290,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent nooptim 'error' semicolon"]
+    #[doc = "Directive -> percent nooptim <Error> semicolon"]
     #[inline]
     fn reduce_Directive_26(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -2268,7 +2309,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -2313,7 +2358,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent dense 'error' semicolon"]
+    #[doc = "Directive -> percent dense <Error> semicolon"]
     #[inline]
     fn reduce_Directive_28(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -2332,7 +2377,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -2388,7 +2437,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent trace 'error' semicolon"]
+    #[doc = "Directive -> percent trace <Error> semicolon"]
     #[inline]
     fn reduce_Directive_30(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -2407,7 +2456,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -2520,7 +2573,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent runtime 'error' semicolon"]
+    #[doc = "Directive -> percent runtime <Error> semicolon"]
     #[inline]
     fn reduce_Directive_34(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -2539,7 +2592,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -2624,7 +2681,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent 'error' semicolon"]
+    #[doc = "Directive -> percent <Error> semicolon"]
     #[inline]
     fn reduce_Directive_37(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -2638,7 +2695,11 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
+        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
+            __rustylr_args.pop().unwrap()
+        else {
+            unreachable!()
+        };
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -2674,7 +2735,7 @@ impl GrammarTokenData {
     }
     #[doc = "TokenMapped+ -> TokenMapped"]
     #[inline]
-    fn reduce__TokenMappedPlus16_0(
+    fn reduce__TokenMappedPlus15_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2690,7 +2751,7 @@ impl GrammarTokenData {
     }
     #[doc = "TokenMapped+ -> TokenMapped+ TokenMapped"]
     #[inline]
-    fn reduce__TokenMappedPlus16_1(
+    fn reduce__TokenMappedPlus15_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2714,7 +2775,7 @@ impl GrammarTokenData {
     }
     #[doc = "TokenMapped* -> "]
     #[inline]
-    fn reduce__TokenMappedStar17_1(
+    fn reduce__TokenMappedStar16_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2725,7 +2786,7 @@ impl GrammarTokenData {
     }
     #[doc = "PrecDef+ -> PrecDef"]
     #[inline]
-    fn reduce__PrecDefPlus18_0(
+    fn reduce__PrecDefPlus17_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2741,7 +2802,7 @@ impl GrammarTokenData {
     }
     #[doc = "PrecDef+ -> PrecDef+ PrecDef"]
     #[inline]
-    fn reduce__PrecDefPlus18_1(
+    fn reduce__PrecDefPlus17_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2765,7 +2826,7 @@ impl GrammarTokenData {
     }
     #[doc = "PrecDef* -> "]
     #[inline]
-    fn reduce__PrecDefStar19_1(
+    fn reduce__PrecDefStar18_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2776,7 +2837,7 @@ impl GrammarTokenData {
     }
     #[doc = "caret? -> caret"]
     #[inline]
-    fn reduce__caretQuestion20_0(
+    fn reduce__caretQuestion19_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2792,7 +2853,7 @@ impl GrammarTokenData {
     }
     #[doc = "caret? -> "]
     #[inline]
-    fn reduce__caretQuestion20_1(
+    fn reduce__caretQuestion19_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2803,7 +2864,7 @@ impl GrammarTokenData {
     }
     #[doc = "TerminalSetItem+ -> TerminalSetItem"]
     #[inline]
-    fn reduce__TerminalSetItemPlus21_0(
+    fn reduce__TerminalSetItemPlus20_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2819,7 +2880,7 @@ impl GrammarTokenData {
     }
     #[doc = "TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem"]
     #[inline]
-    fn reduce__TerminalSetItemPlus21_1(
+    fn reduce__TerminalSetItemPlus20_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2843,7 +2904,7 @@ impl GrammarTokenData {
     }
     #[doc = "TerminalSetItem* -> "]
     #[inline]
-    fn reduce__TerminalSetItemStar22_1(
+    fn reduce__TerminalSetItemStar21_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2854,7 +2915,7 @@ impl GrammarTokenData {
     }
     #[doc = "Pattern+ -> Pattern"]
     #[inline]
-    fn reduce__PatternPlus23_0(
+    fn reduce__PatternPlus22_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2870,7 +2931,7 @@ impl GrammarTokenData {
     }
     #[doc = "Pattern+ -> Pattern+ Pattern"]
     #[inline]
-    fn reduce__PatternPlus23_1(
+    fn reduce__PatternPlus22_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2894,7 +2955,7 @@ impl GrammarTokenData {
     }
     #[doc = "[^semicolon]+ -> [^semicolon]"]
     #[inline]
-    fn reduce___TermSet24Plus25_0(
+    fn reduce___TermSet23Plus24_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2910,7 +2971,7 @@ impl GrammarTokenData {
     }
     #[doc = "[^semicolon]+ -> [^semicolon]+ [^semicolon]"]
     #[inline]
-    fn reduce___TermSet24Plus25_1(
+    fn reduce___TermSet23Plus24_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2934,7 +2995,7 @@ impl GrammarTokenData {
     }
     #[doc = "IdentOrLiteral+ -> IdentOrLiteral"]
     #[inline]
-    fn reduce__IdentOrLiteralPlus26_0(
+    fn reduce__IdentOrLiteralPlus25_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2950,7 +3011,7 @@ impl GrammarTokenData {
     }
     #[doc = "IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral"]
     #[inline]
-    fn reduce__IdentOrLiteralPlus26_1(
+    fn reduce__IdentOrLiteralPlus25_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2974,7 +3035,7 @@ impl GrammarTokenData {
     }
     #[doc = "ident+ -> ident"]
     #[inline]
-    fn reduce__identPlus27_0(
+    fn reduce__identPlus26_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -2990,7 +3051,7 @@ impl GrammarTokenData {
     }
     #[doc = "ident+ -> ident+ ident"]
     #[inline]
-    fn reduce__identPlus27_1(
+    fn reduce__identPlus26_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -3014,7 +3075,7 @@ impl GrammarTokenData {
     }
     #[doc = "ident* -> "]
     #[inline]
-    fn reduce__identStar28_1(
+    fn reduce__identStar27_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
@@ -3224,21 +3285,21 @@ impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
             74usize => {
                 Self::reduce_GrammarLine_0(reduce_args, shift, lookahead, user_data, location0)
             }
-            75usize => Self::reduce__TokenMappedPlus16_0(
+            75usize => Self::reduce__TokenMappedPlus15_0(
                 reduce_args,
                 shift,
                 lookahead,
                 user_data,
                 location0,
             ),
-            76usize => Self::reduce__TokenMappedPlus16_1(
+            76usize => Self::reduce__TokenMappedPlus15_1(
                 reduce_args,
                 shift,
                 lookahead,
                 user_data,
                 location0,
             ),
-            77usize => Self::reduce__TokenMappedStar17_1(
+            77usize => Self::reduce__TokenMappedStar16_1(
                 reduce_args,
                 shift,
                 lookahead,
@@ -3246,35 +3307,35 @@ impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
                 location0,
             ),
             78usize => {
-                Self::reduce__PrecDefPlus18_0(reduce_args, shift, lookahead, user_data, location0)
+                Self::reduce__PrecDefPlus17_0(reduce_args, shift, lookahead, user_data, location0)
             }
             79usize => {
-                Self::reduce__PrecDefPlus18_1(reduce_args, shift, lookahead, user_data, location0)
+                Self::reduce__PrecDefPlus17_1(reduce_args, shift, lookahead, user_data, location0)
             }
             80usize => {
-                Self::reduce__PrecDefStar19_1(reduce_args, shift, lookahead, user_data, location0)
+                Self::reduce__PrecDefStar18_1(reduce_args, shift, lookahead, user_data, location0)
             }
             81usize => {
-                Self::reduce__caretQuestion20_0(reduce_args, shift, lookahead, user_data, location0)
+                Self::reduce__caretQuestion19_0(reduce_args, shift, lookahead, user_data, location0)
             }
             82usize => {
-                Self::reduce__caretQuestion20_1(reduce_args, shift, lookahead, user_data, location0)
+                Self::reduce__caretQuestion19_1(reduce_args, shift, lookahead, user_data, location0)
             }
-            83usize => Self::reduce__TerminalSetItemPlus21_0(
+            83usize => Self::reduce__TerminalSetItemPlus20_0(
                 reduce_args,
                 shift,
                 lookahead,
                 user_data,
                 location0,
             ),
-            84usize => Self::reduce__TerminalSetItemPlus21_1(
+            84usize => Self::reduce__TerminalSetItemPlus20_1(
                 reduce_args,
                 shift,
                 lookahead,
                 user_data,
                 location0,
             ),
-            85usize => Self::reduce__TerminalSetItemStar22_1(
+            85usize => Self::reduce__TerminalSetItemStar21_1(
                 reduce_args,
                 shift,
                 lookahead,
@@ -3282,33 +3343,33 @@ impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
                 location0,
             ),
             86usize => {
-                Self::reduce__PatternPlus23_0(reduce_args, shift, lookahead, user_data, location0)
+                Self::reduce__PatternPlus22_0(reduce_args, shift, lookahead, user_data, location0)
             }
             87usize => {
-                Self::reduce__PatternPlus23_1(reduce_args, shift, lookahead, user_data, location0)
+                Self::reduce__PatternPlus22_1(reduce_args, shift, lookahead, user_data, location0)
             }
-            88usize => Self::reduce___TermSet24Plus25_0(
+            88usize => Self::reduce___TermSet23Plus24_0(
                 reduce_args,
                 shift,
                 lookahead,
                 user_data,
                 location0,
             ),
-            89usize => Self::reduce___TermSet24Plus25_1(
+            89usize => Self::reduce___TermSet23Plus24_1(
                 reduce_args,
                 shift,
                 lookahead,
                 user_data,
                 location0,
             ),
-            90usize => Self::reduce__IdentOrLiteralPlus26_0(
+            90usize => Self::reduce__IdentOrLiteralPlus25_0(
                 reduce_args,
                 shift,
                 lookahead,
                 user_data,
                 location0,
             ),
-            91usize => Self::reduce__IdentOrLiteralPlus26_1(
+            91usize => Self::reduce__IdentOrLiteralPlus25_1(
                 reduce_args,
                 shift,
                 lookahead,
@@ -3316,13 +3377,13 @@ impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
                 location0,
             ),
             92usize => {
-                Self::reduce__identPlus27_0(reduce_args, shift, lookahead, user_data, location0)
+                Self::reduce__identPlus26_0(reduce_args, shift, lookahead, user_data, location0)
             }
             93usize => {
-                Self::reduce__identPlus27_1(reduce_args, shift, lookahead, user_data, location0)
+                Self::reduce__identPlus26_1(reduce_args, shift, lookahead, user_data, location0)
             }
             94usize => {
-                Self::reduce__identStar28_1(reduce_args, shift, lookahead, user_data, location0)
+                Self::reduce__identStar27_1(reduce_args, shift, lookahead, user_data, location0)
             }
             95usize..=139usize => Ok(Self::reduce_identity(reduce_args, 0usize)),
             140usize..=144usize => Ok(Self::reduce_clear(reduce_args)),
@@ -3467,17 +3528,19 @@ impl GrammarParser {
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Rule,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(0usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(0usize)),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleType),
-                    ::rusty_lr_core::Token::Term(1usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(1usize)),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLines),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::RuleType,
-                rule: vec![::rusty_lr_core::Token::Term(15usize)],
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(15usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
@@ -3489,7 +3552,7 @@ impl GrammarParser {
                 name: GrammarNonTerminals::RuleLines,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLines),
-                    ::rusty_lr_core::Token::Term(3usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(3usize)),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLine),
                 ],
                 precedence: None,
@@ -3504,8 +3567,8 @@ impl GrammarParser {
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::RuleLine,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMappedStar17),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDefStar19),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMappedStar16),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDefStar18),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Action),
                 ],
                 precedence: None,
@@ -3513,8 +3576,8 @@ impl GrammarParser {
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::PrecDef,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(32usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(32usize)),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::IdentOrLiteral),
                 ],
                 precedence: None,
@@ -3522,35 +3585,35 @@ impl GrammarParser {
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::PrecDef,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(32usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(32usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::PrecDef,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(37usize),
-                    ::rusty_lr_core::Token::Term(14usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(37usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(14usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::PrecDef,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(37usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(37usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::PrecDef,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
                 ],
                 precedence: None,
             },
@@ -3564,83 +3627,91 @@ impl GrammarParser {
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TokenMapped,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(0usize),
-                    ::rusty_lr_core::Token::Term(5usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(0usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(5usize)),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSetItem,
-                rule: vec![::rusty_lr_core::Token::Term(0usize)],
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(0usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSetItem,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(0usize),
-                    ::rusty_lr_core::Token::Term(10usize),
-                    ::rusty_lr_core::Token::Term(0usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(0usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(10usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(0usize)),
                 ],
                 precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSetItem,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(0usize),
-                    ::rusty_lr_core::Token::Term(10usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(0usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(10usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
                 ],
                 precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSetItem,
-                rule: vec![::rusty_lr_core::Token::Term(14usize)],
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(14usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSetItem,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(14usize),
-                    ::rusty_lr_core::Token::Term(10usize),
-                    ::rusty_lr_core::Token::Term(14usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(14usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(10usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(14usize)),
                 ],
                 precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSetItem,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(14usize),
-                    ::rusty_lr_core::Token::Term(10usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(14usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(10usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
                 ],
                 precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSet,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(19usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_caretQuestion20),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItemStar22),
-                    ::rusty_lr_core::Token::Term(20usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(19usize)),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_caretQuestion19),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItemStar21),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(20usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::TerminalSet,
-                rule: vec![::rusty_lr_core::Token::Term(13usize)],
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(13usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Pattern,
-                rule: vec![::rusty_lr_core::Token::Term(0usize)],
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(0usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Pattern,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(6usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(6usize)),
                 ],
                 precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(2usize)),
             },
@@ -3648,7 +3719,7 @@ impl GrammarParser {
                 name: GrammarNonTerminals::Pattern,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(7usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(7usize)),
                 ],
                 precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(2usize)),
             },
@@ -3656,7 +3727,7 @@ impl GrammarParser {
                 name: GrammarNonTerminals::Pattern,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(8usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(8usize)),
                 ],
                 precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(2usize)),
             },
@@ -3664,7 +3735,7 @@ impl GrammarParser {
                 name: GrammarNonTerminals::Pattern,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(11usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(11usize)),
                 ],
                 precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(2usize)),
             },
@@ -3679,7 +3750,7 @@ impl GrammarParser {
                 name: GrammarNonTerminals::Pattern,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(12usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(12usize)),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
                 ],
                 precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(1usize)),
@@ -3687,29 +3758,33 @@ impl GrammarParser {
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Pattern,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(17usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PatternPlus23),
-                    ::rusty_lr_core::Token::Term(18usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(17usize)),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PatternPlus22),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(18usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Pattern,
-                rule: vec![::rusty_lr_core::Token::Term(14usize)],
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(14usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Pattern,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(10usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(10usize)),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
                 ],
                 precedence: Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Action,
-                rule: vec![::rusty_lr_core::Token::Term(16usize)],
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(16usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
@@ -3719,386 +3794,390 @@ impl GrammarParser {
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::IdentOrLiteral,
-                rule: vec![::rusty_lr_core::Token::Term(0usize)],
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(0usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::IdentOrLiteral,
-                rule: vec![::rusty_lr_core::Token::Term(14usize)],
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(14usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::RustCode,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::__TermSet24Plus25,
+                    GrammarNonTerminals::__TermSet23Plus24,
                 )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(23usize),
-                    ::rusty_lr_core::Token::Term(0usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(23usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(0usize)),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(23usize),
-                    ::rusty_lr_core::Token::Term(0usize),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(23usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(0usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(23usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(23usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(24usize),
-                    ::rusty_lr_core::Token::Term(0usize),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(24usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(0usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(24usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(24usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(25usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(25usize)),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(25usize),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(25usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(26usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(26usize)),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(26usize),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(26usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(27usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(27usize)),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(27usize),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(27usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(21usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus26),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(21usize)),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus25),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(21usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(21usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(22usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus26),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(22usize)),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus25),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(22usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(22usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(33usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus26),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(33usize)),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus25),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(33usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(33usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(28usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(28usize)),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(28usize),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(28usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(29usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(29usize)),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(29usize),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(29usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(31usize),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(31usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(31usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(31usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(30usize),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(30usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(30usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(30usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(34usize),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(34usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(34usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(34usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(35usize),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(35usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(35usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(35usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(36usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_identStar28),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(36usize)),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_identStar27),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(36usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(36usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(38usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(38usize)),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(38usize),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(38usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(39usize),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(39usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(39usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(39usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(40usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(40usize)),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::Term(40usize),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(40usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Directive,
                 rule: vec![
-                    ::rusty_lr_core::Token::Term(4usize),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::error),
-                    ::rusty_lr_core::Token::Term(2usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4usize)),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Error),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2usize)),
                 ],
                 precedence: None,
             },
@@ -4108,368 +4187,454 @@ impl GrammarParser {
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TokenMappedPlus16,
+                name: GrammarNonTerminals::_TokenMappedPlus15,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::TokenMapped,
                 )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TokenMappedPlus16,
+                name: GrammarNonTerminals::_TokenMappedPlus15,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMappedPlus16),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMappedPlus15),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TokenMapped),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TokenMappedStar17,
+                name: GrammarNonTerminals::_TokenMappedStar16,
                 rule: vec![],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_PrecDefPlus18,
+                name: GrammarNonTerminals::_PrecDefPlus17,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::PrecDef,
                 )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_PrecDefPlus18,
+                name: GrammarNonTerminals::_PrecDefPlus17,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDefPlus18),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDefPlus17),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::PrecDef),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_PrecDefStar19,
+                name: GrammarNonTerminals::_PrecDefStar18,
                 rule: vec![],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_caretQuestion20,
-                rule: vec![::rusty_lr_core::Token::Term(9usize)],
+                name: GrammarNonTerminals::_caretQuestion19,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(9usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_caretQuestion20,
+                name: GrammarNonTerminals::_caretQuestion19,
                 rule: vec![],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TerminalSetItemPlus21,
+                name: GrammarNonTerminals::_TerminalSetItemPlus20,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::TerminalSetItem,
                 )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TerminalSetItemPlus21,
+                name: GrammarNonTerminals::_TerminalSetItemPlus20,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItemPlus21),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItemPlus20),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalSetItem),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TerminalSetItemStar22,
+                name: GrammarNonTerminals::_TerminalSetItemStar21,
                 rule: vec![],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_PatternPlus23,
+                name: GrammarNonTerminals::_PatternPlus22,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::Pattern,
                 )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_PatternPlus23,
+                name: GrammarNonTerminals::_PatternPlus22,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PatternPlus23),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PatternPlus22),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::__TermSet24Plus25,
+                name: GrammarNonTerminals::__TermSet23Plus24,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_TermSet24,
+                    GrammarNonTerminals::_TermSet23,
                 )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::__TermSet24Plus25,
+                name: GrammarNonTerminals::__TermSet23Plus24,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet24Plus25),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TermSet24),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet23Plus24),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TermSet23),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_IdentOrLiteralPlus26,
+                name: GrammarNonTerminals::_IdentOrLiteralPlus25,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::IdentOrLiteral,
                 )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_IdentOrLiteralPlus26,
+                name: GrammarNonTerminals::_IdentOrLiteralPlus25,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus26),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus25),
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::IdentOrLiteral),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_identPlus27,
-                rule: vec![::rusty_lr_core::Token::Term(0usize)],
+                name: GrammarNonTerminals::_identPlus26,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(0usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_identPlus27,
+                name: GrammarNonTerminals::_identPlus26,
                 rule: vec![
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_identPlus27),
-                    ::rusty_lr_core::Token::Term(0usize),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_identPlus26),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(0usize)),
                 ],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_identStar28,
+                name: GrammarNonTerminals::_identStar27,
                 rule: vec![],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TokenMappedStar17,
+                name: GrammarNonTerminals::_TokenMappedStar16,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_TokenMappedPlus16,
+                    GrammarNonTerminals::_TokenMappedPlus15,
                 )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_PrecDefStar19,
+                name: GrammarNonTerminals::_PrecDefStar18,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_PrecDefPlus18,
+                    GrammarNonTerminals::_PrecDefPlus17,
                 )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TerminalSetItemStar22,
+                name: GrammarNonTerminals::_TerminalSetItemStar21,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_TerminalSetItemPlus21,
+                    GrammarNonTerminals::_TerminalSetItemPlus20,
                 )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(0usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(0usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(1usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(1usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(3usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(3usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(4usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(4usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(5usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(5usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(6usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(6usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(7usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(7usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(8usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(8usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(9usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(9usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(10usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(10usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(11usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(11usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(12usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(12usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(13usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(13usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(14usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(14usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(15usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(15usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(16usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(16usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(17usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(17usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(18usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(18usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(19usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(19usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(20usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(20usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(21usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(21usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(22usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(22usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(23usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(23usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(24usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(24usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(25usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(25usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(26usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(26usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(27usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(27usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(28usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(28usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(29usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(29usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(30usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(30usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(31usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(31usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(32usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(32usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(33usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(33usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(34usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(34usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(35usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(35usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(36usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(36usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(37usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(37usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(38usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(38usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(39usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(39usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(40usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(40usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_TermSet24,
-                rule: vec![::rusty_lr_core::Token::Term(42usize)],
+                name: GrammarNonTerminals::_TermSet23,
+                rule: vec![::rusty_lr_core::Token::Term(
+                    ::rusty_lr_core::TerminalSymbol::Term(42usize),
+                )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_identStar28,
+                name: GrammarNonTerminals::_identStar27,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_identPlus27,
+                    GrammarNonTerminals::_identPlus26,
                 )],
                 precedence: None,
             },
@@ -4483,22 +4648,22 @@ impl GrammarParser {
             ::rusty_lr_core::rule::ProductionRule {
                 name: GrammarNonTerminals::Grammar,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
-                    GrammarNonTerminals::_GrammarLinePlus29,
+                    GrammarNonTerminals::_GrammarLinePlus28,
                 )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_GrammarLinePlus29,
+                name: GrammarNonTerminals::_GrammarLinePlus28,
                 rule: vec![::rusty_lr_core::Token::NonTerm(
                     GrammarNonTerminals::GrammarLine,
                 )],
                 precedence: None,
             },
             ::rusty_lr_core::rule::ProductionRule {
-                name: GrammarNonTerminals::_GrammarLinePlus29,
+                name: GrammarNonTerminals::_GrammarLinePlus28,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::GrammarLine),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_GrammarLinePlus29),
+                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_GrammarLinePlus28),
                 ],
                 precedence: None,
             },
@@ -4506,7 +4671,7 @@ impl GrammarParser {
                 name: GrammarNonTerminals::Augmented,
                 rule: vec![
                     ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
-                    ::rusty_lr_core::Token::Term(41usize),
+                    ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(41usize)),
                 ],
                 precedence: None,
             },
@@ -4558,201 +4723,203 @@ impl GrammarParser {
         ];
         let rules = rules
             .into_iter()
-            .map(move |rule| rule.map(|term| terminal_class_names[term], |nonterm| nonterm))
+            .map(move |rule| {
+                rule.map(
+                    |term| match term {
+                        ::rusty_lr_core::TerminalSymbol::Term(term) => terminal_class_names[term],
+                        ::rusty_lr_core::TerminalSymbol::Error => "error",
+                    },
+                    |nonterm| nonterm,
+                )
+            })
             .collect();
-        let __rustylr_uset39 = std::collections::BTreeSet::from([0usize]);
-        let __rustylr_uset70 = std::collections::BTreeSet::from([
-            0usize, 1usize, 2usize, 3usize, 4usize, 5usize, 6usize, 7usize, 8usize, 9usize,
-            10usize, 11usize, 12usize, 13usize, 14usize, 15usize, 16usize, 17usize, 18usize,
-            19usize, 20usize, 21usize, 22usize, 23usize, 24usize, 25usize, 26usize, 27usize,
-            28usize, 29usize, 30usize, 31usize, 32usize, 33usize, 34usize, 35usize, 36usize,
-            37usize, 38usize, 39usize, 40usize, 42usize,
+        let __rustylr_tset15 = std::collections::BTreeSet::from([
+            ::rusty_lr_core::TerminalSymbol::Term(0usize),
+            ::rusty_lr_core::TerminalSymbol::Term(1usize),
+            ::rusty_lr_core::TerminalSymbol::Term(2usize),
+            ::rusty_lr_core::TerminalSymbol::Term(3usize),
+            ::rusty_lr_core::TerminalSymbol::Term(4usize),
+            ::rusty_lr_core::TerminalSymbol::Term(5usize),
+            ::rusty_lr_core::TerminalSymbol::Term(6usize),
+            ::rusty_lr_core::TerminalSymbol::Term(7usize),
+            ::rusty_lr_core::TerminalSymbol::Term(8usize),
+            ::rusty_lr_core::TerminalSymbol::Term(9usize),
+            ::rusty_lr_core::TerminalSymbol::Term(10usize),
+            ::rusty_lr_core::TerminalSymbol::Term(11usize),
+            ::rusty_lr_core::TerminalSymbol::Term(12usize),
+            ::rusty_lr_core::TerminalSymbol::Term(13usize),
+            ::rusty_lr_core::TerminalSymbol::Term(14usize),
+            ::rusty_lr_core::TerminalSymbol::Term(15usize),
+            ::rusty_lr_core::TerminalSymbol::Term(16usize),
+            ::rusty_lr_core::TerminalSymbol::Term(17usize),
+            ::rusty_lr_core::TerminalSymbol::Term(18usize),
+            ::rusty_lr_core::TerminalSymbol::Term(19usize),
+            ::rusty_lr_core::TerminalSymbol::Term(20usize),
+            ::rusty_lr_core::TerminalSymbol::Term(21usize),
+            ::rusty_lr_core::TerminalSymbol::Term(22usize),
+            ::rusty_lr_core::TerminalSymbol::Term(23usize),
+            ::rusty_lr_core::TerminalSymbol::Term(24usize),
+            ::rusty_lr_core::TerminalSymbol::Term(25usize),
+            ::rusty_lr_core::TerminalSymbol::Term(26usize),
+            ::rusty_lr_core::TerminalSymbol::Term(27usize),
+            ::rusty_lr_core::TerminalSymbol::Term(28usize),
+            ::rusty_lr_core::TerminalSymbol::Term(29usize),
+            ::rusty_lr_core::TerminalSymbol::Term(30usize),
+            ::rusty_lr_core::TerminalSymbol::Term(31usize),
+            ::rusty_lr_core::TerminalSymbol::Term(32usize),
+            ::rusty_lr_core::TerminalSymbol::Term(33usize),
+            ::rusty_lr_core::TerminalSymbol::Term(34usize),
+            ::rusty_lr_core::TerminalSymbol::Term(35usize),
+            ::rusty_lr_core::TerminalSymbol::Term(36usize),
+            ::rusty_lr_core::TerminalSymbol::Term(37usize),
+            ::rusty_lr_core::TerminalSymbol::Term(38usize),
+            ::rusty_lr_core::TerminalSymbol::Term(39usize),
+            ::rusty_lr_core::TerminalSymbol::Term(40usize),
+            ::rusty_lr_core::TerminalSymbol::Term(42usize),
         ]);
-        let __rustylr_uset141 = std::collections::BTreeSet::from([0usize, 2usize]);
-        let __rustylr_uset6 = std::collections::BTreeSet::from([
-            0usize, 2usize, 3usize, 4usize, 6usize, 7usize, 8usize, 10usize, 11usize, 12usize,
-            13usize, 14usize, 16usize, 17usize, 18usize, 19usize,
+        let __rustylr_tset17 = std::collections::BTreeSet::from([
+            ::rusty_lr_core::TerminalSymbol::Term(0usize),
+            ::rusty_lr_core::TerminalSymbol::Term(2usize),
         ]);
-        let __rustylr_uset4 = std::collections::BTreeSet::from([
-            0usize, 2usize, 3usize, 4usize, 6usize, 7usize, 8usize, 10usize, 11usize, 12usize,
-            13usize, 14usize, 16usize, 17usize, 19usize,
+        let __rustylr_tset3 = std::collections::BTreeSet::from([
+            ::rusty_lr_core::TerminalSymbol::Term(0usize),
+            ::rusty_lr_core::TerminalSymbol::Term(2usize),
+            ::rusty_lr_core::TerminalSymbol::Term(3usize),
+            ::rusty_lr_core::TerminalSymbol::Term(4usize),
+            ::rusty_lr_core::TerminalSymbol::Term(6usize),
+            ::rusty_lr_core::TerminalSymbol::Term(7usize),
+            ::rusty_lr_core::TerminalSymbol::Term(8usize),
+            ::rusty_lr_core::TerminalSymbol::Term(10usize),
+            ::rusty_lr_core::TerminalSymbol::Term(11usize),
+            ::rusty_lr_core::TerminalSymbol::Term(12usize),
+            ::rusty_lr_core::TerminalSymbol::Term(13usize),
+            ::rusty_lr_core::TerminalSymbol::Term(14usize),
+            ::rusty_lr_core::TerminalSymbol::Term(16usize),
+            ::rusty_lr_core::TerminalSymbol::Term(17usize),
+            ::rusty_lr_core::TerminalSymbol::Term(18usize),
+            ::rusty_lr_core::TerminalSymbol::Term(19usize),
         ]);
-        let __rustylr_uset32 = std::collections::BTreeSet::from([
-            0usize, 2usize, 3usize, 4usize, 10usize, 12usize, 13usize, 14usize, 16usize, 17usize,
-            18usize, 19usize,
+        let __rustylr_tset2 = std::collections::BTreeSet::from([
+            ::rusty_lr_core::TerminalSymbol::Term(0usize),
+            ::rusty_lr_core::TerminalSymbol::Term(2usize),
+            ::rusty_lr_core::TerminalSymbol::Term(3usize),
+            ::rusty_lr_core::TerminalSymbol::Term(4usize),
+            ::rusty_lr_core::TerminalSymbol::Term(6usize),
+            ::rusty_lr_core::TerminalSymbol::Term(7usize),
+            ::rusty_lr_core::TerminalSymbol::Term(8usize),
+            ::rusty_lr_core::TerminalSymbol::Term(10usize),
+            ::rusty_lr_core::TerminalSymbol::Term(11usize),
+            ::rusty_lr_core::TerminalSymbol::Term(12usize),
+            ::rusty_lr_core::TerminalSymbol::Term(13usize),
+            ::rusty_lr_core::TerminalSymbol::Term(14usize),
+            ::rusty_lr_core::TerminalSymbol::Term(16usize),
+            ::rusty_lr_core::TerminalSymbol::Term(17usize),
+            ::rusty_lr_core::TerminalSymbol::Term(19usize),
         ]);
-        let __rustylr_uset29 = std::collections::BTreeSet::from([
-            0usize, 2usize, 3usize, 4usize, 10usize, 13usize, 14usize, 16usize, 17usize, 18usize,
-            19usize,
+        let __rustylr_tset8 = std::collections::BTreeSet::from([
+            ::rusty_lr_core::TerminalSymbol::Term(0usize),
+            ::rusty_lr_core::TerminalSymbol::Term(2usize),
+            ::rusty_lr_core::TerminalSymbol::Term(3usize),
+            ::rusty_lr_core::TerminalSymbol::Term(4usize),
+            ::rusty_lr_core::TerminalSymbol::Term(10usize),
+            ::rusty_lr_core::TerminalSymbol::Term(12usize),
+            ::rusty_lr_core::TerminalSymbol::Term(13usize),
+            ::rusty_lr_core::TerminalSymbol::Term(14usize),
+            ::rusty_lr_core::TerminalSymbol::Term(16usize),
+            ::rusty_lr_core::TerminalSymbol::Term(17usize),
+            ::rusty_lr_core::TerminalSymbol::Term(18usize),
+            ::rusty_lr_core::TerminalSymbol::Term(19usize),
         ]);
-        let __rustylr_uset36 = std::collections::BTreeSet::from([
-            0usize, 2usize, 3usize, 4usize, 13usize, 14usize, 16usize, 17usize, 19usize,
+        let __rustylr_tset7 = std::collections::BTreeSet::from([
+            ::rusty_lr_core::TerminalSymbol::Term(0usize),
+            ::rusty_lr_core::TerminalSymbol::Term(2usize),
+            ::rusty_lr_core::TerminalSymbol::Term(3usize),
+            ::rusty_lr_core::TerminalSymbol::Term(4usize),
+            ::rusty_lr_core::TerminalSymbol::Term(10usize),
+            ::rusty_lr_core::TerminalSymbol::Term(13usize),
+            ::rusty_lr_core::TerminalSymbol::Term(14usize),
+            ::rusty_lr_core::TerminalSymbol::Term(16usize),
+            ::rusty_lr_core::TerminalSymbol::Term(17usize),
+            ::rusty_lr_core::TerminalSymbol::Term(18usize),
+            ::rusty_lr_core::TerminalSymbol::Term(19usize),
         ]);
-        let __rustylr_uset48 =
-            std::collections::BTreeSet::from([0usize, 2usize, 3usize, 4usize, 14usize, 16usize]);
-        let __rustylr_uset63 = std::collections::BTreeSet::from([0usize, 2usize, 14usize]);
-        let __rustylr_uset38 = std::collections::BTreeSet::from([0usize, 4usize, 41usize]);
-        let __rustylr_uset24 =
-            std::collections::BTreeSet::from([0usize, 13usize, 14usize, 17usize, 18usize, 19usize]);
-        let __rustylr_uset9 = std::collections::BTreeSet::from([0usize, 14usize, 20usize]);
-        let __rustylr_uset0 = std::collections::BTreeSet::from([1usize]);
-        let __rustylr_uset1 = std::collections::BTreeSet::from([2usize]);
-        let __rustylr_uset40 = std::collections::BTreeSet::from([2usize, 3usize]);
-        let __rustylr_uset2 = std::collections::BTreeSet::from([2usize, 3usize, 4usize, 16usize]);
-        let __rustylr_uset46 = std::collections::BTreeSet::from([2usize, 3usize, 16usize]);
-        let __rustylr_uset41 = std::collections::BTreeSet::from([3usize]);
-        let __rustylr_uset62 = std::collections::BTreeSet::from([4usize]);
-        let __rustylr_uset61 = std::collections::BTreeSet::from([5usize]);
-        let __rustylr_uset51 = std::collections::BTreeSet::from([6usize]);
-        let __rustylr_uset52 = std::collections::BTreeSet::from([7usize]);
-        let __rustylr_uset53 = std::collections::BTreeSet::from([8usize]);
-        let __rustylr_uset54 = std::collections::BTreeSet::from([9usize]);
-        let __rustylr_uset55 = std::collections::BTreeSet::from([10usize]);
-        let __rustylr_uset43 = std::collections::BTreeSet::from([11usize]);
-        let __rustylr_uset37 = std::collections::BTreeSet::from([12usize]);
-        let __rustylr_uset13 = std::collections::BTreeSet::from([13usize]);
-        let __rustylr_uset14 = std::collections::BTreeSet::from([14usize]);
-        let __rustylr_uset15 = std::collections::BTreeSet::from([15usize]);
-        let __rustylr_uset16 = std::collections::BTreeSet::from([16usize]);
-        let __rustylr_uset17 = std::collections::BTreeSet::from([17usize]);
-        let __rustylr_uset18 = std::collections::BTreeSet::from([18usize]);
-        let __rustylr_uset22 = std::collections::BTreeSet::from([19usize]);
-        let __rustylr_uset7 = std::collections::BTreeSet::from([20usize]);
-        let __rustylr_uset5 = std::collections::BTreeSet::from([21usize]);
-        let __rustylr_uset26 = std::collections::BTreeSet::from([22usize]);
-        let __rustylr_uset27 = std::collections::BTreeSet::from([23usize]);
-        let __rustylr_uset28 = std::collections::BTreeSet::from([24usize]);
-        let __rustylr_uset31 = std::collections::BTreeSet::from([25usize]);
-        let __rustylr_uset23 = std::collections::BTreeSet::from([26usize]);
-        let __rustylr_uset33 = std::collections::BTreeSet::from([27usize]);
-        let __rustylr_uset34 = std::collections::BTreeSet::from([28usize]);
-        let __rustylr_uset8 = std::collections::BTreeSet::from([29usize]);
-        let __rustylr_uset30 = std::collections::BTreeSet::from([30usize]);
-        let __rustylr_uset60 = std::collections::BTreeSet::from([31usize]);
-        let __rustylr_uset59 = std::collections::BTreeSet::from([32usize]);
-        let __rustylr_uset49 = std::collections::BTreeSet::from([33usize]);
-        let __rustylr_uset50 = std::collections::BTreeSet::from([34usize]);
-        let __rustylr_uset115 = std::collections::BTreeSet::from([35usize]);
-        let __rustylr_uset113 = std::collections::BTreeSet::from([36usize]);
-        let __rustylr_uset73 = std::collections::BTreeSet::from([37usize]);
-        let __rustylr_uset117 = std::collections::BTreeSet::from([38usize]);
-        let __rustylr_uset118 = std::collections::BTreeSet::from([39usize]);
-        let __rustylr_uset119 = std::collections::BTreeSet::from([40usize]);
-        let __rustylr_uset121 = std::collections::BTreeSet::from([41usize]);
-        let __rustylr_uset120 = std::collections::BTreeSet::from([42usize]);
-        let __rustylr_uset123 = std::collections::BTreeSet::from([43usize]);
-        let __rustylr_uset122 = std::collections::BTreeSet::from([44usize]);
-        let __rustylr_uset125 = std::collections::BTreeSet::from([45usize]);
-        let __rustylr_uset124 = std::collections::BTreeSet::from([46usize]);
-        let __rustylr_uset66 = std::collections::BTreeSet::from([47usize]);
-        let __rustylr_uset65 = std::collections::BTreeSet::from([48usize]);
-        let __rustylr_uset69 = std::collections::BTreeSet::from([49usize]);
-        let __rustylr_uset68 = std::collections::BTreeSet::from([50usize]);
-        let __rustylr_uset135 = std::collections::BTreeSet::from([51usize]);
-        let __rustylr_uset134 = std::collections::BTreeSet::from([52usize]);
-        let __rustylr_uset127 = std::collections::BTreeSet::from([53usize]);
-        let __rustylr_uset126 = std::collections::BTreeSet::from([54usize]);
-        let __rustylr_uset129 = std::collections::BTreeSet::from([55usize]);
-        let __rustylr_uset128 = std::collections::BTreeSet::from([56usize]);
-        let __rustylr_uset132 = std::collections::BTreeSet::from([57usize]);
-        let __rustylr_uset133 = std::collections::BTreeSet::from([58usize]);
-        let __rustylr_uset130 = std::collections::BTreeSet::from([59usize]);
-        let __rustylr_uset131 = std::collections::BTreeSet::from([60usize]);
-        let __rustylr_uset136 = std::collections::BTreeSet::from([61usize]);
-        let __rustylr_uset137 = std::collections::BTreeSet::from([62usize]);
-        let __rustylr_uset138 = std::collections::BTreeSet::from([63usize]);
-        let __rustylr_uset139 = std::collections::BTreeSet::from([64usize]);
-        let __rustylr_uset146 = std::collections::BTreeSet::from([65usize]);
-        let __rustylr_uset143 = std::collections::BTreeSet::from([66usize]);
-        let __rustylr_uset148 = std::collections::BTreeSet::from([67usize]);
-        let __rustylr_uset147 = std::collections::BTreeSet::from([68usize]);
-        let __rustylr_uset149 = std::collections::BTreeSet::from([69usize]);
-        let __rustylr_uset150 = std::collections::BTreeSet::from([70usize]);
-        let __rustylr_uset152 = std::collections::BTreeSet::from([71usize]);
-        let __rustylr_uset151 = std::collections::BTreeSet::from([72usize]);
-        let __rustylr_uset153 = std::collections::BTreeSet::from([73usize]);
-        let __rustylr_uset154 = std::collections::BTreeSet::from([74usize]);
-        let __rustylr_uset42 = std::collections::BTreeSet::from([75usize]);
-        let __rustylr_uset45 = std::collections::BTreeSet::from([76usize]);
-        let __rustylr_uset3 = std::collections::BTreeSet::from([77usize]);
-        let __rustylr_uset56 = std::collections::BTreeSet::from([78usize]);
-        let __rustylr_uset58 = std::collections::BTreeSet::from([79usize]);
-        let __rustylr_uset47 = std::collections::BTreeSet::from([80usize]);
-        let __rustylr_uset11 = std::collections::BTreeSet::from([81usize]);
-        let __rustylr_uset10 = std::collections::BTreeSet::from([82usize]);
-        let __rustylr_uset19 = std::collections::BTreeSet::from([83usize]);
-        let __rustylr_uset21 = std::collections::BTreeSet::from([84usize]);
-        let __rustylr_uset12 = std::collections::BTreeSet::from([85usize]);
-        let __rustylr_uset25 = std::collections::BTreeSet::from([86usize]);
-        let __rustylr_uset35 = std::collections::BTreeSet::from([87usize]);
-        let __rustylr_uset114 = std::collections::BTreeSet::from([88usize]);
-        let __rustylr_uset116 = std::collections::BTreeSet::from([89usize]);
-        let __rustylr_uset64 = std::collections::BTreeSet::from([90usize]);
-        let __rustylr_uset67 = std::collections::BTreeSet::from([91usize]);
-        let __rustylr_uset142 = std::collections::BTreeSet::from([92usize]);
-        let __rustylr_uset145 = std::collections::BTreeSet::from([93usize]);
-        let __rustylr_uset140 = std::collections::BTreeSet::from([94usize]);
-        let __rustylr_uset44 = std::collections::BTreeSet::from([95usize]);
-        let __rustylr_uset57 = std::collections::BTreeSet::from([96usize]);
-        let __rustylr_uset20 = std::collections::BTreeSet::from([97usize]);
-        let __rustylr_uset71 = std::collections::BTreeSet::from([98usize]);
-        let __rustylr_uset72 = std::collections::BTreeSet::from([99usize]);
-        let __rustylr_uset74 = std::collections::BTreeSet::from([100usize]);
-        let __rustylr_uset75 = std::collections::BTreeSet::from([101usize]);
-        let __rustylr_uset76 = std::collections::BTreeSet::from([102usize]);
-        let __rustylr_uset77 = std::collections::BTreeSet::from([103usize]);
-        let __rustylr_uset78 = std::collections::BTreeSet::from([104usize]);
-        let __rustylr_uset79 = std::collections::BTreeSet::from([105usize]);
-        let __rustylr_uset80 = std::collections::BTreeSet::from([106usize]);
-        let __rustylr_uset81 = std::collections::BTreeSet::from([107usize]);
-        let __rustylr_uset82 = std::collections::BTreeSet::from([108usize]);
-        let __rustylr_uset83 = std::collections::BTreeSet::from([109usize]);
-        let __rustylr_uset84 = std::collections::BTreeSet::from([110usize]);
-        let __rustylr_uset85 = std::collections::BTreeSet::from([111usize]);
-        let __rustylr_uset86 = std::collections::BTreeSet::from([112usize]);
-        let __rustylr_uset87 = std::collections::BTreeSet::from([113usize]);
-        let __rustylr_uset88 = std::collections::BTreeSet::from([114usize]);
-        let __rustylr_uset89 = std::collections::BTreeSet::from([115usize]);
-        let __rustylr_uset90 = std::collections::BTreeSet::from([116usize]);
-        let __rustylr_uset91 = std::collections::BTreeSet::from([117usize]);
-        let __rustylr_uset92 = std::collections::BTreeSet::from([118usize]);
-        let __rustylr_uset93 = std::collections::BTreeSet::from([119usize]);
-        let __rustylr_uset94 = std::collections::BTreeSet::from([120usize]);
-        let __rustylr_uset95 = std::collections::BTreeSet::from([121usize]);
-        let __rustylr_uset96 = std::collections::BTreeSet::from([122usize]);
-        let __rustylr_uset97 = std::collections::BTreeSet::from([123usize]);
-        let __rustylr_uset98 = std::collections::BTreeSet::from([124usize]);
-        let __rustylr_uset99 = std::collections::BTreeSet::from([125usize]);
-        let __rustylr_uset100 = std::collections::BTreeSet::from([126usize]);
-        let __rustylr_uset101 = std::collections::BTreeSet::from([127usize]);
-        let __rustylr_uset102 = std::collections::BTreeSet::from([128usize]);
-        let __rustylr_uset103 = std::collections::BTreeSet::from([129usize]);
-        let __rustylr_uset104 = std::collections::BTreeSet::from([130usize]);
-        let __rustylr_uset105 = std::collections::BTreeSet::from([131usize]);
-        let __rustylr_uset106 = std::collections::BTreeSet::from([132usize]);
-        let __rustylr_uset107 = std::collections::BTreeSet::from([133usize]);
-        let __rustylr_uset108 = std::collections::BTreeSet::from([134usize]);
-        let __rustylr_uset109 = std::collections::BTreeSet::from([135usize]);
-        let __rustylr_uset110 = std::collections::BTreeSet::from([136usize]);
-        let __rustylr_uset111 = std::collections::BTreeSet::from([137usize]);
-        let __rustylr_uset112 = std::collections::BTreeSet::from([138usize]);
-        let __rustylr_uset144 = std::collections::BTreeSet::from([139usize]);
-        let __rustylr_uset155 = std::collections::BTreeSet::from([140usize]);
-        let __rustylr_uset158 = std::collections::BTreeSet::from([141usize]);
-        let __rustylr_uset156 = std::collections::BTreeSet::from([142usize]);
-        let __rustylr_uset157 = std::collections::BTreeSet::from([143usize]);
+        let __rustylr_tset9 = std::collections::BTreeSet::from([
+            ::rusty_lr_core::TerminalSymbol::Term(0usize),
+            ::rusty_lr_core::TerminalSymbol::Term(2usize),
+            ::rusty_lr_core::TerminalSymbol::Term(3usize),
+            ::rusty_lr_core::TerminalSymbol::Term(4usize),
+            ::rusty_lr_core::TerminalSymbol::Term(13usize),
+            ::rusty_lr_core::TerminalSymbol::Term(14usize),
+            ::rusty_lr_core::TerminalSymbol::Term(16usize),
+            ::rusty_lr_core::TerminalSymbol::Term(17usize),
+            ::rusty_lr_core::TerminalSymbol::Term(19usize),
+        ]);
+        let __rustylr_tset13 = std::collections::BTreeSet::from([
+            ::rusty_lr_core::TerminalSymbol::Term(0usize),
+            ::rusty_lr_core::TerminalSymbol::Term(2usize),
+            ::rusty_lr_core::TerminalSymbol::Term(3usize),
+            ::rusty_lr_core::TerminalSymbol::Term(4usize),
+            ::rusty_lr_core::TerminalSymbol::Term(14usize),
+            ::rusty_lr_core::TerminalSymbol::Term(16usize),
+        ]);
+        let __rustylr_tset14 = std::collections::BTreeSet::from([
+            ::rusty_lr_core::TerminalSymbol::Term(0usize),
+            ::rusty_lr_core::TerminalSymbol::Term(2usize),
+            ::rusty_lr_core::TerminalSymbol::Term(14usize),
+        ]);
+        let __rustylr_tset10 = std::collections::BTreeSet::from([
+            ::rusty_lr_core::TerminalSymbol::Term(0usize),
+            ::rusty_lr_core::TerminalSymbol::Term(4usize),
+            ::rusty_lr_core::TerminalSymbol::Term(41usize),
+        ]);
+        let __rustylr_tset6 = std::collections::BTreeSet::from([
+            ::rusty_lr_core::TerminalSymbol::Term(0usize),
+            ::rusty_lr_core::TerminalSymbol::Term(13usize),
+            ::rusty_lr_core::TerminalSymbol::Term(14usize),
+            ::rusty_lr_core::TerminalSymbol::Term(17usize),
+            ::rusty_lr_core::TerminalSymbol::Term(18usize),
+            ::rusty_lr_core::TerminalSymbol::Term(19usize),
+        ]);
+        let __rustylr_tset4 = std::collections::BTreeSet::from([
+            ::rusty_lr_core::TerminalSymbol::Term(0usize),
+            ::rusty_lr_core::TerminalSymbol::Term(14usize),
+            ::rusty_lr_core::TerminalSymbol::Term(20usize),
+        ]);
+        let __rustylr_tset0 =
+            std::collections::BTreeSet::from([::rusty_lr_core::TerminalSymbol::Term(1usize)]);
+        let __rustylr_tset16 =
+            std::collections::BTreeSet::from([::rusty_lr_core::TerminalSymbol::Term(2usize)]);
+        let __rustylr_tset11 = std::collections::BTreeSet::from([
+            ::rusty_lr_core::TerminalSymbol::Term(2usize),
+            ::rusty_lr_core::TerminalSymbol::Term(3usize),
+        ]);
+        let __rustylr_tset1 = std::collections::BTreeSet::from([
+            ::rusty_lr_core::TerminalSymbol::Term(2usize),
+            ::rusty_lr_core::TerminalSymbol::Term(3usize),
+            ::rusty_lr_core::TerminalSymbol::Term(4usize),
+            ::rusty_lr_core::TerminalSymbol::Term(16usize),
+        ]);
+        let __rustylr_tset12 = std::collections::BTreeSet::from([
+            ::rusty_lr_core::TerminalSymbol::Term(2usize),
+            ::rusty_lr_core::TerminalSymbol::Term(3usize),
+            ::rusty_lr_core::TerminalSymbol::Term(16usize),
+        ]);
+        let __rustylr_tset5 =
+            std::collections::BTreeSet::from([::rusty_lr_core::TerminalSymbol::Term(20usize)]);
+        let __rustylr_tset18 =
+            std::collections::BTreeSet::from([::rusty_lr_core::TerminalSymbol::Term(41usize)]);
         let states = vec![
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 1usize),
-                    (4usize, 67usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 1usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 67usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::Rule, 199usize),
                     (GrammarNonTerminals::Directive, 200usize),
                     (GrammarNonTerminals::GrammarLine, 201usize),
                     (GrammarNonTerminals::Grammar, 203usize),
-                    (GrammarNonTerminals::_GrammarLinePlus29, 205usize),
+                    (GrammarNonTerminals::_GrammarLinePlus28, 205usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -4942,17 +5109,21 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(15usize, 2usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(15usize),
+                    2usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::RuleType,
                     3usize,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([2usize]);
                     __reduce_map.extend(
-                        __rustylr_uset0
+                        __rustylr_tset0
                             .iter()
-                            .map(|term| (*term, __rustylr_uset1.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -4976,10 +5147,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([1usize]);
                     __reduce_map.extend(
-                        __rustylr_uset0
+                        __rustylr_tset0
                             .iter()
-                            .map(|term| (*term, __rustylr_uset0.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -4991,7 +5163,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(1usize, 4usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(1usize),
+                    4usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -5006,11 +5181,11 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 5usize),
-                    (13usize, 8usize),
-                    (14usize, 9usize),
-                    (17usize, 10usize),
-                    (19usize, 11usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 5usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 10usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 11usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::RuleLines, 41usize),
@@ -5018,15 +5193,16 @@ impl GrammarParser {
                     (GrammarNonTerminals::TokenMapped, 45usize),
                     (GrammarNonTerminals::TerminalSet, 27usize),
                     (GrammarNonTerminals::Pattern, 46usize),
-                    (GrammarNonTerminals::_TokenMappedPlus16, 47usize),
-                    (GrammarNonTerminals::_TokenMappedStar17, 49usize),
+                    (GrammarNonTerminals::_TokenMappedPlus15, 47usize),
+                    (GrammarNonTerminals::_TokenMappedStar16, 49usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([77usize]);
                     __reduce_map.extend(
-                        __rustylr_uset2
+                        __rustylr_tset1
                             .iter()
-                            .map(|term| (*term, __rustylr_uset3.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5122,14 +5298,18 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(5usize, 6usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(5usize),
+                    6usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([21usize]);
                     __reduce_map.extend(
-                        __rustylr_uset4
+                        __rustylr_tset2
                             .iter()
-                            .map(|term| (*term, __rustylr_uset5.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5146,11 +5326,11 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 7usize),
-                    (13usize, 8usize),
-                    (14usize, 9usize),
-                    (17usize, 10usize),
-                    (19usize, 11usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 10usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 11usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::TerminalSet, 27usize),
@@ -5220,10 +5400,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([21usize]);
                     __reduce_map.extend(
-                        __rustylr_uset6
+                        __rustylr_tset3
                             .iter()
-                            .map(|term| (*term, __rustylr_uset5.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5239,10 +5420,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([20usize]);
                     __reduce_map.extend(
-                        __rustylr_uset6
+                        __rustylr_tset3
                             .iter()
-                            .map(|term| (*term, __rustylr_uset7.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5258,10 +5440,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([29usize]);
                     __reduce_map.extend(
-                        __rustylr_uset6
+                        __rustylr_tset3
                             .iter()
-                            .map(|term| (*term, __rustylr_uset8.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5274,16 +5457,16 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 7usize),
-                    (13usize, 8usize),
-                    (14usize, 9usize),
-                    (17usize, 10usize),
-                    (19usize, 11usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 10usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 11usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::TerminalSet, 27usize),
                     (GrammarNonTerminals::Pattern, 28usize),
-                    (GrammarNonTerminals::_PatternPlus23, 37usize),
+                    (GrammarNonTerminals::_PatternPlus22, 37usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -5353,17 +5536,21 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(9usize, 12usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(9usize),
+                    12usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::_caretQuestion20,
+                    GrammarNonTerminals::_caretQuestion19,
                     13usize,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([82usize]);
                     __reduce_map.extend(
-                        __rustylr_uset9
+                        __rustylr_tset4
                             .iter()
-                            .map(|term| (*term, __rustylr_uset10.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5387,10 +5574,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([81usize]);
                     __reduce_map.extend(
-                        __rustylr_uset9
+                        __rustylr_tset4
                             .iter()
-                            .map(|term| (*term, __rustylr_uset11.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5403,20 +5591,21 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 14usize),
-                    (14usize, 18usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 14usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 18usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::TerminalSetItem, 22usize),
-                    (GrammarNonTerminals::_TerminalSetItemPlus21, 23usize),
-                    (GrammarNonTerminals::_TerminalSetItemStar22, 25usize),
+                    (GrammarNonTerminals::_TerminalSetItemPlus20, 23usize),
+                    (GrammarNonTerminals::_TerminalSetItemStar21, 25usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([85usize]);
                     __reduce_map.extend(
-                        __rustylr_uset7
+                        __rustylr_tset5
                             .iter()
-                            .map(|term| (*term, __rustylr_uset12.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5468,14 +5657,18 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(10usize, 15usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(10usize),
+                    15usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([13usize]);
                     __reduce_map.extend(
-                        __rustylr_uset9
+                        __rustylr_tset4
                             .iter()
-                            .map(|term| (*term, __rustylr_uset13.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5495,73 +5688,79 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(0usize, 16usize)]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::error,
-                    17usize,
+                shift_goto_map_term: std::collections::BTreeMap::from([
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 16usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 17usize),
+                ]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: {
+                    let mut __reduce_map = std::collections::BTreeMap::new();
+                    __reduce_map
+                },
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 14usize,
+                        shifted: 2usize,
+                    },
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 15usize,
+                        shifted: 2usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: {
+                    let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([14usize]);
+                    __reduce_map.extend(
+                        __rustylr_tset4
+                            .iter()
+                            .map(|term| (*term, reduce_rules.clone())),
+                    );
+                    __reduce_map
+                },
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 14usize,
+                        shifted: 3usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: {
+                    let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([15usize]);
+                    __reduce_map.extend(
+                        __rustylr_tset4
+                            .iter()
+                            .map(|term| (*term, reduce_rules.clone())),
+                    );
+                    __reduce_map
+                },
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 15usize,
+                        shifted: 3usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(10usize),
+                    19usize,
                 )]),
-                reduce_map: {
-                    let mut __reduce_map = std::collections::BTreeMap::new();
-                    __reduce_map
-                },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 14usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 15usize,
-                        shifted: 2usize,
-                    },
-                ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([16usize]);
                     __reduce_map.extend(
-                        __rustylr_uset9
+                        __rustylr_tset4
                             .iter()
-                            .map(|term| (*term, __rustylr_uset14.clone())),
-                    );
-                    __reduce_map
-                },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 14usize,
-                        shifted: 3usize,
-                    },
-                ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: {
-                    let mut __reduce_map = std::collections::BTreeMap::new();
-                    __reduce_map.extend(
-                        __rustylr_uset9
-                            .iter()
-                            .map(|term| (*term, __rustylr_uset15.clone())),
-                    );
-                    __reduce_map
-                },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 15usize,
-                        shifted: 3usize,
-                    },
-                ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(10usize, 19usize)]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: {
-                    let mut __reduce_map = std::collections::BTreeMap::new();
-                    __reduce_map.extend(
-                        __rustylr_uset9
-                            .iter()
-                            .map(|term| (*term, __rustylr_uset16.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5581,11 +5780,11 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(14usize, 20usize)]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::error,
-                    21usize,
-                )]),
+                shift_goto_map_term: std::collections::BTreeMap::from([
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 20usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 21usize),
+                ]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
@@ -5606,10 +5805,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([17usize]);
                     __reduce_map.extend(
-                        __rustylr_uset9
+                        __rustylr_tset4
                             .iter()
-                            .map(|term| (*term, __rustylr_uset17.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5625,10 +5825,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([18usize]);
                     __reduce_map.extend(
-                        __rustylr_uset9
+                        __rustylr_tset4
                             .iter()
-                            .map(|term| (*term, __rustylr_uset18.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5644,10 +5845,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([83usize]);
                     __reduce_map.extend(
-                        __rustylr_uset9
+                        __rustylr_tset4
                             .iter()
-                            .map(|term| (*term, __rustylr_uset19.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5660,8 +5862,8 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 14usize),
-                    (14usize, 18usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 14usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 18usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::TerminalSetItem,
@@ -5669,10 +5871,11 @@ impl GrammarParser {
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([97usize]);
                     __reduce_map.extend(
-                        __rustylr_uset7
+                        __rustylr_tset5
                             .iter()
-                            .map(|term| (*term, __rustylr_uset20.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5716,10 +5919,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([84usize]);
                     __reduce_map.extend(
-                        __rustylr_uset9
+                        __rustylr_tset4
                             .iter()
-                            .map(|term| (*term, __rustylr_uset21.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5731,7 +5935,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(20usize, 26usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(20usize),
+                    26usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -5749,10 +5956,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([19usize]);
                     __reduce_map.extend(
-                        __rustylr_uset6
+                        __rustylr_tset3
                             .iter()
-                            .map(|term| (*term, __rustylr_uset22.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5768,10 +5976,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([26usize]);
                     __reduce_map.extend(
-                        __rustylr_uset6
+                        __rustylr_tset3
                             .iter()
-                            .map(|term| (*term, __rustylr_uset23.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5784,20 +5993,21 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (6usize, 29usize),
-                    (7usize, 30usize),
-                    (8usize, 31usize),
-                    (10usize, 32usize),
-                    (11usize, 34usize),
-                    (12usize, 35usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 29usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 30usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 31usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 32usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 34usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 35usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([86usize]);
                     __reduce_map.extend(
-                        __rustylr_uset24
+                        __rustylr_tset6
                             .iter()
-                            .map(|term| (*term, __rustylr_uset25.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5837,10 +6047,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([22usize]);
                     __reduce_map.extend(
-                        __rustylr_uset6
+                        __rustylr_tset3
                             .iter()
-                            .map(|term| (*term, __rustylr_uset26.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5856,10 +6067,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([23usize]);
                     __reduce_map.extend(
-                        __rustylr_uset6
+                        __rustylr_tset3
                             .iter()
-                            .map(|term| (*term, __rustylr_uset27.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5875,10 +6087,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([24usize]);
                     __reduce_map.extend(
-                        __rustylr_uset6
+                        __rustylr_tset3
                             .iter()
-                            .map(|term| (*term, __rustylr_uset28.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -5891,11 +6104,11 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 7usize),
-                    (13usize, 8usize),
-                    (14usize, 9usize),
-                    (17usize, 10usize),
-                    (19usize, 11usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 10usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 11usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::TerminalSet, 27usize),
@@ -5962,19 +6175,20 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (6usize, 29usize),
-                    (7usize, 30usize),
-                    (8usize, 31usize),
-                    (11usize, 34usize),
-                    (12usize, 35usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 29usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 30usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 31usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 34usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 35usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([30usize]);
                     __reduce_map.extend(
-                        __rustylr_uset29
+                        __rustylr_tset7
                             .iter()
-                            .map(|term| (*term, __rustylr_uset30.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6010,10 +6224,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([25usize]);
                     __reduce_map.extend(
-                        __rustylr_uset6
+                        __rustylr_tset3
                             .iter()
-                            .map(|term| (*term, __rustylr_uset31.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6026,11 +6241,11 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 7usize),
-                    (13usize, 8usize),
-                    (14usize, 9usize),
-                    (17usize, 10usize),
-                    (19usize, 11usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 10usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 11usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::TerminalSet, 27usize),
@@ -6097,18 +6312,19 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (6usize, 29usize),
-                    (7usize, 30usize),
-                    (8usize, 31usize),
-                    (11usize, 34usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 29usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 30usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 31usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 34usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([27usize]);
                     __reduce_map.extend(
-                        __rustylr_uset32
+                        __rustylr_tset8
                             .iter()
-                            .map(|term| (*term, __rustylr_uset33.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6137,12 +6353,12 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 7usize),
-                    (13usize, 8usize),
-                    (14usize, 9usize),
-                    (17usize, 10usize),
-                    (18usize, 38usize),
-                    (19usize, 11usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 10usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 38usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 11usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::TerminalSet, 27usize),
@@ -6216,10 +6432,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([28usize]);
                     __reduce_map.extend(
-                        __rustylr_uset6
+                        __rustylr_tset3
                             .iter()
-                            .map(|term| (*term, __rustylr_uset34.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6232,20 +6449,21 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (6usize, 29usize),
-                    (7usize, 30usize),
-                    (8usize, 31usize),
-                    (10usize, 32usize),
-                    (11usize, 34usize),
-                    (12usize, 35usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 29usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 30usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 31usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 32usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 34usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 35usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([87usize]);
                     __reduce_map.extend(
-                        __rustylr_uset24
+                        __rustylr_tset6
                             .iter()
-                            .map(|term| (*term, __rustylr_uset35.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6282,20 +6500,21 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (6usize, 29usize),
-                    (7usize, 30usize),
-                    (8usize, 31usize),
-                    (10usize, 32usize),
-                    (11usize, 34usize),
-                    (12usize, 35usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 29usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 30usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 31usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 32usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 34usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 35usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([12usize]);
                     __reduce_map.extend(
-                        __rustylr_uset36
+                        __rustylr_tset9
                             .iter()
-                            .map(|term| (*term, __rustylr_uset37.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6332,8 +6551,8 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (2usize, 42usize),
-                    (3usize, 43usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 42usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 43usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -6356,10 +6575,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([0usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset39.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6372,26 +6592,27 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 5usize),
-                    (13usize, 8usize),
-                    (14usize, 9usize),
-                    (17usize, 10usize),
-                    (19usize, 11usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 5usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 10usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 11usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::RuleLine, 44usize),
                     (GrammarNonTerminals::TokenMapped, 45usize),
                     (GrammarNonTerminals::TerminalSet, 27usize),
                     (GrammarNonTerminals::Pattern, 46usize),
-                    (GrammarNonTerminals::_TokenMappedPlus16, 47usize),
-                    (GrammarNonTerminals::_TokenMappedStar17, 49usize),
+                    (GrammarNonTerminals::_TokenMappedPlus15, 47usize),
+                    (GrammarNonTerminals::_TokenMappedStar16, 49usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([77usize]);
                     __reduce_map.extend(
-                        __rustylr_uset2
+                        __rustylr_tset1
                             .iter()
-                            .map(|term| (*term, __rustylr_uset3.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6483,10 +6704,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([3usize]);
                     __reduce_map.extend(
-                        __rustylr_uset40
+                        __rustylr_tset11
                             .iter()
-                            .map(|term| (*term, __rustylr_uset41.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6502,10 +6724,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([75usize]);
                     __reduce_map.extend(
-                        __rustylr_uset36
+                        __rustylr_tset9
                             .iter()
-                            .map(|term| (*term, __rustylr_uset42.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6518,20 +6741,21 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (6usize, 29usize),
-                    (7usize, 30usize),
-                    (8usize, 31usize),
-                    (10usize, 32usize),
-                    (11usize, 34usize),
-                    (12usize, 35usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 29usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 30usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 31usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 32usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 34usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 35usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([11usize]);
                     __reduce_map.extend(
-                        __rustylr_uset36
+                        __rustylr_tset9
                             .iter()
-                            .map(|term| (*term, __rustylr_uset43.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6568,11 +6792,11 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 5usize),
-                    (13usize, 8usize),
-                    (14usize, 9usize),
-                    (17usize, 10usize),
-                    (19usize, 11usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 5usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 10usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 11usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::TokenMapped, 48usize),
@@ -6581,10 +6805,11 @@ impl GrammarParser {
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([95usize]);
                     __reduce_map.extend(
-                        __rustylr_uset2
+                        __rustylr_tset1
                             .iter()
-                            .map(|term| (*term, __rustylr_uset44.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6660,10 +6885,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([76usize]);
                     __reduce_map.extend(
-                        __rustylr_uset36
+                        __rustylr_tset9
                             .iter()
-                            .map(|term| (*term, __rustylr_uset45.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6675,18 +6901,22 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(4usize, 50usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(4usize),
+                    50usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::PrecDef, 60usize),
-                    (GrammarNonTerminals::_PrecDefPlus18, 61usize),
-                    (GrammarNonTerminals::_PrecDefStar19, 63usize),
+                    (GrammarNonTerminals::_PrecDefPlus17, 61usize),
+                    (GrammarNonTerminals::_PrecDefStar18, 63usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([80usize]);
                     __reduce_map.extend(
-                        __rustylr_uset46
+                        __rustylr_tset12
                             .iter()
-                            .map(|term| (*term, __rustylr_uset47.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6735,13 +6965,11 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (32usize, 51usize),
-                    (37usize, 56usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 51usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 56usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 59usize),
                 ]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::error,
-                    59usize,
-                )]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
@@ -6771,117 +6999,13 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 52usize),
-                    (14usize, 53usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 52usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 53usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 54usize),
                 ]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::IdentOrLiteral, 54usize),
-                    (GrammarNonTerminals::error, 55usize),
-                ]),
-                reduce_map: {
-                    let mut __reduce_map = std::collections::BTreeMap::new();
-                    __reduce_map
-                },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 6usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 7usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 0usize,
-                    },
-                ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: {
-                    let mut __reduce_map = std::collections::BTreeMap::new();
-                    __reduce_map.extend(
-                        __rustylr_uset48
-                            .iter()
-                            .map(|term| (*term, __rustylr_uset49.clone())),
-                    );
-                    __reduce_map
-                },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 1usize,
-                    },
-                ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: {
-                    let mut __reduce_map = std::collections::BTreeMap::new();
-                    __reduce_map.extend(
-                        __rustylr_uset48
-                            .iter()
-                            .map(|term| (*term, __rustylr_uset50.clone())),
-                    );
-                    __reduce_map
-                },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 1usize,
-                    },
-                ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: {
-                    let mut __reduce_map = std::collections::BTreeMap::new();
-                    __reduce_map.extend(
-                        __rustylr_uset2
-                            .iter()
-                            .map(|term| (*term, __rustylr_uset51.clone())),
-                    );
-                    __reduce_map
-                },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 6usize,
-                        shifted: 3usize,
-                    },
-                ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: {
-                    let mut __reduce_map = std::collections::BTreeMap::new();
-                    __reduce_map.extend(
-                        __rustylr_uset2
-                            .iter()
-                            .map(|term| (*term, __rustylr_uset52.clone())),
-                    );
-                    __reduce_map
-                },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 7usize,
-                        shifted: 3usize,
-                    },
-                ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(14usize, 57usize)]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::error,
-                    58usize,
+                    GrammarNonTerminals::IdentOrLiteral,
+                    55usize,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -6889,6 +7013,115 @@ impl GrammarParser {
                 },
                 ruleset: std::collections::BTreeSet::from([
                     ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 6usize,
+                        shifted: 2usize,
+                    },
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 7usize,
+                        shifted: 2usize,
+                    },
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 33usize,
+                        shifted: 0usize,
+                    },
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 34usize,
+                        shifted: 0usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: {
+                    let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([33usize]);
+                    __reduce_map.extend(
+                        __rustylr_tset13
+                            .iter()
+                            .map(|term| (*term, reduce_rules.clone())),
+                    );
+                    __reduce_map
+                },
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 33usize,
+                        shifted: 1usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: {
+                    let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([34usize]);
+                    __reduce_map.extend(
+                        __rustylr_tset13
+                            .iter()
+                            .map(|term| (*term, reduce_rules.clone())),
+                    );
+                    __reduce_map
+                },
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 34usize,
+                        shifted: 1usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: {
+                    let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([7usize]);
+                    __reduce_map.extend(
+                        __rustylr_tset1
+                            .iter()
+                            .map(|term| (*term, reduce_rules.clone())),
+                    );
+                    __reduce_map
+                },
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 7usize,
+                        shifted: 3usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: {
+                    let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([6usize]);
+                    __reduce_map.extend(
+                        __rustylr_tset1
+                            .iter()
+                            .map(|term| (*term, reduce_rules.clone())),
+                    );
+                    __reduce_map
+                },
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 6usize,
+                        shifted: 3usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 57usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 58usize),
+                ]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: {
+                    let mut __reduce_map = std::collections::BTreeMap::new();
+                    __reduce_map
+                },
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
                         rule: 8usize,
                         shifted: 2usize,
                     },
@@ -6903,10 +7136,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([8usize]);
                     __reduce_map.extend(
-                        __rustylr_uset2
+                        __rustylr_tset1
                             .iter()
-                            .map(|term| (*term, __rustylr_uset53.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6922,10 +7156,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([9usize]);
                     __reduce_map.extend(
-                        __rustylr_uset2
+                        __rustylr_tset1
                             .iter()
-                            .map(|term| (*term, __rustylr_uset54.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6941,10 +7176,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([10usize]);
                     __reduce_map.extend(
-                        __rustylr_uset2
+                        __rustylr_tset1
                             .iter()
-                            .map(|term| (*term, __rustylr_uset55.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6960,10 +7196,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([78usize]);
                     __reduce_map.extend(
-                        __rustylr_uset2
+                        __rustylr_tset1
                             .iter()
-                            .map(|term| (*term, __rustylr_uset56.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -6975,17 +7212,21 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(4usize, 50usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(4usize),
+                    50usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::PrecDef,
                     62usize,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([96usize]);
                     __reduce_map.extend(
-                        __rustylr_uset46
+                        __rustylr_tset12
                             .iter()
-                            .map(|term| (*term, __rustylr_uset57.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7025,10 +7266,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([79usize]);
                     __reduce_map.extend(
-                        __rustylr_uset2
+                        __rustylr_tset1
                             .iter()
-                            .map(|term| (*term, __rustylr_uset58.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7040,17 +7282,21 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(16usize, 64usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(16usize),
+                    64usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::Action,
                     65usize,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([32usize]);
                     __reduce_map.extend(
-                        __rustylr_uset40
+                        __rustylr_tset11
                             .iter()
-                            .map(|term| (*term, __rustylr_uset59.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7074,10 +7320,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([31usize]);
                     __reduce_map.extend(
-                        __rustylr_uset40
+                        __rustylr_tset11
                             .iter()
-                            .map(|term| (*term, __rustylr_uset60.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7093,10 +7340,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([5usize]);
                     __reduce_map.extend(
-                        __rustylr_uset40
+                        __rustylr_tset11
                             .iter()
-                            .map(|term| (*term, __rustylr_uset61.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7112,10 +7360,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([4usize]);
                     __reduce_map.extend(
-                        __rustylr_uset40
+                        __rustylr_tset11
                             .iter()
-                            .map(|term| (*term, __rustylr_uset62.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7128,29 +7377,27 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (21usize, 68usize),
-                    (22usize, 75usize),
-                    (23usize, 80usize),
-                    (24usize, 131usize),
-                    (25usize, 136usize),
-                    (26usize, 140usize),
-                    (27usize, 144usize),
-                    (28usize, 148usize),
-                    (29usize, 152usize),
-                    (30usize, 156usize),
-                    (31usize, 160usize),
-                    (33usize, 164usize),
-                    (34usize, 169usize),
-                    (35usize, 173usize),
-                    (36usize, 177usize),
-                    (38usize, 185usize),
-                    (39usize, 189usize),
-                    (40usize, 193usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 68usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 75usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 80usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 131usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 136usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 140usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 144usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 148usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 152usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 156usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 160usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 164usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 169usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 173usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 177usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 185usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 189usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 193usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 197usize),
                 ]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::error,
-                    197usize,
-                )]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
@@ -7312,13 +7559,13 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 52usize),
-                    (14usize, 53usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 52usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 53usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 69usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::IdentOrLiteral, 69usize),
-                    (GrammarNonTerminals::error, 70usize),
-                    (GrammarNonTerminals::_IdentOrLiteralPlus26, 72usize),
+                    (GrammarNonTerminals::IdentOrLiteral, 71usize),
+                    (GrammarNonTerminals::_IdentOrLiteralPlus25, 72usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -7352,26 +7599,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: {
-                    let mut __reduce_map = std::collections::BTreeMap::new();
-                    __reduce_map.extend(
-                        __rustylr_uset63
-                            .iter()
-                            .map(|term| (*term, __rustylr_uset64.clone())),
-                    );
-                    __reduce_map
-                },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 90usize,
-                        shifted: 1usize,
-                    },
-                ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 71usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    70usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -7389,10 +7620,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([48usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset65.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7404,10 +7636,30 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: {
+                    let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([90usize]);
+                    __reduce_map.extend(
+                        __rustylr_tset14
+                            .iter()
+                            .map(|term| (*term, reduce_rules.clone())),
+                    );
+                    __reduce_map
+                },
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 90usize,
+                        shifted: 1usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 52usize),
-                    (2usize, 73usize),
-                    (14usize, 53usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 52usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 73usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 53usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::IdentOrLiteral,
@@ -7441,10 +7693,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([47usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset66.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7460,10 +7713,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([91usize]);
                     __reduce_map.extend(
-                        __rustylr_uset63
+                        __rustylr_tset14
                             .iter()
-                            .map(|term| (*term, __rustylr_uset67.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7476,13 +7730,13 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 52usize),
-                    (14usize, 53usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 52usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 53usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 76usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::IdentOrLiteral, 69usize),
-                    (GrammarNonTerminals::error, 76usize),
-                    (GrammarNonTerminals::_IdentOrLiteralPlus26, 78usize),
+                    (GrammarNonTerminals::IdentOrLiteral, 71usize),
+                    (GrammarNonTerminals::_IdentOrLiteralPlus25, 78usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -7516,7 +7770,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 77usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    77usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -7534,10 +7791,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([50usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset68.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7550,9 +7808,9 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 52usize),
-                    (2usize, 79usize),
-                    (14usize, 53usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 52usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 79usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 53usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::IdentOrLiteral,
@@ -7586,10 +7844,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([49usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset69.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7601,11 +7860,11 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(0usize, 81usize)]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::error,
-                    129usize,
-                )]),
+                shift_goto_map_term: std::collections::BTreeMap::from([
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 81usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 129usize),
+                ]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
@@ -7627,53 +7886,53 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 82usize),
-                    (1usize, 83usize),
-                    (2usize, 84usize),
-                    (3usize, 85usize),
-                    (4usize, 86usize),
-                    (5usize, 87usize),
-                    (6usize, 88usize),
-                    (7usize, 89usize),
-                    (8usize, 90usize),
-                    (9usize, 91usize),
-                    (10usize, 92usize),
-                    (11usize, 93usize),
-                    (12usize, 94usize),
-                    (13usize, 95usize),
-                    (14usize, 96usize),
-                    (15usize, 97usize),
-                    (16usize, 98usize),
-                    (17usize, 99usize),
-                    (18usize, 100usize),
-                    (19usize, 101usize),
-                    (20usize, 102usize),
-                    (21usize, 103usize),
-                    (22usize, 104usize),
-                    (23usize, 105usize),
-                    (24usize, 106usize),
-                    (25usize, 107usize),
-                    (26usize, 108usize),
-                    (27usize, 109usize),
-                    (28usize, 110usize),
-                    (29usize, 111usize),
-                    (30usize, 112usize),
-                    (31usize, 113usize),
-                    (32usize, 114usize),
-                    (33usize, 115usize),
-                    (34usize, 116usize),
-                    (35usize, 117usize),
-                    (36usize, 118usize),
-                    (37usize, 119usize),
-                    (38usize, 120usize),
-                    (39usize, 121usize),
-                    (40usize, 122usize),
-                    (42usize, 123usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 82usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 83usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 84usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 85usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 86usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 87usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 88usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 89usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 90usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 91usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 92usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 93usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 94usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 95usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 96usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 97usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 98usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 99usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 100usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 101usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 102usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 103usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 104usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 105usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 106usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 107usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 108usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 109usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 110usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 111usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 112usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 113usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 114usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 115usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 116usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 117usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 118usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 119usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 120usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 121usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 122usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 123usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::RustCode, 124usize),
-                    (GrammarNonTerminals::_TermSet24, 126usize),
-                    (GrammarNonTerminals::__TermSet24Plus25, 127usize),
+                    (GrammarNonTerminals::_TermSet23, 126usize),
+                    (GrammarNonTerminals::__TermSet23Plus24, 127usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -7871,10 +8130,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([98usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset71.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7890,10 +8150,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([99usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset72.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7909,10 +8170,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([37usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset73.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7928,10 +8190,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([100usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset74.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7947,10 +8210,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([101usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset75.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7966,10 +8230,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([102usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset76.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -7985,10 +8250,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([103usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset77.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8004,10 +8270,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([104usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset78.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8023,10 +8290,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([105usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset79.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8042,10 +8310,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([106usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset80.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8061,10 +8330,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([107usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset81.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8080,10 +8350,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([108usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset82.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8099,10 +8370,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([109usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset83.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8118,10 +8390,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([110usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset84.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8137,10 +8410,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([111usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset85.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8156,10 +8430,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([112usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset86.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8175,10 +8450,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([113usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset87.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8194,10 +8470,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([114usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset88.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8213,10 +8490,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([115usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset89.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8232,10 +8510,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([116usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset90.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8251,10 +8530,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([117usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset91.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8270,10 +8550,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([118usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset92.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8289,10 +8570,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([119usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset93.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8308,10 +8590,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([120usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset94.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8327,10 +8610,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([121usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset95.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8346,10 +8630,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([122usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset96.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8365,10 +8650,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([123usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset97.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8384,10 +8670,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([124usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset98.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8403,10 +8690,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([125usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset99.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8422,10 +8710,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([126usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset100.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8441,10 +8730,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([127usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset101.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8460,10 +8750,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([128usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset102.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8479,10 +8770,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([129usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset103.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8498,10 +8790,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([130usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset104.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8517,10 +8810,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([131usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset105.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8536,10 +8830,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([132usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset106.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8555,10 +8850,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([133usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset107.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8574,10 +8870,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([134usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset108.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8593,10 +8890,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([135usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset109.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8612,10 +8910,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([136usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset110.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8631,10 +8930,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([137usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset111.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8650,10 +8950,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([138usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset112.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8665,7 +8966,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 125usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    125usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -8683,10 +8987,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([36usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset113.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8702,10 +9007,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([88usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset114.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8718,58 +9024,59 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 82usize),
-                    (1usize, 83usize),
-                    (3usize, 85usize),
-                    (4usize, 86usize),
-                    (5usize, 87usize),
-                    (6usize, 88usize),
-                    (7usize, 89usize),
-                    (8usize, 90usize),
-                    (9usize, 91usize),
-                    (10usize, 92usize),
-                    (11usize, 93usize),
-                    (12usize, 94usize),
-                    (13usize, 95usize),
-                    (14usize, 96usize),
-                    (15usize, 97usize),
-                    (16usize, 98usize),
-                    (17usize, 99usize),
-                    (18usize, 100usize),
-                    (19usize, 101usize),
-                    (20usize, 102usize),
-                    (21usize, 103usize),
-                    (22usize, 104usize),
-                    (23usize, 105usize),
-                    (24usize, 106usize),
-                    (25usize, 107usize),
-                    (26usize, 108usize),
-                    (27usize, 109usize),
-                    (28usize, 110usize),
-                    (29usize, 111usize),
-                    (30usize, 112usize),
-                    (31usize, 113usize),
-                    (32usize, 114usize),
-                    (33usize, 115usize),
-                    (34usize, 116usize),
-                    (35usize, 117usize),
-                    (36usize, 118usize),
-                    (37usize, 119usize),
-                    (38usize, 120usize),
-                    (39usize, 121usize),
-                    (40usize, 122usize),
-                    (42usize, 123usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 82usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 83usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 85usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 86usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 87usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 88usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 89usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 90usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 91usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 92usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 93usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 94usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 95usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 96usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 97usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 98usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 99usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 100usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 101usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 102usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 103usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 104usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 105usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 106usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 107usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 108usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 109usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 110usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 111usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 112usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 113usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 114usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 115usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 116usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 117usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 118usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 119usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 120usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 121usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 122usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 123usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::_TermSet24,
+                    GrammarNonTerminals::_TermSet23,
                     128usize,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([35usize]);
                     __reduce_map.extend(
-                        __rustylr_uset1
+                        __rustylr_tset16
                             .iter()
-                            .map(|term| (*term, __rustylr_uset115.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8953,10 +9260,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([89usize]);
                     __reduce_map.extend(
-                        __rustylr_uset70
+                        __rustylr_tset15
                             .iter()
-                            .map(|term| (*term, __rustylr_uset116.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -8968,44 +9276,48 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 130usize)]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: {
-                    let mut __reduce_map = std::collections::BTreeMap::new();
-                    __reduce_map
-                },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 38usize,
-                        shifted: 3usize,
-                    },
-                ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: {
-                    let mut __reduce_map = std::collections::BTreeMap::new();
-                    __reduce_map.extend(
-                        __rustylr_uset38
-                            .iter()
-                            .map(|term| (*term, __rustylr_uset117.clone())),
-                    );
-                    __reduce_map
-                },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 38usize,
-                        shifted: 4usize,
-                    },
-                ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(0usize, 132usize)]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::error,
-                    134usize,
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    130usize,
                 )]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: {
+                    let mut __reduce_map = std::collections::BTreeMap::new();
+                    __reduce_map
+                },
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 38usize,
+                        shifted: 3usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: {
+                    let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([38usize]);
+                    __reduce_map.extend(
+                        __rustylr_tset10
+                            .iter()
+                            .map(|term| (*term, reduce_rules.clone())),
+                    );
+                    __reduce_map
+                },
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 38usize,
+                        shifted: 4usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 132usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 134usize),
+                ]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
@@ -9022,7 +9334,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 133usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    133usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -9040,10 +9355,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([39usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset118.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -9055,7 +9371,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 135usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    135usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -9073,10 +9392,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([40usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset119.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -9089,53 +9409,53 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 82usize),
-                    (1usize, 83usize),
-                    (2usize, 137usize),
-                    (3usize, 85usize),
-                    (4usize, 86usize),
-                    (5usize, 87usize),
-                    (6usize, 88usize),
-                    (7usize, 89usize),
-                    (8usize, 90usize),
-                    (9usize, 91usize),
-                    (10usize, 92usize),
-                    (11usize, 93usize),
-                    (12usize, 94usize),
-                    (13usize, 95usize),
-                    (14usize, 96usize),
-                    (15usize, 97usize),
-                    (16usize, 98usize),
-                    (17usize, 99usize),
-                    (18usize, 100usize),
-                    (19usize, 101usize),
-                    (20usize, 102usize),
-                    (21usize, 103usize),
-                    (22usize, 104usize),
-                    (23usize, 105usize),
-                    (24usize, 106usize),
-                    (25usize, 107usize),
-                    (26usize, 108usize),
-                    (27usize, 109usize),
-                    (28usize, 110usize),
-                    (29usize, 111usize),
-                    (30usize, 112usize),
-                    (31usize, 113usize),
-                    (32usize, 114usize),
-                    (33usize, 115usize),
-                    (34usize, 116usize),
-                    (35usize, 117usize),
-                    (36usize, 118usize),
-                    (37usize, 119usize),
-                    (38usize, 120usize),
-                    (39usize, 121usize),
-                    (40usize, 122usize),
-                    (42usize, 123usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 82usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 83usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 137usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 85usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 86usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 87usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 88usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 89usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 90usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 91usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 92usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 93usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 94usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 95usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 96usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 97usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 98usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 99usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 100usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 101usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 102usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 103usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 104usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 105usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 106usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 107usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 108usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 109usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 110usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 111usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 112usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 113usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 114usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 115usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 116usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 117usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 118usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 119usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 120usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 121usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 122usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 123usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::RustCode, 138usize),
-                    (GrammarNonTerminals::_TermSet24, 126usize),
-                    (GrammarNonTerminals::__TermSet24Plus25, 127usize),
+                    (GrammarNonTerminals::_TermSet23, 126usize),
+                    (GrammarNonTerminals::__TermSet23Plus24, 127usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -9333,10 +9653,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([42usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset120.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -9348,7 +9669,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 139usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    139usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -9366,10 +9690,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([41usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset121.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -9382,53 +9707,53 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 82usize),
-                    (1usize, 83usize),
-                    (2usize, 141usize),
-                    (3usize, 85usize),
-                    (4usize, 86usize),
-                    (5usize, 87usize),
-                    (6usize, 88usize),
-                    (7usize, 89usize),
-                    (8usize, 90usize),
-                    (9usize, 91usize),
-                    (10usize, 92usize),
-                    (11usize, 93usize),
-                    (12usize, 94usize),
-                    (13usize, 95usize),
-                    (14usize, 96usize),
-                    (15usize, 97usize),
-                    (16usize, 98usize),
-                    (17usize, 99usize),
-                    (18usize, 100usize),
-                    (19usize, 101usize),
-                    (20usize, 102usize),
-                    (21usize, 103usize),
-                    (22usize, 104usize),
-                    (23usize, 105usize),
-                    (24usize, 106usize),
-                    (25usize, 107usize),
-                    (26usize, 108usize),
-                    (27usize, 109usize),
-                    (28usize, 110usize),
-                    (29usize, 111usize),
-                    (30usize, 112usize),
-                    (31usize, 113usize),
-                    (32usize, 114usize),
-                    (33usize, 115usize),
-                    (34usize, 116usize),
-                    (35usize, 117usize),
-                    (36usize, 118usize),
-                    (37usize, 119usize),
-                    (38usize, 120usize),
-                    (39usize, 121usize),
-                    (40usize, 122usize),
-                    (42usize, 123usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 82usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 83usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 141usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 85usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 86usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 87usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 88usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 89usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 90usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 91usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 92usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 93usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 94usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 95usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 96usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 97usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 98usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 99usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 100usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 101usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 102usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 103usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 104usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 105usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 106usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 107usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 108usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 109usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 110usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 111usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 112usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 113usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 114usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 115usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 116usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 117usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 118usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 119usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 120usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 121usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 122usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 123usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::RustCode, 142usize),
-                    (GrammarNonTerminals::_TermSet24, 126usize),
-                    (GrammarNonTerminals::__TermSet24Plus25, 127usize),
+                    (GrammarNonTerminals::_TermSet23, 126usize),
+                    (GrammarNonTerminals::__TermSet23Plus24, 127usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -9626,10 +9951,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([44usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset122.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -9641,7 +9967,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 143usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    143usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -9659,10 +9988,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([43usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset123.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -9675,53 +10005,53 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 82usize),
-                    (1usize, 83usize),
-                    (2usize, 145usize),
-                    (3usize, 85usize),
-                    (4usize, 86usize),
-                    (5usize, 87usize),
-                    (6usize, 88usize),
-                    (7usize, 89usize),
-                    (8usize, 90usize),
-                    (9usize, 91usize),
-                    (10usize, 92usize),
-                    (11usize, 93usize),
-                    (12usize, 94usize),
-                    (13usize, 95usize),
-                    (14usize, 96usize),
-                    (15usize, 97usize),
-                    (16usize, 98usize),
-                    (17usize, 99usize),
-                    (18usize, 100usize),
-                    (19usize, 101usize),
-                    (20usize, 102usize),
-                    (21usize, 103usize),
-                    (22usize, 104usize),
-                    (23usize, 105usize),
-                    (24usize, 106usize),
-                    (25usize, 107usize),
-                    (26usize, 108usize),
-                    (27usize, 109usize),
-                    (28usize, 110usize),
-                    (29usize, 111usize),
-                    (30usize, 112usize),
-                    (31usize, 113usize),
-                    (32usize, 114usize),
-                    (33usize, 115usize),
-                    (34usize, 116usize),
-                    (35usize, 117usize),
-                    (36usize, 118usize),
-                    (37usize, 119usize),
-                    (38usize, 120usize),
-                    (39usize, 121usize),
-                    (40usize, 122usize),
-                    (42usize, 123usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 82usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 83usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 145usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 85usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 86usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 87usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 88usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 89usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 90usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 91usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 92usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 93usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 94usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 95usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 96usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 97usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 98usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 99usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 100usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 101usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 102usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 103usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 104usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 105usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 106usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 107usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 108usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 109usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 110usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 111usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 112usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 113usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 114usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 115usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 116usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 117usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 118usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 119usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 120usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 121usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 122usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 123usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::RustCode, 146usize),
-                    (GrammarNonTerminals::_TermSet24, 126usize),
-                    (GrammarNonTerminals::__TermSet24Plus25, 127usize),
+                    (GrammarNonTerminals::_TermSet23, 126usize),
+                    (GrammarNonTerminals::__TermSet23Plus24, 127usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -9919,10 +10249,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([46usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset124.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -9934,7 +10265,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 147usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    147usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -9952,10 +10286,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([45usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset125.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -9968,53 +10303,53 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 82usize),
-                    (1usize, 83usize),
-                    (2usize, 149usize),
-                    (3usize, 85usize),
-                    (4usize, 86usize),
-                    (5usize, 87usize),
-                    (6usize, 88usize),
-                    (7usize, 89usize),
-                    (8usize, 90usize),
-                    (9usize, 91usize),
-                    (10usize, 92usize),
-                    (11usize, 93usize),
-                    (12usize, 94usize),
-                    (13usize, 95usize),
-                    (14usize, 96usize),
-                    (15usize, 97usize),
-                    (16usize, 98usize),
-                    (17usize, 99usize),
-                    (18usize, 100usize),
-                    (19usize, 101usize),
-                    (20usize, 102usize),
-                    (21usize, 103usize),
-                    (22usize, 104usize),
-                    (23usize, 105usize),
-                    (24usize, 106usize),
-                    (25usize, 107usize),
-                    (26usize, 108usize),
-                    (27usize, 109usize),
-                    (28usize, 110usize),
-                    (29usize, 111usize),
-                    (30usize, 112usize),
-                    (31usize, 113usize),
-                    (32usize, 114usize),
-                    (33usize, 115usize),
-                    (34usize, 116usize),
-                    (35usize, 117usize),
-                    (36usize, 118usize),
-                    (37usize, 119usize),
-                    (38usize, 120usize),
-                    (39usize, 121usize),
-                    (40usize, 122usize),
-                    (42usize, 123usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 82usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 83usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 149usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 85usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 86usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 87usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 88usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 89usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 90usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 91usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 92usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 93usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 94usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 95usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 96usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 97usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 98usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 99usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 100usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 101usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 102usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 103usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 104usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 105usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 106usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 107usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 108usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 109usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 110usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 111usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 112usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 113usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 114usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 115usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 116usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 117usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 118usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 119usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 120usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 121usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 122usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 123usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::RustCode, 150usize),
-                    (GrammarNonTerminals::_TermSet24, 126usize),
-                    (GrammarNonTerminals::__TermSet24Plus25, 127usize),
+                    (GrammarNonTerminals::_TermSet23, 126usize),
+                    (GrammarNonTerminals::__TermSet23Plus24, 127usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -10212,10 +10547,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([54usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset126.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -10227,7 +10563,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 151usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    151usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -10245,10 +10584,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([53usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset127.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -10261,53 +10601,53 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 82usize),
-                    (1usize, 83usize),
-                    (2usize, 153usize),
-                    (3usize, 85usize),
-                    (4usize, 86usize),
-                    (5usize, 87usize),
-                    (6usize, 88usize),
-                    (7usize, 89usize),
-                    (8usize, 90usize),
-                    (9usize, 91usize),
-                    (10usize, 92usize),
-                    (11usize, 93usize),
-                    (12usize, 94usize),
-                    (13usize, 95usize),
-                    (14usize, 96usize),
-                    (15usize, 97usize),
-                    (16usize, 98usize),
-                    (17usize, 99usize),
-                    (18usize, 100usize),
-                    (19usize, 101usize),
-                    (20usize, 102usize),
-                    (21usize, 103usize),
-                    (22usize, 104usize),
-                    (23usize, 105usize),
-                    (24usize, 106usize),
-                    (25usize, 107usize),
-                    (26usize, 108usize),
-                    (27usize, 109usize),
-                    (28usize, 110usize),
-                    (29usize, 111usize),
-                    (30usize, 112usize),
-                    (31usize, 113usize),
-                    (32usize, 114usize),
-                    (33usize, 115usize),
-                    (34usize, 116usize),
-                    (35usize, 117usize),
-                    (36usize, 118usize),
-                    (37usize, 119usize),
-                    (38usize, 120usize),
-                    (39usize, 121usize),
-                    (40usize, 122usize),
-                    (42usize, 123usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 82usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 83usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 153usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 85usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 86usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 87usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 88usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 89usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 90usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 91usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 92usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 93usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 94usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 95usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 96usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 97usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 98usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 99usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 100usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 101usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 102usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 103usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 104usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 105usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 106usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 107usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 108usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 109usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 110usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 111usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 112usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 113usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 114usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 115usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 116usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 117usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 118usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 119usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 120usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 121usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 122usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 123usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::RustCode, 154usize),
-                    (GrammarNonTerminals::_TermSet24, 126usize),
-                    (GrammarNonTerminals::__TermSet24Plus25, 127usize),
+                    (GrammarNonTerminals::_TermSet23, 126usize),
+                    (GrammarNonTerminals::__TermSet23Plus24, 127usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -10505,10 +10845,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([56usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset128.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -10520,7 +10861,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 155usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    155usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -10538,10 +10882,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([55usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset129.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -10553,11 +10898,11 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 157usize)]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::error,
-                    158usize,
-                )]),
+                shift_goto_map_term: std::collections::BTreeMap::from([
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 157usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 158usize),
+                ]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
@@ -10578,10 +10923,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([59usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset130.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -10593,7 +10939,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 159usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    159usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -10611,10 +10960,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([60usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset131.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -10626,11 +10976,11 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 161usize)]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::error,
-                    162usize,
-                )]),
+                shift_goto_map_term: std::collections::BTreeMap::from([
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 161usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 162usize),
+                ]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
@@ -10651,10 +11001,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([57usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset132.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -10666,7 +11017,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 163usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    163usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -10684,10 +11038,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([58usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset133.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -10700,13 +11055,13 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 52usize),
-                    (14usize, 53usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 52usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 53usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 165usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::IdentOrLiteral, 69usize),
-                    (GrammarNonTerminals::error, 165usize),
-                    (GrammarNonTerminals::_IdentOrLiteralPlus26, 167usize),
+                    (GrammarNonTerminals::IdentOrLiteral, 71usize),
+                    (GrammarNonTerminals::_IdentOrLiteralPlus25, 167usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -10740,7 +11095,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 166usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    166usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -10758,10 +11116,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([52usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset134.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -10774,9 +11133,9 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 52usize),
-                    (2usize, 168usize),
-                    (14usize, 53usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 52usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 168usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 53usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::IdentOrLiteral,
@@ -10810,10 +11169,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([51usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset135.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -10825,11 +11185,11 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 170usize)]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::error,
-                    171usize,
-                )]),
+                shift_goto_map_term: std::collections::BTreeMap::from([
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 170usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 171usize),
+                ]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
@@ -10850,10 +11210,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([61usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset136.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -10865,44 +11226,48 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 172usize)]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: {
-                    let mut __reduce_map = std::collections::BTreeMap::new();
-                    __reduce_map
-                },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 62usize,
-                        shifted: 3usize,
-                    },
-                ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
-                reduce_map: {
-                    let mut __reduce_map = std::collections::BTreeMap::new();
-                    __reduce_map.extend(
-                        __rustylr_uset38
-                            .iter()
-                            .map(|term| (*term, __rustylr_uset137.clone())),
-                    );
-                    __reduce_map
-                },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 62usize,
-                        shifted: 4usize,
-                    },
-                ]),
-            },
-            ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 174usize)]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::error,
-                    175usize,
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    172usize,
                 )]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: {
+                    let mut __reduce_map = std::collections::BTreeMap::new();
+                    __reduce_map
+                },
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 62usize,
+                        shifted: 3usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
+                reduce_map: {
+                    let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([62usize]);
+                    __reduce_map.extend(
+                        __rustylr_tset10
+                            .iter()
+                            .map(|term| (*term, reduce_rules.clone())),
+                    );
+                    __reduce_map
+                },
+                ruleset: std::collections::BTreeSet::from([
+                    ::rusty_lr_core::rule::ShiftedRuleRef {
+                        rule: 62usize,
+                        shifted: 4usize,
+                    },
+                ]),
+            },
+            ::rusty_lr_core::builder::State {
+                shift_goto_map_term: std::collections::BTreeMap::from([
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 174usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 175usize),
+                ]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
@@ -10923,10 +11288,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([63usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset138.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -10938,7 +11304,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 176usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    176usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -10956,10 +11325,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([64usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset139.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -10971,18 +11341,21 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(0usize, 178usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 178usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 179usize),
+                ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::error, 179usize),
-                    (GrammarNonTerminals::_identPlus27, 181usize),
-                    (GrammarNonTerminals::_identStar28, 183usize),
+                    (GrammarNonTerminals::_identPlus26, 181usize),
+                    (GrammarNonTerminals::_identStar27, 183usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([94usize]);
                     __reduce_map.extend(
-                        __rustylr_uset1
+                        __rustylr_tset16
                             .iter()
-                            .map(|term| (*term, __rustylr_uset140.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -11018,10 +11391,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([92usize]);
                     __reduce_map.extend(
-                        __rustylr_uset141
+                        __rustylr_tset17
                             .iter()
-                            .map(|term| (*term, __rustylr_uset142.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -11033,7 +11407,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 180usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    180usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -11051,10 +11428,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([66usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset143.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -11066,14 +11444,18 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(0usize, 182usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(0usize),
+                    182usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([139usize]);
                     __reduce_map.extend(
-                        __rustylr_uset1
+                        __rustylr_tset16
                             .iter()
-                            .map(|term| (*term, __rustylr_uset144.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -11093,10 +11475,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([93usize]);
                     __reduce_map.extend(
-                        __rustylr_uset141
+                        __rustylr_tset17
                             .iter()
-                            .map(|term| (*term, __rustylr_uset145.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -11108,7 +11491,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 184usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    184usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -11126,10 +11512,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([65usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset146.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -11142,53 +11529,53 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 82usize),
-                    (1usize, 83usize),
-                    (2usize, 186usize),
-                    (3usize, 85usize),
-                    (4usize, 86usize),
-                    (5usize, 87usize),
-                    (6usize, 88usize),
-                    (7usize, 89usize),
-                    (8usize, 90usize),
-                    (9usize, 91usize),
-                    (10usize, 92usize),
-                    (11usize, 93usize),
-                    (12usize, 94usize),
-                    (13usize, 95usize),
-                    (14usize, 96usize),
-                    (15usize, 97usize),
-                    (16usize, 98usize),
-                    (17usize, 99usize),
-                    (18usize, 100usize),
-                    (19usize, 101usize),
-                    (20usize, 102usize),
-                    (21usize, 103usize),
-                    (22usize, 104usize),
-                    (23usize, 105usize),
-                    (24usize, 106usize),
-                    (25usize, 107usize),
-                    (26usize, 108usize),
-                    (27usize, 109usize),
-                    (28usize, 110usize),
-                    (29usize, 111usize),
-                    (30usize, 112usize),
-                    (31usize, 113usize),
-                    (32usize, 114usize),
-                    (33usize, 115usize),
-                    (34usize, 116usize),
-                    (35usize, 117usize),
-                    (36usize, 118usize),
-                    (37usize, 119usize),
-                    (38usize, 120usize),
-                    (39usize, 121usize),
-                    (40usize, 122usize),
-                    (42usize, 123usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 82usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 83usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 186usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 85usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 86usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 87usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 88usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 89usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 90usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 91usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 92usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 93usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 94usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 95usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 96usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 97usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 98usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 99usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 100usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 101usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 102usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 103usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 104usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 105usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 106usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 107usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 108usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 109usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 110usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 111usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 112usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 113usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 114usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 115usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 116usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 117usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 118usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 119usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 120usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 121usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 122usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 123usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::RustCode, 187usize),
-                    (GrammarNonTerminals::_TermSet24, 126usize),
-                    (GrammarNonTerminals::__TermSet24Plus25, 127usize),
+                    (GrammarNonTerminals::_TermSet23, 126usize),
+                    (GrammarNonTerminals::__TermSet23Plus24, 127usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -11386,10 +11773,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([68usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset147.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -11401,7 +11789,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 188usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    188usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -11419,10 +11810,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([67usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset148.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -11434,11 +11826,11 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 190usize)]),
-                shift_goto_map_nonterm: std::collections::BTreeMap::from([(
-                    GrammarNonTerminals::error,
-                    191usize,
-                )]),
+                shift_goto_map_term: std::collections::BTreeMap::from([
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 190usize),
+                    (::rusty_lr_core::TerminalSymbol::Error, 191usize),
+                ]),
+                shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
@@ -11459,10 +11851,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([69usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset149.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -11474,7 +11867,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 192usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    192usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -11492,10 +11888,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([70usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset150.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -11508,53 +11905,53 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 82usize),
-                    (1usize, 83usize),
-                    (2usize, 194usize),
-                    (3usize, 85usize),
-                    (4usize, 86usize),
-                    (5usize, 87usize),
-                    (6usize, 88usize),
-                    (7usize, 89usize),
-                    (8usize, 90usize),
-                    (9usize, 91usize),
-                    (10usize, 92usize),
-                    (11usize, 93usize),
-                    (12usize, 94usize),
-                    (13usize, 95usize),
-                    (14usize, 96usize),
-                    (15usize, 97usize),
-                    (16usize, 98usize),
-                    (17usize, 99usize),
-                    (18usize, 100usize),
-                    (19usize, 101usize),
-                    (20usize, 102usize),
-                    (21usize, 103usize),
-                    (22usize, 104usize),
-                    (23usize, 105usize),
-                    (24usize, 106usize),
-                    (25usize, 107usize),
-                    (26usize, 108usize),
-                    (27usize, 109usize),
-                    (28usize, 110usize),
-                    (29usize, 111usize),
-                    (30usize, 112usize),
-                    (31usize, 113usize),
-                    (32usize, 114usize),
-                    (33usize, 115usize),
-                    (34usize, 116usize),
-                    (35usize, 117usize),
-                    (36usize, 118usize),
-                    (37usize, 119usize),
-                    (38usize, 120usize),
-                    (39usize, 121usize),
-                    (40usize, 122usize),
-                    (42usize, 123usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 82usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 83usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 194usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 85usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 86usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 87usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 88usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 89usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 90usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 91usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 92usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 93usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 94usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 95usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 96usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 97usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 98usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 99usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 100usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 101usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 102usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 103usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 104usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 105usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 106usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 107usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 108usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 109usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 110usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 111usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 112usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 113usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 114usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 115usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 116usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 117usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 118usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 119usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 120usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 121usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 122usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 123usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::RustCode, 195usize),
-                    (GrammarNonTerminals::_TermSet24, 126usize),
-                    (GrammarNonTerminals::__TermSet24Plus25, 127usize),
+                    (GrammarNonTerminals::_TermSet23, 126usize),
+                    (GrammarNonTerminals::__TermSet23Plus24, 127usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -11752,10 +12149,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([72usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset151.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -11767,7 +12165,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 196usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    196usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -11785,10 +12186,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([71usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset152.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -11800,7 +12202,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(2usize, 198usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(2usize),
+                    198usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -11818,10 +12223,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([73usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset153.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -11837,10 +12243,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([74usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset154.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -11856,10 +12263,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([140usize]);
                     __reduce_map.extend(
-                        __rustylr_uset38
+                        __rustylr_tset10
                             .iter()
-                            .map(|term| (*term, __rustylr_uset155.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -11872,21 +12280,22 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (0usize, 1usize),
-                    (4usize, 67usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 1usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 67usize),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
                     (GrammarNonTerminals::Rule, 199usize),
                     (GrammarNonTerminals::Directive, 200usize),
                     (GrammarNonTerminals::GrammarLine, 201usize),
-                    (GrammarNonTerminals::_GrammarLinePlus29, 202usize),
+                    (GrammarNonTerminals::_GrammarLinePlus28, 202usize),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([142usize]);
                     __reduce_map.extend(
-                        __rustylr_uset121
+                        __rustylr_tset18
                             .iter()
-                            .map(|term| (*term, __rustylr_uset156.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -12078,10 +12487,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([143usize]);
                     __reduce_map.extend(
-                        __rustylr_uset121
+                        __rustylr_tset18
                             .iter()
-                            .map(|term| (*term, __rustylr_uset157.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -12093,7 +12503,10 @@ impl GrammarParser {
                 ]),
             },
             ::rusty_lr_core::builder::State {
-                shift_goto_map_term: std::collections::BTreeMap::from([(41usize, 204usize)]),
+                shift_goto_map_term: std::collections::BTreeMap::from([(
+                    ::rusty_lr_core::TerminalSymbol::Term(41usize),
+                    204usize,
+                )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -12125,10 +12538,11 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
+                    let reduce_rules = std::collections::BTreeSet::from([141usize]);
                     __reduce_map.extend(
-                        __rustylr_uset121
+                        __rustylr_tset18
                             .iter()
-                            .map(|term| (*term, __rustylr_uset158.clone())),
+                            .map(|term| (*term, reduce_rules.clone())),
                     );
                     __reduce_map
                 },
@@ -12140,30 +12554,7 @@ impl GrammarParser {
                 ]),
             },
         ];
-        use rusty_lr_core::TerminalSymbol;
-        type SS = rusty_lr_core::builder::State<TerminalSymbol<usize>, GrammarNonTerminals>;
-        let states: Vec<GrammarState> = states
-            .into_iter()
-            .map(|state| {
-                let shift_goto_map_term: BTreeMap<_, _> = state
-                    .shift_goto_map_term
-                    .into_iter()
-                    .map(|(k, v)| (TerminalSymbol::Term(k), v))
-                    .collect();
-                let reduce_map: BTreeMap<_, _> = state
-                    .reduce_map
-                    .into_iter()
-                    .map(|(k, v)| (TerminalSymbol::Term(k), v))
-                    .collect();
-                SS {
-                    shift_goto_map_term,
-                    shift_goto_map_nonterm: state.shift_goto_map_nonterm,
-                    reduce_map,
-                    ruleset: state.ruleset,
-                }
-                .into()
-            })
-            .collect();
+        let states: Vec<GrammarState> = states.into_iter().map(|state| state.into()).collect();
         Self {
             rules,
             states,
