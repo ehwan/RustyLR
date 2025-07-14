@@ -199,6 +199,11 @@ E(i32): left=A '+' right=A { left + right };
 ```rust
 E(i32): A '+' right=A { A + right }; // use A directly
 ```
+This is also possible for advanced patterns:
+```rust
+E(i32): A* { A.iter().sum() }; // sum all values in A
+```
+Here, `A` is a `Vec<A>` and you can access its values directly.
 
 **User Data:** Access mutable user-defined data passed to the parser.
 ```rust
@@ -207,14 +212,16 @@ E(i32): A '+' right=A {
     A + right 
 };
 ```
+Here, `data` is `&mut UserData`, which is defined by the `%userdata` directive.
 
 **Lookahead Token:** Inspect the next token without consuming it.
 ```rust
-match *lookahead { // lookahead: &TerminalType
+match *lookahead.to_term().unwrap() { // lookahead: &TerminalType
     '+' => { /* ... */ },
     _ => { /* ... */ },
 }
 ```
+Here, `lookahead` is a `&TerminalSymbol<%TokenType>`, it is either a terminal symbol fed by the user or a special token like `error`.
 
 **Shift Control:** Control whether to perform a shift operation (for GLR parser).
 ```rust

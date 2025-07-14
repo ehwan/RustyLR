@@ -2,8 +2,9 @@ use std::fmt::Debug;
 use std::fmt::Display;
 use std::hash::Hash;
 
-/// Custom type for terminal symbols,
-/// just because we have to take care of the `error` token specially
+/// A type for terminal symbols in the grammar.
+/// just because we have to take care of the `error` token specially,
+/// and future support for other special tokens.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum TerminalSymbol<Term> {
     Term(Term), // index in the terminals vector
@@ -16,12 +17,14 @@ impl<Term> TerminalSymbol<Term> {
     pub fn is_term(&self) -> bool {
         matches!(self, TerminalSymbol::Term(_))
     }
+    /// converts self to a term if it is a `Term` variant, otherwise returns `None`.
     pub fn to_term(&self) -> Option<&Term> {
         match self {
             TerminalSymbol::Term(term) => Some(term),
             TerminalSymbol::Error => None,
         }
     }
+    /// converts self to a term if it is a `Term` variant, otherwise returns `None`.
     pub fn into_term(self) -> Option<Term> {
         match self {
             TerminalSymbol::Term(term) => Some(term),
