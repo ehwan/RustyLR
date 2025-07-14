@@ -295,6 +295,16 @@ Pattern(PatternArgs): ident {
     PatternArgs::Minus( Box::new(p1), Box::new(p2) )
 }
 | dollar ident lparen base=Pattern comma del=Pattern comma? rparen {
+    let Lexed::Ident(ident) = ident else {
+        unreachable!( "Pattern-Sep-Ident" );
+    };
+    if ident != "sep" {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected $sep".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
+            span: @ident,
+        });
+    }
     PatternArgs::Sep(
         Box::new(base),
         Box::new(del),
@@ -303,6 +313,16 @@ Pattern(PatternArgs): ident {
     )
 }
 | dollar ident lparen base=Pattern comma del=Pattern comma plus rparen {
+    let Lexed::Ident(ident) = ident else {
+        unreachable!( "Pattern-Sep-Ident" );
+    };
+    if ident != "sep" {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected $sep".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
+            span: @ident,
+        });
+    }
     PatternArgs::Sep(
         Box::new(base),
         Box::new(del),
@@ -311,6 +331,16 @@ Pattern(PatternArgs): ident {
     )
 }
 | dollar ident lparen base=Pattern comma del=Pattern comma star rparen {
+    let Lexed::Ident(ident) = ident else {
+        unreachable!( "Pattern-Sep-Ident" );
+    };
+    if ident != "sep" {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected $sep".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
+            span: @ident,
+        });
+    }
     PatternArgs::Sep(
         Box::new(base),
         Box::new(del),
@@ -319,7 +349,46 @@ Pattern(PatternArgs): ident {
     )
 }
 | dollar ident lparen base=Pattern comma del=Pattern error rparen {
-    // TODO error recovery
+    let Lexed::Ident(ident) = ident else {
+        unreachable!( "Pattern-Sep-Ident" );
+    };
+    if ident != "sep" {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected $sep".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
+            span: @ident,
+        });
+    }
+    data.error_recovered.push( RecoveredError {
+        message: "Unexpected $sep arguments".to_string(),
+        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
+        span: @error
+    });
+
+    PatternArgs::Sep(
+        Box::new(base),
+        Box::new(del),
+        false,
+        *@$
+    )
+}
+| dollar ident lparen base=Pattern comma del=Pattern comma error rparen {
+    let Lexed::Ident(ident) = ident else {
+        unreachable!( "Pattern-Sep-Ident" );
+    };
+    if ident != "sep" {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected $sep".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
+            span: @ident,
+        });
+    }
+    data.error_recovered.push( RecoveredError {
+        message: "Expected '+' or '*' repetition".to_string(),
+        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
+        span: @error
+    });
+
     PatternArgs::Sep(
         Box::new(base),
         Box::new(del),
@@ -345,6 +414,9 @@ Action(Option<Group>): bracegroup {
 }
 | { None }
 ;
+
+A: $sepp(a, b, c, d) {
+};
 
 IdentOrLiteral(IdentOrLiteral): ident {
     let Lexed::Ident(ident) = ident else {
