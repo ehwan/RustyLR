@@ -8,7 +8,7 @@ use crate::TerminalSymbol;
 #[derive(Clone)]
 pub enum ParseError<Data: TokenData> {
     /// No action defined for the given terminal in the parser table
-    NoAction(Data::Term, Data::Location),
+    NoAction(TerminalSymbol<Data::Term>, Data::Location),
 
     /// Error from reduce action
     ReduceAction(
@@ -19,7 +19,7 @@ pub enum ParseError<Data: TokenData> {
 
     /// Rule index when shift/reduce conflict occur with no shift/reduce precedence defined.
     /// This is same as when setting %nonassoc in Bison.
-    NoPrecedence(Data::Term, Data::Location, usize),
+    NoPrecedence(TerminalSymbol<Data::Term>, Data::Location, usize),
 }
 
 impl<Data: TokenData> ParseError<Data> {
@@ -31,10 +31,10 @@ impl<Data: TokenData> ParseError<Data> {
         }
     }
 
-    pub fn term(&self) -> &Data::Term {
+    pub fn term(&self) -> &TerminalSymbol<Data::Term> {
         match self {
             ParseError::NoAction(term, _) => term,
-            ParseError::ReduceAction(term, _, _) => term.to_term().unwrap(),
+            ParseError::ReduceAction(term, _, _) => term,
             ParseError::NoPrecedence(term, _, _) => term,
         }
     }

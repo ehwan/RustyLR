@@ -36,18 +36,18 @@ RuleLines -> RuleLines pipe RuleLine
 RuleLines -> RuleLine
 RuleLine -> TokenMapped* PrecDef* Action
 PrecDef -> percent prec IdentOrLiteral
-PrecDef -> percent prec <Error>
+PrecDef -> percent prec error
 PrecDef -> percent dprec literal
-PrecDef -> percent dprec <Error>
-PrecDef -> percent <Error>
+PrecDef -> percent dprec error
+PrecDef -> percent error
 TokenMapped -> Pattern
 TokenMapped -> ident equal Pattern
 TerminalSetItem -> ident
 TerminalSetItem -> ident minus ident
-TerminalSetItem -> ident minus <Error>
+TerminalSetItem -> ident minus error
 TerminalSetItem -> literal
 TerminalSetItem -> literal minus literal
-TerminalSetItem -> literal minus <Error>
+TerminalSetItem -> literal minus error
 TerminalSet -> lbracket caret? TerminalSetItem* rbracket
 TerminalSet -> dot
 Pattern -> ident
@@ -67,9 +67,9 @@ IdentOrLiteral -> literal
 RustCode -> [^semicolon]+
 Directive -> percent token ident RustCode semicolon
 Directive -> percent token ident semicolon
-Directive -> percent token <Error> semicolon
+Directive -> percent token error semicolon
 Directive -> percent start ident semicolon
-Directive -> percent start <Error> semicolon
+Directive -> percent start error semicolon
 Directive -> percent eofdef RustCode semicolon
 Directive -> percent eofdef semicolon
 Directive -> percent tokentype RustCode semicolon
@@ -77,32 +77,32 @@ Directive -> percent tokentype semicolon
 Directive -> percent userdata RustCode semicolon
 Directive -> percent userdata semicolon
 Directive -> percent left IdentOrLiteral+ semicolon
-Directive -> percent left <Error> semicolon
+Directive -> percent left error semicolon
 Directive -> percent right IdentOrLiteral+ semicolon
-Directive -> percent right <Error> semicolon
+Directive -> percent right error semicolon
 Directive -> percent precedence IdentOrLiteral+ semicolon
-Directive -> percent precedence <Error> semicolon
+Directive -> percent precedence error semicolon
 Directive -> percent errortype RustCode semicolon
 Directive -> percent errortype semicolon
 Directive -> percent moduleprefix RustCode semicolon
 Directive -> percent moduleprefix semicolon
 Directive -> percent glr semicolon
-Directive -> percent glr <Error> semicolon
+Directive -> percent glr error semicolon
 Directive -> percent lalr semicolon
-Directive -> percent lalr <Error> semicolon
+Directive -> percent lalr error semicolon
 Directive -> percent nooptim semicolon
-Directive -> percent nooptim <Error> semicolon
+Directive -> percent nooptim error semicolon
 Directive -> percent dense semicolon
-Directive -> percent dense <Error> semicolon
+Directive -> percent dense error semicolon
 Directive -> percent trace ident* semicolon
-Directive -> percent trace <Error> semicolon
+Directive -> percent trace error semicolon
 Directive -> percent filter RustCode semicolon
 Directive -> percent filter semicolon
 Directive -> percent runtime semicolon
-Directive -> percent runtime <Error> semicolon
+Directive -> percent runtime error semicolon
 Directive -> percent location RustCode semicolon
 Directive -> percent location semicolon
-Directive -> percent <Error> semicolon
+Directive -> percent error semicolon
 GrammarLine -> Rule
 TokenMapped+ -> TokenMapped
 TokenMapped+ -> TokenMapped+ TokenMapped
@@ -613,7 +613,7 @@ impl GrammarTokenData {
             PrecDPrecArgs::Prec(IdentOrLiteral)
         }))
     }
-    #[doc = "PrecDef -> percent prec <Error>"]
+    #[doc = "PrecDef -> percent prec error"]
     #[inline]
     fn reduce_PrecDef_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -678,7 +678,7 @@ impl GrammarTokenData {
             PrecDPrecArgs::DPrec(literal)
         }))
     }
-    #[doc = "PrecDef -> percent dprec <Error>"]
+    #[doc = "PrecDef -> percent dprec error"]
     #[inline]
     fn reduce_PrecDef_3(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -712,7 +712,7 @@ impl GrammarTokenData {
             PrecDPrecArgs::None
         }))
     }
-    #[doc = "PrecDef -> percent <Error>"]
+    #[doc = "PrecDef -> percent error"]
     #[inline]
     fn reduce_PrecDef_4(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -843,7 +843,7 @@ impl GrammarTokenData {
             TerminalSetItem::Range(first, last)
         }))
     }
-    #[doc = "TerminalSetItem -> ident minus <Error>"]
+    #[doc = "TerminalSetItem -> ident minus error"]
     #[inline]
     fn reduce_TerminalSetItem_2(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -931,7 +931,7 @@ impl GrammarTokenData {
             TerminalSetItem::LiteralRange(first, last)
         }))
     }
-    #[doc = "TerminalSetItem -> literal minus <Error>"]
+    #[doc = "TerminalSetItem -> literal minus error"]
     #[inline]
     fn reduce_TerminalSetItem_5(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -1441,7 +1441,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent token <Error> semicolon"]
+    #[doc = "Directive -> percent token error semicolon"]
     #[inline]
     fn reduce_Directive_2(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -1512,7 +1512,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent start <Error> semicolon"]
+    #[doc = "Directive -> percent start error semicolon"]
     #[inline]
     fn reduce_Directive_4(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -1798,7 +1798,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent left <Error> semicolon"]
+    #[doc = "Directive -> percent left error semicolon"]
     #[inline]
     fn reduce_Directive_12(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -1875,7 +1875,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent right <Error> semicolon"]
+    #[doc = "Directive -> percent right error semicolon"]
     #[inline]
     fn reduce_Directive_14(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -1949,7 +1949,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent precedence <Error> semicolon"]
+    #[doc = "Directive -> percent precedence error semicolon"]
     #[inline]
     fn reduce_Directive_16(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -2154,7 +2154,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent glr <Error> semicolon"]
+    #[doc = "Directive -> percent glr error semicolon"]
     #[inline]
     fn reduce_Directive_22(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -2222,7 +2222,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent lalr <Error> semicolon"]
+    #[doc = "Directive -> percent lalr error semicolon"]
     #[inline]
     fn reduce_Directive_24(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -2290,7 +2290,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent nooptim <Error> semicolon"]
+    #[doc = "Directive -> percent nooptim error semicolon"]
     #[inline]
     fn reduce_Directive_26(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -2358,7 +2358,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent dense <Error> semicolon"]
+    #[doc = "Directive -> percent dense error semicolon"]
     #[inline]
     fn reduce_Directive_28(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -2437,7 +2437,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent trace <Error> semicolon"]
+    #[doc = "Directive -> percent trace error semicolon"]
     #[inline]
     fn reduce_Directive_30(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -2573,7 +2573,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent runtime <Error> semicolon"]
+    #[doc = "Directive -> percent runtime error semicolon"]
     #[inline]
     fn reduce_Directive_34(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
@@ -2681,7 +2681,7 @@ impl GrammarTokenData {
         }
         Ok(GrammarTokenData::Empty)
     }
-    #[doc = "Directive -> percent <Error> semicolon"]
+    #[doc = "Directive -> percent error semicolon"]
     #[inline]
     fn reduce_Directive_37(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
