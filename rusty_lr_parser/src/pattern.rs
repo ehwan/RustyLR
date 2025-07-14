@@ -945,8 +945,10 @@ impl Pattern {
                             },
                         ],
                         reduce_action: Some(ReduceAction::Custom(quote! {
+                            {
                             __token0.push(__token1);
                             __token0
+                            }
                         })),
                         separator_span: Span::call_site(),
                         lookaheads: None,
