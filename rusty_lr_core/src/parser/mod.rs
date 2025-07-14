@@ -35,9 +35,6 @@ pub trait Parser {
     /// Get the terminal class of the given terminal
     fn to_terminal_class(&self, terminal: &Self::Term) -> usize;
 
-    /// get non-terminal symbol for `error` in panic-recovery
-    fn get_error_nonterm(&self) -> Option<Self::NonTerm>;
-
     /// Get the type of precedence for i'th level.
     /// `None` if i'th level was defined as %precedence (no reduce type).
     fn precedence_types(&self, level: usize) -> Option<crate::builder::ReduceType>;
