@@ -1608,3 +1608,11 @@ impl Grammar {
         collector
     }
 }
+
+/// Custom type for terminal symbols,
+/// just because we have to take care of the `error` token specially
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum TerminalSymbol {
+    Term(usize), // index in the terminals vector
+    Error,       // error token
+}
