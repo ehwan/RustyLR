@@ -22,6 +22,7 @@ use quote::format_ident;
 use quote::ToTokens;
 use rusty_lr_core::builder::ReduceType;
 use std::boxed::Box;
+use std::collections::BTreeMap;
 // =================================User Codes End=================================
 /*
 ====================================Grammar=====================================
@@ -185,8 +186,7 @@ pub type GrammarContext = ::rusty_lr_core::parser::deterministic::Context<Gramma
 pub type GrammarRule = ::rusty_lr_core::rule::ProductionRule<&'static str, GrammarNonTerminals>;
 #[doc = r" type alias for DFA state"]
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarState =
-    ::rusty_lr_core::parser::deterministic::state::SparseState<GrammarNonTerminals>;
+pub type GrammarState = ::rusty_lr_core::parser::state::SparseState<GrammarNonTerminals, usize>;
 #[doc = r" type alias for `ParseError`"]
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarParseError = ::rusty_lr_core::parser::deterministic::ParseError<GrammarTokenData>;
@@ -435,7 +435,7 @@ impl GrammarTokenData {
     fn reduce_Rule_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -484,7 +484,7 @@ impl GrammarTokenData {
     fn reduce_RuleType_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -505,7 +505,7 @@ impl GrammarTokenData {
     fn reduce_RuleType_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -516,7 +516,7 @@ impl GrammarTokenData {
     fn reduce_RuleLines_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -546,7 +546,7 @@ impl GrammarTokenData {
     fn reduce_RuleLines_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -562,7 +562,7 @@ impl GrammarTokenData {
     fn reduce_RuleLine_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -597,7 +597,7 @@ impl GrammarTokenData {
     fn reduce_PrecDef_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -625,7 +625,7 @@ impl GrammarTokenData {
     fn reduce_PrecDef_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -655,7 +655,7 @@ impl GrammarTokenData {
     fn reduce_PrecDef_2(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -686,7 +686,7 @@ impl GrammarTokenData {
     fn reduce_PrecDef_3(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -716,7 +716,7 @@ impl GrammarTokenData {
     fn reduce_PrecDef_4(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -741,7 +741,7 @@ impl GrammarTokenData {
     fn reduce_TokenMapped_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -757,7 +757,7 @@ impl GrammarTokenData {
     fn reduce_TokenMapped_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -788,7 +788,7 @@ impl GrammarTokenData {
     fn reduce_TerminalSetItem_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -809,7 +809,7 @@ impl GrammarTokenData {
     fn reduce_TerminalSetItem_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -843,7 +843,7 @@ impl GrammarTokenData {
     fn reduce_TerminalSetItem_2(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -872,7 +872,7 @@ impl GrammarTokenData {
     fn reduce_TerminalSetItem_3(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -893,7 +893,7 @@ impl GrammarTokenData {
     fn reduce_TerminalSetItem_4(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -927,7 +927,7 @@ impl GrammarTokenData {
     fn reduce_TerminalSetItem_5(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -956,7 +956,7 @@ impl GrammarTokenData {
     fn reduce_TerminalSet_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -994,7 +994,7 @@ impl GrammarTokenData {
     fn reduce_TerminalSet_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1018,7 +1018,7 @@ impl GrammarTokenData {
     fn reduce_Pattern_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1039,7 +1039,7 @@ impl GrammarTokenData {
     fn reduce_Pattern_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1065,7 +1065,7 @@ impl GrammarTokenData {
     fn reduce_Pattern_2(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1088,7 +1088,7 @@ impl GrammarTokenData {
     fn reduce_Pattern_3(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1111,7 +1111,7 @@ impl GrammarTokenData {
     fn reduce_Pattern_4(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1134,7 +1134,7 @@ impl GrammarTokenData {
     fn reduce_Pattern_5(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1152,7 +1152,7 @@ impl GrammarTokenData {
     fn reduce_Pattern_6(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1180,7 +1180,7 @@ impl GrammarTokenData {
     fn reduce_Pattern_7(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1212,7 +1212,7 @@ impl GrammarTokenData {
     fn reduce_Pattern_8(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1233,7 +1233,7 @@ impl GrammarTokenData {
     fn reduce_Pattern_9(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1261,7 +1261,7 @@ impl GrammarTokenData {
     fn reduce_Action_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1282,7 +1282,7 @@ impl GrammarTokenData {
     fn reduce_Action_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1293,7 +1293,7 @@ impl GrammarTokenData {
     fn reduce_IdentOrLiteral_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1314,7 +1314,7 @@ impl GrammarTokenData {
     fn reduce_IdentOrLiteral_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1335,7 +1335,7 @@ impl GrammarTokenData {
     fn reduce_RustCode_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1357,7 +1357,7 @@ impl GrammarTokenData {
     fn reduce_Directive_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1399,7 +1399,7 @@ impl GrammarTokenData {
     fn reduce_Directive_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1433,7 +1433,7 @@ impl GrammarTokenData {
     fn reduce_Directive_2(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1463,7 +1463,7 @@ impl GrammarTokenData {
     fn reduce_Directive_3(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1500,7 +1500,7 @@ impl GrammarTokenData {
     fn reduce_Directive_4(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1536,7 +1536,7 @@ impl GrammarTokenData {
     fn reduce_Directive_5(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1570,7 +1570,7 @@ impl GrammarTokenData {
     fn reduce_Directive_6(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1605,7 +1605,7 @@ impl GrammarTokenData {
     fn reduce_Directive_7(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1640,7 +1640,7 @@ impl GrammarTokenData {
     fn reduce_Directive_8(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1675,7 +1675,7 @@ impl GrammarTokenData {
     fn reduce_Directive_9(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1710,7 +1710,7 @@ impl GrammarTokenData {
     fn reduce_Directive_10(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1744,7 +1744,7 @@ impl GrammarTokenData {
     fn reduce_Directive_11(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1782,7 +1782,7 @@ impl GrammarTokenData {
     fn reduce_Directive_12(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1817,7 +1817,7 @@ impl GrammarTokenData {
     fn reduce_Directive_13(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1855,7 +1855,7 @@ impl GrammarTokenData {
     fn reduce_Directive_14(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1890,7 +1890,7 @@ impl GrammarTokenData {
     fn reduce_Directive_15(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1925,7 +1925,7 @@ impl GrammarTokenData {
     fn reduce_Directive_16(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1960,7 +1960,7 @@ impl GrammarTokenData {
     fn reduce_Directive_17(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -1995,7 +1995,7 @@ impl GrammarTokenData {
     fn reduce_Directive_18(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2029,7 +2029,7 @@ impl GrammarTokenData {
     fn reduce_Directive_19(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2064,7 +2064,7 @@ impl GrammarTokenData {
     fn reduce_Directive_20(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2097,7 +2097,7 @@ impl GrammarTokenData {
     fn reduce_Directive_21(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2126,7 +2126,7 @@ impl GrammarTokenData {
     fn reduce_Directive_22(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2161,7 +2161,7 @@ impl GrammarTokenData {
     fn reduce_Directive_23(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2190,7 +2190,7 @@ impl GrammarTokenData {
     fn reduce_Directive_24(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2225,7 +2225,7 @@ impl GrammarTokenData {
     fn reduce_Directive_25(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2254,7 +2254,7 @@ impl GrammarTokenData {
     fn reduce_Directive_26(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2289,7 +2289,7 @@ impl GrammarTokenData {
     fn reduce_Directive_27(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2318,7 +2318,7 @@ impl GrammarTokenData {
     fn reduce_Directive_28(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2353,7 +2353,7 @@ impl GrammarTokenData {
     fn reduce_Directive_29(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2393,7 +2393,7 @@ impl GrammarTokenData {
     fn reduce_Directive_30(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2428,7 +2428,7 @@ impl GrammarTokenData {
     fn reduce_Directive_31(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2462,7 +2462,7 @@ impl GrammarTokenData {
     fn reduce_Directive_32(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2496,7 +2496,7 @@ impl GrammarTokenData {
     fn reduce_Directive_33(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2525,7 +2525,7 @@ impl GrammarTokenData {
     fn reduce_Directive_34(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2561,7 +2561,7 @@ impl GrammarTokenData {
     fn reduce_Directive_35(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2595,7 +2595,7 @@ impl GrammarTokenData {
     fn reduce_Directive_36(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2629,7 +2629,7 @@ impl GrammarTokenData {
     fn reduce_Directive_37(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2658,7 +2658,7 @@ impl GrammarTokenData {
     fn reduce_GrammarLine_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2677,7 +2677,7 @@ impl GrammarTokenData {
     fn reduce__TokenMappedPlus16_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2693,7 +2693,7 @@ impl GrammarTokenData {
     fn reduce__TokenMappedPlus16_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2717,7 +2717,7 @@ impl GrammarTokenData {
     fn reduce__TokenMappedStar17_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2728,7 +2728,7 @@ impl GrammarTokenData {
     fn reduce__PrecDefPlus18_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2744,7 +2744,7 @@ impl GrammarTokenData {
     fn reduce__PrecDefPlus18_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2768,7 +2768,7 @@ impl GrammarTokenData {
     fn reduce__PrecDefStar19_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2779,7 +2779,7 @@ impl GrammarTokenData {
     fn reduce__caretQuestion20_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2795,7 +2795,7 @@ impl GrammarTokenData {
     fn reduce__caretQuestion20_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2806,7 +2806,7 @@ impl GrammarTokenData {
     fn reduce__TerminalSetItemPlus21_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2822,7 +2822,7 @@ impl GrammarTokenData {
     fn reduce__TerminalSetItemPlus21_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2846,7 +2846,7 @@ impl GrammarTokenData {
     fn reduce__TerminalSetItemStar22_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2857,7 +2857,7 @@ impl GrammarTokenData {
     fn reduce__PatternPlus23_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2873,7 +2873,7 @@ impl GrammarTokenData {
     fn reduce__PatternPlus23_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2897,7 +2897,7 @@ impl GrammarTokenData {
     fn reduce___TermSet24Plus25_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2913,7 +2913,7 @@ impl GrammarTokenData {
     fn reduce___TermSet24Plus25_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2937,7 +2937,7 @@ impl GrammarTokenData {
     fn reduce__IdentOrLiteralPlus26_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2953,7 +2953,7 @@ impl GrammarTokenData {
     fn reduce__IdentOrLiteralPlus26_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2977,7 +2977,7 @@ impl GrammarTokenData {
     fn reduce__identPlus27_0(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -2993,7 +2993,7 @@ impl GrammarTokenData {
     fn reduce__identPlus27_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -3017,7 +3017,7 @@ impl GrammarTokenData {
     fn reduce__identStar28_1(
         __rustylr_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Lexed,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
@@ -3042,7 +3042,7 @@ impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
         rule_index: usize,
         reduce_args: &mut ::rusty_lr_core::nonterminal::ReduceArgsStack<Self>,
         shift: &mut bool,
-        lookahead: &Self::Term,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Self::Term>,
         user_data: &mut Self::UserData,
         location0: &mut Self::Location,
     ) -> Result<Self, Self::ReduceActionError> {
@@ -3331,7 +3331,7 @@ impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
             }
         }
     }
-    fn new_error_nonterm() -> Self {
+    fn new_error() -> Self {
         GrammarTokenData::Empty
     }
     fn new_terminal(term: Lexed) -> Self {
@@ -3449,9 +3449,6 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
             Lexed::Eof => 41usize,
             _ => 42usize,
         }
-    }
-    fn get_error_nonterm(&self) -> Option<Self::NonTerm> {
-        Some(GrammarNonTerminals::error)
     }
 }
 #[doc = r" A struct that holds the whole parser table."]
@@ -12143,7 +12140,30 @@ impl GrammarParser {
                 ]),
             },
         ];
-        let states: Vec<GrammarState> = states.into_iter().map(|state| state.into()).collect();
+        use rusty_lr_core::TerminalSymbol;
+        type SS = rusty_lr_core::builder::State<TerminalSymbol<usize>, GrammarNonTerminals>;
+        let states: Vec<GrammarState> = states
+            .into_iter()
+            .map(|state| {
+                let shift_goto_map_term: BTreeMap<_, _> = state
+                    .shift_goto_map_term
+                    .into_iter()
+                    .map(|(k, v)| (TerminalSymbol::Term(k), v))
+                    .collect();
+                let reduce_map: BTreeMap<_, _> = state
+                    .reduce_map
+                    .into_iter()
+                    .map(|(k, v)| (TerminalSymbol::Term(k), v))
+                    .collect();
+                SS {
+                    shift_goto_map_term,
+                    shift_goto_map_nonterm: state.shift_goto_map_nonterm,
+                    reduce_map,
+                    ruleset: state.ruleset,
+                }
+                .into()
+            })
+            .collect();
         Self {
             rules,
             states,

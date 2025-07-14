@@ -58,7 +58,7 @@ pub struct PatternToToken {
     /// only for internal usage; generating name like A_star, A_plus, A_question
     name: Ident,
     /// actual token for the pattern
-    pub token: Token<TerminalSymbol, usize>,
+    pub token: Token<TerminalSymbol<usize>, usize>,
     /// ruletype for this pattern
     pub ruletype: Option<TokenStream>,
     /// implicit mapto derived from its parent pattern (e.g. 'A' from A+, 'A' from A*!)

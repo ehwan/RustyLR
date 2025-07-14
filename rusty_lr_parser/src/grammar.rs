@@ -100,8 +100,8 @@ pub struct Grammar {
 
     /// do terminal classificate optimization
     pub optimize: bool,
-    pub builder: rusty_lr_core::builder::Grammar<TerminalSymbol, usize>,
-    pub states: Vec<rusty_lr_core::builder::State<TerminalSymbol, usize>>,
+    pub builder: rusty_lr_core::builder::Grammar<TerminalSymbol<usize>, usize>,
+    pub states: Vec<rusty_lr_core::builder::State<TerminalSymbol<usize>, usize>>,
 
     /// set of terminals for each terminal class
     pub terminal_classes: Vec<TerminalClassDefinition>,
@@ -1245,8 +1245,8 @@ impl Grammar {
         // remove rules that have single production rule and single token
         // e.g. A -> B, then fix all occurrences of A to B
         let mut nonterm_replace: HashMap<
-            Token<TerminalSymbol, usize>,
-            Token<TerminalSymbol, usize>,
+            Token<TerminalSymbol<usize>, usize>,
+            Token<TerminalSymbol<usize>, usize>,
         > = Default::default();
         for (nonterm_id, nonterm) in self.nonterminals.iter_mut().enumerate() {
             // do not delete protected non-terminals
@@ -1281,13 +1281,15 @@ impl Grammar {
         }
 
         // ensure that from -> to map does not create a cycle, and reaches to the leaf
-        let mut cycles: HashSet<Token<TerminalSymbol, usize>> = Default::default();
-        let mut next_replace: HashMap<Token<TerminalSymbol, usize>, Token<TerminalSymbol, usize>> =
-            Default::default();
+        let mut cycles: HashSet<Token<TerminalSymbol<usize>, usize>> = Default::default();
+        let mut next_replace: HashMap<
+            Token<TerminalSymbol<usize>, usize>,
+            Token<TerminalSymbol<usize>, usize>,
+        > = Default::default();
         // calculate cycle
         for &from in nonterm_replace.keys() {
             let mut cur = from;
-            let mut chains: HashSet<Token<TerminalSymbol, usize>> = Default::default();
+            let mut chains: HashSet<Token<TerminalSymbol<usize>, usize>> = Default::default();
             while let Some(&next) = nonterm_replace.get(&cur) {
                 if cycles.contains(&next) {
                     cycles.insert(from);
@@ -1464,33 +1466,38 @@ impl Grammar {
         }
     }
     /// returns either 'term' or '[term1, term2, ...]'
-    pub fn class_pretty_name_list(&self, class_idx: usize, max_len: usize) -> String {
-        let class = &self.terminal_classes[class_idx];
-        let len: usize = class
-            .terminals
-            .iter()
-            .map(|term| self.terminals[*term].name.count())
-            .sum();
-        if len == 1 {
-            self.term_pretty_name(class.terminals[0])
-        } else if class.terminals.len() < max_len {
-            let f = self.terminal_classes[class_idx]
-                .terminals
-                .iter()
-                .map(|&term| self.term_pretty_name(term))
-                .collect::<Vec<_>>()
-                .join(", ");
-            format!("[{f}] ({len} terms)")
-        } else {
-            let class = &self.terminal_classes[class_idx];
-            let first = class.terminals[0];
-            let second = class.terminals[1];
-            let last = *class.terminals.last().unwrap();
+    pub fn class_pretty_name_list(&self, class: TerminalSymbol<usize>, max_len: usize) -> String {
+        match class {
+            TerminalSymbol::Error => return "<Error>".to_string(),
+            TerminalSymbol::Term(class_idx) => {
+                let class = &self.terminal_classes[class_idx];
+                let len: usize = class
+                    .terminals
+                    .iter()
+                    .map(|term| self.terminals[*term].name.count())
+                    .sum();
+                if len == 1 {
+                    self.term_pretty_name(class.terminals[0])
+                } else if class.terminals.len() < max_len {
+                    let f = self.terminal_classes[class_idx]
+                        .terminals
+                        .iter()
+                        .map(|&term| self.term_pretty_name(term))
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    format!("[{f}] ({len} terms)")
+                } else {
+                    let class = &self.terminal_classes[class_idx];
+                    let first = class.terminals[0];
+                    let second = class.terminals[1];
+                    let last = *class.terminals.last().unwrap();
 
-            let first = self.term_pretty_name(first);
-            let second = self.term_pretty_name(second);
-            let last = self.term_pretty_name(last);
-            format!("[{first}, {second}, ..., {last}] ({len} terms)")
+                    let first = self.term_pretty_name(first);
+                    let second = self.term_pretty_name(second);
+                    let last = self.term_pretty_name(last);
+                    format!("[{first}, {second}, ..., {last}] ({len} terms)")
+                }
+            }
         }
     }
     pub fn nonterm_pretty_name(&self, nonterm_idx: usize) -> String {
@@ -1498,8 +1505,10 @@ impl Grammar {
     }
 
     /// create the rusty_lr_core::Grammar from the parsed CFGs
-    pub fn create_builder(&mut self) -> rusty_lr_core::builder::Grammar<TerminalSymbol, usize> {
-        let mut grammar: rusty_lr_core::builder::Grammar<TerminalSymbol, usize> =
+    pub fn create_builder(
+        &mut self,
+    ) -> rusty_lr_core::builder::Grammar<TerminalSymbol<usize>, usize> {
+        let mut grammar: rusty_lr_core::builder::Grammar<TerminalSymbol<usize>, usize> =
             rusty_lr_core::builder::Grammar::new();
 
         let mut rules = Vec::new();
@@ -1573,7 +1582,9 @@ impl Grammar {
         grammar
     }
 
-    pub fn build_grammar(&mut self) -> rusty_lr_core::builder::DiagnosticCollector<TerminalSymbol> {
+    pub fn build_grammar(
+        &mut self,
+    ) -> rusty_lr_core::builder::DiagnosticCollector<TerminalSymbol<usize>> {
         let augmented_idx = *self
             .nonterminals_index
             .get(&Ident::new(utils::AUGMENTED_NAME, Span::call_site()))

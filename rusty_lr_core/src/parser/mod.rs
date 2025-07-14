@@ -4,7 +4,7 @@ pub mod deterministic;
 /// Core parser functionality for non-deterministic parsers
 pub mod nondeterministic;
 
-mod state;
+pub mod state;
 pub use state::State;
 
 /// A trait for Parser that holds the entire parser table.

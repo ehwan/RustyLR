@@ -4,7 +4,7 @@ use proc_macro2::{Ident, Span};
 #[derive(Debug, Clone)]
 pub struct TokenMapped {
     /// terminal or non-terminal name
-    pub token: rusty_lr_core::Token<rusty_lr_core::TerminalSymbol, usize>,
+    pub token: rusty_lr_core::Token<rusty_lr_core::TerminalSymbol<usize>, usize>,
 
     /// variable name that the token's data will be mapped to
     pub mapto: Option<Ident>,

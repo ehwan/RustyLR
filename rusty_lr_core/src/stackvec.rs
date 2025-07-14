@@ -5,6 +5,12 @@ pub trait ToUsizeList {
     fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone;
 }
 
+impl ToUsizeList for usize {
+    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
+        std::iter::once(*self)
+    }
+}
+
 pub type SmallVecU8 = smallvec::SmallVec<[u8; 16]>;
 pub type SmallVecU16 = smallvec::SmallVec<[u16; 8]>;
 pub type SmallVecU32 = smallvec::SmallVec<[u32; 4]>;

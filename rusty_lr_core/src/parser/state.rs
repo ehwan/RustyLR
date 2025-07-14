@@ -214,6 +214,20 @@ where
     }
 }
 impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
+    for SparseState<NonTerm, usize>
+where
+    NonTerm: Hash + Eq,
+{
+    fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
+        builder_state_into_sparse(builder_state, |reduce_map| {
+            if reduce_map.len() != 1 {
+                unreachable!("SparseState with usize reduce_map should only have one rule");
+            }
+            reduce_map.into_iter().next().unwrap()
+        })
+    }
+}
+impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
     for SparseState<NonTerm, crate::stackvec::SmallVecU8>
 where
     NonTerm: Hash + Eq,
@@ -300,6 +314,20 @@ where
         reduce_map,
         error_reduce,
         ruleset: builder_state.ruleset.into_iter().collect(),
+    }
+}
+impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
+    for DenseState<NonTerm, usize>
+where
+    NonTerm: Hash + Eq,
+{
+    fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
+        builder_state_into_dense(builder_state, |reduce_map| {
+            if reduce_map.len() != 1 {
+                unreachable!("DenseState with usize reduce_map should only have one rule");
+            }
+            reduce_map.into_iter().next().unwrap()
+        })
     }
 }
 impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
