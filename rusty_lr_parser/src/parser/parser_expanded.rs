@@ -3511,6 +3511,9 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
             _ => 42usize,
         }
     }
+    fn error_used() -> bool {
+        true
+    }
 }
 #[doc = r" A struct that holds the whole parser table."]
 #[allow(

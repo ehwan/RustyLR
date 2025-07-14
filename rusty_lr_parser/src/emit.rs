@@ -752,6 +752,8 @@ impl Grammar {
                 _ => #other_class_id,
             });
 
+            let error_used = self.error_used;
+
             stream.extend(quote! {
             /// A struct that holds the entire parser table and production rules.
             #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
@@ -799,6 +801,9 @@ impl Grammar {
                     match *terminal {
                         #terminal_class_match_body_stream
                     }
+                }
+                fn error_used() -> bool {
+                    #error_used
                 }
             }
 
@@ -932,6 +937,7 @@ impl Grammar {
             } else {
                 quote! {terminal}
             };
+            let error_used = self.error_used;
 
             stream.extend(quote! {
             /// A struct that holds the entire parser table and production rules.
@@ -979,6 +985,10 @@ impl Grammar {
                     match #match_terminal_filter_expression {
                         #terminal_class_match_body_stream
                     }
+                }
+
+                fn error_used() -> bool {
+                    #error_used
                 }
             }
 
