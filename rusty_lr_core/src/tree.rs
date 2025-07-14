@@ -76,58 +76,113 @@ impl<Term, NonTerm> TreeNonTerminal<Term, NonTerm> {
             // remove left/right recursion, make it to flat array
             Some(NonTerminalType::PlusLeft) => {
                 let tree = TermTree::new(nonterm_name);
-                let tree = if self.tokens.len() == 1 {
-                    let child = self.tokens[0]
-                        .to_term_tree(term_to_display, nonterm_to_display)
-                        .into_iter()
-                        .next()
-                        .unwrap();
-                    tree.with_leaves([child])
-                } else {
-                    // 2
-                    let mut child_list = self.tokens[0]
-                        .to_term_tree(term_to_display, nonterm_to_display)
-                        .into_iter()
-                        .next()
-                        .unwrap()
-                        .leaves;
-                    let child = self.tokens[1]
-                        .to_term_tree(term_to_display, nonterm_to_display)
-                        .into_iter()
-                        .next()
-                        .unwrap();
-                    child_list.push(child);
-                    tree.with_leaves(child_list)
+                let tree = match self.tokens.len() {
+                    1 => {
+                        let child = self.tokens[0]
+                            .to_term_tree(term_to_display, nonterm_to_display)
+                            .into_iter()
+                            .next()
+                            .unwrap();
+                        tree.with_leaves([child])
+                    }
+                    2 => {
+                        let mut child_list = self.tokens[0]
+                            .to_term_tree(term_to_display, nonterm_to_display)
+                            .into_iter()
+                            .next()
+                            .unwrap()
+                            .leaves;
+                        let child = self.tokens[1]
+                            .to_term_tree(term_to_display, nonterm_to_display)
+                            .into_iter()
+                            .next()
+                            .unwrap();
+                        child_list.push(child);
+                        tree.with_leaves(child_list)
+                    }
+                    3 => {
+                        let mut child_list = self.tokens[0]
+                            .to_term_tree(term_to_display, nonterm_to_display)
+                            .into_iter()
+                            .next()
+                            .unwrap()
+                            .leaves;
+                        let separator = self.tokens[1]
+                            .to_term_tree(term_to_display, nonterm_to_display)
+                            .into_iter()
+                            .next()
+                            .unwrap();
+                        let child = self.tokens[2]
+                            .to_term_tree(term_to_display, nonterm_to_display)
+                            .into_iter()
+                            .next()
+                            .unwrap();
+                        child_list.push(separator);
+                        child_list.push(child);
+                        tree.with_leaves(child_list)
+                    }
+                    _ => {
+                        unreachable!("PlusLeft length of child: {}", self.tokens.len())
+                    }
                 };
                 vec![tree]
             }
             // remove left/right recursion, make it to flat array
             Some(NonTerminalType::PlusRight) => {
                 let tree = TermTree::new(nonterm_name);
-                let tree = if self.tokens.len() == 1 {
-                    let child = self.tokens[0]
-                        .to_term_tree(term_to_display, nonterm_to_display)
-                        .into_iter()
-                        .next()
-                        .unwrap();
-                    tree.with_leaves([child])
-                } else {
-                    // 2
-                    let child = self.tokens[0]
-                        .to_term_tree(term_to_display, nonterm_to_display)
-                        .into_iter()
-                        .next()
-                        .unwrap();
-                    let mut child_list = self.tokens[1]
-                        .to_term_tree(term_to_display, nonterm_to_display)
-                        .into_iter()
-                        .next()
-                        .unwrap()
-                        .leaves;
-                    let mut children = vec![child];
-                    children.append(&mut child_list);
+                let tree = match self.tokens.len() {
+                    1 => {
+                        let child = self.tokens[0]
+                            .to_term_tree(term_to_display, nonterm_to_display)
+                            .into_iter()
+                            .next()
+                            .unwrap();
+                        tree.with_leaves([child])
+                    }
+                    2 => {
+                        let child = self.tokens[0]
+                            .to_term_tree(term_to_display, nonterm_to_display)
+                            .into_iter()
+                            .next()
+                            .unwrap();
+                        let mut child_list = self.tokens[1]
+                            .to_term_tree(term_to_display, nonterm_to_display)
+                            .into_iter()
+                            .next()
+                            .unwrap()
+                            .leaves;
+                        let mut children = vec![child];
+                        children.append(&mut child_list);
 
-                    tree.with_leaves(children)
+                        tree.with_leaves(children)
+                    }
+                    3 => {
+                        // with separator
+                        let child = self.tokens[0]
+                            .to_term_tree(term_to_display, nonterm_to_display)
+                            .into_iter()
+                            .next()
+                            .unwrap();
+                        let separator = self.tokens[1]
+                            .to_term_tree(term_to_display, nonterm_to_display)
+                            .into_iter()
+                            .next()
+                            .unwrap();
+                        let mut child_list = self.tokens[2]
+                            .to_term_tree(term_to_display, nonterm_to_display)
+                            .into_iter()
+                            .next()
+                            .unwrap()
+                            .leaves;
+                        let mut children = vec![child];
+                        children.push(separator);
+                        children.append(&mut child_list);
+
+                        tree.with_leaves(children)
+                    }
+                    _ => {
+                        unreachable!("PlusRight length of child: {}", self.tokens.len())
+                    }
                 };
                 vec![tree]
             }

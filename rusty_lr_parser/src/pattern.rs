@@ -962,7 +962,7 @@ impl Pattern {
                         regex_span: Some(root_span_pair),
                         trace: false,
                         protected: false,
-                        nonterm_type: None,
+                        nonterm_type: Some(NonTerminalType::PlusLeft),
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
@@ -1025,7 +1025,7 @@ impl Pattern {
                         regex_span: Some(root_span_pair),
                         trace: false,
                         protected: false,
-                        nonterm_type: None,
+                        nonterm_type: Some(NonTerminalType::PlusRight),
                     };
                     grammar.nonterminals.push(nonterm_info);
                     grammar
