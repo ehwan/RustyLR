@@ -128,7 +128,7 @@ Patterns define the structure of the input that matches a production rule.
  - `P*` : Zero or more repetitions of `P`
  - `P+` : One or more repetitions of `P`
  - `P?` : Zero or one repetition of `P`
- - `$sep( P, P_separator, repetetion )`: A repetition of `P` separated by `P_separator`. The `repetetion` can be `*`, or `+` to indicate zero or more, or one or more repetitions respectively
+ - `$sep( P, P_separator, repetition )`: A repetition of `P` separated by `P_separator`. The `repetition` can be `*`, or `+` to indicate zero or more, or one or more repetitions respectively
  - `(P1 P2 P3)` : Grouping of patterns
  - `P / term` or `P / [term1 term_start-term_last]`: Pattern `P` followed by lookaheads. Lookaheads will not be consumed
  - `'a'` or `b'a'`: Single character literal or byte literal. This is only supported if the `%tokentype` is `char` or `u8`
