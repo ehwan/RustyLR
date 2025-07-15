@@ -3376,6 +3376,7 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                 match class {
                     10usize => Some(0usize),
                     12usize => Some(1usize),
+                    6usize..=8usize | 11usize => Some(2usize),
                     _ => None,
                 }
             }
