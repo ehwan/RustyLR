@@ -368,6 +368,7 @@ At that point, it shifts the invalid fed token as the `error` token, then tries 
 
 **Important notes:**
 - The `error` token does not have any value, no associated rule-type
+- `error` token does have location data, which can be accessed in the reduce action by `@error`. The location data is merged from the invalid tokens that consist of the `error` token.
 - In GLR parsing, the `error` path will be ignored if there are any other valid paths. In other words, it enters panic-mode only if there is no other way to feed the terminal symbol
 
 ### Operator Precedence
