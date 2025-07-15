@@ -475,8 +475,7 @@ impl<Data: TokenData> Context<Data> {
         }
     }
 
-    /// Check if `term` can be feeded to current state.
-    /// This does not simulate for reduce action error.
+    /// Check if current context can enter panic mode
     pub fn can_panic<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,

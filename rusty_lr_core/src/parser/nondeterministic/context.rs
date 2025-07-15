@@ -33,8 +33,6 @@ pub struct Context<Data: TokenData> {
     /// For temporary use.
     /// store rule indices where shift/reduce conflicts occured with no precedence defined.
     pub(crate) no_precedences: Vec<usize>,
-
-    pub(crate) error_nodes: smallvec::SmallVec<[Node<Data>; 3]>,
 }
 
 impl<Data: TokenData> Context<Data> {
@@ -234,14 +232,13 @@ impl<Data: TokenData> Context<Data> {
         self.no_precedences.clear();
         self.fallback_nodes.clear();
         self.next_nodes.clear();
-        self.error_nodes.clear();
 
         let class = parser.to_terminal_class(&term);
         let shift_prec = parser.class_precedence(class);
 
         let mut current_nodes = std::mem::take(&mut self.current_nodes);
         for node in current_nodes.drain(..) {
-            if let Err(node) = Node::feed_location(
+            if let Err((node, _, _)) = Node::feed_location(
                 node,
                 self,
                 parser,
@@ -262,20 +259,27 @@ impl<Data: TokenData> Context<Data> {
         // check for panic mode
         // and restore nodes to original state from fallback_nodes
         if self.next_nodes.is_empty() {
+            // early return if `error` token is not used in the grammar
+            if !P::error_used() {
+                std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
+
+                return Err(ParseError {
+                    term: TerminalSymbol::Term(term),
+                    location,
+                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                    no_precedences: std::mem::take(&mut self.no_precedences),
+                });
+            }
+
             let fallback_nodes = std::mem::take(&mut self.fallback_nodes);
             // try enter panic mode and store error nodes to next_nodes
             for node in fallback_nodes.iter() {
                 Node::panic_mode(Rc::clone(node), self, parser, userdata);
             }
-            if self.error_nodes.is_empty() {
-                for node in fallback_nodes.iter() {
-                    Node::panic_mode_pop(node, self, parser);
-                }
-            }
             self.fallback_nodes = fallback_nodes;
-            // if error_nodes is still empty, then no panic mode was entered, this is an error
+            // if next_node is still empty, then no panic mode was entered, this is an error
             // restore current_nodes to fallback_nodes
-            if self.error_nodes.is_empty() {
+            if self.next_nodes.is_empty() {
                 std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
 
                 Err(ParseError {
@@ -285,10 +289,11 @@ impl<Data: TokenData> Context<Data> {
                     no_precedences: std::mem::take(&mut self.no_precedences),
                 })
             } else {
+                // panic mode was entered, so we can continue parsing
                 self.fallback_nodes.clear();
 
                 // try shift term to error state
-                for mut error_node in self.error_nodes.drain(..) {
+                for mut error_node in self.next_nodes.drain(..) {
                     if let Some(next_state) = parser.get_states()[error_node.state]
                         .shift_goto_class(TerminalSymbol::Term(class))
                     {
@@ -296,7 +301,7 @@ impl<Data: TokenData> Context<Data> {
                         // and b is fed, shift error and b
 
                         let next_node = Node {
-                            parent: Some(Rc::new(error_node)),
+                            parent: Some(error_node),
                             state: next_state,
                             data: Some((Data::new_terminal(term.clone()), location.clone())),
                             precedence_level: shift_prec,
@@ -316,9 +321,15 @@ impl<Data: TokenData> Context<Data> {
                             ),
                             2, // error node + fed token
                         );
-                        error_node.data.as_mut().unwrap().1 = new_location;
-
-                        self.current_nodes.push(Rc::new(error_node));
+                        if let Some(node) = Rc::get_mut(&mut error_node) {
+                            node.data.as_mut().unwrap().1 = new_location;
+                        } else {
+                            unreachable!(
+                                "error node should be mutable, but it is not. \
+                                 This is a bug in the parser."
+                            );
+                        }
+                        self.current_nodes.push(error_node);
                     }
                 }
                 Ok(())
@@ -330,10 +341,9 @@ impl<Data: TokenData> Context<Data> {
     }
 
     /// Check if `term` can be feeded to current state.
-    /// This does not check for reduce action error, nor the panic mode.
-    /// You should call `can_panic_mode()` after this fails to check if panic mode can accept this term.
-    ///
-    /// This does not change the state of the context.
+    /// This does not simulate for reduce action error, or panic mode.
+    /// So this function will return `false` even if term can be shifted as `error` token,
+    /// and will return `true` if `Err` variant is returned by `reduce_action`.
     pub fn can_feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
@@ -346,20 +356,20 @@ impl<Data: TokenData> Context<Data> {
         let shift_prec = parser.class_precedence(class);
         self.current_nodes
             .iter()
-            .any(|node| Node::can_feed(node, parser, term, class, shift_prec))
+            .any(|node| Node::can_feed(node, parser, class, shift_prec))
     }
 
     /// Check if current context can enter panic mode.
-    pub fn can_panic_mode<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    pub fn can_panic<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
     ) -> bool
     where
-        Data::NonTerm: std::hash::Hash + Eq,
+        Data::NonTerm: Hash + Eq,
     {
         self.current_nodes
             .iter()
-            .any(|node| Node::can_panic_mode(node, parser))
+            .any(|node| Node::can_panic(node, parser))
     }
 }
 
@@ -372,7 +382,6 @@ impl<Data: TokenData> Default for Context<Data> {
             reduce_args: Default::default(),
             fallback_nodes: Default::default(),
             no_precedences: Default::default(),
-            error_nodes: Default::default(),
         }
     }
 }

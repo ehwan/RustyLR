@@ -21,8 +21,8 @@ impl<Data: TokenData> ParseError<Data> {
     pub fn location(&self) -> &Data::Location {
         &self.location
     }
-    pub fn term(&self) -> &Data::Term {
-        self.term.to_term().unwrap()
+    pub fn term(&self) -> &crate::TerminalSymbol<Data::Term> {
+        &self.term
     }
 }
 
