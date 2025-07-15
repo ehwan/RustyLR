@@ -753,6 +753,11 @@ impl Grammar {
             });
 
             let error_used = self.error_used;
+            let error_prec_stream = if let Some(error_prec) = self.error_precedence {
+                quote! { Some(#error_prec) }
+            } else {
+                quote! { None }
+            };
 
             stream.extend(quote! {
             /// A struct that holds the entire parser table and production rules.
@@ -771,11 +776,16 @@ impl Grammar {
                 type State = #state_typename;
                 type TerminalClassElement = ::std::ops::RangeInclusive<#token_typename>;
 
-                fn class_precedence(&self, class: usize) -> Option<usize> {
-                    #[allow(unreachable_patterns)]
+                fn class_precedence(&self, class: #module_prefix::TerminalSymbol<usize>) -> Option<usize> {
                     match class {
-                        #class_level_match_body_stream
-                        _ => None,
+                        #module_prefix::TerminalSymbol::Term(class) => {
+                            #[allow(unreachable_patterns)]
+                            match class {
+                                #class_level_match_body_stream
+                                _ => None,
+                            }
+                        }
+                        #module_prefix::TerminalSymbol::Error => #error_prec_stream,
                     }
                 }
                 fn precedence_types(&self, level: usize) -> Option<#module_prefix::builder::ReduceType> {
@@ -938,6 +948,11 @@ impl Grammar {
                 quote! {terminal}
             };
             let error_used = self.error_used;
+            let error_prec_stream = if let Some(error_prec) = self.error_precedence {
+                quote! { Some(#error_prec) }
+            } else {
+                quote! { None }
+            };
 
             stream.extend(quote! {
             /// A struct that holds the entire parser table and production rules.
@@ -956,11 +971,16 @@ impl Grammar {
                 type State = #state_typename;
                 type TerminalClassElement = &'static str;
 
-                fn class_precedence(&self, class: usize) -> Option<usize> {
-                    #[allow(unreachable_patterns)]
+                fn class_precedence(&self, class: #module_prefix::TerminalSymbol<usize>) -> Option<usize> {
                     match class {
-                        #class_level_match_body_stream
-                        _ => None,
+                        #module_prefix::TerminalSymbol::Term(class) => {
+                            #[allow(unreachable_patterns)]
+                            match class {
+                                #class_level_match_body_stream
+                                _ => None,
+                            }
+                        }
+                        #module_prefix::TerminalSymbol::Error => #error_prec_stream,
                     }
                 }
                 fn precedence_types(&self, level: usize) -> Option<#module_prefix::builder::ReduceType> {

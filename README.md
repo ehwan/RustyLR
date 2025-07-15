@@ -219,7 +219,7 @@ See [GLR.md](GLR.md) for details.
 RustyLR provides multiple mechanisms for handling semantic errors and resolving conflicts during parsing:
  - **Panic Mode Error Recovery:** Use the `error` token for panic-mode error recovery
  - **Operator Precedence:** Set precedence with `%left`, `%right`, `%precedence` for terminals
- - **Rule Priority:** Set priority with `%dprec` for production rules
+ - **Reduce Rule Priority:** Set priority with `%dprec` for production rules
  - **Runtime Errors:** Return `Err` from reduce actions to handle semantic errors
 
 See [SYNTAX.md - Resolving Conflicts](SYNTAX.md#resolving-conflicts) for detailed information.

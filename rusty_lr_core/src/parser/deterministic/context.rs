@@ -189,9 +189,8 @@ impl<Data: TokenData> Context<Data> {
         Data::NonTerm: Hash + Eq + Copy,
     {
         use crate::Location;
-        let class = parser.to_terminal_class(&term);
+        let class = TerminalSymbol::Term(parser.to_terminal_class(&term));
         let shift_prec = parser.class_precedence(class);
-        let class = TerminalSymbol::Term(class);
 
         match self.feed_location_impl(
             parser,
@@ -212,13 +211,14 @@ impl<Data: TokenData> Context<Data> {
 
                 let mut error_location =
                     Location::new(self.data_stack.iter().map(|(_, loc)| loc).rev(), 0);
+                let error_prec = parser.class_precedence(TerminalSymbol::Error);
 
                 loop {
                     match self.feed_location_impl(
                         parser,
                         TerminalSymbol::Error,
                         TerminalSymbol::Error,
-                        None,
+                        error_prec,
                         userdata,
                         error_location,
                     ) {
@@ -459,14 +459,14 @@ impl<Data: TokenData> Context<Data> {
     {
         let mut state_stack = self.state_stack.clone();
         let mut precedence_stack = self.precedence_stack.clone();
-        let class = parser.to_terminal_class(&term);
+        let class = TerminalSymbol::Term(parser.to_terminal_class(&term));
         let shift_prec = parser.class_precedence(class);
 
         match Self::can_feed_impl(
             &mut state_stack,
             &mut precedence_stack,
             parser,
-            TerminalSymbol::Term(class),
+            class,
             shift_prec,
         ) {
             Some(true) => true,
@@ -490,6 +490,7 @@ impl<Data: TokenData> Context<Data> {
 
         let mut state_stack = self.state_stack.clone();
         let mut precedence_stack = self.precedence_stack.clone();
+        let error_prec = parser.class_precedence(TerminalSymbol::Error);
 
         loop {
             match Self::can_feed_impl(
@@ -497,7 +498,7 @@ impl<Data: TokenData> Context<Data> {
                 &mut precedence_stack,
                 parser,
                 TerminalSymbol::Error,
-                None,
+                error_prec,
             ) {
                 Some(true) => break true, // successfully shifted `error`
                 Some(false) => {

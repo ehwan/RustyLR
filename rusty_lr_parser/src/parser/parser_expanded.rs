@@ -3368,12 +3368,18 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
     type NonTerm = GrammarNonTerminals;
     type State = GrammarState;
     type TerminalClassElement = &'static str;
-    fn class_precedence(&self, class: usize) -> Option<usize> {
-        #[allow(unreachable_patterns)]
+    fn class_precedence(&self, class: ::rusty_lr_core::TerminalSymbol<usize>) -> Option<usize> {
         match class {
-            10usize => Some(0usize),
-            12usize => Some(1usize),
-            _ => None,
+            ::rusty_lr_core::TerminalSymbol::Term(class) =>
+            {
+                #[allow(unreachable_patterns)]
+                match class {
+                    10usize => Some(0usize),
+                    12usize => Some(1usize),
+                    _ => None,
+                }
+            }
+            ::rusty_lr_core::TerminalSymbol::Error => None,
         }
     }
     fn precedence_types(&self, level: usize) -> Option<::rusty_lr_core::builder::ReduceType> {

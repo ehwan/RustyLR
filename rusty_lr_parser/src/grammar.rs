@@ -143,6 +143,9 @@ pub struct Grammar {
 
     /// type for location
     pub location_typename: Option<TokenStream>,
+
+    /// precedence level of error token
+    pub error_precedence: Option<usize>,
 }
 
 impl Grammar {
@@ -377,6 +380,7 @@ impl Grammar {
 
             compiled: grammar_args.compiled,
             location_typename: grammar_args.location_typename,
+            error_precedence: None,
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";
@@ -547,6 +551,8 @@ impl Grammar {
                         if let Some(&term_idx) = grammar.terminals_index.get(&ident.clone().into())
                         {
                             grammar.terminals[term_idx].precedence = Some((level, span));
+                        } else if ident == utils::ERROR_NAME {
+                            grammar.error_precedence = Some(level);
                         }
                     }
                     &IdentOrU32::U32(ch) => {
@@ -626,7 +632,11 @@ impl Grammar {
                                     }
                                 }
                                 TerminalSymbol::Error => {
-                                    return Err(ParseError::PrecedenceNotDefined(prec));
+                                    if let Some(error_prec) = grammar.error_precedence {
+                                        Some((Precedence::Fixed(error_prec), span))
+                                    } else {
+                                        return Err(ParseError::PrecedenceNotDefined(prec));
+                                    }
                                 }
                             }
                         } else {

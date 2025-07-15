@@ -422,6 +422,7 @@ impl<Data: TokenData> Node<Data> {
         mut self: Rc<Node<Data>>,
         context: &mut super::Context<Data>,
         parser: &P,
+        error_prec: Option<usize>,
         userdata: &mut Data::UserData,
     ) -> bool
     where
@@ -441,7 +442,7 @@ impl<Data: TokenData> Node<Data> {
                 parser,
                 TerminalSymbol::Error,
                 TerminalSymbol::Error,
-                None,
+                error_prec,
                 userdata,
                 error_location,
             ) {
@@ -795,17 +796,13 @@ impl<Data: TokenData> Node<Data> {
     pub fn can_panic<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         mut node: &Rc<Node<Data>>,
         parser: &P,
+        error_prec: Option<usize>,
     ) -> bool
     where
         Data::NonTerm: std::hash::Hash + Eq,
     {
-        // if `error` token was not used in the grammar, early return here
-        if !P::error_used() {
-            return false;
-        }
-
         loop {
-            if Self::can_feed_impl(node, parser, TerminalSymbol::Error, None) {
+            if Self::can_feed_impl(node, parser, TerminalSymbol::Error, error_prec) {
                 return true;
             } else {
                 node = match node.parent.as_ref() {

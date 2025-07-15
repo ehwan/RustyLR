@@ -234,7 +234,7 @@ impl<Data: TokenData> Context<Data> {
         self.next_nodes.clear();
 
         let class = parser.to_terminal_class(&term);
-        let shift_prec = parser.class_precedence(class);
+        let shift_prec = parser.class_precedence(TerminalSymbol::Term(class));
 
         let mut current_nodes = std::mem::take(&mut self.current_nodes);
         for node in current_nodes.drain(..) {
@@ -271,17 +271,17 @@ impl<Data: TokenData> Context<Data> {
                 });
             }
 
-            let fallback_nodes = std::mem::take(&mut self.fallback_nodes);
+            let error_prec = parser.class_precedence(TerminalSymbol::Error);
+
+            let mut fallback_nodes = std::mem::take(&mut self.fallback_nodes);
             // try enter panic mode and store error nodes to next_nodes
-            for node in fallback_nodes.iter() {
-                Node::panic_mode(Rc::clone(node), self, parser, userdata);
+            for node in fallback_nodes.drain(..) {
+                Node::panic_mode(node, self, parser, error_prec, userdata);
             }
             self.fallback_nodes = fallback_nodes;
             // if next_node is still empty, then no panic mode was entered, this is an error
             // restore current_nodes to fallback_nodes
             if self.next_nodes.is_empty() {
-                std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
-
                 Err(ParseError {
                     term: TerminalSymbol::Term(term),
                     location,
@@ -289,9 +289,6 @@ impl<Data: TokenData> Context<Data> {
                     no_precedences: std::mem::take(&mut self.no_precedences),
                 })
             } else {
-                // panic mode was entered, so we can continue parsing
-                self.fallback_nodes.clear();
-
                 // try shift term to error state
                 for mut error_node in self.next_nodes.drain(..) {
                     if let Some(next_state) = parser.get_states()[error_node.state]
@@ -353,7 +350,7 @@ impl<Data: TokenData> Context<Data> {
         P::NonTerm: Hash + Eq,
     {
         let class = parser.to_terminal_class(term);
-        let shift_prec = parser.class_precedence(class);
+        let shift_prec = parser.class_precedence(TerminalSymbol::Term(class));
         self.current_nodes
             .iter()
             .any(|node| Node::can_feed(node, parser, class, shift_prec))
@@ -367,9 +364,15 @@ impl<Data: TokenData> Context<Data> {
     where
         Data::NonTerm: Hash + Eq,
     {
+        // if `error` token was not used in the grammar, early return here
+        if !P::error_used() {
+            return false;
+        }
+        let error_prec = parser.class_precedence(TerminalSymbol::Error);
+
         self.current_nodes
             .iter()
-            .any(|node| Node::can_panic(node, parser))
+            .any(|node| Node::can_panic(node, parser, error_prec))
     }
 }
 
