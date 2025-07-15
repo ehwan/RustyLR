@@ -78,6 +78,7 @@ lr1! {
             if let MyToken::Num(value) = num {
                 value
             } else {
+                println!("Error at: {:?}", @num); // location of the token
                 0
             }
         };
@@ -87,6 +88,10 @@ lr1! {
               *data += 1;                       // Access userdata via `data`
               println!("Values: {:?} {:?}", E, e2);   // Any Rust code can be written here
               E + e2                            // This becomes the value of `E` (f32)
+          }
+          | E error e2=E {
+              println!("Expected '+' or '*' at {:?}", @error); // location of the error token
+              0.0
           }
           | Number { Number as f32 }           // Number is `i32`, so cast to `f32`
           ;
