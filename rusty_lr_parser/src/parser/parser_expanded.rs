@@ -632,11 +632,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         Ok(GrammarTokenData::Variant6({
             data.error_recovered.push(RecoveredError {
                 message: "Expected <ident> to token or <literal>".to_string(),
@@ -697,11 +693,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         Ok(GrammarTokenData::Variant6({
             data.error_recovered.push(RecoveredError {
                 message: "Expected integer literal".to_string(),
@@ -726,11 +718,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         Ok(GrammarTokenData::Variant6({
             data.error_recovered.push(RecoveredError {
                 message: "Expected %prec or %dprec".to_string(),
@@ -862,11 +850,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         Ok(GrammarTokenData::Variant8({
             data.error_recovered.push(RecoveredError {
                 message: "Expected ident for terminal set".to_string(),
@@ -950,11 +934,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         Ok(GrammarTokenData::Variant8({
             data.error_recovered.push(RecoveredError {
                 message: "Expected literal for terminal set".to_string(),
@@ -1460,11 +1440,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -1531,11 +1507,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -1817,11 +1789,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -1894,11 +1862,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -1968,11 +1932,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -2173,11 +2133,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -2241,11 +2197,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -2309,11 +2261,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -2377,11 +2325,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -2456,11 +2400,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -2592,11 +2532,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {
@@ -2695,11 +2631,7 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        let (GrammarTokenData::Terminals(mut error), __rustylr_location_error) =
-            __rustylr_args.pop().unwrap()
-        else {
-            unreachable!()
-        };
+        let (_, __rustylr_location_error) = __rustylr_args.pop().unwrap();
         let (GrammarTokenData::Terminals(mut semicolon), __rustylr_location_semicolon) =
             __rustylr_args.pop().unwrap()
         else {

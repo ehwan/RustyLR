@@ -1083,6 +1083,7 @@ impl Grammar {
         let mut identity_reduce_action_range: BTreeMap<usize, (usize, usize)> = BTreeMap::new();
         let mut clear_reduce_action_range: Option<(usize, usize)> = None;
 
+        use rusty_lr_core::TerminalSymbol;
         use rusty_lr_core::Token;
         for (rule_index, &(nonterm_idx, rule_local_id)) in self.rules_sorted.iter().enumerate() {
             let nonterm = &self.nonterminals[nonterm_idx];
@@ -1094,15 +1095,25 @@ impl Grammar {
                     let mut extract_token_data_from_args = TokenStream::new();
                     for token in rule.tokens.iter() {
                         match &token.token {
-                            Token::Term(_) => match &token.mapto {
+                            Token::Term(term) => match &token.mapto {
                                 Some(mapto) => {
                                     let location_varname =
                                         format_ident!("__rustylr_location_{}", mapto);
-                                    extract_token_data_from_args.extend(quote! {
-                                        let (#token_data_typename::#terminal_variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
-                                            unreachable!()
-                                        };
-                                    });
+
+                                    match term {
+                                        TerminalSymbol::Term(_) => {
+                                            extract_token_data_from_args.extend(quote! {
+                                                let (#token_data_typename::#terminal_variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
+                                                    unreachable!()
+                                                };
+                                            });
+                                        }
+                                        TerminalSymbol::Error => {
+                                            extract_token_data_from_args.extend(quote! {
+                                                let (_, #location_varname) = __rustylr_args.pop().unwrap();
+                                            });
+                                        }
+                                    }
                                 }
                                 None => {
                                     extract_token_data_from_args.extend(quote! {
