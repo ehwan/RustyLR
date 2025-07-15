@@ -639,7 +639,7 @@ impl Grammar {
             for (level, classes) in level_classes.into_iter().enumerate() {
                 if classes.is_empty() {
                     continue;
-                } else if classes.len() == 1 {
+                } else {
                     let case_stream = usize_list_to_case_stream(classes.into_iter());
                     stream.extend(quote! {
                         #case_stream => Some(#level),
