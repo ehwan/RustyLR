@@ -49,7 +49,7 @@ For example, to enforce operator precedence (e.g., `*` has higher precedence tha
 
 ```rust
 E : E '+' E {
-      match *lookahead {
+      match *lookahead.to_term().unwrap() {
           '*' => {
               // Don't reduce if the next token is '*'
               // This prevents:
@@ -76,7 +76,7 @@ E : E '+' E {
 ```
 
 ### Predefined Variables in Reduce Actions
-- `lookahead: &TokenType` - refers to the next token in the input stream
+- `lookahead: &TerminalSymbol<TokenType>` - refers to the next token in the input stream. either a terminal fed by the user or an special token like `error`
 - `shift: &mut bool` - controls whether a shift action should be performed
 
 ### Ambiguity Resolution Rules

@@ -5,8 +5,6 @@ use proc_macro2::TokenStream;
 use quote::format_ident;
 use quote::quote;
 
-use rusty_lr_core::Token;
-
 use crate::grammar::Grammar;
 use crate::terminal_info::TerminalName;
 use crate::utils;
@@ -42,22 +40,21 @@ impl Grammar {
             } else {
                 quote! { #module_prefix::stackvec::SmallVecUsize }
             };
-
             stream.extend(
-        quote! {
-                /// type alias for `Context`
-                #[allow(non_camel_case_types,dead_code)]
-                pub type #context_struct_name = #module_prefix::parser::nondeterministic::Context<#token_data_typename>;
-                /// type alias for CFG production rule
-                #[allow(non_camel_case_types,dead_code)]
-                pub type #rule_typename = #module_prefix::rule::ProductionRule<&'static str, #enum_name>;
-                /// type alias for DFA state
-                #[allow(non_camel_case_types,dead_code)]
-                pub type #state_typename = #module_prefix::parser::nondeterministic::state::#state_structname<#enum_name, #rule_container_type>;
-                /// type alias for `InvalidTerminalError`
-                #[allow(non_camel_case_types,dead_code)]
-                pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_data_typename>;
-            }
+            quote! {
+                    /// type alias for `Context`
+                    #[allow(non_camel_case_types,dead_code)]
+                    pub type #context_struct_name = #module_prefix::parser::nondeterministic::Context<#token_data_typename>;
+                    /// type alias for CFG production rule
+                    #[allow(non_camel_case_types,dead_code)]
+                    pub type #rule_typename = #module_prefix::rule::ProductionRule<&'static str, #enum_name>;
+                    /// type alias for DFA state
+                    #[allow(non_camel_case_types,dead_code)]
+                    pub type #state_typename = #module_prefix::parser::state::#state_structname<#enum_name, #rule_container_type>;
+                    /// type alias for `InvalidTerminalError`
+                    #[allow(non_camel_case_types,dead_code)]
+                    pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_data_typename>;
+                }
             );
         } else {
             stream.extend(
@@ -70,7 +67,7 @@ impl Grammar {
                 pub type #rule_typename = #module_prefix::rule::ProductionRule<&'static str, #enum_name>;
                 /// type alias for DFA state
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #state_typename = #module_prefix::parser::deterministic::state::#state_structname<#enum_name>;
+                pub type #state_typename = #module_prefix::parser::state::#state_structname<#enum_name, usize>;
                 /// type alias for `ParseError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_data_typename>;
@@ -183,6 +180,7 @@ impl Grammar {
         // building grammar
         // ======================
         use rusty_lr_core::builder::ReduceType;
+        use rusty_lr_core::TerminalSymbol;
         use rusty_lr_core::Token;
 
         let reduce_type_to_stream = |reduce_type: ReduceType| -> TokenStream {
@@ -211,9 +209,20 @@ impl Grammar {
                 }
             })
             .collect();
-        let token_to_stream = |token: Token<usize, usize>| -> TokenStream {
+        let terminal_symbol_to_stream = |term: TerminalSymbol<usize>| -> TokenStream {
+            match term {
+                TerminalSymbol::Term(term) => {
+                    quote! { #module_prefix::TerminalSymbol::Term(#term) }
+                }
+                TerminalSymbol::Error => {
+                    quote! { #module_prefix::TerminalSymbol::Error }
+                }
+            }
+        };
+        let token_to_stream = |token: Token<TerminalSymbol<usize>, usize>| -> TokenStream {
             match token {
                 Token::Term(term) => {
+                    let term = terminal_symbol_to_stream(term);
                     quote! { #module_prefix::Token::Term(#term) }
                 }
                 Token::NonTerm(nonterm) => {
@@ -225,7 +234,7 @@ impl Grammar {
 
         let mut terminal_class_names_stream = TokenStream::new();
         for class in 0..self.terminal_classes.len() {
-            let name = self.class_pretty_name_list(class, 4);
+            let name = self.class_pretty_name_list(TerminalSymbol::Term(class), 4);
             terminal_class_names_stream.extend(quote! {
                 #name,
             });
@@ -357,17 +366,19 @@ impl Grammar {
                 });
             }
             let mut states_body_stream = TokenStream::new();
-            let mut usize_sets_name_map = std::collections::BTreeMap::new();
-            let mut get_or_insert_usize_set = |set: std::collections::BTreeSet<usize>| -> Ident {
-                let new_index = usize_sets_name_map.len();
-                usize_sets_name_map
-                    .entry(set)
-                    .or_insert_with(|| format_ident!("__rustylr_uset{new_index}"))
-                    .clone()
-            };
+            let mut terminal_sets_name_map = std::collections::BTreeMap::new();
+            let mut get_or_insert_terminal_set =
+                |set: std::collections::BTreeSet<TerminalSymbol<usize>>| -> Ident {
+                    let new_index = terminal_sets_name_map.len();
+                    terminal_sets_name_map
+                        .entry(set)
+                        .or_insert_with(|| format_ident!("__rustylr_tset{new_index}"))
+                        .clone()
+                };
             for state in &self.states {
                 let mut shift_term_body_stream = TokenStream::new();
                 for (&term, &next_state) in &state.shift_goto_map_term {
+                    let term = terminal_symbol_to_stream(term);
                     shift_term_body_stream.extend(quote! {
                         (#term, #next_state),
                     });
@@ -390,12 +401,19 @@ impl Grammar {
                         .insert(term);
                 }
                 for (rules, terms) in reduce_rules_terms_map {
-                    let terms_set_name = get_or_insert_usize_set(terms);
-                    let rules_set_name = get_or_insert_usize_set(rules.clone());
+                    let terms_set_name = get_or_insert_terminal_set(terms);
+
+                    let mut rules_body_stream = TokenStream::new();
+                    for &rule in rules {
+                        rules_body_stream.extend(quote! {
+                            #rule,
+                        });
+                    }
                     reduce_body_stream.extend(quote! {
+                        let reduce_rules = std::collections::BTreeSet::from([#rules_body_stream]);
                         __reduce_map.extend(
                             #terms_set_name.iter().map(
-                                |term| (*term, #rules_set_name.clone())
+                                |term| (*term, reduce_rules.clone())
                             )
                         );
                     });
@@ -427,15 +445,16 @@ impl Grammar {
                 });
             }
 
-            let mut uset_initialize_stream = TokenStream::new();
-            for (set, name) in usize_sets_name_map {
+            let mut terminal_set_initialize_stream = TokenStream::new();
+            for (set, name) in terminal_sets_name_map {
                 let mut set_body_stream = TokenStream::new();
                 for val in set {
+                    let val = terminal_symbol_to_stream(val);
                     set_body_stream.extend(quote! {
                         #val,
                     });
                 }
-                uset_initialize_stream.extend(quote! {
+                terminal_set_initialize_stream.extend(quote! {
                     let #name = std::collections::BTreeSet::from([#set_body_stream]);
                 });
             }
@@ -450,13 +469,20 @@ impl Grammar {
                 let rules = rules.into_iter().map(
                     move |rule| {
                         rule.map(
-                            |term| terminal_class_names[term],
+                            |term| match term {
+                                #module_prefix::TerminalSymbol::Term(term) => {
+                                    terminal_class_names[term]
+                                }
+                                #module_prefix::TerminalSymbol::Error => {
+                                    "error"
+                                }
+                            },
                             |nonterm| nonterm,
                         )
                     }
                 ).collect();
 
-                #uset_initialize_stream
+                #terminal_set_initialize_stream
                 let states = vec![
                     #states_body_stream
                 ];
@@ -470,6 +496,7 @@ impl Grammar {
             // adding precedence levels
             let mut add_precedence_levels_stream = TokenStream::new();
             for (&term, &level) in self.builder.precedence_levels.iter() {
+                let term = terminal_symbol_to_stream(term);
                 add_precedence_levels_stream.extend(quote! {
                     builder.add_precedence(#term, #level);
                 });
@@ -490,6 +517,7 @@ impl Grammar {
                 let lookaheads_stream = if let Some(lookaheads) = rule.lookaheads.as_ref() {
                     let mut lookaheads_body_stream = TokenStream::new();
                     for &lookahead in lookaheads.iter() {
+                        let lookahead = terminal_symbol_to_stream(lookahead);
                         lookaheads_body_stream.extend(quote! {
                             #lookahead,
                         });
@@ -524,12 +552,6 @@ impl Grammar {
                     );
                 });
             }
-            // add `error` non-terminal
-            add_rules_stream.extend(quote! {
-                builder.add_empty_rule(
-                    #nonterminals_enum_name::error
-                );
-            });
 
             let prec_cap = self.builder.precedence_types.len();
             let mut precedence_types_stream = quote! {
@@ -597,7 +619,14 @@ impl Grammar {
                 let rules = builder.rules.into_iter().map(
                     move |rule| {
                         rule.rule.map(
-                            |term| terminal_class_names[term],
+                            |term| match term {
+                                #module_prefix::TerminalSymbol::Term(term) => {
+                                    terminal_class_names[term]
+                                }
+                                #module_prefix::TerminalSymbol::Error => {
+                                    "error"
+                                }
+                            },
                             |nonterm| nonterm,
                         )
                     }
@@ -617,12 +646,6 @@ impl Grammar {
 
         let other_class_id = self.other_terminal_class_id;
 
-        let get_error_nonterm_stream = if self.error_used {
-            quote! { Some(#nonterminals_enum_name::error) }
-        } else {
-            quote! { None }
-        };
-
         // generate `Parser::class_precedence()` terminal class -> precedence level match body
         let class_level_match_body_stream = {
             let mut stream = TokenStream::new();
@@ -633,13 +656,13 @@ impl Grammar {
                 std::collections::BTreeSet::new(),
             );
             for (&class, &level) in self.builder.precedence_levels.iter() {
-                level_classes[level].insert(class);
+                level_classes[level].insert(class.into_term().unwrap());
             }
 
             for (level, classes) in level_classes.into_iter().enumerate() {
                 if classes.is_empty() {
                     continue;
-                } else if classes.len() == 1 {
+                } else {
                     let case_stream = usize_list_to_case_stream(classes.into_iter());
                     stream.extend(quote! {
                         #case_stream => Some(#level),
@@ -729,6 +752,13 @@ impl Grammar {
                 _ => #other_class_id,
             });
 
+            let error_used = self.error_used;
+            let error_prec_stream = if let Some(error_prec) = self.error_precedence {
+                quote! { Some(#error_prec) }
+            } else {
+                quote! { None }
+            };
+
             stream.extend(quote! {
             /// A struct that holds the entire parser table and production rules.
             #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
@@ -746,11 +776,16 @@ impl Grammar {
                 type State = #state_typename;
                 type TerminalClassElement = ::std::ops::RangeInclusive<#token_typename>;
 
-                fn class_precedence(&self, class: usize) -> Option<usize> {
-                    #[allow(unreachable_patterns)]
+                fn class_precedence(&self, class: #module_prefix::TerminalSymbol<usize>) -> Option<usize> {
                     match class {
-                        #class_level_match_body_stream
-                        _ => None,
+                        #module_prefix::TerminalSymbol::Term(class) => {
+                            #[allow(unreachable_patterns)]
+                            match class {
+                                #class_level_match_body_stream
+                                _ => None,
+                            }
+                        }
+                        #module_prefix::TerminalSymbol::Error => #error_prec_stream,
                     }
                 }
                 fn precedence_types(&self, level: usize) -> Option<#module_prefix::builder::ReduceType> {
@@ -777,8 +812,8 @@ impl Grammar {
                         #terminal_class_match_body_stream
                     }
                 }
-                fn get_error_nonterm(&self) -> Option<Self::NonTerm> {
-                    #get_error_nonterm_stream
+                fn error_used() -> bool {
+                    #error_used
                 }
             }
 
@@ -912,6 +947,12 @@ impl Grammar {
             } else {
                 quote! {terminal}
             };
+            let error_used = self.error_used;
+            let error_prec_stream = if let Some(error_prec) = self.error_precedence {
+                quote! { Some(#error_prec) }
+            } else {
+                quote! { None }
+            };
 
             stream.extend(quote! {
             /// A struct that holds the entire parser table and production rules.
@@ -930,11 +971,16 @@ impl Grammar {
                 type State = #state_typename;
                 type TerminalClassElement = &'static str;
 
-                fn class_precedence(&self, class: usize) -> Option<usize> {
-                    #[allow(unreachable_patterns)]
+                fn class_precedence(&self, class: #module_prefix::TerminalSymbol<usize>) -> Option<usize> {
                     match class {
-                        #class_level_match_body_stream
-                        _ => None,
+                        #module_prefix::TerminalSymbol::Term(class) => {
+                            #[allow(unreachable_patterns)]
+                            match class {
+                                #class_level_match_body_stream
+                                _ => None,
+                            }
+                        }
+                        #module_prefix::TerminalSymbol::Error => #error_prec_stream,
                     }
                 }
                 fn precedence_types(&self, level: usize) -> Option<#module_prefix::builder::ReduceType> {
@@ -960,8 +1006,9 @@ impl Grammar {
                         #terminal_class_match_body_stream
                     }
                 }
-                fn get_error_nonterm(&self) -> Option<Self::NonTerm> {
-                    #get_error_nonterm_stream
+
+                fn error_used() -> bool {
+                    #error_used
                 }
             }
 
@@ -1056,6 +1103,8 @@ impl Grammar {
         let mut identity_reduce_action_range: BTreeMap<usize, (usize, usize)> = BTreeMap::new();
         let mut clear_reduce_action_range: Option<(usize, usize)> = None;
 
+        use rusty_lr_core::TerminalSymbol;
+        use rusty_lr_core::Token;
         for (rule_index, &(nonterm_idx, rule_local_id)) in self.rules_sorted.iter().enumerate() {
             let nonterm = &self.nonterminals[nonterm_idx];
             let rule = &nonterm.rules[rule_local_id];
@@ -1066,15 +1115,25 @@ impl Grammar {
                     let mut extract_token_data_from_args = TokenStream::new();
                     for token in rule.tokens.iter() {
                         match &token.token {
-                            Token::Term(_) => match &token.mapto {
+                            Token::Term(term) => match &token.mapto {
                                 Some(mapto) => {
                                     let location_varname =
                                         format_ident!("__rustylr_location_{}", mapto);
-                                    extract_token_data_from_args.extend(quote! {
-                                        let (#token_data_typename::#terminal_variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
-                                            unreachable!()
-                                        };
-                                    });
+
+                                    match term {
+                                        TerminalSymbol::Term(_) => {
+                                            extract_token_data_from_args.extend(quote! {
+                                                let (#token_data_typename::#terminal_variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
+                                                    unreachable!()
+                                                };
+                                            });
+                                        }
+                                        TerminalSymbol::Error => {
+                                            extract_token_data_from_args.extend(quote! {
+                                                let (_, #location_varname) = __rustylr_args.pop().unwrap();
+                                            });
+                                        }
+                                    }
                                 }
                                 None => {
                                     extract_token_data_from_args.extend(quote! {
@@ -1145,7 +1204,7 @@ impl Grammar {
                             fn #reduce_fn_ident(
                                 __rustylr_args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
                                 shift: &mut bool,
-                                lookahead: &#token_typename,
+                                lookahead: &#module_prefix::TerminalSymbol<#token_typename>,
                                 #user_data_parameter_name: &mut #user_data_typename,
                                 __rustylr_location0: &mut #location_typename,
                             ) -> Result<#token_data_typename, #reduce_error_typename> {
@@ -1165,7 +1224,7 @@ impl Grammar {
                             fn #reduce_fn_ident(
                                 __rustylr_args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
                                 shift: &mut bool,
-                                lookahead: &#token_typename,
+                                lookahead: &#module_prefix::TerminalSymbol<#token_typename>,
                                 #user_data_parameter_name: &mut #user_data_typename,
                                 __rustylr_location0: &mut #location_typename,
                             ) -> Result<#token_data_typename, #reduce_error_typename> {
@@ -1313,7 +1372,7 @@ impl Grammar {
                 rule_index: usize,
                 reduce_args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
                 shift: &mut bool,
-                lookahead: &Self::Term,
+                lookahead: &#module_prefix::TerminalSymbol<Self::Term>,
                 user_data: &mut Self::UserData,
                 location0: &mut Self::Location,
             ) -> Result<Self, Self::ReduceActionError> {
@@ -1324,7 +1383,7 @@ impl Grammar {
                     }
                 }
             }
-            fn new_error_nonterm() -> Self {
+            fn new_error() -> Self {
                 #token_data_typename::#empty_ruletype_variant_name
             }
             fn new_terminal(term: #token_typename) -> Self {

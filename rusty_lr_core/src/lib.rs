@@ -30,6 +30,7 @@ pub mod nonterminal;
 pub mod rule;
 
 pub(crate) mod token;
+pub use token::TerminalSymbol;
 pub use token::Token;
 
 pub(crate) mod backtrace;

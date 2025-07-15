@@ -1,5 +1,8 @@
 use crate::terminal_info::TerminalName;
 
+use rusty_lr_core::TerminalSymbol;
+use rusty_lr_core::Token;
+
 use super::error::ParseError;
 use super::grammar::Grammar;
 use super::nonterminal_info::{NonTerminalInfo, Rule};
@@ -13,8 +16,6 @@ use proc_macro2::TokenStream;
 
 use quote::format_ident;
 use quote::{quote, ToTokens};
-
-use rusty_lr_core::Token;
 
 /// Some regex pattern
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -58,7 +59,7 @@ pub struct PatternToToken {
     /// only for internal usage; generating name like A_star, A_plus, A_question
     name: Ident,
     /// actual token for the pattern
-    pub token: Token<usize, usize>,
+    pub token: Token<TerminalSymbol<usize>, usize>,
     /// ruletype for this pattern
     pub ruletype: Option<TokenStream>,
     /// implicit mapto derived from its parent pattern (e.g. 'A' from A+, 'A' from A*!)
@@ -100,8 +101,17 @@ impl Pattern {
 
         match &self.internal {
             PatternInternal::Ident(ident) => {
-                // check if this ident is either name of terminal or nonterminal
+                if ident == crate::utils::ERROR_NAME {
+                    // special case for error token
+                    return Ok(PatternToToken {
+                        name: ident.clone(),
+                        token: Token::Term(TerminalSymbol::Error),
+                        ruletype: None,
+                        mapto: Some(ident.clone()),
+                    });
+                }
 
+                // check if this ident is either name of terminal or nonterminal
                 if let Some(term_idx) = grammar
                     .terminals_index
                     .get(&TerminalName::Ident(ident.clone()))
@@ -109,7 +119,7 @@ impl Pattern {
                     // terminal
                     Ok(PatternToToken {
                         name: ident.clone(),
-                        token: Token::Term(*term_idx),
+                        token: Token::Term(TerminalSymbol::Term(*term_idx)),
                         ruletype: Some(grammar.token_typename.clone()),
                         mapto: Some(ident.clone()),
                     })
@@ -495,7 +505,7 @@ impl Pattern {
                     let term_info = &grammar.terminals[terminal];
                     return Ok(PatternToToken {
                         name: term_info.name.clone().name(),
-                        token: Token::Term(terminal),
+                        token: Token::Term(TerminalSymbol::Term(terminal)),
                         ruletype: Some(grammar.token_typename.clone()),
                         mapto: None,
                     });
@@ -508,7 +518,7 @@ impl Pattern {
                 for terminal in terminals {
                     let rule = Rule {
                         tokens: vec![TokenMapped {
-                            token: Token::Term(terminal),
+                            token: Token::Term(TerminalSymbol::Term(terminal)),
                             mapto: Some(Ident::new("__token0", Span::call_site())),
                             begin_span: Span::call_site(),
                             end_span: Span::call_site(),
@@ -781,7 +791,7 @@ impl Pattern {
 
                     Ok(PatternToToken {
                         name: info.name.clone().name(),
-                        token: Token::Term(idx),
+                        token: Token::Term(TerminalSymbol::Term(idx)),
                         ruletype: Some(grammar.token_typename.clone()),
                         mapto: None,
                     })
@@ -792,7 +802,7 @@ impl Pattern {
 
                     Ok(PatternToToken {
                         name: info.name.clone().name(),
-                        token: Token::Term(idx),
+                        token: Token::Term(TerminalSymbol::Term(idx)),
                         ruletype: Some(grammar.token_typename.clone()),
                         mapto: None,
                     })
@@ -810,7 +820,7 @@ impl Pattern {
                             .map(|ch| {
                                 let term_id = grammar.get_terminal_index_from_char(ch);
                                 TokenMapped {
-                                    token: Token::Term(term_id),
+                                    token: Token::Term(TerminalSymbol::Term(term_id)),
                                     mapto: None,
                                     begin_span: str_span,
                                     end_span: str_span,
@@ -859,7 +869,7 @@ impl Pattern {
                             .map(|ch| {
                                 let term_id = grammar.get_terminal_index_from_char(*ch as char);
                                 TokenMapped {
-                                    token: Token::Term(term_id),
+                                    token: Token::Term(TerminalSymbol::Term(term_id)),
                                     mapto: None,
                                     begin_span: str_span,
                                     end_span: str_span,

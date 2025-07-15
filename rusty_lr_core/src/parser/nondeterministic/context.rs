@@ -6,6 +6,7 @@ use super::ParseError;
 
 use crate::nonterminal::TokenData;
 use crate::parser::Parser;
+use crate::TerminalSymbol;
 
 type SmallVecNode<Data> = smallvec::SmallVec<[Rc<Node<Data>>; 3]>;
 
@@ -227,12 +228,17 @@ impl<Data: TokenData> Context<Data> {
         use crate::parser::State;
         use crate::Location;
 
+        self.reduce_errors.clear();
+        self.no_precedences.clear();
+        self.fallback_nodes.clear();
+        self.next_nodes.clear();
+
         let class = parser.to_terminal_class(&term);
-        let shift_prec = parser.class_precedence(class);
+        let shift_prec = parser.class_precedence(TerminalSymbol::Term(class));
 
         let mut current_nodes = std::mem::take(&mut self.current_nodes);
         for node in current_nodes.drain(..) {
-            if let Err(node) = Node::feed_location(
+            if let Err((node, _, _)) = Node::feed_location(
                 node,
                 self,
                 parser,
@@ -253,42 +259,53 @@ impl<Data: TokenData> Context<Data> {
         // check for panic mode
         // and restore nodes to original state from fallback_nodes
         if self.next_nodes.is_empty() {
-            let mut error_nodes: smallvec::SmallVec<[Node<Data>; 3]> = smallvec::SmallVec::new();
-            // try enter panic mode and store error nodes to next_nodes
-            for node in self.fallback_nodes.iter() {
-                if let Some(error_node) = Node::panic_mode(node, parser) {
-                    error_nodes.push(error_node);
-                }
-            }
-            // if error_nodes is still empty, then no panic mode was entered, this is an error
-            // restore current_nodes to fallback_nodes
-            if error_nodes.is_empty() {
+            // early return if `error` token is not used in the grammar
+            if !P::error_used() {
                 std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
 
+                return Err(ParseError {
+                    term: TerminalSymbol::Term(term),
+                    location,
+                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                    no_precedences: std::mem::take(&mut self.no_precedences),
+                });
+            }
+
+            let error_prec = parser.class_precedence(TerminalSymbol::Error);
+
+            let mut fallback_nodes = std::mem::take(&mut self.fallback_nodes);
+            // try enter panic mode and store error nodes to next_nodes
+            for node in fallback_nodes.drain(..) {
+                Node::panic_mode(node, self, parser, error_prec, userdata);
+            }
+            self.fallback_nodes = fallback_nodes;
+            // if next_node is still empty, then no panic mode was entered, this is an error
+            // restore current_nodes to fallback_nodes
+            if self.next_nodes.is_empty() {
                 Err(ParseError {
-                    term,
+                    term: TerminalSymbol::Term(term),
                     location,
                     reduce_action_errors: std::mem::take(&mut self.reduce_errors),
                     no_precedences: std::mem::take(&mut self.no_precedences),
                 })
             } else {
-                self.fallback_nodes.clear();
-
                 // try shift term to error state
-                for mut error_node in error_nodes {
-                    if let Some(next_state) =
-                        parser.get_states()[error_node.state].shift_goto_class(class)
+                for mut error_node in self.next_nodes.drain(..) {
+                    if let Some(next_state) = parser.get_states()[error_node.state]
+                        .shift_goto_class(TerminalSymbol::Term(class))
                     {
                         // A -> a . error b
                         // and b is fed, shift error and b
 
                         let next_node = Node {
-                            parent: Some(Rc::new(error_node)),
+                            parent: Some(error_node),
                             state: next_state,
                             data: Some((Data::new_terminal(term.clone()), location.clone())),
                             precedence_level: shift_prec,
                             #[cfg(feature = "tree")]
-                            tree: Some(crate::tree::Tree::new_terminal(term.clone())),
+                            tree: Some(crate::tree::Tree::new_terminal(TerminalSymbol::Term(
+                                term.clone(),
+                            ))),
                         };
                         self.current_nodes.push(Rc::new(next_node));
                     } else {
@@ -301,9 +318,15 @@ impl<Data: TokenData> Context<Data> {
                             ),
                             2, // error node + fed token
                         );
-                        error_node.data.as_mut().unwrap().1 = new_location;
-
-                        self.current_nodes.push(Rc::new(error_node));
+                        if let Some(node) = Rc::get_mut(&mut error_node) {
+                            node.data.as_mut().unwrap().1 = new_location;
+                        } else {
+                            unreachable!(
+                                "error node should be mutable, but it is not. \
+                                 This is a bug in the parser."
+                            );
+                        }
+                        self.current_nodes.push(error_node);
                     }
                 }
                 Ok(())
@@ -315,10 +338,9 @@ impl<Data: TokenData> Context<Data> {
     }
 
     /// Check if `term` can be feeded to current state.
-    /// This does not check for reduce action error, nor the panic mode.
-    /// You should call `can_panic_mode()` after this fails to check if panic mode can accept this term.
-    ///
-    /// This does not change the state of the context.
+    /// This does not simulate for reduce action error, or panic mode.
+    /// So this function will return `false` even if term can be shifted as `error` token,
+    /// and will return `true` if `Err` variant is returned by `reduce_action`.
     pub fn can_feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
@@ -328,40 +350,29 @@ impl<Data: TokenData> Context<Data> {
         P::NonTerm: Hash + Eq,
     {
         let class = parser.to_terminal_class(term);
-        let shift_prec = parser.class_precedence(class);
+        let shift_prec = parser.class_precedence(TerminalSymbol::Term(class));
         self.current_nodes
             .iter()
-            .any(|node| Node::can_feed(node, parser, term, class, shift_prec))
+            .any(|node| Node::can_feed(node, parser, class, shift_prec))
     }
 
     /// Check if current context can enter panic mode.
-    pub fn can_panic_mode<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &mut self,
+    pub fn can_panic<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
         parser: &P,
     ) -> bool
     where
-        Data::NonTerm: std::hash::Hash + Eq,
+        Data::NonTerm: Hash + Eq,
     {
-        use crate::parser::State;
-
-        let Some(error_nonterm) = parser.get_error_nonterm() else {
+        // if `error` token was not used in the grammar, early return here
+        if !P::error_used() {
             return false;
-        };
-        for mut node in self.current_nodes.iter() {
-            loop {
-                let last_state = &parser.get_states()[node.state];
-                if last_state.shift_goto_nonterm(&error_nonterm).is_some() {
-                    return true;
-                }
-
-                if let Some(parent) = node.parent.as_ref() {
-                    node = parent;
-                } else {
-                    break;
-                }
-            }
         }
-        false
+        let error_prec = parser.class_precedence(TerminalSymbol::Error);
+
+        self.current_nodes
+            .iter()
+            .any(|node| Node::can_panic(node, parser, error_prec))
     }
 }
 

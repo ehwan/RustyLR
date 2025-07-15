@@ -29,6 +29,7 @@ use codespan_reporting::term::termcolor::StandardStream;
 use proc_macro2::TokenStream;
 
 use quote::quote;
+use rusty_lr_core::TerminalSymbol;
 use rusty_lr_parser::error::ArgError;
 use rusty_lr_parser::error::ParseArgError;
 use rusty_lr_parser::error::ParseError;
@@ -796,7 +797,7 @@ impl Builder {
                     let msg = format!(
                         "TerminalClass{}: {}",
                         class_def.multiterm_counter,
-                        grammar.class_pretty_name_list(class_idx, 10)
+                        grammar.class_pretty_name_list(TerminalSymbol::Term(class_idx), 10)
                     );
                     class_message.push(msg);
                 }
@@ -912,7 +913,10 @@ impl Builder {
                 if !grammar.other_used && other_terminal_class.terminals.len() > 1 {
                     let class_name =
                         grammar.class_pretty_name_abbr(grammar.other_terminal_class_id);
-                    let terms = grammar.class_pretty_name_list(grammar.other_terminal_class_id, 10);
+                    let terms = grammar.class_pretty_name_list(
+                        TerminalSymbol::Term(grammar.other_terminal_class_id),
+                        10,
+                    );
                     let mut notes = Vec::new();
                     notes.push(format!("{class_name}: {terms}"));
 

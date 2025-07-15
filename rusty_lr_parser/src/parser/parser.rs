@@ -415,9 +415,6 @@ Action(Option<Group>): bracegroup {
 | { None }
 ;
 
-A: $sepp(a, b, c, d) {
-};
-
 IdentOrLiteral(IdentOrLiteral): ident {
     let Lexed::Ident(ident) = ident else {
         unreachable!( "IdentOrLiteral-Ident" );

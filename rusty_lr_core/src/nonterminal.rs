@@ -82,15 +82,15 @@ pub trait TokenData: Sized {
         // if this variable is set to false in the action, the shift action will not be performed. (GLR parser)
         shift: &mut bool,
         // the lookahead token that caused this reduce action
-        lookahead: &Self::Term,
+        lookahead: &crate::TerminalSymbol<Self::Term>,
         // user input data
         userdata: &mut Self::UserData,
         // location of this non-terminal, e.g. `@$`
         location0: &mut Self::Location,
     ) -> Result<Self, Self::ReduceActionError>;
 
-    /// create new non-terminal for error recovery
-    fn new_error_nonterm() -> Self;
+    /// create new token data for error recovery
+    fn new_error() -> Self;
 
     /// create new terminal variant
     fn new_terminal(term: Self::Term) -> Self;
