@@ -15,7 +15,7 @@ lr1! {
 
     E(i32) : E '+' e2=E
             {
-                match *lookahead {
+                match *lookahead.to_term().unwrap() {
                     '*' => {
                         return Err("".to_string());
                     }

@@ -199,6 +199,11 @@ E(i32): left=A '+' right=A { left + right };
 ```rust
 E(i32): A '+' right=A { A + right }; // use A directly
 ```
+This is also possible for advanced patterns:
+```rust
+E(i32): A* { A.iter().sum() }; // sum all values in A
+```
+Here, `A` is a `Vec<A>` and you can access its values directly.
 
 **User Data:** Access mutable user-defined data passed to the parser.
 ```rust
@@ -207,14 +212,16 @@ E(i32): A '+' right=A {
     A + right 
 };
 ```
+Here, `data` is `&mut UserData`, which is defined by the `%userdata` directive.
 
 **Lookahead Token:** Inspect the next token without consuming it.
 ```rust
-match *lookahead { // lookahead: &TerminalType
+match *lookahead.to_term().unwrap() { // lookahead: &TerminalType
     '+' => { /* ... */ },
     _ => { /* ... */ },
 }
 ```
+Here, `lookahead` is a `&TerminalSymbol<%TokenType>`, it is either a terminal symbol fed by the user or a special token like `error`.
 
 **Shift Control:** Control whether to perform a shift operation (for GLR parser).
 ```rust
@@ -352,7 +359,7 @@ JsonObject: '{' JsonKeyValue* '}'
           | '{' error '}'          { println!("recovering with '}}' at {}", @error); }
           ;
 ```
-The `error` token is a reserved non-terminal symbol that can be matched with **any tokens**.
+The `error` token is a reserved terminal symbol that can be matched with **any zero or more tokens**.
 In the above example, if the parser encounters an invalid token while parsing a JSON object, it will enter panic mode and discard all tokens until it finds a closing brace `}`.
 
 **How it works:**
@@ -361,6 +368,7 @@ At that point, it shifts the invalid fed token as the `error` token, then tries 
 
 **Important notes:**
 - The `error` token does not have any value, no associated rule-type
+- `error` token does have location data, which can be accessed in the reduce action by `@error`. The location data is merged from the invalid tokens that consist of the `error` token.
 - In GLR parsing, the `error` path will be ignored if there are any other valid paths. In other words, it enters panic-mode only if there is no other way to feed the terminal symbol
 
 ### Operator Precedence

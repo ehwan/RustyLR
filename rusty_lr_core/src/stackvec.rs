@@ -1,8 +1,14 @@
 // stack allocated Vec for small lists ( ~ 8 elements )
-// currently only for reduce_rules in GLR parser
 
 pub trait ToUsizeList {
     fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone;
+}
+
+/// For deterministic parser behavior
+impl ToUsizeList for usize {
+    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
+        std::iter::once(*self)
+    }
 }
 
 pub type SmallVecU8 = smallvec::SmallVec<[u8; 16]>;

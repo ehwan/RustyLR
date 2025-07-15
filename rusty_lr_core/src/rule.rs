@@ -12,7 +12,7 @@ pub enum Precedence {
     /// fixed precedence level
     Fixed(usize), // precedence level
 
-    /// get precedence from it's child token; for runtime conflict resolution
+    /// get precedence from i'th child token; for runtime conflict resolution
     Dynamic(usize), // token index
 }
 

@@ -6,6 +6,7 @@ use super::ParseError;
 use crate::nonterminal::TokenData;
 use crate::parser::Parser;
 use crate::parser::State;
+use crate::TerminalSymbol;
 
 /// A struct that maintains the current state and the values associated with each symbol.
 pub struct Context<Data: TokenData> {
@@ -174,6 +175,7 @@ impl<Data: TokenData> Context<Data> {
     {
         self.feed_location(parser, term, userdata, Default::default())
     }
+
     /// Feed one terminal with location to parser, and update stacks.
     pub fn feed_location<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &mut self,
@@ -187,8 +189,110 @@ impl<Data: TokenData> Context<Data> {
         Data::NonTerm: Hash + Eq + Copy,
     {
         use crate::Location;
-        let class = parser.to_terminal_class(&term);
+        let class = TerminalSymbol::Term(parser.to_terminal_class(&term));
         let shift_prec = parser.class_precedence(class);
+
+        match self.feed_location_impl(
+            parser,
+            TerminalSymbol::Term(term),
+            class,
+            shift_prec,
+            userdata,
+            location,
+        ) {
+            Ok(()) => return Ok(()),
+            Err(ParseError::NoAction(term, location)) => {
+                // nothing shifted; enters panic mode
+
+                // if `error` token was not used in the grammar, early return here
+                if !P::error_used() {
+                    return Err(ParseError::NoAction(term, location));
+                }
+
+                let mut error_location =
+                    Location::new(self.data_stack.iter().map(|(_, loc)| loc).rev(), 0);
+                let error_prec = parser.class_precedence(TerminalSymbol::Error);
+
+                loop {
+                    match self.feed_location_impl(
+                        parser,
+                        TerminalSymbol::Error,
+                        TerminalSymbol::Error,
+                        error_prec,
+                        userdata,
+                        error_location,
+                    ) {
+                        Err(ParseError::NoAction(_, error_loc)) => {
+                            if self.state_stack.len() == 1 {
+                                return Err(ParseError::NoAction(term, location));
+                            }
+
+                            // no action for `error` token, continue to panic mode
+                            // merge location with previous
+                            error_location = Data::Location::new(
+                                std::iter::once(&error_loc)
+                                    .chain(self.data_stack.iter().map(|(_, loc)| loc).rev()),
+                                2, // error node
+                            );
+                            self.data_stack.pop();
+                            self.precedence_stack.pop();
+                            self.state_stack.pop();
+
+                            #[cfg(feature = "tree")]
+                            self.tree_stack.pop(); // pop tree node for `error`
+                        }
+                        Ok(()) => break,             // successfully shifted `error`
+                        Err(err) => return Err(err), // other errors
+                    }
+                }
+
+                // try shift given term again
+                if let Some(next_state) =
+                    parser.get_states()[*self.state_stack.last().unwrap()].shift_goto_class(class)
+                {
+                    #[cfg(feature = "tree")]
+                    self.tree_stack
+                        .push(crate::tree::Tree::new_terminal(term.clone()));
+
+                    // shift with `error` token
+                    self.data_stack
+                        .push((Data::new_terminal(term.into_term().unwrap()), location));
+                    self.precedence_stack.push(shift_prec);
+                    self.state_stack.push(next_state);
+                } else {
+                    // merge term with previous error
+
+                    let error_location = Data::Location::new(
+                        std::iter::once(&location)
+                            .chain(self.data_stack.iter().map(|(_, loc)| loc).rev()),
+                        2, // error node
+                    );
+                    if let Some((_, err_loc)) = self.data_stack.last_mut() {
+                        *err_loc = error_location;
+                    } else {
+                        unreachable!("data stack must have at least one element");
+                    }
+                }
+                Ok(())
+            }
+            Err(err) => return Err(err),
+        }
+    }
+
+    fn feed_location_impl<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &mut self,
+        parser: &P,
+        term: TerminalSymbol<Data::Term>,
+        class: TerminalSymbol<usize>,
+        shift_prec: Option<usize>,
+        userdata: &mut Data::UserData,
+        location: Data::Location,
+    ) -> Result<(), ParseError<Data>>
+    where
+        Data::Term: Clone,
+        Data::NonTerm: Hash + Eq + Copy,
+    {
+        use crate::Location;
 
         let shift_to = loop {
             let state = &parser.get_states()[*self.state_stack.last().unwrap()];
@@ -328,50 +432,23 @@ impl<Data: TokenData> Context<Data> {
             self.tree_stack
                 .push(crate::tree::Tree::new_terminal(term.clone()));
 
-            self.data_stack.push((Data::new_terminal(term), location));
+            let data = match term {
+                TerminalSymbol::Term(term) => Data::new_terminal(term),
+                TerminalSymbol::Error => Data::new_error(),
+            };
+            self.data_stack.push((data, location));
             self.precedence_stack.push(shift_prec);
 
             Ok(())
         } else {
-            // enters panic mode
-            if self.panic_mode(parser) {
-                // check for shift terminal again
-                if let Some(next_state_id) =
-                    parser.get_states()[*self.state_stack.last().unwrap()].shift_goto_class(class)
-                {
-                    // A -> a . error b
-                    // and b is fed, shift error and b
-                    self.state_stack.push(next_state_id);
-
-                    #[cfg(feature = "tree")]
-                    self.tree_stack
-                        .push(crate::tree::Tree::new_terminal(term.clone()));
-
-                    self.data_stack.push((Data::new_terminal(term), location));
-                    self.precedence_stack.push(shift_prec);
-                } else {
-                    // here, fed token is in `error` non-terminal
-                    // so merge location with previous
-
-                    let new_location = Data::Location::new(
-                        std::iter::once(&location)
-                            .chain(self.data_stack.iter().map(|(_, loc)| loc).rev()),
-                        2, // error node + fed token
-                    );
-                    self.data_stack.last_mut().unwrap().1 = new_location;
-                }
-                Ok(())
-            } else {
-                Err(ParseError::NoAction(term, location))
-            }
+            Err(ParseError::NoAction(term, location))
         }
     }
 
     /// Check if `term` can be feeded to current state.
-    /// This does not check for reduce action error, nor panic mode.
-    /// You should call `can_panic_mode()` after this fails to check if panic mode can accept this term.
-    ///
-    /// This does not change the state of the context.
+    /// This does not simulate for reduce action error, or panic mode.
+    /// So this function will return `false` even if term can be shifted as `error` token,
+    /// and will return `true` if `Err` variant is returned by `reduce_action`.
     pub fn can_feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
@@ -382,9 +459,67 @@ impl<Data: TokenData> Context<Data> {
     {
         let mut state_stack = self.state_stack.clone();
         let mut precedence_stack = self.precedence_stack.clone();
-        let class = parser.to_terminal_class(&term);
+        let class = TerminalSymbol::Term(parser.to_terminal_class(&term));
         let shift_prec = parser.class_precedence(class);
 
+        match Self::can_feed_impl(
+            &mut state_stack,
+            &mut precedence_stack,
+            parser,
+            class,
+            shift_prec,
+        ) {
+            Some(true) => true,
+            Some(false) => false,
+            None => false,
+        }
+    }
+
+    /// Check if current context can enter panic mode
+    pub fn can_panic<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &P,
+    ) -> bool
+    where
+        Data::NonTerm: Hash + Eq,
+    {
+        // if `error` token was not used in the grammar, early return here
+        if !P::error_used() {
+            return false;
+        }
+
+        let mut state_stack = self.state_stack.clone();
+        let mut precedence_stack = self.precedence_stack.clone();
+        let error_prec = parser.class_precedence(TerminalSymbol::Error);
+
+        loop {
+            match Self::can_feed_impl(
+                &mut state_stack,
+                &mut precedence_stack,
+                parser,
+                TerminalSymbol::Error,
+                error_prec,
+            ) {
+                Some(true) => break true, // successfully shifted `error`
+                Some(false) => {
+                    state_stack.pop();
+                    precedence_stack.pop();
+                }
+                None => break false,
+            }
+        }
+    }
+
+    fn can_feed_impl<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        state_stack: &mut Vec<usize>,
+        precedence_stack: &mut Vec<Option<usize>>,
+        parser: &P,
+        class: TerminalSymbol<usize>,
+        shift_prec: Option<usize>,
+    ) -> Option<bool>
+    where
+        Data::NonTerm: Hash + Eq,
+    {
         let shift_to = loop {
             let state = &parser.get_states()[*state_stack.last().unwrap()];
 
@@ -428,7 +563,7 @@ impl<Data: TokenData> Context<Data> {
                                 }
                                 None => {
                                     // error
-                                    return false;
+                                    return None;
                                 }
                             }
                         }
@@ -442,9 +577,9 @@ impl<Data: TokenData> Context<Data> {
                 // if the code reaches here, it proceed to reduce, without shifting
 
                 // pop state stack
-                state_stack.truncate(self.state_stack.len() - tokens_len);
+                state_stack.truncate(state_stack.len() - tokens_len);
                 // pop precedence stack
-                precedence_stack.truncate(self.precedence_stack.len() - tokens_len);
+                precedence_stack.truncate(precedence_stack.len() - tokens_len);
                 precedence_stack.push(reduce_prec);
 
                 // shift with reduced nonterminal
@@ -461,26 +596,7 @@ impl<Data: TokenData> Context<Data> {
         };
 
         // shift with terminal
-        shift_to.is_some()
-    }
-    /// Check if current context can enter panic mode.
-    pub fn can_panic_mode<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
-        parser: &P,
-    ) -> bool
-    where
-        Data::NonTerm: Hash + Eq,
-    {
-        let Some(error_nonterm) = parser.get_error_nonterm() else {
-            return false;
-        };
-        for &last_state in self.state_stack.iter().rev() {
-            let last_state = &parser.get_states()[last_state];
-            if last_state.shift_goto_nonterm(&error_nonterm).is_some() {
-                return true;
-            }
-        }
-        false
+        Some(shift_to.is_some())
     }
 
     /// Get set of `%trace` non-terminal symbols that current context is trying to parse.
@@ -582,67 +698,6 @@ impl<Data: TokenData> Context<Data> {
         }
 
         ret
-    }
-
-    /// Panic mode recovery with `error` non-terminal.
-    /// Returns true if error is shifted.
-    fn panic_mode<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &mut self,
-        parser: &P,
-    ) -> bool
-    where
-        Data::NonTerm: Hash + Eq + Copy,
-    {
-        use crate::Location;
-        let Some(error_nonterm) = parser.get_error_nonterm() else {
-            return false;
-        };
-        let mut popped_token = 0;
-        for (stack_idx, &last_state) in self.state_stack.iter().enumerate().rev() {
-            let last_state = &parser.get_states()[last_state];
-            if let Some(error_state) = last_state.shift_goto_nonterm(&error_nonterm) {
-                // pop all states above this state
-                self.state_stack.truncate(stack_idx + 1);
-
-                let new_location = Data::Location::new(
-                    self.data_stack.iter().map(|(_, loc)| loc).rev(),
-                    popped_token,
-                );
-
-                // pop all data
-                {
-                    let new_len = self.data_stack.len() - popped_token;
-                    self.data_stack.truncate(new_len);
-                }
-                #[cfg(feature = "tree")]
-                {
-                    let new_len = self.tree_stack.len() - popped_token;
-                    self.tree_stack.truncate(new_len);
-                }
-                {
-                    let new_len = self.precedence_stack.len() - popped_token;
-                    self.precedence_stack.truncate(new_len);
-                }
-
-                // shift to error state
-                self.state_stack.push(error_state);
-                self.data_stack
-                    .push((Data::new_error_nonterm(), new_location));
-                self.precedence_stack.push(None);
-                #[cfg(feature = "tree")]
-                {
-                    // push error tree
-                    self.tree_stack.push(crate::tree::Tree::new_nonterminal(
-                        error_nonterm,
-                        Vec::new(),
-                    ));
-                }
-                return true;
-            }
-
-            popped_token += 1;
-        }
-        false
     }
 
     /// Get backtrace information for current state.
