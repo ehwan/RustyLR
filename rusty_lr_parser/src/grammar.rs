@@ -652,10 +652,21 @@ impl Grammar {
                     // choose the last terminal symbol that has precedence
                     let mut op = None;
                     for token in tokens.iter().rev() {
-                        if let Token::Term(TerminalSymbol::Term(term_idx)) = token.token {
-                            if let Some((level, _)) = grammar.terminals[term_idx].precedence {
-                                op = Some((Precedence::Fixed(level), token.end_span));
-                                break;
+                        if let Token::Term(term) = token.token {
+                            match term {
+                                TerminalSymbol::Term(term_idx) => {
+                                    if let Some((level, _)) = grammar.terminals[term_idx].precedence
+                                    {
+                                        op = Some((Precedence::Fixed(level), token.end_span));
+                                        break;
+                                    }
+                                }
+                                TerminalSymbol::Error => {
+                                    if let Some(error_prec) = grammar.error_precedence {
+                                        op = Some((Precedence::Fixed(error_prec), token.end_span));
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
