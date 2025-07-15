@@ -29,6 +29,7 @@ pub enum PatternInternal {
     Lookaheads(Box<Pattern>, bool, BTreeSet<usize>),
     Group(Vec<Pattern>),
     Literal(syn::Lit),
+    Sep(Box<Pattern>, Box<Pattern>, bool),
 }
 
 #[derive(Debug, Clone)]
@@ -906,6 +907,264 @@ impl Pattern {
                 }
                 _ => unreachable!("Only char, byte, str and bytes are supported"),
             },
+
+            PatternInternal::Sep(base, del, true) => {
+                let base_rule = base.to_token(grammar, pattern_cache, root_span_pair)?;
+                let del = del.to_token(grammar, pattern_cache, root_span_pair)?;
+                let newrule_idx = grammar.nonterminals.len();
+                let newrule_name = Ident::new(
+                    &format!("_{}SepPlus{}", base_rule.name, newrule_idx),
+                    root_span_pair.0,
+                );
+
+                if let Some(base_typename) = &base_rule.ruletype {
+                    let rule1 = Rule {
+                        tokens: vec![TokenMapped {
+                            token: base_rule.token,
+                            mapto: Some(Ident::new("__token0", Span::call_site())),
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
+                        }],
+                        reduce_action: Some(ReduceAction::Custom(quote! {
+                            { vec![__token0] }
+                        })),
+                        separator_span: Span::call_site(),
+                        lookaheads: None,
+                        prec: None,
+                        dprec: None,
+                    };
+                    let rule2 = Rule {
+                        tokens: vec![
+                            TokenMapped {
+                                token: Token::NonTerm(newrule_idx),
+                                mapto: Some(Ident::new("__token0", Span::call_site())),
+                                begin_span: Span::call_site(),
+                                end_span: Span::call_site(),
+                            },
+                            TokenMapped {
+                                token: del.token,
+                                mapto: None,
+                                begin_span: Span::call_site(),
+                                end_span: Span::call_site(),
+                            },
+                            TokenMapped {
+                                token: base_rule.token,
+                                mapto: Some(Ident::new("__token1", Span::call_site())),
+                                begin_span: Span::call_site(),
+                                end_span: Span::call_site(),
+                            },
+                        ],
+                        reduce_action: Some(ReduceAction::Custom(quote! {
+                            {
+                            __token0.push(__token1);
+                            __token0
+                            }
+                        })),
+                        separator_span: Span::call_site(),
+                        lookaheads: None,
+                        prec: None,
+                        dprec: None,
+                    };
+
+                    let nonterm_info = NonTerminalInfo {
+                        name: newrule_name.clone(),
+                        pretty_name: self.pretty_name.clone(),
+                        ruletype: Some(quote! { Vec<#base_typename> }),
+                        rules: vec![rule1, rule2],
+                        regex_span: Some(root_span_pair),
+                        trace: false,
+                        protected: false,
+                        nonterm_type: Some(NonTerminalType::PlusLeft),
+                    };
+                    grammar.nonterminals.push(nonterm_info);
+                    grammar
+                        .nonterminals_index
+                        .insert(newrule_name.clone(), newrule_idx);
+
+                    Ok(PatternToToken {
+                        name: newrule_name,
+                        token: Token::NonTerm(newrule_idx),
+                        ruletype: Some(base_typename.clone()),
+                        mapto: base_rule.mapto.clone(),
+                    })
+                } else {
+                    let rule1 = Rule {
+                        tokens: vec![TokenMapped {
+                            token: base_rule.token,
+                            mapto: None,
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
+                        }],
+                        reduce_action: None,
+                        separator_span: Span::call_site(),
+                        lookaheads: None,
+                        prec: None,
+                        dprec: None,
+                    };
+                    let rule2 = Rule {
+                        tokens: vec![
+                            TokenMapped {
+                                token: base_rule.token,
+                                mapto: None,
+                                begin_span: Span::call_site(),
+                                end_span: Span::call_site(),
+                            },
+                            TokenMapped {
+                                token: del.token,
+                                mapto: None,
+                                begin_span: Span::call_site(),
+                                end_span: Span::call_site(),
+                            },
+                            TokenMapped {
+                                token: Token::NonTerm(newrule_idx),
+                                mapto: None,
+                                begin_span: Span::call_site(),
+                                end_span: Span::call_site(),
+                            },
+                        ],
+                        reduce_action: None,
+                        separator_span: Span::call_site(),
+                        lookaheads: None,
+                        prec: None,
+                        dprec: None,
+                    };
+
+                    let nonterm_info = NonTerminalInfo {
+                        name: newrule_name.clone(),
+                        pretty_name: self.pretty_name.clone(),
+                        ruletype: None,
+                        rules: vec![rule1, rule2],
+                        regex_span: Some(root_span_pair),
+                        trace: false,
+                        protected: false,
+                        nonterm_type: Some(NonTerminalType::PlusRight),
+                    };
+                    grammar.nonterminals.push(nonterm_info);
+                    grammar
+                        .nonterminals_index
+                        .insert(newrule_name.clone(), newrule_idx);
+
+                    Ok(PatternToToken {
+                        name: newrule_name,
+                        token: Token::NonTerm(newrule_idx),
+                        ruletype: None,
+                        mapto: base_rule.mapto.clone(),
+                    })
+                }
+            }
+
+            PatternInternal::Sep(base, del, false) => {
+                let plus_rule = Pattern {
+                    internal: PatternInternal::Sep(base.clone(), del.clone(), true),
+                    pretty_name: format!("$sep({}, {}, +)", base.pretty_name, del.pretty_name),
+                }
+                .to_token(grammar, pattern_cache, root_span_pair)?;
+
+                let base_rule = base.to_token(grammar, pattern_cache, root_span_pair)?;
+
+                let newrule_idx = grammar.nonterminals.len();
+                let newrule_name = Ident::new(
+                    &format!("_{}SepStar{}", base_rule.name, newrule_idx),
+                    root_span_pair.0,
+                );
+
+                if let Some(base_typename) = &base_rule.ruletype {
+                    // typename exist, make new rule with typename Vec<base_typename>
+                    // A* -> A+ { Ap }
+                    //     |    { vec![] }
+                    let line1 = Rule {
+                        tokens: vec![TokenMapped {
+                            token: plus_rule.token,
+                            mapto: Some(Ident::new("__token0", Span::call_site())),
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
+                        }],
+                        reduce_action: Some(ReduceAction::Identity(0)),
+                        separator_span: Span::call_site(),
+                        lookaheads: None,
+                        prec: None,
+                        dprec: None,
+                    };
+                    let line2 = Rule {
+                        tokens: vec![],
+                        reduce_action: Some(ReduceAction::Custom(quote! {
+                            { vec![] }
+                        })),
+                        separator_span: Span::call_site(),
+                        lookaheads: None,
+                        prec: None,
+                        dprec: None,
+                    };
+
+                    let nonterm_info = NonTerminalInfo {
+                        name: newrule_name.clone(),
+                        pretty_name: self.pretty_name.clone(),
+                        ruletype: Some(quote! { Vec<#base_typename> }),
+                        rules: vec![line1, line2],
+                        regex_span: Some(root_span_pair),
+                        trace: false,
+                        protected: false,
+                        nonterm_type: Some(NonTerminalType::Star),
+                    };
+                    grammar.nonterminals.push(nonterm_info);
+                    grammar
+                        .nonterminals_index
+                        .insert(newrule_name.clone(), newrule_idx);
+
+                    Ok(PatternToToken {
+                        name: newrule_name,
+                        token: Token::NonTerm(newrule_idx),
+                        ruletype: Some(quote! { Vec<#base_typename> }),
+                        mapto: base_rule.mapto.clone(),
+                    })
+                } else {
+                    // typename not exist, make new rule with typename ()
+                    // A* -> A+
+                    //     |
+                    let line1 = Rule {
+                        tokens: vec![TokenMapped {
+                            token: plus_rule.token,
+                            mapto: None,
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
+                        }],
+                        reduce_action: None,
+                        separator_span: Span::call_site(),
+                        lookaheads: None,
+                        prec: None,
+                        dprec: None,
+                    };
+                    let line2 = Rule {
+                        tokens: vec![],
+                        reduce_action: None,
+                        separator_span: Span::call_site(),
+                        lookaheads: None,
+                        prec: None,
+                        dprec: None,
+                    };
+                    let nonterm_info = NonTerminalInfo {
+                        name: newrule_name.clone(),
+                        pretty_name: self.pretty_name.clone(),
+                        ruletype: None,
+                        rules: vec![line1, line2],
+                        regex_span: Some(root_span_pair),
+                        trace: false,
+                        protected: false,
+                        nonterm_type: Some(NonTerminalType::Star),
+                    };
+                    grammar.nonterminals.push(nonterm_info);
+                    grammar
+                        .nonterminals_index
+                        .insert(newrule_name.clone(), newrule_idx);
+
+                    Ok(PatternToToken {
+                        name: newrule_name,
+                        token: Token::NonTerm(newrule_idx),
+                        ruletype: None,
+                        mapto: base_rule.mapto.clone(),
+                    })
+                }
+            }
         }
     }
 }
