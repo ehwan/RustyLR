@@ -69,25 +69,36 @@ impl<Data: TokenData> Context<Data> {
         self.current_nodes.into_iter()
     }
 
-    /// Returns an iterator of `%start` symbols from all diverged paths.
-    /// This function should be called after feeding all tokens (including EOF).
-    pub fn accept(self) -> impl Iterator<Item = Data::StartType>
+    /// End this context and return iterator of the start value from the data stack.
+    pub fn accept<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        mut self,
+        parser: &P,
+        userdata: &mut Data::UserData,
+    ) -> Result<impl Iterator<Item = Data::StartType>, ParseError<Data>>
     where
         Data: Clone + TryInto<Data::StartType>,
+        P::Term: Clone,
+        P::NonTerm: Hash + Eq + Clone + std::fmt::Debug,
+        Data: Clone,
     {
-        // since `eof` is feeded, the node graph should be like this:
+        self.feed_eof(parser, userdata)?;
+        // since `eof` is feeded, every node graph should be like this:
         // Root <- Start <- EOF
         //                  ^^^ here, current_node
-        self.into_nodes().filter_map(|rc_eof_node| {
-            let rc_data_node = Rc::clone(rc_eof_node.parent.as_ref()?);
+        Ok(self.into_nodes().map(|rc_eof_node| {
+            let rc_data_node = Rc::clone(rc_eof_node.parent.as_ref().unwrap());
             drop(rc_eof_node);
 
             let data_node = match Rc::try_unwrap(rc_data_node) {
-                Ok(data_node) => data_node.data?,
-                Err(rc_data_node) => rc_data_node.data.as_ref()?.clone(),
+                Ok(data_node) => data_node.data.unwrap().0,
+                Err(rc_data_node) => rc_data_node.data.as_ref().unwrap().0.clone(),
             };
-            data_node.0.try_into().ok()
-        })
+            if let Ok(start) = data_node.try_into() {
+                start
+            } else {
+                unreachable!("data stack must have start symbol at this point");
+            }
+        }))
     }
 
     /// For debugging.
@@ -376,7 +387,7 @@ impl<Data: TokenData> Context<Data> {
     }
 
     /// Feed eof symbol with default zero-length location from the end of stream.
-    pub fn feed_eof<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    fn feed_eof<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &mut self,
         parser: &P,
         userdata: &mut Data::UserData,

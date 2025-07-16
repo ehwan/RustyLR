@@ -173,11 +173,12 @@ impl Grammar {
                 return Err(ParseArgError::MacroLineParse { span, message });
             }
         }
-        match context.feed_eof(&parser, &mut grammar_args) {
+        match context.accept(&parser, &mut grammar_args) {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();
-                return Err(ParseArgError::MacroLineParseEnd { message });
+                let span = err.location().pair.unwrap().0;
+                return Err(ParseArgError::MacroLineParse { span, message });
             }
         }
 

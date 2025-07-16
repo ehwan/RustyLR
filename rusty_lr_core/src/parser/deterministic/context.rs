@@ -57,16 +57,26 @@ impl<Data: TokenData> Context<Data> {
             tree_stack: crate::tree::TreeList::new(),
         }
     }
-    /// Pops the value of the start symbol from the data stack.
-    /// The result is `None` if current context is not in the final state (i.e. not after feeding EOF).
-    #[inline]
-    pub fn accept(&mut self) -> Option<Data::StartType>
+    /// End this context and pop the value of the start symbol from the data stack.
+    pub fn accept<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &mut self,
+        parser: &P,
+        userdata: &mut Data::UserData,
+    ) -> Result<Data::StartType, ParseError<Data>>
     where
         Data: TryInto<Data::StartType>,
+        Data::Term: Clone,
+        Data::NonTerm: Hash + Eq + Copy,
     {
+        self.feed_eof(parser, userdata)?;
+
         // data_stack must be <Start> <EOF> in this point
         self.data_stack.pop();
-        self.data_stack.pop()?.0.try_into().ok()
+        if let Ok(start) = self.data_stack.pop().unwrap().0.try_into() {
+            Ok(start)
+        } else {
+            unreachable!("data stack must have start symbol at this point");
+        }
     }
 
     /// Get current state index
@@ -600,7 +610,7 @@ impl<Data: TokenData> Context<Data> {
         Some(shift_to.is_some())
     }
 
-    pub fn feed_eof<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    fn feed_eof<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &mut self,
         parser: &P,
         userdata: &mut Data::UserData,
