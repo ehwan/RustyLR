@@ -9,6 +9,7 @@ use std::hash::Hash;
 pub enum TerminalSymbol<Term> {
     Term(Term), // index in the terminals vector
     Error,      // error token
+    Eof,        // end of file token
 }
 impl<Term> TerminalSymbol<Term> {
     pub fn is_error(&self) -> bool {
@@ -17,11 +18,15 @@ impl<Term> TerminalSymbol<Term> {
     pub fn is_term(&self) -> bool {
         matches!(self, TerminalSymbol::Term(_))
     }
+    pub fn is_eof(&self) -> bool {
+        matches!(self, TerminalSymbol::Eof)
+    }
     /// converts self to a term if it is a `Term` variant, otherwise returns `None`.
     pub fn to_term(&self) -> Option<&Term> {
         match self {
             TerminalSymbol::Term(term) => Some(term),
             TerminalSymbol::Error => None,
+            TerminalSymbol::Eof => None,
         }
     }
     /// converts self to a term if it is a `Term` variant, otherwise returns `None`.
@@ -29,6 +34,7 @@ impl<Term> TerminalSymbol<Term> {
         match self {
             TerminalSymbol::Term(term) => Some(term),
             TerminalSymbol::Error => None,
+            TerminalSymbol::Eof => None,
         }
     }
 }
@@ -38,6 +44,7 @@ impl<Term: Display> std::fmt::Display for TerminalSymbol<Term> {
         match self {
             TerminalSymbol::Term(term) => write!(f, "{}", term),
             TerminalSymbol::Error => write!(f, "error"),
+            TerminalSymbol::Eof => write!(f, "eof"),
         }
     }
 }

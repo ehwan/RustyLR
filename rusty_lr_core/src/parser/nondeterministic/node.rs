@@ -623,6 +623,7 @@ impl<Data: TokenData> Node<Data> {
                         match term {
                             TerminalSymbol::Term(term) => Data::new_terminal(term),
                             TerminalSymbol::Error => Data::new_error(),
+                            TerminalSymbol::Eof => Data::new_empty(),
                         },
                         location,
                     )),
@@ -652,6 +653,7 @@ impl<Data: TokenData> Node<Data> {
                     match term {
                         TerminalSymbol::Term(term) => Data::new_terminal(term),
                         TerminalSymbol::Error => Data::new_error(),
+                        TerminalSymbol::Eof => Data::new_empty(),
                     },
                     location,
                 )),

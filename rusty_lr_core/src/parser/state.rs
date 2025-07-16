@@ -44,6 +44,7 @@ pub struct SparseState<NonTerm, RuleContainer> {
     /// terminal symbol -> next state
     pub(crate) shift_goto_map_class: HashMap<usize, usize>,
     pub(crate) error_shift: Option<usize>,
+    pub(crate) eof_shift: Option<usize>,
 
     /// non-terminal symbol -> next state
     pub(crate) shift_goto_map_nonterm: HashMap<NonTerm, usize>,
@@ -51,6 +52,7 @@ pub struct SparseState<NonTerm, RuleContainer> {
     /// terminal symbol -> reduce rule index
     pub(crate) reduce_map: HashMap<usize, RuleContainer>,
     pub(crate) error_reduce: Option<RuleContainer>,
+    pub(crate) eof_reduce: Option<RuleContainer>,
 
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
@@ -63,6 +65,7 @@ impl<NonTerm: Copy, RuleIndex: crate::stackvec::ToUsizeList> State<NonTerm>
         match class {
             TerminalSymbol::Term(class) => self.shift_goto_map_class.get(&class).copied(),
             TerminalSymbol::Error => self.error_shift,
+            TerminalSymbol::Eof => self.eof_shift,
         }
     }
     fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
@@ -82,6 +85,10 @@ impl<NonTerm: Copy, RuleIndex: crate::stackvec::ToUsizeList> State<NonTerm>
                 .map(crate::stackvec::ToUsizeList::to_usize_list),
             TerminalSymbol::Error => self
                 .error_reduce
+                .as_ref()
+                .map(crate::stackvec::ToUsizeList::to_usize_list),
+            TerminalSymbol::Eof => self
+                .eof_reduce
                 .as_ref()
                 .map(crate::stackvec::ToUsizeList::to_usize_list),
         }
@@ -114,12 +121,15 @@ pub struct DenseState<NonTerm, RuleContainer> {
     /// terminal symbol -> next state
     pub(crate) shift_goto_map_class: Vec<Option<usize>>,
     pub(crate) error_shift: Option<usize>,
+    pub(crate) eof_shift: Option<usize>,
 
     /// non-terminal symbol -> next state
     pub(crate) shift_goto_map_nonterm: HashMap<NonTerm, usize>,
+
     /// terminal symbol -> reduce rule index
     pub(crate) reduce_map: Vec<Option<RuleContainer>>,
     pub(crate) error_reduce: Option<RuleContainer>,
+    pub(crate) eof_reduce: Option<RuleContainer>,
 
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
@@ -131,6 +141,7 @@ impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
         match class {
             TerminalSymbol::Term(class) => self.shift_goto_map_class.get(class).copied().flatten(),
             TerminalSymbol::Error => self.error_shift,
+            TerminalSymbol::Eof => self.eof_shift,
         }
     }
     fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
@@ -152,6 +163,10 @@ impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
                 .map(crate::stackvec::ToUsizeList::to_usize_list),
             TerminalSymbol::Error => self
                 .error_reduce
+                .as_ref()
+                .map(crate::stackvec::ToUsizeList::to_usize_list),
+            TerminalSymbol::Eof => self
+                .eof_reduce
                 .as_ref()
                 .map(crate::stackvec::ToUsizeList::to_usize_list),
         }
@@ -192,9 +207,16 @@ where
     let error_shift = builder_state
         .shift_goto_map_term
         .remove(&TerminalSymbol::Error);
+    let eof_shift = builder_state
+        .shift_goto_map_term
+        .remove(&TerminalSymbol::Eof);
     let error_reduce = builder_state
         .reduce_map
         .remove(&TerminalSymbol::Error)
+        .map(&rule_vec_map);
+    let eof_reduce = builder_state
+        .reduce_map
+        .remove(&TerminalSymbol::Eof)
         .map(&rule_vec_map);
     SparseState {
         shift_goto_map_class: builder_state
@@ -203,6 +225,7 @@ where
             .map(|(term, state)| (*term.to_term().unwrap(), state))
             .collect(),
         error_shift,
+        eof_shift,
         shift_goto_map_nonterm: builder_state.shift_goto_map_nonterm.into_iter().collect(),
         reduce_map: builder_state
             .reduce_map
@@ -210,6 +233,7 @@ where
             .map(|(term, rule)| (*term.to_term().unwrap(), rule_vec_map(rule)))
             .collect(),
         error_reduce,
+        eof_reduce,
         ruleset: builder_state.ruleset.into_iter().collect(),
     }
 }
@@ -280,9 +304,16 @@ where
     let error_shift = builder_state
         .shift_goto_map_term
         .remove(&TerminalSymbol::Error);
+    let eof_shift = builder_state
+        .shift_goto_map_term
+        .remove(&TerminalSymbol::Eof);
     let error_reduce = builder_state
         .reduce_map
         .remove(&TerminalSymbol::Error)
+        .map(&rule_vec_map);
+    let eof_reduce = builder_state
+        .reduce_map
+        .remove(&TerminalSymbol::Eof)
         .map(&rule_vec_map);
 
     let shift_term_len = builder_state
@@ -310,9 +341,11 @@ where
     DenseState {
         shift_goto_map_class,
         error_shift,
+        eof_shift,
         shift_goto_map_nonterm: builder_state.shift_goto_map_nonterm.into_iter().collect(),
         reduce_map,
         error_reduce,
+        eof_reduce,
         ruleset: builder_state.ruleset.into_iter().collect(),
     }
 }

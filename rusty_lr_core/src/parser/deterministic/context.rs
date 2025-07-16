@@ -435,6 +435,7 @@ impl<Data: TokenData> Context<Data> {
             let data = match term {
                 TerminalSymbol::Term(term) => Data::new_terminal(term),
                 TerminalSymbol::Error => Data::new_error(),
+                TerminalSymbol::Eof => Data::new_empty(),
             };
             self.data_stack.push((data, location));
             self.precedence_stack.push(shift_prec);
