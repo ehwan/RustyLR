@@ -217,6 +217,9 @@ impl Grammar {
                 TerminalSymbol::Error => {
                     quote! { #module_prefix::TerminalSymbol::Error }
                 }
+                TerminalSymbol::Eof => {
+                    quote! { #module_prefix::TerminalSymbol::Eof }
+                }
             }
         };
         let token_to_stream = |token: Token<TerminalSymbol<usize>, usize>| -> TokenStream {
@@ -1132,6 +1135,11 @@ impl Grammar {
                                             extract_token_data_from_args.extend(quote! {
                                                 let (_, #location_varname) = __rustylr_args.pop().unwrap();
                                             });
+                                        }
+                                        TerminalSymbol::Eof => {
+                                            unreachable!(
+                                                "eof token cannot be used in production rules"
+                                            )
                                         }
                                     }
                                 }

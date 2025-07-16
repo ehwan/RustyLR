@@ -638,6 +638,9 @@ impl Grammar {
                                         return Err(ParseError::PrecedenceNotDefined(prec));
                                     }
                                 }
+                                TerminalSymbol::Eof => {
+                                    unreachable!("eof token cannot be used in %prec, nor cannot be used in production rules")
+                                }
                             }
                         } else {
                             Some((Precedence::Dynamic(from_token), span))
@@ -666,6 +669,9 @@ impl Grammar {
                                         op = Some((Precedence::Fixed(error_prec), token.end_span));
                                         break;
                                     }
+                                }
+                                TerminalSymbol::Eof => {
+                                    unreachable!("eof token cannot be used in %prec, nor cannot be used in production rules")
                                 }
                             }
                         }
@@ -1490,6 +1496,7 @@ impl Grammar {
     pub fn class_pretty_name_list(&self, class: TerminalSymbol<usize>, max_len: usize) -> String {
         match class {
             TerminalSymbol::Error => return "error".to_string(),
+            TerminalSymbol::Eof => return "eof".to_string(),
             TerminalSymbol::Term(class_idx) => {
                 let class = &self.terminal_classes[class_idx];
                 let len: usize = class
