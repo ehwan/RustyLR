@@ -79,6 +79,30 @@ impl<Data: TokenData> Context<Data> {
         }
     }
 
+    /// Check if current context can be terminated and get the value of the start symbol.
+    pub fn can_accept<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &P,
+    ) -> bool
+    where
+        Data::NonTerm: Hash + Eq,
+    {
+        let mut state_stack = self.state_stack.clone();
+        let mut precedence_stack = self.precedence_stack.clone();
+
+        match Self::can_feed_impl(
+            &mut state_stack,
+            &mut precedence_stack,
+            parser,
+            TerminalSymbol::Eof,
+            None,
+        ) {
+            Some(true) => true,
+            Some(false) => false,
+            None => false,
+        }
+    }
+
     /// Get current state index
     #[inline]
     pub fn state(&self) -> usize {

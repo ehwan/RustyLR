@@ -841,6 +841,16 @@ impl<Data: TokenData> Node<Data> {
             eof_location,
         )
     }
+
+    pub fn can_feed_eof<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        self: &Rc<Self>,
+        parser: &P,
+    ) -> bool
+    where
+        P::NonTerm: std::hash::Hash + Eq,
+    {
+        self.can_feed_impl(parser, TerminalSymbol::Eof, None)
+    }
 }
 
 #[cfg(feature = "tree")]

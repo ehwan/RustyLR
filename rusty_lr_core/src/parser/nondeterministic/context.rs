@@ -436,6 +436,18 @@ impl<Data: TokenData> Context<Data> {
             Ok(())
         }
     }
+    /// Check if current context can be terminated and get the start value.
+    pub fn can_accept<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &P,
+    ) -> bool
+    where
+        P::NonTerm: Hash + Eq,
+    {
+        self.current_nodes
+            .iter()
+            .any(|node| Node::can_feed_eof(node, parser))
+    }
 }
 
 impl<Data: TokenData> Default for Context<Data> {
