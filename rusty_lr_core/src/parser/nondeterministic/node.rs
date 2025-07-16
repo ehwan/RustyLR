@@ -623,6 +623,7 @@ impl<Data: TokenData> Node<Data> {
                         match term {
                             TerminalSymbol::Term(term) => Data::new_terminal(term),
                             TerminalSymbol::Error => Data::new_error(),
+                            TerminalSymbol::Eof => Data::new_empty(),
                         },
                         location,
                     )),
@@ -652,6 +653,7 @@ impl<Data: TokenData> Node<Data> {
                     match term {
                         TerminalSymbol::Term(term) => Data::new_terminal(term),
                         TerminalSymbol::Error => Data::new_error(),
+                        TerminalSymbol::Eof => Data::new_empty(),
                     },
                     location,
                 )),
@@ -814,6 +816,40 @@ impl<Data: TokenData> Node<Data> {
                 };
             }
         }
+    }
+
+    /// Feed one terminal with location to parser, and update state stack.
+    pub fn feed_eof<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        self: Rc<Self>,
+        context: &mut super::Context<Data>,
+        parser: &P,
+        eof_location: Data::Location,
+        userdata: &mut Data::UserData,
+    ) -> Result<(), (Rc<Self>, TerminalSymbol<Data::Term>, Data::Location)>
+    where
+        P::Term: Clone,
+        P::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug,
+        Data: Clone,
+    {
+        self.feed_location_impl(
+            context,
+            parser,
+            TerminalSymbol::Eof,
+            TerminalSymbol::Eof,
+            None,
+            userdata,
+            eof_location,
+        )
+    }
+
+    pub fn can_feed_eof<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        self: &Rc<Self>,
+        parser: &P,
+    ) -> bool
+    where
+        P::NonTerm: std::hash::Hash + Eq,
+    {
+        self.can_feed_impl(parser, TerminalSymbol::Eof, None)
     }
 }
 

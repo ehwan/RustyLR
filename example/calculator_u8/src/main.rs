@@ -17,9 +17,8 @@ fn main() {
         }
     }
     println!("{:?}", context);
-    context.feed(&parser, 0 as char, &mut userdata).unwrap(); // feed EOF
 
-    let result = context.accept().unwrap(); // get value of start 'E'
+    let result = context.accept(&parser, &mut userdata).unwrap(); // get value of start 'E'
     println!("result: {}", result);
     println!("userdata: {}", userdata);
 

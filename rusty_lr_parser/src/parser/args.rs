@@ -181,7 +181,7 @@ impl PatternArgs {
             }),
             PatternArgs::Exclamation(pattern, _) => pattern.into_pattern(grammar, true),
             PatternArgs::TerminalSet(terminal_set) => {
-                let (negate, terminal_set) = terminal_set.to_terminal_set(grammar, false)?;
+                let (negate, terminal_set) = terminal_set.to_terminal_set(grammar)?;
                 let pattern = Pattern {
                     internal: PatternInternal::TerminalSet(negate, terminal_set),
                     pretty_name: pretty_name.clone(),
@@ -299,7 +299,7 @@ impl PatternArgs {
         grammar: &mut Grammar,
     ) -> Result<(bool, BTreeSet<usize>), ParseError> {
         match self {
-            PatternArgs::TerminalSet(terminal_set) => terminal_set.to_terminal_set(grammar, false),
+            PatternArgs::TerminalSet(terminal_set) => terminal_set.to_terminal_set(grammar),
             PatternArgs::Ident(ident) => {
                 if let Some(idx) = grammar
                     .terminals_index
@@ -505,7 +505,6 @@ pub struct GrammarArgs {
     pub token_typename: Vec<(Span, TokenStream)>,
     pub userdata_typename: Vec<(Span, TokenStream)>,
     pub start_rule_name: Vec<Ident>,
-    pub eof: Vec<(Span, TokenStream)>,
     pub error_typename: Vec<(Span, TokenStream)>,
     pub terminals: Vec<(Ident, TokenStream)>,
     pub precedences: Vec<(
@@ -533,7 +532,6 @@ impl Default for GrammarArgs {
             token_typename: Vec::new(),
             userdata_typename: Vec::new(),
             start_rule_name: Vec::new(),
-            eof: Vec::new(),
             error_typename: Vec::new(),
             terminals: Vec::new(),
             precedences: Vec::new(),

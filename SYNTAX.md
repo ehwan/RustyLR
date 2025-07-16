@@ -11,7 +11,6 @@
  - [Exclamation mark `!`](#exclamation-mark-)
  - [Traceable Non-Terminals - `%trace`](#tracing-non-terminals)
  - [Start symbol - `%start`](#start-symbol-must-defined)
- - [EOF token - `%eof`](#eof-symbol-must-defined)
  - [User data type - `%userdata`](#userdata-type-optional)
  - [Resolving Conflicts](#resolving-conflicts)
     - [Panic Mode Error Recovery - `error`](#panic-mode-error-recovery)
@@ -124,7 +123,7 @@ Patterns define the structure of the input that matches a production rule.
 
  - `.` : Any single terminal symbol
  - `name` : Non-terminal or terminal symbol `name` defined in the grammar
- - `[term1 term_start-term_last]`, `[^term1 term_start-term_last]` : Set of terminal symbols. [`eof`](#eof-symbol-must-defined) will be automatically removed from the terminal set
+ - `[term1 term_start-term_last]`, `[^term1 term_start-term_last]` : Set of terminal symbols.
  - `P*` : Zero or more repetitions of `P`
  - `P+` : One or more repetitions of `P`
  - `P?` : Zero or one repetition of `P`
@@ -306,27 +305,11 @@ Set the start symbol of the grammar as `NonTerminalName`.
 
 ```rust
 %start E;
-// This internally generates augmented rule <Augmented> -> E eof
+// This internally generates augmented rule Augmented -> E eof
 
 E: ... ;
 ```
 
-
-
-## Eof symbol <sub><sup>(must defined)</sup></sub>
-```
-%eof <RustExpr> ;
-```
-Define the `eof` terminal symbol.
-`<RustExpr>` must be accessible at the point where the macro is called.
-The `eof` terminal symbol will be automatically added to the grammar.
-
-**Example:**
-```rust
-%eof b'\0';
-// You can access eof terminal symbol by 'eof' in the grammar
-// without %token eof ...;
-```
 
 
 ## Userdata type <sub><sup>(optional)</sup></sub>

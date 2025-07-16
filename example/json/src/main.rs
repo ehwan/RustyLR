@@ -51,7 +51,7 @@ fn main() {
     {
         let mut context = parser::JsonContext::new();
         let mut range_start = 0;
-        for ch in TEST_JSON.chars().chain(['\0']) {
+        for ch in TEST_JSON.chars() {
             let range_end = range_start + ch.len_utf8();
             context
                 .feed_location(&parser, ch, &mut (), range_start..range_end)

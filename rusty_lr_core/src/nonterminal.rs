@@ -92,6 +92,11 @@ pub trait TokenData: Sized {
     /// create new token data for error recovery
     fn new_error() -> Self;
 
+    /// create new token data that is empty.
+    fn new_empty() -> Self {
+        Self::new_error()
+    }
+
     /// create new terminal variant
     fn new_terminal(term: Self::Term) -> Self;
 }

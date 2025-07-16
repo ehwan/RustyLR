@@ -57,16 +57,50 @@ impl<Data: TokenData> Context<Data> {
             tree_stack: crate::tree::TreeList::new(),
         }
     }
-    /// Pops the value of the start symbol from the data stack.
-    /// The result is `None` if current context is not in the final state (i.e. not after feeding EOF).
-    #[inline]
-    pub fn accept(&mut self) -> Option<Data::StartType>
+    /// End this context and pop the value of the start symbol from the data stack.
+    pub fn accept<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        mut self,
+        parser: &P,
+        userdata: &mut Data::UserData,
+    ) -> Result<Data::StartType, ParseError<Data>>
     where
         Data: TryInto<Data::StartType>,
+        Data::Term: Clone,
+        Data::NonTerm: Hash + Eq + Copy,
     {
+        self.feed_eof(parser, userdata)?;
+
         // data_stack must be <Start> <EOF> in this point
         self.data_stack.pop();
-        self.data_stack.pop()?.0.try_into().ok()
+        if let Ok(start) = self.data_stack.pop().unwrap().0.try_into() {
+            Ok(start)
+        } else {
+            unreachable!("data stack must have start symbol at this point");
+        }
+    }
+
+    /// Check if current context can be terminated and get the value of the start symbol.
+    pub fn can_accept<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &P,
+    ) -> bool
+    where
+        Data::NonTerm: Hash + Eq,
+    {
+        let mut state_stack = self.state_stack.clone();
+        let mut precedence_stack = self.precedence_stack.clone();
+
+        match Self::can_feed_impl(
+            &mut state_stack,
+            &mut precedence_stack,
+            parser,
+            TerminalSymbol::Eof,
+            None,
+        ) {
+            Some(true) => true,
+            Some(false) => false,
+            None => false,
+        }
     }
 
     /// Get current state index
@@ -435,6 +469,7 @@ impl<Data: TokenData> Context<Data> {
             let data = match term {
                 TerminalSymbol::Term(term) => Data::new_terminal(term),
                 TerminalSymbol::Error => Data::new_error(),
+                TerminalSymbol::Eof => Data::new_empty(),
             };
             self.data_stack.push((data, location));
             self.precedence_stack.push(shift_prec);
@@ -597,6 +632,30 @@ impl<Data: TokenData> Context<Data> {
 
         // shift with terminal
         Some(shift_to.is_some())
+    }
+
+    fn feed_eof<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &mut self,
+        parser: &P,
+        userdata: &mut Data::UserData,
+    ) -> Result<(), ParseError<Data>>
+    where
+        Data::Term: Clone,
+        Data::NonTerm: Hash + Eq + Copy,
+    {
+        use crate::Location;
+        let eof_location = Data::Location::new(
+            self.data_stack.iter().map(|(_, loc)| loc).rev(),
+            0, // eof node
+        );
+        self.feed_location_impl(
+            parser,
+            TerminalSymbol::Eof,
+            TerminalSymbol::Eof,
+            None,
+            userdata,
+            eof_location,
+        )
     }
 
     /// Get set of `%trace` non-terminal symbols that current context is trying to parse.

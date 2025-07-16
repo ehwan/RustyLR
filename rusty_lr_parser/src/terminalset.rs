@@ -148,28 +148,11 @@ impl TerminalSet {
     pub fn to_terminal_set(
         &self,
         grammar: &mut Grammar,
-        include_eof: bool,
     ) -> Result<(bool, BTreeSet<usize>), ParseError> {
         let mut terminal_set = BTreeSet::new();
         for item in &self.items {
             let mut item_set = item.to_terminal_set(grammar)?;
             terminal_set.append(&mut item_set);
-        }
-
-        // include eof when TerminalSet is used in a lookahead set
-        let eof_idx = grammar.eof_index;
-        if include_eof {
-            if self.negate {
-                terminal_set.remove(&eof_idx);
-            } else {
-                terminal_set.insert(eof_idx);
-            }
-        } else {
-            if self.negate {
-                terminal_set.insert(eof_idx);
-            } else {
-                terminal_set.remove(&eof_idx);
-            }
         }
         Ok((self.negate, terminal_set))
     }

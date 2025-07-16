@@ -1,16 +1,15 @@
 pub mod parser;
-// pub mod parser_expanded;
 
 fn main() {
-    let p = parser::EParser::new();
-    let mut c = parser::EContext::new();
+    let parser = parser::EParser::new();
+    let mut context = parser::EContext::new();
 
     let input = "1+2*3+4";
     for ch in input.chars() {
-        println!("feed: {}, possible: {}", ch, c.can_feed(&p, &ch));
-        match c.feed(&p, ch, &mut ()) {
+        println!("feed: {}, possible: {}", ch, context.can_feed(&parser, &ch));
+        match context.feed(&parser, ch, &mut ()) {
             Ok(_) => {
-                println!("nodes: {}", c.len_paths());
+                println!("nodes: {}", context.len_paths());
             }
             Err(e) => {
                 println!("Error: {}", e);
@@ -18,25 +17,26 @@ fn main() {
             }
         }
     }
-    println!("feed eof");
-    match c.feed(&p, '\0', &mut ()) {
-        Ok(_) => {
-            println!("nodes: {}", c.len_paths());
-        }
+    let result = match context.accept(&parser, &mut ()) {
+        Ok(mut results) => results.next().unwrap(),
         Err(e) => {
             println!("Error: {}", e);
+            return;
         }
-    }
-    let result = c.accept().next().unwrap();
+    };
     println!("Result: {}", result);
 
     let input = "1+2**3+4";
-    let mut c = parser::EContext::new();
+    let mut context = parser::EContext::new();
     for ch in input.chars() {
-        println!("feed: {}, can_feed(): {}", ch, c.can_feed(&p, &ch));
-        match c.feed(&p, ch, &mut ()) {
+        println!(
+            "feed: {}, can_feed(): {}",
+            ch,
+            context.can_feed(&parser, &ch)
+        );
+        match context.feed(&parser, ch, &mut ()) {
             Ok(_) => {
-                println!("nodes: {}", c.len_paths());
+                println!("nodes: {}", context.len_paths());
             }
             Err(e) => {
                 println!("Error: {}", e);
@@ -44,17 +44,8 @@ fn main() {
             }
         }
     }
-    println!("feed eof");
-    match c.feed(&p, '\0', &mut ()) {
-        Ok(_) => {
-            println!("nodes: {}", c.len_paths());
-        }
-        Err(e) => {
-            println!("Error: {}", e);
-        }
-    }
 
-    for result in c.accept() {
+    for result in context.accept(&parser, &mut ()).unwrap() {
         println!("Result: {}", result);
     }
 

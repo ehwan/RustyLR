@@ -4,7 +4,6 @@ lr1! {
     %userdata i32;
     %tokentype char;
     %start E;
-    %eof '\0';
 
     %left '+';
     %left '*';
