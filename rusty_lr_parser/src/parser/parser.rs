@@ -82,8 +82,6 @@ use rusty_lr_core::builder::ReduceType;
 %token runtime Lexed::Runtime(_);
 %token location Lexed::Location(_);
 
-%eof Lexed::Eof;
-
 %start Grammar;
 
 Rule(RuleDefArgs) : ident RuleType colon RuleLines semicolon {
@@ -470,11 +468,10 @@ Directive
             span: @error
         });
     }
-    | percent eofdef RustCode semicolon
-    | percent eofdef semicolon {
+    | percent eofdef error semicolon {
         data.error_recovered.push( RecoveredError {
-            message: "Expected EOF definition".to_string(),
-            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#eof-symbol-must-defined".to_string(),
+            message: "%eof directive is deprecated. You don't need to define eof token explicitly".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md".to_string(),
             span: @eofdef
         });
     }
@@ -636,7 +633,7 @@ Directive
     }
     | percent error semicolon {
         data.error_recovered.push( RecoveredError {
-            message: "Expected directive, e.g. %token, %start, %eof, ...".to_string(),
+            message: "Expected directive, e.g. %token, %start, ...".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#syntax".to_string(),
             span: @error,
         });

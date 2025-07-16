@@ -67,7 +67,6 @@ pub enum Lexed {
     Filter(Ident),       // %filter
     Runtime(Ident),      // %runtime
     Location(Ident),     // %location
-    Eof,
 }
 impl Lexed {
     pub fn append_to_stream(self, stream: &mut TokenStream) {
@@ -164,8 +163,6 @@ impl Lexed {
             Lexed::Location(ident) => {
                 stream.append(ident);
             }
-
-            Lexed::Eof => unreachable!("Eof::stream()"),
         }
     }
 }
@@ -222,8 +219,6 @@ impl std::fmt::Display for Lexed {
             Lexed::Filter(_) => write!(f, "filter"),
             Lexed::Runtime(_) => write!(f, "runtime"),
             Lexed::Location(_) => write!(f, "location"),
-
-            Lexed::Eof => write!(f, "<eof>"),
         }
     }
 }
