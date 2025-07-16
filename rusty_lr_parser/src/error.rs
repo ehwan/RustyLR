@@ -12,14 +12,7 @@ use crate::parser::args::IdentOrLiteral;
 #[derive(Debug)]
 pub enum ParseArgError {
     /// feed() failed
-    MacroLineParse {
-        span: Span,
-        message: String,
-    },
-    // feed(eof) failed
-    MacroLineParseEnd {
-        message: String,
-    },
+    MacroLineParse { span: Span, message: String },
 }
 
 #[non_exhaustive]
@@ -213,14 +206,12 @@ impl ParseArgError {
     pub fn span(&self) -> Span {
         match self {
             ParseArgError::MacroLineParse { span, message } => *span,
-            ParseArgError::MacroLineParseEnd { message } => Span::call_site(),
         }
     }
 
     pub fn short_message(&self) -> String {
         match self {
             ParseArgError::MacroLineParse { span, message } => message.clone(),
-            ParseArgError::MacroLineParseEnd { message } => message.clone(),
         }
     }
 }

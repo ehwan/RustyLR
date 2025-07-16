@@ -315,9 +315,6 @@ impl Builder {
                                 ])
                                 .with_notes(vec![message])
                         }
-                        ParseArgError::MacroLineParseEnd { message } => Diagnostic::error()
-                            .with_message("Parse Failed")
-                            .with_notes(vec![message]),
 
                         _ => {
                             let message = e.short_message();
