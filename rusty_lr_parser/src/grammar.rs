@@ -113,8 +113,6 @@ pub struct Grammar {
     pub other_used: bool,
     pub error_used: bool,
 
-    /// terminal index of eof
-    pub eof_index: TerminalIndex,
     /// terminal index of other_terminals
     /// `other_terminal` can be only used by [^ term ...] pattern,
     /// to indicate *other terminals* not defined in this grammar.
@@ -218,16 +216,6 @@ impl Grammar {
             return Err(ArgError::MultipleTokenTypeDefinition(
                 grammar_args.token_typename[0].clone(),
                 grammar_args.token_typename[1].clone(),
-            ));
-        }
-
-        // %eof
-        if grammar_args.eof.is_empty() {
-            return Err(ArgError::EofNotDefined);
-        } else if grammar_args.eof.len() > 1 {
-            return Err(ArgError::MultipleEofDefinition(
-                grammar_args.eof[0].clone(),
-                grammar_args.eof[1].clone(),
             ));
         }
 
@@ -369,7 +357,6 @@ impl Grammar {
             other_used: false,
             error_used: false,
 
-            eof_index: 0,
             other_terminal_index: 0,
             range_resolver: RangeResolver::new(),
 
@@ -392,18 +379,6 @@ impl Grammar {
         // but we can't assign every single character to a self.terminals.
         // Rather, we assign a range of characters to a single self.terminals
         if grammar.is_char || grammar.is_u8 {
-            // add eof
-            let eof_val = {
-                let eof_body = grammar_args.eof.first().unwrap().1.clone();
-                let eof_parsed = syn::parse2::<syn::Lit>(eof_body.clone());
-                if let Ok(lit) = eof_parsed {
-                    let val = grammar.get_char_value(&lit)?;
-                    grammar.range_resolver.insert(val, val);
-                    val
-                } else {
-                    return Err(ParseError::UnsupportedLiteralType(eof_body));
-                }
-            };
             // add terminals from %prec definition in each rule
             for rules_arg in grammar_args.rules.iter() {
                 for rule in rules_arg.rule_lines.iter() {
@@ -443,9 +418,6 @@ impl Grammar {
                     body: quote! { range_term },
                 };
                 let index = grammar.terminals.len();
-                if range.0 == eof_val {
-                    grammar.eof_index = index;
-                }
                 grammar.terminals.push(terminal_info);
                 grammar.terminals_index.insert(name, index);
             }
@@ -477,20 +449,6 @@ impl Grammar {
                 grammar.terminals.push(terminal_info);
                 grammar.terminals_index.insert(name, index);
             }
-            // add eof
-            let eof_body = grammar_args.eof.into_iter().next().unwrap().1;
-            let eof_ident = Ident::new(utils::EOF_NAME, Span::call_site());
-            let name: TerminalName = eof_ident.into();
-
-            let terminal_info = TerminalInfo {
-                name: name.clone(),
-                precedence: None,
-                body: eof_body,
-            };
-            let idx = grammar.terminals.len();
-            grammar.eof_index = idx;
-            grammar.terminals.push(terminal_info);
-            grammar.terminals_index.insert(name, idx);
         }
 
         // add other_terminals
@@ -904,7 +862,7 @@ impl Grammar {
                         end_span: Span::call_site(),
                     },
                     TokenMapped {
-                        token: Token::Term(TerminalSymbol::Term(grammar.eof_index)),
+                        token: Token::Term(TerminalSymbol::Eof),
                         mapto: None,
                         begin_span: Span::call_site(),
                         end_span: Span::call_site(),

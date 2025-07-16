@@ -470,9 +470,7 @@ Directive
             span: @error
         });
     }
-    | percent eofdef RustCode semicolon {
-        data.eof.push( (@eofdef.span(), RustCode) );
-    }
+    | percent eofdef RustCode semicolon
     | percent eofdef semicolon {
         data.error_recovered.push( RecoveredError {
             message: "Expected EOF definition".to_string(),

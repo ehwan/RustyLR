@@ -1905,9 +1905,6 @@ impl GrammarTokenData {
         else {
             unreachable!()
         };
-        {
-            data.eof.push((__rustylr_location_eofdef.span(), RustCode));
-        }
         Ok(GrammarTokenData::Empty)
     }
     #[doc = "Directive -> percent eofdef semicolon"]
