@@ -5,19 +5,7 @@ pub enum Token {
     Star,
     LParen,
     RParen,
-    Eof,
 }
-impl std::hash::Hash for Token {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        std::mem::discriminant(self).hash(state);
-    }
-}
-impl std::cmp::PartialEq for Token {
-    fn eq(&self, other: &Self) -> bool {
-        std::mem::discriminant(self) == std::mem::discriminant(other)
-    }
-}
-impl std::cmp::Eq for Token {}
 
 fn filter( term: &Token ) -> &Token {
     term
@@ -38,8 +26,6 @@ fn filter( term: &Token ) -> &Token {
 
 // start symbol
 %start E;
-// eof symbol; for augmented rule generation
-%eof Token::Eof;
 
 // error type
 %err String;

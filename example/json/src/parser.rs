@@ -4,7 +4,6 @@
 
 %tokentype char;
 %start Json;
-%eof '\0';
 %dense;
 %location std::ops::Range<usize>;
 

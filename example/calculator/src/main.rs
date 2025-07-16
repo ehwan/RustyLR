@@ -14,7 +14,6 @@ fn main() {
         Token::Plus,
         Token::Num(4),
         Token::RParen,
-        Token::Eof,
     ];
 
     let parser = parser::EParser::new();
@@ -40,7 +39,7 @@ fn main() {
         );
     }
     // res = value of start symbol ( E(i32) )
-    let res = context.accept().unwrap();
+    let res = context.accept(&parser, &mut userdata).unwrap();
     println!("{}", res);
     println!("userdata: {}", userdata);
 }
