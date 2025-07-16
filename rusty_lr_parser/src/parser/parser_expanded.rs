@@ -3771,6 +3771,7 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                 }
             }
             ::rusty_lr_core::TerminalSymbol::Error => None,
+            ::rusty_lr_core::TerminalSymbol::Eof => None,
         }
     }
     fn precedence_types(&self, level: usize) -> Option<::rusty_lr_core::builder::ReduceType> {
@@ -5163,6 +5164,7 @@ impl GrammarParser {
                     |term| match term {
                         ::rusty_lr_core::TerminalSymbol::Term(term) => terminal_class_names[term],
                         ::rusty_lr_core::TerminalSymbol::Error => "error",
+                        ::rusty_lr_core::TerminalSymbol::Eof => "eof",
                     },
                     |nonterm| nonterm,
                 )
