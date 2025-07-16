@@ -374,6 +374,57 @@ impl<Data: TokenData> Context<Data> {
             .iter()
             .any(|node| Node::can_panic(node, parser, error_prec))
     }
+
+    /// Feed eof symbol with default zero-length location from the end of stream.
+    pub fn feed_eof<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &mut self,
+        parser: &P,
+        userdata: &mut Data::UserData,
+    ) -> Result<(), ParseError<Data>>
+    where
+        P::Term: Clone,
+        P::NonTerm: Hash + Eq + Clone + std::fmt::Debug,
+        Data: Clone,
+    {
+        use crate::Location;
+        self.reduce_errors.clear();
+        self.no_precedences.clear();
+        self.fallback_nodes.clear();
+        self.next_nodes.clear();
+
+        let mut current_nodes = std::mem::take(&mut self.current_nodes);
+        let eof_location = if let Some(node) = current_nodes.first() {
+            Data::Location::new(node.iter().map(|node| &node.data.as_ref().unwrap().1), 0)
+        } else {
+            Data::Location::new(None.into_iter(), 0)
+        };
+        for node in current_nodes.drain(..) {
+            if let Err((node, _, _)) =
+                Node::feed_eof(node, self, parser, eof_location.clone(), userdata)
+            {
+                if self.next_nodes.is_empty() {
+                    self.fallback_nodes.push(node);
+                }
+            }
+        }
+        self.current_nodes = current_nodes;
+
+        // next_nodes is empty; invalid terminal was given
+        // do not check for panic mode; this is eof token.
+        if self.next_nodes.is_empty() {
+            std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
+
+            return Err(ParseError {
+                term: TerminalSymbol::Eof,
+                location: eof_location,
+                reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                no_precedences: std::mem::take(&mut self.no_precedences),
+            });
+        } else {
+            std::mem::swap(&mut self.current_nodes, &mut self.next_nodes);
+            Ok(())
+        }
+    }
 }
 
 impl<Data: TokenData> Default for Context<Data> {

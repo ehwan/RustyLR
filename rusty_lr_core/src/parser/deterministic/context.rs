@@ -600,6 +600,30 @@ impl<Data: TokenData> Context<Data> {
         Some(shift_to.is_some())
     }
 
+    pub fn feed_eof<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &mut self,
+        parser: &P,
+        userdata: &mut Data::UserData,
+    ) -> Result<(), ParseError<Data>>
+    where
+        Data::Term: Clone,
+        Data::NonTerm: Hash + Eq + Copy,
+    {
+        use crate::Location;
+        let eof_location = Data::Location::new(
+            self.data_stack.iter().map(|(_, loc)| loc).rev(),
+            0, // eof node
+        );
+        self.feed_location_impl(
+            parser,
+            TerminalSymbol::Eof,
+            TerminalSymbol::Eof,
+            None,
+            userdata,
+            eof_location,
+        )
+    }
+
     /// Get set of `%trace` non-terminal symbols that current context is trying to parse.
     ///
     /// The order of the returned set does not mean anything.

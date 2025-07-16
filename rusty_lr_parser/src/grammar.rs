@@ -21,7 +21,6 @@ use crate::nonterminal_info::ReduceAction;
 use crate::nonterminal_info::Rule;
 use crate::parser::args::GrammarArgs;
 use crate::parser::args::IdentOrU32;
-use crate::parser::lexer::Lexed;
 use crate::parser::parser_expanded::GrammarContext;
 use crate::parser::parser_expanded::GrammarParser;
 use crate::pattern::Pattern;
@@ -174,7 +173,7 @@ impl Grammar {
                 return Err(ParseArgError::MacroLineParse { span, message });
             }
         }
-        match context.feed(&parser, Lexed::Eof, &mut grammar_args) {
+        match context.feed_eof(&parser, &mut grammar_args) {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();
