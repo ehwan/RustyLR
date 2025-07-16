@@ -470,7 +470,7 @@ Directive
     }
     | percent eofdef error semicolon {
         data.error_recovered.push( RecoveredError {
-            message: "%eof directive is deprecated. You don't need to define eof token explicitly".to_string(),
+            message: "%eof directive is deprecated. You don't need to define an eof token explicitly".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md".to_string(),
             span: @eofdef
         });
