@@ -22,7 +22,6 @@ It's important to be aware of points in your grammar where shift/reduce or reduc
 %glr;
 %tokentype char;
 %start E;
-%eof '\0';
 
 Digit(char): ['0'-'9'] ;
 
@@ -102,8 +101,8 @@ for token in input_sequence {
 }
 
 // Retrieve all possible parse results
-for result in context.accept() {
-    println!("Parse result: {:?}", result.unwrap());
+for result in context.accept().unwrap() {
+    println!("Parse result: {:?}", result);
 }
 ```
 

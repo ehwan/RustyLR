@@ -50,14 +50,12 @@ pub enum MyToken {
     Num(i32),
     Op(char),
     Whitespace(char),
-    EOF,
 }
 
 lr1! {
     %userdata i32;              // User data type passed to parser
     %tokentype MyToken;         // Token type; sequence of tokens fed to parser
     %start E;                   // Start symbol; this is the final value of parser
-    %eof MyToken::EOF;          // End-of-file token
 
     // Token definitions
     %token num  MyToken::Num(_);
@@ -117,7 +115,6 @@ pub enum MyToken {
 
 %tokentype MyToken;
 %start E;
-%eof MyToken::EOF;
 
 %token id MyToken::Identifier(_);
 %token num MyToken::Number(_);
@@ -162,9 +159,6 @@ for token in tokens {
         }
     }
 }
-
-// Feed EOF token to complete parsing
-context.feed(&parser, MyToken::EOF, &mut userdata).unwrap();
 
 // Get the final parsed result
 let result: i32 = context.accept().unwrap();
