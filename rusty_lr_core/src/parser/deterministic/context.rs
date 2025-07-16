@@ -59,7 +59,7 @@ impl<Data: TokenData> Context<Data> {
     }
     /// End this context and pop the value of the start symbol from the data stack.
     pub fn accept<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &mut self,
+        mut self,
         parser: &P,
         userdata: &mut Data::UserData,
     ) -> Result<Data::StartType, ParseError<Data>>
