@@ -195,13 +195,17 @@ impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
             && self.shift_goto_map_nonterm.is_empty()
     }
     fn expected_shift_term(&self) -> impl Iterator<Item = usize> + '_ {
-        (0..self.shift_goto_map_class.len()).filter(|&i| self.shift_goto_map_class[i].is_some())
+        (0..self.shift_goto_map_class.len())
+            .filter(|&i| self.shift_goto_map_class[i].is_some())
+            .map(|i| i + self.shift_class_offset)
     }
     fn expected_shift_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_ {
         self.shift_goto_map_nonterm.keys().copied()
     }
     fn expected_reduce_term(&self) -> impl Iterator<Item = usize> + '_ {
-        (0..self.shift_goto_map_class.len()).filter(|&i| self.reduce_map[i].is_some())
+        (0..self.shift_goto_map_class.len())
+            .filter(|&i| self.reduce_map[i].is_some())
+            .map(|i| i + self.reduce_offset)
     }
     fn expected_reduce_rule(&self) -> impl Iterator<Item = usize> + '_ {
         self.reduce_map
