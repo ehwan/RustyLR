@@ -7,6 +7,7 @@ pub use error::ParseError;
 pub use node::Node;
 pub use node::NodeRefIterator;
 
+use crate::nonterminal::NonTerminal;
 use crate::nonterminal::TokenData;
 use crate::parser::Parser;
 use std::rc::Rc;
@@ -97,7 +98,7 @@ pub(crate) fn reduce<P: Parser, Data: TokenData<Term = P::Term, NonTerm = P::Non
 ) -> Result<Rc<Node<Data>>, Data::ReduceActionError>
 where
     P::Term: Clone,
-    P::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug,
+    P::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
 {
     use crate::Location;
     let mut new_location = Data::Location::new(

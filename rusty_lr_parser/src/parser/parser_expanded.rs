@@ -289,9 +289,6 @@ impl ::rusty_lr_core::nonterminal::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::Augmented => "Augmented",
         }
     }
-    fn to_usize(&self) -> usize {
-        *self as usize
-    }
     fn is_trace(&self) -> bool {
         match self {
             GrammarNonTerminals::Rule => false,
@@ -393,6 +390,9 @@ impl ::rusty_lr_core::nonterminal::NonTerminal for GrammarNonTerminals {
                 Some(::rusty_lr_core::nonterminal::NonTerminalType::Augmented)
             }
         }
+    }
+    fn to_usize(&self) -> usize {
+        *self as usize
     }
 }
 #[doc = r" enum for each non-terminal and terminal symbol, that actually hold data"]

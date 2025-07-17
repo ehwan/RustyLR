@@ -1,6 +1,7 @@
 use std::hash::Hash;
 
 use crate::hash::HashMap;
+use crate::nonterminal::NonTerminal;
 use crate::TerminalSymbol;
 
 /// A trait representing a parser state.
@@ -11,7 +12,7 @@ pub trait State<NonTerm> {
     /// Get the next state for a given non-terminal symbol.
     fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
     where
-        NonTerm: Hash + Eq;
+        NonTerm: Hash + Eq + NonTerminal;
 
     /// Get the reduce rule index for a given terminal symbol.
     fn reduce(
@@ -126,7 +127,8 @@ pub struct DenseState<NonTerm, RuleContainer> {
     pub(crate) eof_shift: Option<usize>,
 
     /// non-terminal symbol -> next state
-    pub(crate) shift_goto_map_nonterm: HashMap<NonTerm, usize>,
+    pub(crate) shift_goto_map_nonterm: Vec<Option<usize>>,
+    pub(crate) shift_nonterm_offset: usize,
     /// set of non-terminal symbols that is keys of `shift_goto_map_nonterm`
     pub(crate) shift_goto_map_nonterm_keys: Vec<NonTerm>,
 
@@ -161,9 +163,17 @@ impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
     }
     fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
     where
-        NonTerm: Hash + Eq,
+        NonTerm: Hash + Eq + NonTerminal,
     {
-        self.shift_goto_map_nonterm.get(nonterm).copied()
+        let nonterm = nonterm.to_usize();
+        if nonterm < self.shift_nonterm_offset {
+            None
+        } else {
+            self.shift_goto_map_nonterm
+                .get(nonterm - self.shift_nonterm_offset)
+                .copied()
+                .flatten()
+        }
     }
     fn reduce(
         &self,
@@ -323,7 +333,7 @@ fn builder_state_into_dense<NonTerm, RuleContainer: Clone>(
     rule_vec_map: impl Fn(std::collections::BTreeSet<usize>) -> RuleContainer,
 ) -> DenseState<NonTerm, RuleContainer>
 where
-    NonTerm: Hash + Eq + Copy,
+    NonTerm: Hash + Eq + Copy + NonTerminal,
 {
     let error_shift = builder_state
         .shift_goto_map_term
@@ -361,12 +371,23 @@ where
             (0, 0)
         }
     };
+    let (nonterm_min, nonterm_len) = {
+        let mut iter = builder_state.shift_goto_map_nonterm.keys();
+        let min = iter.next().map(|x| x.to_usize());
+        let max = iter.next_back().map(|x| x.to_usize()).or(min);
+        if let (Some(min), Some(max)) = (min, max) {
+            (min, max - min + 1)
+        } else {
+            (0, 0)
+        }
+    };
 
     let mut shift_goto_map_class = vec![None; shift_len];
-    let mut reduce_map = vec![None; reduce_len];
     for (term, state) in builder_state.shift_goto_map_term {
         shift_goto_map_class[*term.to_term().unwrap() - shift_min] = Some(state);
     }
+
+    let mut reduce_map = vec![None; reduce_len];
     for (term, rule) in builder_state.reduce_map {
         reduce_map[*term.to_term().unwrap() - reduce_min] = Some(rule_vec_map(rule));
     }
@@ -376,14 +397,19 @@ where
         .keys()
         .copied()
         .collect();
+    let mut shift_goto_map_nonterm = vec![None; nonterm_len];
+    for (nonterm, state) in builder_state.shift_goto_map_nonterm {
+        shift_goto_map_nonterm[nonterm.to_usize() - nonterm_min] = Some(state);
+    }
 
     DenseState {
         shift_goto_map_class,
         shift_class_offset: shift_min,
         error_shift,
         eof_shift,
-        shift_goto_map_nonterm: builder_state.shift_goto_map_nonterm.into_iter().collect(),
+        shift_goto_map_nonterm,
         shift_goto_map_nonterm_keys: nonterm_keys,
+        shift_nonterm_offset: nonterm_min,
         reduce_map,
         reduce_offset: reduce_min,
         error_reduce,
@@ -394,7 +420,7 @@ where
 impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
     for DenseState<NonTerm, usize>
 where
-    NonTerm: Hash + Eq + Copy,
+    NonTerm: Hash + Eq + Copy + NonTerminal,
 {
     fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
         builder_state_into_dense(builder_state, |reduce_map| {
@@ -408,7 +434,7 @@ where
 impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
     for DenseState<NonTerm, crate::stackvec::SmallVecU8>
 where
-    NonTerm: Hash + Eq + Copy,
+    NonTerm: Hash + Eq + Copy + NonTerminal,
 {
     fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
         builder_state_into_dense(builder_state, |reduce_map| {
@@ -419,7 +445,7 @@ where
 impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
     for DenseState<NonTerm, crate::stackvec::SmallVecU16>
 where
-    NonTerm: Hash + Eq + Copy,
+    NonTerm: Hash + Eq + Copy + NonTerminal,
 {
     fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
         builder_state_into_dense(builder_state, |reduce_map| {
@@ -430,7 +456,7 @@ where
 impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
     for DenseState<NonTerm, crate::stackvec::SmallVecU32>
 where
-    NonTerm: Hash + Eq + Copy,
+    NonTerm: Hash + Eq + Copy + NonTerminal,
 {
     fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
         builder_state_into_dense(builder_state, |reduce_map| {
@@ -441,7 +467,7 @@ where
 impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
     for DenseState<NonTerm, crate::stackvec::SmallVecUsize>
 where
-    NonTerm: Hash + Eq + Copy,
+    NonTerm: Hash + Eq + Copy + NonTerminal,
 {
     fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
         builder_state_into_dense(builder_state, crate::stackvec::SmallVecUsize::from_iter)
