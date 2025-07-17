@@ -289,6 +289,9 @@ impl ::rusty_lr_core::nonterminal::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::Augmented => "Augmented",
         }
     }
+    fn to_usize(&self) -> usize {
+        *self as usize
+    }
     fn is_trace(&self) -> bool {
         match self {
             GrammarNonTerminals::Rule => false,
