@@ -120,6 +120,8 @@ impl<NonTerm: Copy, RuleIndex: crate::stackvec::ToUsizeList> State<NonTerm>
 pub struct DenseState<NonTerm, RuleContainer> {
     /// terminal symbol -> next state
     pub(crate) shift_goto_map_class: Vec<Option<usize>>,
+    /// shift_goto_map_class[i] will contain i+offset 'th class's next state.
+    pub(crate) shift_class_offset: usize,
     pub(crate) error_shift: Option<usize>,
     pub(crate) eof_shift: Option<usize>,
 
@@ -128,6 +130,8 @@ pub struct DenseState<NonTerm, RuleContainer> {
 
     /// terminal symbol -> reduce rule index
     pub(crate) reduce_map: Vec<Option<RuleContainer>>,
+    /// reduce_map[i] will contain i+offset 'th class's reduce rule.
+    pub(crate) reduce_offset: usize,
     pub(crate) error_reduce: Option<RuleContainer>,
     pub(crate) eof_reduce: Option<RuleContainer>,
 
@@ -139,7 +143,16 @@ impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
 {
     fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<usize> {
         match class {
-            TerminalSymbol::Term(class) => self.shift_goto_map_class.get(class).copied().flatten(),
+            TerminalSymbol::Term(class) => {
+                if class < self.shift_class_offset {
+                    None
+                } else {
+                    self.shift_goto_map_class
+                        .get(class - self.shift_class_offset)
+                        .copied()
+                        .flatten()
+                }
+            }
             TerminalSymbol::Error => self.error_shift,
             TerminalSymbol::Eof => self.eof_shift,
         }
@@ -155,12 +168,17 @@ impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
         class: TerminalSymbol<usize>,
     ) -> Option<impl Iterator<Item = usize> + Clone + '_> {
         match class {
-            TerminalSymbol::Term(class) => self
-                .reduce_map
-                .get(class)
-                .map(|r| r.as_ref())
-                .flatten()
-                .map(crate::stackvec::ToUsizeList::to_usize_list),
+            TerminalSymbol::Term(class) => {
+                if class < self.reduce_offset {
+                    None
+                } else {
+                    self.reduce_map
+                        .get(class - self.reduce_offset)
+                        .map(|r| r.as_ref())
+                        .flatten()
+                        .map(crate::stackvec::ToUsizeList::to_usize_list)
+                }
+            }
             TerminalSymbol::Error => self
                 .error_reduce
                 .as_ref()
@@ -316,34 +334,41 @@ where
         .remove(&TerminalSymbol::Eof)
         .map(&rule_vec_map);
 
-    let shift_term_len = builder_state
-        .shift_goto_map_term
-        .keys()
-        .next_back()
-        .copied()
-        .map(|x| x.to_term().unwrap() + 1)
-        .unwrap_or(0);
-    let reduce_term_len = builder_state
-        .reduce_map
-        .keys()
-        .next_back()
-        .copied()
-        .map(|x| x.to_term().unwrap() + 1)
-        .unwrap_or(0);
-    let mut shift_goto_map_class = vec![None; shift_term_len];
-    let mut reduce_map = vec![None; reduce_term_len];
+    let (shift_min, shift_max) = {
+        let mut iter = builder_state.shift_goto_map_term.keys();
+        let min = iter.next().map(|x| *x.to_term().unwrap()).unwrap_or(0);
+        let max = iter
+            .next_back()
+            .map(|x| *x.to_term().unwrap())
+            .unwrap_or(min);
+        (min, max)
+    };
+    let (reduce_min, reduce_max) = {
+        let mut iter = builder_state.reduce_map.keys();
+        let min = iter.next().map(|x| *x.to_term().unwrap()).unwrap_or(0);
+        let max = iter
+            .next_back()
+            .map(|x| *x.to_term().unwrap())
+            .unwrap_or(min);
+        (min, max)
+    };
+
+    let mut shift_goto_map_class = vec![None; shift_max - shift_min + 1];
+    let mut reduce_map = vec![None; reduce_max - reduce_min + 1];
     for (term, state) in builder_state.shift_goto_map_term {
-        shift_goto_map_class[*term.to_term().unwrap()] = Some(state);
+        shift_goto_map_class[*term.to_term().unwrap() - shift_min] = Some(state);
     }
     for (term, rule) in builder_state.reduce_map {
-        reduce_map[*term.to_term().unwrap()] = Some(rule_vec_map(rule));
+        reduce_map[*term.to_term().unwrap() - reduce_min] = Some(rule_vec_map(rule));
     }
     DenseState {
         shift_goto_map_class,
+        shift_class_offset: shift_min,
         error_shift,
         eof_shift,
         shift_goto_map_nonterm: builder_state.shift_goto_map_nonterm.into_iter().collect(),
         reduce_map,
+        reduce_offset: reduce_min,
         error_reduce,
         eof_reduce,
         ruleset: builder_state.ruleset.into_iter().collect(),
