@@ -215,7 +215,7 @@ impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
         self.shift_goto_map_nonterm_keys.iter().copied()
     }
     fn expected_reduce_term(&self) -> impl Iterator<Item = usize> + '_ {
-        (0..self.shift_goto_map_class.len())
+        (0..self.reduce_map.len())
             .filter(|&i| self.reduce_map[i].is_some())
             .map(|i| i + self.reduce_offset)
     }
