@@ -338,27 +338,30 @@ where
         .remove(&TerminalSymbol::Eof)
         .map(&rule_vec_map);
 
-    let (shift_min, shift_max) = {
+    let (shift_min, shift_len) = {
         let mut iter = builder_state.shift_goto_map_term.keys();
-        let min = iter.next().map(|x| *x.to_term().unwrap()).unwrap_or(0);
-        let max = iter
-            .next_back()
-            .map(|x| *x.to_term().unwrap())
-            .unwrap_or(min);
-        (min, max)
+        let min = iter.next().map(|x| *x.to_term().unwrap());
+        let max = iter.next_back().map(|x| *x.to_term().unwrap()).or(min);
+
+        if let (Some(min), Some(max)) = (min, max) {
+            (min, max - min + 1)
+        } else {
+            (0, 0)
+        }
     };
-    let (reduce_min, reduce_max) = {
+    let (reduce_min, reduce_len) = {
         let mut iter = builder_state.reduce_map.keys();
-        let min = iter.next().map(|x| *x.to_term().unwrap()).unwrap_or(0);
-        let max = iter
-            .next_back()
-            .map(|x| *x.to_term().unwrap())
-            .unwrap_or(min);
-        (min, max)
+        let min = iter.next().map(|x| *x.to_term().unwrap());
+        let max = iter.next_back().map(|x| *x.to_term().unwrap()).or(min);
+        if let (Some(min), Some(max)) = (min, max) {
+            (min, max - min + 1)
+        } else {
+            (0, 0)
+        }
     };
 
-    let mut shift_goto_map_class = vec![None; shift_max - shift_min + 1];
-    let mut reduce_map = vec![None; reduce_max - reduce_min + 1];
+    let mut shift_goto_map_class = vec![None; shift_len];
+    let mut reduce_map = vec![None; reduce_len];
     for (term, state) in builder_state.shift_goto_map_term {
         shift_goto_map_class[*term.to_term().unwrap() - shift_min] = Some(state);
     }
