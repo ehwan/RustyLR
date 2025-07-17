@@ -163,6 +163,9 @@ impl Grammar {
                         #nonterm_type_case
                     }
                 }
+                fn to_usize(&self) -> usize {
+                    *self as usize
+                }
             }
         }
         );

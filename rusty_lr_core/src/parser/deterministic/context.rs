@@ -3,6 +3,7 @@ use std::hash::Hash;
 
 use super::ParseError;
 
+use crate::nonterminal::NonTerminal;
 use crate::nonterminal::TokenData;
 use crate::parser::Parser;
 use crate::parser::State;
@@ -66,7 +67,7 @@ impl<Data: TokenData> Context<Data> {
     where
         Data: TryInto<Data::StartType>,
         Data::Term: Clone,
-        Data::NonTerm: Hash + Eq + Copy,
+        Data::NonTerm: Hash + Eq + Copy + NonTerminal,
     {
         self.feed_eof(parser, userdata)?;
 
@@ -85,7 +86,7 @@ impl<Data: TokenData> Context<Data> {
         parser: &P,
     ) -> bool
     where
-        Data::NonTerm: Hash + Eq,
+        Data::NonTerm: Hash + Eq + NonTerminal,
     {
         let mut state_stack = self.state_stack.clone();
         let mut precedence_stack = self.precedence_stack.clone();
@@ -132,7 +133,7 @@ impl<Data: TokenData> Context<Data> {
         parser: &P,
     ) -> (BTreeSet<usize>, BTreeSet<Data::NonTerm>)
     where
-        Data::NonTerm: Ord + Copy + Hash,
+        Data::NonTerm: Ord + Copy + Hash + NonTerminal,
     {
         let mut terms = BTreeSet::new();
         let mut nonterms = BTreeSet::new();
@@ -169,7 +170,7 @@ impl<Data: TokenData> Context<Data> {
         terms: &mut BTreeSet<usize>,
         nonterms: &mut BTreeSet<Data::NonTerm>,
     ) where
-        Data::NonTerm: Ord + Copy + Hash,
+        Data::NonTerm: Ord + Copy + Hash + NonTerminal,
     {
         let s = *states.last().unwrap();
         let s = parser.get_states().get(s).expect("state must exist");
@@ -204,7 +205,7 @@ impl<Data: TokenData> Context<Data> {
     ) -> Result<(), ParseError<Data>>
     where
         Data::Term: Clone,
-        Data::NonTerm: Hash + Eq + Copy,
+        Data::NonTerm: Hash + Eq + Copy + NonTerminal,
         Data::Location: Default,
     {
         self.feed_location(parser, term, userdata, Default::default())
@@ -220,7 +221,7 @@ impl<Data: TokenData> Context<Data> {
     ) -> Result<(), ParseError<Data>>
     where
         Data::Term: Clone,
-        Data::NonTerm: Hash + Eq + Copy,
+        Data::NonTerm: Hash + Eq + Copy + NonTerminal,
     {
         use crate::Location;
         let class = TerminalSymbol::Term(parser.to_terminal_class(&term));
@@ -324,7 +325,7 @@ impl<Data: TokenData> Context<Data> {
     ) -> Result<(), ParseError<Data>>
     where
         Data::Term: Clone,
-        Data::NonTerm: Hash + Eq + Copy,
+        Data::NonTerm: Hash + Eq + Copy + NonTerminal,
     {
         use crate::Location;
 
@@ -490,7 +491,7 @@ impl<Data: TokenData> Context<Data> {
         term: &Data::Term,
     ) -> bool
     where
-        Data::NonTerm: Hash + Eq,
+        Data::NonTerm: Hash + Eq + NonTerminal,
     {
         let mut state_stack = self.state_stack.clone();
         let mut precedence_stack = self.precedence_stack.clone();
@@ -516,7 +517,7 @@ impl<Data: TokenData> Context<Data> {
         parser: &P,
     ) -> bool
     where
-        Data::NonTerm: Hash + Eq,
+        Data::NonTerm: Hash + Eq + NonTerminal,
     {
         // if `error` token was not used in the grammar, early return here
         if !P::error_used() {
@@ -553,7 +554,7 @@ impl<Data: TokenData> Context<Data> {
         shift_prec: Option<usize>,
     ) -> Option<bool>
     where
-        Data::NonTerm: Hash + Eq,
+        Data::NonTerm: Hash + Eq + NonTerminal,
     {
         let shift_to = loop {
             let state = &parser.get_states()[*state_stack.last().unwrap()];
@@ -641,7 +642,7 @@ impl<Data: TokenData> Context<Data> {
     ) -> Result<(), ParseError<Data>>
     where
         Data::Term: Clone,
-        Data::NonTerm: Hash + Eq + Copy,
+        Data::NonTerm: Hash + Eq + Copy + NonTerminal,
     {
         use crate::Location;
         let eof_location = Data::Location::new(

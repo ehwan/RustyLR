@@ -4,6 +4,7 @@ use std::rc::Rc;
 use super::Node;
 use super::ParseError;
 
+use crate::nonterminal::NonTerminal;
 use crate::nonterminal::TokenData;
 use crate::parser::Parser;
 use crate::TerminalSymbol;
@@ -78,7 +79,7 @@ impl<Data: TokenData> Context<Data> {
     where
         Data: Clone + TryInto<Data::StartType>,
         P::Term: Clone,
-        P::NonTerm: Hash + Eq + Clone + std::fmt::Debug,
+        P::NonTerm: Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
         Data: Clone,
     {
         self.feed_eof(parser, userdata)?;
@@ -135,7 +136,7 @@ impl<Data: TokenData> Context<Data> {
         std::collections::BTreeSet<Data::NonTerm>,
     )
     where
-        Data::NonTerm: Ord + Copy + Hash,
+        Data::NonTerm: Ord + Copy + Hash + NonTerminal,
     {
         let mut terms = std::collections::BTreeSet::new();
         let mut nonterms = std::collections::BTreeSet::new();
@@ -217,7 +218,7 @@ impl<Data: TokenData> Context<Data> {
     ) -> Result<(), ParseError<Data>>
     where
         P::Term: Clone,
-        P::NonTerm: Hash + Eq + Clone + std::fmt::Debug,
+        P::NonTerm: Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
         Data: Clone,
         Data::Location: Default,
     {
@@ -233,7 +234,7 @@ impl<Data: TokenData> Context<Data> {
     ) -> Result<(), ParseError<Data>>
     where
         P::Term: Clone,
-        P::NonTerm: Hash + Eq + Clone + std::fmt::Debug,
+        P::NonTerm: Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
         Data: Clone,
     {
         use crate::parser::State;
@@ -358,7 +359,7 @@ impl<Data: TokenData> Context<Data> {
         term: &P::Term,
     ) -> bool
     where
-        P::NonTerm: Hash + Eq,
+        P::NonTerm: Hash + Eq + NonTerminal,
     {
         let class = parser.to_terminal_class(term);
         let shift_prec = parser.class_precedence(TerminalSymbol::Term(class));
@@ -373,7 +374,7 @@ impl<Data: TokenData> Context<Data> {
         parser: &P,
     ) -> bool
     where
-        Data::NonTerm: Hash + Eq,
+        Data::NonTerm: Hash + Eq + NonTerminal,
     {
         // if `error` token was not used in the grammar, early return here
         if !P::error_used() {
@@ -394,7 +395,7 @@ impl<Data: TokenData> Context<Data> {
     ) -> Result<(), ParseError<Data>>
     where
         P::Term: Clone,
-        P::NonTerm: Hash + Eq + Clone + std::fmt::Debug,
+        P::NonTerm: Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
         Data: Clone,
     {
         use crate::Location;
@@ -442,7 +443,7 @@ impl<Data: TokenData> Context<Data> {
         parser: &P,
     ) -> bool
     where
-        P::NonTerm: Hash + Eq,
+        P::NonTerm: Hash + Eq + NonTerminal,
     {
         self.current_nodes
             .iter()

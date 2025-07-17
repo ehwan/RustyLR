@@ -18,6 +18,9 @@ pub trait NonTerminal {
 
     /// Gets the pretty name of this non-terminal.
     fn as_str(&self) -> &'static str;
+
+    /// converts this non-terminal to a usize
+    fn to_usize(&self) -> usize;
 }
 
 /// If the non-terminal is auto-generated,

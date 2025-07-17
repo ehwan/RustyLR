@@ -2,6 +2,7 @@ use std::ops::Deref;
 use std::ops::DerefMut;
 use std::rc::Rc;
 
+use crate::nonterminal::NonTerminal;
 use crate::nonterminal::TokenData;
 use crate::parser::State;
 use crate::TerminalSymbol;
@@ -382,7 +383,7 @@ impl<Data: TokenData> Node<Data> {
         terms: &mut std::collections::BTreeSet<usize>,
         nonterms: &mut std::collections::BTreeSet<Data::NonTerm>,
     ) where
-        Data::NonTerm: Ord + Copy + std::hash::Hash,
+        Data::NonTerm: Ord + Copy + std::hash::Hash + NonTerminal,
     {
         let s = self.state;
         let s = parser.get_states().get(s).expect("state must exist");
@@ -428,7 +429,7 @@ impl<Data: TokenData> Node<Data> {
     where
         Data: Clone,
         Data::Term: Clone,
-        Data::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug,
+        Data::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
     {
         use crate::Location;
 
@@ -477,7 +478,7 @@ impl<Data: TokenData> Node<Data> {
     ) -> Result<(), (Rc<Self>, TerminalSymbol<Data::Term>, Data::Location)>
     where
         P::Term: Clone,
-        P::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug,
+        P::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
         Data: Clone,
     {
         let class = TerminalSymbol::Term(class);
@@ -497,7 +498,7 @@ impl<Data: TokenData> Node<Data> {
     ) -> Result<(), (Rc<Self>, TerminalSymbol<Data::Term>, Data::Location)>
     where
         P::Term: Clone,
-        P::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug,
+        P::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
         Data: Clone,
     {
         use crate::parser::State;
@@ -675,7 +676,7 @@ impl<Data: TokenData> Node<Data> {
         shift_prec: Option<usize>,
     ) -> bool
     where
-        P::NonTerm: std::hash::Hash + Eq,
+        P::NonTerm: std::hash::Hash + Eq + NonTerminal,
     {
         let class = TerminalSymbol::Term(class);
         self.can_feed_impl(parser, class, shift_prec)
@@ -689,7 +690,7 @@ impl<Data: TokenData> Node<Data> {
         shift_prec: Option<usize>,
     ) -> bool
     where
-        P::NonTerm: std::hash::Hash + Eq,
+        P::NonTerm: std::hash::Hash + Eq + NonTerminal,
     {
         use crate::parser::State;
         use crate::rule::Precedence;
@@ -801,7 +802,7 @@ impl<Data: TokenData> Node<Data> {
         error_prec: Option<usize>,
     ) -> bool
     where
-        Data::NonTerm: std::hash::Hash + Eq,
+        Data::NonTerm: std::hash::Hash + Eq + NonTerminal,
     {
         loop {
             if Self::can_feed_impl(node, parser, TerminalSymbol::Error, error_prec) {
@@ -828,7 +829,7 @@ impl<Data: TokenData> Node<Data> {
     ) -> Result<(), (Rc<Self>, TerminalSymbol<Data::Term>, Data::Location)>
     where
         P::Term: Clone,
-        P::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug,
+        P::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
         Data: Clone,
     {
         self.feed_location_impl(
@@ -847,7 +848,7 @@ impl<Data: TokenData> Node<Data> {
         parser: &P,
     ) -> bool
     where
-        P::NonTerm: std::hash::Hash + Eq,
+        P::NonTerm: std::hash::Hash + Eq + NonTerminal,
     {
         self.can_feed_impl(parser, TerminalSymbol::Eof, None)
     }
