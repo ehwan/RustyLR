@@ -42,9 +42,10 @@ where
     let mut current_node = node;
     context.reduce_args.reserve(count);
     for _ in 0..count {
-        let data = match Rc::try_unwrap(current_node) {
+        let (data, location) = match Rc::try_unwrap(current_node) {
             Ok(node) => {
                 let data = node.data.unwrap();
+                let location = node.location.unwrap();
 
                 #[cfg(feature = "tree")]
                 {
@@ -53,20 +54,21 @@ where
                 }
 
                 current_node = node.parent.unwrap();
-                data
+                (data, location)
             }
             Err(rc_node) => {
                 let data = rc_node.data.as_ref().unwrap().clone();
+                let location = rc_node.location.as_ref().unwrap().clone();
                 #[cfg(feature = "tree")]
                 {
                     let tree = rc_node.tree.as_ref().unwrap().clone();
                     trees.push(tree);
                 }
                 current_node = Rc::clone(rc_node.parent.as_ref().unwrap());
-                data
+                (data, location)
             }
         };
-        context.reduce_args.push(data);
+        context.reduce_args.push((data, location));
     }
 
     #[cfg(feature = "tree")]
@@ -102,7 +104,7 @@ where
 {
     use crate::Location;
     let mut new_location = Data::Location::new(
-        node.iter().map(|node| &node.data.as_ref().unwrap().1),
+        node.iter().map(|node| node.location.as_ref().unwrap()),
         parser.get_rules()[reduce_rule].rule.len(),
     );
 
@@ -130,7 +132,8 @@ where
             {
                 Ok(Rc::new(Node {
                     parent: Some(parent),
-                    data: Some((new_data, new_location)),
+                    data: Some(new_data),
+                    location: Some(new_location),
                     precedence_level: precedence,
                     state: nonterm_shift_state,
                     #[cfg(feature = "tree")]

@@ -8,8 +8,9 @@ use crate::nonterminal::TokenData;
 pub struct ParseError<Data: TokenData> {
     /// The terminal symbol that caused the error.
     pub term: crate::TerminalSymbol<Data::Term>,
-    /// Location of the terminal symbol
-    pub location: Data::Location,
+    /// Location of the terminal symbol.
+    /// location will be `None` if the terminal was eof.
+    pub location: Option<Data::Location>,
     /// Error from reduce action (from every diverged paths)
     pub reduce_action_errors: Vec<Data::ReduceActionError>,
     /// Rule indices when shift/reduce conflict occur with no shift/reduce precedence defined.
@@ -18,7 +19,8 @@ pub struct ParseError<Data: TokenData> {
 }
 
 impl<Data: TokenData> ParseError<Data> {
-    pub fn location(&self) -> &Data::Location {
+    /// location will be `None` if the terminal was eof.
+    pub fn location(&self) -> &Option<Data::Location> {
         &self.location
     }
     pub fn term(&self) -> &crate::TerminalSymbol<Data::Term> {

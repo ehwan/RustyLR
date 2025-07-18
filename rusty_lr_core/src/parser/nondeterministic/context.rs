@@ -91,8 +91,8 @@ impl<Data: TokenData> Context<Data> {
             drop(rc_eof_node);
 
             let data_node = match Rc::try_unwrap(rc_data_node) {
-                Ok(data_node) => data_node.data.unwrap().0,
-                Err(rc_data_node) => rc_data_node.data.as_ref().unwrap().0.clone(),
+                Ok(data_node) => data_node.data.unwrap(),
+                Err(rc_data_node) => rc_data_node.data.as_ref().unwrap().clone(),
             };
             if let Ok(start) = data_node.try_into() {
                 start
@@ -258,7 +258,7 @@ impl<Data: TokenData> Context<Data> {
                 class,
                 shift_prec,
                 userdata,
-                location.clone(),
+                Some(location.clone()),
             ) {
                 if self.next_nodes.is_empty() {
                     self.fallback_nodes.push(node);
@@ -277,7 +277,7 @@ impl<Data: TokenData> Context<Data> {
 
                 return Err(ParseError {
                     term: TerminalSymbol::Term(term),
-                    location,
+                    location: Some(location),
                     reduce_action_errors: std::mem::take(&mut self.reduce_errors),
                     no_precedences: std::mem::take(&mut self.no_precedences),
                 });
@@ -296,7 +296,7 @@ impl<Data: TokenData> Context<Data> {
             if self.next_nodes.is_empty() {
                 Err(ParseError {
                     term: TerminalSymbol::Term(term),
-                    location,
+                    location: Some(location),
                     reduce_action_errors: std::mem::take(&mut self.reduce_errors),
                     no_precedences: std::mem::take(&mut self.no_precedences),
                 })
@@ -312,7 +312,8 @@ impl<Data: TokenData> Context<Data> {
                         let next_node = Node {
                             parent: Some(error_node),
                             state: next_state,
-                            data: Some((Data::new_terminal(term.clone()), location.clone())),
+                            data: Some(Data::new_terminal(term.clone())),
+                            location: Some(location.clone()),
                             precedence_level: shift_prec,
                             #[cfg(feature = "tree")]
                             tree: Some(crate::tree::Tree::new_terminal(TerminalSymbol::Term(
@@ -326,12 +327,14 @@ impl<Data: TokenData> Context<Data> {
 
                         let new_location = Data::Location::new(
                             std::iter::once(&location).chain(
-                                error_node.iter().map(|node| &node.data.as_ref().unwrap().1),
+                                error_node
+                                    .iter()
+                                    .map(|node| node.location.as_ref().unwrap()),
                             ),
                             2, // error node + fed token
                         );
                         if let Some(node) = Rc::get_mut(&mut error_node) {
-                            node.data.as_mut().unwrap().1 = new_location;
+                            node.location = Some(new_location);
                         } else {
                             unreachable!(
                                 "error node should be mutable, but it is not. \
@@ -398,22 +401,14 @@ impl<Data: TokenData> Context<Data> {
         P::NonTerm: Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
         Data: Clone,
     {
-        use crate::Location;
         self.reduce_errors.clear();
         self.no_precedences.clear();
         self.fallback_nodes.clear();
         self.next_nodes.clear();
 
         let mut current_nodes = std::mem::take(&mut self.current_nodes);
-        let eof_location = if let Some(node) = current_nodes.first() {
-            Data::Location::new(node.iter().map(|node| &node.data.as_ref().unwrap().1), 0)
-        } else {
-            Data::Location::new(None.into_iter(), 0)
-        };
         for node in current_nodes.drain(..) {
-            if let Err((node, _, _)) =
-                Node::feed_eof(node, self, parser, eof_location.clone(), userdata)
-            {
+            if let Err(node) = Node::feed_eof(node, self, parser, userdata) {
                 if self.next_nodes.is_empty() {
                     self.fallback_nodes.push(node);
                 }
@@ -428,7 +423,7 @@ impl<Data: TokenData> Context<Data> {
 
             return Err(ParseError {
                 term: TerminalSymbol::Eof,
-                location: eof_location,
+                location: None,
                 reduce_action_errors: std::mem::take(&mut self.reduce_errors),
                 no_precedences: std::mem::take(&mut self.no_precedences),
             });

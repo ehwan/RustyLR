@@ -169,7 +169,7 @@ impl Grammar {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();
-                let span = err.location().pair.unwrap().0;
+                let span = err.location().unwrap().pair.unwrap().0;
                 return Err(ParseArgError::MacroLineParse { span, message });
             }
         }
@@ -177,7 +177,7 @@ impl Grammar {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();
-                let span = err.location().pair.unwrap().0;
+                let span = Span::call_site();
                 return Err(ParseArgError::MacroLineParse { span, message });
             }
         }

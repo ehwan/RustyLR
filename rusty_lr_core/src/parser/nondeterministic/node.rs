@@ -1,5 +1,3 @@
-use std::ops::Deref;
-use std::ops::DerefMut;
 use std::rc::Rc;
 
 use crate::nonterminal::NonTerminal;
@@ -45,7 +43,8 @@ pub struct Node<Data: TokenData> {
     pub state: usize,
 
     /// token data for this node
-    pub data: Option<(Data, Data::Location)>,
+    pub data: Option<Data>,
+    pub location: Option<Data::Location>,
     pub precedence_level: Option<usize>,
 
     /// tree representation of this node
@@ -61,6 +60,7 @@ impl<Data: TokenData> Node<Data> {
             state: 0,
 
             data: None,
+            location: None,
             precedence_level: None,
             #[cfg(feature = "tree")]
             tree: None,
@@ -102,13 +102,13 @@ impl<Data: TokenData> Node<Data> {
     /// This function should not be called from root node.
     pub fn to_data(&self) -> &Data {
         debug_assert!(self.parent.is_some());
-        &self.data.as_ref().unwrap().0
+        &self.data.as_ref().unwrap()
     }
     /// Get data for this node.
     /// This function should not be called from root node.
     pub fn into_data(self) -> Data {
         debug_assert!(self.parent.is_some());
-        self.data.unwrap().0
+        self.data.unwrap()
     }
     /// Get list of data from root to this node.
     /// Unlike other [`Iterator`] functions, the order of returned data is from root to this node.
@@ -408,6 +408,7 @@ impl<Data: TokenData> Node<Data> {
                     precedence_level: None,
                     state: next_state,
                     data: None,
+                    location: None,
                     #[cfg(feature = "tree")]
                     tree: None,
                 };
@@ -434,7 +435,7 @@ impl<Data: TokenData> Node<Data> {
         use crate::Location;
 
         let mut error_location =
-            Data::Location::new(self.iter().map(|node| &node.data.as_ref().unwrap().1), 0);
+            Data::Location::new(self.iter().map(|node| node.location.as_ref().unwrap()), 0);
 
         loop {
             match Self::feed_location_impl(
@@ -445,15 +446,15 @@ impl<Data: TokenData> Node<Data> {
                 TerminalSymbol::Error,
                 error_prec,
                 userdata,
-                error_location,
+                Some(error_location),
             ) {
                 Ok(_) => {
                     return true;
                 }
                 Err((err_node, _, err_loc)) => {
                     error_location = Data::Location::new(
-                        std::iter::once(&err_loc)
-                            .chain(err_node.iter().map(|node| &node.data.as_ref().unwrap().1)),
+                        std::iter::once(&err_loc.unwrap())
+                            .chain(err_node.iter().map(|node| node.location.as_ref().unwrap())),
                         2,
                     );
                     self = match err_node.parent.as_ref() {
@@ -474,8 +475,8 @@ impl<Data: TokenData> Node<Data> {
         class: usize,
         shift_prec: Option<usize>,
         userdata: &mut Data::UserData,
-        location: Data::Location,
-    ) -> Result<(), (Rc<Self>, TerminalSymbol<Data::Term>, Data::Location)>
+        location: Option<Data::Location>,
+    ) -> Result<(), (Rc<Self>, TerminalSymbol<Data::Term>, Option<Data::Location>)>
     where
         P::Term: Clone,
         P::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
@@ -494,13 +495,16 @@ impl<Data: TokenData> Node<Data> {
         class: TerminalSymbol<usize>,
         shift_prec: Option<usize>,
         userdata: &mut Data::UserData,
-        location: Data::Location,
-    ) -> Result<(), (Rc<Self>, TerminalSymbol<Data::Term>, Data::Location)>
+        location: Option<Data::Location>,
+    ) -> Result<(), (Rc<Self>, TerminalSymbol<Data::Term>, Option<Data::Location>)>
     where
         P::Term: Clone,
         P::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
         Data: Clone,
     {
+        debug_assert!(
+            (term.is_eof() && location.is_none()) || (!term.is_eof() && location.is_some())
+        );
         use crate::parser::State;
         use crate::rule::Precedence;
 
@@ -620,14 +624,12 @@ impl<Data: TokenData> Node<Data> {
                     precedence_level: shift_prec,
                     #[cfg(feature = "tree")]
                     tree: Some(crate::tree::Tree::new_terminal(term.clone())),
-                    data: Some((
-                        match term {
-                            TerminalSymbol::Term(term) => Data::new_terminal(term),
-                            TerminalSymbol::Error => Data::new_error(),
-                            TerminalSymbol::Eof => Data::new_empty(),
-                        },
-                        location,
-                    )),
+                    data: Some(match term {
+                        TerminalSymbol::Term(term) => Data::new_terminal(term),
+                        TerminalSymbol::Error => Data::new_error(),
+                        TerminalSymbol::Eof => Data::new_empty(),
+                    }),
+                    location,
                 };
 
                 context.next_nodes.push(Rc::new(next_node));
@@ -650,14 +652,12 @@ impl<Data: TokenData> Node<Data> {
                 precedence_level: shift_prec,
                 #[cfg(feature = "tree")]
                 tree: Some(crate::tree::Tree::new_terminal(term.clone())),
-                data: Some((
-                    match term {
-                        TerminalSymbol::Term(term) => Data::new_terminal(term),
-                        TerminalSymbol::Error => Data::new_error(),
-                        TerminalSymbol::Eof => Data::new_empty(),
-                    },
-                    location,
-                )),
+                data: Some(match term {
+                    TerminalSymbol::Term(term) => Data::new_terminal(term),
+                    TerminalSymbol::Error => Data::new_error(),
+                    TerminalSymbol::Eof => Data::new_empty(),
+                }),
+                location,
             };
 
             context.next_nodes.push(Rc::new(next_node));
@@ -778,6 +778,7 @@ impl<Data: TokenData> Node<Data> {
                         #[cfg(feature = "tree")]
                         tree: None,
                         data: None,
+                        location: None,
                     };
                     if Self::can_feed_impl(&Rc::new(next_node), parser, class, shift_prec) {
                         return true;
@@ -824,9 +825,8 @@ impl<Data: TokenData> Node<Data> {
         self: Rc<Self>,
         context: &mut super::Context<Data>,
         parser: &P,
-        eof_location: Data::Location,
         userdata: &mut Data::UserData,
-    ) -> Result<(), (Rc<Self>, TerminalSymbol<Data::Term>, Data::Location)>
+    ) -> Result<(), Rc<Self>>
     where
         P::Term: Clone,
         P::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
@@ -839,8 +839,9 @@ impl<Data: TokenData> Node<Data> {
             TerminalSymbol::Eof,
             None,
             userdata,
-            eof_location,
+            None,
         )
+        .map_err(|(node, _, _)| node)
     }
 
     pub fn can_feed_eof<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
@@ -887,18 +888,5 @@ where
         } else {
             write!(f, "{:?}", self.to_tree())
         }
-    }
-}
-
-impl<Data: TokenData> Deref for Node<Data> {
-    type Target = Data;
-
-    fn deref(&self) -> &Self::Target {
-        self.to_data()
-    }
-}
-impl<Data: TokenData> DerefMut for Node<Data> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.data.as_mut().unwrap().0
     }
 }

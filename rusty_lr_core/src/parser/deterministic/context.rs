@@ -11,20 +11,17 @@ use crate::TerminalSymbol;
 
 /// A struct that maintains the current state and the values associated with each symbol.
 pub struct Context<Data: TokenData> {
-    /// State stack
+    /// stacks hold the values associated with each shifted symbol.
     pub state_stack: Vec<usize>,
-
-    /// Data stack holds the values associated with each symbol.
-    pub(crate) data_stack: Vec<(Data, Data::Location)>,
-
+    pub(crate) data_stack: Vec<Data>,
+    pub(crate) location_stack: Vec<Data::Location>,
     pub(crate) precedence_stack: Vec<Option<usize>>,
-
-    /// temporary data stack for reduce action.
-    pub(crate) reduce_args: crate::nonterminal::ReduceArgsStack<Data>,
-
     /// Tree stack for tree representation of the parse.
     #[cfg(feature = "tree")]
     pub(crate) tree_stack: crate::tree::TreeList<Data::Term, Data::NonTerm>,
+
+    /// temporary data stack for reduce action.
+    pub(crate) reduce_args: crate::nonterminal::ReduceArgsStack<Data>,
 }
 
 impl<Data: TokenData> Context<Data> {
@@ -35,6 +32,7 @@ impl<Data: TokenData> Context<Data> {
             state_stack: vec![0],
 
             data_stack: Vec::new(),
+            location_stack: Vec::new(),
             precedence_stack: Vec::new(),
             reduce_args: Default::default(),
 
@@ -51,6 +49,7 @@ impl<Data: TokenData> Context<Data> {
             state_stack,
 
             data_stack: Vec::with_capacity(capacity),
+            location_stack: Vec::with_capacity(capacity),
             precedence_stack: Vec::with_capacity(capacity),
             reduce_args: Default::default(),
 
@@ -73,7 +72,7 @@ impl<Data: TokenData> Context<Data> {
 
         // data_stack must be <Start> <EOF> in this point
         self.data_stack.pop();
-        if let Ok(start) = self.data_stack.pop().unwrap().0.try_into() {
+        if let Ok(start) = self.data_stack.pop().unwrap().try_into() {
             Ok(start)
         } else {
             unreachable!("data stack must have start symbol at this point");
@@ -233,7 +232,7 @@ impl<Data: TokenData> Context<Data> {
             class,
             shift_prec,
             userdata,
-            location,
+            Some(location),
         ) {
             Ok(()) => return Ok(()),
             Err(ParseError::NoAction(term, location)) => {
@@ -244,8 +243,7 @@ impl<Data: TokenData> Context<Data> {
                     return Err(ParseError::NoAction(term, location));
                 }
 
-                let mut error_location =
-                    Location::new(self.data_stack.iter().map(|(_, loc)| loc).rev(), 0);
+                let mut error_location = Location::new(self.location_stack.iter().rev(), 0);
                 let error_prec = parser.class_precedence(TerminalSymbol::Error);
 
                 loop {
@@ -255,7 +253,7 @@ impl<Data: TokenData> Context<Data> {
                         TerminalSymbol::Error,
                         error_prec,
                         userdata,
-                        error_location,
+                        Some(error_location),
                     ) {
                         Err(ParseError::NoAction(_, error_loc)) => {
                             if self.state_stack.len() == 1 {
@@ -265,12 +263,13 @@ impl<Data: TokenData> Context<Data> {
                             // no action for `error` token, continue to panic mode
                             // merge location with previous
                             error_location = Data::Location::new(
-                                std::iter::once(&error_loc)
-                                    .chain(self.data_stack.iter().map(|(_, loc)| loc).rev()),
+                                std::iter::once(&error_loc.unwrap())
+                                    .chain(self.location_stack.iter().rev()),
                                 2, // error node
                             );
                             self.data_stack.pop();
                             self.precedence_stack.pop();
+                            self.location_stack.pop();
                             self.state_stack.pop();
 
                             #[cfg(feature = "tree")]
@@ -291,21 +290,21 @@ impl<Data: TokenData> Context<Data> {
 
                     // shift with `error` token
                     self.data_stack
-                        .push((Data::new_terminal(term.into_term().unwrap()), location));
+                        .push(Data::new_terminal(term.into_term().unwrap()));
+                    self.location_stack.push(location.unwrap());
                     self.precedence_stack.push(shift_prec);
                     self.state_stack.push(next_state);
                 } else {
                     // merge term with previous error
 
                     let error_location = Data::Location::new(
-                        std::iter::once(&location)
-                            .chain(self.data_stack.iter().map(|(_, loc)| loc).rev()),
+                        std::iter::once(&location.unwrap()).chain(self.location_stack.iter().rev()),
                         2, // error node
                     );
-                    if let Some((_, err_loc)) = self.data_stack.last_mut() {
+                    if let Some(err_loc) = self.location_stack.last_mut() {
                         *err_loc = error_location;
                     } else {
-                        unreachable!("data stack must have at least one element");
+                        unreachable!("location stack must have at least one element");
                     }
                 }
                 Ok(())
@@ -321,12 +320,15 @@ impl<Data: TokenData> Context<Data> {
         class: TerminalSymbol<usize>,
         shift_prec: Option<usize>,
         userdata: &mut Data::UserData,
-        location: Data::Location,
+        location: Option<Data::Location>,
     ) -> Result<(), ParseError<Data>>
     where
         Data::Term: Clone,
         Data::NonTerm: Hash + Eq + Copy + NonTerminal,
     {
+        debug_assert!(
+            (term.is_eof() && location.is_none()) || (!term.is_eof() && location.is_some())
+        );
         use crate::Location;
 
         let shift_to = loop {
@@ -399,19 +401,21 @@ impl<Data: TokenData> Context<Data> {
 
                 let mut shift = false;
 
-                let mut new_location = Data::Location::new(
-                    self.data_stack.iter().map(|(_, loc)| loc).rev(),
-                    tokens_len,
-                );
+                let mut new_location =
+                    Data::Location::new(self.location_stack.iter().rev(), tokens_len);
 
                 self.reduce_args.clear();
                 self.reduce_args.reserve(tokens_len);
                 for _ in 0..tokens_len {
-                    self.reduce_args.push(
-                        self.data_stack
-                            .pop()
-                            .expect("data stack must have at least one element"),
-                    );
+                    let data = self
+                        .data_stack
+                        .pop()
+                        .expect("data stack must have at least one element");
+                    let location = self
+                        .location_stack
+                        .pop()
+                        .expect("location stack must have at least one element");
+                    self.reduce_args.push((data, location));
                 }
 
                 // call reduce action
@@ -428,7 +432,8 @@ impl<Data: TokenData> Context<Data> {
                         return Err(ParseError::ReduceAction(term, location, err));
                     }
                 };
-                self.data_stack.push((new_data, new_location));
+                self.data_stack.push(new_data);
+                self.location_stack.push(new_location);
 
                 // construct tree
                 #[cfg(feature = "tree")]
@@ -472,7 +477,10 @@ impl<Data: TokenData> Context<Data> {
                 TerminalSymbol::Error => Data::new_error(),
                 TerminalSymbol::Eof => Data::new_empty(),
             };
-            self.data_stack.push((data, location));
+            self.data_stack.push(data);
+            if let Some(location) = location {
+                self.location_stack.push(location);
+            }
             self.precedence_stack.push(shift_prec);
 
             Ok(())
@@ -644,18 +652,13 @@ impl<Data: TokenData> Context<Data> {
         Data::Term: Clone,
         Data::NonTerm: Hash + Eq + Copy + NonTerminal,
     {
-        use crate::Location;
-        let eof_location = Data::Location::new(
-            self.data_stack.iter().map(|(_, loc)| loc).rev(),
-            0, // eof node
-        );
         self.feed_location_impl(
             parser,
             TerminalSymbol::Eof,
             TerminalSymbol::Eof,
             None,
             userdata,
-            eof_location,
+            None,
         )
     }
 
@@ -876,6 +879,7 @@ where
         Context {
             state_stack: self.state_stack.clone(),
             data_stack: self.data_stack.clone(),
+            location_stack: self.location_stack.clone(),
             precedence_stack: self.precedence_stack.clone(),
             reduce_args: Default::default(),
 

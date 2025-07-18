@@ -7,23 +7,27 @@ use crate::TerminalSymbol;
 /// Error type for feed()
 #[derive(Clone)]
 pub enum ParseError<Data: TokenData> {
-    /// No action defined for the given terminal in the parser table
-    NoAction(TerminalSymbol<Data::Term>, Data::Location),
+    /// No action defined for the given terminal in the parser table.
+    /// location will be `None` if the terminal was eof.
+    NoAction(TerminalSymbol<Data::Term>, Option<Data::Location>),
 
-    /// Error from reduce action
+    /// Error from reduce action.
+    /// location will be `None` if the terminal was eof.
     ReduceAction(
         TerminalSymbol<Data::Term>,
-        Data::Location,
+        Option<Data::Location>,
         Data::ReduceActionError,
     ),
 
     /// Rule index when shift/reduce conflict occur with no shift/reduce precedence defined.
     /// This is same as when setting %nonassoc in Bison.
-    NoPrecedence(TerminalSymbol<Data::Term>, Data::Location, usize),
+    /// location will be `None` if the terminal was eof.
+    NoPrecedence(TerminalSymbol<Data::Term>, Option<Data::Location>, usize),
 }
 
 impl<Data: TokenData> ParseError<Data> {
-    pub fn location(&self) -> &Data::Location {
+    /// location will be `None` if the terminal was eof.
+    pub fn location(&self) -> &Option<Data::Location> {
         match self {
             ParseError::NoAction(_, location) => location,
             ParseError::ReduceAction(_, location, _) => location,
