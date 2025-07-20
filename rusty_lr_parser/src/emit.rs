@@ -1091,12 +1091,16 @@ impl Grammar {
         // ruletype_variant_map.insert(quote! {()}.to_string(), empty_ruletype_variant_name.clone());
         variant_names_in_order.push((empty_ruletype_variant_name.clone(), quote! {}));
 
+        fn remove_whitespaces(s: String) -> String {
+            s.chars().filter(|c| !c.is_whitespace()).collect()
+        }
+
         for nonterm in self.nonterminals.iter() {
             let ruletype_stream = nonterm.ruletype.as_ref().cloned().unwrap_or_default();
 
             let cur_len = ruletype_variant_map.len();
             let variant_name = ruletype_variant_map
-                .entry(ruletype_stream.to_string())
+                .entry(remove_whitespaces(ruletype_stream.to_string()))
                 .or_insert_with(|| {
                     let new_variant_name =
                         Ident::new(&format!("Variant{}", cur_len), Span::call_site());

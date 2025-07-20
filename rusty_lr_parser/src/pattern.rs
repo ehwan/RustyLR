@@ -984,7 +984,7 @@ impl Pattern {
                     Ok(PatternToToken {
                         name: newrule_name,
                         token: Token::NonTerm(newrule_idx),
-                        ruletype: Some(base_typename.clone()),
+                        ruletype: Some(quote! { Vec<#base_typename> }),
                         mapto: base_rule.mapto.clone(),
                     })
                 } else {
