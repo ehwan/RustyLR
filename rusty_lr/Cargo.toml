@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr"
-version = "3.26.0"
+version = "3.27.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "bison-like parser generator that converts context-free grammars into IELR(1)/LALR(1) tables with deterministic LR and non-deterministic GLR parsing support"
@@ -10,9 +10,9 @@ keywords = ["parser", "bison", "lr", "glr", "compiler"]
 categories = ["parsing", "compilers", "parser-implementations"]
 
 [dependencies]
-rusty_lr_core = { version = "3.31.0", path = "../rusty_lr_core" }
-rusty_lr_derive = { version = "2.34.0", path = "../rusty_lr_derive", optional = true }
-rusty_lr_buildscript = { version = "0.52.0", path = "../rusty_lr_buildscript", optional = true }
+rusty_lr_core = { version = "3.32.0", path = "../rusty_lr_core" }
+rusty_lr_derive = { version = "2.35.0", path = "../rusty_lr_derive", optional = true }
+rusty_lr_buildscript = { version = "0.53.0", path = "../rusty_lr_buildscript", optional = true }
 
 [features]
 default = ["derive"]
