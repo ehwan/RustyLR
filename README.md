@@ -161,7 +161,7 @@ for token in tokens {
 }
 
 // Get the final parsed result
-let result: i32 = context.accept().unwrap();
+let result: i32 = context.accept(&parser).unwrap();
 ```
 
 ### Using the `rustylr` Executable

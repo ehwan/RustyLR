@@ -101,7 +101,7 @@ for token in input_sequence {
 }
 
 // Retrieve all possible parse results
-for result in context.accept().unwrap() {
+for result in context.accept(&parser).unwrap() {
     println!("Parse result: {:?}", result);
 }
 ```
@@ -110,4 +110,4 @@ for result in context.accept().unwrap() {
 - `EParser::new()` - Creates a new parser instance
 - `EContext::new()` - Initializes the parsing context
 - `context.feed(&parser, token)` - Feeds tokens to the parser
-- `context.accept()` - Returns all possible values of the `%start` symbol from every parse path
+- `context.accept(&parser)` - Returns all possible values of the `%start` symbol from every parse path
