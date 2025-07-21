@@ -280,8 +280,16 @@ Pattern(PatternArgs): ident {
 | p1=Pattern slash lh=Pattern {
     PatternArgs::Lookaheads( Box::new(p1), Box::new(lh) )
 }
-| lparen Pattern+ rparen {
+| lparen $sep( Pattern*, pipe, + ) rparen {
     PatternArgs::Group(Pattern, @lparen.span(), @rparen.span())
+}
+| lparen error rparen {
+    data.error_recovered.push( RecoveredError {
+        message: "syntax error when parsing GROUP".to_string(),
+        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
+        span: @error,
+    });
+    PatternArgs::Ident(format_ident!("dummy"))
 }
 | literal {
     let Lexed::Literal(literal) = literal else {

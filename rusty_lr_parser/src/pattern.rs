@@ -27,7 +27,7 @@ pub enum PatternInternal {
     Exclamation(Box<Pattern>),
     TerminalSet(bool, BTreeSet<usize>),
     Lookaheads(Box<Pattern>, bool, BTreeSet<usize>),
-    Group(Vec<Pattern>),
+    Group(Vec<Vec<Pattern>>),
     Literal(syn::Lit),
     Sep(Box<Pattern>, Box<Pattern>, bool),
 }
@@ -643,145 +643,130 @@ impl Pattern {
             }
 
             PatternInternal::Group(group) => {
-                // Consider parenthesis-ed group of patterns
-                // ( A B C D ... )
-                // if there are no pattern holding a value, then the RuleType of the group is None
-                // if there is only one pattern holding a value, T, then the RuleType of the group is T
-                // otherwise, the RuleType of the group is (T1, T2, T3, ...) where T1 T2 T3 ... are the RuleType of the patterns holding a value
+                debug_assert!(group.len() > 0);
 
-                let mut elements = Vec::with_capacity(group.len());
-                for child in group.iter() {
-                    elements.push(child.to_token(grammar, pattern_cache, root_span_pair)?);
-                }
-                let mut tokens = Vec::with_capacity(group.len());
-                // indices of children that have ruletype
-                let mut ruletype_child_idxs = Vec::with_capacity(group.len());
-                for (child_idx, child) in elements.iter().enumerate() {
-                    tokens.push(TokenMapped {
-                        token: child.token,
-                        mapto: Some(format_ident!("__token{child_idx}")),
-                        begin_span: Span::call_site(),
-                        end_span: Span::call_site(),
-                    });
-                    if child.ruletype.is_some() {
-                        ruletype_child_idxs.push(child_idx);
+                let mut ruletypes = Vec::with_capacity(group.len());
+                let mut rules = Vec::with_capacity(group.len());
+
+                for line in group {
+                    // Consider parenthesis-ed group of patterns
+                    // ( A B C D ... )
+                    // if there are no pattern holding a value, then the RuleType of the group is None
+                    // if there is only one pattern holding a value, T, then the RuleType of the group is T
+                    // otherwise, the RuleType of the group is (T1, T2, T3, ...) where T1 T2 T3 ... are the RuleType of the patterns holding a value
+
+                    let mut elements = Vec::with_capacity(line.len());
+                    for child in line.iter() {
+                        elements.push(child.to_token(grammar, pattern_cache, root_span_pair)?);
                     }
-                }
-
-                let newrule_idx = grammar.nonterminals.len();
-                let newrule_name = Ident::new(&format!("_Group{}", newrule_idx), root_span_pair.0);
-
-                match ruletype_child_idxs.len() {
-                    0 => {
-                        let rule = Rule {
-                            tokens,
-                            reduce_action: None,
-                            separator_span: Span::call_site(),
-                            lookaheads: None,
-                            prec: None,
-                            dprec: None,
-                        };
-                        let nonterm_info = NonTerminalInfo {
-                            name: newrule_name.clone(),
-                            pretty_name: self.pretty_name.clone(),
-                            ruletype: None,
-                            rules: vec![rule],
-                            regex_span: Some(root_span_pair),
-                            trace: false,
-                            protected: false,
-                            nonterm_type: Some(NonTerminalType::Group),
-                        };
-                        grammar.nonterminals.push(nonterm_info);
-                        grammar
-                            .nonterminals_index
-                            .insert(newrule_name.clone(), newrule_idx);
-
-                        Ok(PatternToToken {
-                            name: newrule_name,
-                            token: Token::NonTerm(newrule_idx),
-                            ruletype: None,
-                            mapto: None,
-                        })
-                    }
-
-                    1 => {
-                        let unique_child_idx = ruletype_child_idxs[0];
-                        // let (typename, mapto) =
-                        //     &elements[unique_child_idx].ruletype_map.as_ref().unwrap();
-                        let rule = Rule {
-                            tokens,
-                            reduce_action: Some(ReduceAction::Identity(unique_child_idx)),
-                            separator_span: Span::call_site(),
-                            lookaheads: None,
-                            prec: None,
-                            dprec: None,
-                        };
-                        let nonterm_info = NonTerminalInfo {
-                            name: newrule_name.clone(),
-                            pretty_name: self.pretty_name.clone(),
-                            ruletype: elements[unique_child_idx].ruletype.clone(),
-                            rules: vec![rule],
-                            regex_span: Some(root_span_pair),
-                            trace: false,
-                            protected: false,
-                            nonterm_type: Some(NonTerminalType::Group),
-                        };
-                        grammar.nonterminals.push(nonterm_info);
-                        grammar
-                            .nonterminals_index
-                            .insert(newrule_name.clone(), newrule_idx);
-
-                        Ok(PatternToToken {
-                            name: newrule_name,
-                            token: Token::NonTerm(newrule_idx),
-                            ruletype: elements[unique_child_idx].ruletype.clone(),
-                            mapto: elements[unique_child_idx].mapto.clone(),
-                        })
-                    }
-
-                    _ => {
-                        let mut typename = TokenStream::new();
-                        let mut initializer = TokenStream::new();
-
-                        for child_idx in ruletype_child_idxs {
-                            let child_typename = elements[child_idx].ruletype.as_ref().unwrap();
-                            let child_mapto = format_ident!("__token{child_idx}");
-                            typename.extend(quote! { #child_typename, });
-                            initializer.extend(quote! { #child_mapto, });
+                    let mut tokens = Vec::with_capacity(line.len());
+                    // indices of children that have ruletype
+                    let mut ruletype_child_idxs = Vec::with_capacity(line.len());
+                    for (child_idx, child) in elements.iter().enumerate() {
+                        tokens.push(TokenMapped {
+                            token: child.token,
+                            mapto: Some(format_ident!("__token{child_idx}")),
+                            begin_span: Span::call_site(),
+                            end_span: Span::call_site(),
+                        });
+                        if child.ruletype.is_some() {
+                            ruletype_child_idxs.push(child_idx);
                         }
-                        let typename = quote! {(#typename)};
-                        let initializer = quote! {(#initializer)};
-                        let rule = Rule {
-                            tokens,
-                            reduce_action: Some(ReduceAction::Custom(initializer)),
-                            separator_span: Span::call_site(),
-                            lookaheads: None,
-                            prec: None,
-                            dprec: None,
-                        };
-                        let nonterm_info = NonTerminalInfo {
-                            name: newrule_name.clone(),
-                            pretty_name: self.pretty_name.clone(),
-                            ruletype: Some(typename.clone()),
-                            rules: vec![rule],
-                            regex_span: Some(root_span_pair),
-                            trace: false,
-                            protected: false,
-                            nonterm_type: Some(NonTerminalType::Group),
-                        };
-                        grammar.nonterminals.push(nonterm_info);
-                        grammar
-                            .nonterminals_index
-                            .insert(newrule_name.clone(), newrule_idx);
+                    }
 
-                        Ok(PatternToToken {
-                            name: newrule_name,
-                            token: Token::NonTerm(newrule_idx),
-                            ruletype: Some(typename),
-                            mapto: None,
-                        })
+                    let (cur_rule, cur_ruletype) = match ruletype_child_idxs.len() {
+                        0 => {
+                            let rule = Rule {
+                                tokens,
+                                reduce_action: None,
+                                separator_span: Span::call_site(),
+                                lookaheads: None,
+                                prec: None,
+                                dprec: None,
+                            };
+                            (rule, None)
+                        }
+
+                        1 => {
+                            let unique_child_idx = ruletype_child_idxs[0];
+                            // let (typename, mapto) =
+                            //     &elements[unique_child_idx].ruletype_map.as_ref().unwrap();
+                            let rule = Rule {
+                                tokens,
+                                reduce_action: Some(ReduceAction::Identity(unique_child_idx)),
+                                separator_span: Span::call_site(),
+                                lookaheads: None,
+                                prec: None,
+                                dprec: None,
+                            };
+                            let ruletype = elements[unique_child_idx].ruletype.clone();
+                            (rule, ruletype)
+                        }
+
+                        _ => {
+                            let mut typename = TokenStream::new();
+                            let mut initializer = TokenStream::new();
+
+                            for child_idx in ruletype_child_idxs {
+                                let child_typename = elements[child_idx].ruletype.as_ref().unwrap();
+                                let child_mapto = format_ident!("__token{child_idx}");
+                                typename.extend(quote! { #child_typename, });
+                                initializer.extend(quote! { #child_mapto, });
+                            }
+                            let typename = quote! {(#typename)};
+                            let initializer = quote! {(#initializer)};
+                            let rule = Rule {
+                                tokens,
+                                reduce_action: Some(ReduceAction::Custom(initializer)),
+                                separator_span: Span::call_site(),
+                                lookaheads: None,
+                                prec: None,
+                                dprec: None,
+                            };
+                            (rule, Some(typename))
+                        }
+                    };
+
+                    rules.push(cur_rule);
+                    ruletypes.push(cur_ruletype);
+                }
+
+                let mut ruletype_it = ruletypes.into_iter();
+                let mut ruletype = ruletype_it.next().unwrap();
+                let ruletype_s = ruletype.as_ref().map(|t| t.to_string());
+                for r in ruletype_it {
+                    let r_s = r.as_ref().map(|t| t.to_string());
+                    if ruletype_s != r_s {
+                        ruletype = None;
+                        for rule in &mut rules {
+                            rule.reduce_action = None;
+                        }
+                        break;
                     }
                 }
+                let newrule_idx = grammar.nonterminals.len();
+                let newrule_name = format_ident!("_Group{}", newrule_idx);
+                let nonterm_info = NonTerminalInfo {
+                    name: newrule_name.clone(),
+                    pretty_name: self.pretty_name.clone(),
+                    ruletype: ruletype.clone(),
+                    rules,
+                    regex_span: Some(root_span_pair),
+                    trace: false,
+                    protected: false,
+                    nonterm_type: Some(NonTerminalType::Group),
+                };
+                grammar.nonterminals.push(nonterm_info);
+                grammar
+                    .nonterminals_index
+                    .insert(newrule_name.clone(), newrule_idx);
+
+                Ok(PatternToToken {
+                    name: newrule_name,
+                    token: Token::NonTerm(newrule_idx),
+                    ruletype,
+                    mapto: None,
+                })
             }
 
             PatternInternal::Literal(literal) => match literal {

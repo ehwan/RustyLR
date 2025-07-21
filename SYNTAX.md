@@ -128,7 +128,7 @@ Patterns define the structure of the input that matches a production rule.
  - `P+` : One or more repetitions of `P`
  - `P?` : Zero or one repetition of `P`
  - `$sep( P, P_separator, repetition )`: A repetition of `P` separated by `P_separator`. The `repetition` can be `*`, or `+` to indicate zero or more, or one or more repetitions respectively
- - `(P1 P2 P3)` : Grouping of patterns
+ - `(P1 P2 P3 | P4 | P5 P6 ...)` : Grouping of patterns
  - `P / term` or `P / [term1 term_start-term_last]`: Pattern `P` followed by lookaheads. Lookaheads will not be consumed
  - `'a'` or `b'a'`: Single character literal or byte literal. This is only supported if the `%tokentype` is `char` or `u8`
  - `"abcd"` or `b"abcd"`: String literal or byte string literal. This is only supported if the `%tokentype` is `char` or `u8`
@@ -251,10 +251,13 @@ E: digit=[zero-nine] {
 ```
 
 ### Pattern Groups
-For group `(P1 P2 P3)`:
- - If none of the patterns hold value, the group itself will not hold any value
- - If only one of the patterns holds value, the group will hold the value of that pattern. The variable name will be the same as the pattern (i.e. If `P1` holds value, and others don't, then `(P1 P2 P3)` will hold the value of `P1`, and can be accessed via name `P1`)
- - If there are multiple patterns holding value, the group will hold a `Tuple` of the values. There is no default variable name for the group, you must define the variable name explicitly with the `=` operator
+For group `(P1 P2 P3 | P4 P5 | P6)`:
+ - For each line `P1 P2 P3`, `P4 P5`, and `P6`, if every line holds a same type of value `T`, the group will hold a `T` value. Else, the group will not hold any value.
+ - Rule type for each line will be determined by following rules:
+   - If none of the tokens in the line holds a value, the group will not hold any value
+   - If only one of the tokens in the line holds a value, the group will hold that value
+   - If there are multiple tokens in the line holding value, the group will hold a `Tuple` of those values
+ - There is no default variable name for the group, you must define the variable name explicitly with the `=` operator
 
  ```rust
  NoRuleType: ... ;
@@ -262,14 +265,13 @@ For group `(P1 P2 P3)`:
  I(i32): ... ;
 
  // I will be chosen
- A: (NoRuleType I NoRuleType) {
-     println!("Value of I: {:?}", I); // can access by 'I'
-     I
+ A: i=(NoRuleType I NoRuleType | I) {
+     println!("Value of I: {:?}", i); // can access by 'i'
+     i
  };
 
- // ( i32, i32 )
- B: i2=( I NoRuleType I ) {
-     println!("Value of I: {:?}", i2); // must explicitly define the variable name
+// (I I) and A does not match, so it will not hold any value
+ B: ( I NoRuleType I | A ) {
  };
 
  ```

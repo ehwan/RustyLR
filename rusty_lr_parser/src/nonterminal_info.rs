@@ -68,7 +68,8 @@ pub struct NonTerminalInfo {
     /// protected from optimization removal; trace rules are always protected
     pub(crate) protected: bool,
 
-    /// if this non-terminal is auto-generated, the pattern that generated this rule
+    /// if this non-terminal is auto-generated, the pattern that generated this rule.
+    /// This field is used in rusty_lr_core/tree.rs to unwrap left/right recursion parsing tree into flat array.
     pub(crate) nonterm_type: Option<rusty_lr_core::nonterminal::NonTerminalType>,
 }
 

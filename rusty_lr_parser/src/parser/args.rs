@@ -87,7 +87,7 @@ pub enum PatternArgs {
 
     /// ( Pattern+ )
     /// span of '(' and ')'
-    Group(Vec<PatternArgs>, Span, Span),
+    Group(Vec<Vec<PatternArgs>>, Span, Span),
 
     /// 'a', b'a', "abc", b"abc"
     Literal(Literal),
@@ -116,9 +116,13 @@ impl std::fmt::Display for PatternArgs {
                     "({})",
                     group
                         .iter()
-                        .map(|p| p.to_string())
+                        .map(|p| p
+                            .iter()
+                            .map(|x| x.to_string())
+                            .collect::<Vec<_>>()
+                            .join(", "))
                         .collect::<Vec<_>>()
-                        .join(", ")
+                        .join(" | ")
                 )
             }
             PatternArgs::Literal(literal) => {
@@ -208,17 +212,23 @@ impl PatternArgs {
                 Ok(pattern)
             }
             PatternArgs::Group(group, _, _) => {
-                if group.len() == 1 {
-                    return group
+                if group.len() == 1 && group[0].len() == 1 {
+                    let line = group.into_iter().next().unwrap();
+                    return line
                         .into_iter()
                         .next()
                         .unwrap()
                         .into_pattern(grammar, put_exclamation);
                 }
-                let mut patterns = Vec::with_capacity(group.len());
-                for pattern in group.into_iter() {
-                    patterns.push(pattern.into_pattern(grammar, put_exclamation)?);
-                }
+
+                let patterns = group
+                    .into_iter()
+                    .map(|line| {
+                        line.into_iter()
+                            .map(|p| p.into_pattern(grammar, put_exclamation))
+                            .collect::<Result<_, _>>()
+                    })
+                    .collect::<Result<Vec<_>, _>>()?;
                 Ok(Pattern {
                     internal: PatternInternal::Group(patterns),
                     pretty_name,
@@ -325,8 +335,8 @@ impl PatternArgs {
                 Err(ParseError::OnlyTerminalSet(span_begin, span_end))
             }
             PatternArgs::Group(group, span_begin, span_end) => {
-                if group.len() == 1 {
-                    group[0].to_terminal_set(grammar)
+                if group.len() == 1 && group[0].len() == 1 {
+                    group[0][0].to_terminal_set(grammar)
                 } else {
                     Err(ParseError::OnlyTerminalSet(*span_begin, *span_end))
                 }
@@ -408,8 +418,10 @@ impl PatternArgs {
                 Ok(())
             }
             PatternArgs::Group(groups, _, _) => {
-                for group in groups {
-                    group.range_resolve(grammar)?;
+                for line in groups {
+                    for pattern in line {
+                        pattern.range_resolve(grammar)?;
+                    }
                 }
                 Ok(())
             }
