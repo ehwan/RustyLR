@@ -78,18 +78,26 @@ lr1! {
             }
         };
 
-    E(f32): E star e2=E { E * e2 }
-          | E plus e2=E {
-              *data += 1;                       // Access userdata via `data`
-              println!("Values: {:?} {:?}", E, e2);   // Any Rust code can be written here
-              E + e2                            // This becomes the value of `E` (f32)
-          }
-          | E error e2=E {
-              println!("Expected '+' or '*' at {:?}", @error); // location of the error token
-              0.0
-          }
-          | Number { Number as f32 }           // Number is `i32`, so cast to `f32`
-          ;
+    // Binary operator
+    BinOp(MyToken): plus | star ;
+
+    // Expression rules
+    E(f32): E BinOp e2=E { 
+        match BinOp {
+            MyToken::Op('+') => E + e2,  // Handle addition
+            MyToken::Op('*') => E * e2,  // Handle multiplication
+            _ => {
+                println!("Unexpected operator: {:?}", @BinOp); // location of the operator
+                0.0 // Default value for unexpected operators
+            }
+        }
+    }
+    | E error e2=E {
+        println!("Expected '+' or '*' at {:?}", @error); // location of the error token
+        0.0
+    }
+    | Number { Number as f32 }           // Number is `i32`, so cast to `f32`
+    ;
 }
 ```
 This defines a simple arithmetic expression parser that can handle expressions like `2 + 3 * 4`.
