@@ -1,5 +1,7 @@
 mod parser_expanded;
 
+use std::time::Instant;
+
 use parser_expanded as parser;
 use rusty_lr::parser::Parser;
 
@@ -48,21 +50,22 @@ fn main() {
     println!("#states: {}", parser.get_states().len());
     println!("#terminals: {}", parser.classes.len());
 
-    {
+    fn try_once(parser: &parser::JsonParser) {
         let mut context = parser::JsonContext::new();
         let mut range_start = 0;
         for ch in TEST_JSON.chars() {
             let range_end = range_start + ch.len_utf8();
             context
-                .feed_location(&parser, ch, &mut (), range_start..range_end)
+                .feed_location(parser, ch, &mut (), range_start..range_end)
                 .expect("Error parsing character");
             range_start = range_end;
         }
-        println!("Parsed successfully");
-        // println!("{:?}", context);
-
-        context
-            .feed_location(&parser, 'a', &mut (), range_start..range_start + 1)
-            .expect("Error finalizing parsing");
     }
+
+    let start = Instant::now();
+    for _ in 0..1000 {
+        try_once(&parser);
+    }
+    let duration = start.elapsed();
+    println!("Parsed 1000 times in {:?}", duration);
 }
