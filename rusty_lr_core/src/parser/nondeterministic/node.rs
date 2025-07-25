@@ -8,7 +8,7 @@ pub struct Node<Data: TokenData> {
     /// parent node
     pub parent: Option<usize>,
 
-    pub reference_count: usize,
+    pub child_count: usize,
 
     /// index of state in parser
     pub state_stack: Vec<usize>,
@@ -23,7 +23,7 @@ impl<Data: TokenData> Default for Node<Data> {
     fn default() -> Self {
         Node {
             parent: None,
-            reference_count: 1,
+            child_count: 0,
             state_stack: Vec::new(),
             data_stack: Vec::new(),
             location_stack: Vec::new(),
@@ -38,7 +38,7 @@ impl<Data: TokenData> Node<Data> {
     /// Clear this node to `Default::default()`.
     pub fn clear(&mut self) {
         self.parent = None;
-        self.reference_count = 1;
+        self.child_count = 0;
         self.state_stack.clear();
         self.data_stack.clear();
         self.location_stack.clear();
@@ -49,7 +49,7 @@ impl<Data: TokenData> Node<Data> {
     pub fn len(&self) -> usize {
         self.data_stack.len()
     }
-    pub fn is_unique(&self) -> bool {
-        self.reference_count == 1
+    pub fn is_leaf(&self) -> bool {
+        self.child_count == 0
     }
 }
