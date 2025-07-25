@@ -619,9 +619,13 @@ impl<Data: TokenData> Context<Data> {
                 // call every reduce action
                 // and check if every reduce action revoked shift
                 let mut shift_ = false;
-                for (reduce_rule, precedence) in reduces {
+                let l = reduces.len();
+                for (idx, (reduce_rule, precedence)) in reduces.into_iter().enumerate() {
                     let mut pass = shift.is_some();
-                    self.inc(node);
+
+                    if idx < l - 1 || shift.is_some() {
+                        self.inc(node);
+                    }
                     match self.reduce(
                         parser,
                         reduce_rule,
