@@ -1,8 +1,8 @@
 use crate::nonterminal::TokenData;
 
-/// Node represents single token in the parse tree.
-/// To handle multiple paths in the GLR parsing,
-/// this constructs Linked List of nodes, where parent node is the previous token in the parse tree.
+/// To handle multiple paths in the non-deterministic GLR parsing,
+/// this node represents a subrange in stack of the parser.
+/// this constructs LinkedList tree of nodes, where parent node is the previous token in the parse tree.
 #[derive(Clone)]
 pub struct Node<Data: TokenData> {
     /// parent node
