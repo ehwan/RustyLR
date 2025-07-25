@@ -16,6 +16,7 @@ fn main() {
                 return;
             }
         }
+        context.debug_check();
     }
     let result = match context.accept(&parser, &mut ()) {
         Ok(mut results) => results.next().unwrap(),

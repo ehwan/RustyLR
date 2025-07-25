@@ -75,6 +75,42 @@ impl<Data: TokenData> Context<Data> {
         &mut self.nodes_pool[node]
     }
 
+    /// for debugging; checks for memory leak, not freed nodes, etc.
+    pub fn debug_check(&self) {
+        let mut active_nodes = std::collections::BTreeSet::new();
+
+        for &tail_node in self.current_nodes.iter() {
+            let mut node = tail_node;
+            loop {
+                if !active_nodes.insert(node) {
+                    // panic!("node {} is already in active nodes", node);
+                }
+                if let Some(parent) = self.node(node).parent {
+                    node = parent;
+                } else {
+                    break; // reached root node
+                }
+            }
+        }
+
+        for (node, _) in self.nodes_pool.iter().enumerate() {
+            if self.empty_node_indices.contains(&node) {
+                if active_nodes.contains(&node) {
+                    panic!("empty node {} is in active nodes", node);
+                }
+                continue; // empty node
+            } else {
+                if !active_nodes.contains(&node) {
+                    panic!("node {} is not in active nodes", node);
+                }
+                active_nodes.remove(&node);
+            }
+        }
+        if active_nodes.len() > 0 {
+            panic!("active nodes are not empty: {:?}", active_nodes);
+        }
+    }
+
     /// Create a new node in the pool and return its index.
     pub(crate) fn new_node(&mut self) -> usize {
         if let Some(idx) = self.empty_node_indices.pop_first() {
@@ -90,20 +126,42 @@ impl<Data: TokenData> Context<Data> {
         self.node_mut(node).child_count += 1;
         self.node_mut(child).parent = Some(node);
     }
-    pub(crate) fn remove_child(&mut self, node: usize) -> Option<usize> {
-        if let Some(parent) = self.node(node).parent {
-            let p = self.node_mut(parent);
-            p.child_count -= 1;
-            self.node_mut(node).parent = None;
-            Some(parent)
+    pub(crate) fn try_remove_node(&mut self, node: usize) -> Option<usize> {
+        let node_ = self.node_mut(node);
+        let parent = node_.parent;
+
+        if node_.is_leaf() {
+            if node == self.nodes_pool.len() - 1 {
+                self.nodes_pool.pop();
+            } else {
+                self.node_mut(node).clear();
+                self.empty_node_indices.insert(node);
+            }
         } else {
-            None
+            node_.parent = None;
+        }
+
+        if let Some(parent) = parent {
+            let parent_node = self.node_mut(parent);
+            parent_node.child_count -= 1;
+        }
+        parent
+    }
+    pub(crate) fn try_remove_node_recursive(&mut self, node: usize) -> Option<usize> {
+        // remove node recursive
+        let mut node = node;
+        loop {
+            let parent = self.try_remove_node(node);
+            if let Some(parent) = parent {
+                if self.node(parent).is_leaf() {
+                    node = parent;
+                    continue;
+                }
+            }
+            break parent;
         }
     }
-    pub(crate) fn remove_node(&mut self, node: usize) {
-        self.node_mut(node).clear();
-        self.empty_node_indices.insert(node);
-    }
+
     /// Get iterator for all nodes in the current context.
     fn node_iter(&self, node: usize) -> NodeRefIterator<Data> {
         NodeRefIterator {
@@ -150,11 +208,7 @@ impl<Data: TokenData> Context<Data> {
     fn pop(&mut self, node: usize) -> Option<usize> {
         match self.node(node).len() {
             0 => unreachable!("cannot pop from empty node"),
-            1 => {
-                let parent = self.node(node).parent;
-                self.remove_child(node);
-                parent
-            }
+            1 => self.try_remove_node(node),
             _ => {
                 let node_ = self.node_mut(node);
                 node_.data_stack.pop();
@@ -221,8 +275,7 @@ impl<Data: TokenData> Context<Data> {
                     #[cfg(feature = "tree")]
                     trees.extend(tree_stack.into_iter().rev());
 
-                    self.remove_child(current_node);
-                    self.remove_node(current_node);
+                    self.try_remove_node(current_node);
                 } else {
                     // clone the values from current_node to reduce_args
 
@@ -286,11 +339,17 @@ impl<Data: TokenData> Context<Data> {
                         }
 
                         break new_node;
+                    } else if i == node.len() {
+                        // create new empty node pointing to this node, and use it as node_to_shift
+                        let new_node = self.new_node();
+                        self.add_child(current_node, new_node);
+
+                        break new_node;
                     } else {
                         // split the node into [..i] and [i..]
                         // and make new parent node with [..i]
                         // create new empty node pointing to parent node, and use it as node_to_shift
-                        // new_parent[..i] <- current_node[..i]
+                        // new_parent[..i] <- current_node[i..]
                         //                 <- new_node (empty)
 
                         let new_parent = self.new_node();
@@ -313,8 +372,10 @@ impl<Data: TokenData> Context<Data> {
                             parent_node.tree_stack = parent_tree_stack;
                         }
 
-                        self.remove_child(current_node);
                         if let Some(parent) = parent {
+                            self.node_mut(current_node).parent = None;
+                            self.node_mut(parent).child_count -= 1;
+
                             self.add_child(parent, new_parent);
                         }
                         self.add_child(new_parent, current_node);
@@ -366,7 +427,10 @@ impl<Data: TokenData> Context<Data> {
                     );
                 }
             }
-            Err(err) => Err(err),
+            Err(err) => {
+                self.try_remove_node_recursive(node_to_shift);
+                Err(err)
+            }
         }
     }
 
@@ -932,7 +996,11 @@ impl<Data: TokenData> Context<Data> {
                 // if every reduce action revoked shift,
                 // then reset shift to None
                 if !shift_ {
-                    shift = None;
+                    if shift.is_some() {
+                        // remove node recursive
+                        self.try_remove_node_recursive(node);
+                        shift = None;
+                    }
                 }
             }
             if let Some(shift) = shift {
