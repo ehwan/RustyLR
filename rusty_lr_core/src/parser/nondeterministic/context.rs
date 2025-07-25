@@ -6,6 +6,7 @@ use super::ParseError;
 use crate::nonterminal::NonTerminal;
 use crate::nonterminal::TokenData;
 use crate::parser::Parser;
+use crate::parser::State;
 use crate::TerminalSymbol;
 
 type SmallVecNode = smallvec::SmallVec<[usize; 3]>;
@@ -109,6 +110,11 @@ impl<Data: TokenData> Context<Data> {
     {
         self.node_iter(node)
             .flat_map(|node| node.location_stack.iter().rev())
+    }
+    /// Get iterator for `node` that traverses from `node` to root on the parsing tree.
+    fn state_iter(&self, node: usize) -> impl Iterator<Item = usize> + '_ {
+        self.node_iter(node)
+            .flat_map(|node| node.state_stack.iter().rev().copied())
     }
     /// Get iterator for `node` that traverses from `node` to root on the parsing tree.
     fn tree_iter(
@@ -993,7 +999,6 @@ impl<Data: TokenData> Context<Data> {
     }
 
     /// Check if current context can enter panic mode.
-    /*
     pub fn can_panic<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
@@ -1005,13 +1010,15 @@ impl<Data: TokenData> Context<Data> {
         if !P::error_used() {
             return false;
         }
-        let error_prec = parser.class_precedence(TerminalSymbol::Error);
 
-        self.current_nodes
-            .iter()
-            .any(|node| Node::can_panic(node, parser, error_prec))
+        self.current_nodes.iter().any(|&node| {
+            self.state_iter(node).any(|state| {
+                let state = &parser.get_states()[state];
+                state.shift_goto_class(TerminalSymbol::Error).is_some()
+                    || state.reduce(TerminalSymbol::Error).is_some()
+            })
+        })
     }
-    */
 
     /// Feed eof symbol with default zero-length location from the end of stream.
     fn feed_eof<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
