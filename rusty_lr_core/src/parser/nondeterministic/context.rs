@@ -192,13 +192,12 @@ impl<Data: TokenData> Context<Data> {
 
         self.reduce_args.clear();
         self.reduce_args.reserve(count);
+        let mut reduce_args = std::mem::take(&mut self.reduce_args);
 
         #[cfg(feature = "tree")]
         let mut trees = Vec::with_capacity(count);
 
         let mut current_node = node;
-        self.reduce_args.reserve(count);
-        let mut reduce_args = std::mem::take(&mut self.reduce_args);
         let node_to_shift = loop {
             let node = self.node(current_node);
             if count > node.len() {
