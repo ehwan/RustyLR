@@ -1094,9 +1094,14 @@ impl<Data: TokenData> Default for Context<Data> {
     }
 }
 
-impl<Data: TokenData> Clone for Context<Data> {
+impl<Data: TokenData> Clone for Context<Data>
+where
+    Node<Data>: Clone,
+{
     fn clone(&self) -> Self {
         Context {
+            nodes_pool: self.nodes_pool.clone(),
+            empty_node_indices: self.empty_node_indices.clone(),
             current_nodes: self.current_nodes.clone(),
             ..Default::default()
         }
