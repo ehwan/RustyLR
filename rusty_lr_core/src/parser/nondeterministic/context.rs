@@ -85,15 +85,11 @@ impl<Data: TokenData> Context<Data> {
             idx
         }
     }
-    /// increase reference count of the node.
     pub(crate) fn add_child(&mut self, node: usize, child: usize) {
-        self.remove_child(child);
+        debug_assert!(self.node(child).parent.is_none());
         self.node_mut(node).child_count += 1;
         self.node_mut(child).parent = Some(node);
     }
-    /// decrease reference count of the node.
-    /// If the reference count reaches zero, the node is cleared and returned to the pool.
-    /// This decrease is recursive, so it will clear all parent nodes until the reference count is greater than zero.
     pub(crate) fn remove_child(&mut self, node: usize) -> Option<usize> {
         if let Some(parent) = self.node(node).parent {
             let p = self.node_mut(parent);
@@ -103,6 +99,10 @@ impl<Data: TokenData> Context<Data> {
         } else {
             None
         }
+    }
+    pub(crate) fn remove_node(&mut self, node: usize) {
+        self.node_mut(node).clear();
+        self.empty_node_indices.insert(node);
     }
     /// Get iterator for all nodes in the current context.
     fn node_iter(&self, node: usize) -> NodeRefIterator<Data> {
@@ -222,6 +222,7 @@ impl<Data: TokenData> Context<Data> {
                     trees.extend(tree_stack.into_iter().rev());
 
                     self.remove_child(current_node);
+                    self.remove_node(current_node);
                 } else {
                     // clone the values from current_node to reduce_args
 
