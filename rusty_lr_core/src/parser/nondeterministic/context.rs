@@ -706,8 +706,23 @@ impl<Data: TokenData> Context<Data> {
             .map(|&node| self.backtrace_impl(parser, node))
     }
 
-    /// Simulate parser and get next expected (terminals, non-terminals) for current context.
-    /*
+    fn expected_token_impl<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &P,
+        node: usize,
+        terms: &mut std::collections::BTreeSet<usize>,
+        nonterms: &mut std::collections::BTreeSet<Data::NonTerm>,
+    ) where
+        Data::NonTerm: Ord + Copy + std::hash::Hash + NonTerminal,
+    {
+        let s = self.state(node);
+        let state = parser.get_states().get(s).expect("state must exist");
+
+        terms.extend(state.expected_shift_term());
+        nonterms.extend(state.expected_shift_nonterm());
+    }
+
+    /// Get next expected (terminals, non-terminals) for current context.
     pub fn expected_token<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
@@ -720,8 +735,8 @@ impl<Data: TokenData> Context<Data> {
     {
         let mut terms = std::collections::BTreeSet::new();
         let mut nonterms = std::collections::BTreeSet::new();
-        for node in self.nodes() {
-            Node::expected_token(node, parser, &mut terms, &mut nonterms);
+        for &node in self.current_nodes.iter() {
+            self.expected_token_impl(parser, node, &mut terms, &mut nonterms);
         }
 
         (terms, nonterms)
@@ -746,14 +761,6 @@ impl<Data: TokenData> Context<Data> {
             nonterms.into_iter().map(|nonterm| nonterm.as_str()),
         )
     }
-
-
-
-    /// move all nodes in `other` to `self`.
-    pub fn append(&mut self, other: &mut Self) {
-        self.current_nodes.append(&mut other.current_nodes);
-    }
-    */
 
     /// Feed one terminal to parser, and update stacks.
     /// This will use `Default::default()` for location.
