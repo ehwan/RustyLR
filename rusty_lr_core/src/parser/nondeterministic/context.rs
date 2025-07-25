@@ -1136,6 +1136,7 @@ impl<Data: TokenData> Context<Data> {
                 Some(location.clone()),
                 userdata,
             ) {
+                // store to fallback nodes in case of all nodes failed to shift
                 self.fallback_nodes.push(node);
             }
         }

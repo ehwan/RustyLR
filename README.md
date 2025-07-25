@@ -271,6 +271,23 @@ See [SYNTAX.md](SYNTAX.md) for detailed grammar definition syntax.
 ## Contributing
 Contributions are welcome! Please feel free to open an issue or submit a pull request.
 
+### Project Structure
+This project is organized as a Cargo workspace with the following crates:
+
+ - **`rusty_lr/`**: The main end-user library that provides the public API. This is what users add to their `Cargo.toml`.
+ - **`rusty_lr_core/`**: Core parsing engine containing the fundamental data structures, algorithms, and runtime components for both deterministic (`src/parser/deterministic`) and non-deterministic (`src/parser/nondeterministic`) parsing.
+ - **`rusty_lr_parser/`**: The main code generation engine that parses RustyLR's grammar syntax, builds parser tables, and generates the actual parser code. This is the core of the parser generation process.
+ - **`rusty_lr_derive/`**: Procedural macro interface that wraps `rusty_lr_parser` to provide the `lr1!` macro for inline grammar definitions.
+ - **`rusty_lr_buildscript/`**: Build script interface that wraps `rusty_lr_parser` for generating parser code at compile time when using the `build` feature.
+ - **`rusty_lr_executable/`**: Standalone `rustylr` executable for command-line parser generation.
+ - **`scripts/`**: Development and testing scripts
+
+The crates have the following dependency relationships:
+- `rusty_lr` depends on `rusty_lr_core`, `rusty_lr_derive`, and `rusty_lr_buildscript` (optional)
+- `rusty_lr_derive` and `rusty_lr_buildscript` depend on `rusty_lr_parser`
+- `rusty_lr_parser` depends on `rusty_lr_core`
+- `rusty_lr_executable` depends on `rusty_lr_buildscript`
+
 ## License
 This project is dual-licensed under either of the following licenses, at your option:
 
