@@ -124,6 +124,7 @@ impl<Data: TokenData> Context<Data> {
         self.node_iter(node)
             .flat_map(|node| node.state_stack.iter().rev().copied())
     }
+    #[cfg(feature = "tree")]
     /// Get iterator for `node` that traverses from `node` to root on the parsing tree.
     fn tree_iter(
         &self,
