@@ -436,6 +436,124 @@ impl<Data: TokenData> Context<Data> {
         })
     }
 
+    fn trace_impl<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &P,
+        node: usize,
+    ) -> crate::hash::HashSet<Data::NonTerm>
+    where
+        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::nonterminal::NonTerminal,
+    {
+        use crate::hash::HashSet;
+        use crate::nonterminal::NonTerminal;
+        use crate::token::Token;
+        use std::collections::BTreeSet;
+
+        let rules = parser.get_rules();
+        let states = parser.get_states();
+
+        let mut zero_shifted_rules = BTreeSet::new();
+        let mut non_zero_shifted_rules = BTreeSet::new();
+        {
+            let last_state = &states[self.state(node)];
+            for rule in last_state.get_rules().iter() {
+                if rule.shifted == 0 {
+                    zero_shifted_rules.insert(rule.rule);
+                } else {
+                    non_zero_shifted_rules.insert((rule.rule, rule.shifted));
+                }
+            }
+        }
+
+        let mut ret: HashSet<Data::NonTerm> = Default::default();
+
+        for state in self.state_iter(node).chain(std::iter::once(0)) {
+            let state = &states[state];
+            let ruleset = &state.get_rules();
+
+            // insert new shifted rule that brings zero_shifted rules in this state
+            let mut new_zero_shifted_rules = Vec::new();
+            loop {
+                let zero_len0 = zero_shifted_rules.len();
+                let nonzero_len0 = non_zero_shifted_rules.len();
+
+                new_zero_shifted_rules.clear();
+
+                for &zero_rule in zero_shifted_rules.iter() {
+                    let nonterm0 = rules[zero_rule].name;
+                    for rule in ruleset.iter() {
+                        let prod_rule = &rules[rule.rule];
+                        if let Some(Token::NonTerm(nonterm)) = prod_rule.rule.get(rule.shifted) {
+                            if &nonterm0 == nonterm {
+                                if rule.shifted == 0 {
+                                    new_zero_shifted_rules.push(rule.rule);
+                                } else {
+                                    // insert new shifted rule
+                                    non_zero_shifted_rules.insert((rule.rule, rule.shifted));
+                                }
+                            }
+                        }
+                    }
+                }
+                zero_shifted_rules.extend(new_zero_shifted_rules.iter().copied());
+
+                if zero_len0 == zero_shifted_rules.len()
+                    && nonzero_len0 == non_zero_shifted_rules.len()
+                {
+                    break;
+                }
+            }
+
+            // push nonterminal of zero-shifted-rules into backtrace vector
+            for &zero_rule in zero_shifted_rules.iter() {
+                let nonterm0 = rules[zero_rule].name;
+                // do not insert auto-generated nonterminals
+                // since user don't need to know about them
+                if nonterm0.is_trace() {
+                    ret.insert(nonterm0);
+                }
+            }
+
+            // shift to next state
+            zero_shifted_rules.clear();
+            let mut new_non_zero_shifted_rules = BTreeSet::new();
+            for (rule, shifted) in non_zero_shifted_rules.into_iter() {
+                if shifted == 1 {
+                    zero_shifted_rules.insert(rule);
+                } else {
+                    new_non_zero_shifted_rules.insert((rule, shifted - 1));
+                }
+            }
+            non_zero_shifted_rules = new_non_zero_shifted_rules;
+        }
+
+        ret
+    }
+
+    /// Get set of `%trace` non-terminal symbols that current context is trying to parse.
+    ///
+    /// The order of the returned set does not mean anything.
+    /// If the current context is attempting to recognize following grammar:
+    ///
+    /// Chunk -> Statement -> IfStatement -> ReturnStatement -> ...
+    ///
+    /// Then the returned set will be:
+    /// [`Chunk`, `Statement`, `IfStatement`, `ReturnStatement`]
+    pub fn trace<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+        &self,
+        parser: &P,
+    ) -> crate::hash::HashSet<Data::NonTerm>
+    where
+        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::nonterminal::NonTerminal,
+    {
+        let mut ret: crate::hash::HashSet<Data::NonTerm> = Default::default();
+        for &node in self.current_nodes.iter() {
+            let set = self.trace_impl(parser, node);
+            ret.extend(set.into_iter());
+        }
+        ret
+    }
+
     /// Simulate parser and get next expected (terminals, non-terminals) for current context.
     /*
     pub fn expected_token<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
@@ -477,29 +595,6 @@ impl<Data: TokenData> Context<Data> {
         )
     }
 
-    /// Get set of `%trace` non-terminal symbols that current context is trying to parse.
-    ///
-    /// The order of the returned set does not mean anything.
-    /// If the current context is attempting to recognize following grammar:
-    ///
-    /// Chunk -> Statement -> IfStatement -> ReturnStatement -> ...
-    ///
-    /// Then the returned set will be:
-    /// [`Chunk`, `Statement`, `IfStatement`, `ReturnStatement`]
-    pub fn trace<P: super::Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
-        parser: &P,
-    ) -> crate::hash::HashSet<Data::NonTerm>
-    where
-        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::nonterminal::NonTerminal,
-    {
-        let mut ret: crate::hash::HashSet<Data::NonTerm> = Default::default();
-        for node in self.nodes() {
-            let set = node.trace(parser);
-            ret.extend(set.into_iter());
-        }
-        ret
-    }
 
     /// Get backtrace infos for all paths.
     pub fn backtraces<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
