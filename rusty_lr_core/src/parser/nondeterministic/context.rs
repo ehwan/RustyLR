@@ -63,6 +63,7 @@ impl<Data: TokenData> Context<Data> {
         Default::default()
     }
 
+    /// Create a new node in the pool and return its index.
     pub(crate) fn new_node(&mut self) -> usize {
         if let Some(idx) = self.empty_node_indices.pop_first() {
             idx
@@ -72,9 +73,13 @@ impl<Data: TokenData> Context<Data> {
             idx
         }
     }
+    /// increase reference count of the node.
     pub(crate) fn inc(&mut self, node: usize) {
         self.nodes_pool[node].reference_count += 1;
     }
+    /// decrease reference count of the node.
+    /// If the reference count reaches zero, the node is cleared and returned to the pool.
+    /// This decrease is recursive, so it will clear all parent nodes until the reference count is greater than zero.
     pub(crate) fn dec(&mut self, mut node: usize) {
         loop {
             self.nodes_pool[node].reference_count -= 1;
@@ -90,12 +95,14 @@ impl<Data: TokenData> Context<Data> {
             }
         }
     }
+    /// Get iterator for all nodes in the current context.
     fn node_iter(&self, node: usize) -> NodeRefIterator<Data> {
         NodeRefIterator {
             context: self,
             node: Some(node),
         }
     }
+    /// Get iterator for `node` that traverses from `node` to root on the parsing tree.
     fn location_iter(&self, node: usize) -> impl Iterator<Item = &Data::Location> + Clone
     where
         Data: Clone,
@@ -103,6 +110,7 @@ impl<Data: TokenData> Context<Data> {
         self.node_iter(node)
             .flat_map(|node| node.location_stack.iter().rev())
     }
+    /// Get iterator for `node` that traverses from `node` to root on the parsing tree.
     fn tree_iter(
         &self,
         node: usize,
@@ -111,6 +119,7 @@ impl<Data: TokenData> Context<Data> {
             .flat_map(|node| node.tree_stack.iter().rev())
     }
 
+    /// Get state of the node.
     fn state(&self, mut node: usize) -> usize {
         while self.nodes_pool[node].state_stack.is_empty() {
             if let Some(parent) = self.nodes_pool[node].parent {
@@ -122,6 +131,7 @@ impl<Data: TokenData> Context<Data> {
         *self.nodes_pool[node].state_stack.last().unwrap()
     }
 
+    /// pop one stack from the node.
     fn pop(&mut self, node: usize) -> Option<usize> {
         match self.nodes_pool[node].len() {
             0 => unreachable!("cannot pop from empty node"),
