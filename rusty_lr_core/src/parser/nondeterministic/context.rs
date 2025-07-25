@@ -926,7 +926,7 @@ impl<Data: TokenData> Context<Data> {
 
                     if prevent_leaf {
                         // if there are more reduce_rule left, or there is shift action,
-                        // add child t o this node to prevent it from being cleared (as leaf)
+                        // add child to this node to prevent it from being cleared (as leaf)
                         self.node_mut(node).child_count -= 1;
                     }
                 }
