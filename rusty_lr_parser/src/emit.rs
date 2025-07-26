@@ -764,7 +764,7 @@ impl Grammar {
                     continue;
                 } else {
                     let case_stream = list_to_case_stream(classes.into_iter());
-                    debug_assert!(level < u8::MAX as usize);
+                    debug_assert!(level <= u8::MAX as usize);
                     let level = proc_macro2::Literal::usize_unsuffixed(level);
                     stream.extend(quote! {
                         #case_stream => #module_prefix::parser::Precedence::new(#level),
