@@ -1149,7 +1149,7 @@ impl<Data: TokenData> Context<Data> {
         // and restore nodes to original state from fallback_nodes
         if self.next_nodes.is_empty() {
             // early return if `error` token is not used in the grammar
-            if !P::error_used() {
+            if !P::ERROR_USED {
                 std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
 
                 return Err(ParseError {
@@ -1330,7 +1330,7 @@ impl<Data: TokenData> Context<Data> {
         Data::NonTerm: Hash + Eq + NonTerminal,
     {
         // if `error` token was not used in the grammar, early return here
-        if !P::error_used() {
+        if !P::ERROR_USED {
             return false;
         }
 

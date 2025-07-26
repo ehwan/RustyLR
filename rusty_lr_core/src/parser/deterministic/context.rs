@@ -240,7 +240,7 @@ impl<Data: TokenData> Context<Data> {
                 // nothing shifted; enters panic mode
 
                 // if `error` token was not used in the grammar, early return here
-                if !P::error_used() {
+                if !P::ERROR_USED {
                     return Err(ParseError::NoAction(term, location));
                 }
 
@@ -529,7 +529,7 @@ impl<Data: TokenData> Context<Data> {
         Data::NonTerm: Hash + Eq + NonTerminal,
     {
         // if `error` token was not used in the grammar, early return here
-        if !P::error_used() {
+        if !P::ERROR_USED {
             return false;
         }
 

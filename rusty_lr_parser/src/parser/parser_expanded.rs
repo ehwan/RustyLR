@@ -3841,6 +3841,7 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
     type NonTerm = GrammarNonTerminals;
     type State = GrammarState;
     type TerminalClassElement = &'static str;
+    const ERROR_USED: bool = true;
     fn class_precedence(
         &self,
         class: ::rusty_lr_core::TerminalSymbol<usize>,
@@ -3929,9 +3930,6 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
             Lexed::Location(_) => 42usize,
             _ => 43usize,
         }
-    }
-    fn error_used() -> bool {
-        true
     }
 }
 #[doc = r" A struct that holds the whole parser table."]

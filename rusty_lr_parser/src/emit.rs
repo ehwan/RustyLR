@@ -800,6 +800,8 @@ impl Grammar {
                 type State = #state_typename;
                 type TerminalClassElement = ::std::ops::RangeInclusive<#token_typename>;
 
+                const ERROR_USED:bool = #error_used;
+
                 fn class_precedence(&self, class: #module_prefix::TerminalSymbol<usize>) -> #module_prefix::parser::Precedence {
                     match class {
                         #module_prefix::TerminalSymbol::Term(class) => {
@@ -838,9 +840,6 @@ impl Grammar {
                     match *terminal {
                         #terminal_class_match_body_stream
                     }
-                }
-                fn error_used() -> bool {
-                    #error_used
                 }
             }
 
@@ -992,6 +991,8 @@ impl Grammar {
                 type State = #state_typename;
                 type TerminalClassElement = &'static str;
 
+                const ERROR_USED:bool = #error_used;
+
                 fn class_precedence(&self, class: #module_prefix::TerminalSymbol<usize>) -> #module_prefix::parser::Precedence {
                     match class {
                         #module_prefix::TerminalSymbol::Term(class) => {
@@ -1029,10 +1030,6 @@ impl Grammar {
                     match #match_terminal_filter_expression {
                         #terminal_class_match_body_stream
                     }
-                }
-
-                fn error_used() -> bool {
-                    #error_used
                 }
             }
 

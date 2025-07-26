@@ -34,6 +34,9 @@ impl Precedence {
 /// A trait for Parser that holds the entire parser table.
 /// This trait will be automatically implemented by rusty_lr
 pub trait Parser {
+    /// whether the `error` token was used in the grammar.
+    const ERROR_USED: bool;
+
     /// The type of terminal symbols.
     type Term;
     /// The type of non-terminal symbols.
@@ -66,7 +69,4 @@ pub trait Parser {
     /// Get the precedence level (priority) of the given terminal class
     /// `None` if the terminal class has no precedence defined.
     fn class_precedence(&self, class: crate::TerminalSymbol<usize>) -> Precedence;
-
-    /// whether the `error` token was used in the grammar.
-    fn error_used() -> bool;
 }
