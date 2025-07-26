@@ -393,6 +393,16 @@ impl Grammar {
                 quote! { usize }
             };
 
+            let rule_index_typename = if self.builder.rules.len() <= u8::MAX as usize {
+                quote! { u8 }
+            } else if self.builder.rules.len() <= u16::MAX as usize {
+                quote! { u16 }
+            } else if self.builder.rules.len() <= u32::MAX as usize {
+                quote! { u32 }
+            } else {
+                quote! { usize }
+            };
+
             let mut production_rules_body_stream = TokenStream::new();
             for rule in &self.builder.rules {
                 let mut tokens_vec_body_stream = TokenStream::new();
@@ -461,6 +471,7 @@ impl Grammar {
 
                     let mut rules_body_stream = TokenStream::new();
                     for &rule in rules {
+                        let rule = proc_macro2::Literal::usize_unsuffixed(rule);
                         rules_body_stream.extend(quote! {
                             #rule,
                         });
@@ -549,7 +560,7 @@ impl Grammar {
 
                 #terminal_set_initialize_stream
                 let states: Vec<#module_prefix::builder::State<
-                    #module_prefix::TerminalSymbol<#class_index_typename>, _, #state_index_typename
+                    #module_prefix::TerminalSymbol<#class_index_typename>, _, #state_index_typename, #rule_index_typename
                 >> = vec![
                     #states_body_stream
                 ];

@@ -3,13 +3,13 @@ use std::collections::BTreeSet;
 
 /// state in DFA building
 #[derive(Debug, Clone)]
-pub struct State<Term, NonTerm, StateIndex> {
+pub struct State<Term, NonTerm, StateIndex, RuleIndex> {
     pub shift_goto_map_term: BTreeMap<Term, StateIndex>,
     pub shift_goto_map_nonterm: BTreeMap<NonTerm, StateIndex>,
-    pub reduce_map: BTreeMap<Term, BTreeSet<usize>>,
+    pub reduce_map: BTreeMap<Term, BTreeSet<RuleIndex>>,
     pub ruleset: BTreeSet<crate::rule::ShiftedRuleRef>,
 }
-impl<Term, NonTerm, StateIndex> State<Term, NonTerm, StateIndex> {
+impl<Term, NonTerm, StateIndex, RuleIndex> State<Term, NonTerm, StateIndex, RuleIndex> {
     pub fn new() -> Self {
         State {
             shift_goto_map_term: Default::default(),
@@ -32,7 +32,7 @@ impl<Term, NonTerm, StateIndex> State<Term, NonTerm, StateIndex> {
     }
 }
 
-impl<Term, NonTerm, StateIndex> Default for State<Term, NonTerm, StateIndex> {
+impl<Term, NonTerm, StateIndex, RuleIndex> Default for State<Term, NonTerm, StateIndex, RuleIndex> {
     fn default() -> Self {
         Self::new()
     }

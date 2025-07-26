@@ -100,7 +100,7 @@ pub struct Grammar {
     /// do terminal classificate optimization
     pub optimize: bool,
     pub builder: rusty_lr_core::builder::Grammar<TerminalSymbol<usize>, usize>,
-    pub states: Vec<rusty_lr_core::builder::State<TerminalSymbol<usize>, usize, usize>>,
+    pub states: Vec<rusty_lr_core::builder::State<TerminalSymbol<usize>, usize, usize, usize>>,
 
     /// set of terminals for each terminal class
     pub terminal_classes: Vec<TerminalClassDefinition>,

@@ -391,7 +391,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     /// check for any shift/reduce or reduce/reduce conflicts and report them to `diags`.
     fn check_conflicts(
         &self,
-        states: &[State<Term, NonTerm, usize>],
+        states: &[State<Term, NonTerm, usize, usize>],
         diags: &mut DiagnosticCollector<Term>,
     ) where
         Term: Ord + Copy + Hash,
@@ -929,7 +929,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     fn build_recursive(
         &self,
         mut rules: LookaheadRuleRefSet<Term>,
-        states: &mut Vec<State<Term, NonTerm, usize>>,
+        states: &mut Vec<State<Term, NonTerm, usize, usize>>,
         state_map: &mut BTreeMap<LookaheadRuleRefSet<Term>, usize>,
         diags: &mut DiagnosticCollector<Term>,
     ) -> Result<usize, BuildError<Term, NonTerm>>

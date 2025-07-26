@@ -42,32 +42,48 @@ impl Index for u32 {
         value as u32
     }
 }
-#[cfg(target_pointer_width = "64")]
-impl Index for u64 {
-    fn into_usize(self) -> usize {
-        self as usize
-    }
-    fn from_usize_unchecked(value: usize) -> Self {
-        value as u64
-    }
-}
 
 /// Since non-deterministic parsers can have multiple reduce rules for a single terminal,
 /// we need to handle the set of reduce rules efficiently, usually 2~3 items.
 /// this trait implements the stack-allocated vector for this purpose.
 pub trait ReduceRules {
+    type RuleIndex: Index;
+
     fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone;
-    fn from_set(set: std::collections::BTreeSet<usize>) -> Self;
+    fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(
+        set: std::collections::BTreeSet<RuleIndexFrom>,
+    ) -> Self;
 }
 
 /// For deterministic parser behavior
-impl ReduceRules for usize {
+impl<Integral: Index + Copy> ReduceRules for Integral {
+    type RuleIndex = Integral;
+
     fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
-        std::iter::once(*self)
+        std::iter::once(self.into_usize())
     }
-    fn from_set(set: std::collections::BTreeSet<usize>) -> Self {
+    fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(
+        set: std::collections::BTreeSet<RuleIndexFrom>,
+    ) -> Self {
         debug_assert!(set.len() == 1, "Expected a single element set");
-        *set.iter().next().unwrap()
+        set.into_iter().next().unwrap().try_into().ok().unwrap()
+    }
+}
+impl<Arr: smallvec::Array> ReduceRules for smallvec::SmallVec<Arr>
+where
+    Arr::Item: Index + Copy,
+{
+    type RuleIndex = Arr::Item;
+
+    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
+        self.iter().map(|&x| x.into_usize())
+    }
+    fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(
+        set: std::collections::BTreeSet<RuleIndexFrom>,
+    ) -> Self {
+        set.into_iter()
+            .map(|value| value.try_into().ok().unwrap())
+            .collect()
     }
 }
 
@@ -75,58 +91,6 @@ pub type SmallVecU8 = smallvec::SmallVec<[u8; 16]>;
 pub type SmallVecU16 = smallvec::SmallVec<[u16; 8]>;
 pub type SmallVecU32 = smallvec::SmallVec<[u32; 4]>;
 pub type SmallVecUsize = smallvec::SmallVec<[usize; 2]>;
-impl ReduceRules for SmallVecU8 {
-    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
-        self.iter().map(|&x| x as usize)
-    }
-    fn from_set(set: std::collections::BTreeSet<usize>) -> Self {
-        let mut vec = SmallVecU8::new();
-        for value in set {
-            debug_assert!(value <= u8::MAX as usize, "Value exceeds u8 range");
-            vec.push(value as u8);
-        }
-        vec
-    }
-}
-impl ReduceRules for SmallVecU16 {
-    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
-        self.iter().map(|&x| x as usize)
-    }
-    fn from_set(set: std::collections::BTreeSet<usize>) -> Self {
-        let mut vec = SmallVecU16::new();
-        for value in set {
-            debug_assert!(value <= u16::MAX as usize, "Value exceeds u16 range");
-            vec.push(value as u16);
-        }
-        vec
-    }
-}
-impl ReduceRules for SmallVecU32 {
-    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
-        self.iter().map(|&x| x as usize)
-    }
-    fn from_set(set: std::collections::BTreeSet<usize>) -> Self {
-        let mut vec = SmallVecU32::new();
-        for value in set {
-            debug_assert!(value <= u32::MAX as usize, "Value exceeds u32 range");
-            vec.push(value as u32);
-        }
-        vec
-    }
-}
-impl ReduceRules for SmallVecUsize {
-    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
-        self.iter().copied()
-    }
-    fn from_set(set: std::collections::BTreeSet<usize>) -> Self {
-        let mut vec = SmallVecUsize::new();
-        for value in set {
-            debug_assert!(value <= usize::MAX, "Value exceeds usize range");
-            vec.push(value);
-        }
-        vec
-    }
-}
 
 /// A trait representing a parser state.
 pub trait State<NonTerm> {
@@ -186,9 +150,9 @@ pub struct SparseState<Term, NonTerm, RuleContainer, StateIndex> {
 impl<
         Term: Into<usize> + Index + Copy + Hash + Eq,
         NonTerm: Copy,
-        RuleIndex: ReduceRules,
+        RuleContainer: ReduceRules,
         StateIndex: Into<usize> + Copy,
-    > State<NonTerm> for SparseState<Term, NonTerm, RuleIndex, StateIndex>
+    > State<NonTerm> for SparseState<Term, NonTerm, RuleContainer, StateIndex>
 {
     fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<usize> {
         match class {
@@ -356,8 +320,8 @@ impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + 
     }
 }
 
-impl<Term, TermTo, NonTerm, RuleContainer, StateIndex, StateIndexTo>
-    From<crate::builder::State<TerminalSymbol<Term>, NonTerm, StateIndex>>
+impl<Term, TermTo, NonTerm, RuleContainer, StateIndex, StateIndexTo, RuleIndex>
+    From<crate::builder::State<TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>>
     for SparseState<TermTo, NonTerm, RuleContainer, StateIndexTo>
 where
     Term: Ord + TryInto<TermTo>,
@@ -367,9 +331,15 @@ where
     StateIndex: TryInto<StateIndexTo>,
     StateIndex::Error: std::fmt::Debug,
     RuleContainer: ReduceRules,
+    RuleContainer::RuleIndex: TryFrom<RuleIndex>,
 {
     fn from(
-        mut builder_state: crate::builder::State<TerminalSymbol<Term>, NonTerm, StateIndex>,
+        mut builder_state: crate::builder::State<
+            TerminalSymbol<Term>,
+            NonTerm,
+            StateIndex,
+            RuleIndex,
+        >,
     ) -> Self {
         let error_shift = builder_state
             .shift_goto_map_term
@@ -432,8 +402,8 @@ where
         }
     }
 }
-impl<Term, TermTo, NonTerm, RuleContainer, StateIndex, StateIndexTo: Copy>
-    From<crate::builder::State<TerminalSymbol<Term>, NonTerm, StateIndex>>
+impl<Term, TermTo, NonTerm, RuleContainer, StateIndex, StateIndexTo: Copy, RuleIndex>
+    From<crate::builder::State<TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>>
     for DenseState<TermTo, NonTerm, RuleContainer, StateIndexTo>
 where
     Term: Ord + Into<usize> + Copy,
@@ -441,9 +411,15 @@ where
     StateIndex: TryInto<StateIndexTo>,
     StateIndex::Error: std::fmt::Debug,
     RuleContainer: Clone + ReduceRules,
+    RuleContainer::RuleIndex: TryFrom<RuleIndex>,
 {
     fn from(
-        mut builder_state: crate::builder::State<TerminalSymbol<Term>, NonTerm, StateIndex>,
+        mut builder_state: crate::builder::State<
+            TerminalSymbol<Term>,
+            NonTerm,
+            StateIndex,
+            RuleIndex,
+        >,
     ) -> Self {
         let error_shift = builder_state
             .shift_goto_map_term

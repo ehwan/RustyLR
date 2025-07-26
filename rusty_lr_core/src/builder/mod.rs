@@ -12,5 +12,5 @@ pub use state::State;
 
 /// struct for output of parser building.
 pub struct States<Term, NonTerm> {
-    pub states: Vec<State<Term, NonTerm, usize>>,
+    pub states: Vec<State<Term, NonTerm, usize, usize>>,
 }

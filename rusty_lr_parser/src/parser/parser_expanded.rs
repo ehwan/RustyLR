@@ -5500,7 +5500,7 @@ impl GrammarParser {
         let __rustylr_tset20: std::collections::BTreeSet<::rusty_lr_core::TerminalSymbol<u8>> =
             std::collections::BTreeSet::from([::rusty_lr_core::TerminalSymbol::Eof]);
         let states: Vec<
-            ::rusty_lr_core::builder::State<::rusty_lr_core::TerminalSymbol<u8>, _, u8>,
+            ::rusty_lr_core::builder::State<::rusty_lr_core::TerminalSymbol<u8>, _, u8, u8>,
         > = vec![
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -5708,7 +5708,7 @@ impl GrammarParser {
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([2usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([2]);
                     __reduce_map.extend(
                         __rustylr_tset0
                             .iter()
@@ -5736,7 +5736,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([1usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([1]);
                     __reduce_map.extend(
                         __rustylr_tset0
                             .iter()
@@ -5788,7 +5788,7 @@ impl GrammarParser {
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([82usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([82]);
                     __reduce_map.extend(
                         __rustylr_tset1
                             .iter()
@@ -5919,7 +5919,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([21usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([21]);
                     __reduce_map.extend(
                         __rustylr_tset2
                             .iter()
@@ -6039,7 +6039,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([21usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([21]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -6059,7 +6059,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([20usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([20]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -6257,7 +6257,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([30usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([30]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -6291,7 +6291,7 @@ impl GrammarParser {
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([93usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([93]);
                     __reduce_map.extend(
                         __rustylr_tset4
                             .iter()
@@ -6417,7 +6417,7 @@ impl GrammarParser {
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([87usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([87]);
                     __reduce_map.extend(
                         __rustylr_tset5
                             .iter()
@@ -6445,7 +6445,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([86usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([86]);
                     __reduce_map.extend(
                         __rustylr_tset5
                             .iter()
@@ -6472,7 +6472,7 @@ impl GrammarParser {
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([90usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([90]);
                     __reduce_map.extend(
                         __rustylr_tset6
                             .iter()
@@ -6535,7 +6535,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([13usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([13]);
                     __reduce_map.extend(
                         __rustylr_tset5
                             .iter()
@@ -6584,7 +6584,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([14usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([14]);
                     __reduce_map.extend(
                         __rustylr_tset5
                             .iter()
@@ -6604,7 +6604,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([15usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([15]);
                     __reduce_map.extend(
                         __rustylr_tset5
                             .iter()
@@ -6627,7 +6627,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([16usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([16]);
                     __reduce_map.extend(
                         __rustylr_tset5
                             .iter()
@@ -6676,7 +6676,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([17usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([17]);
                     __reduce_map.extend(
                         __rustylr_tset5
                             .iter()
@@ -6696,7 +6696,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([18usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([18]);
                     __reduce_map.extend(
                         __rustylr_tset5
                             .iter()
@@ -6716,7 +6716,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([88usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([88]);
                     __reduce_map.extend(
                         __rustylr_tset5
                             .iter()
@@ -6742,7 +6742,7 @@ impl GrammarParser {
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([107usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([107]);
                     __reduce_map.extend(
                         __rustylr_tset6
                             .iter()
@@ -6790,7 +6790,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([89usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([89]);
                     __reduce_map.extend(
                         __rustylr_tset5
                             .iter()
@@ -6827,7 +6827,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([19usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([19]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -6847,7 +6847,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([26usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([26]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -6929,7 +6929,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([22usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([22]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -6949,7 +6949,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([23usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([23]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -6969,7 +6969,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([24usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([24]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -7091,7 +7091,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([31usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([31]);
                     __reduce_map.extend(
                         __rustylr_tset7
                             .iter()
@@ -7131,7 +7131,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([25usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([25]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -7252,7 +7252,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([27usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([27]);
                     __reduce_map.extend(
                         __rustylr_tset8
                             .iter()
@@ -7417,7 +7417,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([29usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([29]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -7444,7 +7444,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([91usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([91]);
                     __reduce_map.extend(
                         __rustylr_tset9
                             .iter()
@@ -7498,7 +7498,7 @@ impl GrammarParser {
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([108usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([108]);
                     __reduce_map.extend(
                         __rustylr_tset4
                             .iter()
@@ -7601,7 +7601,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([92usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([92]);
                     __reduce_map.extend(
                         __rustylr_tset9
                             .iter()
@@ -7645,7 +7645,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([94usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([94]);
                     __reduce_map.extend(
                         __rustylr_tset4
                             .iter()
@@ -7698,7 +7698,7 @@ impl GrammarParser {
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([93usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([93]);
                     __reduce_map.extend(
                         __rustylr_tset4
                             .iter()
@@ -7806,7 +7806,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([95usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([95]);
                     __reduce_map.extend(
                         __rustylr_tset4
                             .iter()
@@ -7826,7 +7826,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([28usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([28]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -7858,7 +7858,7 @@ impl GrammarParser {
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([97usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([97]);
                     __reduce_map.extend(
                         __rustylr_tset10
                             .iter()
@@ -7930,7 +7930,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([96usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([96]);
                     __reduce_map.extend(
                         __rustylr_tset10
                             .iter()
@@ -7979,7 +7979,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([33usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([33]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -8016,7 +8016,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([34usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([34]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -8053,7 +8053,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([36usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([36]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -8090,7 +8090,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([35usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([35]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -8127,7 +8127,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([32usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([32]);
                     __reduce_map.extend(
                         __rustylr_tset3
                             .iter()
@@ -8154,7 +8154,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([12usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([12]);
                     __reduce_map.extend(
                         __rustylr_tset11
                             .iter()
@@ -8219,7 +8219,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([0usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([0]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -8253,7 +8253,7 @@ impl GrammarParser {
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([82usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([82]);
                     __reduce_map.extend(
                         __rustylr_tset1
                             .iter()
@@ -8373,7 +8373,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([3usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([3]);
                     __reduce_map.extend(
                         __rustylr_tset13
                             .iter()
@@ -8393,7 +8393,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([80usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([80]);
                     __reduce_map.extend(
                         __rustylr_tset11
                             .iter()
@@ -8420,7 +8420,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([11usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([11]);
                     __reduce_map.extend(
                         __rustylr_tset11
                             .iter()
@@ -8475,7 +8475,7 @@ impl GrammarParser {
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([105usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([105]);
                     __reduce_map.extend(
                         __rustylr_tset1
                             .iter()
@@ -8579,7 +8579,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([81usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([81]);
                     __reduce_map.extend(
                         __rustylr_tset11
                             .iter()
@@ -8606,7 +8606,7 @@ impl GrammarParser {
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([85usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([85]);
                     __reduce_map.extend(
                         __rustylr_tset14
                             .iter()
@@ -8729,7 +8729,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([39usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([39]);
                     __reduce_map.extend(
                         __rustylr_tset15
                             .iter()
@@ -8749,7 +8749,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([40usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([40]);
                     __reduce_map.extend(
                         __rustylr_tset15
                             .iter()
@@ -8769,7 +8769,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([7usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([7]);
                     __reduce_map.extend(
                         __rustylr_tset1
                             .iter()
@@ -8789,7 +8789,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([6usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([6]);
                     __reduce_map.extend(
                         __rustylr_tset1
                             .iter()
@@ -8830,7 +8830,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([8usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([8]);
                     __reduce_map.extend(
                         __rustylr_tset1
                             .iter()
@@ -8850,7 +8850,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([9usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([9]);
                     __reduce_map.extend(
                         __rustylr_tset1
                             .iter()
@@ -8870,7 +8870,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([10usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([10]);
                     __reduce_map.extend(
                         __rustylr_tset1
                             .iter()
@@ -8890,7 +8890,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([83usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([83]);
                     __reduce_map.extend(
                         __rustylr_tset1
                             .iter()
@@ -8916,7 +8916,7 @@ impl GrammarParser {
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([106usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([106]);
                     __reduce_map.extend(
                         __rustylr_tset14
                             .iter()
@@ -8960,7 +8960,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([84usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([84]);
                     __reduce_map.extend(
                         __rustylr_tset1
                             .iter()
@@ -8986,7 +8986,7 @@ impl GrammarParser {
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([38usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([38]);
                     __reduce_map.extend(
                         __rustylr_tset13
                             .iter()
@@ -9014,7 +9014,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([37usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([37]);
                     __reduce_map.extend(
                         __rustylr_tset13
                             .iter()
@@ -9034,7 +9034,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([5usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([5]);
                     __reduce_map.extend(
                         __rustylr_tset13
                             .iter()
@@ -9054,7 +9054,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([4usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([4]);
                     __reduce_map.extend(
                         __rustylr_tset13
                             .iter()
@@ -9310,7 +9310,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([53usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([53]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -9330,7 +9330,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([100usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([100]);
                     __reduce_map.extend(
                         __rustylr_tset16
                             .iter()
@@ -9383,7 +9383,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([52usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([52]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -9403,7 +9403,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([101usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([101]);
                     __reduce_map.extend(
                         __rustylr_tset16
                             .iter()
@@ -9481,7 +9481,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([55usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([55]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -9534,7 +9534,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([54usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([54]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -9830,7 +9830,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([109usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([109]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -9850,7 +9850,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([110usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([110]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -9870,7 +9870,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([43usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([43]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -9890,7 +9890,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([111usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([111]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -9910,7 +9910,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([112usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([112]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -9930,7 +9930,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([113usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([113]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -9950,7 +9950,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([114usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([114]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -9970,7 +9970,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([115usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([115]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -9990,7 +9990,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([116usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([116]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10010,7 +10010,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([117usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([117]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10030,7 +10030,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([118usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([118]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10050,7 +10050,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([119usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([119]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10070,7 +10070,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([120usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([120]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10090,7 +10090,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([121usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([121]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10110,7 +10110,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([122usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([122]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10130,7 +10130,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([123usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([123]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10150,7 +10150,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([124usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([124]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10170,7 +10170,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([125usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([125]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10190,7 +10190,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([126usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([126]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10210,7 +10210,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([127usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([127]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10230,7 +10230,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([128usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([128]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10250,7 +10250,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([129usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([129]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10270,7 +10270,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([130usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([130]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10290,7 +10290,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([131usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([131]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10310,7 +10310,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([132usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([132]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10330,7 +10330,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([133usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([133]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10350,7 +10350,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([134usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([134]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10370,7 +10370,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([135usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([135]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10390,7 +10390,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([136usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([136]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10410,7 +10410,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([137usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([137]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10430,7 +10430,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([138usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([138]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10450,7 +10450,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([139usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([139]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10470,7 +10470,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([140usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([140]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10490,7 +10490,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([141usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([141]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10510,7 +10510,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([142usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([142]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10530,7 +10530,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([143usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([143]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10550,7 +10550,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([144usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([144]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10570,7 +10570,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([145usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([145]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10590,7 +10590,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([146usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([146]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10610,7 +10610,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([147usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([147]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10630,7 +10630,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([148usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([148]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10650,7 +10650,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([149usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([149]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10670,7 +10670,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([150usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([150]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10690,7 +10690,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([151usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([151]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10727,7 +10727,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([42usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([42]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -10747,7 +10747,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([98usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([98]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -10814,7 +10814,7 @@ impl GrammarParser {
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([41usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([41]);
                     __reduce_map.extend(
                         __rustylr_tset18
                             .iter()
@@ -11010,7 +11010,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([99usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([99]);
                     __reduce_map.extend(
                         __rustylr_tset17
                             .iter()
@@ -11047,7 +11047,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([44usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([44]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -11105,7 +11105,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([45usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([45]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -11142,7 +11142,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([46usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([46]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -11196,7 +11196,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([47usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([47]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -11467,7 +11467,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([49usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([49]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -11504,7 +11504,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([48usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([48]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -11775,7 +11775,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([51usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([51]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -11812,7 +11812,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([50usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([50]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12083,7 +12083,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([59usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([59]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12120,7 +12120,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([58usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([58]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12391,7 +12391,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([61usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([61]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12428,7 +12428,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([60usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([60]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12469,7 +12469,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([64usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([64]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12506,7 +12506,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([65usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([65]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12547,7 +12547,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([62usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([62]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12584,7 +12584,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([63usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([63]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12662,7 +12662,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([57usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([57]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12715,7 +12715,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([56usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([56]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12756,7 +12756,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([66usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([66]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12793,7 +12793,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([67usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([67]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12834,7 +12834,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([68usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([68]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12871,7 +12871,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([69usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([69]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12897,7 +12897,7 @@ impl GrammarParser {
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([104usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([104]);
                     __reduce_map.extend(
                         __rustylr_tset18
                             .iter()
@@ -12937,7 +12937,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([102usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([102]);
                     __reduce_map.extend(
                         __rustylr_tset19
                             .iter()
@@ -12974,7 +12974,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([71usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([71]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -12997,7 +12997,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([152usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([152]);
                     __reduce_map.extend(
                         __rustylr_tset18
                             .iter()
@@ -13021,7 +13021,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([103usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([103]);
                     __reduce_map.extend(
                         __rustylr_tset19
                             .iter()
@@ -13058,7 +13058,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([70usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([70]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -13329,7 +13329,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([73usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([73]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -13366,7 +13366,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([72usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([72]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -13407,7 +13407,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([74usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([74]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -13444,7 +13444,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([75usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([75]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -13715,7 +13715,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([77usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([77]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -13752,7 +13752,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([76usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([76]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -13789,7 +13789,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([78usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([78]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -13809,7 +13809,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([79usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([79]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -13829,7 +13829,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([153usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([153]);
                     __reduce_map.extend(
                         __rustylr_tset12
                             .iter()
@@ -13857,7 +13857,7 @@ impl GrammarParser {
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([155usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([155]);
                     __reduce_map.extend(
                         __rustylr_tset20
                             .iter()
@@ -14049,7 +14049,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([156usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([156]);
                     __reduce_map.extend(
                         __rustylr_tset20
                             .iter()
@@ -14100,7 +14100,7 @@ impl GrammarParser {
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
-                    let reduce_rules = std::collections::BTreeSet::from([154usize]);
+                    let reduce_rules = std::collections::BTreeSet::from([154]);
                     __reduce_map.extend(
                         __rustylr_tset20
                             .iter()
