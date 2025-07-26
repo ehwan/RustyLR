@@ -1014,8 +1014,8 @@ impl<Data: TokenData> Context<Data> {
                 node_
                     .tree_stack
                     .push(crate::tree::Tree::new_terminal(term.clone()));
-                node_.data_stack.push(match &term {
-                    TerminalSymbol::Term(term) => Data::new_terminal(term.clone()),
+                node_.data_stack.push(match term {
+                    TerminalSymbol::Term(term) => Data::new_terminal(term),
                     TerminalSymbol::Eof => Data::new_empty(),
                     TerminalSymbol::Error => Data::new_error(),
                 });
