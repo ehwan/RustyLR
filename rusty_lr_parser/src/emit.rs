@@ -246,9 +246,9 @@ impl Grammar {
             });
         }
 
-        // helper function to generate case stream.
+        // helper function to generate match-case stream.
         // convert integer list to `a | b..=c | d` syntax
-        fn usize_list_to_case_stream(list: impl Iterator<Item = usize>) -> TokenStream {
+        fn list_to_case_stream(list: impl Iterator<Item = usize>) -> TokenStream {
             let mut stream = TokenStream::new();
             let mut prev = None;
             for val in list {
@@ -262,8 +262,11 @@ impl Grammar {
                             stream.extend(quote! { | });
                         }
                         if prev_start == prev_last {
+                            let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
                             stream.extend(quote! { #prev_start });
                         } else {
+                            let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
+                            let prev_last = proc_macro2::Literal::usize_unsuffixed(prev_last);
                             stream.extend(quote! { #prev_start..=#prev_last });
                         }
 
@@ -279,8 +282,11 @@ impl Grammar {
                     stream.extend(quote! { | });
                 }
                 if prev_start == prev_last {
+                    let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
                     stream.extend(quote! { #prev_start });
                 } else {
+                    let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
+                    let prev_last = proc_macro2::Literal::usize_unsuffixed(prev_last);
                     stream.extend(quote! { #prev_start..=#prev_last });
                 }
             }
@@ -295,13 +301,14 @@ impl Grammar {
         //     ...
         // }
         let precedence_types_match_body_stream = {
-            let lefts = usize_list_to_case_stream(
+            let lefts = list_to_case_stream(
                 self.builder
                     .precedence_types
                     .iter()
                     .copied()
                     .enumerate()
                     .filter_map(|(level, reduce_type)| {
+                        debug_assert!(level < u8::MAX as usize);
                         if reduce_type == Some(ReduceType::Left) {
                             Some(level)
                         } else {
@@ -309,13 +316,14 @@ impl Grammar {
                         }
                     }),
             );
-            let rights = usize_list_to_case_stream(
+            let rights = list_to_case_stream(
                 self.builder
                     .precedence_types
                     .iter()
                     .copied()
                     .enumerate()
                     .filter_map(|(level, reduce_type)| {
+                        debug_assert!(level < u8::MAX as usize);
                         if reduce_type == Some(ReduceType::Right) {
                             Some(level)
                         } else {
@@ -675,8 +683,9 @@ impl Grammar {
                 if classes.is_empty() {
                     continue;
                 } else {
-                    let case_stream = usize_list_to_case_stream(classes.into_iter());
-                    let level = u8::try_from(level).expect("level should fit in u8");
+                    let case_stream = list_to_case_stream(classes.into_iter());
+                    debug_assert!(level < u8::MAX as usize);
+                    let level = proc_macro2::Literal::usize_unsuffixed(level);
                     stream.extend(quote! {
                         #case_stream => #module_prefix::parser::Precedence::new(#level),
                     });
@@ -687,7 +696,8 @@ impl Grammar {
 
         let error_used = self.error_used;
         let error_prec_stream = if let Some(error_prec) = self.error_precedence {
-            let error_prec = u8::try_from(error_prec).expect("error precedence should fit in u8");
+            debug_assert!(error_prec < u8::MAX as usize);
+            let error_prec = proc_macro2::Literal::usize_unsuffixed(error_prec);
             quote! { #module_prefix::parser::Precedence::new(#error_prec) }
         } else {
             quote! { #module_prefix::parser::Precedence::none() }
@@ -805,7 +815,7 @@ impl Grammar {
                         }
                     }
                 }
-                fn precedence_types(&self, level: usize) -> Option<#module_prefix::builder::ReduceType> {
+                fn precedence_types(&self, level: u8) -> Option<#module_prefix::builder::ReduceType> {
                     #[allow(unreachable_patterns)]
                     match level {
                         #precedence_types_match_body_stream
@@ -997,7 +1007,7 @@ impl Grammar {
                         }
                     }
                 }
-                fn precedence_types(&self, level: usize) -> Option<#module_prefix::builder::ReduceType> {
+                fn precedence_types(&self, level: u8) -> Option<#module_prefix::builder::ReduceType> {
                     #[allow(unreachable_patterns)]
                     match level {
                         #precedence_types_match_body_stream

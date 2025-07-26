@@ -906,7 +906,7 @@ impl<Data: TokenData> Context<Data> {
                             std::cmp::Ordering::Equal => {
                                 // check for reduce_type
                                 use crate::builder::ReduceType;
-                                match parser.precedence_types(reduce_prec_ as usize) {
+                                match parser.precedence_types(reduce_prec_) {
                                     Some(ReduceType::Left) => {
                                         // no shift
                                         reduces.push((reduce_rule, reduce_prec));
@@ -1266,7 +1266,7 @@ impl<Data: TokenData> Context<Data> {
                             std::cmp::Ordering::Equal => {
                                 // check for reduce_type
                                 use crate::builder::ReduceType;
-                                match parser.precedence_types(reduce_prec_ as usize) {
+                                match parser.precedence_types(reduce_prec_) {
                                     Some(ReduceType::Left) => {
                                         // no shift
                                         reduces.push((reduce_rule, reduce_prec));

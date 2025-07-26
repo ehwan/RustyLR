@@ -364,7 +364,7 @@ impl<Data: TokenData> Context<Data> {
                         Ordering::Equal => {
                             // check for reduce type
                             use crate::builder::ReduceType;
-                            match parser.precedence_types(reduce_prec as usize) {
+                            match parser.precedence_types(reduce_prec) {
                                 Some(ReduceType::Left) => {
                                     // no shift
                                     // shift = None;
@@ -597,7 +597,7 @@ impl<Data: TokenData> Context<Data> {
                         Ordering::Equal => {
                             // check for reduce type
                             use crate::builder::ReduceType;
-                            match parser.precedence_types(reduce_prec as usize) {
+                            match parser.precedence_types(reduce_prec) {
                                 Some(ReduceType::Left) => {
                                     // no shift
                                     // shift = None;

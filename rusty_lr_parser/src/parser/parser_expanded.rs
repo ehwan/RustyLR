@@ -3850,9 +3850,9 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
             {
                 #[allow(unreachable_patterns)]
                 match class {
-                    10usize => ::rusty_lr_core::parser::Precedence::new(0u8),
-                    12usize => ::rusty_lr_core::parser::Precedence::new(1u8),
-                    6usize..=8usize | 11usize => ::rusty_lr_core::parser::Precedence::new(2u8),
+                    10 => ::rusty_lr_core::parser::Precedence::new(0),
+                    12 => ::rusty_lr_core::parser::Precedence::new(1),
+                    6..=8 | 11 => ::rusty_lr_core::parser::Precedence::new(2),
                     _ => ::rusty_lr_core::parser::Precedence::none(),
                 }
             }
@@ -3862,10 +3862,10 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
             }
         }
     }
-    fn precedence_types(&self, level: usize) -> Option<::rusty_lr_core::builder::ReduceType> {
+    fn precedence_types(&self, level: u8) -> Option<::rusty_lr_core::builder::ReduceType> {
         #[allow(unreachable_patterns)]
         match level {
-            0usize..=2usize => Some(::rusty_lr_core::builder::ReduceType::Left),
+            0..=2 => Some(::rusty_lr_core::builder::ReduceType::Left),
             _ => None,
         }
     }
