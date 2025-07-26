@@ -192,7 +192,7 @@ Augmented -> Grammar eof
 // =============================Generated Codes Begin==============================
 #[doc = r" type alias for `Context`"]
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarContext = ::rusty_lr_core::parser::deterministic::Context<GrammarTokenData>;
+pub type GrammarContext = ::rusty_lr_core::parser::deterministic::Context<GrammarTokenData, u8>;
 #[doc = r" type alias for CFG production rule"]
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarRule = ::rusty_lr_core::rule::ProductionRule<&'static str, GrammarNonTerminals>;

@@ -80,7 +80,7 @@ impl Grammar {
         quote! {
                 /// type alias for `Context`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #context_struct_name = #module_prefix::parser::deterministic::Context<#token_data_typename>;
+                pub type #context_struct_name = #module_prefix::parser::deterministic::Context<#token_data_typename, #state_index_typename>;
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #rule_typename = #module_prefix::rule::ProductionRule<&'static str, #enum_name>;

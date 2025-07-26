@@ -5,15 +5,16 @@ use super::ParseError;
 
 use crate::nonterminal::NonTerminal;
 use crate::nonterminal::TokenData;
+use crate::parser::state::Index;
 use crate::parser::Parser;
 use crate::parser::Precedence;
 use crate::parser::State;
 use crate::TerminalSymbol;
 
 /// A struct that maintains the current state and the values associated with each symbol.
-pub struct Context<Data: TokenData> {
+pub struct Context<Data: TokenData, StateIndex> {
     /// stacks hold the values associated with each shifted symbol.
-    pub state_stack: Vec<usize>,
+    pub state_stack: Vec<StateIndex>,
     pub(crate) data_stack: Vec<Data>,
     pub(crate) location_stack: Vec<Data::Location>,
     pub(crate) precedence_stack: Vec<Precedence>,
@@ -25,12 +26,12 @@ pub struct Context<Data: TokenData> {
     pub(crate) reduce_args: crate::nonterminal::ReduceArgsStack<Data>,
 }
 
-impl<Data: TokenData> Context<Data> {
+impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
     /// Create a new context.
     /// `state_stack` is initialized with [0] (root state).
     pub fn new() -> Self {
         Context {
-            state_stack: vec![0],
+            state_stack: vec![StateIndex::from_usize_unchecked(0)],
 
             data_stack: Vec::new(),
             location_stack: Vec::new(),
@@ -45,7 +46,9 @@ impl<Data: TokenData> Context<Data> {
     /// `state_stack` is initialized with [0] (root state).
     pub fn with_capacity(capacity: usize) -> Self {
         let mut state_stack = Vec::with_capacity(capacity);
-        state_stack.push(0);
+        state_stack.push(
+            StateIndex::from_usize_unchecked(0), // root state
+        );
         Context {
             state_stack,
 
@@ -107,7 +110,7 @@ impl<Data: TokenData> Context<Data> {
     /// Get current state index
     #[inline]
     pub fn state(&self) -> usize {
-        *self.state_stack.last().unwrap()
+        self.state_stack.last().unwrap().into_usize()
     }
 
     /// For debugging.
@@ -166,13 +169,13 @@ impl<Data: TokenData> Context<Data> {
     fn expected_token_impl<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &'a P,
-        states: &mut Vec<usize>,
+        states: &mut Vec<StateIndex>,
         terms: &mut BTreeSet<usize>,
         nonterms: &mut BTreeSet<Data::NonTerm>,
     ) where
         Data::NonTerm: Ord + Copy + Hash + NonTerminal,
     {
-        let s = *states.last().unwrap();
+        let s = states.last().unwrap().into_usize();
         let s = parser.get_states().get(s).expect("state must exist");
 
         terms.extend(s.expected_shift_term());
@@ -185,9 +188,9 @@ impl<Data: TokenData> Context<Data> {
         }
         for &(nonterm, len) in reduce_nonterms.iter() {
             let mut popped_states = states.drain(states.len() - len..).collect::<Vec<_>>();
-            let last_state = *states.last().unwrap();
+            let last_state = states.last().unwrap().into_usize();
             if let Some(next_state) = parser.get_states()[last_state].shift_goto_nonterm(&nonterm) {
-                states.push(next_state);
+                states.push(StateIndex::from_usize_unchecked(next_state));
                 self.expected_token_impl(parser, states, terms, nonterms);
                 states.pop();
             }
@@ -282,8 +285,9 @@ impl<Data: TokenData> Context<Data> {
                 }
 
                 // try shift given term again
-                if let Some(next_state) =
-                    parser.get_states()[*self.state_stack.last().unwrap()].shift_goto_class(class)
+                if let Some(next_state) = parser.get_states()
+                    [self.state_stack.last().unwrap().into_usize()]
+                .shift_goto_class(class)
                 {
                     #[cfg(feature = "tree")]
                     self.tree_stack
@@ -294,7 +298,8 @@ impl<Data: TokenData> Context<Data> {
                         .push(Data::new_terminal(term.into_term().unwrap()));
                     self.location_stack.push(location.unwrap());
                     self.precedence_stack.push(shift_prec);
-                    self.state_stack.push(next_state);
+                    self.state_stack
+                        .push(StateIndex::from_usize_unchecked(next_state));
                 } else {
                     // merge term with previous error
 
@@ -333,7 +338,7 @@ impl<Data: TokenData> Context<Data> {
         use crate::Location;
 
         let shift_to = loop {
-            let state = &parser.get_states()[*self.state_stack.last().unwrap()];
+            let state = &parser.get_states()[self.state_stack.last().unwrap().into_usize()];
 
             let shift = state.shift_goto_class(class);
             if let Some(mut reduce_rule) = state.reduce(class) {
@@ -453,10 +458,12 @@ impl<Data: TokenData> Context<Data> {
                 }
 
                 // shift with reduced nonterminal
-                if let Some(next_state_id) = parser.get_states()[*self.state_stack.last().unwrap()]
-                    .shift_goto_nonterm(&rule.name)
+                if let Some(next_state_id) = parser.get_states()
+                    [self.state_stack.last().unwrap().into_usize()]
+                .shift_goto_nonterm(&rule.name)
                 {
-                    self.state_stack.push(next_state_id);
+                    self.state_stack
+                        .push(StateIndex::from_usize_unchecked(next_state_id));
                 } else {
                     unreachable!("shift nonterm failed");
                 }
@@ -467,7 +474,8 @@ impl<Data: TokenData> Context<Data> {
 
         // shift with terminal
         if let Some(next_state_id) = shift_to {
-            self.state_stack.push(next_state_id);
+            self.state_stack
+                .push(StateIndex::from_usize_unchecked(next_state_id));
 
             #[cfg(feature = "tree")]
             self.tree_stack
@@ -556,7 +564,7 @@ impl<Data: TokenData> Context<Data> {
     }
 
     fn can_feed_impl<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        state_stack: &mut Vec<usize>,
+        state_stack: &mut Vec<StateIndex>,
         precedence_stack: &mut Vec<Precedence>,
         parser: &P,
         class: TerminalSymbol<usize>,
@@ -566,7 +574,7 @@ impl<Data: TokenData> Context<Data> {
         Data::NonTerm: Hash + Eq + NonTerminal,
     {
         let shift_to = loop {
-            let state = &parser.get_states()[*state_stack.last().unwrap()];
+            let state = &parser.get_states()[state_stack.last().unwrap().into_usize()];
 
             let shift = state.shift_goto_class(class);
             if let Some(mut reduce_rule) = state.reduce(class) {
@@ -628,10 +636,11 @@ impl<Data: TokenData> Context<Data> {
                 precedence_stack.push(reduce_prec);
 
                 // shift with reduced nonterminal
-                if let Some(next_state_id) =
-                    parser.get_states()[*state_stack.last().unwrap()].shift_goto_nonterm(&rule.name)
+                if let Some(next_state_id) = parser.get_states()
+                    [state_stack.last().unwrap().into_usize()]
+                .shift_goto_nonterm(&rule.name)
                 {
-                    state_stack.push(next_state_id);
+                    state_stack.push(StateIndex::from_usize_unchecked(next_state_id));
                 } else {
                     unreachable!("shift nonterm failed");
                 }
@@ -689,7 +698,7 @@ impl<Data: TokenData> Context<Data> {
         let mut zero_shifted_rules = BTreeSet::new();
         let mut non_zero_shifted_rules = BTreeSet::new();
         {
-            let last_state = &states[*self.state_stack.last().unwrap()];
+            let last_state = &states[self.state_stack.last().unwrap().into_usize()];
             for rule in last_state.get_rules().iter() {
                 if rule.shifted == 0 {
                     zero_shifted_rules.insert(rule.rule);
@@ -702,7 +711,7 @@ impl<Data: TokenData> Context<Data> {
         let mut ret: HashSet<Data::NonTerm> = Default::default();
 
         for &state_idx in self.state_stack.iter().rev() {
-            let state = &states[state_idx];
+            let state = &states[state_idx.into_usize()];
             let ruleset = state.get_rules();
 
             // insert new shifted rule that brings zero_shifted rules in this state
@@ -797,12 +806,13 @@ impl<Data: TokenData> Context<Data> {
         }
 
         let mut traces = Vec::new();
-        let mut current_rules: BTreeSet<_> = parser.get_states()[*self.state_stack.last().unwrap()]
-            .get_rules()
-            .iter()
-            // .filter(|rule| rule.shifted > 0)
-            .copied()
-            .collect();
+        let mut current_rules: BTreeSet<_> = parser.get_states()
+            [self.state_stack.last().unwrap().into_usize()]
+        .get_rules()
+        .iter()
+        // .filter(|rule| rule.shifted > 0)
+        .copied()
+        .collect();
         let mut next_rules = BTreeSet::new();
         traces.push(current_rules.clone());
         let mut zero_shifted_rules: HashSet<Data::NonTerm> = Default::default();
@@ -828,7 +838,10 @@ impl<Data: TokenData> Context<Data> {
 
             loop {
                 let len0 = current_rules.len();
-                for rule in parser.get_states()[state_idx].get_rules().iter() {
+                for rule in parser.get_states()[state_idx.into_usize()]
+                    .get_rules()
+                    .iter()
+                {
                     let prod_rule = &parser.get_rules()[rule.rule];
                     if let Some(Token::NonTerm(nonterm)) = prod_rule.rule.get(rule.shifted) {
                         if zero_shifted_rules.contains(nonterm) {
@@ -864,13 +877,13 @@ impl<Data: TokenData> Context<Data> {
     }
 }
 
-impl<Data: TokenData> Default for Context<Data> {
+impl<Data: TokenData, StateIndex: Index + Copy> Default for Context<Data, StateIndex> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<Data: TokenData> Clone for Context<Data>
+impl<Data: TokenData, StateIndex: Index + Copy> Clone for Context<Data, StateIndex>
 where
     Data: Clone,
     Data::Term: Clone,
@@ -891,7 +904,7 @@ where
 }
 
 #[cfg(feature = "tree")]
-impl<Data: TokenData> std::fmt::Display for Context<Data>
+impl<Data: TokenData, StateIndex: Index + Copy> std::fmt::Display for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Display + Clone,
     Data::NonTerm: std::fmt::Display + Clone + crate::nonterminal::NonTerminal,
@@ -901,7 +914,7 @@ where
     }
 }
 #[cfg(feature = "tree")]
-impl<Data: TokenData> std::fmt::Debug for Context<Data>
+impl<Data: TokenData, StateIndex: Index + Copy> std::fmt::Debug for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Debug + Clone,
     Data::NonTerm: std::fmt::Debug + Clone + crate::nonterminal::NonTerminal,
@@ -912,7 +925,7 @@ where
 }
 
 #[cfg(feature = "tree")]
-impl<Data: TokenData> std::ops::Deref for Context<Data> {
+impl<Data: TokenData, StateIndex: Index + Copy> std::ops::Deref for Context<Data, StateIndex> {
     type Target = crate::tree::TreeList<Data::Term, Data::NonTerm>;
     fn deref(&self) -> &Self::Target {
         &self.tree_stack
@@ -920,7 +933,7 @@ impl<Data: TokenData> std::ops::Deref for Context<Data> {
 }
 
 #[cfg(feature = "tree")]
-impl<Data: TokenData> std::ops::DerefMut for Context<Data> {
+impl<Data: TokenData, StateIndex: Index + Copy> std::ops::DerefMut for Context<Data, StateIndex> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.tree_stack
     }
