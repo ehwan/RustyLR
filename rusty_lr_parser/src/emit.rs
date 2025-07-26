@@ -28,6 +28,16 @@ impl Grammar {
             format_ident!("SparseState")
         };
 
+        let state_index_typename = if self.states.len() <= u8::MAX as usize {
+            quote! { u8 }
+        } else if self.states.len() <= u16::MAX as usize {
+            quote! { u16 }
+        } else if self.states.len() <= u32::MAX as usize {
+            quote! { u32 }
+        } else {
+            quote! { usize }
+        };
+
         if self.glr {
             // count the number of rules
             // and calculate the integral type for rule index -> u8, u16, u32, usize ...
@@ -50,7 +60,7 @@ impl Grammar {
                     pub type #rule_typename = #module_prefix::rule::ProductionRule<&'static str, #enum_name>;
                     /// type alias for DFA state
                     #[allow(non_camel_case_types,dead_code)]
-                    pub type #state_typename = #module_prefix::parser::state::#state_structname<#enum_name, #rule_container_type>;
+                    pub type #state_typename = #module_prefix::parser::state::#state_structname<#enum_name, #rule_container_type, #state_index_typename>;
                     /// type alias for `InvalidTerminalError`
                     #[allow(non_camel_case_types,dead_code)]
                     pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_data_typename>;
@@ -67,7 +77,7 @@ impl Grammar {
                 pub type #rule_typename = #module_prefix::rule::ProductionRule<&'static str, #enum_name>;
                 /// type alias for DFA state
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #state_typename = #module_prefix::parser::state::#state_structname<#enum_name, usize>;
+                pub type #state_typename = #module_prefix::parser::state::#state_structname<#enum_name, usize, #state_index_typename>;
                 /// type alias for `ParseError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_data_typename>;
@@ -353,6 +363,16 @@ impl Grammar {
             // do not build at runtime
             // write all parser tables and production rules directly here
 
+            let state_index_typename = if self.states.len() <= u8::MAX as usize {
+                quote! { u8 }
+            } else if self.states.len() <= u16::MAX as usize {
+                quote! { u16 }
+            } else if self.states.len() <= u32::MAX as usize {
+                quote! { u32 }
+            } else {
+                quote! { usize }
+            };
+
             let mut production_rules_body_stream = TokenStream::new();
             for rule in &self.builder.rules {
                 let mut tokens_vec_body_stream = TokenStream::new();
@@ -393,6 +413,7 @@ impl Grammar {
                 let mut shift_term_body_stream = TokenStream::new();
                 for (&term, &next_state) in &state.shift_goto_map_term {
                     let term = terminal_symbol_to_stream(term);
+                    let next_state = proc_macro2::Literal::usize_unsuffixed(next_state);
                     shift_term_body_stream.extend(quote! {
                         (#term, #next_state),
                     });
@@ -401,6 +422,7 @@ impl Grammar {
                 let mut shift_nonterm_body_stream = TokenStream::new();
                 for (&nonterm, &next_state) in &state.shift_goto_map_nonterm {
                     let nonterm_stream = &nonterminals_token[nonterm];
+                    let next_state = proc_macro2::Literal::usize_unsuffixed(next_state);
                     shift_nonterm_body_stream.extend(quote! {
                         (#nonterm_stream, #next_state),
                     });
@@ -500,7 +522,7 @@ impl Grammar {
                 ).collect();
 
                 #terminal_set_initialize_stream
-                let states = vec![
+                let states: Vec<#module_prefix::builder::State<_,_, #state_index_typename>> = vec![
                     #states_body_stream
                 ];
                 let states:Vec<#state_typename> = states.into_iter().map(

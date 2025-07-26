@@ -41,14 +41,14 @@ pub trait State<NonTerm> {
 
 /// `State` implementation for a sparse state representation using HashMap
 #[derive(Debug, Clone)]
-pub struct SparseState<NonTerm, RuleContainer> {
+pub struct SparseState<NonTerm, RuleContainer, StateIndex> {
     /// terminal symbol -> next state
-    pub(crate) shift_goto_map_class: HashMap<usize, usize>,
-    pub(crate) error_shift: Option<usize>,
-    pub(crate) eof_shift: Option<usize>,
+    pub(crate) shift_goto_map_class: HashMap<usize, StateIndex>,
+    pub(crate) error_shift: Option<StateIndex>,
+    pub(crate) eof_shift: Option<StateIndex>,
 
     /// non-terminal symbol -> next state
-    pub(crate) shift_goto_map_nonterm: HashMap<NonTerm, usize>,
+    pub(crate) shift_goto_map_nonterm: HashMap<NonTerm, StateIndex>,
 
     /// terminal symbol -> reduce rule index
     pub(crate) reduce_map: HashMap<usize, RuleContainer>,
@@ -59,8 +59,8 @@ pub struct SparseState<NonTerm, RuleContainer> {
     pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
 }
 
-impl<NonTerm: Copy, RuleIndex: crate::stackvec::ToUsizeList> State<NonTerm>
-    for SparseState<NonTerm, RuleIndex>
+impl<NonTerm: Copy, RuleIndex: crate::stackvec::ToUsizeList, StateIndex: IntoUsize + Copy>
+    State<NonTerm> for SparseState<NonTerm, RuleIndex, StateIndex>
 {
     fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<usize> {
         match class {
@@ -68,12 +68,16 @@ impl<NonTerm: Copy, RuleIndex: crate::stackvec::ToUsizeList> State<NonTerm>
             TerminalSymbol::Error => self.error_shift,
             TerminalSymbol::Eof => self.eof_shift,
         }
+        .map(IntoUsize::into_usize)
     }
     fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
     where
         NonTerm: Hash + Eq,
     {
-        self.shift_goto_map_nonterm.get(nonterm).copied()
+        self.shift_goto_map_nonterm
+            .get(nonterm)
+            .copied()
+            .map(IntoUsize::into_usize)
     }
     fn reduce(
         &self,
@@ -118,16 +122,16 @@ impl<NonTerm: Copy, RuleIndex: crate::stackvec::ToUsizeList> State<NonTerm>
 
 /// `State` implementation for a dense state representation using Vec
 #[derive(Debug, Clone)]
-pub struct DenseState<NonTerm, RuleContainer> {
+pub struct DenseState<NonTerm, RuleContainer, StateIndex> {
     /// terminal symbol -> next state
-    pub(crate) shift_goto_map_class: Vec<Option<usize>>,
+    pub(crate) shift_goto_map_class: Vec<Option<StateIndex>>,
     /// shift_goto_map_class[i] will contain i+offset 'th class's next state.
     pub(crate) shift_class_offset: usize,
-    pub(crate) error_shift: Option<usize>,
-    pub(crate) eof_shift: Option<usize>,
+    pub(crate) error_shift: Option<StateIndex>,
+    pub(crate) eof_shift: Option<StateIndex>,
 
     /// non-terminal symbol -> next state
-    pub(crate) shift_goto_map_nonterm: Vec<Option<usize>>,
+    pub(crate) shift_goto_map_nonterm: Vec<Option<StateIndex>>,
     pub(crate) shift_nonterm_offset: usize,
     /// set of non-terminal symbols that is keys of `shift_goto_map_nonterm`
     pub(crate) shift_goto_map_nonterm_keys: Vec<NonTerm>,
@@ -142,8 +146,11 @@ pub struct DenseState<NonTerm, RuleContainer> {
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
 }
-impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
-    for DenseState<NonTerm, RuleContainer>
+impl<
+        NonTerm: Copy,
+        RuleContainer: crate::stackvec::ToUsizeList,
+        StateIndex: crate::integral::IntoUsize + Copy,
+    > State<NonTerm> for DenseState<NonTerm, RuleContainer, StateIndex>
 {
     fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<usize> {
         match class {
@@ -160,6 +167,7 @@ impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
             TerminalSymbol::Error => self.error_shift,
             TerminalSymbol::Eof => self.eof_shift,
         }
+        .map(IntoUsize::into_usize)
     }
     fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
     where
@@ -173,6 +181,7 @@ impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
                 .get(nonterm - self.shift_nonterm_offset)
                 .copied()
                 .flatten()
+                .map(IntoUsize::into_usize)
         }
     }
     fn reduce(
@@ -231,12 +240,16 @@ impl<NonTerm: Copy, RuleContainer: crate::stackvec::ToUsizeList> State<NonTerm>
     }
 }
 
-fn builder_state_into_sparse<NonTerm, RuleContainer>(
-    mut builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>,
+use crate::integral::IntoUsize;
+
+fn builder_state_into_sparse<NonTerm, RuleContainer, StateIndex, StateIndexTo>(
+    mut builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>,
     rule_vec_map: impl Fn(std::collections::BTreeSet<usize>) -> RuleContainer,
-) -> SparseState<NonTerm, RuleContainer>
+) -> SparseState<NonTerm, RuleContainer, StateIndexTo>
 where
     NonTerm: Hash + Eq,
+    StateIndex: TryInto<StateIndexTo>,
+    StateIndex::Error: std::fmt::Debug,
 {
     let error_shift = builder_state
         .shift_goto_map_term
@@ -256,11 +269,27 @@ where
         shift_goto_map_class: builder_state
             .shift_goto_map_term
             .into_iter()
-            .map(|(term, state)| (*term.to_term().unwrap(), state))
+            .map(|(term, state)| {
+                (
+                    *term.to_term().unwrap(),
+                    state.try_into().expect("state conversion failed"),
+                )
+            })
             .collect(),
-        error_shift,
-        eof_shift,
-        shift_goto_map_nonterm: builder_state.shift_goto_map_nonterm.into_iter().collect(),
+        error_shift: error_shift.map(|s| s.try_into().expect("error shift conversion failed")),
+        eof_shift: eof_shift.map(|s| s.try_into().expect("eof shift conversion failed")),
+        shift_goto_map_nonterm: builder_state
+            .shift_goto_map_nonterm
+            .into_iter()
+            .map(|(nonterm, state)| {
+                (
+                    nonterm,
+                    state
+                        .try_into()
+                        .expect("non-terminal state conversion failed"),
+                )
+            })
+            .collect(),
         reduce_map: builder_state
             .reduce_map
             .into_iter()
@@ -271,12 +300,17 @@ where
         ruleset: builder_state.ruleset.into_iter().collect(),
     }
 }
-impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
-    for SparseState<NonTerm, usize>
+impl<NonTerm, StateIndex, StateIndexTo>
+    From<crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>>
+    for SparseState<NonTerm, usize, StateIndexTo>
 where
     NonTerm: Hash + Eq,
+    StateIndex: TryInto<StateIndexTo>,
+    StateIndex::Error: std::fmt::Debug,
 {
-    fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
+    fn from(
+        builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>,
+    ) -> Self {
         builder_state_into_sparse(builder_state, |reduce_map| {
             if reduce_map.len() != 1 {
                 unreachable!("SparseState with usize reduce_map should only have one rule");
@@ -285,55 +319,77 @@ where
         })
     }
 }
-impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
-    for SparseState<NonTerm, crate::stackvec::SmallVecU8>
+impl<NonTerm, StateIndex, StateIndexTo>
+    From<crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>>
+    for SparseState<NonTerm, crate::stackvec::SmallVecU8, StateIndexTo>
 where
     NonTerm: Hash + Eq,
+    StateIndex: TryInto<StateIndexTo>,
+    StateIndex::Error: std::fmt::Debug,
 {
-    fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
+    fn from(
+        builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>,
+    ) -> Self {
         builder_state_into_sparse(builder_state, |reduce_map| {
             crate::stackvec::SmallVecU8::from_iter(reduce_map.into_iter().map(|x| x as u8))
         })
     }
 }
-impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
-    for SparseState<NonTerm, crate::stackvec::SmallVecU16>
+impl<NonTerm, StateIndex, StateIndexTo>
+    From<crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>>
+    for SparseState<NonTerm, crate::stackvec::SmallVecU16, StateIndexTo>
 where
     NonTerm: Hash + Eq,
+    StateIndex: TryInto<StateIndexTo>,
+    StateIndex::Error: std::fmt::Debug,
 {
-    fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
+    fn from(
+        builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>,
+    ) -> Self {
         builder_state_into_sparse(builder_state, |reduce_map| {
             crate::stackvec::SmallVecU16::from_iter(reduce_map.into_iter().map(|x| x as u16))
         })
     }
 }
-impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
-    for SparseState<NonTerm, crate::stackvec::SmallVecU32>
+impl<NonTerm, StateIndex, StateIndexTo>
+    From<crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>>
+    for SparseState<NonTerm, crate::stackvec::SmallVecU32, StateIndexTo>
 where
     NonTerm: Hash + Eq,
+    StateIndex: TryInto<StateIndexTo>,
+    StateIndex::Error: std::fmt::Debug,
 {
-    fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
+    fn from(
+        builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>,
+    ) -> Self {
         builder_state_into_sparse(builder_state, |reduce_map| {
             crate::stackvec::SmallVecU32::from_iter(reduce_map.into_iter().map(|x| x as u32))
         })
     }
 }
-impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
-    for SparseState<NonTerm, crate::stackvec::SmallVecUsize>
+impl<NonTerm, StateIndex, StateIndexTo>
+    From<crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>>
+    for SparseState<NonTerm, crate::stackvec::SmallVecUsize, StateIndexTo>
 where
     NonTerm: Hash + Eq,
+    StateIndex: TryInto<StateIndexTo>,
+    StateIndex::Error: std::fmt::Debug,
 {
-    fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
+    fn from(
+        builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>,
+    ) -> Self {
         builder_state_into_sparse(builder_state, crate::stackvec::SmallVecUsize::from_iter)
     }
 }
 
-fn builder_state_into_dense<NonTerm, RuleContainer: Clone>(
-    mut builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>,
+fn builder_state_into_dense<NonTerm, RuleContainer: Clone, StateIndex, StateIndexTo: Copy>(
+    mut builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>,
     rule_vec_map: impl Fn(std::collections::BTreeSet<usize>) -> RuleContainer,
-) -> DenseState<NonTerm, RuleContainer>
+) -> DenseState<NonTerm, RuleContainer, StateIndexTo>
 where
     NonTerm: Hash + Eq + Copy + NonTerminal,
+    StateIndex: TryInto<StateIndexTo>,
+    StateIndex::Error: std::fmt::Debug,
 {
     let error_shift = builder_state
         .shift_goto_map_term
@@ -384,7 +440,8 @@ where
 
     let mut shift_goto_map_class = vec![None; shift_len];
     for (term, state) in builder_state.shift_goto_map_term {
-        shift_goto_map_class[*term.to_term().unwrap() - shift_min] = Some(state);
+        shift_goto_map_class[*term.to_term().unwrap() - shift_min] =
+            Some(state.try_into().expect("state conversion failed"));
     }
 
     let mut reduce_map = vec![None; reduce_len];
@@ -399,14 +456,18 @@ where
         .collect();
     let mut shift_goto_map_nonterm = vec![None; nonterm_len];
     for (nonterm, state) in builder_state.shift_goto_map_nonterm {
-        shift_goto_map_nonterm[nonterm.to_usize() - nonterm_min] = Some(state);
+        shift_goto_map_nonterm[nonterm.to_usize() - nonterm_min] = Some(
+            state
+                .try_into()
+                .expect("non-terminal state conversion failed"),
+        );
     }
 
     DenseState {
         shift_goto_map_class,
         shift_class_offset: shift_min,
-        error_shift,
-        eof_shift,
+        error_shift: error_shift.map(|s| s.try_into().expect("error shift conversion failed")),
+        eof_shift: eof_shift.map(|s| s.try_into().expect("EOF shift conversion failed")),
         shift_goto_map_nonterm,
         shift_goto_map_nonterm_keys: nonterm_keys,
         shift_nonterm_offset: nonterm_min,
@@ -417,12 +478,17 @@ where
         ruleset: builder_state.ruleset.into_iter().collect(),
     }
 }
-impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
-    for DenseState<NonTerm, usize>
+impl<NonTerm, StateIndex, StateIndexTo: Copy>
+    From<crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>>
+    for DenseState<NonTerm, usize, StateIndexTo>
 where
     NonTerm: Hash + Eq + Copy + NonTerminal,
+    StateIndex: TryInto<StateIndexTo>,
+    StateIndex::Error: std::fmt::Debug,
 {
-    fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
+    fn from(
+        builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>,
+    ) -> Self {
         builder_state_into_dense(builder_state, |reduce_map| {
             if reduce_map.len() != 1 {
                 unreachable!("DenseState with usize reduce_map should only have one rule");
@@ -431,45 +497,65 @@ where
         })
     }
 }
-impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
-    for DenseState<NonTerm, crate::stackvec::SmallVecU8>
+impl<NonTerm, StateIndex, StateIndexTo: Copy>
+    From<crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>>
+    for DenseState<NonTerm, crate::stackvec::SmallVecU8, StateIndexTo>
 where
     NonTerm: Hash + Eq + Copy + NonTerminal,
+    StateIndex: TryInto<StateIndexTo>,
+    StateIndex::Error: std::fmt::Debug,
 {
-    fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
+    fn from(
+        builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>,
+    ) -> Self {
         builder_state_into_dense(builder_state, |reduce_map| {
             crate::stackvec::SmallVecU8::from_iter(reduce_map.into_iter().map(|x| x as u8))
         })
     }
 }
-impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
-    for DenseState<NonTerm, crate::stackvec::SmallVecU16>
+impl<NonTerm, StateIndex, StateIndexTo: Copy>
+    From<crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>>
+    for DenseState<NonTerm, crate::stackvec::SmallVecU16, StateIndexTo>
 where
     NonTerm: Hash + Eq + Copy + NonTerminal,
+    StateIndex: TryInto<StateIndexTo>,
+    StateIndex::Error: std::fmt::Debug,
 {
-    fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
+    fn from(
+        builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>,
+    ) -> Self {
         builder_state_into_dense(builder_state, |reduce_map| {
             crate::stackvec::SmallVecU16::from_iter(reduce_map.into_iter().map(|x| x as u16))
         })
     }
 }
-impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
-    for DenseState<NonTerm, crate::stackvec::SmallVecU32>
+impl<NonTerm, StateIndex, StateIndexTo: Copy>
+    From<crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>>
+    for DenseState<NonTerm, crate::stackvec::SmallVecU32, StateIndexTo>
 where
     NonTerm: Hash + Eq + Copy + NonTerminal,
+    StateIndex: TryInto<StateIndexTo>,
+    StateIndex::Error: std::fmt::Debug,
 {
-    fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
+    fn from(
+        builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>,
+    ) -> Self {
         builder_state_into_dense(builder_state, |reduce_map| {
             crate::stackvec::SmallVecU32::from_iter(reduce_map.into_iter().map(|x| x as u32))
         })
     }
 }
-impl<NonTerm> From<crate::builder::State<TerminalSymbol<usize>, NonTerm>>
-    for DenseState<NonTerm, crate::stackvec::SmallVecUsize>
+impl<NonTerm, StateIndex, StateIndexTo: Copy>
+    From<crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>>
+    for DenseState<NonTerm, crate::stackvec::SmallVecUsize, StateIndexTo>
 where
     NonTerm: Hash + Eq + Copy + NonTerminal,
+    StateIndex: TryInto<StateIndexTo>,
+    StateIndex::Error: std::fmt::Debug,
 {
-    fn from(builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm>) -> Self {
+    fn from(
+        builder_state: crate::builder::State<TerminalSymbol<usize>, NonTerm, StateIndex>,
+    ) -> Self {
         builder_state_into_dense(builder_state, crate::stackvec::SmallVecUsize::from_iter)
     }
 }

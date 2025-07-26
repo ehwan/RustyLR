@@ -198,7 +198,7 @@ pub type GrammarContext = ::rusty_lr_core::parser::deterministic::Context<Gramma
 pub type GrammarRule = ::rusty_lr_core::rule::ProductionRule<&'static str, GrammarNonTerminals>;
 #[doc = r" type alias for DFA state"]
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarState = ::rusty_lr_core::parser::state::SparseState<GrammarNonTerminals, usize>;
+pub type GrammarState = ::rusty_lr_core::parser::state::SparseState<GrammarNonTerminals, usize, u8>;
 #[doc = r" type alias for `ParseError`"]
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarParseError = ::rusty_lr_core::parser::deterministic::ParseError<GrammarTokenData>;
@@ -5478,18 +5478,18 @@ impl GrammarParser {
             std::collections::BTreeSet::from([::rusty_lr_core::TerminalSymbol::Term(22usize)]);
         let __rustylr_tset20 =
             std::collections::BTreeSet::from([::rusty_lr_core::TerminalSymbol::Eof]);
-        let states = vec![
+        let states: Vec<::rusty_lr_core::builder::State<_, _, u8>> = vec![
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 1usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 90usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 1),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 90),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::Rule, 223usize),
-                    (GrammarNonTerminals::Directive, 224usize),
-                    (GrammarNonTerminals::GrammarLine, 225usize),
-                    (GrammarNonTerminals::Grammar, 227usize),
-                    (GrammarNonTerminals::_GrammarLinePlus31, 229usize),
+                    (GrammarNonTerminals::Rule, 223),
+                    (GrammarNonTerminals::Directive, 224),
+                    (GrammarNonTerminals::GrammarLine, 225),
+                    (GrammarNonTerminals::Grammar, 227),
+                    (GrammarNonTerminals::_GrammarLinePlus31, 229),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -5677,11 +5677,11 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(17usize),
-                    2usize,
+                    2,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::RuleType,
-                    3usize,
+                    3,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -5731,7 +5731,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(1usize),
-                    4usize,
+                    4,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -5747,21 +5747,21 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 5usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 5),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RuleLines, 64usize),
-                    (GrammarNonTerminals::RuleLine, 89usize),
-                    (GrammarNonTerminals::TokenMapped, 68usize),
-                    (GrammarNonTerminals::TerminalSet, 30usize),
-                    (GrammarNonTerminals::Pattern, 69usize),
-                    (GrammarNonTerminals::_TokenMappedPlus15, 70usize),
-                    (GrammarNonTerminals::_TokenMappedStar16, 72usize),
+                    (GrammarNonTerminals::RuleLines, 64),
+                    (GrammarNonTerminals::RuleLine, 89),
+                    (GrammarNonTerminals::TokenMapped, 68),
+                    (GrammarNonTerminals::TerminalSet, 30),
+                    (GrammarNonTerminals::Pattern, 69),
+                    (GrammarNonTerminals::_TokenMappedPlus15, 70),
+                    (GrammarNonTerminals::_TokenMappedStar16, 72),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -5891,7 +5891,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(5usize),
-                    6usize,
+                    6,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -5917,16 +5917,16 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::TerminalSet, 30usize),
-                    (GrammarNonTerminals::Pattern, 63usize),
+                    (GrammarNonTerminals::TerminalSet, 30),
+                    (GrammarNonTerminals::Pattern, 63),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -6054,7 +6054,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(0usize),
-                    10usize,
+                    10,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -6087,7 +6087,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(19usize),
-                    11usize,
+                    11,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -6119,16 +6119,16 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::TerminalSet, 30usize),
-                    (GrammarNonTerminals::Pattern, 31usize),
+                    (GrammarNonTerminals::TerminalSet, 30),
+                    (GrammarNonTerminals::Pattern, 31),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -6251,20 +6251,20 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 41usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14),
+                    (::rusty_lr_core::TerminalSymbol::Error, 41),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::TerminalSet, 30usize),
-                    (GrammarNonTerminals::Pattern, 43usize),
-                    (GrammarNonTerminals::_PatternPlus22, 44usize),
-                    (GrammarNonTerminals::_PatternStar23, 46usize),
-                    (GrammarNonTerminals::__PatternStar23SepPlus24, 47usize),
+                    (GrammarNonTerminals::TerminalSet, 30),
+                    (GrammarNonTerminals::Pattern, 43),
+                    (GrammarNonTerminals::_PatternPlus22, 44),
+                    (GrammarNonTerminals::_PatternStar23, 46),
+                    (GrammarNonTerminals::__PatternStar23SepPlus24, 47),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -6386,11 +6386,11 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(9usize),
-                    15usize,
+                    15,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::_caretQuestion19,
-                    16usize,
+                    16,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -6439,13 +6439,13 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 17usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 21usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 17),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 21),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::TerminalSetItem, 25usize),
-                    (GrammarNonTerminals::_TerminalSetItemPlus20, 26usize),
-                    (GrammarNonTerminals::_TerminalSetItemStar21, 28usize),
+                    (GrammarNonTerminals::TerminalSetItem, 25),
+                    (GrammarNonTerminals::_TerminalSetItemPlus20, 26),
+                    (GrammarNonTerminals::_TerminalSetItemStar21, 28),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -6507,7 +6507,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(10usize),
-                    18usize,
+                    18,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -6537,8 +6537,8 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 19usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 20usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 19),
+                    (::rusty_lr_core::TerminalSymbol::Error, 20),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -6599,7 +6599,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(10usize),
-                    22usize,
+                    22,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -6629,8 +6629,8 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 23usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 24usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 23),
+                    (::rusty_lr_core::TerminalSymbol::Error, 24),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -6710,12 +6710,12 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 17usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 21usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 17),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 21),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::TerminalSetItem,
-                    27usize,
+                    27,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -6785,7 +6785,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(22usize),
-                    29usize,
+                    29,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -6841,13 +6841,13 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 35usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 38usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 40usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 35),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 38),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 40),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -6963,16 +6963,16 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::TerminalSet, 30usize),
-                    (GrammarNonTerminals::Pattern, 36usize),
+                    (GrammarNonTerminals::TerminalSet, 30),
+                    (GrammarNonTerminals::Pattern, 36),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -7059,11 +7059,11 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 38usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 38),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -7125,16 +7125,16 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::TerminalSet, 30usize),
-                    (GrammarNonTerminals::Pattern, 39usize),
+                    (GrammarNonTerminals::TerminalSet, 30),
+                    (GrammarNonTerminals::Pattern, 39),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -7221,10 +7221,10 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -7262,16 +7262,16 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::TerminalSet, 30usize),
-                    (GrammarNonTerminals::Pattern, 51usize),
+                    (GrammarNonTerminals::TerminalSet, 30),
+                    (GrammarNonTerminals::Pattern, 51),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -7375,7 +7375,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(20usize),
-                    42usize,
+                    42,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -7411,12 +7411,12 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 35usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 38usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 35),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 38),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -7462,16 +7462,16 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::TerminalSet, 30usize),
-                    (GrammarNonTerminals::Pattern, 45usize),
+                    (GrammarNonTerminals::TerminalSet, 30),
+                    (GrammarNonTerminals::Pattern, 45),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -7568,12 +7568,12 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 35usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 38usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 35),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 38),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -7639,8 +7639,8 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 48usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 50usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 48),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 50),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -7660,18 +7660,18 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 7),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::TerminalSet, 30usize),
-                    (GrammarNonTerminals::Pattern, 43usize),
-                    (GrammarNonTerminals::_PatternPlus22, 44usize),
-                    (GrammarNonTerminals::_PatternStar23, 49usize),
+                    (GrammarNonTerminals::TerminalSet, 30),
+                    (GrammarNonTerminals::Pattern, 43),
+                    (GrammarNonTerminals::_PatternPlus22, 44),
+                    (GrammarNonTerminals::_PatternStar23, 49),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -7820,18 +7820,18 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 35usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 38usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 52usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 59usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 35),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 38),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 52),
+                    (::rusty_lr_core::TerminalSymbol::Error, 59),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::_commaQuestion25,
-                    61usize,
+                    61,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -7900,9 +7900,9 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 53usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 55usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 57usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 53),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 55),
+                    (::rusty_lr_core::TerminalSymbol::Error, 57),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -7937,7 +7937,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(20usize),
-                    54usize,
+                    54,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -7974,7 +7974,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(20usize),
-                    56usize,
+                    56,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -8011,7 +8011,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(20usize),
-                    58usize,
+                    58,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -8048,7 +8048,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(20usize),
-                    60usize,
+                    60,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -8085,7 +8085,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(20usize),
-                    62usize,
+                    62,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -8121,12 +8121,12 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 35usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 38usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 35),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 38),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -8172,8 +8172,8 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 65usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 66usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 65),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 66),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -8213,20 +8213,20 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 5usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 5),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RuleLine, 67usize),
-                    (GrammarNonTerminals::TokenMapped, 68usize),
-                    (GrammarNonTerminals::TerminalSet, 30usize),
-                    (GrammarNonTerminals::Pattern, 69usize),
-                    (GrammarNonTerminals::_TokenMappedPlus15, 70usize),
-                    (GrammarNonTerminals::_TokenMappedStar16, 72usize),
+                    (GrammarNonTerminals::RuleLine, 67),
+                    (GrammarNonTerminals::TokenMapped, 68),
+                    (GrammarNonTerminals::TerminalSet, 30),
+                    (GrammarNonTerminals::Pattern, 69),
+                    (GrammarNonTerminals::_TokenMappedPlus15, 70),
+                    (GrammarNonTerminals::_TokenMappedStar16, 72),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -8387,12 +8387,12 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 35usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 38usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 32),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 33),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 34),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 35),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 37),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 38),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -8438,17 +8438,17 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 5usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 5),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 8),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 9),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 12),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 13),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 14),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::TokenMapped, 71usize),
-                    (GrammarNonTerminals::TerminalSet, 30usize),
-                    (GrammarNonTerminals::Pattern, 69usize),
+                    (GrammarNonTerminals::TokenMapped, 71),
+                    (GrammarNonTerminals::TerminalSet, 30),
+                    (GrammarNonTerminals::Pattern, 69),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -8574,12 +8574,12 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(4usize),
-                    73usize,
+                    73,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::PrecDef, 83usize),
-                    (GrammarNonTerminals::_PrecDefPlus17, 84usize),
-                    (GrammarNonTerminals::_PrecDefStar18, 86usize),
+                    (GrammarNonTerminals::PrecDef, 83),
+                    (GrammarNonTerminals::_PrecDefPlus17, 84),
+                    (GrammarNonTerminals::_PrecDefStar18, 86),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -8636,9 +8636,9 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 74usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 79usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 82usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 74),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 79),
+                    (::rusty_lr_core::TerminalSymbol::Error, 82),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -8670,13 +8670,13 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 75usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 76usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 77usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 75),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 76),
+                    (::rusty_lr_core::TerminalSymbol::Error, 77),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::IdentOrLiteral,
-                    78usize,
+                    78,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -8783,8 +8783,8 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 80usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 81usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 80),
+                    (::rusty_lr_core::TerminalSymbol::Error, 81),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -8885,11 +8885,11 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(4usize),
-                    73usize,
+                    73,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::PrecDef,
-                    85usize,
+                    85,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -8955,11 +8955,11 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(18usize),
-                    87usize,
+                    87,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::Action,
-                    88usize,
+                    88,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -9048,25 +9048,25 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 91usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 98usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 103usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 156usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 161usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 164usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 168usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 172usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 176usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 180usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 184usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 188usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 193usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 197usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 201usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 209usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 213usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 217usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 221usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 91),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 98),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 103),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 156),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 161),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 164),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 168),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 172),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 176),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 180),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 184),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 188),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 193),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 197),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 201),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 209),
+                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 213),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 217),
+                    (::rusty_lr_core::TerminalSymbol::Error, 221),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -9226,13 +9226,13 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 75usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 76usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 92usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 75),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 76),
+                    (::rusty_lr_core::TerminalSymbol::Error, 92),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::IdentOrLiteral, 94usize),
-                    (GrammarNonTerminals::_IdentOrLiteralPlus28, 95usize),
+                    (GrammarNonTerminals::IdentOrLiteral, 94),
+                    (GrammarNonTerminals::_IdentOrLiteralPlus28, 95),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -9268,7 +9268,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    93usize,
+                    93,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -9324,13 +9324,13 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 75usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 96usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 76usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 75),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 96),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 76),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::IdentOrLiteral,
-                    97usize,
+                    97,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -9397,13 +9397,13 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 75usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 76usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 99usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 75),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 76),
+                    (::rusty_lr_core::TerminalSymbol::Error, 99),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::IdentOrLiteral, 94usize),
-                    (GrammarNonTerminals::_IdentOrLiteralPlus28, 101usize),
+                    (GrammarNonTerminals::IdentOrLiteral, 94),
+                    (GrammarNonTerminals::_IdentOrLiteralPlus28, 101),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -9439,7 +9439,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    100usize,
+                    100,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -9475,13 +9475,13 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 75usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 102usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 76usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 75),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 102),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 76),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::IdentOrLiteral,
-                    97usize,
+                    97,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -9528,8 +9528,8 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 104usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 154usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 104),
+                    (::rusty_lr_core::TerminalSymbol::Error, 154),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -9553,55 +9553,55 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 107usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 107),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145),
+                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147),
+                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RustCode, 149usize),
-                    (GrammarNonTerminals::_TermSet26, 151usize),
-                    (GrammarNonTerminals::__TermSet26Plus27, 152usize),
+                    (GrammarNonTerminals::RustCode, 149),
+                    (GrammarNonTerminals::_TermSet26, 151),
+                    (GrammarNonTerminals::__TermSet26Plus27, 152),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -10685,7 +10685,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    150usize,
+                    150,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -10741,53 +10741,53 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145),
+                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147),
+                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::_TermSet26,
-                    153usize,
+                    153,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -11005,7 +11005,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    155usize,
+                    155,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -11041,8 +11041,8 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 157usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 159usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 157),
+                    (::rusty_lr_core::TerminalSymbol::Error, 159),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -11063,7 +11063,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    158usize,
+                    158,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -11100,7 +11100,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    160usize,
+                    160,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -11137,7 +11137,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Error,
-                    162usize,
+                    162,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -11154,7 +11154,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    163usize,
+                    163,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -11190,55 +11190,55 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 165usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 165),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145),
+                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147),
+                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RustCode, 166usize),
-                    (GrammarNonTerminals::_TermSet26, 151usize),
-                    (GrammarNonTerminals::__TermSet26Plus27, 152usize),
+                    (GrammarNonTerminals::RustCode, 166),
+                    (GrammarNonTerminals::_TermSet26, 151),
+                    (GrammarNonTerminals::__TermSet26Plus27, 152),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -11462,7 +11462,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    167usize,
+                    167,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -11498,55 +11498,55 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 169usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 169),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145),
+                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147),
+                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RustCode, 170usize),
-                    (GrammarNonTerminals::_TermSet26, 151usize),
-                    (GrammarNonTerminals::__TermSet26Plus27, 152usize),
+                    (GrammarNonTerminals::RustCode, 170),
+                    (GrammarNonTerminals::_TermSet26, 151),
+                    (GrammarNonTerminals::__TermSet26Plus27, 152),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -11770,7 +11770,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    171usize,
+                    171,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -11806,55 +11806,55 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 173usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 173),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145),
+                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147),
+                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RustCode, 174usize),
-                    (GrammarNonTerminals::_TermSet26, 151usize),
-                    (GrammarNonTerminals::__TermSet26Plus27, 152usize),
+                    (GrammarNonTerminals::RustCode, 174),
+                    (GrammarNonTerminals::_TermSet26, 151),
+                    (GrammarNonTerminals::__TermSet26Plus27, 152),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -12078,7 +12078,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    175usize,
+                    175,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -12114,55 +12114,55 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 177usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 177),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145),
+                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147),
+                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RustCode, 178usize),
-                    (GrammarNonTerminals::_TermSet26, 151usize),
-                    (GrammarNonTerminals::__TermSet26Plus27, 152usize),
+                    (GrammarNonTerminals::RustCode, 178),
+                    (GrammarNonTerminals::_TermSet26, 151),
+                    (GrammarNonTerminals::__TermSet26Plus27, 152),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -12386,7 +12386,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    179usize,
+                    179,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -12422,8 +12422,8 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 181usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 182usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 181),
+                    (::rusty_lr_core::TerminalSymbol::Error, 182),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -12464,7 +12464,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    183usize,
+                    183,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -12500,8 +12500,8 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 185usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 186usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 185),
+                    (::rusty_lr_core::TerminalSymbol::Error, 186),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -12542,7 +12542,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    187usize,
+                    187,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -12578,13 +12578,13 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 75usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 76usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 189usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 75),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 76),
+                    (::rusty_lr_core::TerminalSymbol::Error, 189),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::IdentOrLiteral, 94usize),
-                    (GrammarNonTerminals::_IdentOrLiteralPlus28, 191usize),
+                    (GrammarNonTerminals::IdentOrLiteral, 94),
+                    (GrammarNonTerminals::_IdentOrLiteralPlus28, 191),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -12620,7 +12620,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    190usize,
+                    190,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -12656,13 +12656,13 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 75usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 192usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 76usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 75),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 192),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 76),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([(
                     GrammarNonTerminals::IdentOrLiteral,
-                    97usize,
+                    97,
                 )]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -12709,8 +12709,8 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 194usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 195usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 194),
+                    (::rusty_lr_core::TerminalSymbol::Error, 195),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -12751,7 +12751,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    196usize,
+                    196,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -12787,8 +12787,8 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 198usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 199usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 198),
+                    (::rusty_lr_core::TerminalSymbol::Error, 199),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -12829,7 +12829,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    200usize,
+                    200,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -12865,12 +12865,12 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 202usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 203usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 202),
+                    (::rusty_lr_core::TerminalSymbol::Error, 203),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::_identPlus29, 205usize),
-                    (GrammarNonTerminals::_identStar30, 207usize),
+                    (GrammarNonTerminals::_identPlus29, 205),
+                    (GrammarNonTerminals::_identStar30, 207),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -12932,7 +12932,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    204usize,
+                    204,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -12969,7 +12969,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(0usize),
-                    206usize,
+                    206,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -13016,7 +13016,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    208usize,
+                    208,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -13052,55 +13052,55 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 210usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 210),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145),
+                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147),
+                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RustCode, 211usize),
-                    (GrammarNonTerminals::_TermSet26, 151usize),
-                    (GrammarNonTerminals::__TermSet26Plus27, 152usize),
+                    (GrammarNonTerminals::RustCode, 211),
+                    (GrammarNonTerminals::_TermSet26, 151),
+                    (GrammarNonTerminals::__TermSet26Plus27, 152),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -13324,7 +13324,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    212usize,
+                    212,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -13360,8 +13360,8 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 214usize),
-                    (::rusty_lr_core::TerminalSymbol::Error, 215usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 214),
+                    (::rusty_lr_core::TerminalSymbol::Error, 215),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -13402,7 +13402,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    216usize,
+                    216,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -13438,55 +13438,55 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 218usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 105),
+                    (::rusty_lr_core::TerminalSymbol::Term(1usize), 106),
+                    (::rusty_lr_core::TerminalSymbol::Term(2usize), 218),
+                    (::rusty_lr_core::TerminalSymbol::Term(3usize), 108),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 109),
+                    (::rusty_lr_core::TerminalSymbol::Term(5usize), 110),
+                    (::rusty_lr_core::TerminalSymbol::Term(6usize), 111),
+                    (::rusty_lr_core::TerminalSymbol::Term(7usize), 112),
+                    (::rusty_lr_core::TerminalSymbol::Term(8usize), 113),
+                    (::rusty_lr_core::TerminalSymbol::Term(9usize), 114),
+                    (::rusty_lr_core::TerminalSymbol::Term(10usize), 115),
+                    (::rusty_lr_core::TerminalSymbol::Term(11usize), 116),
+                    (::rusty_lr_core::TerminalSymbol::Term(12usize), 117),
+                    (::rusty_lr_core::TerminalSymbol::Term(13usize), 118),
+                    (::rusty_lr_core::TerminalSymbol::Term(14usize), 119),
+                    (::rusty_lr_core::TerminalSymbol::Term(15usize), 120),
+                    (::rusty_lr_core::TerminalSymbol::Term(16usize), 121),
+                    (::rusty_lr_core::TerminalSymbol::Term(17usize), 122),
+                    (::rusty_lr_core::TerminalSymbol::Term(18usize), 123),
+                    (::rusty_lr_core::TerminalSymbol::Term(19usize), 124),
+                    (::rusty_lr_core::TerminalSymbol::Term(20usize), 125),
+                    (::rusty_lr_core::TerminalSymbol::Term(21usize), 126),
+                    (::rusty_lr_core::TerminalSymbol::Term(22usize), 127),
+                    (::rusty_lr_core::TerminalSymbol::Term(23usize), 128),
+                    (::rusty_lr_core::TerminalSymbol::Term(24usize), 129),
+                    (::rusty_lr_core::TerminalSymbol::Term(25usize), 130),
+                    (::rusty_lr_core::TerminalSymbol::Term(26usize), 131),
+                    (::rusty_lr_core::TerminalSymbol::Term(27usize), 132),
+                    (::rusty_lr_core::TerminalSymbol::Term(28usize), 133),
+                    (::rusty_lr_core::TerminalSymbol::Term(29usize), 134),
+                    (::rusty_lr_core::TerminalSymbol::Term(30usize), 135),
+                    (::rusty_lr_core::TerminalSymbol::Term(31usize), 136),
+                    (::rusty_lr_core::TerminalSymbol::Term(32usize), 137),
+                    (::rusty_lr_core::TerminalSymbol::Term(33usize), 138),
+                    (::rusty_lr_core::TerminalSymbol::Term(34usize), 139),
+                    (::rusty_lr_core::TerminalSymbol::Term(35usize), 140),
+                    (::rusty_lr_core::TerminalSymbol::Term(36usize), 141),
+                    (::rusty_lr_core::TerminalSymbol::Term(37usize), 142),
+                    (::rusty_lr_core::TerminalSymbol::Term(38usize), 143),
+                    (::rusty_lr_core::TerminalSymbol::Term(39usize), 144),
+                    (::rusty_lr_core::TerminalSymbol::Term(40usize), 145),
+                    (::rusty_lr_core::TerminalSymbol::Term(41usize), 146),
+                    (::rusty_lr_core::TerminalSymbol::Term(42usize), 147),
+                    (::rusty_lr_core::TerminalSymbol::Term(43usize), 148),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::RustCode, 219usize),
-                    (GrammarNonTerminals::_TermSet26, 151usize),
-                    (GrammarNonTerminals::__TermSet26Plus27, 152usize),
+                    (GrammarNonTerminals::RustCode, 219),
+                    (GrammarNonTerminals::_TermSet26, 151),
+                    (GrammarNonTerminals::__TermSet26Plus27, 152),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -13710,7 +13710,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    220usize,
+                    220,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -13747,7 +13747,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Term(2usize),
-                    222usize,
+                    222,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
@@ -13823,14 +13823,14 @@ impl GrammarParser {
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
-                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 1usize),
-                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 90usize),
+                    (::rusty_lr_core::TerminalSymbol::Term(0usize), 1),
+                    (::rusty_lr_core::TerminalSymbol::Term(4usize), 90),
                 ]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([
-                    (GrammarNonTerminals::Rule, 223usize),
-                    (GrammarNonTerminals::Directive, 224usize),
-                    (GrammarNonTerminals::GrammarLine, 225usize),
-                    (GrammarNonTerminals::_GrammarLinePlus31, 226usize),
+                    (GrammarNonTerminals::Rule, 223),
+                    (GrammarNonTerminals::Directive, 224),
+                    (GrammarNonTerminals::GrammarLine, 225),
+                    (GrammarNonTerminals::_GrammarLinePlus31, 226),
                 ]),
                 reduce_map: {
                     let mut __reduce_map = std::collections::BTreeMap::new();
@@ -14044,7 +14044,7 @@ impl GrammarParser {
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
                     ::rusty_lr_core::TerminalSymbol::Eof,
-                    228usize,
+                    228,
                 )]),
                 shift_goto_map_nonterm: std::collections::BTreeMap::from([]),
                 reduce_map: {
