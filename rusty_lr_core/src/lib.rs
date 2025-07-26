@@ -36,6 +36,8 @@ pub use token::Token;
 pub(crate) mod backtrace;
 pub use backtrace::Backtrace;
 
+pub(crate) mod integral;
+
 /// Default error type for reduce action
 #[derive(Debug, Default)]
 pub struct DefaultReduceActionError;
