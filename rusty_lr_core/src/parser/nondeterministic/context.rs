@@ -5,7 +5,9 @@ use super::ParseError;
 
 use crate::nonterminal::NonTerminal;
 use crate::nonterminal::TokenData;
+use crate::parser::state::Index;
 use crate::parser::Parser;
+use crate::parser::Precedence;
 use crate::parser::State;
 use crate::TerminalSymbol;
 
@@ -14,15 +16,26 @@ type SmallVecNode = smallvec::SmallVec<[usize; 3]>;
 /// Iterator for traverse node to root.
 /// Note that root node is not included in this iterator.
 #[derive(Clone)]
-pub struct NodeRefIterator<'a, Data: TokenData> {
-    context: &'a Context<Data>,
+pub struct NodeRefIterator<'a, Data: TokenData, StateIndex> {
+    context: &'a Context<Data, StateIndex>,
     node: Option<usize>,
+}
+impl<'a, Data: TokenData, StateIndex: Index + Copy> Iterator
+    for NodeRefIterator<'a, Data, StateIndex>
+{
+    type Item = &'a Node<Data, StateIndex>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let node = self.context.node(self.node?);
+        self.node = node.parent;
+        Some(node)
+    }
 }
 
 /// A struct that maintains the current state and the values associated with each symbol.
 /// This handles the divergence and merging of the parser.
-pub struct Context<Data: TokenData> {
-    pub(crate) nodes_pool: Vec<Node<Data>>,
+pub struct Context<Data: TokenData, StateIndex> {
+    pub(crate) nodes_pool: Vec<Node<Data, StateIndex>>,
     pub(crate) empty_node_indices: std::collections::BTreeSet<usize>,
 
     /// each element represents an end-point of diverged paths.
@@ -47,29 +60,19 @@ pub struct Context<Data: TokenData> {
     pub(crate) no_precedences: Vec<usize>,
 }
 
-impl<'a, Data: TokenData> Iterator for NodeRefIterator<'a, Data> {
-    type Item = &'a Node<Data>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let node = self.context.node(self.node?);
-        self.node = node.parent;
-        Some(node)
-    }
-}
-
-impl<Data: TokenData> Context<Data> {
+impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
     /// Create a new context.
     /// `current_nodes` is initialized with a root node.
     pub fn new() -> Self {
         Default::default()
     }
 
-    pub fn node(&self, node: usize) -> &Node<Data> {
+    pub fn node(&self, node: usize) -> &Node<Data, StateIndex> {
         debug_assert!(!self.empty_node_indices.contains(&node) && node < self.nodes_pool.len());
 
         &self.nodes_pool[node]
     }
-    pub fn node_mut(&mut self, node: usize) -> &mut Node<Data> {
+    pub fn node_mut(&mut self, node: usize) -> &mut Node<Data, StateIndex> {
         debug_assert!(!self.empty_node_indices.contains(&node) && node < self.nodes_pool.len());
 
         &mut self.nodes_pool[node]
@@ -163,7 +166,7 @@ impl<Data: TokenData> Context<Data> {
     }
 
     /// Get iterator for all nodes in the current context.
-    fn node_iter(&self, node: usize) -> NodeRefIterator<Data> {
+    fn node_iter(&self, node: usize) -> NodeRefIterator<Data, StateIndex> {
         NodeRefIterator {
             context: self,
             node: Some(node),
@@ -179,8 +182,13 @@ impl<Data: TokenData> Context<Data> {
     }
     /// Get iterator for `node` that traverses from `node` to root on the parsing tree.
     fn state_iter(&self, node: usize) -> impl Iterator<Item = usize> + '_ {
-        self.node_iter(node)
-            .flat_map(|node| node.state_stack.iter().rev().copied())
+        self.node_iter(node).flat_map(|node| {
+            node.state_stack
+                .iter()
+                .rev()
+                .copied()
+                .map(Index::into_usize)
+        })
     }
     #[cfg(feature = "tree")]
     /// Get iterator for `node` that traverses from `node` to root on the parsing tree.
@@ -201,7 +209,7 @@ impl<Data: TokenData> Context<Data> {
                 return 0; // root node
             }
         }
-        *self.node(node).state_stack.last().unwrap()
+        self.node(node).state_stack.last().unwrap().into_usize()
     }
 
     /// pop one stack from the node.
@@ -228,7 +236,7 @@ impl<Data: TokenData> Context<Data> {
         &mut self,
         parser: &P,
         reduce_rule: usize,
-        precedence: Option<usize>,
+        precedence: Precedence,
         node: usize,
         term: &crate::TerminalSymbol<P::Term>,
         shift: &mut bool,
@@ -410,7 +418,8 @@ impl<Data: TokenData> Context<Data> {
                     parser.get_states()[state].shift_goto_nonterm(&rule.name)
                 {
                     let node = self.node_mut(node_to_shift);
-                    node.state_stack.push(nonterm_shift_state);
+                    node.state_stack
+                        .push(StateIndex::from_usize_unchecked(nonterm_shift_state));
                     node.data_stack.push(new_data);
                     node.location_stack.push(new_location);
                     node.precedence_stack.push(precedence);
@@ -858,7 +867,7 @@ impl<Data: TokenData> Context<Data> {
         node: usize,
         term: TerminalSymbol<P::Term>,
         class: TerminalSymbol<usize>,
-        shift_prec: Option<usize>,
+        shift_prec: Precedence,
         location: Option<Data::Location>,
         userdata: &mut Data::UserData,
     ) -> Result<(), (usize, TerminalSymbol<P::Term>, Option<Data::Location>)>
@@ -872,7 +881,6 @@ impl<Data: TokenData> Context<Data> {
         );
         debug_assert!(self.node(node).is_leaf());
         use crate::parser::State;
-        use crate::rule::Precedence;
 
         let last_state = self.state(node);
         let shift_state = parser.get_states()[last_state].shift_goto_class(class);
@@ -883,19 +891,21 @@ impl<Data: TokenData> Context<Data> {
             for reduce_rule in reduce_rules {
                 let rule = &parser.get_rules()[reduce_rule];
                 let reduce_prec = match rule.precedence {
-                    Some(Precedence::Fixed(level)) => Some(level),
-                    Some(Precedence::Dynamic(token_index)) => {
+                    Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
+                    Some(crate::rule::Precedence::Dynamic(token_index)) => {
                         // fix the value to the offset from current node
                         let ith = rule.rule.len() - token_index - 1;
                         let (node, ith) = self.skip_last_n(node, ith).unwrap();
                         self.node(node).precedence_stack[ith]
                     }
-                    None => None,
+                    None => Precedence::none(),
                 };
 
                 // if there is shift/reduce conflict, check for reduce rule's precedence and shift terminal's precedence
                 match (shift_state.is_some(), shift_prec, reduce_prec) {
-                    (true, Some(shift_prec_), Some(reduce_prec_)) => {
+                    (true, Precedence(shift_prec_), Precedence(reduce_prec_))
+                        if shift_prec.is_some() && reduce_prec.is_some() =>
+                    {
                         match reduce_prec_.cmp(&shift_prec_) {
                             std::cmp::Ordering::Less => {
                                 // no reduce
@@ -1005,7 +1015,9 @@ impl<Data: TokenData> Context<Data> {
             }
             if let Some(shift) = shift {
                 let node_ = self.node_mut(node);
-                node_.state_stack.push(shift);
+                node_
+                    .state_stack
+                    .push(StateIndex::from_usize_unchecked(shift));
                 node_.precedence_stack.push(shift_prec);
                 if let Some(location) = &location {
                     node_.location_stack.push(location.clone());
@@ -1014,8 +1026,8 @@ impl<Data: TokenData> Context<Data> {
                 node_
                     .tree_stack
                     .push(crate::tree::Tree::new_terminal(term.clone()));
-                node_.data_stack.push(match &term {
-                    TerminalSymbol::Term(term) => Data::new_terminal(term.clone()),
+                node_.data_stack.push(match term {
+                    TerminalSymbol::Term(term) => Data::new_terminal(term),
                     TerminalSymbol::Eof => Data::new_empty(),
                     TerminalSymbol::Error => Data::new_error(),
                 });
@@ -1031,7 +1043,9 @@ impl<Data: TokenData> Context<Data> {
             }
         } else if let Some(shift) = shift_state {
             let node_ = self.node_mut(node);
-            node_.state_stack.push(shift);
+            node_
+                .state_stack
+                .push(StateIndex::from_usize_unchecked(shift));
             node_.precedence_stack.push(shift_prec);
             if let Some(location) = location {
                 node_.location_stack.push(location);
@@ -1058,7 +1072,7 @@ impl<Data: TokenData> Context<Data> {
         &mut self,
         parser: &P,
         mut node: usize,
-        error_prec: Option<usize>,
+        error_prec: Precedence,
         userdata: &mut Data::UserData,
     ) -> bool
     where
@@ -1147,7 +1161,7 @@ impl<Data: TokenData> Context<Data> {
         // and restore nodes to original state from fallback_nodes
         if self.next_nodes.is_empty() {
             // early return if `error` token is not used in the grammar
-            if !P::error_used() {
+            if !P::ERROR_USED {
                 std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
 
                 return Err(ParseError {
@@ -1186,7 +1200,8 @@ impl<Data: TokenData> Context<Data> {
                         // A -> a . error b
                         // and b is fed, shift error and b
                         let node = self.node_mut(error_node);
-                        node.state_stack.push(next_state);
+                        node.state_stack
+                            .push(StateIndex::from_usize_unchecked(next_state));
                         node.precedence_stack.push(shift_prec);
                         node.location_stack.push(location.clone());
                         #[cfg(feature = "tree")]
@@ -1225,13 +1240,12 @@ impl<Data: TokenData> Context<Data> {
         parser: &P,
         node: usize,
         class: TerminalSymbol<usize>,
-        shift_prec: Option<usize>,
+        shift_prec: Precedence,
     ) -> bool
     where
         P::NonTerm: std::hash::Hash + Eq + NonTerminal,
     {
         use crate::parser::State;
-        use crate::rule::Precedence;
 
         let last_state = self.state(node);
         let shift_state = parser.get_states()[last_state].shift_goto_class(class);
@@ -1242,19 +1256,21 @@ impl<Data: TokenData> Context<Data> {
             for reduce_rule in reduce_rules {
                 let rule = &parser.get_rules()[reduce_rule];
                 let reduce_prec = match rule.precedence {
-                    Some(Precedence::Fixed(level)) => Some(level),
-                    Some(Precedence::Dynamic(token_index)) => {
+                    Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
+                    Some(crate::rule::Precedence::Dynamic(token_index)) => {
                         // fix the value to the offset from current node
                         let ith = rule.rule.len() - token_index - 1;
                         let (node, ith) = self.skip_last_n(node, ith).unwrap();
                         self.node(node).precedence_stack[ith]
                     }
-                    None => None,
+                    None => Precedence::none(),
                 };
 
                 // if there is shift/reduce conflict, check for reduce rule's precedence and shift terminal's precedence
                 match (shift_state.is_some(), shift_prec, reduce_prec) {
-                    (true, Some(shift_prec_), Some(reduce_prec_)) => {
+                    (true, Precedence(shift_prec_), Precedence(reduce_prec_))
+                        if shift_prec.is_some() && reduce_prec.is_some() =>
+                    {
                         match reduce_prec_.cmp(&shift_prec_) {
                             std::cmp::Ordering::Less => {
                                 // no reduce
@@ -1327,7 +1343,7 @@ impl<Data: TokenData> Context<Data> {
         Data::NonTerm: Hash + Eq + NonTerminal,
     {
         // if `error` token was not used in the grammar, early return here
-        if !P::error_used() {
+        if !P::ERROR_USED {
             return false;
         }
 
@@ -1363,7 +1379,7 @@ impl<Data: TokenData> Context<Data> {
                 node,
                 TerminalSymbol::Eof,
                 TerminalSymbol::Eof,
-                None,
+                Precedence::none(),
                 None,
                 userdata,
             ) {
@@ -1399,11 +1415,11 @@ impl<Data: TokenData> Context<Data> {
     {
         self.current_nodes
             .iter()
-            .any(|node| self.can_feed_impl(parser, *node, TerminalSymbol::Eof, None))
+            .any(|node| self.can_feed_impl(parser, *node, TerminalSymbol::Eof, Precedence::none()))
     }
 }
 
-impl<Data: TokenData> Default for Context<Data> {
+impl<Data: TokenData, StateIndex: Index + Copy> Default for Context<Data, StateIndex> {
     fn default() -> Self {
         let mut context = Context {
             nodes_pool: Default::default(),
@@ -1421,9 +1437,9 @@ impl<Data: TokenData> Default for Context<Data> {
     }
 }
 
-impl<Data: TokenData> Clone for Context<Data>
+impl<Data: TokenData, StateIndex: Index + Copy> Clone for Context<Data, StateIndex>
 where
-    Node<Data>: Clone,
+    Node<Data, StateIndex>: Clone,
 {
     fn clone(&self) -> Self {
         Context {
@@ -1436,7 +1452,7 @@ where
 }
 
 #[cfg(feature = "tree")]
-impl<Data: TokenData> std::fmt::Display for Context<Data>
+impl<Data: TokenData, StateIndex: Index + Copy> std::fmt::Display for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Display + Clone,
     Data::NonTerm: std::fmt::Display + Clone + crate::nonterminal::NonTerminal,
@@ -1450,7 +1466,7 @@ where
     }
 }
 #[cfg(feature = "tree")]
-impl<Data: TokenData> std::fmt::Debug for Context<Data>
+impl<Data: TokenData, StateIndex: Index + Copy> std::fmt::Debug for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Debug + Clone,
     Data::NonTerm: std::fmt::Debug + Clone + crate::nonterminal::NonTerminal,

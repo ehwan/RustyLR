@@ -1,25 +1,26 @@
 use crate::nonterminal::TokenData;
+use crate::parser::Precedence;
 
 /// To handle multiple paths in the non-deterministic GLR parsing,
 /// this node represents a subrange in stack of the parser.
 /// this constructs LinkedList tree of nodes, where parent node is the previous token in the parse tree.
 #[derive(Clone)]
-pub struct Node<Data: TokenData> {
+pub struct Node<Data: TokenData, StateIndex> {
     /// parent node
     pub parent: Option<usize>,
 
     pub child_count: usize,
 
     /// index of state in parser
-    pub state_stack: Vec<usize>,
+    pub state_stack: Vec<StateIndex>,
     pub data_stack: Vec<Data>,
     pub location_stack: Vec<Data::Location>,
-    pub precedence_stack: Vec<Option<usize>>,
+    pub precedence_stack: Vec<Precedence>,
     #[cfg(feature = "tree")]
     pub(crate) tree_stack: Vec<crate::tree::Tree<Data::Term, Data::NonTerm>>,
 }
 
-impl<Data: TokenData> Default for Node<Data> {
+impl<Data: TokenData, StateIndex> Default for Node<Data, StateIndex> {
     fn default() -> Self {
         Node {
             parent: None,
@@ -34,7 +35,7 @@ impl<Data: TokenData> Default for Node<Data> {
     }
 }
 
-impl<Data: TokenData> Node<Data> {
+impl<Data: TokenData, StateIndex> Node<Data, StateIndex> {
     /// Clear this node to `Default::default()`.
     pub fn clear(&mut self) {
         self.parent = None;

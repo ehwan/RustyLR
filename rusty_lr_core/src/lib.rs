@@ -6,9 +6,6 @@
 /// FxHash for fast and non-cryptographic hashing
 pub mod hash;
 
-/// stack allocated vector for small data
-pub mod stackvec;
-
 /// module for tree representation of parse results (feature `tree`).
 #[cfg(feature = "tree")]
 pub mod tree;
