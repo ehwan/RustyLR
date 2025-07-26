@@ -5518,184 +5518,26 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 0usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 42usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 43usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 44usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 45usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 46usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 47usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 48usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 49usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 50usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 51usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 52usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 53usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 54usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 55usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 56usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 57usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 58usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 59usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 60usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 61usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 62usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 63usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 64usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 65usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 66usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 67usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 68usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 69usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 70usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 71usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 72usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 73usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 74usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 75usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 76usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 77usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 78usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 79usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 153usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 154usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 155usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 156usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 157usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        0, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+                        60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78,
+                        79, 153, 154, 155, 156, 157,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -5716,20 +5558,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 0usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 1usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 2usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[0, 1, 2];
+                    let shifted: &'static [u8] = &[1u8, 0u8, 0u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -5744,12 +5584,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 1usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[1];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -5761,12 +5607,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 0usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[0];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -5796,120 +5648,24 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 0usize,
-                        shifted: 3usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 3usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 4usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 5usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 11usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 12usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 20usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 21usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 26usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 30usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 80usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 81usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 82usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 105usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        0, 3, 4, 5, 11, 12, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
+                        33, 34, 35, 36, 80, 81, 82, 105,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        3u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -5927,16 +5683,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 12usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 21usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[12, 21];
+                    let shifted: &'static [u8] = &[1u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -5955,84 +5713,23 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 12usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 20usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 21usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 26usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 30usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        12, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -6047,12 +5744,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 21usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[21];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -6067,12 +5770,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 20usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[20];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -6084,28 +5793,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[32, 33, 34, 35, 36];
+                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8, 1u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -6117,28 +5816,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[32, 33, 34, 35, 36];
+                    let shifted: &'static [u8] = &[2u8, 2u8, 2u8, 2u8, 2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -6157,100 +5846,24 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 20usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 21usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 26usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 30usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 3usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 3usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 3usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 3usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 32, 33, 33, 34, 34,
+                        35, 35, 36, 36,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8,
+                        0u8, 3u8, 0u8, 3u8, 0u8, 3u8, 0u8, 3u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -6265,12 +5878,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 30usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[30];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -6299,112 +5918,24 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 20usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 21usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 26usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 30usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 91usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 92usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 93usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 94usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 95usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 108usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 28, 29, 29, 30, 31, 32, 33, 34, 35,
+                        36, 91, 92, 93, 94, 95, 108,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 1u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -6425,20 +5956,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 86usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 87usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[19, 86, 87];
+                    let shifted: &'static [u8] = &[1u8, 0u8, 0u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -6453,12 +5982,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 86usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[86];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -6480,52 +6015,19 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 13usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 14usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 15usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 16usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 17usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 18usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 88usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 89usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 90usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 107usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[13, 14, 15, 16, 17, 18, 19, 88, 89, 90, 107];
+                    let shifted: &'static [u8] =
+                        &[0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8, 0u8, 0u8, 0u8, 0u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -6543,20 +6045,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 13usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 14usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 15usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[13, 14, 15];
+                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -6568,16 +6068,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 14usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 15usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[14, 15];
+                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -6592,12 +6094,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 14usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[14];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -6612,12 +6120,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 15usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[15];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -6635,20 +6149,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 16usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 17usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 18usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[16, 17, 18];
+                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -6660,16 +6172,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 17usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 18usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[17, 18];
+                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -6684,12 +6198,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 17usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[17];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -6704,12 +6224,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 18usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[18];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -6724,12 +6250,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 88usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[88];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -6750,40 +6282,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 13usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 14usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 15usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 16usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 17usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 18usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 89usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 107usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[13, 14, 15, 16, 17, 18, 89, 107];
+                    let shifted: &'static [u8] = &[0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -6798,12 +6308,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 89usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[89];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -6815,12 +6331,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[19];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -6835,12 +6357,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[19];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -6855,12 +6383,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 26usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[26];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -6877,52 +6411,19 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 4usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 4usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 4usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 4usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[22, 23, 24, 25, 27, 31, 32, 33, 34, 35, 36];
+                    let shifted: &'static [u8] =
+                        &[1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 4u8, 4u8, 4u8, 4u8, 4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -6937,12 +6438,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[22];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -6957,12 +6464,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[23];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -6977,12 +6490,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[24];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -7001,84 +6520,23 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 20usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 21usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 26usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 30usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 31, 32, 33, 34, 35, 36,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -7099,32 +6557,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[22, 23, 24, 25, 27, 31];
+                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8, 1u8, 1u8, 3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -7139,12 +6583,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[25];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -7163,84 +6613,23 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 20usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 21usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 26usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 30usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        19, 20, 21, 22, 23, 24, 25, 26, 27, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -7260,28 +6649,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[22, 23, 24, 25, 27];
+                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8, 1u8, 3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -7300,100 +6679,24 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 20usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 21usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 26usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 30usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 5usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 5usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 5usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 5usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 5usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 32, 33, 33, 34, 34,
+                        35, 35, 36, 36,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 5u8,
+                        0u8, 5u8, 0u8, 5u8, 0u8, 5u8, 0u8, 5u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -7405,12 +6708,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[29];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -7425,12 +6734,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[29];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -7452,36 +6767,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 91usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[22, 23, 24, 25, 27, 31, 91];
+                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -7506,88 +6803,24 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 20usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 21usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 26usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 30usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 92usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 108usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 92,
+                        108,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 1u8, 1u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -7609,36 +6842,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 92usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[22, 23, 24, 25, 27, 31, 92];
+                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -7653,12 +6868,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 94usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[94];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -7670,16 +6891,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 95usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[28, 95];
+                    let shifted: &'static [u8] = &[2u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -7706,100 +6929,24 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 20usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 21usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 26usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 30usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 91usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 92usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 93usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 95usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 108usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 91,
+                        92, 93, 95, 108,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -7814,12 +6961,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 95usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[95];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -7834,12 +6987,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[28];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -7866,60 +7025,21 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 6usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 6usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 6usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 6usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 6usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 96usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 97usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] =
+                        &[22, 23, 24, 25, 27, 31, 32, 33, 34, 35, 36, 96, 97];
+                    let shifted: &'static [u8] = &[
+                        1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 6u8, 6u8, 6u8, 6u8, 6u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -7938,24 +7058,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 7usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 7usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 7usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 96usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[33, 34, 36, 96];
+                    let shifted: &'static [u8] = &[7u8, 7u8, 7u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -7967,12 +7081,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 8usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[33];
+                    let shifted: &'static [u8] = &[8u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -7987,12 +7107,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 9usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[33];
+                    let shifted: &'static [u8] = &[9u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -8004,12 +7130,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 8usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[34];
+                    let shifted: &'static [u8] = &[8u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8024,12 +7156,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 9usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[34];
+                    let shifted: &'static [u8] = &[9u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -8041,12 +7179,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 8usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[36];
+                    let shifted: &'static [u8] = &[8u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8061,12 +7205,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 9usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[36];
+                    let shifted: &'static [u8] = &[9u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -8078,12 +7228,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 7usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[35];
+                    let shifted: &'static [u8] = &[7u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8098,12 +7254,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 8usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[35];
+                    let shifted: &'static [u8] = &[8u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -8115,12 +7277,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 7usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[32];
+                    let shifted: &'static [u8] = &[7u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8135,12 +7303,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 8usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[32];
+                    let shifted: &'static [u8] = &[8u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -8162,36 +7336,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 12usize,
-                        shifted: 3usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[12, 22, 23, 24, 25, 27, 31];
+                    let shifted: &'static [u8] = &[3u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -8203,16 +7359,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 0usize,
-                        shifted: 4usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 3usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[0, 3];
+                    let shifted: &'static [u8] = &[4u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8227,12 +7385,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 0usize,
-                        shifted: 5usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[0];
+                    let shifted: &'static [u8] = &[5u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -8261,112 +7425,24 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 3usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 5usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 11usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 12usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 20usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 21usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 26usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 30usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 80usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 81usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 82usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 105usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        3, 5, 11, 12, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
+                        34, 35, 36, 80, 81, 82, 105,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8381,12 +7457,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 3usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[3];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8401,12 +7483,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 80usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[80];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -8428,36 +7516,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 11usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[11, 22, 23, 24, 25, 27, 31];
+                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -8483,96 +7553,24 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 11usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 12usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 19usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 20usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 21usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 22usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 23usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 24usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 25usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 26usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 27usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 28usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 29usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 30usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 31usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 32usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 33usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 34usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 35usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 36usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 81usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 105usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        11, 12, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
+                        36, 81, 105,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 1u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8587,12 +7585,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 81usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[81];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -8614,48 +7618,19 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 5usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 6usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 7usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 8usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 9usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 10usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 83usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 84usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 85usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 106usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[5, 6, 7, 8, 9, 10, 83, 84, 85, 106];
+                    let shifted: &'static [u8] =
+                        &[1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -8668,28 +7643,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 6usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 7usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 8usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 9usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 10usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[6, 7, 8, 9, 10];
+                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8, 1u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -8705,24 +7670,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 6usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 7usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 39usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 40usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[6, 7, 39, 40];
+                    let shifted: &'static [u8] = &[2u8, 2u8, 0u8, 0u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8737,12 +7696,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 39usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[39];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8757,12 +7722,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 40usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[40];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8777,12 +7748,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 7usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[7];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8797,12 +7774,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 6usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[6];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -8814,16 +7797,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 8usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 9usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[8, 9];
+                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8838,12 +7823,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 8usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[8];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8858,12 +7849,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 9usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[9];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8878,12 +7875,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 10usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[10];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8898,12 +7901,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 83usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[83];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -8924,36 +7933,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 6usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 7usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 8usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 9usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 10usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 84usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 106usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[6, 7, 8, 9, 10, 84, 106];
+                    let shifted: &'static [u8] = &[0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -8968,12 +7959,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 84usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[84];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -8994,20 +7991,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 5usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 37usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 38usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[5, 37, 38];
+                    let shifted: &'static [u8] = &[2u8, 0u8, 0u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9022,12 +8017,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 37usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[37];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9042,12 +8043,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 5usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[5];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9062,12 +8069,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 4usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[4];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -9096,156 +8109,25 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 42usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 43usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 44usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 45usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 46usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 47usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 48usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 49usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 50usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 51usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 52usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 53usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 54usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 55usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 56usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 57usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 58usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 59usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 60usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 61usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 62usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 63usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 64usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 65usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 66usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 67usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 68usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 69usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 70usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 71usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 72usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 73usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 74usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 75usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 76usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 77usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 78usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+                        61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8,
+                        1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8,
+                        1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -9261,32 +8143,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 39usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 40usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 52usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 53usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 100usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 101usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[39, 40, 52, 53, 100, 101];
+                    let shifted: &'static [u8] = &[0u8, 0u8, 2u8, 2u8, 0u8, 0u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -9298,12 +8166,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 53usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[53];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9318,12 +8192,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 53usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[53];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9338,12 +8218,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 100usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[100];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -9359,24 +8245,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 39usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 40usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 52usize,
-                        shifted: 3usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 101usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[39, 40, 52, 101];
+                    let shifted: &'static [u8] = &[0u8, 0u8, 3u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9391,12 +8271,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 52usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[52];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9411,12 +8297,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 101usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[101];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -9432,32 +8324,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 39usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 40usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 54usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 55usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 100usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 101usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[39, 40, 54, 55, 100, 101];
+                    let shifted: &'static [u8] = &[0u8, 0u8, 2u8, 2u8, 0u8, 0u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -9469,12 +8347,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 55usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[55];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9489,12 +8373,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 55usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[55];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -9510,24 +8400,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 39usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 40usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 54usize,
-                        shifted: 3usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 101usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[39, 40, 54, 101];
+                    let shifted: &'static [u8] = &[0u8, 0u8, 3u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9542,12 +8426,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 54usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[54];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -9559,20 +8449,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 42usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 43usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 44usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[42, 43, 44];
+                    let shifted: &'static [u8] = &[2u8, 2u8, 2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -9630,200 +8518,28 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 41usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 42usize,
-                        shifted: 3usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 43usize,
-                        shifted: 3usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 98usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 99usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 109usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 110usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 111usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 112usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 113usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 114usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 115usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 116usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 117usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 118usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 119usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 120usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 121usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 122usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 123usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 124usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 125usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 126usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 127usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 128usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 129usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 130usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 131usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 132usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 133usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 134usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 135usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 136usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 137usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 138usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 139usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 140usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 141usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 142usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 143usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 144usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 145usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 146usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 147usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 148usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 149usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 150usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 151usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        41, 42, 43, 98, 99, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
+                        120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134,
+                        135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+                        150, 151,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 3u8, 3u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9838,12 +8554,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 109usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[109];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9858,12 +8580,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 110usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[110];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9878,12 +8606,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 43usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[43];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9898,12 +8632,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 111usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[111];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9918,12 +8658,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 112usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[112];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9938,12 +8684,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 113usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[113];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9958,12 +8710,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 114usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[114];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9978,12 +8736,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 115usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[115];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -9998,12 +8762,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 116usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[116];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10018,12 +8788,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 117usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[117];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10038,12 +8814,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 118usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[118];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10058,12 +8840,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 119usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[119];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10078,12 +8866,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 120usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[120];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10098,12 +8892,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 121usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[121];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10118,12 +8918,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 122usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[122];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10138,12 +8944,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 123usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[123];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10158,12 +8970,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 124usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[124];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10178,12 +8996,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 125usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[125];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10198,12 +9022,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 126usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[126];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10218,12 +9048,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 127usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[127];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10238,12 +9074,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 128usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[128];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10258,12 +9100,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 129usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[129];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10278,12 +9126,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 130usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[130];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10298,12 +9152,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 131usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[131];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10318,12 +9178,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 132usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[132];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10338,12 +9204,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 133usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[133];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10358,12 +9230,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 134usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[134];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10378,12 +9256,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 135usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[135];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10398,12 +9282,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 136usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[136];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10418,12 +9308,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 137usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[137];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10438,12 +9334,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 138usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[138];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10458,12 +9360,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 139usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[139];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10478,12 +9386,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 140usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[140];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10498,12 +9412,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 141usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[141];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10518,12 +9438,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 142usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[142];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10538,12 +9464,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 143usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[143];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10558,12 +9490,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 144usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[144];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10578,12 +9516,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 145usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[145];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10598,12 +9542,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 146usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[146];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10618,12 +9568,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 147usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[147];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10638,12 +9594,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 148usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[148];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10658,12 +9620,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 149usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[149];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10678,12 +9646,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 150usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[150];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10698,12 +9672,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 151usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[151];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -10715,12 +9695,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 42usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[42];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10735,12 +9721,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 42usize,
-                        shifted: 5usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[42];
+                    let shifted: &'static [u8] = &[5u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -10755,12 +9747,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 98usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[98];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -10822,188 +9820,26 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 41usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 99usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 109usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 110usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 111usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 112usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 113usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 114usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 115usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 116usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 117usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 118usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 119usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 120usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 121usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 122usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 123usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 124usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 125usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 126usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 127usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 128usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 129usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 130usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 131usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 132usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 133usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 134usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 135usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 136usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 137usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 138usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 139usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 140usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 141usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 142usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 143usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 144usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 145usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 146usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 147usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 148usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 149usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 150usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 151usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        41, 99, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121,
+                        122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136,
+                        137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        1u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -11018,12 +9854,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 99usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[99];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -11035,12 +9877,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 44usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[44];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -11055,12 +9903,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 44usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[44];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -11072,16 +9926,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 45usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 46usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[45, 46];
+                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -11093,12 +9949,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 45usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[45];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -11113,12 +9975,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 45usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[45];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -11130,12 +9998,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 46usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[46];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -11150,12 +10024,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 46usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[46];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -11167,12 +10047,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 47usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[47];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -11184,12 +10070,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 47usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[47];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -11204,12 +10096,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 47usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[47];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -11267,200 +10165,28 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 41usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 48usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 49usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 98usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 99usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 109usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 110usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 111usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 112usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 113usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 114usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 115usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 116usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 117usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 118usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 119usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 120usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 121usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 122usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 123usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 124usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 125usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 126usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 127usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 128usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 129usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 130usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 131usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 132usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 133usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 134usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 135usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 136usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 137usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 138usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 139usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 140usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 141usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 142usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 143usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 144usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 145usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 146usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 147usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 148usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 149usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 150usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 151usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        41, 48, 49, 98, 99, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
+                        120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134,
+                        135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+                        150, 151,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 2u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -11475,12 +10201,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 49usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[49];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -11492,12 +10224,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 48usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[48];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -11512,12 +10250,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 48usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[48];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -11575,200 +10319,28 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 41usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 50usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 51usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 98usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 99usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 109usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 110usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 111usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 112usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 113usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 114usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 115usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 116usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 117usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 118usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 119usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 120usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 121usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 122usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 123usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 124usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 125usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 126usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 127usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 128usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 129usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 130usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 131usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 132usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 133usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 134usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 135usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 136usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 137usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 138usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 139usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 140usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 141usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 142usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 143usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 144usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 145usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 146usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 147usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 148usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 149usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 150usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 151usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        41, 50, 51, 98, 99, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
+                        120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134,
+                        135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+                        150, 151,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 2u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -11783,12 +10355,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 51usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[51];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -11800,12 +10378,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 50usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[50];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -11820,12 +10404,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 50usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[50];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -11883,200 +10473,28 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 41usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 58usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 59usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 98usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 99usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 109usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 110usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 111usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 112usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 113usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 114usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 115usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 116usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 117usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 118usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 119usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 120usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 121usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 122usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 123usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 124usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 125usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 126usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 127usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 128usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 129usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 130usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 131usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 132usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 133usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 134usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 135usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 136usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 137usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 138usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 139usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 140usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 141usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 142usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 143usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 144usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 145usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 146usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 147usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 148usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 149usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 150usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 151usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        41, 58, 59, 98, 99, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
+                        120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134,
+                        135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+                        150, 151,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 2u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12091,12 +10509,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 59usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[59];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -12108,12 +10532,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 58usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[58];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12128,12 +10558,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 58usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[58];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -12191,200 +10627,28 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 41usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 60usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 61usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 98usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 99usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 109usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 110usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 111usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 112usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 113usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 114usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 115usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 116usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 117usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 118usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 119usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 120usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 121usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 122usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 123usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 124usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 125usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 126usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 127usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 128usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 129usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 130usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 131usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 132usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 133usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 134usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 135usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 136usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 137usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 138usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 139usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 140usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 141usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 142usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 143usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 144usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 145usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 146usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 147usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 148usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 149usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 150usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 151usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        41, 60, 61, 98, 99, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
+                        120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134,
+                        135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+                        150, 151,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 2u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12399,12 +10663,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 61usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[61];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -12416,12 +10686,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 60usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[60];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12436,12 +10712,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 60usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[60];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -12453,16 +10735,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 64usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 65usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[64, 65];
+                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12477,12 +10761,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 64usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[64];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -12494,12 +10784,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 65usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[65];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12514,12 +10810,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 65usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[65];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -12531,16 +10833,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 62usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 63usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[62, 63];
+                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12555,12 +10859,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 62usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[62];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -12572,12 +10882,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 63usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[63];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12592,12 +10908,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 63usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[63];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -12613,32 +10935,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 39usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 40usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 56usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 57usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 100usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 101usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[39, 40, 56, 57, 100, 101];
+                    let shifted: &'static [u8] = &[0u8, 0u8, 2u8, 2u8, 0u8, 0u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -12650,12 +10958,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 57usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[57];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12670,12 +10984,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 57usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[57];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -12691,24 +11011,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 39usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 40usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 56usize,
-                        shifted: 3usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 101usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[39, 40, 56, 101];
+                    let shifted: &'static [u8] = &[0u8, 0u8, 3u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12723,12 +11037,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 56usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[56];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -12740,16 +11060,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 66usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 67usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[66, 67];
+                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12764,12 +11086,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 66usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[66];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -12781,12 +11109,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 67usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[67];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12801,12 +11135,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 67usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[67];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -12818,16 +11158,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 68usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 69usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[68, 69];
+                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12842,12 +11184,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 68usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[68];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -12859,12 +11207,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 69usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[69];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12879,12 +11233,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 69usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[69];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -12905,32 +11265,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 70usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 71usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 102usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 103usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 104usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 152usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[70, 71, 102, 103, 104, 152];
+                    let shifted: &'static [u8] = &[2u8, 2u8, 0u8, 0u8, 0u8, 0u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12945,12 +11291,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 102usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[102];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -12962,12 +11314,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 71usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[71];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -12982,12 +11340,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 71usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[71];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -13005,16 +11369,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 103usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 152usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[103, 152];
+                    let shifted: &'static [u8] = &[1u8, 1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -13029,12 +11395,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 103usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[103];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -13046,12 +11418,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 70usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[70];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -13066,12 +11444,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 70usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[70];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -13129,200 +11513,28 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 41usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 72usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 73usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 98usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 99usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 109usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 110usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 111usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 112usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 113usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 114usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 115usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 116usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 117usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 118usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 119usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 120usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 121usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 122usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 123usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 124usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 125usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 126usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 127usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 128usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 129usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 130usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 131usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 132usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 133usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 134usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 135usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 136usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 137usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 138usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 139usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 140usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 141usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 142usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 143usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 144usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 145usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 146usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 147usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 148usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 149usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 150usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 151usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        41, 72, 73, 98, 99, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
+                        120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134,
+                        135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+                        150, 151,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 2u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -13337,12 +11549,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 73usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[73];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -13354,12 +11572,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 72usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[72];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -13374,12 +11598,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 72usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[72];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -13391,16 +11621,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 74usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 75usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[74, 75];
+                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -13415,12 +11647,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 74usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[74];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -13432,12 +11670,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 75usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[75];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -13452,12 +11696,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 75usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[75];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -13515,200 +11765,28 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 41usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 76usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 77usize,
-                        shifted: 2usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 98usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 99usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 109usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 110usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 111usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 112usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 113usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 114usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 115usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 116usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 117usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 118usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 119usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 120usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 121usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 122usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 123usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 124usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 125usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 126usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 127usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 128usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 129usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 130usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 131usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 132usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 133usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 134usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 135usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 136usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 137usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 138usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 139usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 140usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 141usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 142usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 143usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 144usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 145usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 146usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 147usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 148usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 149usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 150usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 151usize,
-                        shifted: 0usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        41, 76, 77, 98, 99, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
+                        120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134,
+                        135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+                        150, 151,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 2u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -13723,12 +11801,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 77usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[77];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -13740,12 +11824,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 76usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[76];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -13760,12 +11850,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 76usize,
-                        shifted: 4usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[76];
+                    let shifted: &'static [u8] = &[4u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -13777,12 +11873,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 78usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[78];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -13797,12 +11899,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 78usize,
-                        shifted: 3usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[78];
+                    let shifted: &'static [u8] = &[3u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -13817,12 +11925,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 79usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[79];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -13837,12 +11951,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 153usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[153];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([
@@ -13865,184 +11985,26 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 0usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 42usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 43usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 44usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 45usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 46usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 47usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 48usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 49usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 50usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 51usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 52usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 53usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 54usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 55usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 56usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 57usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 58usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 59usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 60usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 61usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 62usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 63usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 64usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 65usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 66usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 67usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 68usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 69usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 70usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 71usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 72usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 73usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 74usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 75usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 76usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 77usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 78usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 79usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 153usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 155usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 155usize,
-                        shifted: 1usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 156usize,
-                        shifted: 0usize,
-                    },
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 156usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[
+                        0, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+                        60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78,
+                        79, 153, 155, 155, 156, 156,
+                    ];
+                    let shifted: &'static [u8] = &[
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 1u8,
+                    ];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -14057,12 +12019,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 156usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[156];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([(
@@ -14074,12 +12042,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 157usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[157];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -14088,12 +12062,18 @@ impl GrammarParser {
                     let mut __reduce_map = std::collections::BTreeMap::new();
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 157usize,
-                        shifted: 2usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[157];
+                    let shifted: &'static [u8] = &[2u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
             ::rusty_lr_core::builder::State {
                 shift_goto_map_term: std::collections::BTreeMap::from([]),
@@ -14108,12 +12088,18 @@ impl GrammarParser {
                     );
                     __reduce_map
                 },
-                ruleset: std::collections::BTreeSet::from([
-                    ::rusty_lr_core::rule::ShiftedRuleRef {
-                        rule: 154usize,
-                        shifted: 1usize,
-                    },
-                ]),
+                ruleset: {
+                    let rules: &'static [u8] = &[154];
+                    let shifted: &'static [u8] = &[1u8];
+                    rules
+                        .iter()
+                        .zip(shifted.iter())
+                        .map(|(&rule, &shifted)| ::rusty_lr_core::rule::ShiftedRuleRef {
+                            rule: rule as usize,
+                            shifted: shifted as usize,
+                        })
+                        .collect()
+                },
             },
         ];
         let states: Vec<GrammarState> = states.into_iter().map(|state| state.into()).collect();

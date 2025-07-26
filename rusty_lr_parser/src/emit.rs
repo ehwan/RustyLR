@@ -486,15 +486,17 @@ impl Grammar {
                     });
                 }
 
-                let mut ruleset_body_stream = TokenStream::new();
+                let mut ruleset_rules_body_stream = TokenStream::new();
+                let mut ruleset_shifted_body_stream = TokenStream::new();
                 for &rule in &state.ruleset {
-                    let shifted = rule.shifted;
-                    let rule = rule.rule;
-                    ruleset_body_stream.extend(quote! {
-                        #module_prefix::rule::ShiftedRuleRef {
-                            rule: #rule,
-                            shifted: #shifted,
-                        },
+                    debug_assert!(rule.shifted < u8::MAX as usize);
+                    let shifted = rule.shifted as u8;
+                    let rule = proc_macro2::Literal::usize_unsuffixed(rule.rule);
+                    ruleset_rules_body_stream.extend(quote! {
+                        #rule,
+                    });
+                    ruleset_shifted_body_stream.extend(quote! {
+                        #shifted,
                     });
                 }
 
@@ -507,7 +509,22 @@ impl Grammar {
                             #reduce_body_stream
                             __reduce_map
                         },
-                        ruleset: std::collections::BTreeSet::from([#ruleset_body_stream]),
+                        ruleset: {
+                            let rules: &'static [#rule_index_typename] = &[
+                                #ruleset_rules_body_stream
+                            ];
+                            let shifted: &'static [u8] = &[
+                                #ruleset_shifted_body_stream
+                            ];
+                            rules.iter().zip(shifted.iter()).map(
+                                |(&rule, &shifted)| {
+                                    #module_prefix::rule::ShiftedRuleRef {
+                                        rule: rule as usize,
+                                        shifted: shifted as usize,
+                                    }
+                                }
+                            ).collect()
+                        }
                     },
                 });
             }
