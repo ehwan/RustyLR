@@ -343,7 +343,7 @@ impl Grammar {
                     .copied()
                     .enumerate()
                     .filter_map(|(level, reduce_type)| {
-                        debug_assert!(level < u8::MAX as usize);
+                        debug_assert!(level <= u8::MAX as usize);
                         if reduce_type == Some(ReduceType::Right) {
                             Some(level)
                         } else {
