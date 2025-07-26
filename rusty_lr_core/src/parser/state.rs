@@ -498,6 +498,7 @@ where
                     .try_into()
                     .expect("non-terminal state conversion failed"),
             );
+            debug_assert!(rule.shifted <= u8::MAX as usize, "Shifted value exceeds u8::MAX");
         }
 
         DenseState {
