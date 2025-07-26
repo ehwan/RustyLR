@@ -6,6 +6,7 @@ use super::ParseError;
 use crate::nonterminal::NonTerminal;
 use crate::nonterminal::TokenData;
 use crate::parser::Parser;
+use crate::parser::Precedence;
 use crate::parser::State;
 use crate::TerminalSymbol;
 
@@ -15,7 +16,7 @@ pub struct Context<Data: TokenData> {
     pub state_stack: Vec<usize>,
     pub(crate) data_stack: Vec<Data>,
     pub(crate) location_stack: Vec<Data::Location>,
-    pub(crate) precedence_stack: Vec<Option<usize>>,
+    pub(crate) precedence_stack: Vec<Precedence>,
     /// Tree stack for tree representation of the parse.
     #[cfg(feature = "tree")]
     pub(crate) tree_stack: crate::tree::TreeList<Data::Term, Data::NonTerm>,
@@ -95,7 +96,7 @@ impl<Data: TokenData> Context<Data> {
             &mut precedence_stack,
             parser,
             TerminalSymbol::Eof,
-            None,
+            Precedence::none(),
         ) {
             Some(true) => true,
             Some(false) => false,
@@ -318,7 +319,7 @@ impl<Data: TokenData> Context<Data> {
         parser: &P,
         term: TerminalSymbol<Data::Term>,
         class: TerminalSymbol<usize>,
-        shift_prec: Option<usize>,
+        shift_prec: Precedence,
         userdata: &mut Data::UserData,
         location: Option<Data::Location>,
     ) -> Result<(), ParseError<Data>>
@@ -341,13 +342,13 @@ impl<Data: TokenData> Context<Data> {
                 let tokens_len = rule.rule.len();
 
                 let reduce_prec = match rule.precedence {
-                    Some(crate::rule::Precedence::Fixed(level)) => Some(level),
+                    Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
                     Some(crate::rule::Precedence::Dynamic(token_idx)) => {
                         // get token_idx'th precedence from back of precedence stack
                         let idx = self.precedence_stack.len() - tokens_len + token_idx;
                         self.precedence_stack[idx]
                     }
-                    None => None,
+                    None => Precedence::none(),
                 };
 
                 // resolve shift/reduce conflict by precedence
@@ -363,7 +364,7 @@ impl<Data: TokenData> Context<Data> {
                         Ordering::Equal => {
                             // check for reduce type
                             use crate::builder::ReduceType;
-                            match parser.precedence_types(reduce_prec) {
+                            match parser.precedence_types(reduce_prec as usize) {
                                 Some(ReduceType::Left) => {
                                     // no shift
                                     // shift = None;
@@ -556,10 +557,10 @@ impl<Data: TokenData> Context<Data> {
 
     fn can_feed_impl<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         state_stack: &mut Vec<usize>,
-        precedence_stack: &mut Vec<Option<usize>>,
+        precedence_stack: &mut Vec<Precedence>,
         parser: &P,
         class: TerminalSymbol<usize>,
-        shift_prec: Option<usize>,
+        shift_prec: Precedence,
     ) -> Option<bool>
     where
         Data::NonTerm: Hash + Eq + NonTerminal,
@@ -574,13 +575,13 @@ impl<Data: TokenData> Context<Data> {
                 let tokens_len = rule.rule.len();
 
                 let reduce_prec = match rule.precedence {
-                    Some(crate::rule::Precedence::Fixed(level)) => Some(level),
+                    Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
                     Some(crate::rule::Precedence::Dynamic(token_idx)) => {
                         // get token_idx'th precedence from back of precedence stack
                         let idx = precedence_stack.len() - tokens_len + token_idx;
                         precedence_stack[idx]
                     }
-                    None => None,
+                    None => Precedence::none(),
                 };
 
                 // resolve shift/reduce conflict by precedence
@@ -596,7 +597,7 @@ impl<Data: TokenData> Context<Data> {
                         Ordering::Equal => {
                             // check for reduce type
                             use crate::builder::ReduceType;
-                            match parser.precedence_types(reduce_prec) {
+                            match parser.precedence_types(reduce_prec as usize) {
                                 Some(ReduceType::Left) => {
                                     // no shift
                                     // shift = None;
@@ -656,7 +657,7 @@ impl<Data: TokenData> Context<Data> {
             parser,
             TerminalSymbol::Eof,
             TerminalSymbol::Eof,
-            None,
+            Precedence::none(),
             userdata,
             None,
         )

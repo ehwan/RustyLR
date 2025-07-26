@@ -6,6 +6,7 @@ use super::ParseError;
 use crate::nonterminal::NonTerminal;
 use crate::nonterminal::TokenData;
 use crate::parser::Parser;
+use crate::parser::Precedence;
 use crate::parser::State;
 use crate::TerminalSymbol;
 
@@ -228,7 +229,7 @@ impl<Data: TokenData> Context<Data> {
         &mut self,
         parser: &P,
         reduce_rule: usize,
-        precedence: Option<usize>,
+        precedence: Precedence,
         node: usize,
         term: &crate::TerminalSymbol<P::Term>,
         shift: &mut bool,
@@ -858,7 +859,7 @@ impl<Data: TokenData> Context<Data> {
         node: usize,
         term: TerminalSymbol<P::Term>,
         class: TerminalSymbol<usize>,
-        shift_prec: Option<usize>,
+        shift_prec: Precedence,
         location: Option<Data::Location>,
         userdata: &mut Data::UserData,
     ) -> Result<(), (usize, TerminalSymbol<P::Term>, Option<Data::Location>)>
@@ -872,7 +873,6 @@ impl<Data: TokenData> Context<Data> {
         );
         debug_assert!(self.node(node).is_leaf());
         use crate::parser::State;
-        use crate::rule::Precedence;
 
         let last_state = self.state(node);
         let shift_state = parser.get_states()[last_state].shift_goto_class(class);
@@ -883,19 +883,21 @@ impl<Data: TokenData> Context<Data> {
             for reduce_rule in reduce_rules {
                 let rule = &parser.get_rules()[reduce_rule];
                 let reduce_prec = match rule.precedence {
-                    Some(Precedence::Fixed(level)) => Some(level),
-                    Some(Precedence::Dynamic(token_index)) => {
+                    Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
+                    Some(crate::rule::Precedence::Dynamic(token_index)) => {
                         // fix the value to the offset from current node
                         let ith = rule.rule.len() - token_index - 1;
                         let (node, ith) = self.skip_last_n(node, ith).unwrap();
                         self.node(node).precedence_stack[ith]
                     }
-                    None => None,
+                    None => Precedence::none(),
                 };
 
                 // if there is shift/reduce conflict, check for reduce rule's precedence and shift terminal's precedence
                 match (shift_state.is_some(), shift_prec, reduce_prec) {
-                    (true, Some(shift_prec_), Some(reduce_prec_)) => {
+                    (true, Precedence(shift_prec_), Precedence(reduce_prec_))
+                        if shift_prec.is_some() && reduce_prec.is_some() =>
+                    {
                         match reduce_prec_.cmp(&shift_prec_) {
                             std::cmp::Ordering::Less => {
                                 // no reduce
@@ -904,7 +906,7 @@ impl<Data: TokenData> Context<Data> {
                             std::cmp::Ordering::Equal => {
                                 // check for reduce_type
                                 use crate::builder::ReduceType;
-                                match parser.precedence_types(reduce_prec_) {
+                                match parser.precedence_types(reduce_prec_ as usize) {
                                     Some(ReduceType::Left) => {
                                         // no shift
                                         reduces.push((reduce_rule, reduce_prec));
@@ -1058,7 +1060,7 @@ impl<Data: TokenData> Context<Data> {
         &mut self,
         parser: &P,
         mut node: usize,
-        error_prec: Option<usize>,
+        error_prec: Precedence,
         userdata: &mut Data::UserData,
     ) -> bool
     where
@@ -1225,13 +1227,12 @@ impl<Data: TokenData> Context<Data> {
         parser: &P,
         node: usize,
         class: TerminalSymbol<usize>,
-        shift_prec: Option<usize>,
+        shift_prec: Precedence,
     ) -> bool
     where
         P::NonTerm: std::hash::Hash + Eq + NonTerminal,
     {
         use crate::parser::State;
-        use crate::rule::Precedence;
 
         let last_state = self.state(node);
         let shift_state = parser.get_states()[last_state].shift_goto_class(class);
@@ -1242,19 +1243,21 @@ impl<Data: TokenData> Context<Data> {
             for reduce_rule in reduce_rules {
                 let rule = &parser.get_rules()[reduce_rule];
                 let reduce_prec = match rule.precedence {
-                    Some(Precedence::Fixed(level)) => Some(level),
-                    Some(Precedence::Dynamic(token_index)) => {
+                    Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
+                    Some(crate::rule::Precedence::Dynamic(token_index)) => {
                         // fix the value to the offset from current node
                         let ith = rule.rule.len() - token_index - 1;
                         let (node, ith) = self.skip_last_n(node, ith).unwrap();
                         self.node(node).precedence_stack[ith]
                     }
-                    None => None,
+                    None => Precedence::none(),
                 };
 
                 // if there is shift/reduce conflict, check for reduce rule's precedence and shift terminal's precedence
                 match (shift_state.is_some(), shift_prec, reduce_prec) {
-                    (true, Some(shift_prec_), Some(reduce_prec_)) => {
+                    (true, Precedence(shift_prec_), Precedence(reduce_prec_))
+                        if shift_prec.is_some() && reduce_prec.is_some() =>
+                    {
                         match reduce_prec_.cmp(&shift_prec_) {
                             std::cmp::Ordering::Less => {
                                 // no reduce
@@ -1263,7 +1266,7 @@ impl<Data: TokenData> Context<Data> {
                             std::cmp::Ordering::Equal => {
                                 // check for reduce_type
                                 use crate::builder::ReduceType;
-                                match parser.precedence_types(reduce_prec_) {
+                                match parser.precedence_types(reduce_prec_ as usize) {
                                     Some(ReduceType::Left) => {
                                         // no shift
                                         reduces.push((reduce_rule, reduce_prec));
@@ -1363,7 +1366,7 @@ impl<Data: TokenData> Context<Data> {
                 node,
                 TerminalSymbol::Eof,
                 TerminalSymbol::Eof,
-                None,
+                Precedence::none(),
                 None,
                 userdata,
             ) {
@@ -1399,7 +1402,7 @@ impl<Data: TokenData> Context<Data> {
     {
         self.current_nodes
             .iter()
-            .any(|node| self.can_feed_impl(parser, *node, TerminalSymbol::Eof, None))
+            .any(|node| self.can_feed_impl(parser, *node, TerminalSymbol::Eof, Precedence::none()))
     }
 }
 

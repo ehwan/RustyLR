@@ -7,6 +7,30 @@ pub mod nondeterministic;
 pub mod state;
 pub use state::State;
 
+#[derive(Clone, Copy)]
+pub struct Precedence(u8);
+
+impl Precedence {
+    #[inline]
+    pub fn none() -> Self {
+        Precedence(u8::MAX)
+    }
+    #[inline]
+    pub fn new(level: u8) -> Self {
+        debug_assert!(level < u8::MAX);
+        Precedence(level)
+    }
+    #[inline]
+    pub fn is_some(&self) -> bool {
+        self.0 < u8::MAX
+    }
+
+    pub fn unwrap(self) -> u8 {
+        debug_assert!(self.0 < u8::MAX);
+        self.0
+    }
+}
+
 /// A trait for Parser that holds the entire parser table.
 /// This trait will be automatically implemented by rusty_lr
 pub trait Parser {
@@ -41,7 +65,7 @@ pub trait Parser {
 
     /// Get the precedence level (priority) of the given terminal class
     /// `None` if the terminal class has no precedence defined.
-    fn class_precedence(&self, class: crate::TerminalSymbol<usize>) -> Option<usize>;
+    fn class_precedence(&self, class: crate::TerminalSymbol<usize>) -> Precedence;
 
     /// whether the `error` token was used in the grammar.
     fn error_used() -> bool;

@@ -676,12 +676,21 @@ impl Grammar {
                     continue;
                 } else {
                     let case_stream = usize_list_to_case_stream(classes.into_iter());
+                    let level = u8::try_from(level).expect("level should fit in u8");
                     stream.extend(quote! {
-                        #case_stream => Some(#level),
+                        #case_stream => #module_prefix::parser::Precedence::new(#level),
                     });
                 }
             }
             stream
+        };
+
+        let error_used = self.error_used;
+        let error_prec_stream = if let Some(error_prec) = self.error_precedence {
+            let error_prec = u8::try_from(error_prec).expect("error precedence should fit in u8");
+            quote! { #module_prefix::parser::Precedence::new(#error_prec) }
+        } else {
+            quote! { #module_prefix::parser::Precedence::none() }
         };
 
         // building terminal-class_id map
@@ -764,13 +773,6 @@ impl Grammar {
                 _ => #other_class_id,
             });
 
-            let error_used = self.error_used;
-            let error_prec_stream = if let Some(error_prec) = self.error_precedence {
-                quote! { Some(#error_prec) }
-            } else {
-                quote! { None }
-            };
-
             stream.extend(quote! {
             /// A struct that holds the entire parser table and production rules.
             #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
@@ -788,13 +790,13 @@ impl Grammar {
                 type State = #state_typename;
                 type TerminalClassElement = ::std::ops::RangeInclusive<#token_typename>;
 
-                fn class_precedence(&self, class: #module_prefix::TerminalSymbol<usize>) -> Option<usize> {
+                fn class_precedence(&self, class: #module_prefix::TerminalSymbol<usize>) -> #module_prefix::parser::Precedence {
                     match class {
                         #module_prefix::TerminalSymbol::Term(class) => {
                             #[allow(unreachable_patterns)]
                             match class {
                                 #class_level_match_body_stream
-                                _ => None,
+                                _ => #module_prefix::parser::Precedence::none(),
                             }
                         }
                         #module_prefix::TerminalSymbol::Error => #error_prec_stream,
@@ -962,12 +964,6 @@ impl Grammar {
             } else {
                 quote! {terminal}
             };
-            let error_used = self.error_used;
-            let error_prec_stream = if let Some(error_prec) = self.error_precedence {
-                quote! { Some(#error_prec) }
-            } else {
-                quote! { None }
-            };
 
             stream.extend(quote! {
             /// A struct that holds the entire parser table and production rules.
@@ -986,13 +982,13 @@ impl Grammar {
                 type State = #state_typename;
                 type TerminalClassElement = &'static str;
 
-                fn class_precedence(&self, class: #module_prefix::TerminalSymbol<usize>) -> Option<usize> {
+                fn class_precedence(&self, class: #module_prefix::TerminalSymbol<usize>) -> #module_prefix::parser::Precedence {
                     match class {
                         #module_prefix::TerminalSymbol::Term(class) => {
                             #[allow(unreachable_patterns)]
                             match class {
                                 #class_level_match_body_stream
-                                _ => None,
+                                _ => #module_prefix::parser::Precedence::none(),
                             }
                         }
                         #module_prefix::TerminalSymbol::Error => #error_prec_stream,

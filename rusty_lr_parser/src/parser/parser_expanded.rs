@@ -3841,19 +3841,22 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
     type NonTerm = GrammarNonTerminals;
     type State = GrammarState;
     type TerminalClassElement = &'static str;
-    fn class_precedence(&self, class: ::rusty_lr_core::TerminalSymbol<usize>) -> Option<usize> {
+    fn class_precedence(
+        &self,
+        class: ::rusty_lr_core::TerminalSymbol<usize>,
+    ) -> ::rusty_lr_core::parser::Precedence {
         match class {
             ::rusty_lr_core::TerminalSymbol::Term(class) =>
             {
                 #[allow(unreachable_patterns)]
                 match class {
-                    10usize => Some(0usize),
-                    12usize => Some(1usize),
-                    6usize..=8usize | 11usize => Some(2usize),
-                    _ => None,
+                    10usize => ::rusty_lr_core::parser::Precedence::new(0u8),
+                    12usize => ::rusty_lr_core::parser::Precedence::new(1u8),
+                    6usize..=8usize | 11usize => ::rusty_lr_core::parser::Precedence::new(2u8),
+                    _ => ::rusty_lr_core::parser::Precedence::none(),
                 }
             }
-            ::rusty_lr_core::TerminalSymbol::Error => None,
+            ::rusty_lr_core::TerminalSymbol::Error => ::rusty_lr_core::parser::Precedence::none(),
             ::rusty_lr_core::TerminalSymbol::Eof => {
                 unreachable!("eof token cannot be used in precedence levels")
             }

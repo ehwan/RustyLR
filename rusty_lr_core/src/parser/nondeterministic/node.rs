@@ -1,4 +1,5 @@
 use crate::nonterminal::TokenData;
+use crate::parser::Precedence;
 
 /// To handle multiple paths in the non-deterministic GLR parsing,
 /// this node represents a subrange in stack of the parser.
@@ -14,7 +15,7 @@ pub struct Node<Data: TokenData> {
     pub state_stack: Vec<usize>,
     pub data_stack: Vec<Data>,
     pub location_stack: Vec<Data::Location>,
-    pub precedence_stack: Vec<Option<usize>>,
+    pub precedence_stack: Vec<Precedence>,
     #[cfg(feature = "tree")]
     pub(crate) tree_stack: Vec<crate::tree::Tree<Data::Term, Data::NonTerm>>,
 }
