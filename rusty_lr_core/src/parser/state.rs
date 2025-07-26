@@ -4,6 +4,8 @@ use crate::hash::HashMap;
 use crate::nonterminal::NonTerminal;
 use crate::TerminalSymbol;
 
+/// For state, terminal and class indices, we use the most compact integer type that can hold the maximum value.
+/// This trait defines the conversion between {u8, u16, u32, usize} <-> usize.
 pub trait Index {
     fn into_usize(self) -> usize;
     fn from_usize_unchecked(value: usize) -> Self;
@@ -50,7 +52,9 @@ impl Index for u64 {
     }
 }
 
-// stack allocated Vec for small lists ( ~ 8 elements )
+/// Since non-deterministic parsers can have multiple reduce rules for a single terminal,
+/// we need to handle the set of reduce rules efficiently, usually 2~3 items.
+/// this trait implements the stack-allocated vector for this purpose.
 pub trait ReduceRules {
     fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone;
     fn from_set(set: std::collections::BTreeSet<usize>) -> Self;
