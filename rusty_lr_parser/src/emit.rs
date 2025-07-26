@@ -489,7 +489,7 @@ impl Grammar {
                 let mut ruleset_rules_body_stream = TokenStream::new();
                 let mut ruleset_shifted_body_stream = TokenStream::new();
                 for &rule in &state.ruleset {
-                    debug_assert!(rule.shifted < u8::MAX as usize);
+                    debug_assert!(rule.shifted <= u8::MAX as usize);
                     let shifted = rule.shifted as u8;
                     let rule = proc_macro2::Literal::usize_unsuffixed(rule.rule);
                     ruleset_rules_body_stream.extend(quote! {
