@@ -6,9 +6,6 @@
 /// FxHash for fast and non-cryptographic hashing
 pub mod hash;
 
-/// stack allocated vector for small data
-pub mod stackvec;
-
 /// module for tree representation of parse results (feature `tree`).
 #[cfg(feature = "tree")]
 pub mod tree;
@@ -35,8 +32,6 @@ pub use token::Token;
 
 pub(crate) mod backtrace;
 pub use backtrace::Backtrace;
-
-pub(crate) mod integral;
 
 /// Default error type for reduce action
 #[derive(Debug, Default)]
