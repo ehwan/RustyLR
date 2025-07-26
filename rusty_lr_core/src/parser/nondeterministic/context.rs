@@ -5,6 +5,7 @@ use super::ParseError;
 
 use crate::nonterminal::NonTerminal;
 use crate::nonterminal::TokenData;
+use crate::parser::state::Index;
 use crate::parser::Parser;
 use crate::parser::Precedence;
 use crate::parser::State;
@@ -15,15 +16,26 @@ type SmallVecNode = smallvec::SmallVec<[usize; 3]>;
 /// Iterator for traverse node to root.
 /// Note that root node is not included in this iterator.
 #[derive(Clone)]
-pub struct NodeRefIterator<'a, Data: TokenData> {
-    context: &'a Context<Data>,
+pub struct NodeRefIterator<'a, Data: TokenData, StateIndex> {
+    context: &'a Context<Data, StateIndex>,
     node: Option<usize>,
+}
+impl<'a, Data: TokenData, StateIndex: Index + Copy> Iterator
+    for NodeRefIterator<'a, Data, StateIndex>
+{
+    type Item = &'a Node<Data, StateIndex>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let node = self.context.node(self.node?);
+        self.node = node.parent;
+        Some(node)
+    }
 }
 
 /// A struct that maintains the current state and the values associated with each symbol.
 /// This handles the divergence and merging of the parser.
-pub struct Context<Data: TokenData> {
-    pub(crate) nodes_pool: Vec<Node<Data>>,
+pub struct Context<Data: TokenData, StateIndex> {
+    pub(crate) nodes_pool: Vec<Node<Data, StateIndex>>,
     pub(crate) empty_node_indices: std::collections::BTreeSet<usize>,
 
     /// each element represents an end-point of diverged paths.
@@ -48,29 +60,19 @@ pub struct Context<Data: TokenData> {
     pub(crate) no_precedences: Vec<usize>,
 }
 
-impl<'a, Data: TokenData> Iterator for NodeRefIterator<'a, Data> {
-    type Item = &'a Node<Data>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let node = self.context.node(self.node?);
-        self.node = node.parent;
-        Some(node)
-    }
-}
-
-impl<Data: TokenData> Context<Data> {
+impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
     /// Create a new context.
     /// `current_nodes` is initialized with a root node.
     pub fn new() -> Self {
         Default::default()
     }
 
-    pub fn node(&self, node: usize) -> &Node<Data> {
+    pub fn node(&self, node: usize) -> &Node<Data, StateIndex> {
         debug_assert!(!self.empty_node_indices.contains(&node) && node < self.nodes_pool.len());
 
         &self.nodes_pool[node]
     }
-    pub fn node_mut(&mut self, node: usize) -> &mut Node<Data> {
+    pub fn node_mut(&mut self, node: usize) -> &mut Node<Data, StateIndex> {
         debug_assert!(!self.empty_node_indices.contains(&node) && node < self.nodes_pool.len());
 
         &mut self.nodes_pool[node]
@@ -164,7 +166,7 @@ impl<Data: TokenData> Context<Data> {
     }
 
     /// Get iterator for all nodes in the current context.
-    fn node_iter(&self, node: usize) -> NodeRefIterator<Data> {
+    fn node_iter(&self, node: usize) -> NodeRefIterator<Data, StateIndex> {
         NodeRefIterator {
             context: self,
             node: Some(node),
@@ -180,8 +182,13 @@ impl<Data: TokenData> Context<Data> {
     }
     /// Get iterator for `node` that traverses from `node` to root on the parsing tree.
     fn state_iter(&self, node: usize) -> impl Iterator<Item = usize> + '_ {
-        self.node_iter(node)
-            .flat_map(|node| node.state_stack.iter().rev().copied())
+        self.node_iter(node).flat_map(|node| {
+            node.state_stack
+                .iter()
+                .rev()
+                .copied()
+                .map(Index::into_usize)
+        })
     }
     #[cfg(feature = "tree")]
     /// Get iterator for `node` that traverses from `node` to root on the parsing tree.
@@ -202,7 +209,7 @@ impl<Data: TokenData> Context<Data> {
                 return 0; // root node
             }
         }
-        *self.node(node).state_stack.last().unwrap()
+        self.node(node).state_stack.last().unwrap().into_usize()
     }
 
     /// pop one stack from the node.
@@ -411,7 +418,8 @@ impl<Data: TokenData> Context<Data> {
                     parser.get_states()[state].shift_goto_nonterm(&rule.name)
                 {
                     let node = self.node_mut(node_to_shift);
-                    node.state_stack.push(nonterm_shift_state);
+                    node.state_stack
+                        .push(StateIndex::from_usize_unchecked(nonterm_shift_state));
                     node.data_stack.push(new_data);
                     node.location_stack.push(new_location);
                     node.precedence_stack.push(precedence);
@@ -1007,7 +1015,9 @@ impl<Data: TokenData> Context<Data> {
             }
             if let Some(shift) = shift {
                 let node_ = self.node_mut(node);
-                node_.state_stack.push(shift);
+                node_
+                    .state_stack
+                    .push(StateIndex::from_usize_unchecked(shift));
                 node_.precedence_stack.push(shift_prec);
                 if let Some(location) = &location {
                     node_.location_stack.push(location.clone());
@@ -1033,7 +1043,9 @@ impl<Data: TokenData> Context<Data> {
             }
         } else if let Some(shift) = shift_state {
             let node_ = self.node_mut(node);
-            node_.state_stack.push(shift);
+            node_
+                .state_stack
+                .push(StateIndex::from_usize_unchecked(shift));
             node_.precedence_stack.push(shift_prec);
             if let Some(location) = location {
                 node_.location_stack.push(location);
@@ -1188,7 +1200,8 @@ impl<Data: TokenData> Context<Data> {
                         // A -> a . error b
                         // and b is fed, shift error and b
                         let node = self.node_mut(error_node);
-                        node.state_stack.push(next_state);
+                        node.state_stack
+                            .push(StateIndex::from_usize_unchecked(next_state));
                         node.precedence_stack.push(shift_prec);
                         node.location_stack.push(location.clone());
                         #[cfg(feature = "tree")]
@@ -1406,7 +1419,7 @@ impl<Data: TokenData> Context<Data> {
     }
 }
 
-impl<Data: TokenData> Default for Context<Data> {
+impl<Data: TokenData, StateIndex: Index + Copy> Default for Context<Data, StateIndex> {
     fn default() -> Self {
         let mut context = Context {
             nodes_pool: Default::default(),
@@ -1424,9 +1437,9 @@ impl<Data: TokenData> Default for Context<Data> {
     }
 }
 
-impl<Data: TokenData> Clone for Context<Data>
+impl<Data: TokenData, StateIndex: Index + Copy> Clone for Context<Data, StateIndex>
 where
-    Node<Data>: Clone,
+    Node<Data, StateIndex>: Clone,
 {
     fn clone(&self) -> Self {
         Context {
@@ -1439,7 +1452,7 @@ where
 }
 
 #[cfg(feature = "tree")]
-impl<Data: TokenData> std::fmt::Display for Context<Data>
+impl<Data: TokenData, StateIndex: Index + Copy> std::fmt::Display for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Display + Clone,
     Data::NonTerm: std::fmt::Display + Clone + crate::nonterminal::NonTerminal,
@@ -1453,7 +1466,7 @@ where
     }
 }
 #[cfg(feature = "tree")]
-impl<Data: TokenData> std::fmt::Debug for Context<Data>
+impl<Data: TokenData, StateIndex: Index + Copy> std::fmt::Debug for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Debug + Clone,
     Data::NonTerm: std::fmt::Debug + Clone + crate::nonterminal::NonTerminal,
