@@ -488,9 +488,10 @@ impl Grammar {
 
                 let mut ruleset_rules_body_stream = TokenStream::new();
                 let mut ruleset_shifted_body_stream = TokenStream::new();
+                let mut max_shifted = 0;
                 for &rule in &state.ruleset {
-                    debug_assert!(rule.shifted <= u8::MAX as usize);
-                    let shifted = rule.shifted as u8;
+                    max_shifted = max_shifted.max(rule.shifted);
+                    let shifted = proc_macro2::Literal::usize_unsuffixed(rule.shifted);
                     let rule = proc_macro2::Literal::usize_unsuffixed(rule.rule);
                     ruleset_rules_body_stream.extend(quote! {
                         #rule,
@@ -499,6 +500,15 @@ impl Grammar {
                         #shifted,
                     });
                 }
+                let shifted_typename = if max_shifted <= u8::MAX as usize {
+                    quote! { u8 }
+                } else if max_shifted <= u16::MAX as usize {
+                    quote! { u16 }
+                } else if max_shifted <= u32::MAX as usize {
+                    quote! { u32 }
+                } else {
+                    quote! { usize }
+                };
 
                 states_body_stream.extend(quote! {
                     #module_prefix::builder::State {
@@ -513,7 +523,7 @@ impl Grammar {
                             let rules: &'static [#rule_index_typename] = &[
                                 #ruleset_rules_body_stream
                             ];
-                            let shifted: &'static [u8] = &[
+                            let shifted: &'static [#shifted_typename] = &[
                                 #ruleset_shifted_body_stream
                             ];
                             rules.iter().zip(shifted.iter()).map(
@@ -855,13 +865,17 @@ impl Grammar {
                     }
                     match_case_stream.extend(quote! { #stream });
                 }
+                let class_id = proc_macro2::Literal::usize_unsuffixed(class_id);
                 terminal_class_match_body_stream.extend(quote! {
                     #match_case_stream => #class_id,
                 });
             }
-            terminal_class_match_body_stream.extend(quote! {
-                _ => #other_class_id,
-            });
+            {
+                let other_class_id = proc_macro2::Literal::usize_unsuffixed(other_class_id);
+                terminal_class_match_body_stream.extend(quote! {
+                    _ => #other_class_id,
+                });
+            }
 
             stream.extend(quote! {
             /// A struct that holds the entire parser table and production rules.
@@ -1039,14 +1053,17 @@ impl Grammar {
                     }
                     match_case_stream.extend(case_stream);
                 }
-
+                let class_id = proc_macro2::Literal::usize_unsuffixed(class_id);
                 terminal_class_match_body_stream.extend(quote! {
                     #match_case_stream => #class_id,
                 });
             }
-            terminal_class_match_body_stream.extend(quote! {
-                _ => #other_class_id,
-            });
+            {
+                let other_class_id = proc_macro2::Literal::usize_unsuffixed(other_class_id);
+                terminal_class_match_body_stream.extend(quote! {
+                    _ => #other_class_id,
+                });
+            }
 
             let match_terminal_filter_expression = if let Some(filter) = &self.filter {
                 quote! { #filter(terminal) }

@@ -14,6 +14,7 @@ It constructs optimized state machines, ensuring efficient and reliable parsing.
  - **Automatic Optimization:** Reduces parser table size and improves performance by grouping terminals with identical behavior across parser states.
  - **Multiple Parsing Strategies:** Supports minimal-LR(1), LALR(1) parser tables, and GLR parsing strategy.
  - **Detailed Diagnostics:** Detects grammar conflicts, verbose conflict resolution stages, and optimization stages.
+ - **Static & Runtime Conflict Resolution:** Provides mechanisms to resolve conflicts at compile time or runtime.
  - **Location Tracking:** Tracks the location of every token in the parse tree, useful for error reporting and debugging.
 
  ## Installation & Usage

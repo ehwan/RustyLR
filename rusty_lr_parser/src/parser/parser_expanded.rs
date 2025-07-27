@@ -3886,50 +3886,50 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
     fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
         #[allow(unreachable_patterns)]
         match terminal {
-            Lexed::Ident(_) => 0usize,
-            Lexed::Colon(_) => 1usize,
-            Lexed::Semicolon(_) => 2usize,
-            Lexed::Pipe(_) => 3usize,
-            Lexed::Percent(_) => 4usize,
-            Lexed::Equal(_) => 5usize,
-            Lexed::Plus(_) => 6usize,
-            Lexed::Star(_) => 7usize,
-            Lexed::Question(_) => 8usize,
-            Lexed::Caret(_) => 9usize,
-            Lexed::Minus(_) => 10usize,
-            Lexed::Exclamation(_) => 11usize,
-            Lexed::Slash(_) => 12usize,
-            Lexed::Dot(_) => 13usize,
-            Lexed::Dollar(_) => 14usize,
-            Lexed::Comma(_) => 15usize,
-            Lexed::Literal(_) => 16usize,
-            Lexed::ParenGroup(_) => 17usize,
-            Lexed::BraceGroup(_) => 18usize,
-            Lexed::LParen => 19usize,
-            Lexed::RParen => 20usize,
-            Lexed::LBracket => 21usize,
-            Lexed::RBracket => 22usize,
-            Lexed::Left(_) => 23usize,
-            Lexed::Right(_) => 24usize,
-            Lexed::Token(_) => 25usize,
-            Lexed::Start(_) => 26usize,
-            Lexed::EofDef(_) => 27usize,
-            Lexed::TokenType(_) => 28usize,
-            Lexed::UserData(_) => 29usize,
-            Lexed::ErrorType(_) => 30usize,
-            Lexed::ModulePrefix(_) => 31usize,
-            Lexed::Lalr(_) => 32usize,
-            Lexed::Glr(_) => 33usize,
-            Lexed::Prec(_) => 34usize,
-            Lexed::Precedence(_) => 35usize,
-            Lexed::NoOptim(_) => 36usize,
-            Lexed::Dense(_) => 37usize,
-            Lexed::Trace(_) => 38usize,
-            Lexed::DPrec(_) => 39usize,
-            Lexed::Filter(_) => 40usize,
-            Lexed::Runtime(_) => 41usize,
-            Lexed::Location(_) => 42usize,
-            _ => 43usize,
+            Lexed::Ident(_) => 0,
+            Lexed::Colon(_) => 1,
+            Lexed::Semicolon(_) => 2,
+            Lexed::Pipe(_) => 3,
+            Lexed::Percent(_) => 4,
+            Lexed::Equal(_) => 5,
+            Lexed::Plus(_) => 6,
+            Lexed::Star(_) => 7,
+            Lexed::Question(_) => 8,
+            Lexed::Caret(_) => 9,
+            Lexed::Minus(_) => 10,
+            Lexed::Exclamation(_) => 11,
+            Lexed::Slash(_) => 12,
+            Lexed::Dot(_) => 13,
+            Lexed::Dollar(_) => 14,
+            Lexed::Comma(_) => 15,
+            Lexed::Literal(_) => 16,
+            Lexed::ParenGroup(_) => 17,
+            Lexed::BraceGroup(_) => 18,
+            Lexed::LParen => 19,
+            Lexed::RParen => 20,
+            Lexed::LBracket => 21,
+            Lexed::RBracket => 22,
+            Lexed::Left(_) => 23,
+            Lexed::Right(_) => 24,
+            Lexed::Token(_) => 25,
+            Lexed::Start(_) => 26,
+            Lexed::EofDef(_) => 27,
+            Lexed::TokenType(_) => 28,
+            Lexed::UserData(_) => 29,
+            Lexed::ErrorType(_) => 30,
+            Lexed::ModulePrefix(_) => 31,
+            Lexed::Lalr(_) => 32,
+            Lexed::Glr(_) => 33,
+            Lexed::Prec(_) => 34,
+            Lexed::Precedence(_) => 35,
+            Lexed::NoOptim(_) => 36,
+            Lexed::Dense(_) => 37,
+            Lexed::Trace(_) => 38,
+            Lexed::DPrec(_) => 39,
+            Lexed::Filter(_) => 40,
+            Lexed::Runtime(_) => 41,
+            Lexed::Location(_) => 42,
+            _ => 43,
         }
     }
 }
@@ -5525,9 +5525,8 @@ impl GrammarParser {
                         79, 153, 154, 155, 156, 157,
                     ];
                     let shifted: &'static [u8] = &[
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ];
                     rules
                         .iter()
@@ -5560,7 +5559,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[0, 1, 2];
-                    let shifted: &'static [u8] = &[1u8, 0u8, 0u8];
+                    let shifted: &'static [u8] = &[1, 0, 0];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -5586,7 +5585,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[1];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -5609,7 +5608,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[0];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -5654,8 +5653,8 @@ impl GrammarParser {
                         33, 34, 35, 36, 80, 81, 82, 105,
                     ];
                     let shifted: &'static [u8] = &[
-                        3u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0,
                     ];
                     rules
                         .iter()
@@ -5685,7 +5684,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[12, 21];
-                    let shifted: &'static [u8] = &[1u8, 1u8];
+                    let shifted: &'static [u8] = &[1, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -5717,10 +5716,8 @@ impl GrammarParser {
                     let rules: &'static [u8] = &[
                         12, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
                     ];
-                    let shifted: &'static [u8] = &[
-                        2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8,
-                    ];
+                    let shifted: &'static [u8] =
+                        &[2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -5746,7 +5743,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[21];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -5772,7 +5769,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[20];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -5795,7 +5792,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[32, 33, 34, 35, 36];
-                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8, 1u8, 1u8];
+                    let shifted: &'static [u8] = &[1, 1, 1, 1, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -5818,7 +5815,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[32, 33, 34, 35, 36];
-                    let shifted: &'static [u8] = &[2u8, 2u8, 2u8, 2u8, 2u8];
+                    let shifted: &'static [u8] = &[2, 2, 2, 2, 2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -5852,8 +5849,7 @@ impl GrammarParser {
                         35, 35, 36, 36,
                     ];
                     let shifted: &'static [u8] = &[
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8,
-                        0u8, 3u8, 0u8, 3u8, 0u8, 3u8, 0u8, 3u8,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3,
                     ];
                     rules
                         .iter()
@@ -5880,7 +5876,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[30];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -5924,8 +5920,8 @@ impl GrammarParser {
                         36, 91, 92, 93, 94, 95, 108,
                     ];
                     let shifted: &'static [u8] = &[
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 1u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0,
                     ];
                     rules
                         .iter()
@@ -5958,7 +5954,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[19, 86, 87];
-                    let shifted: &'static [u8] = &[1u8, 0u8, 0u8];
+                    let shifted: &'static [u8] = &[1, 0, 0];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -5984,7 +5980,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[86];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6017,8 +6013,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[13, 14, 15, 16, 17, 18, 19, 88, 89, 90, 107];
-                    let shifted: &'static [u8] =
-                        &[0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8, 0u8, 0u8, 0u8, 0u8];
+                    let shifted: &'static [u8] = &[0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6047,7 +6042,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[13, 14, 15];
-                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8];
+                    let shifted: &'static [u8] = &[1, 1, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6070,7 +6065,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[14, 15];
-                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    let shifted: &'static [u8] = &[2, 2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6096,7 +6091,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[14];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6122,7 +6117,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[15];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6151,7 +6146,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[16, 17, 18];
-                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8];
+                    let shifted: &'static [u8] = &[1, 1, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6174,7 +6169,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[17, 18];
-                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    let shifted: &'static [u8] = &[2, 2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6200,7 +6195,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[17];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6226,7 +6221,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[18];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6252,7 +6247,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[88];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6284,7 +6279,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[13, 14, 15, 16, 17, 18, 89, 107];
-                    let shifted: &'static [u8] = &[0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 1u8];
+                    let shifted: &'static [u8] = &[0, 0, 0, 0, 0, 0, 1, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6310,7 +6305,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[89];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6333,7 +6328,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[19];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6359,7 +6354,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[19];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6385,7 +6380,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[26];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6413,8 +6408,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[22, 23, 24, 25, 27, 31, 32, 33, 34, 35, 36];
-                    let shifted: &'static [u8] =
-                        &[1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 4u8, 4u8, 4u8, 4u8, 4u8];
+                    let shifted: &'static [u8] = &[1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6440,7 +6434,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[22];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6466,7 +6460,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[23];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6492,7 +6486,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[24];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6524,10 +6518,8 @@ impl GrammarParser {
                     let rules: &'static [u8] = &[
                         19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 31, 32, 33, 34, 35, 36,
                     ];
-                    let shifted: &'static [u8] = &[
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8,
-                    ];
+                    let shifted: &'static [u8] =
+                        &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6559,7 +6551,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[22, 23, 24, 25, 27, 31];
-                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8, 1u8, 1u8, 3u8];
+                    let shifted: &'static [u8] = &[1, 1, 1, 1, 1, 3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6585,7 +6577,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[25];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6617,10 +6609,8 @@ impl GrammarParser {
                     let rules: &'static [u8] = &[
                         19, 20, 21, 22, 23, 24, 25, 26, 27, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
                     ];
-                    let shifted: &'static [u8] = &[
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8,
-                    ];
+                    let shifted: &'static [u8] =
+                        &[0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6651,7 +6641,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[22, 23, 24, 25, 27];
-                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8, 1u8, 3u8];
+                    let shifted: &'static [u8] = &[1, 1, 1, 1, 3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6685,8 +6675,7 @@ impl GrammarParser {
                         35, 35, 36, 36,
                     ];
                     let shifted: &'static [u8] = &[
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 5u8,
-                        0u8, 5u8, 0u8, 5u8, 0u8, 5u8, 0u8, 5u8,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 5, 0, 5, 0, 5, 0, 5,
                     ];
                     rules
                         .iter()
@@ -6710,7 +6699,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[29];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6736,7 +6725,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[29];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6769,7 +6758,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[22, 23, 24, 25, 27, 31, 91];
-                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8];
+                    let shifted: &'static [u8] = &[1, 1, 1, 1, 1, 1, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6808,10 +6797,8 @@ impl GrammarParser {
                         19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 92,
                         108,
                     ];
-                    let shifted: &'static [u8] = &[
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 1u8, 1u8,
-                    ];
+                    let shifted: &'static [u8] =
+                        &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6844,7 +6831,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[22, 23, 24, 25, 27, 31, 92];
-                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 2u8];
+                    let shifted: &'static [u8] = &[1, 1, 1, 1, 1, 1, 2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6870,7 +6857,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[94];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6893,7 +6880,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[28, 95];
-                    let shifted: &'static [u8] = &[2u8, 1u8];
+                    let shifted: &'static [u8] = &[2, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6935,8 +6922,7 @@ impl GrammarParser {
                         92, 93, 95, 108,
                     ];
                     let shifted: &'static [u8] = &[
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8, 0u8,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0,
                     ];
                     rules
                         .iter()
@@ -6963,7 +6949,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[95];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -6989,7 +6975,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[28];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7028,9 +7014,7 @@ impl GrammarParser {
                 ruleset: {
                     let rules: &'static [u8] =
                         &[22, 23, 24, 25, 27, 31, 32, 33, 34, 35, 36, 96, 97];
-                    let shifted: &'static [u8] = &[
-                        1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 6u8, 6u8, 6u8, 6u8, 6u8, 0u8, 0u8,
-                    ];
+                    let shifted: &'static [u8] = &[1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 6, 0, 0];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7060,7 +7044,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[33, 34, 36, 96];
-                    let shifted: &'static [u8] = &[7u8, 7u8, 7u8, 1u8];
+                    let shifted: &'static [u8] = &[7, 7, 7, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7083,7 +7067,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[33];
-                    let shifted: &'static [u8] = &[8u8];
+                    let shifted: &'static [u8] = &[8];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7109,7 +7093,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[33];
-                    let shifted: &'static [u8] = &[9u8];
+                    let shifted: &'static [u8] = &[9];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7132,7 +7116,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[34];
-                    let shifted: &'static [u8] = &[8u8];
+                    let shifted: &'static [u8] = &[8];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7158,7 +7142,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[34];
-                    let shifted: &'static [u8] = &[9u8];
+                    let shifted: &'static [u8] = &[9];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7181,7 +7165,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[36];
-                    let shifted: &'static [u8] = &[8u8];
+                    let shifted: &'static [u8] = &[8];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7207,7 +7191,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[36];
-                    let shifted: &'static [u8] = &[9u8];
+                    let shifted: &'static [u8] = &[9];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7230,7 +7214,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[35];
-                    let shifted: &'static [u8] = &[7u8];
+                    let shifted: &'static [u8] = &[7];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7256,7 +7240,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[35];
-                    let shifted: &'static [u8] = &[8u8];
+                    let shifted: &'static [u8] = &[8];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7279,7 +7263,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[32];
-                    let shifted: &'static [u8] = &[7u8];
+                    let shifted: &'static [u8] = &[7];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7305,7 +7289,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[32];
-                    let shifted: &'static [u8] = &[8u8];
+                    let shifted: &'static [u8] = &[8];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7338,7 +7322,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[12, 22, 23, 24, 25, 27, 31];
-                    let shifted: &'static [u8] = &[3u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8];
+                    let shifted: &'static [u8] = &[3, 1, 1, 1, 1, 1, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7361,7 +7345,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[0, 3];
-                    let shifted: &'static [u8] = &[4u8, 1u8];
+                    let shifted: &'static [u8] = &[4, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7387,7 +7371,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[0];
-                    let shifted: &'static [u8] = &[5u8];
+                    let shifted: &'static [u8] = &[5];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7431,8 +7415,8 @@ impl GrammarParser {
                         34, 35, 36, 80, 81, 82, 105,
                     ];
                     let shifted: &'static [u8] = &[
-                        2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0,
                     ];
                     rules
                         .iter()
@@ -7459,7 +7443,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[3];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7485,7 +7469,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[80];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7518,7 +7502,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[11, 22, 23, 24, 25, 27, 31];
-                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8];
+                    let shifted: &'static [u8] = &[1, 1, 1, 1, 1, 1, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7559,8 +7543,7 @@ impl GrammarParser {
                         36, 81, 105,
                     ];
                     let shifted: &'static [u8] = &[
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 1u8,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
                     ];
                     rules
                         .iter()
@@ -7587,7 +7570,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[81];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7620,8 +7603,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[5, 6, 7, 8, 9, 10, 83, 84, 85, 106];
-                    let shifted: &'static [u8] =
-                        &[1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8];
+                    let shifted: &'static [u8] = &[1, 0, 0, 0, 0, 0, 0, 0, 0, 0];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7645,7 +7627,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[6, 7, 8, 9, 10];
-                    let shifted: &'static [u8] = &[1u8, 1u8, 1u8, 1u8, 1u8];
+                    let shifted: &'static [u8] = &[1, 1, 1, 1, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7672,7 +7654,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[6, 7, 39, 40];
-                    let shifted: &'static [u8] = &[2u8, 2u8, 0u8, 0u8];
+                    let shifted: &'static [u8] = &[2, 2, 0, 0];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7698,7 +7680,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[39];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7724,7 +7706,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[40];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7750,7 +7732,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[7];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7776,7 +7758,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[6];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7799,7 +7781,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[8, 9];
-                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    let shifted: &'static [u8] = &[2, 2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7825,7 +7807,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[8];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7851,7 +7833,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[9];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7877,7 +7859,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[10];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7903,7 +7885,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[83];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7935,7 +7917,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[6, 7, 8, 9, 10, 84, 106];
-                    let shifted: &'static [u8] = &[0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 1u8];
+                    let shifted: &'static [u8] = &[0, 0, 0, 0, 0, 1, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7961,7 +7943,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[84];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -7993,7 +7975,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[5, 37, 38];
-                    let shifted: &'static [u8] = &[2u8, 0u8, 0u8];
+                    let shifted: &'static [u8] = &[2, 0, 0];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8019,7 +8001,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[37];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8045,7 +8027,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[5];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8071,7 +8053,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[4];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8115,9 +8097,8 @@ impl GrammarParser {
                         61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78,
                     ];
                     let shifted: &'static [u8] = &[
-                        1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8,
-                        1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8,
-                        1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                     ];
                     rules
                         .iter()
@@ -8145,7 +8126,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[39, 40, 52, 53, 100, 101];
-                    let shifted: &'static [u8] = &[0u8, 0u8, 2u8, 2u8, 0u8, 0u8];
+                    let shifted: &'static [u8] = &[0, 0, 2, 2, 0, 0];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8168,7 +8149,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[53];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8194,7 +8175,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[53];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8220,7 +8201,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[100];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8247,7 +8228,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[39, 40, 52, 101];
-                    let shifted: &'static [u8] = &[0u8, 0u8, 3u8, 1u8];
+                    let shifted: &'static [u8] = &[0, 0, 3, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8273,7 +8254,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[52];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8299,7 +8280,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[101];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8326,7 +8307,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[39, 40, 54, 55, 100, 101];
-                    let shifted: &'static [u8] = &[0u8, 0u8, 2u8, 2u8, 0u8, 0u8];
+                    let shifted: &'static [u8] = &[0, 0, 2, 2, 0, 0];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8349,7 +8330,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[55];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8375,7 +8356,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[55];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8402,7 +8383,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[39, 40, 54, 101];
-                    let shifted: &'static [u8] = &[0u8, 0u8, 3u8, 1u8];
+                    let shifted: &'static [u8] = &[0, 0, 3, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8428,7 +8409,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[54];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8451,7 +8432,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[42, 43, 44];
-                    let shifted: &'static [u8] = &[2u8, 2u8, 2u8];
+                    let shifted: &'static [u8] = &[2, 2, 2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8526,10 +8507,8 @@ impl GrammarParser {
                         150, 151,
                     ];
                     let shifted: &'static [u8] = &[
-                        0u8, 3u8, 3u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8,
+                        0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ];
                     rules
                         .iter()
@@ -8556,7 +8535,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[109];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8582,7 +8561,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[110];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8608,7 +8587,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[43];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8634,7 +8613,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[111];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8660,7 +8639,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[112];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8686,7 +8665,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[113];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8712,7 +8691,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[114];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8738,7 +8717,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[115];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8764,7 +8743,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[116];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8790,7 +8769,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[117];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8816,7 +8795,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[118];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8842,7 +8821,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[119];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8868,7 +8847,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[120];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8894,7 +8873,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[121];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8920,7 +8899,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[122];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8946,7 +8925,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[123];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8972,7 +8951,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[124];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -8998,7 +8977,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[125];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9024,7 +9003,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[126];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9050,7 +9029,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[127];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9076,7 +9055,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[128];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9102,7 +9081,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[129];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9128,7 +9107,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[130];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9154,7 +9133,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[131];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9180,7 +9159,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[132];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9206,7 +9185,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[133];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9232,7 +9211,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[134];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9258,7 +9237,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[135];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9284,7 +9263,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[136];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9310,7 +9289,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[137];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9336,7 +9315,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[138];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9362,7 +9341,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[139];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9388,7 +9367,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[140];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9414,7 +9393,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[141];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9440,7 +9419,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[142];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9466,7 +9445,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[143];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9492,7 +9471,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[144];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9518,7 +9497,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[145];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9544,7 +9523,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[146];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9570,7 +9549,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[147];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9596,7 +9575,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[148];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9622,7 +9601,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[149];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9648,7 +9627,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[150];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9674,7 +9653,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[151];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9697,7 +9676,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[42];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9723,7 +9702,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[42];
-                    let shifted: &'static [u8] = &[5u8];
+                    let shifted: &'static [u8] = &[5];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9749,7 +9728,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[98];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9827,9 +9806,8 @@ impl GrammarParser {
                         137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151,
                     ];
                     let shifted: &'static [u8] = &[
-                        1u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ];
                     rules
                         .iter()
@@ -9856,7 +9834,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[99];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9879,7 +9857,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[44];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9905,7 +9883,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[44];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9928,7 +9906,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[45, 46];
-                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    let shifted: &'static [u8] = &[2, 2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9951,7 +9929,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[45];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -9977,7 +9955,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[45];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10000,7 +9978,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[46];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10026,7 +10004,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[46];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10049,7 +10027,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[47];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10072,7 +10050,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[47];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10098,7 +10076,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[47];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10173,10 +10151,8 @@ impl GrammarParser {
                         150, 151,
                     ];
                     let shifted: &'static [u8] = &[
-                        0u8, 2u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8,
+                        0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ];
                     rules
                         .iter()
@@ -10203,7 +10179,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[49];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10226,7 +10202,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[48];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10252,7 +10228,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[48];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10327,10 +10303,8 @@ impl GrammarParser {
                         150, 151,
                     ];
                     let shifted: &'static [u8] = &[
-                        0u8, 2u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8,
+                        0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ];
                     rules
                         .iter()
@@ -10357,7 +10331,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[51];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10380,7 +10354,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[50];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10406,7 +10380,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[50];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10481,10 +10455,8 @@ impl GrammarParser {
                         150, 151,
                     ];
                     let shifted: &'static [u8] = &[
-                        0u8, 2u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8,
+                        0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ];
                     rules
                         .iter()
@@ -10511,7 +10483,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[59];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10534,7 +10506,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[58];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10560,7 +10532,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[58];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10635,10 +10607,8 @@ impl GrammarParser {
                         150, 151,
                     ];
                     let shifted: &'static [u8] = &[
-                        0u8, 2u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8,
+                        0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ];
                     rules
                         .iter()
@@ -10665,7 +10635,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[61];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10688,7 +10658,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[60];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10714,7 +10684,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[60];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10737,7 +10707,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[64, 65];
-                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    let shifted: &'static [u8] = &[2, 2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10763,7 +10733,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[64];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10786,7 +10756,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[65];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10812,7 +10782,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[65];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10835,7 +10805,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[62, 63];
-                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    let shifted: &'static [u8] = &[2, 2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10861,7 +10831,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[62];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10884,7 +10854,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[63];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10910,7 +10880,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[63];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10937,7 +10907,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[39, 40, 56, 57, 100, 101];
-                    let shifted: &'static [u8] = &[0u8, 0u8, 2u8, 2u8, 0u8, 0u8];
+                    let shifted: &'static [u8] = &[0, 0, 2, 2, 0, 0];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10960,7 +10930,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[57];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -10986,7 +10956,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[57];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11013,7 +10983,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[39, 40, 56, 101];
-                    let shifted: &'static [u8] = &[0u8, 0u8, 3u8, 1u8];
+                    let shifted: &'static [u8] = &[0, 0, 3, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11039,7 +11009,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[56];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11062,7 +11032,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[66, 67];
-                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    let shifted: &'static [u8] = &[2, 2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11088,7 +11058,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[66];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11111,7 +11081,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[67];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11137,7 +11107,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[67];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11160,7 +11130,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[68, 69];
-                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    let shifted: &'static [u8] = &[2, 2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11186,7 +11156,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[68];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11209,7 +11179,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[69];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11235,7 +11205,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[69];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11267,7 +11237,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[70, 71, 102, 103, 104, 152];
-                    let shifted: &'static [u8] = &[2u8, 2u8, 0u8, 0u8, 0u8, 0u8];
+                    let shifted: &'static [u8] = &[2, 2, 0, 0, 0, 0];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11293,7 +11263,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[102];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11316,7 +11286,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[71];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11342,7 +11312,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[71];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11371,7 +11341,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[103, 152];
-                    let shifted: &'static [u8] = &[1u8, 1u8];
+                    let shifted: &'static [u8] = &[1, 1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11397,7 +11367,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[103];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11420,7 +11390,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[70];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11446,7 +11416,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[70];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11521,10 +11491,8 @@ impl GrammarParser {
                         150, 151,
                     ];
                     let shifted: &'static [u8] = &[
-                        0u8, 2u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8,
+                        0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ];
                     rules
                         .iter()
@@ -11551,7 +11519,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[73];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11574,7 +11542,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[72];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11600,7 +11568,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[72];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11623,7 +11591,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[74, 75];
-                    let shifted: &'static [u8] = &[2u8, 2u8];
+                    let shifted: &'static [u8] = &[2, 2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11649,7 +11617,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[74];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11672,7 +11640,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[75];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11698,7 +11666,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[75];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11773,10 +11741,8 @@ impl GrammarParser {
                         150, 151,
                     ];
                     let shifted: &'static [u8] = &[
-                        0u8, 2u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8,
+                        0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ];
                     rules
                         .iter()
@@ -11803,7 +11769,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[77];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11826,7 +11792,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[76];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11852,7 +11818,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[76];
-                    let shifted: &'static [u8] = &[4u8];
+                    let shifted: &'static [u8] = &[4];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11875,7 +11841,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[78];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11901,7 +11867,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[78];
-                    let shifted: &'static [u8] = &[3u8];
+                    let shifted: &'static [u8] = &[3];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11927,7 +11893,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[79];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11953,7 +11919,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[153];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -11992,9 +11958,8 @@ impl GrammarParser {
                         79, 153, 155, 155, 156, 156,
                     ];
                     let shifted: &'static [u8] = &[
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 1u8,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1,
                     ];
                     rules
                         .iter()
@@ -12021,7 +11986,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[156];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -12044,7 +12009,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[157];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -12064,7 +12029,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[157];
-                    let shifted: &'static [u8] = &[2u8];
+                    let shifted: &'static [u8] = &[2];
                     rules
                         .iter()
                         .zip(shifted.iter())
@@ -12090,7 +12055,7 @@ impl GrammarParser {
                 },
                 ruleset: {
                     let rules: &'static [u8] = &[154];
-                    let shifted: &'static [u8] = &[1u8];
+                    let shifted: &'static [u8] = &[1];
                     rules
                         .iter()
                         .zip(shifted.iter())
