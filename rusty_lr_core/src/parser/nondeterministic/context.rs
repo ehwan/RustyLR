@@ -3,8 +3,8 @@ use std::hash::Hash;
 use super::Node;
 use super::ParseError;
 
+use crate::nonterminal::DataStack;
 use crate::nonterminal::NonTerminal;
-use crate::nonterminal::TokenData;
 use crate::parser::state::Index;
 use crate::parser::Parser;
 use crate::parser::Precedence;
@@ -16,11 +16,11 @@ type SmallVecNode = smallvec::SmallVec<[usize; 3]>;
 /// Iterator for traverse node to root.
 /// Note that root node is not included in this iterator.
 #[derive(Clone)]
-pub struct NodeRefIterator<'a, Data: TokenData, StateIndex> {
+pub struct NodeRefIterator<'a, Data: DataStack, StateIndex> {
     context: &'a Context<Data, StateIndex>,
     node: Option<usize>,
 }
-impl<'a, Data: TokenData, StateIndex: Index + Copy> Iterator
+impl<'a, Data: DataStack, StateIndex: Index + Copy> Iterator
     for NodeRefIterator<'a, Data, StateIndex>
 {
     type Item = &'a Node<Data, StateIndex>;
@@ -34,7 +34,7 @@ impl<'a, Data: TokenData, StateIndex: Index + Copy> Iterator
 
 /// A struct that maintains the current state and the values associated with each symbol.
 /// This handles the divergence and merging of the parser.
-pub struct Context<Data: TokenData, StateIndex> {
+pub struct Context<Data: DataStack, StateIndex> {
     pub(crate) nodes_pool: Vec<Node<Data, StateIndex>>,
     pub(crate) empty_node_indices: std::collections::BTreeSet<usize>,
 
@@ -48,8 +48,7 @@ pub struct Context<Data: TokenData, StateIndex> {
     pub(crate) fallback_nodes: SmallVecNode,
 
     /// For temporary use. store arguments for calling `reduce_action`.
-    /// But we don't want to reallocate every `feed` call
-    pub(crate) reduce_args: crate::nonterminal::ReduceArgsStack<Data>,
+    // pub(crate) reduce_args: crate::nonterminal::ReduceArgsStack<Data>,
 
     /// For temporary use. store reduce errors returned from `reduce_action`.
     /// But we don't want to reallocate every `feed` call
@@ -60,7 +59,7 @@ pub struct Context<Data: TokenData, StateIndex> {
     pub(crate) no_precedences: Vec<usize>,
 }
 
-impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
+impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     /// Create a new context.
     /// `current_nodes` is initialized with a root node.
     pub fn new() -> Self {
@@ -252,34 +251,31 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
         let mut count = rule.rule.len();
         let mut new_location = Data::Location::new(self.location_iter(node), count);
 
-        self.reduce_args.clear();
-        self.reduce_args.reserve(count);
-        let mut reduce_args = std::mem::take(&mut self.reduce_args);
-
         #[cfg(feature = "tree")]
         let mut trees = Vec::with_capacity(count);
+
+        let mut reduce_args = Data::default();
+        let mut location_args = crate::nonterminal::ArgsVec::default();
+        location_args.reserve(count);
 
         let mut current_node = node;
         let node_to_shift = loop {
             let node = self.node(current_node);
-            if count > node.len() {
-                count -= node.len();
+            let len = node.len();
+            if count > len {
+                count -= len;
                 let parent = node.parent;
                 if node.is_leaf() {
                     // move the values from current_node to reduce_args
 
-                    let node = &mut self.node_mut(current_node);
-                    let data_stack = std::mem::take(&mut node.data_stack);
+                    let node = self.node_mut(current_node);
                     let location_stack = std::mem::take(&mut node.location_stack);
                     #[cfg(feature = "tree")]
                     let tree_stack = std::mem::take(&mut node.tree_stack);
 
-                    reduce_args.extend(
-                        data_stack
-                            .into_iter()
-                            .rev()
-                            .zip(location_stack.into_iter().rev()),
-                    );
+                    reduce_args.drain_reverse(&mut node.data_stack, len);
+                    location_args.extend(location_stack.into_iter().rev());
+
                     #[cfg(feature = "tree")]
                     trees.extend(tree_stack.into_iter().rev());
 
@@ -287,38 +283,29 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 } else {
                     // clone the values from current_node to reduce_args
 
-                    let data_stack = &node.data_stack;
                     let location_stack = &node.location_stack;
                     #[cfg(feature = "tree")]
                     let tree_stack = &node.tree_stack;
 
-                    reduce_args.extend(
-                        data_stack
-                            .iter()
-                            .rev()
-                            .cloned()
-                            .zip(location_stack.iter().rev().cloned()),
-                    );
+                    reduce_args.drain_reverse(&mut node.data_stack.clone(), node.len());
+                    location_args.extend(location_stack.iter().rev().cloned());
+
                     #[cfg(feature = "tree")]
                     trees.extend(tree_stack.iter().rev().cloned());
                 }
                 current_node = parent.unwrap(); // since count > 0, there must be parent node
             } else {
                 // count <= node.len
-                let i = node.len() - count;
+                let i = len - count;
 
                 if node.is_leaf() {
                     // move the values in range [i..] from current_node to reduce_args
                     // use this node as node_to_shift
 
-                    let node = &mut self.node_mut(current_node);
+                    let node = self.node_mut(current_node);
 
-                    reduce_args.extend(
-                        node.data_stack
-                            .drain(i..)
-                            .rev()
-                            .zip(node.location_stack.drain(i..).rev()),
-                    );
+                    reduce_args.drain_reverse(&mut node.data_stack, count);
+                    location_args.extend(node.location_stack.drain(i..).rev());
                     #[cfg(feature = "tree")]
                     trees.extend(node.tree_stack.drain(i..).rev());
 
@@ -329,17 +316,14 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 } else {
                     // clone the values in range [i..] from current_node to reduce_args
                     let parent = node.parent;
-                    reduce_args.extend(
-                        node.data_stack[i..]
-                            .iter()
-                            .rev()
-                            .cloned()
-                            .zip(node.location_stack[i..].iter().rev().cloned()),
-                    );
+
+                    location_args.extend(node.location_stack[i..].iter().rev().cloned());
                     #[cfg(feature = "tree")]
                     trees.extend(node.tree_stack[i..].iter().rev().cloned());
 
                     if i == 0 {
+                        reduce_args.drain_reverse(&mut node.data_stack.clone(), count);
+
                         // create new empty node pointing to this node's parent node, and use it as node_to_shift
                         let new_node = self.new_node();
                         if let Some(parent) = parent {
@@ -347,7 +331,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         }
 
                         break new_node;
-                    } else if i == node.len() {
+                    } else if i == len {
                         // create new empty node pointing to this node, and use it as node_to_shift
                         let new_node = self.new_node();
                         self.add_child(current_node, new_node);
@@ -363,7 +347,9 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         let new_parent = self.new_node();
                         let node = self.node_mut(current_node);
 
-                        let parent_data_stack = node.data_stack.drain(..i).collect();
+                        let mut parent_data_stack = node.data_stack.split(i);
+                        std::mem::swap(&mut parent_data_stack, &mut node.data_stack);
+                        reduce_args.drain_reverse(&mut node.data_stack.clone(), count);
                         let parent_state_stack = node.state_stack.drain(..i).collect();
                         let parent_location_stack = node.location_stack.drain(..i).collect();
                         let parent_precedence_stack = node.precedence_stack.drain(..i).collect();
@@ -396,7 +382,6 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 }
             }
         };
-        self.reduce_args = reduce_args;
 
         #[cfg(feature = "tree")]
         trees.reverse();
@@ -405,22 +390,22 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
         let state = self.state(node_to_shift);
 
-        match Data::reduce_action(
+        let node = self.node_mut(node_to_shift);
+        match reduce_args.reduce_action(
+            &mut node.data_stack,
+            &mut location_args,
             reduce_rule,
-            &mut self.reduce_args,
             shift,
             term,
             userdata,
             &mut new_location,
         ) {
-            Ok(new_data) => {
+            Ok(_) => {
                 if let Some(nonterm_shift_state) =
                     parser.get_states()[state].shift_goto_nonterm(&rule.name)
                 {
-                    let node = self.node_mut(node_to_shift);
                     node.state_stack
                         .push(StateIndex::from_usize_unchecked(nonterm_shift_state));
-                    node.data_stack.push(new_data);
                     node.location_stack.push(new_location);
                     node.precedence_stack.push(precedence);
                     #[cfg(feature = "tree")]
@@ -465,7 +450,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
         userdata: &mut Data::UserData,
     ) -> Result<impl Iterator<Item = Data::StartType>, ParseError<Data>>
     where
-        Data: Clone + TryInto<Data::StartType>,
+        Data: Clone,
         P::Term: Clone,
         P::NonTerm: Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
     {
@@ -475,8 +460,8 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
         //                  ^^^ here, current_node
         let nodes = std::mem::take(&mut self.current_nodes);
         Ok(nodes.into_iter().map(move |eof_node| {
-            let node = self.pop(eof_node).unwrap();
-            let data = self.nodes_pool[node].data_stack.pop().unwrap();
+            // since eof has empty rule_type, no need to pop
+            let data = self.nodes_pool[eof_node].data_stack.pop_start().unwrap();
 
             match data.try_into() {
                 Ok(start) => start,
@@ -1026,11 +1011,11 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 node_
                     .tree_stack
                     .push(crate::tree::Tree::new_terminal(term.clone()));
-                node_.data_stack.push(match term {
-                    TerminalSymbol::Term(term) => Data::new_terminal(term),
-                    TerminalSymbol::Eof => Data::new_empty(),
-                    TerminalSymbol::Error => Data::new_error(),
-                });
+                match term {
+                    TerminalSymbol::Term(term) => node_.data_stack.push_terminal(term),
+                    TerminalSymbol::Eof => node_.data_stack.push_empty(),
+                    TerminalSymbol::Error => node_.data_stack.push_empty(),
+                }
 
                 self.next_nodes.push(node);
                 Ok(())
@@ -1054,11 +1039,11 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
             node_
                 .tree_stack
                 .push(crate::tree::Tree::new_terminal(term.clone()));
-            node_.data_stack.push(match term {
-                TerminalSymbol::Term(term) => Data::new_terminal(term),
-                TerminalSymbol::Eof => Data::new_empty(),
-                TerminalSymbol::Error => Data::new_error(),
-            });
+            match term {
+                TerminalSymbol::Term(term) => node_.data_stack.push_terminal(term),
+                TerminalSymbol::Eof => node_.data_stack.push_empty(),
+                TerminalSymbol::Error => node_.data_stack.push_empty(),
+            }
 
             self.next_nodes.push(node);
             Ok(())
@@ -1208,7 +1193,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         node.tree_stack.push(crate::tree::Tree::new_terminal(
                             TerminalSymbol::Term(term.clone()),
                         ));
-                        node.data_stack.push(Data::new_terminal(term.clone()));
+                        node.data_stack.push_terminal(term.clone());
 
                         self.current_nodes.push(error_node);
                     } else {
@@ -1419,7 +1404,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
     }
 }
 
-impl<Data: TokenData, StateIndex: Index + Copy> Default for Context<Data, StateIndex> {
+impl<Data: DataStack, StateIndex: Index + Copy> Default for Context<Data, StateIndex> {
     fn default() -> Self {
         let mut context = Context {
             nodes_pool: Default::default(),
@@ -1427,7 +1412,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Default for Context<Data, StateI
             current_nodes: Default::default(),
             next_nodes: Default::default(),
             reduce_errors: Default::default(),
-            reduce_args: Default::default(),
+            // reduce_args: Default::default(),
             fallback_nodes: Default::default(),
             no_precedences: Default::default(),
         };
@@ -1437,7 +1422,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Default for Context<Data, StateI
     }
 }
 
-impl<Data: TokenData, StateIndex: Index + Copy> Clone for Context<Data, StateIndex>
+impl<Data: DataStack, StateIndex: Index + Copy> Clone for Context<Data, StateIndex>
 where
     Node<Data, StateIndex>: Clone,
 {
@@ -1452,7 +1437,7 @@ where
 }
 
 #[cfg(feature = "tree")]
-impl<Data: TokenData, StateIndex: Index + Copy> std::fmt::Display for Context<Data, StateIndex>
+impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Display for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Display + Clone,
     Data::NonTerm: std::fmt::Display + Clone + crate::nonterminal::NonTerminal,
@@ -1466,7 +1451,7 @@ where
     }
 }
 #[cfg(feature = "tree")]
-impl<Data: TokenData, StateIndex: Index + Copy> std::fmt::Debug for Context<Data, StateIndex>
+impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Debug for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Debug + Clone,
     Data::NonTerm: std::fmt::Debug + Clone + crate::nonterminal::NonTerminal,
