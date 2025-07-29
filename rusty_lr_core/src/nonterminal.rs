@@ -75,7 +75,7 @@ pub trait DataStack: Default {
     fn push_empty(&mut self);
     fn pop(&mut self);
     fn pop_start(&mut self) -> Option<Self::StartType>;
-    fn drain_reverse(&mut self, other: &mut Self, count: usize);
+    fn drain_reverse(&mut self, from: &mut Self, count: usize);
     fn split(&mut self, i: usize) -> Self;
 
     /// performs a reduce action with the given rule index, and pushes the result to the data stack (self)

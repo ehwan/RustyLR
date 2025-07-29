@@ -1286,15 +1286,12 @@ impl Grammar {
                                             extract_token_data_from_args.extend(quote! {
                                                 let mut #mapto = self.#stack_name.pop().unwrap();
                                             });
-                                            extract_location_from_args.extend(quote! {
-                                                let #location_varname = __location_args.pop().unwrap();
-                                            });
                                         } else {
                                             // empty ruletype, so no need to pop
-                                            extract_location_from_args.extend(quote! {
-                                                let #location_varname = __location_args.pop().unwrap();
-                                            });
                                         }
+                                        extract_location_from_args.extend(quote! {
+                                            let #location_varname = __location_args.pop().unwrap();
+                                        });
                                     }
                                     None => {
                                         if let Some(stack_name) = stack_name {
@@ -1490,10 +1487,13 @@ impl Grammar {
             });
             drain_case_streams.extend(quote! {
                 Some(#tag_typename::#stack_name) => {
-                    out.#stack_name.push(self.#stack_name.pop().unwrap());
+                    self.#stack_name.push(from.#stack_name.pop().unwrap());
+                    self.tags.push(#tag_typename::#stack_name);
                 }
             });
         }
+
+        let num_production_rules = self.rules_sorted.len();
 
         stream.extend(quote! {
         #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
@@ -1567,7 +1567,9 @@ impl Grammar {
                 match rule_index {
                     #case_streams
                     _ => {
-                        unreachable!( "Invalid Rule: {}", rule_index );
+                        assert!(rule_index < #num_production_rules );
+                        out.push_empty();
+                        Ok(())
                     }
                 }
             }
@@ -1594,11 +1596,12 @@ impl Grammar {
             fn pop_start(&mut self) -> Option<Self::StartType> {
                 #extract_start
             }
-            fn drain_reverse(&mut self, out: &mut Self, count: usize) {
+            fn drain_reverse(&mut self, from: &mut Self, count: usize) {
                 for _ in 0..count {
-                    match self.tags.pop() {
+                    match from.tags.pop() {
                         None => unreachable!("drain_reverse from empty data stack"),
                         Some(#tag_typename::#empty_ruletype_variant_name) => {
+                            self.tags.push(#tag_typename::#empty_ruletype_variant_name);
                             // do nothing, empty ruletype
                         }
                         #drain_case_streams
