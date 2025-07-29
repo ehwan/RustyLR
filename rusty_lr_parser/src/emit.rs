@@ -20,7 +20,7 @@ impl Grammar {
         let enum_name = format_ident!("{}NonTerminals", start_rule_name);
         let parse_error_typename = format_ident!("{}ParseError", start_rule_name);
         let context_struct_name = format_ident!("{}Context", start_rule_name);
-        let token_data_typename = format_ident!("{}TokenData", start_rule_name);
+        let data_stack_typename = format_ident!("{}DataStack", start_rule_name);
 
         let state_structname = if self.emit_dense {
             format_ident!("DenseState")
@@ -63,7 +63,7 @@ impl Grammar {
             quote! {
                     /// type alias for `Context`
                     #[allow(non_camel_case_types,dead_code)]
-                    pub type #context_struct_name = #module_prefix::parser::nondeterministic::Context<#token_data_typename, #state_index_typename>;
+                    pub type #context_struct_name = #module_prefix::parser::nondeterministic::Context<#data_stack_typename, #state_index_typename>;
                     /// type alias for CFG production rule
                     #[allow(non_camel_case_types,dead_code)]
                     pub type #rule_typename = #module_prefix::rule::ProductionRule<&'static str, #enum_name>;
@@ -72,25 +72,25 @@ impl Grammar {
                     pub type #state_typename = #module_prefix::parser::state::#state_structname<#class_index_typename, #enum_name, #rule_container_type, #state_index_typename>;
                     /// type alias for `InvalidTerminalError`
                     #[allow(non_camel_case_types,dead_code)]
-                    pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_data_typename>;
+                    pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#data_stack_typename>;
                 }
             );
         } else {
             stream.extend(
-        quote! {
-                /// type alias for `Context`
-                #[allow(non_camel_case_types,dead_code)]
-                pub type #context_struct_name = #module_prefix::parser::deterministic::Context<#token_data_typename, #state_index_typename>;
-                /// type alias for CFG production rule
-                #[allow(non_camel_case_types,dead_code)]
-                pub type #rule_typename = #module_prefix::rule::ProductionRule<&'static str, #enum_name>;
-                /// type alias for DFA state
-                #[allow(non_camel_case_types,dead_code)]
-                pub type #state_typename = #module_prefix::parser::state::#state_structname<#class_index_typename, #enum_name, usize, #state_index_typename>;
-                /// type alias for `ParseError`
-                #[allow(non_camel_case_types,dead_code)]
-                pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_data_typename>;
-            }
+            quote! {
+                    /// type alias for `Context`
+                    #[allow(non_camel_case_types,dead_code)]
+                    pub type #context_struct_name = #module_prefix::parser::deterministic::Context<#data_stack_typename, #state_index_typename>;
+                    /// type alias for CFG production rule
+                    #[allow(non_camel_case_types,dead_code)]
+                    pub type #rule_typename = #module_prefix::rule::ProductionRule<&'static str, #enum_name>;
+                    /// type alias for DFA state
+                    #[allow(non_camel_case_types,dead_code)]
+                    pub type #state_typename = #module_prefix::parser::state::#state_structname<#class_index_typename, #enum_name, usize, #state_index_typename>;
+                    /// type alias for `ParseError`
+                    #[allow(non_camel_case_types,dead_code)]
+                    pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#data_stack_typename>;
+                }
             );
         }
     }
@@ -1150,11 +1150,11 @@ impl Grammar {
         }
     }
 
-    fn emit_token_data(&self, stream: &mut TokenStream) {
+    fn emit_data_stack(&self, stream: &mut TokenStream) {
         let module_prefix = &self.module_prefix;
         let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
         let reduce_error_typename = &self.error_typename;
-        let token_data_typename = format_ident!("{}TokenData", self.start_rule_name);
+        let data_stack_typename = format_ident!("{}DataStack", self.start_rule_name);
         let token_typename = &self.token_typename;
         let user_data_parameter_name =
             Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
@@ -1165,31 +1165,30 @@ impl Grammar {
             .cloned()
             .unwrap_or_else(|| quote! { #module_prefix::DefaultLocation });
 
-        // variant name for terminal symbol
-        let terminal_variant_name = Ident::new("Terminals", Span::call_site());
-        // enum variant name for each non-terminal
-        let mut variant_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
+        let tag_typename = format_ident!("{}Tag", self.start_rule_name);
 
-        // (<RuleType as ToString>, variant_name) map
-        let mut ruletype_variant_map: rusty_lr_core::hash::HashMap<String, Ident> =
+        // variant name for empty ruletype
+        let empty_ruletype_variant_name = Ident::new("Empty", Span::call_site());
+
+        // variant name for terminal symbol
+        let terminal_stack_name = Ident::new("_terminals", Span::call_site());
+        // stack name for each non-terminal
+        let mut stack_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
+
+        // (<RuleType as ToString>, stack_name) map
+        let mut ruletype_stack_map: rusty_lr_core::hash::HashMap<String, Option<Ident>> =
             Default::default();
 
-        // (variant_name, TokenStream for typename) sorted in insertion order
+        // (stack_name, TokenStream for typename) sorted in insertion order
         // for consistent output
-        let mut variant_names_in_order = Vec::new();
+        let mut stack_names_in_order = Vec::new();
 
-        // insert variant for terminal token type
-        ruletype_variant_map.insert(
+        // insert stack name for terminal token type
+        ruletype_stack_map.insert(
             self.token_typename.to_string(),
-            terminal_variant_name.clone(),
+            Some(terminal_stack_name.clone()),
         );
-        variant_names_in_order.push((terminal_variant_name.clone(), self.token_typename.clone()));
-
-        // insert variant for empty-ruletype
-        let empty_ruletype_variant_name = Ident::new("Empty", Span::call_site());
-        ruletype_variant_map.insert("".to_string(), empty_ruletype_variant_name.clone());
-        // ruletype_variant_map.insert(quote! {()}.to_string(), empty_ruletype_variant_name.clone());
-        variant_names_in_order.push((empty_ruletype_variant_name.clone(), quote! {}));
+        stack_names_in_order.push((terminal_stack_name.clone(), self.token_typename.clone()));
 
         fn remove_whitespaces(s: String) -> String {
             s.chars().filter(|c| !c.is_whitespace()).collect()
@@ -1198,20 +1197,24 @@ impl Grammar {
         for nonterm in self.nonterminals.iter() {
             let ruletype_stream = nonterm.ruletype.as_ref().cloned().unwrap_or_default();
 
-            let cur_len = ruletype_variant_map.len();
-            let variant_name = ruletype_variant_map
-                .entry(remove_whitespaces(ruletype_stream.to_string()))
-                .or_insert_with(|| {
-                    let new_variant_name =
-                        Ident::new(&format!("Variant{}", cur_len), Span::call_site());
-                    variant_names_in_order
-                        .push((new_variant_name.clone(), ruletype_stream.clone()));
-                    new_variant_name
-                })
-                .clone();
-            variant_names_for_nonterm.push(variant_name);
+            let cur_len = ruletype_stack_map.len();
+            let stack_name = if ruletype_stream.is_empty() {
+                None
+            } else {
+                ruletype_stack_map
+                    .entry(remove_whitespaces(ruletype_stream.to_string()))
+                    .or_insert_with(|| {
+                        let new_stack_name =
+                            Ident::new(&format!("__stack{}", cur_len), Span::call_site());
+                        stack_names_in_order
+                            .push((new_stack_name.clone(), ruletype_stream.clone()));
+                        Some(new_stack_name)
+                    })
+                    .clone()
+            };
+            stack_names_for_nonterm.push(stack_name);
         }
-        drop(ruletype_variant_map);
+        drop(ruletype_stack_map);
 
         let mut case_streams = quote! {};
 
@@ -1219,11 +1222,9 @@ impl Grammar {
         let mut fn_reduce_for_each_rule_stream = TokenStream::new();
 
         let identity_reduce_fn_name = format_ident!("reduce_identity");
-        let clear_reduce_fn_name = format_ident!("reduce_clear");
 
         use std::collections::BTreeMap;
         let mut identity_reduce_action_range: BTreeMap<usize, (usize, usize)> = BTreeMap::new();
-        let mut clear_reduce_action_range: Option<(usize, usize)> = None;
 
         use rusty_lr_core::TerminalSymbol;
         use rusty_lr_core::Token;
@@ -1235,6 +1236,7 @@ impl Grammar {
             match &rule.reduce_action {
                 Some(ReduceAction::Custom(reduce_action)) => {
                     let mut extract_token_data_from_args = TokenStream::new();
+                    let mut extract_location_from_args = TokenStream::new();
                     for token in rule.tokens.iter() {
                         match &token.token {
                             Token::Term(term) => match &token.mapto {
@@ -1245,14 +1247,16 @@ impl Grammar {
                                     match term {
                                         TerminalSymbol::Term(_) => {
                                             extract_token_data_from_args.extend(quote! {
-                                                let (#token_data_typename::#terminal_variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
-                                                    unreachable!()
-                                                };
+                                                let mut #mapto = self.#terminal_stack_name.pop().unwrap();
+                                            });
+                                            extract_location_from_args.extend(quote! {
+                                                let #location_varname = __location_args.pop().unwrap();
                                             });
                                         }
                                         TerminalSymbol::Error => {
-                                            extract_token_data_from_args.extend(quote! {
-                                                let (_, #location_varname) = __rustylr_args.pop().unwrap();
+                                            // error has empty ruletype, so no need to pop
+                                            extract_location_from_args.extend(quote! {
+                                                let #location_varname = __location_args.pop().unwrap();
                                             });
                                         }
                                         TerminalSymbol::Eof => {
@@ -1264,32 +1268,45 @@ impl Grammar {
                                 }
                                 None => {
                                     extract_token_data_from_args.extend(quote! {
-                                        __rustylr_args.pop();
+                                        self.#terminal_stack_name.pop();
+                                    });
+                                    extract_location_from_args.extend(quote! {
+                                        __location_args.pop();
                                     });
                                 }
                             },
                             Token::NonTerm(nonterm_idx) => {
+                                let stack_name = &stack_names_for_nonterm[*nonterm_idx];
                                 match &token.mapto {
                                     Some(mapto) => {
                                         let location_varname =
                                             format_ident!("__rustylr_location_{}", mapto);
-                                        let variant_name = &variant_names_for_nonterm[*nonterm_idx];
-                                        if variant_name == &empty_ruletype_variant_name {
-                                            extract_token_data_from_args.extend(quote! {
-                                                let (_, #location_varname) = __rustylr_args.pop().unwrap();
-                                            });
-                                        } else {
+                                        if let Some(stack_name) = stack_name {
                                             // extract token data from args
                                             extract_token_data_from_args.extend(quote! {
-                                                let (#token_data_typename::#variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
-                                                    unreachable!()
-                                                };
+                                                let mut #mapto = self.#stack_name.pop().unwrap();
+                                            });
+                                            extract_location_from_args.extend(quote! {
+                                                let #location_varname = __location_args.pop().unwrap();
+                                            });
+                                        } else {
+                                            // empty ruletype, so no need to pop
+                                            extract_location_from_args.extend(quote! {
+                                                let #location_varname = __location_args.pop().unwrap();
                                             });
                                         }
                                     }
                                     None => {
-                                        extract_token_data_from_args.extend(quote! {
-                                            __rustylr_args.pop();
+                                        if let Some(stack_name) = stack_name {
+                                            // extract token data from args
+                                            extract_token_data_from_args.extend(quote! {
+                                                self.#stack_name.pop();
+                                            });
+                                        } else {
+                                            // empty ruletype, so no need to pop
+                                        }
+                                        extract_location_from_args.extend(quote! {
+                                            __location_args.pop();
                                         });
                                     }
                                 }
@@ -1316,7 +1333,14 @@ impl Grammar {
 
                     case_streams.extend(quote! {
                         #rule_index => {
-                            Self::#reduce_fn_ident( reduce_args, shift, lookahead, user_data, location0 )
+                            self.#reduce_fn_ident(
+                                out,
+                                location_args,
+                                shift,
+                                lookahead,
+                                #user_data_parameter_name,
+                                __rustylr_location0,
+                            )
                         }
                     });
 
@@ -1324,47 +1348,58 @@ impl Grammar {
                     // else, just execute action
                     if nonterm.ruletype.is_some() {
                         // typename is defined, reduce action must be defined
-                        let variant_name = &variant_names_for_nonterm[nonterm_idx];
+                        let stack_name = stack_names_for_nonterm[nonterm_idx].as_ref().unwrap();
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             #[doc = #rule_debug_str]
                             #[inline]
                             fn #reduce_fn_ident(
-                                __rustylr_args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
+                                &mut self,
+                                __out: &mut Self,
+                                __location_args: &mut #module_prefix::nonterminal::ArgsVec<#location_typename>,
                                 shift: &mut bool,
                                 lookahead: &#module_prefix::TerminalSymbol<#token_typename>,
                                 #user_data_parameter_name: &mut #user_data_typename,
                                 __rustylr_location0: &mut #location_typename,
-                            ) -> Result<#token_data_typename, #reduce_error_typename> {
+                            ) -> Result<(), #reduce_error_typename> {
                                 #extract_token_data_from_args
+                                #extract_location_from_args
 
-                                Ok( #token_data_typename::#variant_name(#reduce_action) )
+                                let __ret = { #reduce_action };
+                                __out.#stack_name.push( __ret );
+                                __out.tags.push(#tag_typename::#stack_name);
+
+                                Ok(())
                             }
                         });
                     } else {
                         // <RuleType> is not defined,
                         // just execute action
 
-                        let variant_name = &variant_names_for_nonterm[nonterm_idx];
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             #[doc = #rule_debug_str]
                             #[inline]
                             fn #reduce_fn_ident(
-                                __rustylr_args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
+                                &mut self,
+                                __out: &mut Self,
+                                __location_args: &mut #module_prefix::nonterminal::ArgsVec<#location_typename>,
                                 shift: &mut bool,
                                 lookahead: &#module_prefix::TerminalSymbol<#token_typename>,
                                 #user_data_parameter_name: &mut #user_data_typename,
                                 __rustylr_location0: &mut #location_typename,
-                            ) -> Result<#token_data_typename, #reduce_error_typename> {
+                            ) -> Result<(), #reduce_error_typename> {
                                 #extract_token_data_from_args
-                                #reduce_action
+                                #extract_location_from_args
 
-                                Ok( #token_data_typename::#variant_name )
+                                #reduce_action
+                                __out.push_empty();
+
+                                Ok(())
                             }
                         });
                     }
                 }
                 &Some(ReduceAction::Identity(reduce_action_identity)) => {
-                    // reduce_args is in reverse order
+                    // arguments are in reverse order
                     let reversed_idx = rule.tokens.len() - reduce_action_identity - 1;
 
                     let (_, max) = identity_reduce_action_range
@@ -1374,12 +1409,8 @@ impl Grammar {
                     *max = new_last;
                 }
                 None => {
-                    if let Some((_, last)) = &mut clear_reduce_action_range {
-                        let new_last = (*last).max(rule_index);
-                        *last = new_last;
-                    } else {
-                        clear_reduce_action_range = Some((rule_index, rule_index));
-                    }
+                    // no reduce action
+                    // we don't have to do anything here
                 }
             }
         }
@@ -1391,64 +1422,49 @@ impl Grammar {
                 // identity action
                 case_streams.extend(quote! {
                     #start_rule_index => {
-                        Ok(Self::#identity_reduce_fn_name( reduce_args, #reversed_idx ))
+                        self.#identity_reduce_fn_name( out, #reversed_idx );
+                        Ok(())
                     }
                 });
             } else {
                 // identity action
                 case_streams.extend(quote! {
                     #start_rule_index..=#last_rule_index => {
-                        Ok(Self::#identity_reduce_fn_name( reduce_args, #reversed_idx ))
-                    }
-                });
-            }
-        }
-        // add match choices for clear identity reduce actions.
-        if let Some((start_rule_index, last_rule_index)) = clear_reduce_action_range {
-            if start_rule_index == last_rule_index {
-                // no reduce action (without ruletype)
-                // clear the arguments stack and return empty token data
-                case_streams.extend(quote! {
-                    #start_rule_index => {
-                        Ok(Self::#clear_reduce_fn_name( reduce_args ))
-                    }
-                });
-            } else {
-                // no reduce action (without ruletype)
-                // clear the arguments stack and return empty token data
-                case_streams.extend(quote! {
-                    #start_rule_index..=#last_rule_index => {
-                        Ok(Self::#clear_reduce_fn_name( reduce_args ))
+                        self.#identity_reduce_fn_name( out, #reversed_idx );
+                        Ok(())
                     }
                 });
             }
         }
 
         let start_idx = *self.nonterminals_index.get(&self.start_rule_name).unwrap();
-        let start_variant_name = &variant_names_for_nonterm[start_idx];
+        let start_stack_name = &stack_names_for_nonterm[start_idx];
         let (start_typename, extract_start) = match &self.nonterminals[start_idx].ruletype {
-            Some(typename) => (
-                typename.clone(),
-                quote! { #token_data_typename::#start_variant_name(data) => Ok(data) },
-            ),
-            None => (
-                quote! {()},
-                quote! { #token_data_typename::#start_variant_name => Ok(())},
-            ),
+            Some(typename) => (typename.clone(), quote! { self.#start_stack_name.pop() }),
+            None => (quote! {()}, quote! { Some(()) }),
         };
 
-        // enum data type
-        let mut enum_variants_stream = TokenStream::new();
-        for (variant_name, typename) in variant_names_in_order.into_iter() {
-            if typename.is_empty() {
-                enum_variants_stream.extend(quote! {
-                    #variant_name,
-                });
-            } else {
-                enum_variants_stream.extend(quote! {
-                    #variant_name(#typename),
-                });
-            }
+        // stack definition
+        let mut stack_definitions = TokenStream::new();
+        // Default impl
+        let mut initialize_stacks = TokenStream::new();
+        // .clear() all
+        let mut clear_stacks = TokenStream::new();
+        // .reverse() all
+        let mut reverse_stacks = TokenStream::new();
+        for (stack_name, typename) in &stack_names_in_order {
+            stack_definitions.extend(quote! {
+                #stack_name: Vec<#typename>,
+            });
+            initialize_stacks.extend(quote! {
+                #stack_name: Default::default(),
+            });
+            clear_stacks.extend(quote! {
+                self.#stack_name.clear();
+            });
+            reverse_stacks.extend(quote! {
+                self.#stack_name.reverse();
+            });
         }
 
         let derive_clone_for_glr = if self.glr {
@@ -1457,29 +1473,65 @@ impl Grammar {
             quote! {}
         };
 
+        // tag enum definition
+        let mut tag_definitions = TokenStream::new();
+        // pop() case matches
+        let mut pop_case_streams = TokenStream::new();
+        // drain()
+        let mut drain_case_streams = TokenStream::new();
+        for (stack_name, _) in &stack_names_in_order {
+            tag_definitions.extend(quote! {
+                #stack_name,
+            });
+            pop_case_streams.extend(quote! {
+                Some(#tag_typename::#stack_name) => {
+                    self.#stack_name.pop();
+                }
+            });
+            drain_case_streams.extend(quote! {
+                Some(#tag_typename::#stack_name) => {
+                    out.#stack_name.push(self.#stack_name.pop().unwrap());
+                }
+            });
+        }
+
         stream.extend(quote! {
+        #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+        pub enum #tag_typename {
+            #empty_ruletype_variant_name,
+            #tag_definitions
+        }
+
         /// enum for each non-terminal and terminal symbol, that actually hold data
         #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
         #derive_clone_for_glr
-        pub enum #token_data_typename {
-            #enum_variants_stream
+        pub struct #data_stack_typename {
+            tags: Vec<#tag_typename>,
+            #stack_definitions
         }
 
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
-        impl #token_data_typename {
-            fn #identity_reduce_fn_name(
-                args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
-                idx: usize,
-            ) -> Self {
-                let value = args.swap_remove(idx).0;
-                args.clear();
-                value
+        impl Default for #data_stack_typename {
+            fn default() -> Self {
+                Self {
+                    tags: Default::default(),
+                    #initialize_stacks
+                }
             }
-            fn #clear_reduce_fn_name(
-                args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
-            ) -> Self {
-                args.clear();
-                #token_data_typename::#empty_ruletype_variant_name
+        }
+
+        use #module_prefix::nonterminal::DataStack;
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
+        impl #data_stack_typename {
+            fn #identity_reduce_fn_name(
+                &mut self,
+                out: &mut Self,
+                idx: usize,
+            ) {
+                for _ in 0..idx {
+                    self.pop();
+                }
+                out.drain_reverse(self, 1);
             }
 
             #fn_reduce_for_each_rule_stream
@@ -1487,7 +1539,7 @@ impl Grammar {
 
 
         #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types, unused_variables)]
-        impl #module_prefix::nonterminal::TokenData for #token_data_typename {
+        impl #module_prefix::nonterminal::DataStack for #data_stack_typename {
             type Term = #token_typename;
             type NonTerm = #nonterminals_enum_name;
             type ReduceActionError = #reduce_error_typename;
@@ -1495,14 +1547,23 @@ impl Grammar {
             type StartType = #start_typename;
             type Location = #location_typename;
 
+            fn len(&self) -> usize {
+                self.tags.len()
+            }
+            fn reverse(&mut self) {
+                self.tags.reverse();
+                #reverse_stacks
+            }
             fn reduce_action(
+                &mut self,
+                out: &mut Self,
+                location_args: &mut #module_prefix::nonterminal::ArgsVec<#location_typename>,
                 rule_index: usize,
-                reduce_args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
                 shift: &mut bool,
                 lookahead: &#module_prefix::TerminalSymbol<Self::Term>,
-                user_data: &mut Self::UserData,
-                location0: &mut Self::Location,
-            ) -> Result<Self, Self::ReduceActionError> {
+                #user_data_parameter_name: &mut Self::UserData,
+                __rustylr_location0: &mut Self::Location,
+            ) -> Result<(), Self::ReduceActionError> {
                 match rule_index {
                     #case_streams
                     _ => {
@@ -1510,23 +1571,46 @@ impl Grammar {
                     }
                 }
             }
-            fn new_error() -> Self {
-                #token_data_typename::#empty_ruletype_variant_name
+            fn clear(&mut self) {
+                self.tags.clear();
+                #clear_stacks
             }
-            fn new_terminal(term: #token_typename) -> Self {
-                #token_data_typename::#terminal_variant_name(term)
+            fn push_terminal(&mut self, term: Self::Term) {
+                self.#terminal_stack_name.push(term);
+                self.tags.push(#tag_typename::#terminal_stack_name);
             }
-        }
-
-        #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types, unused_variables)]
-        impl TryFrom<#token_data_typename> for #start_typename {
-            type Error = ();
-
-            fn try_from(token: #token_data_typename) -> Result<Self, Self::Error> {
-                match token {
-                    #extract_start,
-                    _ => Err(()),
+            fn push_empty(&mut self) {
+                self.tags.push(#tag_typename::#empty_ruletype_variant_name);
+            }
+            fn pop(&mut self) {
+                match self.tags.pop() {
+                    None => unreachable!("pop from empty data stack"),
+                    Some(#tag_typename::#empty_ruletype_variant_name) => {
+                        // do nothing, empty ruletype
+                    }
+                    #pop_case_streams
                 }
+            }
+            fn pop_start(&mut self) -> Option<Self::StartType> {
+                #extract_start
+            }
+            fn drain_reverse(&mut self, out: &mut Self, count: usize) {
+                for _ in 0..count {
+                    match self.tags.pop() {
+                        None => unreachable!("drain_reverse from empty data stack"),
+                        Some(#tag_typename::#empty_ruletype_variant_name) => {
+                            // do nothing, empty ruletype
+                        }
+                        #drain_case_streams
+                    }
+                }
+            }
+            fn split(&mut self, i: usize) -> Self {
+                let mut out = Self::default();
+                let count = self.tags.len() - i;
+                self.drain_reverse(&mut out, count);
+                out.reverse();
+                out
             }
         }
         });
@@ -1536,7 +1620,7 @@ impl Grammar {
         let mut stream = TokenStream::new();
         self.emit_type_alises(&mut stream);
         self.emit_nonterm_enum(&mut stream);
-        self.emit_token_data(&mut stream);
+        self.emit_data_stack(&mut stream);
         self.emit_parser(&mut stream);
 
         stream

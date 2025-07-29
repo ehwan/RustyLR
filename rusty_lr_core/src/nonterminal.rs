@@ -68,6 +68,8 @@ pub trait DataStack: Default {
     /// Type for location of the token
     type Location: crate::Location;
 
+    fn len(&self) -> usize;
+    fn reverse(&mut self);
     fn clear(&mut self);
     fn push_terminal(&mut self, term: Self::Term);
     fn push_empty(&mut self);
