@@ -1476,6 +1476,8 @@ impl Grammar {
         let mut pop_case_streams = TokenStream::new();
         // drain()
         let mut drain_case_streams = TokenStream::new();
+        // drain( len() )
+        let mut drain_full_streams = TokenStream::new();
         for (stack_name, _) in &stack_names_in_order {
             tag_definitions.extend(quote! {
                 #stack_name,
@@ -1490,6 +1492,9 @@ impl Grammar {
                     self.#stack_name.push(from.#stack_name.pop().unwrap());
                     self.tags.push(#tag_typename::#stack_name);
                 }
+            });
+            drain_full_streams.extend(quote! {
+                self.#stack_name.extend(from.#stack_name.drain(..).rev());
             });
         }
 
@@ -1597,14 +1602,21 @@ impl Grammar {
                 #extract_start
             }
             fn drain_reverse(&mut self, from: &mut Self, count: usize) {
-                for _ in 0..count {
-                    match from.tags.pop() {
-                        None => unreachable!("drain_reverse from empty data stack"),
-                        Some(#tag_typename::#empty_ruletype_variant_name) => {
-                            self.tags.push(#tag_typename::#empty_ruletype_variant_name);
-                            // do nothing, empty ruletype
+                if count == from.tags.len() {
+                    // if count is equal to self.tags.len(), we can just copy all
+                    // tags and stacks from `from` to `self`
+                    self.tags.extend(from.tags.drain(..).rev());
+                    #drain_full_streams
+                } else {
+                    for _ in 0..count {
+                        match from.tags.pop() {
+                            None => unreachable!("drain_reverse from empty data stack"),
+                            Some(#tag_typename::#empty_ruletype_variant_name) => {
+                                self.tags.push(#tag_typename::#empty_ruletype_variant_name);
+                                // do nothing, empty ruletype
+                            }
+                            #drain_case_streams
                         }
-                        #drain_case_streams
                     }
                 }
             }

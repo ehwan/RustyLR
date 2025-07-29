@@ -4350,91 +4350,115 @@ impl ::rusty_lr_core::nonterminal::DataStack for GrammarDataStack {
         Some(())
     }
     fn drain_reverse(&mut self, from: &mut Self, count: usize) {
-        for _ in 0..count {
-            match from.tags.pop() {
-                None => unreachable!("drain_reverse from empty data stack"),
-                Some(GrammarTag::Empty) => {
-                    self.tags.push(GrammarTag::Empty);
-                }
-                Some(GrammarTag::_terminals) => {
-                    self._terminals.push(from._terminals.pop().unwrap());
-                    self.tags.push(GrammarTag::_terminals);
-                }
-                Some(GrammarTag::__stack1) => {
-                    self.__stack1.push(from.__stack1.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack1);
-                }
-                Some(GrammarTag::__stack2) => {
-                    self.__stack2.push(from.__stack2.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack2);
-                }
-                Some(GrammarTag::__stack3) => {
-                    self.__stack3.push(from.__stack3.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack3);
-                }
-                Some(GrammarTag::__stack4) => {
-                    self.__stack4.push(from.__stack4.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack4);
-                }
-                Some(GrammarTag::__stack5) => {
-                    self.__stack5.push(from.__stack5.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack5);
-                }
-                Some(GrammarTag::__stack6) => {
-                    self.__stack6.push(from.__stack6.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack6);
-                }
-                Some(GrammarTag::__stack7) => {
-                    self.__stack7.push(from.__stack7.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack7);
-                }
-                Some(GrammarTag::__stack8) => {
-                    self.__stack8.push(from.__stack8.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack8);
-                }
-                Some(GrammarTag::__stack9) => {
-                    self.__stack9.push(from.__stack9.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack9);
-                }
-                Some(GrammarTag::__stack10) => {
-                    self.__stack10.push(from.__stack10.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack10);
-                }
-                Some(GrammarTag::__stack11) => {
-                    self.__stack11.push(from.__stack11.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack11);
-                }
-                Some(GrammarTag::__stack12) => {
-                    self.__stack12.push(from.__stack12.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack12);
-                }
-                Some(GrammarTag::__stack13) => {
-                    self.__stack13.push(from.__stack13.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack13);
-                }
-                Some(GrammarTag::__stack14) => {
-                    self.__stack14.push(from.__stack14.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack14);
-                }
-                Some(GrammarTag::__stack15) => {
-                    self.__stack15.push(from.__stack15.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack15);
-                }
-                Some(GrammarTag::__stack16) => {
-                    self.__stack16.push(from.__stack16.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack16);
-                }
-                Some(GrammarTag::__stack17) => {
-                    self.__stack17.push(from.__stack17.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack17);
-                }
-                Some(GrammarTag::__stack18) => {
-                    self.__stack18.push(from.__stack18.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack18);
-                }
-                Some(GrammarTag::__stack19) => {
-                    self.__stack19.push(from.__stack19.pop().unwrap());
-                    self.tags.push(GrammarTag::__stack19);
+        if count == from.tags.len() {
+            self.tags.extend(from.tags.drain(..).rev());
+            self._terminals.extend(from._terminals.drain(..).rev());
+            self.__stack1.extend(from.__stack1.drain(..).rev());
+            self.__stack2.extend(from.__stack2.drain(..).rev());
+            self.__stack3.extend(from.__stack3.drain(..).rev());
+            self.__stack4.extend(from.__stack4.drain(..).rev());
+            self.__stack5.extend(from.__stack5.drain(..).rev());
+            self.__stack6.extend(from.__stack6.drain(..).rev());
+            self.__stack7.extend(from.__stack7.drain(..).rev());
+            self.__stack8.extend(from.__stack8.drain(..).rev());
+            self.__stack9.extend(from.__stack9.drain(..).rev());
+            self.__stack10.extend(from.__stack10.drain(..).rev());
+            self.__stack11.extend(from.__stack11.drain(..).rev());
+            self.__stack12.extend(from.__stack12.drain(..).rev());
+            self.__stack13.extend(from.__stack13.drain(..).rev());
+            self.__stack14.extend(from.__stack14.drain(..).rev());
+            self.__stack15.extend(from.__stack15.drain(..).rev());
+            self.__stack16.extend(from.__stack16.drain(..).rev());
+            self.__stack17.extend(from.__stack17.drain(..).rev());
+            self.__stack18.extend(from.__stack18.drain(..).rev());
+            self.__stack19.extend(from.__stack19.drain(..).rev());
+        } else {
+            for _ in 0..count {
+                match from.tags.pop() {
+                    None => unreachable!("drain_reverse from empty data stack"),
+                    Some(GrammarTag::Empty) => {
+                        self.tags.push(GrammarTag::Empty);
+                    }
+                    Some(GrammarTag::_terminals) => {
+                        self._terminals.push(from._terminals.pop().unwrap());
+                        self.tags.push(GrammarTag::_terminals);
+                    }
+                    Some(GrammarTag::__stack1) => {
+                        self.__stack1.push(from.__stack1.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack1);
+                    }
+                    Some(GrammarTag::__stack2) => {
+                        self.__stack2.push(from.__stack2.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack2);
+                    }
+                    Some(GrammarTag::__stack3) => {
+                        self.__stack3.push(from.__stack3.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack3);
+                    }
+                    Some(GrammarTag::__stack4) => {
+                        self.__stack4.push(from.__stack4.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack4);
+                    }
+                    Some(GrammarTag::__stack5) => {
+                        self.__stack5.push(from.__stack5.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack5);
+                    }
+                    Some(GrammarTag::__stack6) => {
+                        self.__stack6.push(from.__stack6.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack6);
+                    }
+                    Some(GrammarTag::__stack7) => {
+                        self.__stack7.push(from.__stack7.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack7);
+                    }
+                    Some(GrammarTag::__stack8) => {
+                        self.__stack8.push(from.__stack8.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack8);
+                    }
+                    Some(GrammarTag::__stack9) => {
+                        self.__stack9.push(from.__stack9.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack9);
+                    }
+                    Some(GrammarTag::__stack10) => {
+                        self.__stack10.push(from.__stack10.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack10);
+                    }
+                    Some(GrammarTag::__stack11) => {
+                        self.__stack11.push(from.__stack11.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack11);
+                    }
+                    Some(GrammarTag::__stack12) => {
+                        self.__stack12.push(from.__stack12.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack12);
+                    }
+                    Some(GrammarTag::__stack13) => {
+                        self.__stack13.push(from.__stack13.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack13);
+                    }
+                    Some(GrammarTag::__stack14) => {
+                        self.__stack14.push(from.__stack14.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack14);
+                    }
+                    Some(GrammarTag::__stack15) => {
+                        self.__stack15.push(from.__stack15.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack15);
+                    }
+                    Some(GrammarTag::__stack16) => {
+                        self.__stack16.push(from.__stack16.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack16);
+                    }
+                    Some(GrammarTag::__stack17) => {
+                        self.__stack17.push(from.__stack17.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack17);
+                    }
+                    Some(GrammarTag::__stack18) => {
+                        self.__stack18.push(from.__stack18.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack18);
+                    }
+                    Some(GrammarTag::__stack19) => {
+                        self.__stack19.push(from.__stack19.pop().unwrap());
+                        self.tags.push(GrammarTag::__stack19);
+                    }
                 }
             }
         }
