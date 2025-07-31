@@ -240,16 +240,11 @@ impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + 
 {
     fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<usize> {
         match class {
-            TerminalSymbol::Term(class) => {
-                if class < self.shift_class_offset {
-                    None
-                } else {
-                    self.shift_goto_map_class
-                        .get(class - self.shift_class_offset)
-                        .copied()
-                        .flatten()
-                }
-            }
+            TerminalSymbol::Term(class) => self
+                .shift_goto_map_class
+                .get(class.wrapping_sub(self.shift_class_offset))
+                .copied()
+                .flatten(),
             TerminalSymbol::Error => self.error_shift,
             TerminalSymbol::Eof => self.eof_shift,
         }
@@ -260,31 +255,22 @@ impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + 
         NonTerm: Hash + Eq + NonTerminal,
     {
         let nonterm = nonterm.to_usize();
-        if nonterm < self.shift_nonterm_offset {
-            None
-        } else {
-            self.shift_goto_map_nonterm
-                .get(nonterm - self.shift_nonterm_offset)
-                .copied()
-                .flatten()
-                .map(Into::into)
-        }
+        self.shift_goto_map_nonterm
+            .get(nonterm.wrapping_sub(self.shift_nonterm_offset))
+            .copied()
+            .flatten()
+            .map(Into::into)
     }
     fn reduce(
         &self,
         class: TerminalSymbol<usize>,
     ) -> Option<impl Iterator<Item = usize> + Clone + '_> {
         match class {
-            TerminalSymbol::Term(class) => {
-                if class < self.reduce_offset {
-                    None
-                } else {
-                    self.reduce_map
-                        .get(class - self.reduce_offset)
-                        .map(|r| r.as_ref())
-                        .flatten()
-                }
-            }
+            TerminalSymbol::Term(class) => self
+                .reduce_map
+                .get(class.wrapping_sub(self.reduce_offset))
+                .map(|r| r.as_ref())
+                .flatten(),
             TerminalSymbol::Error => self.error_reduce.as_ref(),
             TerminalSymbol::Eof => self.eof_reduce.as_ref(),
         }
