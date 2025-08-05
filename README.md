@@ -8,6 +8,8 @@ RustyLR is a parser generator that converts context-free grammars into IELR(1)/L
 Highly inspired by tools like *bison*, it uses a similar syntax while integrating seamlessly with Rust's ecosystem.
 It constructs optimized state machines, ensuring efficient and reliable parsing.
 
+![title](images/title.png)
+
 ## Features
  - **Custom Reduce Actions:** Define custom actions in Rust, allowing you to build custom data structures easily.
  - **Automatic Optimization:** Reduces parser table size and improves performance by grouping terminals with identical behavior across parser states.
