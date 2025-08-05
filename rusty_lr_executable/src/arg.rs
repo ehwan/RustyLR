@@ -34,7 +34,7 @@ pub struct Args {
     #[arg(short = 'o', long, default_value = "false")]
     pub no_optimization: bool,
 
-    /// Do not print backtrace of production rules when conflicts occured. ruleset could be messed up
+    /// Do not print backtrace of production rules when conflicts occurred. ruleset could be messed up
     #[arg(short = 'b', long, default_value = "false")]
     pub no_backtrace: bool,
 
