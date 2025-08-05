@@ -17,20 +17,17 @@ fn main() {
     let mut builder = rusty_lr_buildscript::Builder::new();
     builder.is_executable = true;
     builder.file(&args.input_file);
-    if args.verbose {
-        builder.verbose();
+    if args.no_conflict {
+        builder.note_conflicts(false);
     }
-    if args.verbose_conflict {
-        builder.verbose_conflicts();
+    if args.no_conflict_resolve {
+        builder.note_conflicts_resolving(false);
     }
-    if args.verbose_conflict_resolve {
-        builder.verbose_conflicts_resolving();
-    }
-    if args.verbose_optimization {
-        builder.verbose_optimization();
+    if args.no_optimization {
+        builder.note_optimization(false);
     }
     if args.no_backtrace {
-        builder.no_print_backtrace();
+        builder.note_backtrace(false);
     }
     if let Some(glr) = args.glr {
         builder.glr(glr);
