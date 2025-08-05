@@ -45,23 +45,23 @@ pub struct Builder {
     /// input_file to read
     input_file: Option<String>,
 
-    /// when `vebose` is on, print debug information about
-    /// any shift/reduce, reduce/reduce conflicts.
-    /// This is for GLR parser, to show where the conflicts occured.
-    verbose_conflicts: bool,
+    /// Print note information about any shift/reduce, reduce/reduce conflicts.
+    /// If the target is deterministic parser, conflict will be treated as an error,
+    /// so this option will be ignored.
+    /// This option is only for non-deterministic GLR parser.
+    note_conflicts: bool,
 
-    /// when `vebose` is on, print debug information about
-    /// conflicts resolving process by `%left` or `%right` for any shift/reduce, reduce/reduce conflicts.
-    verbose_conflicts_resolving: bool,
+    /// Print debug information about conflicts resolving process by any `%left`, `%right`, or `%precedence` directive.
+    note_conflicts_resolving: bool,
 
-    /// print debug information about terminal class optimization
-    verbose_optimization: bool,
+    /// Print debug information about optimization process.
+    note_optimization: bool,
 
-    /// print verbose information to stderr
-    verbose_on_stderr: bool,
+    /// Print every `note_*` information to stderr.
+    note_on_stderr: bool,
 
-    /// print backtrace rules in state when conflicts occured. ruleset could be massive
-    print_backtrace: bool,
+    /// Print backtrace of production rules when conflicts occured. ruleset could be messed up
+    note_backtrace: bool,
 
     /// if true, an executable called this function
     pub is_executable: bool,
@@ -76,11 +76,11 @@ impl Builder {
     pub fn new() -> Self {
         Self {
             input_file: None,
-            verbose_conflicts: false,
-            verbose_conflicts_resolving: false,
-            verbose_on_stderr: false,
-            verbose_optimization: false,
-            print_backtrace: true,
+            note_conflicts: true,
+            note_conflicts_resolving: true,
+            note_on_stderr: false,
+            note_optimization: true,
+            note_backtrace: true,
             is_executable: false,
 
             glr: None,
@@ -111,47 +111,41 @@ impl Builder {
         self
     }
 
-    /// turns on all verbose options
-    pub fn verbose(&mut self) -> &mut Self {
-        self.verbose_conflicts();
-        self.verbose_conflicts_resolving();
-        self.verbose_optimization();
+    /// Print note information about any shift/reduce, reduce/reduce conflicts.
+    /// If the target is deterministic parser, conflict will be treated as an error,
+    /// so this option will be ignored.
+    /// This option is only for non-deterministic GLR parser.
+    pub fn note_conflicts(&mut self, val: bool) -> &mut Self {
+        self.note_conflicts = val;
         self
     }
 
-    /// when `vebose` is on, print debug information about
-    /// any shift/reduce, reduce/reduce conflicts.
-    pub fn verbose_conflicts(&mut self) -> &mut Self {
-        self.verbose_conflicts = true;
+    /// Print debug information about conflicts resolving process by any `%left`, `%right`, or `%precedence` directive.
+    pub fn note_conflicts_resolving(&mut self, val: bool) -> &mut Self {
+        self.note_conflicts_resolving = val;
         self
     }
 
-    /// when `vebose` is on, print debug information about
-    /// conflicts resolving process by `%left` or `%right` for any shift/reduce, reduce/reduce conflicts.
-    pub fn verbose_conflicts_resolving(&mut self) -> &mut Self {
-        self.verbose_conflicts_resolving = true;
+    /// Print debug information about optimization process.
+    pub fn note_optimization(&mut self, val: bool) -> &mut Self {
+        self.note_optimization = val;
         self
     }
 
-    pub fn verbose_optimization(&mut self) -> &mut Self {
-        self.verbose_optimization = true;
+    /// Print every `note_*` information to stderr.
+    pub fn note_on_stderr(&mut self, val: bool) -> &mut Self {
+        self.note_on_stderr = val;
         self
     }
 
-    /// print debug information to stderr.
-    pub fn verbose_on_stderr(&mut self) -> &mut Self {
-        self.verbose_on_stderr = true;
+    /// Print backtrace of production rules when conflicts occured. ruleset could be messed up
+    pub fn note_backtrace(&mut self, val: bool) -> &mut Self {
+        self.note_backtrace = val;
         self
     }
 
-    /// do not print backtrace rules in state when conflicts occured.
-    pub fn no_print_backtrace(&mut self) -> &mut Self {
-        self.print_backtrace = false;
-        self
-    }
-
-    fn verbose_stream(&self) -> StandardStream {
-        if self.verbose_on_stderr {
+    fn note_stream(&self) -> StandardStream {
+        if self.note_on_stderr {
             StandardStream::stderr(ColorChoice::Auto)
         } else {
             StandardStream::stdout(ColorChoice::Auto)
@@ -779,7 +773,7 @@ impl Builder {
             use rusty_lr_parser::grammar::OptimizeRemove;
             let optimized = grammar.optimize(10);
 
-            if self.verbose_optimization {
+            if self.note_optimization {
                 // terminals merged into terminal class
                 let mut class_message = Vec::new();
                 for (class_idx, class_def) in grammar.terminal_classes.iter().enumerate() {
@@ -824,7 +818,7 @@ impl Builder {
                                 .with_labels(labels)
                                 .with_notes(notes);
 
-                            let writer = self.verbose_stream();
+                            let writer = self.note_stream();
                             let config = codespan_reporting::term::Config::default();
                             term::emit(&mut writer.lock(), &config, &files, &diag)
                                 .expect("Failed to write to verbose stream");
@@ -853,7 +847,7 @@ impl Builder {
                                 .with_labels(labels)
                                 .with_notes(notes);
 
-                            let writer = self.verbose_stream();
+                            let writer = self.note_stream();
                             let config = codespan_reporting::term::Config::default();
                             term::emit(&mut writer.lock(), &config, &files, &diag)
                                 .expect("Failed to write to verbose stream");
@@ -875,7 +869,7 @@ impl Builder {
                                 .with_labels(labels)
                                 .with_notes(notes);
 
-                            let writer = self.verbose_stream();
+                            let writer = self.note_stream();
                             let config = codespan_reporting::term::Config::default();
                             term::emit(&mut writer.lock(), &config, &files, &diag)
                                 .expect("Failed to write to verbose stream");
@@ -896,7 +890,7 @@ impl Builder {
                                 .with_labels(labels)
                                 .with_notes(notes);
 
-                            let writer = self.verbose_stream();
+                            let writer = self.note_stream();
                             let config = codespan_reporting::term::Config::default();
                             term::emit(&mut writer.lock(), &config, &files, &diag)
                                 .expect("Failed to write to verbose stream");
@@ -923,7 +917,7 @@ impl Builder {
                         )
                         .with_notes(notes);
 
-                    let writer = self.verbose_stream();
+                    let writer = self.note_stream();
                     let config = codespan_reporting::term::Config::default();
                     term::emit(&mut writer.lock(), &config, &files, &diag)
                         .expect("Failed to write to verbose stream");
@@ -1122,7 +1116,7 @@ impl Builder {
                             .to_string(),
                     ];
 
-            if self.print_backtrace {
+            if self.note_backtrace {
                 if self.is_executable {
                     notes.push("--no-backtrace to disable backtracing".to_string());
                 }
@@ -1156,7 +1150,7 @@ impl Builder {
                     "(Reduce) ",
                 );
 
-                if self.print_backtrace {
+                if self.note_backtrace {
                     let name = nonterm_mapper(grammar.builder.rules[reduce_rule].rule.name);
 
                     notes.push(format!("Backtrace for the reduce rule ({name}):"));
@@ -1198,7 +1192,7 @@ impl Builder {
                     "(Reduce) ",
                 );
 
-                if self.print_backtrace {
+                if self.note_backtrace {
                     if self.is_executable {
                         notes.push("--no-backtrace to disable backtracing".to_string());
                     }
@@ -1235,9 +1229,9 @@ impl Builder {
         }
 
         // print note about shift/reduce conflict resolved with `%left` or `%right`
-        if self.verbose_conflicts_resolving {
+        if self.note_conflicts_resolving {
             for diag in conflict_diags_resolved.into_iter() {
-                let writer = self.verbose_stream();
+                let writer = self.note_stream();
                 let config = codespan_reporting::term::Config::default();
                 term::emit(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to verbose stream");
@@ -1257,13 +1251,13 @@ impl Builder {
             }
         }
         // print note about reduce/reduce conflict and shift/reduce conflict not resolved
-        else if self.verbose_conflicts {
+        else if self.note_conflicts {
             for diag in conflict_diags.into_iter() {
                 let diag = Diagnostic::note()
                     .with_message(diag.message)
                     .with_labels(diag.labels)
                     .with_notes(diag.notes);
-                let writer = self.verbose_stream();
+                let writer = self.note_stream();
                 let config = codespan_reporting::term::Config::default();
                 term::emit(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
