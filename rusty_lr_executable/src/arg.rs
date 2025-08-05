@@ -8,49 +8,45 @@ use clap::Parser;
 #[command(version)]
 #[command(about)]
 pub struct Args {
-    /// input_file to read
+    /// Input_file to read
     pub input_file: String,
 
-    /// output_file to write
+    /// Output_file to write
     #[arg(default_value = "out.tab.rs")]
     pub output_file: String,
 
-    /// do not rustfmt the output
+    /// Do not rustfmt the output
     #[arg(long, default_value = "false")]
     pub no_format: bool,
 
-    /// turns on all verbose options
-    #[arg(short, long, default_value = "true")]
-    pub verbose: bool,
-
-    /// verbose output for any shift/reduce or reduce/reduce conflicts.
+    /// Do not print note information about any shift/reduce, reduce/reduce conflicts.
     ///
-    /// This option is for GLR parser.
-    /// Since such conflicts are not treated as errors, this option is useful for debugging.
+    /// If the target is deterministic parser, conflict will be treated as an error, so this option will be ignored.
+    /// This option is only for non-deterministic GLR parser.
     #[arg(short = 'c', long, default_value = "false")]
-    pub verbose_conflict: bool,
+    pub no_conflict: bool,
 
-    /// verbose output for the conflict resolution process, by '%left' or '%right' directive.
+    /// Do not print debug information about conflicts resolving process by any `%left`, `%right`, or `%precedence` directive.
     #[arg(short = 'r', long, default_value = "false")]
-    pub verbose_conflict_resolve: bool,
+    pub no_conflict_resolve: bool,
 
-    /// verbose output for the terminal class optimization process
+    /// Do not print debug information about optimization process.
     #[arg(short = 'o', long, default_value = "false")]
-    pub verbose_optimization: bool,
+    pub no_optimization: bool,
 
-    /// do not print the backtrace rules in current state when a conflict occurs
+    /// Do not print backtrace of production rules when conflicts occured. ruleset could be messed up
     #[arg(short = 'b', long, default_value = "false")]
     pub no_backtrace: bool,
 
-    /// override the written code and set generated parser use GLR parsing algorithm
+    /// Override the written code and set generated parser use GLR parsing algorithm
     #[arg(long)]
     pub glr: Option<bool>,
 
-    /// override the written code and set parser table to be runtime-calculated
+    /// Override the written code and set parser table to be runtime-calculated
     #[arg(long)]
     pub runtime: Option<bool>,
 
-    /// override the written code and set generated parser table to use dense arrays
+    /// Override the written code and set generated parser table to use dense arrays
     #[arg(long)]
     pub dense: Option<bool>,
 }
