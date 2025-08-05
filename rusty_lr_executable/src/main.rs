@@ -1,6 +1,7 @@
 use clap::Parser;
 
 use std::fs::write;
+use std::process::Command;
 
 mod arg;
 
@@ -77,32 +78,19 @@ fn main() {
         out.generated_stream,
         "Generated Codes End"
     );
-
-    let output_string = if !args.no_format {
-        let syn_file = match syn::parse_file(&output_string) {
-            Ok(file) => file,
-            Err(e) => {
-                eprintln!("Error formatting generated file: {}", args.output_file);
-                eprintln!("Error: {}", e);
-                match write(args.output_file.clone(), output_string) {
-                    Ok(_) => {}
-                    Err(e) => {
-                        eprintln!("Error writing output file: {}", e);
-                        return;
-                    }
-                }
-                return;
-            }
-        };
-        prettyplease::unparse(&syn_file)
-    } else {
-        output_string
-    };
     match write(args.output_file.clone(), output_string) {
         Ok(_) => {}
         Err(e) => {
             eprintln!("Error writing output file: {}", e);
             return;
         }
+    }
+
+    if !args.no_format {
+        let mut child = Command::new("rustfmt")
+            .arg(args.output_file)
+            .spawn()
+            .expect("Failed to run rustfmt");
+        child.wait().expect("Failed to wait on rustfmt");
     }
 }

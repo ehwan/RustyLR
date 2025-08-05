@@ -15,7 +15,7 @@ pub struct Args {
     #[arg(default_value = "out.tab.rs")]
     pub output_file: String,
 
-    /// Do not format the output code
+    /// Do not rustfmt the output
     #[arg(long, default_value = "false")]
     pub no_format: bool,
 
