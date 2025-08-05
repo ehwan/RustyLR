@@ -60,7 +60,7 @@ pub struct Builder {
     /// Print every `note_*` information to stderr.
     note_on_stderr: bool,
 
-    /// Print backtrace of production rules when conflicts occured. ruleset could be messed up
+    /// Print backtrace of production rules when conflicts occurred. ruleset could be messed up
     note_backtrace: bool,
 
     /// if true, an executable called this function
