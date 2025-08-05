@@ -138,7 +138,7 @@ impl Builder {
         self
     }
 
-    /// Print backtrace of production rules when conflicts occured. ruleset could be messed up
+    /// Print backtrace of production rules when conflicts occurred. ruleset could be messed up
     pub fn note_backtrace(&mut self, val: bool) -> &mut Self {
         self.note_backtrace = val;
         self
