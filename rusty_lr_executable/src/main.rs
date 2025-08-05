@@ -1,7 +1,6 @@
 use clap::Parser;
 
 use std::fs::write;
-use std::process::Command;
 
 mod arg;
 
@@ -50,6 +49,30 @@ fn main() {
     println!(">> The generated code is targeting rusty_lr version {major}.{minor}.x.");
     println!(">> There might be a build error if the version is not matched.");
 
+    // format the generated code
+    let user_code = if args.no_format {
+        out.user_stream.to_string()
+    } else {
+        match syn::parse2(out.user_stream.clone()) {
+            Ok(file) => prettyplease::unparse(&file),
+            Err(e) => {
+                eprintln!("Error parsing user code: {}", e);
+                out.user_stream.to_string()
+            }
+        }
+    };
+    let generated_code = if args.no_format {
+        out.generated_stream.to_string()
+    } else {
+        match syn::parse2(out.generated_stream.clone()) {
+            Ok(file) => prettyplease::unparse(&file),
+            Err(e) => {
+                eprintln!("Error parsing generated code: {}", e);
+                out.generated_stream.to_string()
+            }
+        }
+    };
+
     let this_name = env!("CARGO_PKG_NAME");
     let this_version = env!("CARGO_PKG_VERSION");
     let output_string = format!(
@@ -71,11 +94,11 @@ fn main() {
         this_name,
         this_version,
         "User Codes Begin",
-        out.user_stream,
+        user_code,
         "User Codes End",
         out.debug_comments,
         "Generated Codes Begin",
-        out.generated_stream,
+        generated_code,
         "Generated Codes End"
     );
     match write(args.output_file.clone(), output_string) {
@@ -84,13 +107,5 @@ fn main() {
             eprintln!("Error writing output file: {}", e);
             return;
         }
-    }
-
-    if !args.no_format {
-        let mut child = Command::new("rustfmt")
-            .arg(args.output_file)
-            .spawn()
-            .expect("Failed to run rustfmt");
-        child.wait().expect("Failed to wait on rustfmt");
     }
 }
