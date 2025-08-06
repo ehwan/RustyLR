@@ -1,6 +1,6 @@
 # rustylr
-A command-line tool that converts context-free grammars into state automaton tables
-and generates Rust code that can be used as a parser for that grammar.
+Executable for rusty_lr, a bison-like parser generator & compiler frontend for Rust supporting IELR(1), LALR(1) parser tables, with deterministic LR and non-deterministic LR (GLR) parsing.
+
 
 ## Installation
 ```bash
@@ -14,28 +14,45 @@ Usage: rustylr [OPTIONS] <INPUT_FILE> [OUTPUT_FILE]
 
 Arguments:
   <INPUT_FILE>
-          input_file to read
+          Input_file to read
 
   [OUTPUT_FILE]
-          Output file for generated Rust code
+          Output_file to write
+
           [default: out.tab.rs]
 
 Options:
       --no-format
-          do not rustfmt the output
+          Do not rustfmt the output
 
-  -v, --verbose
-          Enable all verbose options
+  -c, --no-conflict
+          Do not print note information about any shift/reduce, reduce/reduce conflicts.
 
-  -c, --verbose-conflict
-          Show verbose output for any shift/reduce or reduce/reduce conflicts.
-          This option is useful for GLR parsers where conflicts are not treated as errors.
+          If the target is deterministic parser, conflict will be treated as an error, so this option will be ignored. This option is only for non-deterministic GLR parser.
 
-  -r, --verbose-conflict-resolve
-          Show verbose output for the conflict resolution process using '%left' or '%right' directives
+  -r, --no-conflict-resolve
+          Do not print debug information about conflicts resolving process by any `%left`, `%right`, or `%precedence` directive
 
-      --verbose-optimization
-          Show verbose output for the terminal class optimization process
+  -o, --no-optimization
+          Do not print debug information about optimization process
+
+  -b, --no-backtrace
+          Do not print backtrace of production rules when conflicts occurred. ruleset could be messed up
+
+      --glr <GLR>
+          Override the written code and set generated parser use GLR parsing algorithm
+
+          [possible values: true, false]
+
+      --runtime <RUNTIME>
+          Override the written code and set parser table to be runtime-calculated
+
+          [possible values: true, false]
+
+      --dense <DENSE>
+          Override the written code and set generated parser table to use dense arrays
+
+          [possible values: true, false]
 
   -h, --help
           Print help (see a summary with '-h')
@@ -64,14 +81,12 @@ pub enum Token {
     Identifier(String),
     Number(i32),
     Punct(char),
-    EOF,
 }
 
 %% // Grammar definition starts here
 
 %tokentype Token;
 %start E;
-%eof Token::EOF;
 
 %token id Token::Identifier(_);
 %token num Token::Number(_);
@@ -112,7 +127,6 @@ fn main() {
         Token::Punct('('),
         Token::Identifier("hello".to_string()),
         Token::Punct(')'),
-        Token::EOF,
     ];
     
     for token in tokens {
@@ -123,7 +137,7 @@ fn main() {
     }
     
     // Get the final result
-    if let Some(result) = context.accept() {
+    if let Ok(result) = context.accept( &parser, &mut () ) {
         println!("Parse successful: {:?}", result);
     }
 }
