@@ -405,6 +405,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
         let state = self.state(node_to_shift);
 
+        /*
         match Data::reduce_action(
             reduce_rule,
             &mut self.reduce_args,
@@ -441,6 +442,8 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 Err(err)
             }
         }
+        */
+        Ok(0)
     }
 
     /// Get number of diverged paths
