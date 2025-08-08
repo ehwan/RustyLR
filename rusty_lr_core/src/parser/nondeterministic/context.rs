@@ -111,12 +111,13 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
     }
 
     /// Create a new node in the pool and return its index.
-    pub(crate) fn new_node(&mut self) -> usize {
+    pub(crate) fn new_node_with_capacity(&mut self, capacity: usize) -> usize {
         if let Some(idx) = self.empty_node_indices.pop_first() {
+            self.node_mut(idx).reserve(capacity);
             idx
         } else {
             let idx = self.nodes_pool.len();
-            self.nodes_pool.push(Node::default());
+            self.nodes_pool.push(Node::with_capacity(capacity));
             idx
         }
     }
@@ -229,7 +230,12 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
     /// From `node`, collect `reduce_token_count` number of tokens for reduce_action.
     /// Returns the index of node that it's data_stack, location_stack and tree_stack have more elements than reduce_token_count,
     /// and other stack containing the (data_stack.len() - reduce_token_count) number of elements.
-    fn prepare_reduce_node(&mut self, node_idx: usize, reduce_token_count: usize) -> usize
+    fn prepare_reduce_node(
+        &mut self,
+        node_idx: usize,
+        reduce_token_count: usize,
+        capacity: usize,
+    ) -> usize
     where
         Data: Clone,
         Data::Term: Clone,
@@ -253,13 +259,16 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 let parent = node.parent;
 
                 if i == 0 {
+                    // parent <- node[0..]
+                    //        <- new_node
+
                     let node_data_stack = node.data_stack.clone();
                     let node_location_stack = node.location_stack.clone();
                     #[cfg(feature = "tree")]
                     let node_tree_stack = node.tree_stack.clone();
 
                     // create new empty node pointing to this node's parent node, and use it as node_to_shift
-                    let new_node_idx = self.new_node();
+                    let new_node_idx = self.new_node_with_capacity(capacity);
                     if let Some(parent) = parent {
                         self.add_child(parent, new_node_idx);
                     }
@@ -274,7 +283,8 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     new_node_idx
                 } else if i == node.len() {
                     // create new empty node pointing to this node, and use it as node_to_shift
-                    let new_node_idx = self.new_node();
+                    // node <- new_node
+                    let new_node_idx = self.new_node_with_capacity(capacity);
                     self.add_child(node_idx, new_node_idx);
                     new_node_idx
                 } else {
@@ -284,7 +294,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     // new_parent[..i] <- current_node[i..]
                     //                 <- new_node (empty)
 
-                    let new_parent = self.new_node();
+                    let new_parent = self.new_node_with_capacity(i);
                     let node = self.node_mut(node_idx);
 
                     let parent_data_stack = node.data_stack.drain(..i).collect();
@@ -317,7 +327,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     }
                     self.add_child(new_parent, node_idx);
 
-                    let new_node = self.new_node();
+                    let new_node = self.new_node_with_capacity(capacity);
                     self.add_child(new_parent, new_node);
                     {
                         let new_node = self.node_mut(new_node);
@@ -376,7 +386,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
             let (mut node_data_stack, mut node_location_stack) = node_stack;
 
             let reduce_node_idx =
-                self.prepare_reduce_node(parent.unwrap(), reduce_token_count - len);
+                self.prepare_reduce_node(parent.unwrap(), reduce_token_count - len, capacity);
             let reduce_node = self.node_mut(reduce_node_idx);
             reduce_node.data_stack.append(&mut node_data_stack);
             reduce_node.location_stack.append(&mut node_location_stack);
@@ -409,7 +419,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
         let count = rule.rule.len();
         let mut new_location = Data::Location::new(self.location_iter(node), count);
 
-        let node_to_shift = self.prepare_reduce_node(node, count);
+        let node_to_shift = self.prepare_reduce_node(node, count, count);
 
         use crate::parser::State;
 
@@ -1443,7 +1453,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Default for Context<Data, StateI
             fallback_nodes: Default::default(),
             no_precedences: Default::default(),
         };
-        let root_node = context.new_node();
+        let root_node = context.new_node_with_capacity(0);
         context.current_nodes.push(root_node);
         context
     }

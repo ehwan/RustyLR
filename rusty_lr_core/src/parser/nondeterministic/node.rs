@@ -53,4 +53,25 @@ impl<Data: TokenData, StateIndex> Node<Data, StateIndex> {
     pub fn is_leaf(&self) -> bool {
         self.child_count == 0
     }
+
+    pub fn with_capacity(capacity: usize) -> Self {
+        Node {
+            parent: None,
+            child_count: 0,
+            state_stack: Vec::with_capacity(capacity),
+            data_stack: Vec::with_capacity(capacity),
+            location_stack: Vec::with_capacity(capacity),
+            precedence_stack: Vec::with_capacity(capacity),
+            #[cfg(feature = "tree")]
+            tree_stack: Vec::with_capacity(capacity),
+        }
+    }
+    pub fn reserve(&mut self, additional: usize) {
+        self.state_stack.reserve(additional);
+        self.data_stack.reserve(additional);
+        self.location_stack.reserve(additional);
+        self.precedence_stack.reserve(additional);
+        #[cfg(feature = "tree")]
+        self.tree_stack.reserve(additional);
+    }
 }
