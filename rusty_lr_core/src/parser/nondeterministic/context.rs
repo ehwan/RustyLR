@@ -295,6 +295,9 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     #[cfg(feature = "tree")]
                     node.tree_stack.extend(tree_stack.into_iter().rev());
 
+                    node.state_stack.truncate(i);
+                    node.precedence_stack.truncate(i);
+
                     break current_node;
                 } else {
                     // clone the values in range [i..] from current_node to reduce_args
