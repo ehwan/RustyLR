@@ -121,6 +121,15 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
             idx
         }
     }
+    pub(crate) fn new_node(&mut self) -> usize {
+        if let Some(idx) = self.empty_node_indices.pop_first() {
+            idx
+        } else {
+            let idx = self.nodes_pool.len();
+            self.nodes_pool.push(Node::default());
+            idx
+        }
+    }
     pub(crate) fn add_child(&mut self, node: usize, child: usize) {
         debug_assert!(self.node(child).parent.is_none());
         self.node_mut(node).child_count += 1;
@@ -294,15 +303,22 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     // new_parent[..i] <- current_node[i..]
                     //                 <- new_node (empty)
 
-                    let new_parent = self.new_node_with_capacity(i);
+                    let new_parent = self.new_node();
                     let node = self.node_mut(node_idx);
 
-                    let parent_data_stack = node.data_stack.drain(..i).collect();
-                    let parent_state_stack = node.state_stack.drain(..i).collect();
-                    let parent_location_stack = node.location_stack.drain(..i).collect();
-                    let parent_precedence_stack = node.precedence_stack.drain(..i).collect();
+                    let mut parent_data_stack = node.data_stack.split_off(i);
+                    let mut parent_state_stack = node.state_stack.split_off(i);
+                    let mut parent_location_stack = node.location_stack.split_off(i);
+                    let mut parent_precedence_stack = node.precedence_stack.split_off(i);
                     #[cfg(feature = "tree")]
-                    let parent_tree_stack = node.tree_stack.drain(..i).collect();
+                    let mut parent_tree_stack = node.tree_stack.split_off(i);
+
+                    std::mem::swap(&mut parent_data_stack, &mut node.data_stack);
+                    std::mem::swap(&mut parent_state_stack, &mut node.state_stack);
+                    std::mem::swap(&mut parent_location_stack, &mut node.location_stack);
+                    std::mem::swap(&mut parent_precedence_stack, &mut node.precedence_stack);
+                    #[cfg(feature = "tree")]
+                    std::mem::swap(&mut parent_tree_stack, &mut node.tree_stack);
 
                     let node_data_stack = node.data_stack.clone();
                     let node_location_stack = node.location_stack.clone();
@@ -1453,7 +1469,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Default for Context<Data, StateI
             fallback_nodes: Default::default(),
             no_precedences: Default::default(),
         };
-        let root_node = context.new_node_with_capacity(0);
+        let root_node = context.new_node();
         context.current_nodes.push(root_node);
         context
     }
