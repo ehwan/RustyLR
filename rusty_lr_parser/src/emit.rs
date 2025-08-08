@@ -1222,8 +1222,9 @@ impl Grammar {
         let clear_reduce_fn_name = format_ident!("reduce_clear");
 
         use std::collections::BTreeMap;
-        let mut identity_reduce_action_range: BTreeMap<usize, (usize, usize)> = BTreeMap::new();
-        let mut clear_reduce_action_range: Option<(usize, usize)> = None;
+        let mut identity_reduce_action_range: BTreeMap<(usize, usize), (usize, usize)> =
+            BTreeMap::new();
+        let mut clear_reduce_action_range: BTreeMap<usize, (usize, usize)> = BTreeMap::new();
 
         use rusty_lr_core::TerminalSymbol;
         use rusty_lr_core::Token;
@@ -1235,7 +1236,7 @@ impl Grammar {
             match &rule.reduce_action {
                 Some(ReduceAction::Custom(reduce_action)) => {
                     let mut extract_token_data_from_args = TokenStream::new();
-                    for token in rule.tokens.iter() {
+                    for token in rule.tokens.iter().rev() {
                         match &token.token {
                             Token::Term(term) => match &token.mapto {
                                 Some(mapto) => {
@@ -1245,14 +1246,16 @@ impl Grammar {
                                     match term {
                                         TerminalSymbol::Term(_) => {
                                             extract_token_data_from_args.extend(quote! {
-                                                let (#token_data_typename::#terminal_variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
+                                                let #token_data_typename::#terminal_variant_name(mut #mapto) = __data_stack.pop().unwrap() else {
                                                     unreachable!()
                                                 };
+                                                let #location_varname = __location_stack.pop().unwrap();
                                             });
                                         }
                                         TerminalSymbol::Error => {
                                             extract_token_data_from_args.extend(quote! {
-                                                let (_, #location_varname) = __rustylr_args.pop().unwrap();
+                                                __data_stack.pop();
+                                                let #location_varname = __location_stack.pop().unwrap();
                                             });
                                         }
                                         TerminalSymbol::Eof => {
@@ -1264,7 +1267,8 @@ impl Grammar {
                                 }
                                 None => {
                                     extract_token_data_from_args.extend(quote! {
-                                        __rustylr_args.pop();
+                                        __data_stack.pop();
+                                        __location_stack.pop();
                                     });
                                 }
                             },
@@ -1276,20 +1280,23 @@ impl Grammar {
                                         let variant_name = &variant_names_for_nonterm[*nonterm_idx];
                                         if variant_name == &empty_ruletype_variant_name {
                                             extract_token_data_from_args.extend(quote! {
-                                                let (_, #location_varname) = __rustylr_args.pop().unwrap();
+                                                __data_stack.pop();
+                                                let #location_varname = __location_stack.pop().unwrap();
                                             });
                                         } else {
                                             // extract token data from args
                                             extract_token_data_from_args.extend(quote! {
-                                                let (#token_data_typename::#variant_name(mut #mapto), #location_varname) = __rustylr_args.pop().unwrap() else {
+                                                let #token_data_typename::#variant_name(mut #mapto) = __data_stack.pop().unwrap() else {
                                                     unreachable!()
                                                 };
+                                                let #location_varname = __location_stack.pop().unwrap();
                                             });
                                         }
                                     }
                                     None => {
                                         extract_token_data_from_args.extend(quote! {
-                                            __rustylr_args.pop();
+                                            __data_stack.pop();
+                                            __location_stack.pop();
                                         });
                                     }
                                 }
@@ -1316,7 +1323,7 @@ impl Grammar {
 
                     case_streams.extend(quote! {
                         #rule_index => {
-                            Self::#reduce_fn_ident( reduce_args, shift, lookahead, user_data, location0 )
+                            Self::#reduce_fn_ident( data_stack, location_stack, shift, lookahead, user_data, location0 )
                         }
                     });
 
@@ -1329,7 +1336,8 @@ impl Grammar {
                             #[doc = #rule_debug_str]
                             #[inline]
                             fn #reduce_fn_ident(
-                                __rustylr_args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
+                                __data_stack: &mut Vec<Self>,
+                                __location_stack: &mut Vec<#location_typename>,
                                 shift: &mut bool,
                                 lookahead: &#module_prefix::TerminalSymbol<#token_typename>,
                                 #user_data_parameter_name: &mut #user_data_typename,
@@ -1349,7 +1357,8 @@ impl Grammar {
                             #[doc = #rule_debug_str]
                             #[inline]
                             fn #reduce_fn_ident(
-                                __rustylr_args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
+                                __data_stack: &mut Vec<Self>,
+                                __location_stack: &mut Vec<#location_typename>,
                                 shift: &mut bool,
                                 lookahead: &#module_prefix::TerminalSymbol<#token_typename>,
                                 #user_data_parameter_name: &mut #user_data_typename,
@@ -1368,49 +1377,50 @@ impl Grammar {
                     let reversed_idx = rule.tokens.len() - reduce_action_identity - 1;
 
                     let (_, max) = identity_reduce_action_range
-                        .entry(reversed_idx)
+                        .entry((reversed_idx, rule.tokens.len()))
                         .or_insert((rule_index, rule_index));
                     let new_last = (*max).max(rule_index);
                     *max = new_last;
                 }
                 None => {
-                    if let Some((_, last)) = &mut clear_reduce_action_range {
-                        let new_last = (*last).max(rule_index);
-                        *last = new_last;
-                    } else {
-                        clear_reduce_action_range = Some((rule_index, rule_index));
-                    }
+                    let (_, max) = clear_reduce_action_range
+                        .entry(rule.tokens.len())
+                        .or_insert((rule_index, rule_index));
+                    let new_last = (*max).max(rule_index);
+                    *max = new_last;
                 }
             }
         }
 
         // add match choices for identity reduce actions.
         // since multiple reduce actions can be identity, merge them into ranges
-        for (reversed_idx, (start_rule_index, last_rule_index)) in identity_reduce_action_range {
+        for ((reversed_idx, num_tokens), (start_rule_index, last_rule_index)) in
+            identity_reduce_action_range
+        {
             if start_rule_index == last_rule_index {
                 // identity action
                 case_streams.extend(quote! {
                     #start_rule_index => {
-                        Ok(Self::#identity_reduce_fn_name( reduce_args, #reversed_idx ))
+                        Ok(Self::#identity_reduce_fn_name( data_stack, location_stack, #reversed_idx, #num_tokens ))
                     }
                 });
             } else {
                 // identity action
                 case_streams.extend(quote! {
                     #start_rule_index..=#last_rule_index => {
-                        Ok(Self::#identity_reduce_fn_name( reduce_args, #reversed_idx ))
+                        Ok(Self::#identity_reduce_fn_name( data_stack, location_stack, #reversed_idx, #num_tokens ))
                     }
                 });
             }
         }
-        // add match choices for clear identity reduce actions.
-        if let Some((start_rule_index, last_rule_index)) = clear_reduce_action_range {
+        // add match choices for clear clear reduce actions.
+        for (num_tokens, (start_rule_index, last_rule_index)) in clear_reduce_action_range {
             if start_rule_index == last_rule_index {
                 // no reduce action (without ruletype)
                 // clear the arguments stack and return empty token data
                 case_streams.extend(quote! {
                     #start_rule_index => {
-                        Ok(Self::#clear_reduce_fn_name( reduce_args ))
+                        Ok(Self::#clear_reduce_fn_name( data_stack, location_stack, #num_tokens ))
                     }
                 });
             } else {
@@ -1418,7 +1428,7 @@ impl Grammar {
                 // clear the arguments stack and return empty token data
                 case_streams.extend(quote! {
                     #start_rule_index..=#last_rule_index => {
-                        Ok(Self::#clear_reduce_fn_name( reduce_args ))
+                        Ok(Self::#clear_reduce_fn_name( data_stack, location_stack, #num_tokens ))
                     }
                 });
             }
@@ -1468,17 +1478,26 @@ impl Grammar {
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
         impl #token_data_typename {
             fn #identity_reduce_fn_name(
-                args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
-                idx: usize,
+                data_stack: &mut Vec<Self>,
+                location_stack: &mut Vec<#location_typename>,
+                reversed_idx: usize,
+                num_tokens: usize,
             ) -> Self {
-                let value = args.swap_remove(idx).0;
-                args.clear();
+                location_stack.truncate(location_stack.len() - num_tokens);
+                let idx = data_stack.len() - reversed_idx - 1;
+                let value = data_stack.swap_remove(idx);
+                if num_tokens > 1 {
+                    data_stack.truncate(data_stack.len() - num_tokens + 1);
+                }
                 value
             }
             fn #clear_reduce_fn_name(
-                args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
+                data_stack: &mut Vec<Self>,
+                location_stack: &mut Vec<#location_typename>,
+                num_tokens: usize,
             ) -> Self {
-                args.clear();
+                data_stack.truncate(data_stack.len() - num_tokens);
+                location_stack.truncate(location_stack.len() - num_tokens);
                 #token_data_typename::#empty_ruletype_variant_name
             }
 
@@ -1496,8 +1515,9 @@ impl Grammar {
             type Location = #location_typename;
 
             fn reduce_action(
+                data_stack: &mut Vec<Self>,
+                location_stack: &mut Vec<#location_typename>,
                 rule_index: usize,
-                reduce_args: &mut #module_prefix::nonterminal::ReduceArgsStack<Self>,
                 shift: &mut bool,
                 lookahead: &#module_prefix::TerminalSymbol<Self::Term>,
                 user_data: &mut Self::UserData,

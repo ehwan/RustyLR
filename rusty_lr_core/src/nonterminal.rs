@@ -74,10 +74,6 @@ pub trait TokenData: Sized {
     /// performs a reduce action with the given rule index
     fn reduce_action(
         // the child tokens for the reduction
-        // .len() must match with the number of symbols in the rule
-        // the order must be in reverse order. That is,
-        // if the rule is A -> B C D,
-        // this must be in the order of [D, C, B]
         data_stack: &mut Vec<Self>,
         location_stack: &mut Vec<Self::Location>,
 
