@@ -16,7 +16,4 @@ smallvec = { version = "1.15" }
 
 [features]
 default = []
-# use `rustc-hash` crate for hash map
-fxhash = []             # deprecated
 tree = ["dep:termtree"]
-error = []              # deprecated

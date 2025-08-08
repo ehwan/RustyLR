@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rusty_lr = { path = "../../rusty_lr", features = ["fxhash", "tree", "error"] }
+rusty_lr = { path = "../../rusty_lr", features = ["tree"] }

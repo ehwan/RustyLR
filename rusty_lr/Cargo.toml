@@ -16,12 +16,6 @@ rusty_lr_buildscript = { version = "0.54.0", path = "../rusty_lr_buildscript", o
 
 [features]
 default = ["derive"]
-fxhash = [] # deprecated
 build = ["dep:rusty_lr_buildscript"]
 derive = ["dep:rusty_lr_derive"]
-tree = [
-  "rusty_lr_core/tree",
-  "rusty_lr_derive/tree",
-  "rusty_lr_buildscript/tree",
-]
-error = [] # deprecated
+tree = ["rusty_lr_core/tree"]
