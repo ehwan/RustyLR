@@ -47,10 +47,6 @@ pub struct Context<Data: TokenData, StateIndex> {
     /// For recovery from error
     pub(crate) fallback_nodes: SmallVecNode,
 
-    /// For temporary use. store arguments for calling `reduce_action`.
-    /// But we don't want to reallocate every `feed` call
-    pub(crate) reduce_args: crate::nonterminal::ReduceArgsStack<Data>,
-
     /// For temporary use. store reduce errors returned from `reduce_action`.
     /// But we don't want to reallocate every `feed` call
     pub(crate) reduce_errors: Vec<Data::ReduceActionError>,
@@ -115,6 +111,16 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
     }
 
     /// Create a new node in the pool and return its index.
+    pub(crate) fn new_node_with_capacity(&mut self, capacity: usize) -> usize {
+        if let Some(idx) = self.empty_node_indices.pop_first() {
+            self.node_mut(idx).reserve(capacity);
+            idx
+        } else {
+            let idx = self.nodes_pool.len();
+            self.nodes_pool.push(Node::with_capacity(capacity));
+            idx
+        }
+    }
     pub(crate) fn new_node(&mut self) -> usize {
         if let Some(idx) = self.empty_node_indices.pop_first() {
             idx
@@ -230,6 +236,183 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
         }
     }
 
+    /// From `node`, collect `reduce_token_count` number of tokens for reduce_action.
+    /// Returns the index of node that it's data_stack, location_stack and tree_stack have more elements than reduce_token_count,
+    /// and other stack containing the (data_stack.len() - reduce_token_count) number of elements.
+    fn prepare_reduce_node(
+        &mut self,
+        node_idx: usize,
+        reduce_token_count: usize,
+        capacity: usize,
+    ) -> usize
+    where
+        Data: Clone,
+        Data::Term: Clone,
+        Data::NonTerm: Clone,
+    {
+        let node = self.node(node_idx);
+        if reduce_token_count <= node.len() {
+            // count <= node.len
+            let i = node.len() - reduce_token_count;
+
+            if node.is_leaf() {
+                let node = &mut self.node_mut(node_idx);
+
+                // truncate stacks to cut off reduce_token_count elements from back
+                node.state_stack.truncate(i);
+                node.precedence_stack.truncate(i);
+
+                node_idx
+            } else {
+                // clone the values in range [i..] from current_node to reduce_args
+                let parent = node.parent;
+
+                if i == 0 {
+                    // parent <- node[0..]
+                    //        <- new_node
+
+                    let node_data_stack = node.data_stack.clone();
+                    let node_location_stack = node.location_stack.clone();
+                    #[cfg(feature = "tree")]
+                    let node_tree_stack = node.tree_stack.clone();
+
+                    // create new empty node pointing to this node's parent node, and use it as node_to_shift
+                    let new_node_idx = self.new_node_with_capacity(capacity);
+                    if let Some(parent) = parent {
+                        self.add_child(parent, new_node_idx);
+                    }
+                    let new_node = self.node_mut(new_node_idx);
+                    new_node.data_stack = node_data_stack;
+                    new_node.location_stack = node_location_stack;
+                    #[cfg(feature = "tree")]
+                    {
+                        new_node.tree_stack = node_tree_stack;
+                    }
+
+                    new_node_idx
+                } else if i == node.len() {
+                    // create new empty node pointing to this node, and use it as node_to_shift
+                    // node <- new_node
+                    let new_node_idx = self.new_node_with_capacity(capacity);
+                    self.add_child(node_idx, new_node_idx);
+                    new_node_idx
+                } else {
+                    // split the node into [..i] and [i..]
+                    // and make new parent node with [..i]
+                    // create new empty node pointing to parent node, and use it as node_to_shift
+                    // new_parent[..i] <- current_node[i..]
+                    //                 <- new_node (empty)
+
+                    let new_parent = self.new_node();
+                    let node = self.node_mut(node_idx);
+
+                    let mut parent_data_stack = node.data_stack.split_off(i);
+                    let mut parent_state_stack = node.state_stack.split_off(i);
+                    let mut parent_location_stack = node.location_stack.split_off(i);
+                    let mut parent_precedence_stack = node.precedence_stack.split_off(i);
+                    #[cfg(feature = "tree")]
+                    let mut parent_tree_stack = node.tree_stack.split_off(i);
+
+                    std::mem::swap(&mut parent_data_stack, &mut node.data_stack);
+                    std::mem::swap(&mut parent_state_stack, &mut node.state_stack);
+                    std::mem::swap(&mut parent_location_stack, &mut node.location_stack);
+                    std::mem::swap(&mut parent_precedence_stack, &mut node.precedence_stack);
+                    #[cfg(feature = "tree")]
+                    std::mem::swap(&mut parent_tree_stack, &mut node.tree_stack);
+
+                    let node_data_stack = node.data_stack.clone();
+                    let node_location_stack = node.location_stack.clone();
+                    #[cfg(feature = "tree")]
+                    let node_tree_stack = node.tree_stack.clone();
+
+                    let parent_node = self.node_mut(new_parent);
+                    parent_node.data_stack = parent_data_stack;
+                    parent_node.state_stack = parent_state_stack;
+                    parent_node.location_stack = parent_location_stack;
+                    parent_node.precedence_stack = parent_precedence_stack;
+                    #[cfg(feature = "tree")]
+                    {
+                        parent_node.tree_stack = parent_tree_stack;
+                    }
+
+                    if let Some(parent) = parent {
+                        self.node_mut(node_idx).parent = None;
+                        self.node_mut(parent).child_count -= 1;
+
+                        self.add_child(parent, new_parent);
+                    }
+                    self.add_child(new_parent, node_idx);
+
+                    let new_node = self.new_node_with_capacity(capacity);
+                    self.add_child(new_parent, new_node);
+                    {
+                        let new_node = self.node_mut(new_node);
+                        new_node.data_stack = node_data_stack;
+                        new_node.location_stack = node_location_stack;
+                        #[cfg(feature = "tree")]
+                        {
+                            new_node.tree_stack = node_tree_stack;
+                        }
+                    }
+
+                    new_node
+                }
+            }
+        } else {
+            let len = node.len();
+            let parent = node.parent;
+            let node_stack = if node.is_leaf() {
+                // move the values from current_node to reduce_args
+
+                let node = &mut self.node_mut(node_idx);
+                let node_data_stack = std::mem::take(&mut node.data_stack);
+                let node_location_stack = std::mem::take(&mut node.location_stack);
+                #[cfg(feature = "tree")]
+                let node_tree_stack = std::mem::take(&mut node.tree_stack);
+
+                self.try_remove_node(node_idx);
+
+                #[cfg(feature = "tree")]
+                let ret = (node_data_stack, node_location_stack, node_tree_stack);
+
+                #[cfg(not(feature = "tree"))]
+                let ret = (node_data_stack, node_location_stack);
+
+                ret
+            } else {
+                // clone the values from current_node to reduce_args
+
+                let node_data_stack = node.data_stack.clone();
+                let node_location_stack = node.location_stack.clone();
+                #[cfg(feature = "tree")]
+                let node_tree_stack = node.tree_stack.clone();
+
+                #[cfg(feature = "tree")]
+                let ret = (node_data_stack, node_location_stack, node_tree_stack);
+
+                #[cfg(not(feature = "tree"))]
+                let ret = (node_data_stack, node_location_stack);
+
+                ret
+            };
+
+            #[cfg(feature = "tree")]
+            let (mut node_data_stack, mut node_location_stack, mut node_tree_stack) = node_stack;
+            #[cfg(not(feature = "tree"))]
+            let (mut node_data_stack, mut node_location_stack) = node_stack;
+
+            let reduce_node_idx =
+                self.prepare_reduce_node(parent.unwrap(), reduce_token_count - len, capacity);
+            let reduce_node = self.node_mut(reduce_node_idx);
+            reduce_node.data_stack.append(&mut node_data_stack);
+            reduce_node.location_stack.append(&mut node_location_stack);
+            #[cfg(feature = "tree")]
+            reduce_node.tree_stack.append(&mut node_tree_stack);
+
+            reduce_node_idx
+        }
+    }
+
     /// give lookahead token to parser, and check if there is any reduce action.
     /// returns false if shift action is revoked
     fn reduce<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
@@ -249,165 +432,22 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
     {
         use crate::Location;
         let rule = &parser.get_rules()[reduce_rule];
-        let mut count = rule.rule.len();
+        let count = rule.rule.len();
         let mut new_location = Data::Location::new(self.location_iter(node), count);
 
-        self.reduce_args.clear();
-        self.reduce_args.reserve(count);
-        let mut reduce_args = std::mem::take(&mut self.reduce_args);
-
-        #[cfg(feature = "tree")]
-        let mut trees = Vec::with_capacity(count);
-
-        let mut current_node = node;
-        let node_to_shift = loop {
-            let node = self.node(current_node);
-            if count > node.len() {
-                count -= node.len();
-                let parent = node.parent;
-                if node.is_leaf() {
-                    // move the values from current_node to reduce_args
-
-                    let node = &mut self.node_mut(current_node);
-                    let data_stack = std::mem::take(&mut node.data_stack);
-                    let location_stack = std::mem::take(&mut node.location_stack);
-                    #[cfg(feature = "tree")]
-                    let tree_stack = std::mem::take(&mut node.tree_stack);
-
-                    reduce_args.extend(
-                        data_stack
-                            .into_iter()
-                            .rev()
-                            .zip(location_stack.into_iter().rev()),
-                    );
-                    #[cfg(feature = "tree")]
-                    trees.extend(tree_stack.into_iter().rev());
-
-                    self.try_remove_node(current_node);
-                } else {
-                    // clone the values from current_node to reduce_args
-
-                    let data_stack = &node.data_stack;
-                    let location_stack = &node.location_stack;
-                    #[cfg(feature = "tree")]
-                    let tree_stack = &node.tree_stack;
-
-                    reduce_args.extend(
-                        data_stack
-                            .iter()
-                            .rev()
-                            .cloned()
-                            .zip(location_stack.iter().rev().cloned()),
-                    );
-                    #[cfg(feature = "tree")]
-                    trees.extend(tree_stack.iter().rev().cloned());
-                }
-                current_node = parent.unwrap(); // since count > 0, there must be parent node
-            } else {
-                // count <= node.len
-                let i = node.len() - count;
-
-                if node.is_leaf() {
-                    // move the values in range [i..] from current_node to reduce_args
-                    // use this node as node_to_shift
-
-                    let node = &mut self.node_mut(current_node);
-
-                    reduce_args.extend(
-                        node.data_stack
-                            .drain(i..)
-                            .rev()
-                            .zip(node.location_stack.drain(i..).rev()),
-                    );
-                    #[cfg(feature = "tree")]
-                    trees.extend(node.tree_stack.drain(i..).rev());
-
-                    node.state_stack.truncate(i);
-                    node.precedence_stack.truncate(i);
-
-                    break current_node;
-                } else {
-                    // clone the values in range [i..] from current_node to reduce_args
-                    let parent = node.parent;
-                    reduce_args.extend(
-                        node.data_stack[i..]
-                            .iter()
-                            .rev()
-                            .cloned()
-                            .zip(node.location_stack[i..].iter().rev().cloned()),
-                    );
-                    #[cfg(feature = "tree")]
-                    trees.extend(node.tree_stack[i..].iter().rev().cloned());
-
-                    if i == 0 {
-                        // create new empty node pointing to this node's parent node, and use it as node_to_shift
-                        let new_node = self.new_node();
-                        if let Some(parent) = parent {
-                            self.add_child(parent, new_node);
-                        }
-
-                        break new_node;
-                    } else if i == node.len() {
-                        // create new empty node pointing to this node, and use it as node_to_shift
-                        let new_node = self.new_node();
-                        self.add_child(current_node, new_node);
-
-                        break new_node;
-                    } else {
-                        // split the node into [..i] and [i..]
-                        // and make new parent node with [..i]
-                        // create new empty node pointing to parent node, and use it as node_to_shift
-                        // new_parent[..i] <- current_node[i..]
-                        //                 <- new_node (empty)
-
-                        let new_parent = self.new_node();
-                        let node = self.node_mut(current_node);
-
-                        let parent_data_stack = node.data_stack.drain(..i).collect();
-                        let parent_state_stack = node.state_stack.drain(..i).collect();
-                        let parent_location_stack = node.location_stack.drain(..i).collect();
-                        let parent_precedence_stack = node.precedence_stack.drain(..i).collect();
-                        #[cfg(feature = "tree")]
-                        let parent_tree_stack = node.tree_stack.drain(..i).collect();
-
-                        let parent_node = self.node_mut(new_parent);
-                        parent_node.data_stack = parent_data_stack;
-                        parent_node.state_stack = parent_state_stack;
-                        parent_node.location_stack = parent_location_stack;
-                        parent_node.precedence_stack = parent_precedence_stack;
-                        #[cfg(feature = "tree")]
-                        {
-                            parent_node.tree_stack = parent_tree_stack;
-                        }
-
-                        if let Some(parent) = parent {
-                            self.node_mut(current_node).parent = None;
-                            self.node_mut(parent).child_count -= 1;
-
-                            self.add_child(parent, new_parent);
-                        }
-                        self.add_child(new_parent, current_node);
-
-                        let new_node = self.new_node();
-                        self.add_child(new_parent, new_node);
-
-                        break new_node;
-                    }
-                }
-            }
-        };
-        self.reduce_args = reduce_args;
-
-        #[cfg(feature = "tree")]
-        trees.reverse();
+        let node_to_shift = self.prepare_reduce_node(node, count, count);
 
         use crate::parser::State;
 
         let state = self.state(node_to_shift);
+        let node = self.node_mut(node_to_shift);
+        #[cfg(feature = "tree")]
+        let trees = node.tree_stack.split_off(node.tree_stack.len() - count);
 
         match Data::reduce_action(
+            &mut node.data_stack,
+            &mut node.location_stack,
             reduce_rule,
-            &mut self.reduce_args,
             shift,
             term,
             userdata,
@@ -417,7 +457,6 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 if let Some(nonterm_shift_state) =
                     parser.get_states()[state].shift_goto_nonterm(&rule.name)
                 {
-                    let node = self.node_mut(node_to_shift);
                     node.state_stack
                         .push(StateIndex::from_usize_unchecked(nonterm_shift_state));
                     node.data_stack.push(new_data);
@@ -1427,7 +1466,6 @@ impl<Data: TokenData, StateIndex: Index + Copy> Default for Context<Data, StateI
             current_nodes: Default::default(),
             next_nodes: Default::default(),
             reduce_errors: Default::default(),
-            reduce_args: Default::default(),
             fallback_nodes: Default::default(),
             no_precedences: Default::default(),
         };

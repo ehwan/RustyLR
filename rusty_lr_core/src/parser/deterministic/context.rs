@@ -21,9 +21,6 @@ pub struct Context<Data: TokenData, StateIndex> {
     /// Tree stack for tree representation of the parse.
     #[cfg(feature = "tree")]
     pub(crate) tree_stack: crate::tree::TreeList<Data::Term, Data::NonTerm>,
-
-    /// temporary data stack for reduce action.
-    pub(crate) reduce_args: crate::nonterminal::ReduceArgsStack<Data>,
 }
 
 impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
@@ -36,7 +33,6 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
             data_stack: Vec::new(),
             location_stack: Vec::new(),
             precedence_stack: Vec::new(),
-            reduce_args: Default::default(),
 
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
@@ -55,7 +51,6 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
             data_stack: Vec::with_capacity(capacity),
             location_stack: Vec::with_capacity(capacity),
             precedence_stack: Vec::with_capacity(capacity),
-            reduce_args: Default::default(),
 
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
@@ -410,24 +405,11 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 let mut new_location =
                     Data::Location::new(self.location_stack.iter().rev(), tokens_len);
 
-                self.reduce_args.clear();
-                self.reduce_args.reserve(tokens_len);
-                for _ in 0..tokens_len {
-                    let data = self
-                        .data_stack
-                        .pop()
-                        .expect("data stack must have at least one element");
-                    let location = self
-                        .location_stack
-                        .pop()
-                        .expect("location stack must have at least one element");
-                    self.reduce_args.push((data, location));
-                }
-
                 // call reduce action
                 let new_data = match Data::reduce_action(
+                    &mut self.data_stack,
+                    &mut self.location_stack,
                     reduce_rule,
-                    &mut self.reduce_args,
                     &mut shift,
                     &term,
                     userdata,
@@ -895,7 +877,6 @@ where
             data_stack: self.data_stack.clone(),
             location_stack: self.location_stack.clone(),
             precedence_stack: self.precedence_stack.clone(),
-            reduce_args: Default::default(),
 
             #[cfg(feature = "tree")]
             tree_stack: self.tree_stack.clone(),

@@ -132,9 +132,6 @@ pub struct Grammar {
     /// };
     pub filter: Option<TokenStream>,
 
-    /// sorted production rules; (nonterminal_id, rule_local_id)
-    pub rules_sorted: Vec<(usize, usize)>,
-
     /// switch between compile-time and runtime table generation
     pub compiled: bool,
 
@@ -147,9 +144,14 @@ pub struct Grammar {
 
 impl Grammar {
     /// get rule by ruleid
-    pub fn get_rule_by_id(&self, rule_idx: usize) -> Option<(&NonTerminalInfo, usize)> {
-        let &(nonterm_idx, rule_local_id) = self.rules_sorted.get(rule_idx)?;
-        Some((&self.nonterminals[nonterm_idx], rule_local_id))
+    pub fn get_rule_by_id(&self, mut rule_idx: usize) -> Option<(&NonTerminalInfo, usize)> {
+        for nonterm in self.nonterminals.iter() {
+            if rule_idx < nonterm.rules.len() {
+                return Some((nonterm, rule_idx));
+            }
+            rule_idx -= nonterm.rules.len();
+        }
+        None
     }
 
     pub(crate) fn negate_terminal_set(&self, terminalset: &BTreeSet<usize>) -> BTreeSet<usize> {
@@ -362,8 +364,6 @@ impl Grammar {
 
             emit_dense: grammar_args.dense,
             filter: grammar_args.filter,
-
-            rules_sorted: Vec::new(),
 
             compiled: grammar_args.compiled,
             location_typename: grammar_args.location_typename,
@@ -1504,33 +1504,6 @@ impl Grammar {
                 rules.push((nonterm_idx, rule));
             }
         }
-        // sort rules by its reduce action type;
-        // so we can merge same reduce actions in match statement
-        // Custom -> Identity -> None
-        rules.sort_by(|&(nonterm_idx_a, rule_a), &(nonterm_idx_b, rule_b)| {
-            let a = &self.nonterminals[nonterm_idx_a].rules[rule_a];
-            let b = &self.nonterminals[nonterm_idx_b].rules[rule_b];
-
-            use std::cmp::Ordering;
-            match (a.reduce_action.as_ref(), b.reduce_action.as_ref()) {
-                (Some(ReduceAction::Custom(_)), Some(ReduceAction::Custom(_))) => Ordering::Equal,
-                (Some(ReduceAction::Custom(_)), Some(ReduceAction::Identity(_))) => Ordering::Less,
-                (Some(ReduceAction::Custom(_)), None) => Ordering::Less,
-                (Some(ReduceAction::Identity(_)), Some(ReduceAction::Custom(_))) => {
-                    Ordering::Greater
-                }
-                (Some(ReduceAction::Identity(a_idx)), Some(ReduceAction::Identity(b_idx))) => {
-                    let a_idx_reversed = a.tokens.len() - 1 - *a_idx;
-                    let b_idx_reversed = b.tokens.len() - 1 - *b_idx;
-                    a_idx_reversed.cmp(&b_idx_reversed)
-                }
-                (Some(ReduceAction::Identity(_)), None) => Ordering::Less,
-                (None, Some(ReduceAction::Custom(_))) => Ordering::Greater,
-                (None, Some(ReduceAction::Identity(_))) => Ordering::Greater,
-                (None, None) => Ordering::Equal,
-            }
-        });
-        self.rules_sorted = rules;
 
         for (term_idx, term_info) in self.terminals.iter().enumerate() {
             if let Some((level, _)) = &term_info.precedence {
@@ -1543,26 +1516,27 @@ impl Grammar {
         grammar.set_precedence_types(self.precedence_types.iter().map(|(op, _)| *op).collect());
 
         // add rules
-        for &(nonterm_id, rule_id) in self.rules_sorted.iter() {
-            let rule = &self.nonterminals[nonterm_id].rules[rule_id];
-            let tokens = rule
-                .tokens
-                .iter()
-                .map(|token_mapped| token_mapped.token)
-                .collect();
+        for (nonterm_id, nonterm) in self.nonterminals.iter().enumerate() {
+            for rule in nonterm.rules.iter() {
+                let tokens = rule
+                    .tokens
+                    .iter()
+                    .map(|token_mapped| token_mapped.token)
+                    .collect();
 
-            grammar.add_rule(
-                nonterm_id,
-                tokens,
-                rule.lookaheads.as_ref().map(|lookaheads| {
-                    lookaheads
-                        .iter()
-                        .map(|&t| TerminalSymbol::Term(t))
-                        .collect()
-                }),
-                rule.prec.map(|(op, _)| op),
-                rule.dprec.map_or(0, |(p, _)| p),
-            );
+                grammar.add_rule(
+                    nonterm_id,
+                    tokens,
+                    rule.lookaheads.as_ref().map(|lookaheads| {
+                        lookaheads
+                            .iter()
+                            .map(|&t| TerminalSymbol::Term(t))
+                            .collect()
+                    }),
+                    rule.prec.map(|(op, _)| op),
+                    rule.dprec.map_or(0, |(p, _)| p),
+                );
+            }
         }
 
         grammar
