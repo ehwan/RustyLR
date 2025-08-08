@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr"
-version = "3.28.0"
+version = "3.28.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "A Bison-like parser generator & compiler frontend for Rust supporting IELR(1), LALR(1) parser tables, with deterministic LR and non-deterministic LR (GLR) parsing."
@@ -12,16 +12,10 @@ categories = ["parsing", "compilers", "parser-implementations"]
 [dependencies]
 rusty_lr_core = { version = "3.33.0", path = "../rusty_lr_core" }
 rusty_lr_derive = { version = "2.36.0", path = "../rusty_lr_derive", optional = true }
-rusty_lr_buildscript = { version = "0.54.0", path = "../rusty_lr_buildscript", optional = true }
+rusty_lr_buildscript = { version = "0.55.0", path = "../rusty_lr_buildscript", optional = true }
 
 [features]
 default = ["derive"]
-fxhash = [] # deprecated
 build = ["dep:rusty_lr_buildscript"]
 derive = ["dep:rusty_lr_derive"]
-tree = [
-  "rusty_lr_core/tree",
-  "rusty_lr_derive/tree",
-  "rusty_lr_buildscript/tree",
-]
-error = [] # deprecated
+tree = ["rusty_lr_core/tree"]

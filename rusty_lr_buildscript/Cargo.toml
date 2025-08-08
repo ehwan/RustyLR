@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr_buildscript"
-version = "0.54.0"
+version = "0.55.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "buildscipt tools for rusty_lr"
@@ -19,5 +19,3 @@ quote = "1.0"
 
 [features]
 default = []
-tree = ["rusty_lr_parser/tree", "rusty_lr_core/tree"]
-fxhash = []
