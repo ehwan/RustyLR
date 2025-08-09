@@ -3,8 +3,8 @@ use std::hash::Hash;
 
 use super::ParseError;
 
+use crate::nonterminal::DataStack;
 use crate::nonterminal::NonTerminal;
-use crate::nonterminal::TokenData;
 use crate::parser::state::Index;
 use crate::parser::Parser;
 use crate::parser::Precedence;
@@ -12,10 +12,10 @@ use crate::parser::State;
 use crate::TerminalSymbol;
 
 /// A struct that maintains the current state and the values associated with each symbol.
-pub struct Context<Data: TokenData, StateIndex> {
+pub struct Context<Data: DataStack, StateIndex> {
     /// stacks hold the values associated with each shifted symbol.
     pub state_stack: Vec<StateIndex>,
-    pub(crate) data_stack: Vec<Data>,
+    pub(crate) data_stack: Data,
     pub(crate) location_stack: Vec<Data::Location>,
     pub(crate) precedence_stack: Vec<Precedence>,
     /// Tree stack for tree representation of the parse.
@@ -23,14 +23,14 @@ pub struct Context<Data: TokenData, StateIndex> {
     pub(crate) tree_stack: crate::tree::TreeList<Data::Term, Data::NonTerm>,
 }
 
-impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
+impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     /// Create a new context.
     /// `state_stack` is initialized with [0] (root state).
     pub fn new() -> Self {
         Context {
             state_stack: vec![StateIndex::from_usize_unchecked(0)],
 
-            data_stack: Vec::new(),
+            data_stack: Default::default(),
             location_stack: Vec::new(),
             precedence_stack: Vec::new(),
 
@@ -48,7 +48,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
         Context {
             state_stack,
 
-            data_stack: Vec::with_capacity(capacity),
+            data_stack: Data::with_capacity(capacity),
             location_stack: Vec::with_capacity(capacity),
             precedence_stack: Vec::with_capacity(capacity),
 
@@ -70,12 +70,8 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
         self.feed_eof(parser, userdata)?;
 
         // data_stack must be <Start> <EOF> in this point
-        self.data_stack.pop();
-        if let Ok(start) = self.data_stack.pop().unwrap().try_into() {
-            Ok(start)
-        } else {
-            unreachable!("data stack must have start symbol at this point");
-        }
+        // Since <EOF> does not have ruletype, no need to pop
+        Ok(self.data_stack.pop_start().unwrap())
     }
 
     /// Check if current context can be terminated and get the value of the start symbol.
@@ -289,8 +285,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         .push(crate::tree::Tree::new_terminal(term.clone()));
 
                     // shift with `error` token
-                    self.data_stack
-                        .push(Data::new_terminal(term.into_term().unwrap()));
+                    self.data_stack.push_terminal(term.into_term().unwrap());
                     self.location_stack.push(location.unwrap());
                     self.precedence_stack.push(shift_prec);
                     self.state_stack
@@ -406,8 +401,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     Data::Location::new(self.location_stack.iter().rev(), tokens_len);
 
                 // call reduce action
-                let new_data = match Data::reduce_action(
-                    &mut self.data_stack,
+                match self.data_stack.reduce_action(
                     &mut self.location_stack,
                     reduce_rule,
                     &mut shift,
@@ -415,12 +409,11 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     userdata,
                     &mut new_location,
                 ) {
-                    Ok(new_data) => new_data,
+                    Ok(_) => {}
                     Err(err) => {
                         return Err(ParseError::ReduceAction(term, location, err));
                     }
                 };
-                self.data_stack.push(new_data);
                 self.location_stack.push(new_location);
 
                 // construct tree
@@ -463,12 +456,15 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
             self.tree_stack
                 .push(crate::tree::Tree::new_terminal(term.clone()));
 
-            let data = match term {
-                TerminalSymbol::Term(term) => Data::new_terminal(term),
-                TerminalSymbol::Error => Data::new_error(),
-                TerminalSymbol::Eof => Data::new_empty(),
-            };
-            self.data_stack.push(data);
+            match term {
+                TerminalSymbol::Term(term) => {
+                    self.data_stack.push_terminal(term);
+                }
+                TerminalSymbol::Error | TerminalSymbol::Eof => {
+                    self.data_stack.push_empty();
+                }
+            }
+            // location is `Some` if it is not `Eof`
             if let Some(location) = location {
                 self.location_stack.push(location);
             }
@@ -859,13 +855,13 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
     }
 }
 
-impl<Data: TokenData, StateIndex: Index + Copy> Default for Context<Data, StateIndex> {
+impl<Data: DataStack, StateIndex: Index + Copy> Default for Context<Data, StateIndex> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<Data: TokenData, StateIndex: Index + Copy> Clone for Context<Data, StateIndex>
+impl<Data: DataStack, StateIndex: Index + Copy> Clone for Context<Data, StateIndex>
 where
     Data: Clone,
     Data::Term: Clone,
@@ -885,7 +881,7 @@ where
 }
 
 #[cfg(feature = "tree")]
-impl<Data: TokenData, StateIndex: Index + Copy> std::fmt::Display for Context<Data, StateIndex>
+impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Display for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Display + Clone,
     Data::NonTerm: std::fmt::Display + Clone + crate::nonterminal::NonTerminal,
@@ -895,7 +891,7 @@ where
     }
 }
 #[cfg(feature = "tree")]
-impl<Data: TokenData, StateIndex: Index + Copy> std::fmt::Debug for Context<Data, StateIndex>
+impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Debug for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Debug + Clone,
     Data::NonTerm: std::fmt::Debug + Clone + crate::nonterminal::NonTerminal,
@@ -906,7 +902,7 @@ where
 }
 
 #[cfg(feature = "tree")]
-impl<Data: TokenData, StateIndex: Index + Copy> std::ops::Deref for Context<Data, StateIndex> {
+impl<Data: DataStack, StateIndex: Index + Copy> std::ops::Deref for Context<Data, StateIndex> {
     type Target = crate::tree::TreeList<Data::Term, Data::NonTerm>;
     fn deref(&self) -> &Self::Target {
         &self.tree_stack
@@ -914,7 +910,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> std::ops::Deref for Context<Data
 }
 
 #[cfg(feature = "tree")]
-impl<Data: TokenData, StateIndex: Index + Copy> std::ops::DerefMut for Context<Data, StateIndex> {
+impl<Data: DataStack, StateIndex: Index + Copy> std::ops::DerefMut for Context<Data, StateIndex> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.tree_stack
     }

@@ -1,11 +1,11 @@
-use crate::nonterminal::TokenData;
+use crate::nonterminal::DataStack;
 use crate::parser::Precedence;
 
 /// To handle multiple paths in the non-deterministic GLR parsing,
 /// this node represents a subrange in stack of the parser.
 /// this constructs LinkedList tree of nodes, where parent node is the previous token in the parse tree.
 #[derive(Clone)]
-pub struct Node<Data: TokenData, StateIndex> {
+pub struct Node<Data: DataStack, StateIndex> {
     /// parent node
     pub parent: Option<usize>,
 
@@ -13,20 +13,20 @@ pub struct Node<Data: TokenData, StateIndex> {
 
     /// index of state in parser
     pub state_stack: Vec<StateIndex>,
-    pub data_stack: Vec<Data>,
+    pub data_stack: Data,
     pub location_stack: Vec<Data::Location>,
     pub precedence_stack: Vec<Precedence>,
     #[cfg(feature = "tree")]
     pub(crate) tree_stack: Vec<crate::tree::Tree<Data::Term, Data::NonTerm>>,
 }
 
-impl<Data: TokenData, StateIndex> Default for Node<Data, StateIndex> {
+impl<Data: DataStack, StateIndex> Default for Node<Data, StateIndex> {
     fn default() -> Self {
         Node {
             parent: None,
             child_count: 0,
             state_stack: Vec::new(),
-            data_stack: Vec::new(),
+            data_stack: Data::default(),
             location_stack: Vec::new(),
             precedence_stack: Vec::new(),
             #[cfg(feature = "tree")]
@@ -35,7 +35,7 @@ impl<Data: TokenData, StateIndex> Default for Node<Data, StateIndex> {
     }
 }
 
-impl<Data: TokenData, StateIndex> Node<Data, StateIndex> {
+impl<Data: DataStack, StateIndex> Node<Data, StateIndex> {
     /// Clear this node to `Default::default()`.
     pub fn clear(&mut self) {
         self.parent = None;
@@ -48,7 +48,7 @@ impl<Data: TokenData, StateIndex> Node<Data, StateIndex> {
         self.tree_stack.clear();
     }
     pub fn len(&self) -> usize {
-        self.data_stack.len()
+        self.state_stack.len()
     }
     pub fn is_leaf(&self) -> bool {
         self.child_count == 0
@@ -59,7 +59,7 @@ impl<Data: TokenData, StateIndex> Node<Data, StateIndex> {
             parent: None,
             child_count: 0,
             state_stack: Vec::with_capacity(capacity),
-            data_stack: Vec::with_capacity(capacity),
+            data_stack: Data::with_capacity(capacity),
             location_stack: Vec::with_capacity(capacity),
             precedence_stack: Vec::with_capacity(capacity),
             #[cfg(feature = "tree")]
