@@ -4,6 +4,8 @@ pub mod deterministic;
 /// Core parser functionality for non-deterministic parsers
 pub mod nondeterministic;
 
+pub mod data_stack;
+
 pub mod state;
 pub use state::State;
 

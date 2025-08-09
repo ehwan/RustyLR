@@ -1,11 +1,11 @@
 use std::fmt::Debug;
 use std::fmt::Display;
 
-use crate::nonterminal::TokenData;
+use crate::parser::data_stack::DataStack;
 
 /// Error type for feed()
 #[derive(Clone)]
-pub struct ParseError<Data: TokenData> {
+pub struct ParseError<Data: DataStack> {
     /// The terminal symbol that caused the error.
     pub term: crate::TerminalSymbol<Data::Term>,
     /// Location of the terminal symbol.
@@ -18,7 +18,7 @@ pub struct ParseError<Data: TokenData> {
     pub no_precedences: Vec<usize>,
 }
 
-impl<Data: TokenData> ParseError<Data> {
+impl<Data: DataStack> ParseError<Data> {
     /// location will be `None` if the terminal was eof.
     pub fn location(&self) -> &Option<Data::Location> {
         &self.location
@@ -28,7 +28,7 @@ impl<Data: TokenData> ParseError<Data> {
     }
 }
 
-impl<Data: TokenData> Display for ParseError<Data>
+impl<Data: DataStack> Display for ParseError<Data>
 where
     Data::Term: Display,
     Data::ReduceActionError: Display,
@@ -38,7 +38,7 @@ where
     }
 }
 
-impl<Data: TokenData> Debug for ParseError<Data>
+impl<Data: DataStack> Debug for ParseError<Data>
 where
     Data::Term: Debug,
     Data::ReduceActionError: Debug,

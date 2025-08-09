@@ -4,7 +4,7 @@ use super::Node;
 use super::ParseError;
 
 use crate::nonterminal::NonTerminal;
-use crate::nonterminal::TokenData;
+use crate::parser::data_stack::DataStack;
 use crate::parser::state::Index;
 use crate::parser::Parser;
 use crate::parser::Precedence;
@@ -16,11 +16,11 @@ type SmallVecNode = smallvec::SmallVec<[usize; 3]>;
 /// Iterator for traverse node to root.
 /// Note that root node is not included in this iterator.
 #[derive(Clone)]
-pub struct NodeRefIterator<'a, Data: TokenData, StateIndex> {
+pub struct NodeRefIterator<'a, Data: DataStack, StateIndex> {
     context: &'a Context<Data, StateIndex>,
     node: Option<usize>,
 }
-impl<'a, Data: TokenData, StateIndex: Index + Copy> Iterator
+impl<'a, Data: DataStack, StateIndex: Index + Copy> Iterator
     for NodeRefIterator<'a, Data, StateIndex>
 {
     type Item = &'a Node<Data, StateIndex>;
@@ -34,7 +34,7 @@ impl<'a, Data: TokenData, StateIndex: Index + Copy> Iterator
 
 /// A struct that maintains the current state and the values associated with each symbol.
 /// This handles the divergence and merging of the parser.
-pub struct Context<Data: TokenData, StateIndex> {
+pub struct Context<Data: DataStack, StateIndex> {
     pub(crate) nodes_pool: Vec<Node<Data, StateIndex>>,
     pub(crate) empty_node_indices: std::collections::BTreeSet<usize>,
 
@@ -56,7 +56,7 @@ pub struct Context<Data: TokenData, StateIndex> {
     pub(crate) no_precedences: Vec<usize>,
 }
 
-impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
+impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     /// Create a new context.
     /// `current_nodes` is initialized with a root node.
     pub fn new() -> Self {
@@ -453,13 +453,12 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
             userdata,
             &mut new_location,
         ) {
-            Ok(new_data) => {
+            Ok(_) => {
                 if let Some(nonterm_shift_state) =
                     parser.get_states()[state].shift_goto_nonterm(&rule.name)
                 {
                     node.state_stack
                         .push(StateIndex::from_usize_unchecked(nonterm_shift_state));
-                    node.data_stack.push(new_data);
                     node.location_stack.push(new_location);
                     node.precedence_stack.push(precedence);
                     #[cfg(feature = "tree")]
@@ -504,7 +503,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
         userdata: &mut Data::UserData,
     ) -> Result<impl Iterator<Item = Data::StartType>, ParseError<Data>>
     where
-        Data: Clone + TryInto<Data::StartType>,
+        Data: Clone,
         P::Term: Clone,
         P::NonTerm: Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
     {
@@ -515,12 +514,8 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
         let nodes = std::mem::take(&mut self.current_nodes);
         Ok(nodes.into_iter().map(move |eof_node| {
             let node = self.pop(eof_node).unwrap();
-            let data = self.nodes_pool[node].data_stack.pop().unwrap();
-
-            match data.try_into() {
-                Ok(start) => start,
-                Err(_) => unreachable!("data stack must have start symbol at this point"),
-            }
+            // Since <EOF> does not have ruletype, no need to pop
+            self.nodes_pool[node].data_stack.pop_start().unwrap()
         }))
     }
 
@@ -1065,11 +1060,15 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 node_
                     .tree_stack
                     .push(crate::tree::Tree::new_terminal(term.clone()));
-                node_.data_stack.push(match term {
-                    TerminalSymbol::Term(term) => Data::new_terminal(term),
-                    TerminalSymbol::Eof => Data::new_empty(),
-                    TerminalSymbol::Error => Data::new_error(),
-                });
+
+                match term {
+                    TerminalSymbol::Term(term) => {
+                        node_.data_stack.push_terminal(term);
+                    }
+                    TerminalSymbol::Eof | TerminalSymbol::Error => {
+                        node_.data_stack.push_empty();
+                    }
+                }
 
                 self.next_nodes.push(node);
                 Ok(())
@@ -1093,11 +1092,15 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
             node_
                 .tree_stack
                 .push(crate::tree::Tree::new_terminal(term.clone()));
-            node_.data_stack.push(match term {
-                TerminalSymbol::Term(term) => Data::new_terminal(term),
-                TerminalSymbol::Eof => Data::new_empty(),
-                TerminalSymbol::Error => Data::new_error(),
-            });
+
+            match term {
+                TerminalSymbol::Term(term) => {
+                    node_.data_stack.push_terminal(term);
+                }
+                TerminalSymbol::Eof | TerminalSymbol::Error => {
+                    node_.data_stack.push_empty();
+                }
+            }
 
             self.next_nodes.push(node);
             Ok(())
@@ -1247,7 +1250,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         node.tree_stack.push(crate::tree::Tree::new_terminal(
                             TerminalSymbol::Term(term.clone()),
                         ));
-                        node.data_stack.push(Data::new_terminal(term.clone()));
+                        node.data_stack.push_terminal(term.clone());
 
                         self.current_nodes.push(error_node);
                     } else {
@@ -1458,7 +1461,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
     }
 }
 
-impl<Data: TokenData, StateIndex: Index + Copy> Default for Context<Data, StateIndex> {
+impl<Data: DataStack, StateIndex: Index + Copy> Default for Context<Data, StateIndex> {
     fn default() -> Self {
         let mut context = Context {
             nodes_pool: Default::default(),
@@ -1475,7 +1478,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Default for Context<Data, StateI
     }
 }
 
-impl<Data: TokenData, StateIndex: Index + Copy> Clone for Context<Data, StateIndex>
+impl<Data: DataStack, StateIndex: Index + Copy> Clone for Context<Data, StateIndex>
 where
     Node<Data, StateIndex>: Clone,
 {
@@ -1490,7 +1493,7 @@ where
 }
 
 #[cfg(feature = "tree")]
-impl<Data: TokenData, StateIndex: Index + Copy> std::fmt::Display for Context<Data, StateIndex>
+impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Display for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Display + Clone,
     Data::NonTerm: std::fmt::Display + Clone + crate::nonterminal::NonTerminal,
@@ -1504,7 +1507,7 @@ where
     }
 }
 #[cfg(feature = "tree")]
-impl<Data: TokenData, StateIndex: Index + Copy> std::fmt::Debug for Context<Data, StateIndex>
+impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Debug for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Debug + Clone,
     Data::NonTerm: std::fmt::Debug + Clone + crate::nonterminal::NonTerminal,

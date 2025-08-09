@@ -1,12 +1,12 @@
 use std::fmt::Debug;
 use std::fmt::Display;
 
-use crate::nonterminal::TokenData;
+use crate::parser::data_stack::DataStack;
 use crate::TerminalSymbol;
 
 /// Error type for feed()
 #[derive(Clone)]
-pub enum ParseError<Data: TokenData> {
+pub enum ParseError<Data: DataStack> {
     /// No action defined for the given terminal in the parser table.
     /// location will be `None` if the terminal was eof.
     NoAction(TerminalSymbol<Data::Term>, Option<Data::Location>),
@@ -25,7 +25,7 @@ pub enum ParseError<Data: TokenData> {
     NoPrecedence(TerminalSymbol<Data::Term>, Option<Data::Location>, usize),
 }
 
-impl<Data: TokenData> ParseError<Data> {
+impl<Data: DataStack> ParseError<Data> {
     /// location will be `None` if the terminal was eof.
     pub fn location(&self) -> &Option<Data::Location> {
         match self {
@@ -44,7 +44,7 @@ impl<Data: TokenData> ParseError<Data> {
     }
 }
 
-impl<Data: TokenData> Display for ParseError<Data>
+impl<Data: DataStack> Display for ParseError<Data>
 where
     Data::Term: Display,
     Data::ReduceActionError: Display,
@@ -64,7 +64,7 @@ where
     }
 }
 
-impl<Data: TokenData> Debug for ParseError<Data>
+impl<Data: DataStack> Debug for ParseError<Data>
 where
     Data::Term: Debug,
     Data::ReduceActionError: Debug,

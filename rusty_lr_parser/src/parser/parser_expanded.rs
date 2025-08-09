@@ -195,7 +195,7 @@ Augmented -> Grammar eof
 /// type alias for `Context`
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarContext = ::rusty_lr_core::parser::deterministic::Context<
-    GrammarTokenData,
+    GrammarDataStack,
     u8,
 >;
 /// type alias for CFG production rule
@@ -215,7 +215,7 @@ pub type GrammarState = ::rusty_lr_core::parser::state::SparseState<
 /// type alias for `ParseError`
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarParseError = ::rusty_lr_core::parser::deterministic::ParseError<
-    GrammarTokenData,
+    GrammarDataStack,
 >;
 /// An enum that represents non-terminal symbols
 #[allow(non_camel_case_types, dead_code)]
@@ -427,30 +427,83 @@ impl ::rusty_lr_core::nonterminal::NonTerminal for GrammarNonTerminals {
         *self as usize
     }
 }
+/// tag for token that represents which stack a token is using
+#[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum GrammarTags {
+    Empty,
+    __terminals,
+    __stack2,
+    __stack3,
+    __stack4,
+    __stack5,
+    __stack6,
+    __stack7,
+    __stack8,
+    __stack9,
+    __stack10,
+    __stack11,
+    __stack12,
+    __stack13,
+    __stack14,
+    __stack15,
+    __stack16,
+    __stack17,
+    __stack18,
+    __stack19,
+    __stack20,
+}
 /// enum for each non-terminal and terminal symbol, that actually hold data
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-pub enum GrammarTokenData {
-    Terminals(Lexed),
-    Empty,
-    Variant2(RuleDefArgs),
-    Variant3(Option<Group>),
-    Variant4(Vec<RuleLineArgs>),
-    Variant5(RuleLineArgs),
-    Variant6(PrecDPrecArgs),
-    Variant7((Option<Ident>, PatternArgs)),
-    Variant8(TerminalSetItem),
-    Variant9(TerminalSet),
-    Variant10(PatternArgs),
-    Variant11(IdentOrLiteral),
-    Variant12(TokenStream),
-    Variant13(Vec<(Option<Ident>, PatternArgs)>),
-    Variant14(Vec<PrecDPrecArgs>),
-    Variant15(Option<Lexed>),
-    Variant16(Vec<TerminalSetItem>),
-    Variant17(Vec<PatternArgs>),
-    Variant18(Vec<Vec<PatternArgs>>),
-    Variant19(Vec<Lexed>),
-    Variant20(Vec<IdentOrLiteral>),
+pub struct GrammarDataStack {
+    pub __tags: Vec<GrammarTags>,
+    __terminals: Vec<Lexed>,
+    __stack2: Vec<RuleDefArgs>,
+    __stack3: Vec<Option<Group>>,
+    __stack4: Vec<Vec<RuleLineArgs>>,
+    __stack5: Vec<RuleLineArgs>,
+    __stack6: Vec<PrecDPrecArgs>,
+    __stack7: Vec<(Option<Ident>, PatternArgs)>,
+    __stack8: Vec<TerminalSetItem>,
+    __stack9: Vec<TerminalSet>,
+    __stack10: Vec<PatternArgs>,
+    __stack11: Vec<IdentOrLiteral>,
+    __stack12: Vec<TokenStream>,
+    __stack13: Vec<Vec<(Option<Ident>, PatternArgs)>>,
+    __stack14: Vec<Vec<PrecDPrecArgs>>,
+    __stack15: Vec<Option<Lexed>>,
+    __stack16: Vec<Vec<TerminalSetItem>>,
+    __stack17: Vec<Vec<PatternArgs>>,
+    __stack18: Vec<Vec<Vec<PatternArgs>>>,
+    __stack19: Vec<Vec<Lexed>>,
+    __stack20: Vec<Vec<IdentOrLiteral>>,
+}
+impl Default for GrammarDataStack {
+    fn default() -> Self {
+        Self {
+            __tags: Vec::new(),
+            __terminals: Vec::new(),
+            __stack2: Vec::new(),
+            __stack3: Vec::new(),
+            __stack4: Vec::new(),
+            __stack5: Vec::new(),
+            __stack6: Vec::new(),
+            __stack7: Vec::new(),
+            __stack8: Vec::new(),
+            __stack9: Vec::new(),
+            __stack10: Vec::new(),
+            __stack11: Vec::new(),
+            __stack12: Vec::new(),
+            __stack13: Vec::new(),
+            __stack14: Vec::new(),
+            __stack15: Vec::new(),
+            __stack16: Vec::new(),
+            __stack17: Vec::new(),
+            __stack18: Vec::new(),
+            __stack19: Vec::new(),
+            __stack20: Vec::new(),
+        }
+    }
 }
 #[allow(
     unused_braces,
@@ -460,1371 +513,1825 @@ pub enum GrammarTokenData {
     unused_mut,
     dead_code
 )]
-impl GrammarTokenData {
+impl GrammarDataStack {
     ///Rule -> ident RuleType colon RuleLines semicolon
     #[inline]
     fn reduce_Rule_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack4)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__stack3)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 5usize);
+        let mut RuleType = __data_stack.__stack3.pop().unwrap();
+        let mut RuleLines = __data_stack.__stack4.pop().unwrap();
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut colon = __data_stack.__terminals.pop().unwrap();
+        let mut ident = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant4(mut RuleLines) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_RuleLines = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut colon) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_colon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant3(mut RuleType) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_RuleType = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut ident) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant2({
-                let Lexed::Ident(ident) = ident else {
-                    unreachable!("Rule-Ident");
-                };
-                let span = __rustylr_location_colon.span();
-                if let Some(fisrt) = RuleLines.first_mut() {
-                    fisrt.separator_span = span;
-                }
-                RuleDefArgs {
-                    name: ident,
-                    typename: RuleType.map(|t| t.stream()),
-                    rule_lines: RuleLines,
-                }
-            }),
-        )
+        let __res = {
+            let Lexed::Ident(ident) = ident else {
+                unreachable!("Rule-Ident");
+            };
+            let span = __rustylr_location_colon.span();
+            if let Some(fisrt) = RuleLines.first_mut() {
+                fisrt.separator_span = span;
+            }
+            RuleDefArgs {
+                name: ident,
+                typename: RuleType.map(|t| t.stream()),
+                rule_lines: RuleLines,
+            }
+        };
+        __data_stack.__stack2.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack2);
+        Ok(())
     }
     ///RuleType -> parengroup
     #[inline]
     fn reduce_RuleType_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut parengroup) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut parengroup = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_parengroup = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant3({
-                let Lexed::ParenGroup(group) = parengroup else {
-                    unreachable!("RuleType - Group");
-                };
-                Some(group)
-            }),
-        )
+        let __res = {
+            let Lexed::ParenGroup(group) = parengroup else {
+                unreachable!("RuleType - Group");
+            };
+            Some(group)
+        };
+        __data_stack.__stack3.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack3);
+        Ok(())
     }
     ///RuleType ->
     #[inline]
     fn reduce_RuleType_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        Ok(GrammarTokenData::Variant3({ None }))
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)] {}
+        let __res = { None };
+        __data_stack.__stack3.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack3);
+        Ok(())
     }
     ///RuleLines -> RuleLines pipe RuleLine
     #[inline]
     fn reduce_RuleLines_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant5(mut RuleLine) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack5)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__stack4)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut RuleLines = __data_stack.__stack4.pop().unwrap();
+        let mut RuleLine = __data_stack.__stack5.pop().unwrap();
+        let mut pipe = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_RuleLine = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut pipe) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_pipe = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant4(mut RuleLines) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_RuleLines = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant4({
-                RuleLine.separator_span = __rustylr_location_pipe.span();
-                RuleLines.push(RuleLine);
-                RuleLines
-            }),
-        )
+        let __res = {
+            RuleLine.separator_span = __rustylr_location_pipe.span();
+            RuleLines.push(RuleLine);
+            RuleLines
+        };
+        __data_stack.__stack4.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack4);
+        Ok(())
     }
     ///RuleLines -> RuleLine
     #[inline]
     fn reduce_RuleLines_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant5(mut RuleLine) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack5)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut RuleLine = __data_stack.__stack5.pop().unwrap();
         let __rustylr_location_RuleLine = __location_stack.pop().unwrap();
-        Ok(GrammarTokenData::Variant4({ vec![RuleLine] }))
+        let __res = { vec![RuleLine] };
+        __data_stack.__stack4.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack4);
+        Ok(())
     }
     ///RuleLine -> TokenMapped* PrecDef* Action
     #[inline]
     fn reduce_RuleLine_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant3(mut Action) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack3)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack14)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__stack13)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut TokenMapped = __data_stack.__stack13.pop().unwrap();
+        let mut PrecDef = __data_stack.__stack14.pop().unwrap();
+        let mut Action = __data_stack.__stack3.pop().unwrap();
         let __rustylr_location_Action = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant14(mut PrecDef) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_PrecDef = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant13(mut TokenMapped) = __data_stack.pop().unwrap()
-        else { unreachable!() };
         let __rustylr_location_TokenMapped = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant5({
-                RuleLineArgs {
-                    tokens: TokenMapped,
-                    reduce_action: Action.map(|action| action.to_token_stream()),
-                    separator_span: Span::call_site(),
-                    precs: PrecDef,
-                    prec: None,
-                    dprec: None,
-                }
-            }),
-        )
+        let __res = {
+            RuleLineArgs {
+                tokens: TokenMapped,
+                reduce_action: Action.map(|action| action.to_token_stream()),
+                separator_span: Span::call_site(),
+                precs: PrecDef,
+                prec: None,
+                dprec: None,
+            }
+        };
+        __data_stack.__stack5.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack5);
+        Ok(())
     }
     ///PrecDef -> percent prec IdentOrLiteral
     #[inline]
     fn reduce_PrecDef_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant11(mut IdentOrLiteral) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack11)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut IdentOrLiteral = __data_stack.__stack11.pop().unwrap();
+        let mut prec = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_IdentOrLiteral = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut prec) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_prec = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
-        Ok(GrammarTokenData::Variant6({ PrecDPrecArgs::Prec(IdentOrLiteral) }))
+        let __res = { PrecDPrecArgs::Prec(IdentOrLiteral) };
+        __data_stack.__stack6.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack6);
+        Ok(())
     }
     ///PrecDef -> percent prec error
     #[inline]
     fn reduce_PrecDef_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        __data_stack.pop();
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut prec = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut prec) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_prec = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant6({
-                data.error_recovered
-                    .push(RecoveredError {
-                        message: "Expected <ident> to token or <literal>".to_string(),
-                        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence"
-                            .to_string(),
-                        span: __rustylr_location_error,
-                    });
-                PrecDPrecArgs::None
-            }),
-        )
+        let __res = {
+            data.error_recovered
+                .push(RecoveredError {
+                    message: "Expected <ident> to token or <literal>".to_string(),
+                    link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence"
+                        .to_string(),
+                    span: __rustylr_location_error,
+                });
+            PrecDPrecArgs::None
+        };
+        __data_stack.__stack6.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack6);
+        Ok(())
     }
     ///PrecDef -> percent dprec literal
     #[inline]
     fn reduce_PrecDef_2(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut literal) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut literal = __data_stack.__terminals.pop().unwrap();
+        let mut dprec = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_literal = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut dprec) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_dprec = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant6({
-                let Lexed::Literal(literal) = literal else {
-                    unreachable!("PrecDPrecArgs-DPrec");
-                };
-                PrecDPrecArgs::DPrec(literal)
-            }),
-        )
+        let __res = {
+            let Lexed::Literal(literal) = literal else {
+                unreachable!("PrecDPrecArgs-DPrec");
+            };
+            PrecDPrecArgs::DPrec(literal)
+        };
+        __data_stack.__stack6.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack6);
+        Ok(())
     }
     ///PrecDef -> percent dprec error
     #[inline]
     fn reduce_PrecDef_3(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        __data_stack.pop();
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut dprec = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut dprec) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_dprec = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant6({
-                data.error_recovered
-                    .push(RecoveredError {
-                        message: "Expected integer literal".to_string(),
-                        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#rule-priority"
-                            .to_string(),
-                        span: __rustylr_location_error,
-                    });
-                PrecDPrecArgs::None
-            }),
-        )
+        let __res = {
+            data.error_recovered
+                .push(RecoveredError {
+                    message: "Expected integer literal".to_string(),
+                    link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#rule-priority"
+                        .to_string(),
+                    span: __rustylr_location_error,
+                });
+            PrecDPrecArgs::None
+        };
+        __data_stack.__stack6.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack6);
+        Ok(())
     }
     ///PrecDef -> percent error
     #[inline]
     fn reduce_PrecDef_4(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        __data_stack.pop();
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant6({
-                data.error_recovered
-                    .push(RecoveredError {
-                        message: "Expected %prec or %dprec".to_string(),
-                        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence"
-                            .to_string(),
-                        span: __rustylr_location_error,
-                    });
-                PrecDPrecArgs::None
-            }),
-        )
+        let __res = {
+            data.error_recovered
+                .push(RecoveredError {
+                    message: "Expected %prec or %dprec".to_string(),
+                    link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence"
+                        .to_string(),
+                    span: __rustylr_location_error,
+                });
+            PrecDPrecArgs::None
+        };
+        __data_stack.__stack6.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack6);
+        Ok(())
     }
     ///TokenMapped -> Pattern
     #[inline]
     fn reduce_TokenMapped_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant10(mut Pattern) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack10)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut Pattern = __data_stack.__stack10.pop().unwrap();
         let __rustylr_location_Pattern = __location_stack.pop().unwrap();
-        Ok(GrammarTokenData::Variant7({ (None, Pattern) }))
+        let __res = { (None, Pattern) };
+        __data_stack.__stack7.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack7);
+        Ok(())
     }
     ///TokenMapped -> ident equal Pattern
     #[inline]
     fn reduce_TokenMapped_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant10(mut Pattern) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack10)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut Pattern = __data_stack.__stack10.pop().unwrap();
+        let mut equal = __data_stack.__terminals.pop().unwrap();
+        let mut ident = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_Pattern = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut equal) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_equal = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut ident) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant7({
-                let Lexed::Ident(ident) = ident else {
-                    unreachable!("Token-Ident");
-                };
-                (Some(ident), Pattern)
-            }),
-        )
+        let __res = {
+            let Lexed::Ident(ident) = ident else {
+                unreachable!("Token-Ident");
+            };
+            (Some(ident), Pattern)
+        };
+        __data_stack.__stack7.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack7);
+        Ok(())
     }
     ///TerminalSetItem -> ident
     #[inline]
     fn reduce_TerminalSetItem_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut ident) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut ident = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant8({
-                let Lexed::Ident(ident) = ident else {
-                    unreachable!("TerminalSetItem-Range1");
-                };
-                TerminalSetItem::Terminal(ident)
-            }),
-        )
+        let __res = {
+            let Lexed::Ident(ident) = ident else {
+                unreachable!("TerminalSetItem-Range1");
+            };
+            TerminalSetItem::Terminal(ident)
+        };
+        __data_stack.__stack8.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack8);
+        Ok(())
     }
     ///TerminalSetItem -> ident minus ident
     #[inline]
     fn reduce_TerminalSetItem_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut last) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut last = __data_stack.__terminals.pop().unwrap();
+        let mut minus = __data_stack.__terminals.pop().unwrap();
+        let mut first = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_last = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut minus) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_minus = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut first) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_first = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant8({
-                let Lexed::Ident(first) = first else {
-                    unreachable!("TerminalSetItem-Range1");
-                };
-                let Lexed::Ident(last) = last else {
-                    unreachable!("TerminalSetItem-Range3");
-                };
-                TerminalSetItem::Range(first, last)
-            }),
-        )
+        let __res = {
+            let Lexed::Ident(first) = first else {
+                unreachable!("TerminalSetItem-Range1");
+            };
+            let Lexed::Ident(last) = last else {
+                unreachable!("TerminalSetItem-Range3");
+            };
+            TerminalSetItem::Range(first, last)
+        };
+        __data_stack.__stack8.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack8);
+        Ok(())
     }
     ///TerminalSetItem -> ident minus error
     #[inline]
     fn reduce_TerminalSetItem_2(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        __data_stack.pop();
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut minus = __data_stack.__terminals.pop().unwrap();
+        let mut ident = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut minus) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_minus = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut ident) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant8({
-                data.error_recovered
-                    .push(RecoveredError {
-                        message: "Expected ident for terminal set".to_string(),
-                        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
-                            .to_string(),
-                        span: __rustylr_location_error,
-                    });
-                TerminalSetItem::Terminal(format_ident!("dummy"))
-            }),
-        )
+        let __res = {
+            data.error_recovered
+                .push(RecoveredError {
+                    message: "Expected ident for terminal set".to_string(),
+                    link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
+                        .to_string(),
+                    span: __rustylr_location_error,
+                });
+            TerminalSetItem::Terminal(format_ident!("dummy"))
+        };
+        __data_stack.__stack8.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack8);
+        Ok(())
     }
     ///TerminalSetItem -> literal
     #[inline]
     fn reduce_TerminalSetItem_3(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut literal) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut literal = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_literal = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant8({
-                let Lexed::Literal(literal) = literal else {
-                    unreachable!("TerminalSetItem-Literal");
-                };
-                TerminalSetItem::Literal(literal)
-            }),
-        )
+        let __res = {
+            let Lexed::Literal(literal) = literal else {
+                unreachable!("TerminalSetItem-Literal");
+            };
+            TerminalSetItem::Literal(literal)
+        };
+        __data_stack.__stack8.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack8);
+        Ok(())
     }
     ///TerminalSetItem -> literal minus literal
     #[inline]
     fn reduce_TerminalSetItem_4(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut last) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut last = __data_stack.__terminals.pop().unwrap();
+        let mut minus = __data_stack.__terminals.pop().unwrap();
+        let mut first = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_last = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut minus) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_minus = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut first) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_first = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant8({
-                let Lexed::Literal(first) = first else {
-                    unreachable!("TerminalSetItem-Range1");
-                };
-                let Lexed::Literal(last) = last else {
-                    unreachable!("TerminalSetItem-Range3");
-                };
-                TerminalSetItem::LiteralRange(first, last)
-            }),
-        )
+        let __res = {
+            let Lexed::Literal(first) = first else {
+                unreachable!("TerminalSetItem-Range1");
+            };
+            let Lexed::Literal(last) = last else {
+                unreachable!("TerminalSetItem-Range3");
+            };
+            TerminalSetItem::LiteralRange(first, last)
+        };
+        __data_stack.__stack8.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack8);
+        Ok(())
     }
     ///TerminalSetItem -> literal minus error
     #[inline]
     fn reduce_TerminalSetItem_5(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        __data_stack.pop();
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut minus = __data_stack.__terminals.pop().unwrap();
+        let mut literal = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut minus) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_minus = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut literal) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_literal = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant8({
-                data.error_recovered
-                    .push(RecoveredError {
-                        message: "Expected literal for terminal set".to_string(),
-                        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
-                            .to_string(),
-                        span: __rustylr_location_error,
-                    });
-                TerminalSetItem::Terminal(format_ident!("dummy"))
-            }),
-        )
+        let __res = {
+            data.error_recovered
+                .push(RecoveredError {
+                    message: "Expected literal for terminal set".to_string(),
+                    link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
+                        .to_string(),
+                    span: __rustylr_location_error,
+                });
+            TerminalSetItem::Terminal(format_ident!("dummy"))
+        };
+        __data_stack.__stack8.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack8);
+        Ok(())
     }
     ///TerminalSet -> lbracket caret? TerminalSetItem* rbracket
     #[inline]
     fn reduce_TerminalSet_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut rbracket) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack16)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__stack15)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut caret = __data_stack.__stack15.pop().unwrap();
+        let mut TerminalSetItem = __data_stack.__stack16.pop().unwrap();
+        let mut rbracket = __data_stack.__terminals.pop().unwrap();
+        let mut lbracket = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_rbracket = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant16(mut TerminalSetItem) = __data_stack
-            .pop()
-            .unwrap() else { unreachable!() };
         let __rustylr_location_TerminalSetItem = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant15(mut caret) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_caret = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut lbracket) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_lbracket = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant9({
-                TerminalSet {
-                    negate: caret.is_some(),
-                    items: TerminalSetItem,
-                    open_span: __rustylr_location_lbracket.span(),
-                    close_span: __rustylr_location_rbracket.span(),
-                }
-            }),
-        )
+        let __res = {
+            TerminalSet {
+                negate: caret.is_some(),
+                items: TerminalSetItem,
+                open_span: __rustylr_location_lbracket.span(),
+                close_span: __rustylr_location_rbracket.span(),
+            }
+        };
+        __data_stack.__stack9.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack9);
+        Ok(())
     }
     ///TerminalSet -> dot
     #[inline]
     fn reduce_TerminalSet_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut dot) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut dot = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_dot = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant9({
-                let span = __rustylr_location_dot.span();
-                TerminalSet {
-                    negate: true,
-                    items: vec![],
-                    open_span: span,
-                    close_span: span,
-                }
-            }),
-        )
+        let __res = {
+            let span = __rustylr_location_dot.span();
+            TerminalSet {
+                negate: true,
+                items: vec![],
+                open_span: span,
+                close_span: span,
+            }
+        };
+        __data_stack.__stack9.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack9);
+        Ok(())
     }
     ///Pattern -> ident
     #[inline]
     fn reduce_Pattern_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut ident) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut ident = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant10({
-                let Lexed::Ident(ident) = ident else {
-                    unreachable!("Pattern-Ident");
-                };
-                PatternArgs::Ident(ident)
-            }),
-        )
+        let __res = {
+            let Lexed::Ident(ident) = ident else {
+                unreachable!("Pattern-Ident");
+            };
+            PatternArgs::Ident(ident)
+        };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Pattern -> Pattern plus
     #[inline]
     fn reduce_Pattern_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut plus) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack10)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        let mut Pattern = __data_stack.__stack10.pop().unwrap();
+        let mut plus = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_plus = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut Pattern) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_Pattern = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant10({
-                let Lexed::Plus(plus) = plus else {
-                    unreachable!("Pattern-Plus");
-                };
-                PatternArgs::Plus(Box::new(Pattern), __rustylr_location_plus.span())
-            }),
-        )
+        let __res = {
+            let Lexed::Plus(plus) = plus else {
+                unreachable!("Pattern-Plus");
+            };
+            PatternArgs::Plus(Box::new(Pattern), __rustylr_location_plus.span())
+        };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Pattern -> Pattern star
     #[inline]
     fn reduce_Pattern_2(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut star) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack10)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        let mut Pattern = __data_stack.__stack10.pop().unwrap();
+        let mut star = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_star = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut Pattern) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_Pattern = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant10({
-                PatternArgs::Star(Box::new(Pattern), __rustylr_location_star.span())
-            }),
-        )
+        let __res = {
+            PatternArgs::Star(Box::new(Pattern), __rustylr_location_star.span())
+        };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Pattern -> Pattern question
     #[inline]
     fn reduce_Pattern_3(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut question) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack10)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        let mut Pattern = __data_stack.__stack10.pop().unwrap();
+        let mut question = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_question = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut Pattern) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_Pattern = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant10({
-                PatternArgs::Question(
-                    Box::new(Pattern),
-                    __rustylr_location_question.span(),
-                )
-            }),
-        )
+        let __res = {
+            PatternArgs::Question(Box::new(Pattern), __rustylr_location_question.span())
+        };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Pattern -> Pattern exclamation
     #[inline]
     fn reduce_Pattern_4(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut exclamation) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack10)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        let mut Pattern = __data_stack.__stack10.pop().unwrap();
+        let mut exclamation = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_exclamation = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut Pattern) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_Pattern = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant10({
-                PatternArgs::Exclamation(
-                    Box::new(Pattern),
-                    __rustylr_location_exclamation.span(),
-                )
-            }),
-        )
+        let __res = {
+            PatternArgs::Exclamation(
+                Box::new(Pattern),
+                __rustylr_location_exclamation.span(),
+            )
+        };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Pattern -> TerminalSet
     #[inline]
     fn reduce_Pattern_5(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant9(mut TerminalSet) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack9)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut TerminalSet = __data_stack.__stack9.pop().unwrap();
         let __rustylr_location_TerminalSet = __location_stack.pop().unwrap();
-        Ok(GrammarTokenData::Variant10({ PatternArgs::TerminalSet(TerminalSet) }))
+        let __res = { PatternArgs::TerminalSet(TerminalSet) };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Pattern -> Pattern slash Pattern
     #[inline]
     fn reduce_Pattern_6(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant10(mut lh) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack10)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__stack10)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut lh = __data_stack.__stack10.pop().unwrap();
+        let mut p1 = __data_stack.__stack10.pop().unwrap();
+        let mut slash = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_lh = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut slash) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_slash = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut p1) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_p1 = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant10({
-                PatternArgs::Lookaheads(Box::new(p1), Box::new(lh))
-            }),
-        )
+        let __res = { PatternArgs::Lookaheads(Box::new(p1), Box::new(lh)) };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Pattern -> lparen $sep(Pattern*, pipe, +) rparen
     #[inline]
     fn reduce_Pattern_7(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut rparen) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack18)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut Pattern = __data_stack.__stack18.pop().unwrap();
+        let mut rparen = __data_stack.__terminals.pop().unwrap();
+        let mut lparen = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_rparen = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant18(mut Pattern) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_Pattern = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut lparen) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_lparen = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant10({
-                PatternArgs::Group(
-                    Pattern,
-                    __rustylr_location_lparen.span(),
-                    __rustylr_location_rparen.span(),
-                )
-            }),
-        )
+        let __res = {
+            PatternArgs::Group(
+                Pattern,
+                __rustylr_location_lparen.span(),
+                __rustylr_location_rparen.span(),
+            )
+        };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Pattern -> lparen error rparen
     #[inline]
     fn reduce_Pattern_8(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut rparen) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut rparen = __data_stack.__terminals.pop().unwrap();
+        let mut lparen = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_rparen = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut lparen) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_lparen = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant10({
-                data.error_recovered
-                    .push(RecoveredError {
-                        message: "syntax error when parsing GROUP".to_string(),
-                        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
-                            .to_string(),
-                        span: __rustylr_location_error,
-                    });
-                PatternArgs::Ident(format_ident!("dummy"))
-            }),
-        )
+        let __res = {
+            data.error_recovered
+                .push(RecoveredError {
+                    message: "syntax error when parsing GROUP".to_string(),
+                    link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
+                        .to_string(),
+                    span: __rustylr_location_error,
+                });
+            PatternArgs::Ident(format_ident!("dummy"))
+        };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Pattern -> literal
     #[inline]
     fn reduce_Pattern_9(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut literal) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut literal = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_literal = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant10({
-                let Lexed::Literal(literal) = literal else {
-                    unreachable!("Pattern-Literal");
-                };
-                PatternArgs::Literal(literal)
-            }),
-        )
+        let __res = {
+            let Lexed::Literal(literal) = literal else {
+                unreachable!("Pattern-Literal");
+            };
+            PatternArgs::Literal(literal)
+        };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Pattern -> Pattern minus Pattern
     #[inline]
     fn reduce_Pattern_10(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant10(mut p2) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack10)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__stack10)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut p2 = __data_stack.__stack10.pop().unwrap();
+        let mut p1 = __data_stack.__stack10.pop().unwrap();
+        let mut minus = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_p2 = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut minus) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_minus = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut p1) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_p1 = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant10({
-                PatternArgs::Minus(Box::new(p1), Box::new(p2))
-            }),
-        )
+        let __res = { PatternArgs::Minus(Box::new(p1), Box::new(p2)) };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma? rparen
     #[inline]
     fn reduce_Pattern_11(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut rparen) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack15)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__stack10)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
+                GrammarTags::__stack10)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 5usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 6usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 7usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 8usize);
+        let mut del = __data_stack.__stack10.pop().unwrap();
+        let mut base = __data_stack.__stack10.pop().unwrap();
+        let mut comma = __data_stack.__stack15.pop().unwrap();
+        let mut rparen = __data_stack.__terminals.pop().unwrap();
+        let mut comma = __data_stack.__terminals.pop().unwrap();
+        let mut lparen = __data_stack.__terminals.pop().unwrap();
+        let mut ident = __data_stack.__terminals.pop().unwrap();
+        let mut dollar = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_rparen = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant15(mut comma) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_comma = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut del) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_del = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut comma) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_comma = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut base) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_base = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut lparen) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_lparen = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut ident) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut dollar) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_dollar = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant10({
-                let Lexed::Ident(ident) = ident else {
-                    unreachable!("Pattern-Sep-Ident");
-                };
-                if ident != "sep" {
-                    data.error_recovered
-                        .push(RecoveredError {
-                            message: "Expected $sep".to_string(),
-                            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
-                                .to_string(),
-                            span: __rustylr_location_ident,
-                        });
-                }
-                PatternArgs::Sep(
-                    Box::new(base),
-                    Box::new(del),
-                    false,
-                    *__rustylr_location0,
-                )
-            }),
-        )
+        let __res = {
+            let Lexed::Ident(ident) = ident else {
+                unreachable!("Pattern-Sep-Ident");
+            };
+            if ident != "sep" {
+                data.error_recovered
+                    .push(RecoveredError {
+                        message: "Expected $sep".to_string(),
+                        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
+                            .to_string(),
+                        span: __rustylr_location_ident,
+                    });
+            }
+            PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
+        };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma plus rparen
     #[inline]
     fn reduce_Pattern_12(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut rparen) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__stack10)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 5usize) == Some(&
+                GrammarTags::__stack10)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 6usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 7usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 8usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 9usize);
+        let mut del = __data_stack.__stack10.pop().unwrap();
+        let mut base = __data_stack.__stack10.pop().unwrap();
+        let mut rparen = __data_stack.__terminals.pop().unwrap();
+        let mut plus = __data_stack.__terminals.pop().unwrap();
+        let mut comma = __data_stack.__terminals.pop().unwrap();
+        let mut comma = __data_stack.__terminals.pop().unwrap();
+        let mut lparen = __data_stack.__terminals.pop().unwrap();
+        let mut ident = __data_stack.__terminals.pop().unwrap();
+        let mut dollar = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_rparen = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut plus) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_plus = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut comma) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_comma = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut del) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_del = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut comma) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_comma = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut base) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_base = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut lparen) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_lparen = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut ident) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut dollar) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_dollar = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant10({
-                let Lexed::Ident(ident) = ident else {
-                    unreachable!("Pattern-Sep-Ident");
-                };
-                if ident != "sep" {
-                    data.error_recovered
-                        .push(RecoveredError {
-                            message: "Expected $sep".to_string(),
-                            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
-                                .to_string(),
-                            span: __rustylr_location_ident,
-                        });
-                }
-                PatternArgs::Sep(
-                    Box::new(base),
-                    Box::new(del),
-                    true,
-                    *__rustylr_location0,
-                )
-            }),
-        )
+        let __res = {
+            let Lexed::Ident(ident) = ident else {
+                unreachable!("Pattern-Sep-Ident");
+            };
+            if ident != "sep" {
+                data.error_recovered
+                    .push(RecoveredError {
+                        message: "Expected $sep".to_string(),
+                        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
+                            .to_string(),
+                        span: __rustylr_location_ident,
+                    });
+            }
+            PatternArgs::Sep(Box::new(base), Box::new(del), true, *__rustylr_location0)
+        };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma star rparen
     #[inline]
     fn reduce_Pattern_13(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut rparen) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__stack10)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 5usize) == Some(&
+                GrammarTags::__stack10)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 6usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 7usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 8usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 9usize);
+        let mut del = __data_stack.__stack10.pop().unwrap();
+        let mut base = __data_stack.__stack10.pop().unwrap();
+        let mut rparen = __data_stack.__terminals.pop().unwrap();
+        let mut star = __data_stack.__terminals.pop().unwrap();
+        let mut comma = __data_stack.__terminals.pop().unwrap();
+        let mut comma = __data_stack.__terminals.pop().unwrap();
+        let mut lparen = __data_stack.__terminals.pop().unwrap();
+        let mut ident = __data_stack.__terminals.pop().unwrap();
+        let mut dollar = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_rparen = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut star) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_star = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut comma) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_comma = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut del) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_del = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut comma) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_comma = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut base) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_base = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut lparen) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_lparen = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut ident) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut dollar) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_dollar = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant10({
-                let Lexed::Ident(ident) = ident else {
-                    unreachable!("Pattern-Sep-Ident");
-                };
-                if ident != "sep" {
-                    data.error_recovered
-                        .push(RecoveredError {
-                            message: "Expected $sep".to_string(),
-                            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
-                                .to_string(),
-                            span: __rustylr_location_ident,
-                        });
-                }
-                PatternArgs::Sep(
-                    Box::new(base),
-                    Box::new(del),
-                    false,
-                    *__rustylr_location0,
-                )
-            }),
-        )
+        let __res = {
+            let Lexed::Ident(ident) = ident else {
+                unreachable!("Pattern-Sep-Ident");
+            };
+            if ident != "sep" {
+                data.error_recovered
+                    .push(RecoveredError {
+                        message: "Expected $sep".to_string(),
+                        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
+                            .to_string(),
+                        span: __rustylr_location_ident,
+                    });
+            }
+            PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
+        };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern error rparen
     #[inline]
     fn reduce_Pattern_14(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut rparen) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__stack10)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
+                GrammarTags::__stack10)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 5usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 6usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 7usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 8usize);
+        let mut del = __data_stack.__stack10.pop().unwrap();
+        let mut base = __data_stack.__stack10.pop().unwrap();
+        let mut rparen = __data_stack.__terminals.pop().unwrap();
+        let mut comma = __data_stack.__terminals.pop().unwrap();
+        let mut lparen = __data_stack.__terminals.pop().unwrap();
+        let mut ident = __data_stack.__terminals.pop().unwrap();
+        let mut dollar = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_rparen = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut del) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_del = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut comma) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_comma = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut base) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_base = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut lparen) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_lparen = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut ident) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut dollar) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_dollar = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant10({
-                let Lexed::Ident(ident) = ident else {
-                    unreachable!("Pattern-Sep-Ident");
-                };
-                if ident != "sep" {
-                    data.error_recovered
-                        .push(RecoveredError {
-                            message: "Expected $sep".to_string(),
-                            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
-                                .to_string(),
-                            span: __rustylr_location_ident,
-                        });
-                }
+        let __res = {
+            let Lexed::Ident(ident) = ident else {
+                unreachable!("Pattern-Sep-Ident");
+            };
+            if ident != "sep" {
                 data.error_recovered
                     .push(RecoveredError {
-                        message: "Unexpected $sep arguments".to_string(),
+                        message: "Expected $sep".to_string(),
                         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
                             .to_string(),
-                        span: __rustylr_location_error,
+                        span: __rustylr_location_ident,
                     });
-                PatternArgs::Sep(
-                    Box::new(base),
-                    Box::new(del),
-                    false,
-                    *__rustylr_location0,
-                )
-            }),
-        )
+            }
+            data.error_recovered
+                .push(RecoveredError {
+                    message: "Unexpected $sep arguments".to_string(),
+                    link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
+                        .to_string(),
+                    span: __rustylr_location_error,
+                });
+            PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
+        };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma error rparen
     #[inline]
     fn reduce_Pattern_15(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut rparen) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__stack10)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 5usize) == Some(&
+                GrammarTags::__stack10)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 6usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 7usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 8usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 9usize);
+        let mut del = __data_stack.__stack10.pop().unwrap();
+        let mut base = __data_stack.__stack10.pop().unwrap();
+        let mut rparen = __data_stack.__terminals.pop().unwrap();
+        let mut comma = __data_stack.__terminals.pop().unwrap();
+        let mut comma = __data_stack.__terminals.pop().unwrap();
+        let mut lparen = __data_stack.__terminals.pop().unwrap();
+        let mut ident = __data_stack.__terminals.pop().unwrap();
+        let mut dollar = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_rparen = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut comma) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_comma = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut del) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_del = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut comma) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_comma = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant10(mut base) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_base = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut lparen) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_lparen = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut ident) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut dollar) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_dollar = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant10({
-                let Lexed::Ident(ident) = ident else {
-                    unreachable!("Pattern-Sep-Ident");
-                };
-                if ident != "sep" {
-                    data.error_recovered
-                        .push(RecoveredError {
-                            message: "Expected $sep".to_string(),
-                            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
-                                .to_string(),
-                            span: __rustylr_location_ident,
-                        });
-                }
+        let __res = {
+            let Lexed::Ident(ident) = ident else {
+                unreachable!("Pattern-Sep-Ident");
+            };
+            if ident != "sep" {
                 data.error_recovered
                     .push(RecoveredError {
-                        message: "Expected '+' or '*' repetition".to_string(),
+                        message: "Expected $sep".to_string(),
                         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
                             .to_string(),
-                        span: __rustylr_location_error,
+                        span: __rustylr_location_ident,
                     });
-                PatternArgs::Sep(
-                    Box::new(base),
-                    Box::new(del),
-                    false,
-                    *__rustylr_location0,
-                )
-            }),
-        )
+            }
+            data.error_recovered
+                .push(RecoveredError {
+                    message: "Expected '+' or '*' repetition".to_string(),
+                    link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
+                        .to_string(),
+                    span: __rustylr_location_error,
+                });
+            PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
+        };
+        __data_stack.__stack10.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack10);
+        Ok(())
     }
     ///Action -> bracegroup
     #[inline]
     fn reduce_Action_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut bracegroup) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut bracegroup = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_bracegroup = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant3({
-                let Lexed::BraceGroup(group) = bracegroup else {
-                    unreachable!("Action0");
-                };
-                Some(group)
-            }),
-        )
+        let __res = {
+            let Lexed::BraceGroup(group) = bracegroup else {
+                unreachable!("Action0");
+            };
+            Some(group)
+        };
+        __data_stack.__stack3.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack3);
+        Ok(())
     }
     ///Action ->
     #[inline]
     fn reduce_Action_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        Ok(GrammarTokenData::Variant3({ None }))
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)] {}
+        let __res = { None };
+        __data_stack.__stack3.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack3);
+        Ok(())
     }
     ///IdentOrLiteral -> ident
     #[inline]
     fn reduce_IdentOrLiteral_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut ident) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut ident = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant11({
-                let Lexed::Ident(ident) = ident else {
-                    unreachable!("IdentOrLiteral-Ident");
-                };
-                IdentOrLiteral::Ident(ident)
-            }),
-        )
+        let __res = {
+            let Lexed::Ident(ident) = ident else {
+                unreachable!("IdentOrLiteral-Ident");
+            };
+            IdentOrLiteral::Ident(ident)
+        };
+        __data_stack.__stack11.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack11);
+        Ok(())
     }
     ///IdentOrLiteral -> literal
     #[inline]
     fn reduce_IdentOrLiteral_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut literal) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut literal = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_literal = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant11({
-                let Lexed::Literal(literal) = literal else {
-                    unreachable!("IdentOrLiteral-Literal");
-                };
-                IdentOrLiteral::Literal(literal)
-            }),
-        )
+        let __res = {
+            let Lexed::Literal(literal) = literal else {
+                unreachable!("IdentOrLiteral-Literal");
+            };
+            IdentOrLiteral::Literal(literal)
+        };
+        __data_stack.__stack11.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack11);
+        Ok(())
     }
     ///RustCode -> [^semicolon]+
     #[inline]
     fn reduce_RustCode_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant19(mut t) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack19)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut t = __data_stack.__stack19.pop().unwrap();
         let __rustylr_location_t = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant12({
-                let mut tokens = TokenStream::new();
-                for token in t.into_iter() {
-                    token.append_to_stream(&mut tokens);
-                }
-                tokens
-            }),
-        )
+        let __res = {
+            let mut tokens = TokenStream::new();
+            for token in t.into_iter() {
+                token.append_to_stream(&mut tokens);
+            }
+            tokens
+        };
+        __data_stack.__stack12.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack12);
+        Ok(())
     }
     ///Directive -> percent token ident RustCode semicolon
     #[inline]
     fn reduce_Directive_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack12)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 5usize);
+        let mut RustCode = __data_stack.__stack12.pop().unwrap();
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut ident = __data_stack.__terminals.pop().unwrap();
+        let mut token = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant12(mut RustCode) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_RustCode = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut ident) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut token) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_token = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             let Lexed::Ident(ident) = ident else {
@@ -1832,32 +2339,46 @@ impl GrammarTokenData {
             };
             data.terminals.push((ident, RustCode));
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent token ident semicolon
     #[inline]
     fn reduce_Directive_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut ident = __data_stack.__terminals.pop().unwrap();
+        let mut token = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut ident) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut token) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_token = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -1868,30 +2389,45 @@ impl GrammarTokenData {
                     span: __rustylr_location_ident,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent token error semicolon
     #[inline]
     fn reduce_Directive_2(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut token = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut token) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_token = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -1902,32 +2438,46 @@ impl GrammarTokenData {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent start ident semicolon
     #[inline]
     fn reduce_Directive_3(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut ident = __data_stack.__terminals.pop().unwrap();
+        let mut start = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut ident) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut start) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_start = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             let Lexed::Ident(ident) = ident else {
@@ -1935,30 +2485,45 @@ impl GrammarTokenData {
             };
             data.start_rule_name.push(ident);
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent start error semicolon
     #[inline]
     fn reduce_Directive_4(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut start = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut start) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_start = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -1969,30 +2534,45 @@ impl GrammarTokenData {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent eofdef error semicolon
     #[inline]
     fn reduce_Directive_5(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut eofdef = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut eofdef) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_eofdef = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2004,56 +2584,84 @@ impl GrammarTokenData {
                     span: __rustylr_location_eofdef,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent tokentype RustCode semicolon
     #[inline]
     fn reduce_Directive_6(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack12)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut RustCode = __data_stack.__stack12.pop().unwrap();
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut tokentype = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant12(mut RustCode) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_RustCode = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut tokentype) = __data_stack.pop().unwrap()
-        else { unreachable!() };
         let __rustylr_location_tokentype = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.token_typename.push((__rustylr_location_tokentype.span(), RustCode));
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent tokentype semicolon
     #[inline]
     fn reduce_Directive_7(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut tokentype = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut tokentype) = __data_stack.pop().unwrap()
-        else { unreachable!() };
         let __rustylr_location_tokentype = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2064,58 +2672,84 @@ impl GrammarTokenData {
                     span: __rustylr_location_tokentype,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent userdata RustCode semicolon
     #[inline]
     fn reduce_Directive_8(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack12)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut RustCode = __data_stack.__stack12.pop().unwrap();
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut userdata = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant12(mut RustCode) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_RustCode = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut userdata) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_userdata = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.userdata_typename.push((__rustylr_location_userdata.span(), RustCode));
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent userdata semicolon
     #[inline]
     fn reduce_Directive_9(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut userdata = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut userdata) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_userdata = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2126,31 +2760,46 @@ impl GrammarTokenData {
                     span: __rustylr_location_userdata,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent left IdentOrLiteral+ semicolon
     #[inline]
     fn reduce_Directive_10(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack20)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut IdentOrLiteral = __data_stack.__stack20.pop().unwrap();
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut left = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant20(mut IdentOrLiteral) = __data_stack.pop().unwrap()
-        else { unreachable!() };
         let __rustylr_location_IdentOrLiteral = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut left) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_left = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.precedences
@@ -2160,30 +2809,45 @@ impl GrammarTokenData {
                     IdentOrLiteral,
                 ));
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent left error semicolon
     #[inline]
     fn reduce_Directive_11(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut left = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut left) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_left = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2194,31 +2858,46 @@ impl GrammarTokenData {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent right IdentOrLiteral+ semicolon
     #[inline]
     fn reduce_Directive_12(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack20)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut IdentOrLiteral = __data_stack.__stack20.pop().unwrap();
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut right = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant20(mut IdentOrLiteral) = __data_stack.pop().unwrap()
-        else { unreachable!() };
         let __rustylr_location_IdentOrLiteral = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut right) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_right = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.precedences
@@ -2228,30 +2907,45 @@ impl GrammarTokenData {
                     IdentOrLiteral,
                 ));
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent right error semicolon
     #[inline]
     fn reduce_Directive_13(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut right = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut right) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_right = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2262,58 +2956,90 @@ impl GrammarTokenData {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent precedence IdentOrLiteral+ semicolon
     #[inline]
     fn reduce_Directive_14(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack20)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut IdentOrLiteral = __data_stack.__stack20.pop().unwrap();
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut precedence = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant20(mut IdentOrLiteral) = __data_stack.pop().unwrap()
-        else { unreachable!() };
         let __rustylr_location_IdentOrLiteral = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut precedence) = __data_stack.pop().unwrap()
-        else { unreachable!() };
         let __rustylr_location_precedence = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.precedences
                 .push((__rustylr_location_precedence.span(), None, IdentOrLiteral));
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent precedence error semicolon
     #[inline]
     fn reduce_Directive_15(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut precedence = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut precedence) = __data_stack.pop().unwrap()
-        else { unreachable!() };
         let __rustylr_location_precedence = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2324,56 +3050,84 @@ impl GrammarTokenData {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent errortype RustCode semicolon
     #[inline]
     fn reduce_Directive_16(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack12)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut RustCode = __data_stack.__stack12.pop().unwrap();
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut errortype = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant12(mut RustCode) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_RustCode = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut errortype) = __data_stack.pop().unwrap()
-        else { unreachable!() };
         let __rustylr_location_errortype = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_typename.push((__rustylr_location_errortype.span(), RustCode));
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent errortype semicolon
     #[inline]
     fn reduce_Directive_17(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut errortype = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut errortype) = __data_stack.pop().unwrap()
-        else { unreachable!() };
         let __rustylr_location_errortype = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2384,56 +3138,84 @@ impl GrammarTokenData {
                     span: __rustylr_location_errortype,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent moduleprefix RustCode semicolon
     #[inline]
     fn reduce_Directive_18(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack12)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut RustCode = __data_stack.__stack12.pop().unwrap();
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut moduleprefix = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant12(mut RustCode) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_RustCode = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut moduleprefix) = __data_stack.pop().unwrap()
-        else { unreachable!() };
         let __rustylr_location_moduleprefix = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.module_prefix.push((__rustylr_location_moduleprefix.span(), RustCode));
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent moduleprefix semicolon
     #[inline]
     fn reduce_Directive_19(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut moduleprefix = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut moduleprefix) = __data_stack.pop().unwrap()
-        else { unreachable!() };
         let __rustylr_location_moduleprefix = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2444,56 +3226,83 @@ impl GrammarTokenData {
                     span: __rustylr_location_moduleprefix,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent glr semicolon
     #[inline]
     fn reduce_Directive_20(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut glr = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut glr) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_glr = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.glr = true;
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent glr error semicolon
     #[inline]
     fn reduce_Directive_21(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut glr = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut glr) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_glr = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2504,56 +3313,83 @@ impl GrammarTokenData {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent lalr semicolon
     #[inline]
     fn reduce_Directive_22(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut lalr = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut lalr) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_lalr = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.lalr = true;
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent lalr error semicolon
     #[inline]
     fn reduce_Directive_23(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut lalr = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut lalr) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_lalr = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2564,56 +3400,83 @@ impl GrammarTokenData {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent nooptim semicolon
     #[inline]
     fn reduce_Directive_24(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut nooptim = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut nooptim) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_nooptim = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.no_optim = true;
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent nooptim error semicolon
     #[inline]
     fn reduce_Directive_25(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut nooptim = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut nooptim) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_nooptim = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2624,56 +3487,83 @@ impl GrammarTokenData {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent dense semicolon
     #[inline]
     fn reduce_Directive_26(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut dense = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut dense) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_dense = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.dense = true;
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent dense error semicolon
     #[inline]
     fn reduce_Directive_27(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut dense = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut dense) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_dense = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2684,32 +3574,46 @@ impl GrammarTokenData {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent trace ident* semicolon
     #[inline]
     fn reduce_Directive_28(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack19)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut ident = __data_stack.__stack19.pop().unwrap();
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut trace = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant19(mut ident) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut trace) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_trace = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             let idents = ident
@@ -2722,30 +3626,45 @@ impl GrammarTokenData {
                 });
             data.traces.extend(idents);
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent trace error semicolon
     #[inline]
     fn reduce_Directive_29(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut trace = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut trace) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_trace = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2756,58 +3675,84 @@ impl GrammarTokenData {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent filter RustCode semicolon
     #[inline]
     fn reduce_Directive_30(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack12)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut RustCode = __data_stack.__stack12.pop().unwrap();
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut filter = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant12(mut RustCode) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_RustCode = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut filter) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_filter = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.filter = Some(RustCode);
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent filter semicolon
     #[inline]
     fn reduce_Directive_31(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut filter = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut filter) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_filter = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2818,56 +3763,83 @@ impl GrammarTokenData {
                     span: __rustylr_location_filter,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent runtime semicolon
     #[inline]
     fn reduce_Directive_32(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut runtime = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut runtime) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_runtime = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.compiled = false;
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent runtime error semicolon
     #[inline]
     fn reduce_Directive_33(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut runtime = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut runtime) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_runtime = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2878,58 +3850,84 @@ impl GrammarTokenData {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent location RustCode semicolon
     #[inline]
     fn reduce_Directive_34(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack12)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        let mut RustCode = __data_stack.__stack12.pop().unwrap();
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut location = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant12(mut RustCode) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_RustCode = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut location) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_location = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.location_typename = Some(RustCode);
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent location semicolon
     #[inline]
     fn reduce_Directive_35(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut location = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut location) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_location = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2940,26 +3938,39 @@ impl GrammarTokenData {
                     span: __rustylr_location_location,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///Directive -> percent error semicolon
     #[inline]
     fn reduce_Directive_36(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut semicolon) = __data_stack.pop().unwrap()
-        else { unreachable!() };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut semicolon = __data_stack.__terminals.pop().unwrap();
+        let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
-        __data_stack.pop();
         let __rustylr_location_error = __location_stack.pop().unwrap();
-        let GrammarTokenData::Terminals(mut percent) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         {
             data.error_recovered
@@ -2970,1002 +3981,1105 @@ impl GrammarTokenData {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///GrammarLine -> Rule
     #[inline]
     fn reduce_GrammarLine_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant2(mut Rule) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack2)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut Rule = __data_stack.__stack2.pop().unwrap();
         let __rustylr_location_Rule = __location_stack.pop().unwrap();
         {
             data.rules.push(Rule);
         }
-        Ok(GrammarTokenData::Empty)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(())
     }
     ///GrammarLine -> Directive
     #[inline]
     fn reduce_GrammarLine_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        __data_stack.truncate(__data_stack.len() - 1usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        GrammarTokenData::Empty
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
     }
     ///Grammar -> GrammarLine+
     #[inline]
-    fn reduce_Grammar_0(
-        __data_stack: &mut Vec<Self>,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        __data_stack.truncate(__data_stack.len() - 1usize);
+    fn reduce_Grammar_0(__data_stack: &mut Self, __location_stack: &mut Vec<SpanPair>) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        GrammarTokenData::Empty
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
     }
     ///TokenMapped+ -> TokenMapped
     #[inline]
     fn reduce__TokenMappedPlus15_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant7(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack7)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut A = __data_stack.__stack7.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        Ok(GrammarTokenData::Variant13({ vec![A] }))
+        let __res = { vec![A] };
+        __data_stack.__stack13.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack13);
+        Ok(())
     }
     ///TokenMapped+ -> TokenMapped+ TokenMapped
     #[inline]
     fn reduce__TokenMappedPlus15_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant7(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack7)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack13)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        let mut Ap = __data_stack.__stack13.pop().unwrap();
+        let mut A = __data_stack.__stack7.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant13(mut Ap) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_Ap = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant13({
-                Ap.push(A);
-                Ap
-            }),
-        )
+        let __res = {
+            Ap.push(A);
+            Ap
+        };
+        __data_stack.__stack13.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack13);
+        Ok(())
     }
     ///TokenMapped* -> TokenMapped+
     #[inline]
     fn reduce__TokenMappedStar16_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///TokenMapped* ->
     #[inline]
     fn reduce__TokenMappedStar16_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        Ok(GrammarTokenData::Variant13({ vec![] }))
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)] {}
+        let __res = { vec![] };
+        __data_stack.__stack13.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack13);
+        Ok(())
     }
     ///PrecDef+ -> PrecDef
     #[inline]
     fn reduce__PrecDefPlus17_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant6(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack6)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut A = __data_stack.__stack6.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        Ok(GrammarTokenData::Variant14({ vec![A] }))
+        let __res = { vec![A] };
+        __data_stack.__stack14.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack14);
+        Ok(())
     }
     ///PrecDef+ -> PrecDef+ PrecDef
     #[inline]
     fn reduce__PrecDefPlus17_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant6(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack6)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack14)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        let mut Ap = __data_stack.__stack14.pop().unwrap();
+        let mut A = __data_stack.__stack6.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant14(mut Ap) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_Ap = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant14({
-                Ap.push(A);
-                Ap
-            }),
-        )
+        let __res = {
+            Ap.push(A);
+            Ap
+        };
+        __data_stack.__stack14.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack14);
+        Ok(())
     }
     ///PrecDef* -> PrecDef+
     #[inline]
     fn reduce__PrecDefStar18_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///PrecDef* ->
     #[inline]
     fn reduce__PrecDefStar18_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        Ok(GrammarTokenData::Variant14({ vec![] }))
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)] {}
+        let __res = { vec![] };
+        __data_stack.__stack14.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack14);
+        Ok(())
     }
     ///caret? -> caret
     #[inline]
     fn reduce__caretQuestion19_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        Ok(GrammarTokenData::Variant15(Some(A)))
+        let __res = Some(A);
+        __data_stack.__stack15.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack15);
+        Ok(())
     }
     ///caret? ->
     #[inline]
     fn reduce__caretQuestion19_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        Ok(GrammarTokenData::Variant15({ None }))
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)] {}
+        let __res = { None };
+        __data_stack.__stack15.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack15);
+        Ok(())
     }
     ///TerminalSetItem+ -> TerminalSetItem
     #[inline]
     fn reduce__TerminalSetItemPlus20_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant8(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack8)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut A = __data_stack.__stack8.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        Ok(GrammarTokenData::Variant16({ vec![A] }))
+        let __res = { vec![A] };
+        __data_stack.__stack16.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack16);
+        Ok(())
     }
     ///TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem
     #[inline]
     fn reduce__TerminalSetItemPlus20_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant8(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack8)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack16)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        let mut Ap = __data_stack.__stack16.pop().unwrap();
+        let mut A = __data_stack.__stack8.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant16(mut Ap) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_Ap = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant16({
-                Ap.push(A);
-                Ap
-            }),
-        )
+        let __res = {
+            Ap.push(A);
+            Ap
+        };
+        __data_stack.__stack16.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack16);
+        Ok(())
     }
     ///TerminalSetItem* -> TerminalSetItem+
     #[inline]
     fn reduce__TerminalSetItemStar21_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///TerminalSetItem* ->
     #[inline]
     fn reduce__TerminalSetItemStar21_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        Ok(GrammarTokenData::Variant16({ vec![] }))
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)] {}
+        let __res = { vec![] };
+        __data_stack.__stack16.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack16);
+        Ok(())
     }
     ///Pattern+ -> Pattern
     #[inline]
     fn reduce__PatternPlus22_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant10(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack10)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut A = __data_stack.__stack10.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        Ok(GrammarTokenData::Variant17({ vec![A] }))
+        let __res = { vec![A] };
+        __data_stack.__stack17.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack17);
+        Ok(())
     }
     ///Pattern+ -> Pattern+ Pattern
     #[inline]
     fn reduce__PatternPlus22_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant10(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack10)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack17)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        let mut A = __data_stack.__stack10.pop().unwrap();
+        let mut Ap = __data_stack.__stack17.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant17(mut Ap) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_Ap = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant17({
-                Ap.push(A);
-                Ap
-            }),
-        )
+        let __res = {
+            Ap.push(A);
+            Ap
+        };
+        __data_stack.__stack17.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack17);
+        Ok(())
     }
     ///Pattern* -> Pattern+
     #[inline]
     fn reduce__PatternStar23_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///Pattern* ->
     #[inline]
     fn reduce__PatternStar23_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        Ok(GrammarTokenData::Variant17({ vec![] }))
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)] {}
+        let __res = { vec![] };
+        __data_stack.__stack17.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack17);
+        Ok(())
     }
     ///$sep(Pattern*, pipe, +) -> Pattern*
     #[inline]
     fn reduce___PatternStar23SepPlus24_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant17(mut __token0) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack17)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut __token0 = __data_stack.__stack17.pop().unwrap();
         let __rustylr_location___token0 = __location_stack.pop().unwrap();
-        Ok(GrammarTokenData::Variant18({ vec![__token0] }))
+        let __res = { vec![__token0] };
+        __data_stack.__stack18.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack18);
+        Ok(())
     }
     ///$sep(Pattern*, pipe, +) -> $sep(Pattern*, pipe, +) pipe Pattern*
     #[inline]
     fn reduce___PatternStar23SepPlus24_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant17(mut __token1) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack17)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                GrammarTags::__stack18)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        let mut __token1 = __data_stack.__stack17.pop().unwrap();
+        let mut __token0 = __data_stack.__stack18.pop().unwrap();
+        __data_stack.__terminals.pop();
         let __rustylr_location___token1 = __location_stack.pop().unwrap();
-        __data_stack.pop();
         __location_stack.pop();
-        let GrammarTokenData::Variant18(mut __token0) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location___token0 = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant18({
-                __token0.push(__token1);
-                __token0
-            }),
-        )
+        let __res = {
+            __token0.push(__token1);
+            __token0
+        };
+        __data_stack.__stack18.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack18);
+        Ok(())
     }
     ///comma? -> comma
     #[inline]
     fn reduce__commaQuestion25_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        Ok(GrammarTokenData::Variant15(Some(A)))
+        let __res = Some(A);
+        __data_stack.__stack15.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack15);
+        Ok(())
     }
     ///comma? ->
     #[inline]
     fn reduce__commaQuestion25_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        Ok(GrammarTokenData::Variant15({ None }))
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)] {}
+        let __res = { None };
+        __data_stack.__stack15.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack15);
+        Ok(())
     }
     ///[^semicolon] -> ident
     #[inline]
     fn reduce__TermSet26_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> colon
     #[inline]
     fn reduce__TermSet26_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> pipe
     #[inline]
     fn reduce__TermSet26_2(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> percent
     #[inline]
     fn reduce__TermSet26_3(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> equal
     #[inline]
     fn reduce__TermSet26_4(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> plus
     #[inline]
     fn reduce__TermSet26_5(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> star
     #[inline]
     fn reduce__TermSet26_6(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> question
     #[inline]
     fn reduce__TermSet26_7(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> caret
     #[inline]
     fn reduce__TermSet26_8(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> minus
     #[inline]
     fn reduce__TermSet26_9(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> exclamation
     #[inline]
     fn reduce__TermSet26_10(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> slash
     #[inline]
     fn reduce__TermSet26_11(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> dot
     #[inline]
     fn reduce__TermSet26_12(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> dollar
     #[inline]
     fn reduce__TermSet26_13(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> comma
     #[inline]
     fn reduce__TermSet26_14(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> literal
     #[inline]
     fn reduce__TermSet26_15(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> parengroup
     #[inline]
     fn reduce__TermSet26_16(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> bracegroup
     #[inline]
     fn reduce__TermSet26_17(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> lparen
     #[inline]
     fn reduce__TermSet26_18(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> rparen
     #[inline]
     fn reduce__TermSet26_19(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> lbracket
     #[inline]
     fn reduce__TermSet26_20(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> rbracket
     #[inline]
     fn reduce__TermSet26_21(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> left
     #[inline]
     fn reduce__TermSet26_22(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> right
     #[inline]
     fn reduce__TermSet26_23(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> token
     #[inline]
     fn reduce__TermSet26_24(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> start
     #[inline]
     fn reduce__TermSet26_25(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> eofdef
     #[inline]
     fn reduce__TermSet26_26(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> tokentype
     #[inline]
     fn reduce__TermSet26_27(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> userdata
     #[inline]
     fn reduce__TermSet26_28(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> errortype
     #[inline]
     fn reduce__TermSet26_29(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> moduleprefix
     #[inline]
     fn reduce__TermSet26_30(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> lalr
     #[inline]
     fn reduce__TermSet26_31(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> glr
     #[inline]
     fn reduce__TermSet26_32(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> prec
     #[inline]
     fn reduce__TermSet26_33(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> precedence
     #[inline]
     fn reduce__TermSet26_34(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> nooptim
     #[inline]
     fn reduce__TermSet26_35(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> dense
     #[inline]
     fn reduce__TermSet26_36(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> trace
     #[inline]
     fn reduce__TermSet26_37(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> dprec
     #[inline]
     fn reduce__TermSet26_38(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> filter
     #[inline]
     fn reduce__TermSet26_39(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> runtime
     #[inline]
     fn reduce__TermSet26_40(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> location
     #[inline]
     fn reduce__TermSet26_41(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon] -> <Others>
     #[inline]
     fn reduce__TermSet26_42(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///[^semicolon]+ -> [^semicolon]
     #[inline]
     fn reduce___TermSet26Plus27_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        Ok(GrammarTokenData::Variant19({ vec![A] }))
+        let __res = { vec![A] };
+        __data_stack.__stack19.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack19);
+        Ok(())
     }
     ///[^semicolon]+ -> [^semicolon]+ [^semicolon]
     #[inline]
     fn reduce___TermSet26Plus27_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack19)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        let mut Ap = __data_stack.__stack19.pop().unwrap();
+        let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant19(mut Ap) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_Ap = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant19({
-                Ap.push(A);
-                Ap
-            }),
-        )
+        let __res = {
+            Ap.push(A);
+            Ap
+        };
+        __data_stack.__stack19.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack19);
+        Ok(())
     }
     ///IdentOrLiteral+ -> IdentOrLiteral
     #[inline]
     fn reduce__IdentOrLiteralPlus28_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant11(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack11)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut A = __data_stack.__stack11.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        Ok(GrammarTokenData::Variant20({ vec![A] }))
+        let __res = { vec![A] };
+        __data_stack.__stack20.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack20);
+        Ok(())
     }
     ///IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
     #[inline]
     fn reduce__IdentOrLiteralPlus28_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Variant11(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack11)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack20)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        let mut A = __data_stack.__stack11.pop().unwrap();
+        let mut Ap = __data_stack.__stack20.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant20(mut Ap) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_Ap = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant20({
-                Ap.push(A);
-                Ap
-            }),
-        )
+        let __res = {
+            Ap.push(A);
+            Ap
+        };
+        __data_stack.__stack20.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack20);
+        Ok(())
     }
     ///ident+ -> ident
     #[inline]
     fn reduce__identPlus29_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        Ok(GrammarTokenData::Variant19({ vec![A] }))
+        let __res = { vec![A] };
+        __data_stack.__stack19.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack19);
+        Ok(())
     }
     ///ident+ -> ident+ ident
     #[inline]
     fn reduce__identPlus29_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        let GrammarTokenData::Terminals(mut A) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack19)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        let mut Ap = __data_stack.__stack19.pop().unwrap();
+        let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let GrammarTokenData::Variant19(mut Ap) = __data_stack.pop().unwrap() else {
-            unreachable!()
-        };
         let __rustylr_location_Ap = __location_stack.pop().unwrap();
-        Ok(
-            GrammarTokenData::Variant19({
-                Ap.push(A);
-                Ap
-            }),
-        )
+        let __res = {
+            Ap.push(A);
+            Ap
+        };
+        __data_stack.__stack19.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack19);
+        Ok(())
     }
     ///ident* -> ident+
     #[inline]
     fn reduce__identStar30_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        let ret = __data_stack.swap_remove(__data_stack.len() - 1usize + 0usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        ret
     }
     ///ident* ->
     #[inline]
     fn reduce__identStar30_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<GrammarTokenData, ::rusty_lr_core::DefaultReduceActionError> {
-        Ok(GrammarTokenData::Variant19({ vec![] }))
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)] {}
+        let __res = { vec![] };
+        __data_stack.__stack19.push(__res);
+        __data_stack.__tags.push(GrammarTags::__stack19);
+        Ok(())
     }
     ///GrammarLine+ -> GrammarLine
     #[inline]
     fn reduce__GrammarLinePlus31_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        __data_stack.truncate(__data_stack.len() - 1usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        GrammarTokenData::Empty
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
     }
     ///GrammarLine+ -> GrammarLine GrammarLine+
     #[inline]
     fn reduce__GrammarLinePlus31_1(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        __data_stack.truncate(__data_stack.len() - 2usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 2usize);
-        GrammarTokenData::Empty
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
     }
     ///Augmented -> Grammar eof
     #[inline]
     fn reduce_Augmented_0(
-        __data_stack: &mut Vec<Self>,
+        __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> GrammarTokenData {
-        __data_stack.truncate(__data_stack.len() - 2usize);
+    ) {
         __location_stack.truncate(__location_stack.len() - 2usize);
-        GrammarTokenData::Empty
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
     }
 }
 #[allow(
@@ -3975,22 +5089,319 @@ impl GrammarTokenData {
     non_camel_case_types,
     unused_variables
 )]
-impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
+impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
     type Term = Lexed;
     type NonTerm = GrammarNonTerminals;
     type ReduceActionError = ::rusty_lr_core::DefaultReduceActionError;
     type UserData = GrammarArgs;
     type StartType = ();
     type Location = SpanPair;
+    fn pop_start(&mut self) -> Option<Self::StartType> {
+        let tag = self.__tags.pop();
+        debug_assert!(tag == Some(GrammarTags::Empty));
+        Some(())
+    }
+    fn pop(&mut self) {
+        match self.__tags.pop().unwrap() {
+            GrammarTags::__terminals => {
+                self.__terminals.pop();
+            }
+            GrammarTags::__stack2 => {
+                self.__stack2.pop();
+            }
+            GrammarTags::__stack3 => {
+                self.__stack3.pop();
+            }
+            GrammarTags::__stack4 => {
+                self.__stack4.pop();
+            }
+            GrammarTags::__stack5 => {
+                self.__stack5.pop();
+            }
+            GrammarTags::__stack6 => {
+                self.__stack6.pop();
+            }
+            GrammarTags::__stack7 => {
+                self.__stack7.pop();
+            }
+            GrammarTags::__stack8 => {
+                self.__stack8.pop();
+            }
+            GrammarTags::__stack9 => {
+                self.__stack9.pop();
+            }
+            GrammarTags::__stack10 => {
+                self.__stack10.pop();
+            }
+            GrammarTags::__stack11 => {
+                self.__stack11.pop();
+            }
+            GrammarTags::__stack12 => {
+                self.__stack12.pop();
+            }
+            GrammarTags::__stack13 => {
+                self.__stack13.pop();
+            }
+            GrammarTags::__stack14 => {
+                self.__stack14.pop();
+            }
+            GrammarTags::__stack15 => {
+                self.__stack15.pop();
+            }
+            GrammarTags::__stack16 => {
+                self.__stack16.pop();
+            }
+            GrammarTags::__stack17 => {
+                self.__stack17.pop();
+            }
+            GrammarTags::__stack18 => {
+                self.__stack18.pop();
+            }
+            GrammarTags::__stack19 => {
+                self.__stack19.pop();
+            }
+            GrammarTags::__stack20 => {
+                self.__stack20.pop();
+            }
+            _ => {}
+        }
+    }
+    fn push_terminal(&mut self, term: Self::Term) {
+        self.__tags.push(GrammarTags::__terminals);
+        self.__terminals.push(term);
+    }
+    fn push_empty(&mut self) {
+        self.__tags.push(GrammarTags::Empty);
+    }
+    fn clear(&mut self) {
+        self.__tags.clear();
+        self.__terminals.clear();
+        self.__stack2.clear();
+        self.__stack3.clear();
+        self.__stack4.clear();
+        self.__stack5.clear();
+        self.__stack6.clear();
+        self.__stack7.clear();
+        self.__stack8.clear();
+        self.__stack9.clear();
+        self.__stack10.clear();
+        self.__stack11.clear();
+        self.__stack12.clear();
+        self.__stack13.clear();
+        self.__stack14.clear();
+        self.__stack15.clear();
+        self.__stack16.clear();
+        self.__stack17.clear();
+        self.__stack18.clear();
+        self.__stack19.clear();
+        self.__stack20.clear();
+    }
+    fn reserve(&mut self, additional: usize) {
+        self.__tags.reserve(additional);
+    }
+    fn split_off(&mut self, at: usize) -> Self {
+        let other_tag_stack = self.__tags.split_off(at);
+        let mut __count___terminals = 0;
+        let mut __count___stack2 = 0;
+        let mut __count___stack3 = 0;
+        let mut __count___stack4 = 0;
+        let mut __count___stack5 = 0;
+        let mut __count___stack6 = 0;
+        let mut __count___stack7 = 0;
+        let mut __count___stack8 = 0;
+        let mut __count___stack9 = 0;
+        let mut __count___stack10 = 0;
+        let mut __count___stack11 = 0;
+        let mut __count___stack12 = 0;
+        let mut __count___stack13 = 0;
+        let mut __count___stack14 = 0;
+        let mut __count___stack15 = 0;
+        let mut __count___stack16 = 0;
+        let mut __count___stack17 = 0;
+        let mut __count___stack18 = 0;
+        let mut __count___stack19 = 0;
+        let mut __count___stack20 = 0;
+        for tag in &other_tag_stack {
+            match tag {
+                GrammarTags::__terminals => {
+                    __count___terminals += 1;
+                }
+                GrammarTags::__stack2 => {
+                    __count___stack2 += 1;
+                }
+                GrammarTags::__stack3 => {
+                    __count___stack3 += 1;
+                }
+                GrammarTags::__stack4 => {
+                    __count___stack4 += 1;
+                }
+                GrammarTags::__stack5 => {
+                    __count___stack5 += 1;
+                }
+                GrammarTags::__stack6 => {
+                    __count___stack6 += 1;
+                }
+                GrammarTags::__stack7 => {
+                    __count___stack7 += 1;
+                }
+                GrammarTags::__stack8 => {
+                    __count___stack8 += 1;
+                }
+                GrammarTags::__stack9 => {
+                    __count___stack9 += 1;
+                }
+                GrammarTags::__stack10 => {
+                    __count___stack10 += 1;
+                }
+                GrammarTags::__stack11 => {
+                    __count___stack11 += 1;
+                }
+                GrammarTags::__stack12 => {
+                    __count___stack12 += 1;
+                }
+                GrammarTags::__stack13 => {
+                    __count___stack13 += 1;
+                }
+                GrammarTags::__stack14 => {
+                    __count___stack14 += 1;
+                }
+                GrammarTags::__stack15 => {
+                    __count___stack15 += 1;
+                }
+                GrammarTags::__stack16 => {
+                    __count___stack16 += 1;
+                }
+                GrammarTags::__stack17 => {
+                    __count___stack17 += 1;
+                }
+                GrammarTags::__stack18 => {
+                    __count___stack18 += 1;
+                }
+                GrammarTags::__stack19 => {
+                    __count___stack19 += 1;
+                }
+                GrammarTags::__stack20 => {
+                    __count___stack20 += 1;
+                }
+                _ => {}
+            }
+        }
+        let __other___terminals = self
+            .__terminals
+            .split_off(self.__terminals.len() - __count___terminals);
+        let __other___stack2 = self
+            .__stack2
+            .split_off(self.__stack2.len() - __count___stack2);
+        let __other___stack3 = self
+            .__stack3
+            .split_off(self.__stack3.len() - __count___stack3);
+        let __other___stack4 = self
+            .__stack4
+            .split_off(self.__stack4.len() - __count___stack4);
+        let __other___stack5 = self
+            .__stack5
+            .split_off(self.__stack5.len() - __count___stack5);
+        let __other___stack6 = self
+            .__stack6
+            .split_off(self.__stack6.len() - __count___stack6);
+        let __other___stack7 = self
+            .__stack7
+            .split_off(self.__stack7.len() - __count___stack7);
+        let __other___stack8 = self
+            .__stack8
+            .split_off(self.__stack8.len() - __count___stack8);
+        let __other___stack9 = self
+            .__stack9
+            .split_off(self.__stack9.len() - __count___stack9);
+        let __other___stack10 = self
+            .__stack10
+            .split_off(self.__stack10.len() - __count___stack10);
+        let __other___stack11 = self
+            .__stack11
+            .split_off(self.__stack11.len() - __count___stack11);
+        let __other___stack12 = self
+            .__stack12
+            .split_off(self.__stack12.len() - __count___stack12);
+        let __other___stack13 = self
+            .__stack13
+            .split_off(self.__stack13.len() - __count___stack13);
+        let __other___stack14 = self
+            .__stack14
+            .split_off(self.__stack14.len() - __count___stack14);
+        let __other___stack15 = self
+            .__stack15
+            .split_off(self.__stack15.len() - __count___stack15);
+        let __other___stack16 = self
+            .__stack16
+            .split_off(self.__stack16.len() - __count___stack16);
+        let __other___stack17 = self
+            .__stack17
+            .split_off(self.__stack17.len() - __count___stack17);
+        let __other___stack18 = self
+            .__stack18
+            .split_off(self.__stack18.len() - __count___stack18);
+        let __other___stack19 = self
+            .__stack19
+            .split_off(self.__stack19.len() - __count___stack19);
+        let __other___stack20 = self
+            .__stack20
+            .split_off(self.__stack20.len() - __count___stack20);
+        Self {
+            __tags: other_tag_stack,
+            __terminals: __other___terminals,
+            __stack2: __other___stack2,
+            __stack3: __other___stack3,
+            __stack4: __other___stack4,
+            __stack5: __other___stack5,
+            __stack6: __other___stack6,
+            __stack7: __other___stack7,
+            __stack8: __other___stack8,
+            __stack9: __other___stack9,
+            __stack10: __other___stack10,
+            __stack11: __other___stack11,
+            __stack12: __other___stack12,
+            __stack13: __other___stack13,
+            __stack14: __other___stack14,
+            __stack15: __other___stack15,
+            __stack16: __other___stack16,
+            __stack17: __other___stack17,
+            __stack18: __other___stack18,
+            __stack19: __other___stack19,
+            __stack20: __other___stack20,
+        }
+    }
+    fn append(&mut self, other: &mut Self) {
+        self.__tags.append(&mut other.__tags);
+        self.__terminals.append(&mut other.__terminals);
+        self.__stack2.append(&mut other.__stack2);
+        self.__stack3.append(&mut other.__stack3);
+        self.__stack4.append(&mut other.__stack4);
+        self.__stack5.append(&mut other.__stack5);
+        self.__stack6.append(&mut other.__stack6);
+        self.__stack7.append(&mut other.__stack7);
+        self.__stack8.append(&mut other.__stack8);
+        self.__stack9.append(&mut other.__stack9);
+        self.__stack10.append(&mut other.__stack10);
+        self.__stack11.append(&mut other.__stack11);
+        self.__stack12.append(&mut other.__stack12);
+        self.__stack13.append(&mut other.__stack13);
+        self.__stack14.append(&mut other.__stack14);
+        self.__stack15.append(&mut other.__stack15);
+        self.__stack16.append(&mut other.__stack16);
+        self.__stack17.append(&mut other.__stack17);
+        self.__stack18.append(&mut other.__stack18);
+        self.__stack19.append(&mut other.__stack19);
+        self.__stack20.append(&mut other.__stack20);
+    }
     fn reduce_action(
-        data_stack: &mut Vec<Self>,
+        data_stack: &mut Self,
         location_stack: &mut Vec<SpanPair>,
         rule_index: usize,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Self::Term>,
         user_data: &mut Self::UserData,
         location0: &mut Self::Location,
-    ) -> Result<Self, Self::ReduceActionError> {
+    ) -> Result<(), Self::ReduceActionError> {
         match rule_index {
             0usize => {
                 Self::reduce_Rule_0(
@@ -4792,8 +6203,14 @@ impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
                     location0,
                 )
             }
-            80usize => Ok(Self::reduce_GrammarLine_1(data_stack, location_stack)),
-            81usize => Ok(Self::reduce_Grammar_0(data_stack, location_stack)),
+            80usize => {
+                Self::reduce_GrammarLine_1(data_stack, location_stack);
+                Ok(())
+            }
+            81usize => {
+                Self::reduce_Grammar_0(data_stack, location_stack);
+                Ok(())
+            }
             82usize => {
                 Self::reduce__TokenMappedPlus15_0(
                     data_stack,
@@ -4814,7 +6231,10 @@ impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
                     location0,
                 )
             }
-            84usize => Ok(Self::reduce__TokenMappedStar16_0(data_stack, location_stack)),
+            84usize => {
+                Self::reduce__TokenMappedStar16_0(data_stack, location_stack);
+                Ok(())
+            }
             85usize => {
                 Self::reduce__TokenMappedStar16_1(
                     data_stack,
@@ -4845,7 +6265,10 @@ impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
                     location0,
                 )
             }
-            88usize => Ok(Self::reduce__PrecDefStar18_0(data_stack, location_stack)),
+            88usize => {
+                Self::reduce__PrecDefStar18_0(data_stack, location_stack);
+                Ok(())
+            }
             89usize => {
                 Self::reduce__PrecDefStar18_1(
                     data_stack,
@@ -4897,7 +6320,8 @@ impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
                 )
             }
             94usize => {
-                Ok(Self::reduce__TerminalSetItemStar21_0(data_stack, location_stack))
+                Self::reduce__TerminalSetItemStar21_0(data_stack, location_stack);
+                Ok(())
             }
             95usize => {
                 Self::reduce__TerminalSetItemStar21_1(
@@ -4929,7 +6353,10 @@ impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
                     location0,
                 )
             }
-            98usize => Ok(Self::reduce__PatternStar23_0(data_stack, location_stack)),
+            98usize => {
+                Self::reduce__PatternStar23_0(data_stack, location_stack);
+                Ok(())
+            }
             99usize => {
                 Self::reduce__PatternStar23_1(
                     data_stack,
@@ -4980,49 +6407,178 @@ impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
                     location0,
                 )
             }
-            104usize => Ok(Self::reduce__TermSet26_0(data_stack, location_stack)),
-            105usize => Ok(Self::reduce__TermSet26_1(data_stack, location_stack)),
-            106usize => Ok(Self::reduce__TermSet26_2(data_stack, location_stack)),
-            107usize => Ok(Self::reduce__TermSet26_3(data_stack, location_stack)),
-            108usize => Ok(Self::reduce__TermSet26_4(data_stack, location_stack)),
-            109usize => Ok(Self::reduce__TermSet26_5(data_stack, location_stack)),
-            110usize => Ok(Self::reduce__TermSet26_6(data_stack, location_stack)),
-            111usize => Ok(Self::reduce__TermSet26_7(data_stack, location_stack)),
-            112usize => Ok(Self::reduce__TermSet26_8(data_stack, location_stack)),
-            113usize => Ok(Self::reduce__TermSet26_9(data_stack, location_stack)),
-            114usize => Ok(Self::reduce__TermSet26_10(data_stack, location_stack)),
-            115usize => Ok(Self::reduce__TermSet26_11(data_stack, location_stack)),
-            116usize => Ok(Self::reduce__TermSet26_12(data_stack, location_stack)),
-            117usize => Ok(Self::reduce__TermSet26_13(data_stack, location_stack)),
-            118usize => Ok(Self::reduce__TermSet26_14(data_stack, location_stack)),
-            119usize => Ok(Self::reduce__TermSet26_15(data_stack, location_stack)),
-            120usize => Ok(Self::reduce__TermSet26_16(data_stack, location_stack)),
-            121usize => Ok(Self::reduce__TermSet26_17(data_stack, location_stack)),
-            122usize => Ok(Self::reduce__TermSet26_18(data_stack, location_stack)),
-            123usize => Ok(Self::reduce__TermSet26_19(data_stack, location_stack)),
-            124usize => Ok(Self::reduce__TermSet26_20(data_stack, location_stack)),
-            125usize => Ok(Self::reduce__TermSet26_21(data_stack, location_stack)),
-            126usize => Ok(Self::reduce__TermSet26_22(data_stack, location_stack)),
-            127usize => Ok(Self::reduce__TermSet26_23(data_stack, location_stack)),
-            128usize => Ok(Self::reduce__TermSet26_24(data_stack, location_stack)),
-            129usize => Ok(Self::reduce__TermSet26_25(data_stack, location_stack)),
-            130usize => Ok(Self::reduce__TermSet26_26(data_stack, location_stack)),
-            131usize => Ok(Self::reduce__TermSet26_27(data_stack, location_stack)),
-            132usize => Ok(Self::reduce__TermSet26_28(data_stack, location_stack)),
-            133usize => Ok(Self::reduce__TermSet26_29(data_stack, location_stack)),
-            134usize => Ok(Self::reduce__TermSet26_30(data_stack, location_stack)),
-            135usize => Ok(Self::reduce__TermSet26_31(data_stack, location_stack)),
-            136usize => Ok(Self::reduce__TermSet26_32(data_stack, location_stack)),
-            137usize => Ok(Self::reduce__TermSet26_33(data_stack, location_stack)),
-            138usize => Ok(Self::reduce__TermSet26_34(data_stack, location_stack)),
-            139usize => Ok(Self::reduce__TermSet26_35(data_stack, location_stack)),
-            140usize => Ok(Self::reduce__TermSet26_36(data_stack, location_stack)),
-            141usize => Ok(Self::reduce__TermSet26_37(data_stack, location_stack)),
-            142usize => Ok(Self::reduce__TermSet26_38(data_stack, location_stack)),
-            143usize => Ok(Self::reduce__TermSet26_39(data_stack, location_stack)),
-            144usize => Ok(Self::reduce__TermSet26_40(data_stack, location_stack)),
-            145usize => Ok(Self::reduce__TermSet26_41(data_stack, location_stack)),
-            146usize => Ok(Self::reduce__TermSet26_42(data_stack, location_stack)),
+            104usize => {
+                Self::reduce__TermSet26_0(data_stack, location_stack);
+                Ok(())
+            }
+            105usize => {
+                Self::reduce__TermSet26_1(data_stack, location_stack);
+                Ok(())
+            }
+            106usize => {
+                Self::reduce__TermSet26_2(data_stack, location_stack);
+                Ok(())
+            }
+            107usize => {
+                Self::reduce__TermSet26_3(data_stack, location_stack);
+                Ok(())
+            }
+            108usize => {
+                Self::reduce__TermSet26_4(data_stack, location_stack);
+                Ok(())
+            }
+            109usize => {
+                Self::reduce__TermSet26_5(data_stack, location_stack);
+                Ok(())
+            }
+            110usize => {
+                Self::reduce__TermSet26_6(data_stack, location_stack);
+                Ok(())
+            }
+            111usize => {
+                Self::reduce__TermSet26_7(data_stack, location_stack);
+                Ok(())
+            }
+            112usize => {
+                Self::reduce__TermSet26_8(data_stack, location_stack);
+                Ok(())
+            }
+            113usize => {
+                Self::reduce__TermSet26_9(data_stack, location_stack);
+                Ok(())
+            }
+            114usize => {
+                Self::reduce__TermSet26_10(data_stack, location_stack);
+                Ok(())
+            }
+            115usize => {
+                Self::reduce__TermSet26_11(data_stack, location_stack);
+                Ok(())
+            }
+            116usize => {
+                Self::reduce__TermSet26_12(data_stack, location_stack);
+                Ok(())
+            }
+            117usize => {
+                Self::reduce__TermSet26_13(data_stack, location_stack);
+                Ok(())
+            }
+            118usize => {
+                Self::reduce__TermSet26_14(data_stack, location_stack);
+                Ok(())
+            }
+            119usize => {
+                Self::reduce__TermSet26_15(data_stack, location_stack);
+                Ok(())
+            }
+            120usize => {
+                Self::reduce__TermSet26_16(data_stack, location_stack);
+                Ok(())
+            }
+            121usize => {
+                Self::reduce__TermSet26_17(data_stack, location_stack);
+                Ok(())
+            }
+            122usize => {
+                Self::reduce__TermSet26_18(data_stack, location_stack);
+                Ok(())
+            }
+            123usize => {
+                Self::reduce__TermSet26_19(data_stack, location_stack);
+                Ok(())
+            }
+            124usize => {
+                Self::reduce__TermSet26_20(data_stack, location_stack);
+                Ok(())
+            }
+            125usize => {
+                Self::reduce__TermSet26_21(data_stack, location_stack);
+                Ok(())
+            }
+            126usize => {
+                Self::reduce__TermSet26_22(data_stack, location_stack);
+                Ok(())
+            }
+            127usize => {
+                Self::reduce__TermSet26_23(data_stack, location_stack);
+                Ok(())
+            }
+            128usize => {
+                Self::reduce__TermSet26_24(data_stack, location_stack);
+                Ok(())
+            }
+            129usize => {
+                Self::reduce__TermSet26_25(data_stack, location_stack);
+                Ok(())
+            }
+            130usize => {
+                Self::reduce__TermSet26_26(data_stack, location_stack);
+                Ok(())
+            }
+            131usize => {
+                Self::reduce__TermSet26_27(data_stack, location_stack);
+                Ok(())
+            }
+            132usize => {
+                Self::reduce__TermSet26_28(data_stack, location_stack);
+                Ok(())
+            }
+            133usize => {
+                Self::reduce__TermSet26_29(data_stack, location_stack);
+                Ok(())
+            }
+            134usize => {
+                Self::reduce__TermSet26_30(data_stack, location_stack);
+                Ok(())
+            }
+            135usize => {
+                Self::reduce__TermSet26_31(data_stack, location_stack);
+                Ok(())
+            }
+            136usize => {
+                Self::reduce__TermSet26_32(data_stack, location_stack);
+                Ok(())
+            }
+            137usize => {
+                Self::reduce__TermSet26_33(data_stack, location_stack);
+                Ok(())
+            }
+            138usize => {
+                Self::reduce__TermSet26_34(data_stack, location_stack);
+                Ok(())
+            }
+            139usize => {
+                Self::reduce__TermSet26_35(data_stack, location_stack);
+                Ok(())
+            }
+            140usize => {
+                Self::reduce__TermSet26_36(data_stack, location_stack);
+                Ok(())
+            }
+            141usize => {
+                Self::reduce__TermSet26_37(data_stack, location_stack);
+                Ok(())
+            }
+            142usize => {
+                Self::reduce__TermSet26_38(data_stack, location_stack);
+                Ok(())
+            }
+            143usize => {
+                Self::reduce__TermSet26_39(data_stack, location_stack);
+                Ok(())
+            }
+            144usize => {
+                Self::reduce__TermSet26_40(data_stack, location_stack);
+                Ok(())
+            }
+            145usize => {
+                Self::reduce__TermSet26_41(data_stack, location_stack);
+                Ok(())
+            }
+            146usize => {
+                Self::reduce__TermSet26_42(data_stack, location_stack);
+                Ok(())
+            }
             147usize => {
                 Self::reduce___TermSet26Plus27_0(
                     data_stack,
@@ -5083,7 +6639,10 @@ impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
                     location0,
                 )
             }
-            153usize => Ok(Self::reduce__identStar30_0(data_stack, location_stack)),
+            153usize => {
+                Self::reduce__identStar30_0(data_stack, location_stack);
+                Ok(())
+            }
             154usize => {
                 Self::reduce__identStar30_1(
                     data_stack,
@@ -5094,34 +6653,21 @@ impl ::rusty_lr_core::nonterminal::TokenData for GrammarTokenData {
                     location0,
                 )
             }
-            155usize => Ok(Self::reduce__GrammarLinePlus31_0(data_stack, location_stack)),
-            156usize => Ok(Self::reduce__GrammarLinePlus31_1(data_stack, location_stack)),
-            157usize => Ok(Self::reduce_Augmented_0(data_stack, location_stack)),
+            155usize => {
+                Self::reduce__GrammarLinePlus31_0(data_stack, location_stack);
+                Ok(())
+            }
+            156usize => {
+                Self::reduce__GrammarLinePlus31_1(data_stack, location_stack);
+                Ok(())
+            }
+            157usize => {
+                Self::reduce_Augmented_0(data_stack, location_stack);
+                Ok(())
+            }
             _ => {
                 unreachable!("Invalid Rule: {}", rule_index);
             }
-        }
-    }
-    fn new_error() -> Self {
-        GrammarTokenData::Empty
-    }
-    fn new_terminal(term: Lexed) -> Self {
-        GrammarTokenData::Terminals(term)
-    }
-}
-#[allow(
-    unused_braces,
-    unused_parens,
-    non_snake_case,
-    non_camel_case_types,
-    unused_variables
-)]
-impl TryFrom<GrammarTokenData> for () {
-    type Error = ();
-    fn try_from(token: GrammarTokenData) -> Result<Self, Self::Error> {
-        match token {
-            GrammarTokenData::Empty => Ok(()),
-            _ => Err(()),
         }
     }
 }
