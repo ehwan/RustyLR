@@ -1,4 +1,4 @@
-use crate::nonterminal::DataStack;
+use crate::parser::data_stack::DataStack;
 use crate::parser::Precedence;
 
 /// To handle multiple paths in the non-deterministic GLR parsing,

@@ -3,8 +3,8 @@ use std::hash::Hash;
 use super::Node;
 use super::ParseError;
 
-use crate::nonterminal::DataStack;
 use crate::nonterminal::NonTerminal;
+use crate::parser::data_stack::DataStack;
 use crate::parser::state::Index;
 use crate::parser::Parser;
 use crate::parser::Precedence;

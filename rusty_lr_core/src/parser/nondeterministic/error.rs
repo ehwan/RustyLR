@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 use std::fmt::Display;
 
-use crate::nonterminal::DataStack;
+use crate::parser::data_stack::DataStack;
 
 /// Error type for feed()
 #[derive(Clone)]
