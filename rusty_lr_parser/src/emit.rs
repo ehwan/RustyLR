@@ -1245,8 +1245,10 @@ impl Grammar {
 
                 match &rule.reduce_action {
                     Some(ReduceAction::Custom(reduce_action)) => {
-                        let mut extract_token_data_from_args = TokenStream::new();
-                        for token in rule.tokens.iter().rev() {
+                        let mut debug_tag_check_stream = TokenStream::new();
+                        let mut extract_location_stream = TokenStream::new();
+                        let mut stack_mapto_map = std::collections::BTreeMap::new();
+                        for (idx_from_back, token) in rule.tokens.iter().rev().enumerate() {
                             match &token.token {
                                 Token::Term(term) => match &token.mapto {
                                     Some(mapto) => {
@@ -1255,18 +1257,29 @@ impl Grammar {
 
                                         match term {
                                             TerminalSymbol::Term(_) => {
-                                                extract_token_data_from_args.extend(quote! {
-                                                    let __tag = __data_stack.#tag_stack_name.pop();
-                                                    debug_assert!(__tag == Some(#tag_enum_name::#terminal_stack_name));
-                                                    let mut #mapto = __data_stack.#terminal_stack_name.pop().unwrap();
+                                                stack_mapto_map.entry(&terminal_stack_name).or_insert_with(Vec::new)
+                                                .push(Some(mapto.clone()));
+                                                extract_location_stream.extend(quote! {
                                                     let #location_varname = __location_stack.pop().unwrap();
+                                                });
+                                                debug_tag_check_stream.extend(quote! {
+                                                    debug_assert!(
+                                                        __data_stack.#tag_stack_name.get(
+                                                            __data_stack.#tag_stack_name.len()-1-#idx_from_back
+                                                        ) == Some( &#tag_enum_name::#terminal_stack_name )
+                                                    );
                                                 });
                                             }
                                             TerminalSymbol::Error => {
-                                                extract_token_data_from_args.extend(quote! {
-                                                    let __tag = __data_stack.#tag_stack_name.pop();
-                                                    debug_assert!(__tag == Some(#tag_enum_name::#empty_tag_name));
+                                                extract_location_stream.extend(quote! {
                                                     let #location_varname = __location_stack.pop().unwrap();
+                                                });
+                                                debug_tag_check_stream.extend(quote! {
+                                                    debug_assert!(
+                                                        __data_stack.#tag_stack_name.get(
+                                                            __data_stack.#tag_stack_name.len()-1-#idx_from_back
+                                                        ) == Some( &#tag_enum_name::#empty_tag_name )
+                                                    );
                                                 });
                                             }
                                             TerminalSymbol::Eof => {
@@ -1277,11 +1290,17 @@ impl Grammar {
                                         }
                                     }
                                     None => {
-                                        extract_token_data_from_args.extend(quote! {
-                                            let __tag = __data_stack.#tag_stack_name.pop();
-                                            debug_assert!(__tag == Some(#tag_enum_name::#terminal_stack_name));
-                                            __data_stack.#terminal_stack_name.pop();
+                                        stack_mapto_map.entry(&terminal_stack_name).or_insert_with(Vec::new)
+                                            .push(None);
+                                        extract_location_stream.extend(quote! {
                                             __location_stack.pop();
+                                        });
+                                        debug_tag_check_stream.extend(quote! {
+                                            debug_assert!(
+                                                __data_stack.#tag_stack_name.get(
+                                                    __data_stack.#tag_stack_name.len()-1-#idx_from_back
+                                                ) == Some( &#tag_enum_name::#terminal_stack_name )
+                                            );
                                         });
                                     }
                                 },
@@ -1295,33 +1314,57 @@ impl Grammar {
 
                                             if let Some(stack_name) = stack_name {
                                                 // extract token data from args
-                                                extract_token_data_from_args.extend(quote! {
-                                                    let __tag = __data_stack.#tag_stack_name.pop();
-                                                    debug_assert!(__tag == Some(#tag_enum_name::#stack_name));
-                                                    let mut #mapto = __data_stack.#stack_name.pop().unwrap();
+                                                stack_mapto_map.entry(&stack_name).or_insert_with(Vec::new)
+                                                    .push(Some(mapto.clone()));
+                                                extract_location_stream.extend(quote! {
                                                     let #location_varname = __location_stack.pop().unwrap();
                                                 });
+                                                debug_tag_check_stream.extend(quote! {
+                                                    debug_assert!(
+                                                        __data_stack.#tag_stack_name.get(
+                                                            __data_stack.#tag_stack_name.len()-1-#idx_from_back
+                                                        ) == Some( &#tag_enum_name::#stack_name )
+                                                    );
+                                                });
+
                                             } else {
-                                                extract_token_data_from_args.extend(quote! {
-                                                    let __tag = __data_stack.#tag_stack_name.pop();
-                                                    debug_assert!(__tag == Some(#tag_enum_name::#empty_tag_name));
+                                                extract_location_stream.extend(quote! {
                                                     let #location_varname = __location_stack.pop().unwrap();
                                                 });
+                                                debug_tag_check_stream.extend(quote! {
+                                                    debug_assert!(
+                                                        __data_stack.#tag_stack_name.get(
+                                                            __data_stack.#tag_stack_name.len()-1-#idx_from_back
+                                                        ) == Some( &#tag_enum_name::#empty_tag_name )
+                                                    );
+                                                });
+
                                             }
                                         }
                                         None => {
                                             if let Some(stack_name) = stack_name {
-                                                extract_token_data_from_args.extend(quote! {
-                                                    let __tag = __data_stack.#tag_stack_name.pop();
-                                                    debug_assert!(__tag == Some(#tag_enum_name::#stack_name));
-                                                    __data_stack.#stack_name.pop();
+                                                stack_mapto_map.entry(&stack_name).or_insert_with(Vec::new)
+                                                    .push(None);
+                                                extract_location_stream.extend(quote! {
                                                     __location_stack.pop();
                                                 });
+                                                debug_tag_check_stream.extend(quote! {
+                                                    debug_assert!(
+                                                        __data_stack.#tag_stack_name.get(
+                                                            __data_stack.#tag_stack_name.len()-1-#idx_from_back
+                                                        ) == Some( &#tag_enum_name::#stack_name )
+                                                    );
+                                                });
                                             } else {
-                                                extract_token_data_from_args.extend(quote! {
-                                                    let __tag = __data_stack.#tag_stack_name.pop();
-                                                    debug_assert!(__tag == Some(#tag_enum_name::#empty_tag_name));
+                                                extract_location_stream.extend(quote! {
                                                     __location_stack.pop();
+                                                });
+                                                debug_tag_check_stream.extend(quote! {
+                                                    debug_assert!(
+                                                        __data_stack.#tag_stack_name.get(
+                                                            __data_stack.#tag_stack_name.len()-1-#idx_from_back
+                                                        ) == Some( &#tag_enum_name::#empty_tag_name )
+                                                    );
                                                 });
                                             }
                                         }
@@ -1329,6 +1372,42 @@ impl Grammar {
                                 }
                             }
                         }
+
+                        let mut truncate_tag_stream = TokenStream::new();
+                        if rule.tokens.len() > 0 {
+                            let len = rule.tokens.len();
+                            truncate_tag_stream.extend(quote! {
+                                __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);
+                            });
+                        }
+
+                        let mut extract_data_stream= TokenStream::new();
+                        for (stack_name, maptos) in stack_mapto_map {
+                            for mapto in maptos {
+                                match mapto {
+                                    Some(mapto) => {
+                                        extract_data_stream.extend(quote! {
+                                            let mut #mapto = __data_stack.#stack_name.pop().unwrap();
+                                        });
+                                    }
+                                    None => {
+                                        extract_data_stream.extend(quote!{ 
+                                                __data_stack.#stack_name.pop();
+                                        });
+                                    }
+                                }
+                            }
+                        }
+
+                        let extract_token_data_from_args = quote! {
+                            #[cfg(debug_assertions)]
+                            {
+                                #debug_tag_check_stream
+                            }
+                            #truncate_tag_stream
+                            #extract_data_stream
+                            #extract_location_stream
+                        };
 
                         case_streams.extend(quote! {
                             #rule_index => Self::#reduce_fn_ident( data_stack, location_stack, shift, lookahead, user_data, location0 ),
@@ -1432,7 +1511,9 @@ impl Grammar {
                             }
                         }
 
-                        let (stack_pop_stream, stack_push_stream, tag_push_stream) = if let Some((
+                        let len = rule.tokens.len();
+                        debug_assert!( len > 0 );
+                        let (stack_pop_stream, stack_push_stream) = if let Some((
                             pop_stack,
                             pop_index_from_back,
                         )) = pop_stack_idx_pair
@@ -1441,22 +1522,50 @@ impl Grammar {
                                 (
                                     quote!{},
                                     quote!{},
-                                    quote!{ __data_stack.#tag_stack_name.push(#tag_enum_name::#pop_stack); }
                                 )
                             } else {
                                 (
                                     quote! { let __ret = __data_stack.#pop_stack.swap_remove( __data_stack.#pop_stack.len() - 1  - #pop_index_from_back ); },
                                     quote! { __data_stack.#pop_stack.push(__ret); },
-                                    quote! { __data_stack.#tag_stack_name.push(#tag_enum_name::#pop_stack); }
                                 )
                             }
                         } else {
                             (
                                 quote! {},
                                 quote! {},
-                                quote! {__data_stack.#tag_stack_name.push(#tag_enum_name::#empty_tag_name); }
                             )
                         };
+
+                        let (tags_truncate_stream, tag_push_stream) = if identity_token_idx == 0 {
+                            let truncate_len = len - 1;
+                            if truncate_len > 0 {
+                                (
+                                    quote!{ __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #truncate_len); },
+                                    quote!{}
+                                )
+                            } else {
+                                (
+                                    quote!{},
+                                    quote!{}
+                                )
+                            }
+                        } else {
+                            let tag_push_stream = if let Some((
+                                pop_stack,
+                                _,
+                            )) = pop_stack_idx_pair
+                            {
+                                quote!{ __data_stack.#tag_stack_name.push(#tag_enum_name::#pop_stack); }
+                            } else {
+                                quote! {__data_stack.#tag_stack_name.push(#tag_enum_name::#empty_tag_name); }
+                            };
+
+                            let tags_truncate_stream = quote! { __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len); };
+
+                            (tags_truncate_stream, tag_push_stream)
+                        };
+
+
                         let mut stack_truncate_stream = TokenStream::new();
                         for (stack_name, count) in stack_count_map {
                             debug_assert!(count > 0);
@@ -1464,18 +1573,7 @@ impl Grammar {
                                 __data_stack.#stack_name.truncate(__data_stack.#stack_name.len() - #count);
                             });
                         }
-                        let location_truncate_stream = if rule.tokens.len() > 0 {
-                            let len = rule.tokens.len();
-                            quote! { __location_stack.truncate(__location_stack.len() - #len); }
-                        } else {
-                            quote! {}
-                        };
-                        let tags_truncate_stream = if rule.tokens.len() > 0 {
-                            let len = rule.tokens.len();
-                            quote! { __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len); }
-                        } else {
-                            quote! {}
-                        };
+                        let location_truncate_stream = quote! { __location_stack.truncate(__location_stack.len() - #len); };
 
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             #[doc = #rule_debug_str]
@@ -1486,9 +1584,9 @@ impl Grammar {
                             ) {
                                 #stack_pop_stream // __ret = stack.swap_remove(i);
                                 #stack_truncate_stream // stack.truncate( ... );
+                                #stack_push_stream // stack.push( __ret );
                                 #location_truncate_stream // location.truncate( ... );
                                 #tags_truncate_stream // tags.truncate( ... );
-                                #stack_push_stream // stack.push( __ret );
                                 #tag_push_stream // tag.push( ... );
                             }
                         });
