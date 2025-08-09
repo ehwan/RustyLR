@@ -172,7 +172,7 @@ impl<Data: TokenData, StateIndex: Index + Copy> Context<Data, StateIndex> {
     }
 
     /// Get iterator for all nodes in the current context.
-    fn node_iter(&self, node: usize) -> NodeRefIterator<Data, StateIndex> {
+    fn node_iter(&self, node: usize) -> NodeRefIterator<'_, Data, StateIndex> {
         NodeRefIterator {
             context: self,
             node: Some(node),
