@@ -444,7 +444,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         #[cfg(feature = "tree")]
         let trees = node.tree_stack.split_off(node.tree_stack.len() - count);
 
-        match node.data_stack.reduce_action(
+        match Data::reduce_action(
+            &mut node.data_stack,
             &mut node.location_stack,
             reduce_rule,
             shift,
@@ -502,7 +503,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         userdata: &mut Data::UserData,
     ) -> Result<impl Iterator<Item = Data::StartType>, ParseError<Data>>
     where
-        Data: Clone + TryInto<Data::StartType>,
+        Data: Clone,
         P::Term: Clone,
         P::NonTerm: Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
     {

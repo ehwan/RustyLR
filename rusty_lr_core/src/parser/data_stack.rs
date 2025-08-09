@@ -34,7 +34,7 @@ pub trait DataStack: Sized + Default {
     fn reduce_action(
         // the child tokens for the reduction
         // the caller (usually from generated code) must pops all of the tokens used for this reduce_action
-        &mut self,
+        data_stack: &mut Self,
         location_stack: &mut Vec<Self::Location>,
 
         // the index of the production rule to reduce

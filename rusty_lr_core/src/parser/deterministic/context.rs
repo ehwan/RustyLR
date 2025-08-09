@@ -63,7 +63,6 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         userdata: &mut Data::UserData,
     ) -> Result<Data::StartType, ParseError<Data>>
     where
-        Data: TryInto<Data::StartType>,
         Data::Term: Clone,
         Data::NonTerm: Hash + Eq + Copy + NonTerminal,
     {
@@ -401,7 +400,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     Data::Location::new(self.location_stack.iter().rev(), tokens_len);
 
                 // call reduce action
-                match self.data_stack.reduce_action(
+                match Data::reduce_action(
+                    &mut self.data_stack,
                     &mut self.location_stack,
                     reduce_rule,
                     &mut shift,

@@ -20,7 +20,7 @@ impl Grammar {
         let enum_name = format_ident!("{}NonTerminals", start_rule_name);
         let parse_error_typename = format_ident!("{}ParseError", start_rule_name);
         let context_struct_name = format_ident!("{}Context", start_rule_name);
-        let token_data_typename = format_ident!("{}TokenData", start_rule_name);
+        let data_stack_typename = format_ident!("{}DataStack", start_rule_name);
 
         let state_structname = if self.emit_dense {
             format_ident!("DenseState")
@@ -63,7 +63,7 @@ impl Grammar {
             quote! {
                     /// type alias for `Context`
                     #[allow(non_camel_case_types,dead_code)]
-                    pub type #context_struct_name = #module_prefix::parser::nondeterministic::Context<#token_data_typename, #state_index_typename>;
+                    pub type #context_struct_name = #module_prefix::parser::nondeterministic::Context<#data_stack_typename, #state_index_typename>;
                     /// type alias for CFG production rule
                     #[allow(non_camel_case_types,dead_code)]
                     pub type #rule_typename = #module_prefix::rule::ProductionRule<&'static str, #enum_name>;
@@ -72,7 +72,7 @@ impl Grammar {
                     pub type #state_typename = #module_prefix::parser::state::#state_structname<#class_index_typename, #enum_name, #rule_container_type, #state_index_typename>;
                     /// type alias for `InvalidTerminalError`
                     #[allow(non_camel_case_types,dead_code)]
-                    pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_data_typename>;
+                    pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#data_stack_typename>;
                 }
             );
         } else {
@@ -80,7 +80,7 @@ impl Grammar {
         quote! {
                 /// type alias for `Context`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #context_struct_name = #module_prefix::parser::deterministic::Context<#token_data_typename, #state_index_typename>;
+                pub type #context_struct_name = #module_prefix::parser::deterministic::Context<#data_stack_typename, #state_index_typename>;
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #rule_typename = #module_prefix::rule::ProductionRule<&'static str, #enum_name>;
@@ -89,7 +89,7 @@ impl Grammar {
                 pub type #state_typename = #module_prefix::parser::state::#state_structname<#class_index_typename, #enum_name, usize, #state_index_typename>;
                 /// type alias for `ParseError`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_data_typename>;
+                pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#data_stack_typename>;
             }
             );
         }
@@ -1150,11 +1150,11 @@ impl Grammar {
         }
     }
 
-    fn emit_token_data(&self, stream: &mut TokenStream) {
+    fn emit_data_stack(&self, stream: &mut TokenStream) {
         let module_prefix = &self.module_prefix;
         let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
         let reduce_error_typename = &self.error_typename;
-        let token_data_typename = format_ident!("{}TokenData", self.start_rule_name);
+        let data_stack_typename = format_ident!("{}DataStack", self.start_rule_name);
         let token_typename = &self.token_typename;
         let user_data_parameter_name =
             Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
@@ -1165,31 +1165,35 @@ impl Grammar {
             .cloned()
             .unwrap_or_else(|| quote! { #module_prefix::DefaultLocation });
 
-        // variant name for terminal symbol
-        let terminal_variant_name = Ident::new("Terminals", Span::call_site());
-        // enum variant name for each non-terminal
-        let mut variant_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
+        // stack name for tags
+        let tag_stack_name = format_ident!("__tags");
+        let tag_enum_name = format_ident!("{}Tags", &self.start_rule_name);
 
-        // (<RuleType as ToString>, variant_name) map
-        let mut ruletype_variant_map: rusty_lr_core::hash::HashMap<String, Ident> =
+        // empty tag
+        let empty_tag_name = format_ident!("Empty");
+
+        // stack name for terminal symbol
+        let terminal_stack_name = format_ident!("__terminals");
+        // stack name for each non-terminal
+        let mut stack_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
+
+        // (<RuleType as ToString>, stack_name) map
+        let mut ruletype_stack_map: rusty_lr_core::hash::HashMap<String, Option<Ident>> =
             Default::default();
 
-        // (variant_name, TokenStream for typename) sorted in insertion order
+        // (stack_name, TokenStream for typename) sorted in insertion order
         // for consistent output
-        let mut variant_names_in_order = Vec::new();
+        let mut stack_names_in_order = Vec::new();
 
-        // insert variant for terminal token type
-        ruletype_variant_map.insert(
+        // insert stack for empty
+        ruletype_stack_map.insert("".to_string(), None);
+
+        // insert stack for terminal token type
+        ruletype_stack_map.insert(
             self.token_typename.to_string(),
-            terminal_variant_name.clone(),
+            Some(terminal_stack_name.clone()),
         );
-        variant_names_in_order.push((terminal_variant_name.clone(), self.token_typename.clone()));
-
-        // insert variant for empty-ruletype
-        let empty_ruletype_variant_name = Ident::new("Empty", Span::call_site());
-        ruletype_variant_map.insert("".to_string(), empty_ruletype_variant_name.clone());
-        // ruletype_variant_map.insert(quote! {()}.to_string(), empty_ruletype_variant_name.clone());
-        variant_names_in_order.push((empty_ruletype_variant_name.clone(), quote! {}));
+        stack_names_in_order.push((terminal_stack_name.clone(), self.token_typename.clone()));
 
         fn remove_whitespaces(s: String) -> String {
             s.chars().filter(|c| !c.is_whitespace()).collect()
@@ -1198,20 +1202,17 @@ impl Grammar {
         for nonterm in self.nonterminals.iter() {
             let ruletype_stream = nonterm.ruletype.as_ref().cloned().unwrap_or_default();
 
-            let cur_len = ruletype_variant_map.len();
-            let variant_name = ruletype_variant_map
+            let cur_len = ruletype_stack_map.len();
+            let stack_name = ruletype_stack_map
                 .entry(remove_whitespaces(ruletype_stream.to_string()))
                 .or_insert_with(|| {
-                    let new_variant_name =
-                        Ident::new(&format!("Variant{}", cur_len), Span::call_site());
-                    variant_names_in_order
-                        .push((new_variant_name.clone(), ruletype_stream.clone()));
-                    new_variant_name
+                    let new_stack_name = format_ident!("__stack{}", cur_len);
+                    stack_names_in_order.push((new_stack_name.clone(), ruletype_stream.clone()));
+                    Some(new_stack_name)
                 })
                 .clone();
-            variant_names_for_nonterm.push(variant_name);
+            stack_names_for_nonterm.push(stack_name);
         }
-        drop(ruletype_variant_map);
 
         let mut case_streams = quote! {};
 
@@ -1255,17 +1256,18 @@ impl Grammar {
                                         match term {
                                             TerminalSymbol::Term(_) => {
                                                 extract_token_data_from_args.extend(quote! {
-                                                let #token_data_typename::#terminal_variant_name(mut #mapto) = __data_stack.pop().unwrap() else {
-                                                    unreachable!()
-                                                };
-                                                let #location_varname = __location_stack.pop().unwrap();
-                                            });
+                                                    let __tag = __data_stack.#tag_stack_name.pop();
+                                                    debug_assert!(__tag == Some(#tag_enum_name::#terminal_stack_name));
+                                                    let mut #mapto = __data_stack.#terminal_stack_name.pop().unwrap();
+                                                    let #location_varname = __location_stack.pop().unwrap();
+                                                });
                                             }
                                             TerminalSymbol::Error => {
                                                 extract_token_data_from_args.extend(quote! {
-                                                __data_stack.pop();
-                                                let #location_varname = __location_stack.pop().unwrap();
-                                            });
+                                                    let __tag = __data_stack.#tag_stack_name.pop();
+                                                    debug_assert!(__tag == Some(#tag_enum_name::#empty_tag_name));
+                                                    let #location_varname = __location_stack.pop().unwrap();
+                                                });
                                             }
                                             TerminalSymbol::Eof => {
                                                 unreachable!(
@@ -1276,38 +1278,53 @@ impl Grammar {
                                     }
                                     None => {
                                         extract_token_data_from_args.extend(quote! {
-                                            __data_stack.pop();
+                                            let __tag = __data_stack.#tag_stack_name.pop();
+                                            debug_assert!(__tag == Some(#tag_enum_name::#terminal_stack_name));
+                                            __data_stack.#terminal_stack_name.pop();
                                             __location_stack.pop();
                                         });
                                     }
                                 },
                                 Token::NonTerm(nonterm_idx) => {
+                                    let stack_name = stack_names_for_nonterm[*nonterm_idx].as_ref();
+
                                     match &token.mapto {
                                         Some(mapto) => {
                                             let location_varname =
                                                 format_ident!("__rustylr_location_{}", mapto);
-                                            let variant_name =
-                                                &variant_names_for_nonterm[*nonterm_idx];
-                                            if variant_name == &empty_ruletype_variant_name {
-                                                extract_token_data_from_args.extend(quote! {
-                                                __data_stack.pop();
-                                                let #location_varname = __location_stack.pop().unwrap();
-                                            });
-                                            } else {
+
+                                            if let Some(stack_name) = stack_name {
                                                 // extract token data from args
                                                 extract_token_data_from_args.extend(quote! {
-                                                let #token_data_typename::#variant_name(mut #mapto) = __data_stack.pop().unwrap() else {
-                                                    unreachable!()
-                                                };
-                                                let #location_varname = __location_stack.pop().unwrap();
-                                            });
+                                                    let __tag = __data_stack.#tag_stack_name.pop();
+                                                    debug_assert!(__tag == Some(#tag_enum_name::#stack_name));
+                                                    let mut #mapto = __data_stack.#stack_name.pop().unwrap();
+                                                    let #location_varname = __location_stack.pop().unwrap();
+                                                });
+                                            } else {
+                                                extract_token_data_from_args.extend(quote! {
+                                                    let __tag = __data_stack.#tag_stack_name.pop();
+                                                    debug_assert!(__tag == Some(#tag_enum_name::#stack_name));
+                                                    __data_stack.#stack_name.pop();
+                                                    let #location_varname = __location_stack.pop().unwrap();
+                                                });
                                             }
                                         }
                                         None => {
-                                            extract_token_data_from_args.extend(quote! {
-                                                __data_stack.pop();
-                                                __location_stack.pop();
-                                            });
+                                            if let Some(stack_name) = stack_name {
+                                                extract_token_data_from_args.extend(quote! {
+                                                    let __tag = __data_stack.#tag_stack_name.pop();
+                                                    debug_assert!(__tag == Some(#tag_enum_name::#stack_name));
+                                                    __data_stack.#stack_name.pop();
+                                                    __location_stack.pop();
+                                                });
+                                            } else {
+                                                extract_token_data_from_args.extend(quote! {
+                                                    let __tag = __data_stack.#tag_stack_name.pop();
+                                                    debug_assert!(__tag == Some(#tag_enum_name::#empty_tag_name));
+                                                    __location_stack.pop();
+                                                });
+                                            }
                                         }
                                     }
                                 }
@@ -1318,60 +1335,137 @@ impl Grammar {
                             #rule_index => Self::#reduce_fn_ident( data_stack, location_stack, shift, lookahead, user_data, location0 ),
                         });
 
-                        // if typename is defined for this rule, push result of action to stack
-                        // else, just execute action
-                        if nonterm.ruletype.is_some() {
-                            // typename is defined, reduce action must be defined
-                            let variant_name = &variant_names_for_nonterm[nonterm_idx];
+                        // typename is defined, reduce action must be defined
+                        if let Some(stack_name) = &stack_names_for_nonterm[nonterm_idx] {
                             fn_reduce_for_each_rule_stream.extend(quote! {
                                 #[doc = #rule_debug_str]
                                 #[inline]
                                 fn #reduce_fn_ident(
-                                    __data_stack: &mut Vec<Self>,
+                                    __data_stack: &mut Self,
                                     __location_stack: &mut Vec<#location_typename>,
                                     shift: &mut bool,
                                     lookahead: &#module_prefix::TerminalSymbol<#token_typename>,
                                     #user_data_parameter_name: &mut #user_data_typename,
                                     __rustylr_location0: &mut #location_typename,
-                                ) -> Result<#token_data_typename, #reduce_error_typename> {
+                                ) -> Result<(), #reduce_error_typename> {
                                     #extract_token_data_from_args
 
-                                    Ok( #token_data_typename::#variant_name(#reduce_action) )
+                                    let res = #reduce_action ;
+                                    __data_stack.#stack_name.push(res);
+                                    __data_stack.#tag_stack_name.push(#tag_enum_name::#stack_name);
+
+                                    Ok(())
                                 }
                             });
                         } else {
-                            // <RuleType> is not defined,
-                            // just execute action
-
-                            let variant_name = &variant_names_for_nonterm[nonterm_idx];
                             fn_reduce_for_each_rule_stream.extend(quote! {
                                 #[doc = #rule_debug_str]
                                 #[inline]
                                 fn #reduce_fn_ident(
-                                    __data_stack: &mut Vec<Self>,
+                                    __data_stack: &mut Self,
                                     __location_stack: &mut Vec<#location_typename>,
                                     shift: &mut bool,
                                     lookahead: &#module_prefix::TerminalSymbol<#token_typename>,
                                     #user_data_parameter_name: &mut #user_data_typename,
                                     __rustylr_location0: &mut #location_typename,
-                                ) -> Result<#token_data_typename, #reduce_error_typename> {
+                                ) -> Result<(), #reduce_error_typename> {
                                     #extract_token_data_from_args
-                                    #reduce_action
 
-                                    Ok( #token_data_typename::#variant_name )
+                                    #reduce_action
+                                    __data_stack.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
+
+                                    Ok(())
                                 }
                             });
                         }
                     }
                     &Some(ReduceAction::Identity(identity_token_idx)) => {
                         case_streams.extend(quote! {
-                            #rule_index => Ok(Self::#reduce_fn_ident( data_stack, location_stack )),
+                            #rule_index => { Self::#reduce_fn_ident( data_stack, location_stack ); Ok(()) }
                         });
 
-                        let tokens_len = rule.tokens.len();
+                        let mut stack_count_map = std::collections::BTreeMap::new();
+                        let mut pop_stack_idx_pair = None;
+                        for (token_idx, token) in rule.tokens.iter().enumerate().rev() {
+                            let token = token.token;
+                            if token_idx == identity_token_idx {
+                                match token {
+                                    Token::Term(TerminalSymbol::Term(_)) => {
+                                        let idx_from_back = stack_count_map
+                                            .get(&terminal_stack_name)
+                                            .copied()
+                                            .unwrap_or(0);
+                                        pop_stack_idx_pair =
+                                            Some((&terminal_stack_name, idx_from_back));
+                                    }
+                                    Token::Term(TerminalSymbol::Error) => {}
+                                    Token::Term(TerminalSymbol::Eof) => {}
+                                    Token::NonTerm(nonterm_idx) => {
+                                        if let Some(stack_name) =
+                                            &stack_names_for_nonterm[nonterm_idx]
+                                        {
+                                            let idx_from_back = stack_count_map
+                                                .get(stack_name)
+                                                .copied()
+                                                .unwrap_or(0);
+                                            pop_stack_idx_pair = Some((stack_name, idx_from_back));
+                                        }
+                                    }
+                                }
+                            } else {
+                                match token {
+                                    Token::Term(TerminalSymbol::Term(_)) => {
+                                        *stack_count_map
+                                            .entry(&terminal_stack_name)
+                                            .or_insert(0usize) += 1;
+                                    }
+                                    Token::Term(TerminalSymbol::Error) => {}
+                                    Token::Term(TerminalSymbol::Eof) => {}
+                                    Token::NonTerm(nonterm_idx) => {
+                                        if let Some(stack_name) =
+                                            &stack_names_for_nonterm[nonterm_idx]
+                                        {
+                                            *stack_count_map.entry(stack_name).or_insert(0usize) +=
+                                                1;
+                                        }
+                                    }
+                                }
+                            }
+                        }
 
-                        let truncate_data_stack = if tokens_len > 1 {
-                            quote! { __data_stack.truncate(__data_stack.len() - #tokens_len + 1); }
+                        let (stack_pop_stream, stack_push_stream) = if let Some((
+                            pop_stack,
+                            pop_index_from_back,
+                        )) = pop_stack_idx_pair
+                        {
+                            (
+                                quote! { let __ret = __data_stack.#pop_stack.swap_remove( __data_stack.#pop_stack.len() - 1  - #pop_index_from_back ); },
+                                quote! { __data_stack.#pop_stack.push(__ret); __data_stack.#tag_stack_name.push(#tag_enum_name::#pop_stack); },
+                            )
+                        } else {
+                            (
+                                quote! {},
+                                quote! {
+                                    __data_stack.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
+                                },
+                            )
+                        };
+                        let mut stack_truncate_stream = TokenStream::new();
+                        for (stack_name, count) in stack_count_map {
+                            debug_assert!(count > 0);
+                            stack_truncate_stream.extend(quote! {
+                                __data_stack.#stack_name.truncate(__data_stack.#stack_name.len() - #count);
+                            });
+                        }
+                        let location_truncate_stream = if rule.tokens.len() > 0 {
+                            let len = rule.tokens.len();
+                            quote! { __location_stack.truncate(__location_stack.len() - #len); }
+                        } else {
+                            quote! {}
+                        };
+                        let tags_truncate_stream = if rule.tokens.len() > 0 {
+                            let len = rule.tokens.len();
+                            quote! { __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len); }
                         } else {
                             quote! {}
                         };
@@ -1380,43 +1474,71 @@ impl Grammar {
                             #[doc = #rule_debug_str]
                             #[inline]
                             fn #reduce_fn_ident(
-                                __data_stack: &mut Vec<Self>,
+                                __data_stack: &mut Self,
                                 __location_stack: &mut Vec<#location_typename>,
-                            ) -> #token_data_typename {
-                                let ret = __data_stack.swap_remove( __data_stack.len() - #tokens_len + #identity_token_idx );
-                                #truncate_data_stack
-                                __location_stack.truncate(__location_stack.len() - #tokens_len);
-                                ret
+                            ) {
+                                #stack_pop_stream
+                                #stack_truncate_stream
+                                #location_truncate_stream
+                                #tags_truncate_stream
+                                #stack_push_stream
                             }
                         });
                     }
                     None => {
                         case_streams.extend(quote! {
-                            #rule_index => Ok(Self::#reduce_fn_ident( data_stack, location_stack )),
+                            #rule_index => { Self::#reduce_fn_ident( data_stack, location_stack ); Ok(()) }
                         });
 
-                        let tokens_len = rule.tokens.len();
-
-                        let (truncate_data_stack, truncate_location_stack) = if tokens_len > 0 {
-                            (
-                                quote! { __data_stack.truncate(__data_stack.len() - #tokens_len); },
-                                quote! { __location_stack.truncate(__location_stack.len() - #tokens_len); },
-                            )
+                        let mut stack_count_map = std::collections::BTreeMap::new();
+                        for token in rule.tokens.iter() {
+                            let token = token.token;
+                            match token {
+                                Token::Term(TerminalSymbol::Term(_)) => {
+                                    *stack_count_map
+                                        .entry(&terminal_stack_name)
+                                        .or_insert(0usize) += 1;
+                                }
+                                Token::Term(TerminalSymbol::Error) => {}
+                                Token::Term(TerminalSymbol::Eof) => {}
+                                Token::NonTerm(nonterm_idx) => {
+                                    if let Some(stack_name) = &stack_names_for_nonterm[nonterm_idx]
+                                    {
+                                        *stack_count_map.entry(stack_name).or_insert(0usize) += 1;
+                                    }
+                                }
+                            }
+                        }
+                        let mut stack_truncate_stream = TokenStream::new();
+                        for (stack_name, count) in stack_count_map {
+                            debug_assert!(count > 0);
+                            stack_truncate_stream.extend(quote! {
+                                __data_stack.#stack_name.truncate(__data_stack.#stack_name.len() - #count);
+                            });
+                        }
+                        let location_truncate_stream = if rule.tokens.len() > 0 {
+                            let len = rule.tokens.len();
+                            quote! { __location_stack.truncate(__location_stack.len() - #len); }
                         } else {
-                            (quote! {}, quote! {})
+                            quote! {}
                         };
-
+                        let tags_truncate_stream = if rule.tokens.len() > 0 {
+                            let len = rule.tokens.len();
+                            quote! { __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len); }
+                        } else {
+                            quote! {}
+                        };
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             #[doc = #rule_debug_str]
                             #[inline]
                             fn #reduce_fn_ident(
-                                __data_stack: &mut Vec<Self>,
+                                __data_stack: &mut Self,
                                 __location_stack: &mut Vec<#location_typename>,
-                            ) -> #token_data_typename {
-                                #truncate_data_stack
-                                #truncate_location_stack
-
-                                #token_data_typename::#empty_ruletype_variant_name
+                            ) {
+                                #stack_truncate_stream
+                                #location_truncate_stream
+                                #tags_truncate_stream
+                                __data_stack.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
                             }
                         });
                     }
@@ -1426,30 +1548,81 @@ impl Grammar {
         }
 
         let start_idx = *self.nonterminals_index.get(&self.start_rule_name).unwrap();
-        let start_variant_name = &variant_names_for_nonterm[start_idx];
-        let (start_typename, extract_start) = match &self.nonterminals[start_idx].ruletype {
-            Some(typename) => (
-                typename.clone(),
-                quote! { #token_data_typename::#start_variant_name(data) => Ok(data) },
-            ),
+        let start_stack_name = &stack_names_for_nonterm[start_idx];
+        let (start_typename, pop_start) = match start_stack_name {
+            Some(stack_name) => {
+                let ruletype = self.nonterminals[start_idx]
+                    .ruletype
+                    .as_ref()
+                    .unwrap()
+                    .clone();
+                (
+                    ruletype,
+                    quote! {
+                        let tag = self.#tag_stack_name.pop();
+                        debug_assert!(tag == Some(#tag_enum_name::#stack_name));
+                        self.#stack_name.pop()
+                    },
+                )
+            }
             None => (
                 quote! {()},
-                quote! { #token_data_typename::#start_variant_name => Ok(())},
+                quote! {
+                    let tag = self.#tag_stack_name.pop();
+                    debug_assert!(tag == Some(#tag_enum_name::#empty_tag_name));
+                    Some(())
+                },
             ),
         };
 
-        // enum data type
-        let mut enum_variants_stream = TokenStream::new();
-        for (variant_name, typename) in variant_names_in_order.into_iter() {
-            if typename.is_empty() {
-                enum_variants_stream.extend(quote! {
-                    #variant_name,
-                });
-            } else {
-                enum_variants_stream.extend(quote! {
-                    #variant_name(#typename),
-                });
-            }
+        let mut tag_definition_stream = TokenStream::new();
+        for (stack_name, _) in &stack_names_in_order {
+            tag_definition_stream.extend(quote! {
+                #stack_name,
+            });
+        }
+
+        let mut stack_definition_stream = TokenStream::new();
+        let mut stack_default_stream = TokenStream::new();
+        let mut pop_match_stream = TokenStream::new();
+        let mut stack_clear_stream = TokenStream::new();
+        let mut stack_append_stream = TokenStream::new();
+        let mut split_off_count_init_stream = TokenStream::new();
+        let mut split_off_count_match_stream = TokenStream::new();
+        let mut split_off_split_stream = TokenStream::new();
+        let mut split_off_ctor_stream = TokenStream::new();
+        for (stack_name, typename) in &stack_names_in_order {
+            stack_definition_stream.extend(quote! {
+                #stack_name: Vec<#typename>,
+            });
+            stack_default_stream.extend(quote! {
+                #stack_name: Vec::new(),
+            });
+            pop_match_stream.extend(quote! {
+                #tag_enum_name::#stack_name => { self.#stack_name.pop(); }
+            });
+            stack_clear_stream.extend(quote! {
+                self.#stack_name.clear();
+            });
+            stack_append_stream.extend(quote! {
+                self.#stack_name.append(&mut other.#stack_name);
+            });
+
+            let count_var_name = format_ident!("__count_{stack_name}");
+            let other_stack_name = format_ident!("__other_{}", stack_name);
+
+            split_off_count_init_stream.extend(quote! {
+                let mut #count_var_name = 0;
+            });
+            split_off_count_match_stream.extend(quote! {
+                #tag_enum_name::#stack_name => { #count_var_name += 1; }
+            });
+            split_off_split_stream.extend(quote! {
+                let #other_stack_name = self.#stack_name.split_off( self.#stack_name.len() - #count_var_name );
+            });
+            split_off_ctor_stream.extend(quote! {
+                #stack_name: #other_stack_name,
+            });
         }
 
         let derive_clone_for_glr = if self.glr {
@@ -1459,21 +1632,39 @@ impl Grammar {
         };
 
         stream.extend(quote! {
+        /// tag for token that represents which stack a token is using
+        #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
+        #[derive(Clone, Copy, PartialEq, Eq)]
+        pub enum #tag_enum_name {
+            #empty_tag_name,
+            #tag_definition_stream
+        }
+        
         /// enum for each non-terminal and terminal symbol, that actually hold data
         #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
         #derive_clone_for_glr
-        pub enum #token_data_typename {
-            #enum_variants_stream
+        pub struct #data_stack_typename {
+            pub #tag_stack_name: Vec<#tag_enum_name>,
+            #stack_definition_stream
+        }
+
+        impl Default for #data_stack_typename {
+            fn default() -> Self {
+                Self {
+                    #tag_stack_name: Vec::new(),
+                    #stack_default_stream
+                }
+            }
         }
 
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
-        impl #token_data_typename {
+        impl #data_stack_typename {
             #fn_reduce_for_each_rule_stream
         }
 
 
         #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types, unused_variables)]
-        impl #module_prefix::nonterminal::TokenData for #token_data_typename {
+        impl #module_prefix::parser::data_stack::DataStack for #data_stack_typename {
             type Term = #token_typename;
             type NonTerm = #nonterminals_enum_name;
             type ReduceActionError = #reduce_error_typename;
@@ -1481,15 +1672,61 @@ impl Grammar {
             type StartType = #start_typename;
             type Location = #location_typename;
 
+            fn pop_start(&mut self) -> Option<Self::StartType> {
+                #pop_start
+            }
+            fn pop(&mut self) {
+                match self.#tag_stack_name.pop().unwrap() {
+                    #pop_match_stream
+                    _ => {}
+                }
+            }
+            fn push_terminal(&mut self, term: Self::Term) {
+                self.#tag_stack_name.push(#tag_enum_name::#terminal_stack_name);
+                self.#terminal_stack_name.push( term );
+            }
+            fn push_empty(&mut self) {
+                self.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
+            }
+
+            fn clear(&mut self) {
+                self.#tag_stack_name.clear();
+                #stack_clear_stream
+            }
+            fn reserve(&mut self, additional: usize) {
+                self.#tag_stack_name.reserve(additional);
+            }
+
+            fn split_off(&mut self, at: usize) -> Self {
+                let other_tag_stack = self.#tag_stack_name.split_off(at);
+
+                #split_off_count_init_stream
+                for tag in &other_tag_stack {
+                    match tag {
+                        #split_off_count_match_stream
+                        _ => {}
+                    }
+                }
+                #split_off_split_stream
+                Self {
+                    #tag_stack_name: other_tag_stack,
+                    #split_off_ctor_stream
+                }
+            }
+            fn append(&mut self, other: &mut Self) {
+                self.#tag_stack_name.append(&mut other.#tag_stack_name);
+                #stack_append_stream
+            }
+
             fn reduce_action(
-                data_stack: &mut Vec<Self>,
+                data_stack: &mut Self,
                 location_stack: &mut Vec<#location_typename>,
                 rule_index: usize,
                 shift: &mut bool,
                 lookahead: &#module_prefix::TerminalSymbol<Self::Term>,
                 user_data: &mut Self::UserData,
                 location0: &mut Self::Location,
-            ) -> Result<Self, Self::ReduceActionError> {
+            ) -> Result<(), Self::ReduceActionError> {
                 match rule_index {
                     #case_streams
                     _ => {
@@ -1497,25 +1734,8 @@ impl Grammar {
                     }
                 }
             }
-            fn new_error() -> Self {
-                #token_data_typename::#empty_ruletype_variant_name
-            }
-            fn new_terminal(term: #token_typename) -> Self {
-                #token_data_typename::#terminal_variant_name(term)
-            }
         }
 
-        #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types, unused_variables)]
-        impl TryFrom<#token_data_typename> for #start_typename {
-            type Error = ();
-
-            fn try_from(token: #token_data_typename) -> Result<Self, Self::Error> {
-                match token {
-                    #extract_start,
-                    _ => Err(()),
-                }
-            }
-        }
         });
     }
 
@@ -1523,7 +1743,7 @@ impl Grammar {
         let mut stream = TokenStream::new();
         self.emit_type_alises(&mut stream);
         self.emit_nonterm_enum(&mut stream);
-        self.emit_token_data(&mut stream);
+        self.emit_data_stack(&mut stream);
         self.emit_parser(&mut stream);
 
         stream
