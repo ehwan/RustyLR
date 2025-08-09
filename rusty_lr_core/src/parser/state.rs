@@ -324,13 +324,30 @@ where
     fn from(
         mut builder_state: IntermediateState<TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>,
     ) -> Self {
-        debug_assert!(
-            TerminalSymbol::Term(0) < TerminalSymbol::Error
-                && TerminalSymbol::<i32>::Error < TerminalSymbol::Eof
-        );
-
         // TerminalSymbol::Term(_) < TerminalSymbol::Error < TerminalSymbol::Eof
-        // since any maps are sorted, eof and error should be at the end of the array
+        // since maps are sorted, eof and error should be at the end of the array
+
+        // make sure the order is preserved
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                TerminalSymbol::Term(0) < TerminalSymbol::Error
+                    && TerminalSymbol::<i32>::Error < TerminalSymbol::Eof
+            );
+            let keys = builder_state
+                .shift_goto_map_term
+                .iter()
+                .map(|(term, _)| term)
+                .collect::<Vec<_>>();
+            debug_assert!(keys.is_sorted());
+
+            let keys = builder_state
+                .reduce_map
+                .iter()
+                .map(|(term, _)| term)
+                .collect::<Vec<_>>();
+            debug_assert!(keys.is_sorted());
+        }
         let eof_shift = if builder_state
             .shift_goto_map_term
             .last()
@@ -433,13 +450,31 @@ where
     fn from(
         mut builder_state: IntermediateState<TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>,
     ) -> Self {
-        debug_assert!(
-            TerminalSymbol::Term(0) < TerminalSymbol::Error
-                && TerminalSymbol::<i32>::Error < TerminalSymbol::Eof
-        );
-
         // TerminalSymbol::Term(_) < TerminalSymbol::Error < TerminalSymbol::Eof
-        // since any maps are sorted, eof and error should be at the end of the array
+        // since maps are sorted, eof and error should be at the end of the array
+
+        // make sure the order is preserved
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                TerminalSymbol::Term(0) < TerminalSymbol::Error
+                    && TerminalSymbol::<i32>::Error < TerminalSymbol::Eof
+            );
+            let keys = builder_state
+                .shift_goto_map_term
+                .iter()
+                .map(|(term, _)| term)
+                .collect::<Vec<_>>();
+            debug_assert!(keys.is_sorted());
+
+            let keys = builder_state
+                .reduce_map
+                .iter()
+                .map(|(term, _)| term)
+                .collect::<Vec<_>>();
+            debug_assert!(keys.is_sorted());
+        }
+
         let eof_shift = if builder_state
             .shift_goto_map_term
             .last()
