@@ -1083,16 +1083,15 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                     .remove(&term)
                     .unwrap()
                     .rules
-                    .into_iter()
-                    .map(|(rule_ref, _)| rule_ref)
+                    .into_keys()
                     .collect()
             } else {
                 next_rules_term
                     .get(&term)
                     .unwrap()
                     .rules
-                    .iter()
-                    .map(|(rule_ref, _)| *rule_ref)
+                    .keys()
+                    .copied()
                     .collect()
             };
 

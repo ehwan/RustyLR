@@ -156,9 +156,9 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         )
     }
 
-    fn expected_token_impl<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    fn expected_token_impl<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
-        parser: &'a P,
+        parser: &P,
         states: &mut Vec<StateIndex>,
         terms: &mut BTreeSet<usize>,
         nonterms: &mut BTreeSet<Data::NonTerm>,
@@ -228,7 +228,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             userdata,
             Some(location),
         ) {
-            Ok(()) => return Ok(()),
+            Ok(()) => Ok(()),
             Err(ParseError::NoAction(term, location)) => {
                 // nothing shifted; enters panic mode
 
@@ -304,7 +304,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 }
                 Ok(())
             }
-            Err(err) => return Err(err),
+            Err(err) => Err(err),
         }
     }
 
@@ -490,7 +490,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     {
         let mut state_stack = self.state_stack.clone();
         let mut precedence_stack = self.precedence_stack.clone();
-        let class = TerminalSymbol::Term(parser.to_terminal_class(&term));
+        let class = TerminalSymbol::Term(parser.to_terminal_class(term));
         let shift_prec = parser.class_precedence(class);
 
         match Self::can_feed_impl(

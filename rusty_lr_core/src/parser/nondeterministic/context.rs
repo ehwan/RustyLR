@@ -105,7 +105,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 active_nodes.remove(&node);
             }
         }
-        if active_nodes.len() > 0 {
+        if !active_nodes.is_empty() {
             panic!("active nodes are not empty: {:?}", active_nodes);
         }
     }
@@ -1350,10 +1350,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             }
 
             shift.is_some() || !reduces.is_empty()
-        } else if shift_state.is_some() {
-            true
         } else {
-            false
+            shift_state.is_some()
         }
     }
 
@@ -1436,12 +1434,12 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         if self.next_nodes.is_empty() {
             std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
 
-            return Err(ParseError {
+            Err(ParseError {
                 term: TerminalSymbol::Eof,
                 location: None,
                 reduce_action_errors: std::mem::take(&mut self.reduce_errors),
                 no_precedences: std::mem::take(&mut self.no_precedences),
-            });
+            })
         } else {
             std::mem::swap(&mut self.current_nodes, &mut self.next_nodes);
             Ok(())

@@ -269,8 +269,7 @@ impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + 
             TerminalSymbol::Term(class) => self
                 .reduce_map
                 .get(class.wrapping_sub(self.reduce_offset))
-                .map(|r| r.as_ref())
-                .flatten(),
+                .and_then(|r| r.as_ref()),
             TerminalSymbol::Error => self.error_reduce.as_ref(),
             TerminalSymbol::Eof => self.eof_reduce.as_ref(),
         }
