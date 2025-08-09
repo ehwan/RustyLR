@@ -13,24 +13,6 @@ pub struct IntermediateState<Term, NonTerm, StateIndex, RuleIndex> {
     pub ruleset: Vec<crate::rule::ShiftedRuleRef>,
 }
 
-impl<Term, NonTerm, StateIndex, RuleIndex>
-    From<crate::builder::State<Term, NonTerm, StateIndex, RuleIndex>>
-    for IntermediateState<Term, NonTerm, StateIndex, RuleIndex>
-{
-    fn from(state: crate::builder::State<Term, NonTerm, StateIndex, RuleIndex>) -> Self {
-        IntermediateState {
-            shift_goto_map_term: state.shift_goto_map_term.into_iter().collect(),
-            shift_goto_map_nonterm: state.shift_goto_map_nonterm.into_iter().collect(),
-            reduce_map: state
-                .reduce_map
-                .into_iter()
-                .map(|(term, rules)| (term, rules.into_iter().collect()))
-                .collect(),
-            ruleset: state.ruleset.into_iter().collect(),
-        }
-    }
-}
-
 /// For state, terminal and class indices, we use the most compact integer type that can hold the maximum value.
 /// This trait defines the conversion between {u8, u16, u32, usize} <-> usize.
 pub trait Index {

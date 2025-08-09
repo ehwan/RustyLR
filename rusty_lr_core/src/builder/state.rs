@@ -37,3 +37,20 @@ impl<Term, NonTerm, StateIndex, RuleIndex> Default for State<Term, NonTerm, Stat
         Self::new()
     }
 }
+
+impl<Term, NonTerm, StateIndex, RuleIndex> From<State<Term, NonTerm, StateIndex, RuleIndex>>
+    for crate::parser::state::IntermediateState<Term, NonTerm, StateIndex, RuleIndex>
+{
+    fn from(state: crate::builder::State<Term, NonTerm, StateIndex, RuleIndex>) -> Self {
+        crate::parser::state::IntermediateState {
+            shift_goto_map_term: state.shift_goto_map_term.into_iter().collect(),
+            shift_goto_map_nonterm: state.shift_goto_map_nonterm.into_iter().collect(),
+            reduce_map: state
+                .reduce_map
+                .into_iter()
+                .map(|(term, rules)| (term, rules.into_iter().collect()))
+                .collect(),
+            ruleset: state.ruleset.into_iter().collect(),
+        }
+    }
+}
