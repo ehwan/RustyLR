@@ -1432,21 +1432,29 @@ impl Grammar {
                             }
                         }
 
-                        let (stack_pop_stream, stack_push_stream) = if let Some((
+                        let (stack_pop_stream, stack_push_stream, tag_push_stream) = if let Some((
                             pop_stack,
                             pop_index_from_back,
                         )) = pop_stack_idx_pair
                         {
-                            (
-                                quote! { let __ret = __data_stack.#pop_stack.swap_remove( __data_stack.#pop_stack.len() - 1  - #pop_index_from_back ); },
-                                quote! { __data_stack.#pop_stack.push(__ret); __data_stack.#tag_stack_name.push(#tag_enum_name::#pop_stack); },
-                            )
+                            if pop_index_from_back == stack_count_map.get(pop_stack).copied().unwrap_or(0) {
+                                (
+                                    quote!{},
+                                    quote!{},
+                                    quote!{ __data_stack.#tag_stack_name.push(#tag_enum_name::#pop_stack); }
+                                )
+                            } else {
+                                (
+                                    quote! { let __ret = __data_stack.#pop_stack.swap_remove( __data_stack.#pop_stack.len() - 1  - #pop_index_from_back ); },
+                                    quote! { __data_stack.#pop_stack.push(__ret); },
+                                    quote! { __data_stack.#tag_stack_name.push(#tag_enum_name::#pop_stack); }
+                                )
+                            }
                         } else {
                             (
                                 quote! {},
-                                quote! {
-                                    __data_stack.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
-                                },
+                                quote! {},
+                                quote! {__data_stack.#tag_stack_name.push(#tag_enum_name::#empty_tag_name); }
                             )
                         };
                         let mut stack_truncate_stream = TokenStream::new();
@@ -1476,11 +1484,12 @@ impl Grammar {
                                 __data_stack: &mut Self,
                                 __location_stack: &mut Vec<#location_typename>,
                             ) {
-                                #stack_pop_stream
-                                #stack_truncate_stream
-                                #location_truncate_stream
-                                #tags_truncate_stream
-                                #stack_push_stream
+                                #stack_pop_stream // __ret = stack.swap_remove(i);
+                                #stack_truncate_stream // stack.truncate( ... );
+                                #location_truncate_stream // location.truncate( ... );
+                                #tags_truncate_stream // tags.truncate( ... );
+                                #stack_push_stream // stack.push( __ret );
+                                #tag_push_stream // tag.push( ... );
                             }
                         });
                     }

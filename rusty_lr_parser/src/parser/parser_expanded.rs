@@ -3248,12 +3248,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__stack13
-            .swap_remove(__data_stack.__stack13.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__stack13.push(__ret);
         __data_stack.__tags.push(GrammarTags::__stack13);
     }
     ///TokenMapped* ->
@@ -3322,12 +3318,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__stack14
-            .swap_remove(__data_stack.__stack14.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__stack14.push(__ret);
         __data_stack.__tags.push(GrammarTags::__stack14);
     }
     ///PrecDef* ->
@@ -3430,12 +3422,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__stack16
-            .swap_remove(__data_stack.__stack16.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__stack16.push(__ret);
         __data_stack.__tags.push(GrammarTags::__stack16);
     }
     ///TerminalSetItem* ->
@@ -3504,12 +3492,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__stack17
-            .swap_remove(__data_stack.__stack17.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__stack17.push(__ret);
         __data_stack.__tags.push(GrammarTags::__stack17);
     }
     ///Pattern* ->
@@ -3616,12 +3600,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> colon
@@ -3630,12 +3610,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> pipe
@@ -3644,12 +3620,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> percent
@@ -3658,12 +3630,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> equal
@@ -3672,12 +3640,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> plus
@@ -3686,12 +3650,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> star
@@ -3700,12 +3660,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> question
@@ -3714,12 +3670,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> caret
@@ -3728,12 +3680,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> minus
@@ -3742,12 +3690,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> exclamation
@@ -3756,12 +3700,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> slash
@@ -3770,12 +3710,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> dot
@@ -3784,12 +3720,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> dollar
@@ -3798,12 +3730,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> comma
@@ -3812,12 +3740,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> literal
@@ -3826,12 +3750,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> parengroup
@@ -3840,12 +3760,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> bracegroup
@@ -3854,12 +3770,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> lparen
@@ -3868,12 +3780,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> rparen
@@ -3882,12 +3790,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> lbracket
@@ -3896,12 +3800,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> rbracket
@@ -3910,12 +3810,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> left
@@ -3924,12 +3820,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> right
@@ -3938,12 +3830,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> token
@@ -3952,12 +3840,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> start
@@ -3966,12 +3850,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> eofdef
@@ -3980,12 +3860,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> tokentype
@@ -3994,12 +3870,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> userdata
@@ -4008,12 +3880,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> errortype
@@ -4022,12 +3890,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> moduleprefix
@@ -4036,12 +3900,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> lalr
@@ -4050,12 +3910,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> glr
@@ -4064,12 +3920,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> prec
@@ -4078,12 +3930,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> precedence
@@ -4092,12 +3940,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> nooptim
@@ -4106,12 +3950,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> dense
@@ -4120,12 +3960,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> trace
@@ -4134,12 +3970,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> dprec
@@ -4148,12 +3980,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> filter
@@ -4162,12 +3990,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> runtime
@@ -4176,12 +4000,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> location
@@ -4190,12 +4010,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon] -> <Others>
@@ -4204,12 +4020,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__terminals
-            .swap_remove(__data_stack.__terminals.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.push(__ret);
         __data_stack.__tags.push(GrammarTags::__terminals);
     }
     ///[^semicolon]+ -> [^semicolon]
@@ -4353,12 +4165,8 @@ impl GrammarDataStack {
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
-        let __ret = __data_stack
-            .__stack19
-            .swap_remove(__data_stack.__stack19.len() - 1 - 0usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__stack19.push(__ret);
         __data_stack.__tags.push(GrammarTags::__stack19);
     }
     ///ident* ->
