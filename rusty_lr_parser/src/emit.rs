@@ -1304,8 +1304,7 @@ impl Grammar {
                                             } else {
                                                 extract_token_data_from_args.extend(quote! {
                                                     let __tag = __data_stack.#tag_stack_name.pop();
-                                                    debug_assert!(__tag == Some(#tag_enum_name::#stack_name));
-                                                    __data_stack.#stack_name.pop();
+                                                    debug_assert!(__tag == Some(#tag_enum_name::#empty_tag_name));
                                                     let #location_varname = __location_stack.pop().unwrap();
                                                 });
                                             }
