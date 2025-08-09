@@ -558,7 +558,7 @@ impl GrammarDataStack {
         let __rustylr_location_colon = __location_stack.pop().unwrap();
         let __rustylr_location_RuleType = __location_stack.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Rule-Ident");
             };
@@ -572,7 +572,7 @@ impl GrammarDataStack {
                 rule_lines: RuleLines,
             }
         };
-        __data_stack.__stack2.push(res);
+        __data_stack.__stack2.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack2);
         Ok(())
     }
@@ -596,13 +596,13 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut parengroup = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_parengroup = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::ParenGroup(group) = parengroup else {
                 unreachable!("RuleType - Group");
             };
             Some(group)
         };
-        __data_stack.__stack3.push(res);
+        __data_stack.__stack3.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack3);
         Ok(())
     }
@@ -617,8 +617,8 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        let res = { None };
-        __data_stack.__stack3.push(res);
+        let __res = { None };
+        __data_stack.__stack3.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack3);
         Ok(())
     }
@@ -654,12 +654,12 @@ impl GrammarDataStack {
         let __rustylr_location_RuleLine = __location_stack.pop().unwrap();
         let __rustylr_location_pipe = __location_stack.pop().unwrap();
         let __rustylr_location_RuleLines = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             RuleLine.separator_span = __rustylr_location_pipe.span();
             RuleLines.push(RuleLine);
             RuleLines
         };
-        __data_stack.__stack4.push(res);
+        __data_stack.__stack4.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack4);
         Ok(())
     }
@@ -683,8 +683,8 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut RuleLine = __data_stack.__stack5.pop().unwrap();
         let __rustylr_location_RuleLine = __location_stack.pop().unwrap();
-        let res = { vec![RuleLine] };
-        __data_stack.__stack4.push(res);
+        let __res = { vec![RuleLine] };
+        __data_stack.__stack4.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack4);
         Ok(())
     }
@@ -720,7 +720,7 @@ impl GrammarDataStack {
         let __rustylr_location_Action = __location_stack.pop().unwrap();
         let __rustylr_location_PrecDef = __location_stack.pop().unwrap();
         let __rustylr_location_TokenMapped = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             RuleLineArgs {
                 tokens: TokenMapped,
                 reduce_action: Action.map(|action| action.to_token_stream()),
@@ -730,7 +730,7 @@ impl GrammarDataStack {
                 dprec: None,
             }
         };
-        __data_stack.__stack5.push(res);
+        __data_stack.__stack5.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack5);
         Ok(())
     }
@@ -766,8 +766,8 @@ impl GrammarDataStack {
         let __rustylr_location_IdentOrLiteral = __location_stack.pop().unwrap();
         let __rustylr_location_prec = __location_stack.pop().unwrap();
         let __rustylr_location_percent = __location_stack.pop().unwrap();
-        let res = { PrecDPrecArgs::Prec(IdentOrLiteral) };
-        __data_stack.__stack6.push(res);
+        let __res = { PrecDPrecArgs::Prec(IdentOrLiteral) };
+        __data_stack.__stack6.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack6);
         Ok(())
     }
@@ -802,7 +802,7 @@ impl GrammarDataStack {
         let __rustylr_location_error = __location_stack.pop().unwrap();
         let __rustylr_location_prec = __location_stack.pop().unwrap();
         let __rustylr_location_percent = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             data.error_recovered
                 .push(RecoveredError {
                     message: "Expected <ident> to token or <literal>".to_string(),
@@ -812,7 +812,7 @@ impl GrammarDataStack {
                 });
             PrecDPrecArgs::None
         };
-        __data_stack.__stack6.push(res);
+        __data_stack.__stack6.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack6);
         Ok(())
     }
@@ -848,13 +848,13 @@ impl GrammarDataStack {
         let __rustylr_location_literal = __location_stack.pop().unwrap();
         let __rustylr_location_dprec = __location_stack.pop().unwrap();
         let __rustylr_location_percent = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Literal(literal) = literal else {
                 unreachable!("PrecDPrecArgs-DPrec");
             };
             PrecDPrecArgs::DPrec(literal)
         };
-        __data_stack.__stack6.push(res);
+        __data_stack.__stack6.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack6);
         Ok(())
     }
@@ -889,7 +889,7 @@ impl GrammarDataStack {
         let __rustylr_location_error = __location_stack.pop().unwrap();
         let __rustylr_location_dprec = __location_stack.pop().unwrap();
         let __rustylr_location_percent = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             data.error_recovered
                 .push(RecoveredError {
                     message: "Expected integer literal".to_string(),
@@ -899,7 +899,7 @@ impl GrammarDataStack {
                 });
             PrecDPrecArgs::None
         };
-        __data_stack.__stack6.push(res);
+        __data_stack.__stack6.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack6);
         Ok(())
     }
@@ -928,7 +928,7 @@ impl GrammarDataStack {
         let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_error = __location_stack.pop().unwrap();
         let __rustylr_location_percent = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             data.error_recovered
                 .push(RecoveredError {
                     message: "Expected %prec or %dprec".to_string(),
@@ -938,7 +938,7 @@ impl GrammarDataStack {
                 });
             PrecDPrecArgs::None
         };
-        __data_stack.__stack6.push(res);
+        __data_stack.__stack6.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack6);
         Ok(())
     }
@@ -962,8 +962,8 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut Pattern = __data_stack.__stack10.pop().unwrap();
         let __rustylr_location_Pattern = __location_stack.pop().unwrap();
-        let res = { (None, Pattern) };
-        __data_stack.__stack7.push(res);
+        let __res = { (None, Pattern) };
+        __data_stack.__stack7.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack7);
         Ok(())
     }
@@ -999,13 +999,13 @@ impl GrammarDataStack {
         let __rustylr_location_Pattern = __location_stack.pop().unwrap();
         let __rustylr_location_equal = __location_stack.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Token-Ident");
             };
             (Some(ident), Pattern)
         };
-        __data_stack.__stack7.push(res);
+        __data_stack.__stack7.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack7);
         Ok(())
     }
@@ -1029,13 +1029,13 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("TerminalSetItem-Range1");
             };
             TerminalSetItem::Terminal(ident)
         };
-        __data_stack.__stack8.push(res);
+        __data_stack.__stack8.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack8);
         Ok(())
     }
@@ -1071,7 +1071,7 @@ impl GrammarDataStack {
         let __rustylr_location_last = __location_stack.pop().unwrap();
         let __rustylr_location_minus = __location_stack.pop().unwrap();
         let __rustylr_location_first = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Ident(first) = first else {
                 unreachable!("TerminalSetItem-Range1");
             };
@@ -1080,7 +1080,7 @@ impl GrammarDataStack {
             };
             TerminalSetItem::Range(first, last)
         };
-        __data_stack.__stack8.push(res);
+        __data_stack.__stack8.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack8);
         Ok(())
     }
@@ -1115,7 +1115,7 @@ impl GrammarDataStack {
         let __rustylr_location_error = __location_stack.pop().unwrap();
         let __rustylr_location_minus = __location_stack.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             data.error_recovered
                 .push(RecoveredError {
                     message: "Expected ident for terminal set".to_string(),
@@ -1125,7 +1125,7 @@ impl GrammarDataStack {
                 });
             TerminalSetItem::Terminal(format_ident!("dummy"))
         };
-        __data_stack.__stack8.push(res);
+        __data_stack.__stack8.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack8);
         Ok(())
     }
@@ -1149,13 +1149,13 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut literal = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_literal = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Literal(literal) = literal else {
                 unreachable!("TerminalSetItem-Literal");
             };
             TerminalSetItem::Literal(literal)
         };
-        __data_stack.__stack8.push(res);
+        __data_stack.__stack8.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack8);
         Ok(())
     }
@@ -1191,7 +1191,7 @@ impl GrammarDataStack {
         let __rustylr_location_last = __location_stack.pop().unwrap();
         let __rustylr_location_minus = __location_stack.pop().unwrap();
         let __rustylr_location_first = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Literal(first) = first else {
                 unreachable!("TerminalSetItem-Range1");
             };
@@ -1200,7 +1200,7 @@ impl GrammarDataStack {
             };
             TerminalSetItem::LiteralRange(first, last)
         };
-        __data_stack.__stack8.push(res);
+        __data_stack.__stack8.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack8);
         Ok(())
     }
@@ -1235,7 +1235,7 @@ impl GrammarDataStack {
         let __rustylr_location_error = __location_stack.pop().unwrap();
         let __rustylr_location_minus = __location_stack.pop().unwrap();
         let __rustylr_location_literal = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             data.error_recovered
                 .push(RecoveredError {
                     message: "Expected literal for terminal set".to_string(),
@@ -1245,7 +1245,7 @@ impl GrammarDataStack {
                 });
             TerminalSetItem::Terminal(format_ident!("dummy"))
         };
-        __data_stack.__stack8.push(res);
+        __data_stack.__stack8.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack8);
         Ok(())
     }
@@ -1287,7 +1287,7 @@ impl GrammarDataStack {
         let __rustylr_location_TerminalSetItem = __location_stack.pop().unwrap();
         let __rustylr_location_caret = __location_stack.pop().unwrap();
         let __rustylr_location_lbracket = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             TerminalSet {
                 negate: caret.is_some(),
                 items: TerminalSetItem,
@@ -1295,7 +1295,7 @@ impl GrammarDataStack {
                 close_span: __rustylr_location_rbracket.span(),
             }
         };
-        __data_stack.__stack9.push(res);
+        __data_stack.__stack9.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack9);
         Ok(())
     }
@@ -1319,7 +1319,7 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut dot = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_dot = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let span = __rustylr_location_dot.span();
             TerminalSet {
                 negate: true,
@@ -1328,7 +1328,7 @@ impl GrammarDataStack {
                 close_span: span,
             }
         };
-        __data_stack.__stack9.push(res);
+        __data_stack.__stack9.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack9);
         Ok(())
     }
@@ -1352,13 +1352,13 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Ident");
             };
             PatternArgs::Ident(ident)
         };
-        __data_stack.__stack10.push(res);
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -1388,13 +1388,13 @@ impl GrammarDataStack {
         let mut plus = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_plus = __location_stack.pop().unwrap();
         let __rustylr_location_Pattern = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Plus(plus) = plus else {
                 unreachable!("Pattern-Plus");
             };
             PatternArgs::Plus(Box::new(Pattern), __rustylr_location_plus.span())
         };
-        __data_stack.__stack10.push(res);
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -1424,10 +1424,10 @@ impl GrammarDataStack {
         let mut star = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_star = __location_stack.pop().unwrap();
         let __rustylr_location_Pattern = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             PatternArgs::Star(Box::new(Pattern), __rustylr_location_star.span())
         };
-        __data_stack.__stack10.push(res);
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -1457,10 +1457,10 @@ impl GrammarDataStack {
         let mut question = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_question = __location_stack.pop().unwrap();
         let __rustylr_location_Pattern = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             PatternArgs::Question(Box::new(Pattern), __rustylr_location_question.span())
         };
-        __data_stack.__stack10.push(res);
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -1490,13 +1490,13 @@ impl GrammarDataStack {
         let mut exclamation = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_exclamation = __location_stack.pop().unwrap();
         let __rustylr_location_Pattern = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             PatternArgs::Exclamation(
                 Box::new(Pattern),
                 __rustylr_location_exclamation.span(),
             )
         };
-        __data_stack.__stack10.push(res);
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -1520,8 +1520,8 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut TerminalSet = __data_stack.__stack9.pop().unwrap();
         let __rustylr_location_TerminalSet = __location_stack.pop().unwrap();
-        let res = { PatternArgs::TerminalSet(TerminalSet) };
-        __data_stack.__stack10.push(res);
+        let __res = { PatternArgs::TerminalSet(TerminalSet) };
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -1557,8 +1557,8 @@ impl GrammarDataStack {
         let __rustylr_location_lh = __location_stack.pop().unwrap();
         let __rustylr_location_slash = __location_stack.pop().unwrap();
         let __rustylr_location_p1 = __location_stack.pop().unwrap();
-        let res = { PatternArgs::Lookaheads(Box::new(p1), Box::new(lh)) };
-        __data_stack.__stack10.push(res);
+        let __res = { PatternArgs::Lookaheads(Box::new(p1), Box::new(lh)) };
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -1594,14 +1594,14 @@ impl GrammarDataStack {
         let __rustylr_location_rparen = __location_stack.pop().unwrap();
         let __rustylr_location_Pattern = __location_stack.pop().unwrap();
         let __rustylr_location_lparen = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             PatternArgs::Group(
                 Pattern,
                 __rustylr_location_lparen.span(),
                 __rustylr_location_rparen.span(),
             )
         };
-        __data_stack.__stack10.push(res);
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -1636,7 +1636,7 @@ impl GrammarDataStack {
         let __rustylr_location_rparen = __location_stack.pop().unwrap();
         let __rustylr_location_error = __location_stack.pop().unwrap();
         let __rustylr_location_lparen = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             data.error_recovered
                 .push(RecoveredError {
                     message: "syntax error when parsing GROUP".to_string(),
@@ -1646,7 +1646,7 @@ impl GrammarDataStack {
                 });
             PatternArgs::Ident(format_ident!("dummy"))
         };
-        __data_stack.__stack10.push(res);
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -1670,13 +1670,13 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut literal = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_literal = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Literal(literal) = literal else {
                 unreachable!("Pattern-Literal");
             };
             PatternArgs::Literal(literal)
         };
-        __data_stack.__stack10.push(res);
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -1712,8 +1712,8 @@ impl GrammarDataStack {
         let __rustylr_location_p2 = __location_stack.pop().unwrap();
         let __rustylr_location_minus = __location_stack.pop().unwrap();
         let __rustylr_location_p1 = __location_stack.pop().unwrap();
-        let res = { PatternArgs::Minus(Box::new(p1), Box::new(p2)) };
-        __data_stack.__stack10.push(res);
+        let __res = { PatternArgs::Minus(Box::new(p1), Box::new(p2)) };
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -1779,7 +1779,7 @@ impl GrammarDataStack {
         let __rustylr_location_lparen = __location_stack.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
         let __rustylr_location_dollar = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Sep-Ident");
             };
@@ -1794,7 +1794,7 @@ impl GrammarDataStack {
             }
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
-        __data_stack.__stack10.push(res);
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -1866,7 +1866,7 @@ impl GrammarDataStack {
         let __rustylr_location_lparen = __location_stack.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
         let __rustylr_location_dollar = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Sep-Ident");
             };
@@ -1881,7 +1881,7 @@ impl GrammarDataStack {
             }
             PatternArgs::Sep(Box::new(base), Box::new(del), true, *__rustylr_location0)
         };
-        __data_stack.__stack10.push(res);
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -1953,7 +1953,7 @@ impl GrammarDataStack {
         let __rustylr_location_lparen = __location_stack.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
         let __rustylr_location_dollar = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Sep-Ident");
             };
@@ -1968,7 +1968,7 @@ impl GrammarDataStack {
             }
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
-        __data_stack.__stack10.push(res);
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -2033,7 +2033,7 @@ impl GrammarDataStack {
         let __rustylr_location_lparen = __location_stack.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
         let __rustylr_location_dollar = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Sep-Ident");
             };
@@ -2055,7 +2055,7 @@ impl GrammarDataStack {
                 });
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
-        __data_stack.__stack10.push(res);
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -2126,7 +2126,7 @@ impl GrammarDataStack {
         let __rustylr_location_lparen = __location_stack.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
         let __rustylr_location_dollar = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Sep-Ident");
             };
@@ -2148,7 +2148,7 @@ impl GrammarDataStack {
                 });
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
-        __data_stack.__stack10.push(res);
+        __data_stack.__stack10.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
@@ -2172,13 +2172,13 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut bracegroup = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_bracegroup = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::BraceGroup(group) = bracegroup else {
                 unreachable!("Action0");
             };
             Some(group)
         };
-        __data_stack.__stack3.push(res);
+        __data_stack.__stack3.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack3);
         Ok(())
     }
@@ -2193,8 +2193,8 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        let res = { None };
-        __data_stack.__stack3.push(res);
+        let __res = { None };
+        __data_stack.__stack3.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack3);
         Ok(())
     }
@@ -2218,13 +2218,13 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("IdentOrLiteral-Ident");
             };
             IdentOrLiteral::Ident(ident)
         };
-        __data_stack.__stack11.push(res);
+        __data_stack.__stack11.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack11);
         Ok(())
     }
@@ -2248,13 +2248,13 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut literal = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_literal = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let Lexed::Literal(literal) = literal else {
                 unreachable!("IdentOrLiteral-Literal");
             };
             IdentOrLiteral::Literal(literal)
         };
-        __data_stack.__stack11.push(res);
+        __data_stack.__stack11.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack11);
         Ok(())
     }
@@ -2278,14 +2278,14 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut t = __data_stack.__stack19.pop().unwrap();
         let __rustylr_location_t = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             let mut tokens = TokenStream::new();
             for token in t.into_iter() {
                 token.append_to_stream(&mut tokens);
             }
             tokens
         };
-        __data_stack.__stack12.push(res);
+        __data_stack.__stack12.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack12);
         Ok(())
     }
@@ -4047,8 +4047,8 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut A = __data_stack.__stack7.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let res = { vec![A] };
-        __data_stack.__stack13.push(res);
+        let __res = { vec![A] };
+        __data_stack.__stack13.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack13);
         Ok(())
     }
@@ -4078,11 +4078,11 @@ impl GrammarDataStack {
         let mut A = __data_stack.__stack7.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __rustylr_location_Ap = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack13.push(res);
+        __data_stack.__stack13.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack13);
         Ok(())
     }
@@ -4105,8 +4105,8 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        let res = { vec![] };
-        __data_stack.__stack13.push(res);
+        let __res = { vec![] };
+        __data_stack.__stack13.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack13);
         Ok(())
     }
@@ -4130,8 +4130,8 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut A = __data_stack.__stack6.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let res = { vec![A] };
-        __data_stack.__stack14.push(res);
+        let __res = { vec![A] };
+        __data_stack.__stack14.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack14);
         Ok(())
     }
@@ -4161,11 +4161,11 @@ impl GrammarDataStack {
         let mut A = __data_stack.__stack6.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __rustylr_location_Ap = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack14.push(res);
+        __data_stack.__stack14.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack14);
         Ok(())
     }
@@ -4188,8 +4188,8 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        let res = { vec![] };
-        __data_stack.__stack14.push(res);
+        let __res = { vec![] };
+        __data_stack.__stack14.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack14);
         Ok(())
     }
@@ -4213,8 +4213,8 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let res = Some(A);
-        __data_stack.__stack15.push(res);
+        let __res = Some(A);
+        __data_stack.__stack15.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack15);
         Ok(())
     }
@@ -4229,8 +4229,8 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        let res = { None };
-        __data_stack.__stack15.push(res);
+        let __res = { None };
+        __data_stack.__stack15.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack15);
         Ok(())
     }
@@ -4254,8 +4254,8 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut A = __data_stack.__stack8.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let res = { vec![A] };
-        __data_stack.__stack16.push(res);
+        let __res = { vec![A] };
+        __data_stack.__stack16.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack16);
         Ok(())
     }
@@ -4285,11 +4285,11 @@ impl GrammarDataStack {
         let mut A = __data_stack.__stack8.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __rustylr_location_Ap = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack16.push(res);
+        __data_stack.__stack16.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack16);
         Ok(())
     }
@@ -4312,8 +4312,8 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        let res = { vec![] };
-        __data_stack.__stack16.push(res);
+        let __res = { vec![] };
+        __data_stack.__stack16.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack16);
         Ok(())
     }
@@ -4337,8 +4337,8 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut A = __data_stack.__stack10.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let res = { vec![A] };
-        __data_stack.__stack17.push(res);
+        let __res = { vec![A] };
+        __data_stack.__stack17.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack17);
         Ok(())
     }
@@ -4368,11 +4368,11 @@ impl GrammarDataStack {
         let mut Ap = __data_stack.__stack17.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __rustylr_location_Ap = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack17.push(res);
+        __data_stack.__stack17.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack17);
         Ok(())
     }
@@ -4395,8 +4395,8 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        let res = { vec![] };
-        __data_stack.__stack17.push(res);
+        let __res = { vec![] };
+        __data_stack.__stack17.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack17);
         Ok(())
     }
@@ -4420,8 +4420,8 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut __token0 = __data_stack.__stack17.pop().unwrap();
         let __rustylr_location___token0 = __location_stack.pop().unwrap();
-        let res = { vec![__token0] };
-        __data_stack.__stack18.push(res);
+        let __res = { vec![__token0] };
+        __data_stack.__stack18.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack18);
         Ok(())
     }
@@ -4457,11 +4457,11 @@ impl GrammarDataStack {
         let __rustylr_location___token1 = __location_stack.pop().unwrap();
         __location_stack.pop();
         let __rustylr_location___token0 = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             __token0.push(__token1);
             __token0
         };
-        __data_stack.__stack18.push(res);
+        __data_stack.__stack18.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack18);
         Ok(())
     }
@@ -4485,8 +4485,8 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let res = Some(A);
-        __data_stack.__stack15.push(res);
+        let __res = Some(A);
+        __data_stack.__stack15.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack15);
         Ok(())
     }
@@ -4501,8 +4501,8 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        let res = { None };
-        __data_stack.__stack15.push(res);
+        let __res = { None };
+        __data_stack.__stack15.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack15);
         Ok(())
     }
@@ -4870,8 +4870,8 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let res = { vec![A] };
-        __data_stack.__stack19.push(res);
+        let __res = { vec![A] };
+        __data_stack.__stack19.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack19);
         Ok(())
     }
@@ -4901,11 +4901,11 @@ impl GrammarDataStack {
         let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __rustylr_location_Ap = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack19.push(res);
+        __data_stack.__stack19.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack19);
         Ok(())
     }
@@ -4929,8 +4929,8 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut A = __data_stack.__stack11.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let res = { vec![A] };
-        __data_stack.__stack20.push(res);
+        let __res = { vec![A] };
+        __data_stack.__stack20.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack20);
         Ok(())
     }
@@ -4960,11 +4960,11 @@ impl GrammarDataStack {
         let mut Ap = __data_stack.__stack20.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __rustylr_location_Ap = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack20.push(res);
+        __data_stack.__stack20.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack20);
         Ok(())
     }
@@ -4988,8 +4988,8 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
-        let res = { vec![A] };
-        __data_stack.__stack19.push(res);
+        let __res = { vec![A] };
+        __data_stack.__stack19.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack19);
         Ok(())
     }
@@ -5019,11 +5019,11 @@ impl GrammarDataStack {
         let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __rustylr_location_Ap = __location_stack.pop().unwrap();
-        let res = {
+        let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack19.push(res);
+        __data_stack.__stack19.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack19);
         Ok(())
     }
@@ -5046,8 +5046,8 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        let res = { vec![] };
-        __data_stack.__stack19.push(res);
+        let __res = { vec![] };
+        __data_stack.__stack19.push(__res);
         __data_stack.__tags.push(GrammarTags::__stack19);
         Ok(())
     }

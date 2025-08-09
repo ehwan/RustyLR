@@ -1428,8 +1428,8 @@ impl Grammar {
                                 ) -> Result<(), #reduce_error_typename> {
                                     #extract_token_data_from_args
 
-                                    let res = #reduce_action ;
-                                    __data_stack.#stack_name.push(res);
+                                    let __res = #reduce_action ;
+                                    __data_stack.#stack_name.push(__res);
                                     __data_stack.#tag_stack_name.push(#tag_enum_name::#stack_name);
 
                                     Ok(())
