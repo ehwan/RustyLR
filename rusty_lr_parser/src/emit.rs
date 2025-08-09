@@ -1688,11 +1688,13 @@ impl Grammar {
         let mut pop_match_stream = TokenStream::new();
         let mut stack_clear_stream = TokenStream::new();
         let mut stack_append_stream = TokenStream::new();
-        let mut split_off_count_init_stream = TokenStream::new();
-        let mut split_off_count_match_stream = TokenStream::new();
+        let stack_len = stack_names_in_order.len();
+        let split_off_count_init_stream = quote! {
+            let mut __counts: [u8; #stack_len] = [0; #stack_len];
+        };
         let mut split_off_split_stream = TokenStream::new();
         let mut split_off_ctor_stream = TokenStream::new();
-        for (stack_name, typename) in &stack_names_in_order {
+        for (stack_idx, (stack_name, typename)) in stack_names_in_order.iter().enumerate() {
             stack_definition_stream.extend(quote! {
                 #stack_name: Vec<#typename>,
             });
@@ -1709,17 +1711,9 @@ impl Grammar {
                 self.#stack_name.append(&mut other.#stack_name);
             });
 
-            let count_var_name = format_ident!("__count_{stack_name}");
             let other_stack_name = format_ident!("__other_{}", stack_name);
-
-            split_off_count_init_stream.extend(quote! {
-                let mut #count_var_name = 0;
-            });
-            split_off_count_match_stream.extend(quote! {
-                #tag_enum_name::#stack_name => { #count_var_name += 1; }
-            });
             split_off_split_stream.extend(quote! {
-                let #other_stack_name = self.#stack_name.split_off( self.#stack_name.len() - #count_var_name );
+                let #other_stack_name = self.#stack_name.split_off( self.#stack_name.len() - (__counts[#stack_idx] as usize) );
             });
             split_off_ctor_stream.extend(quote! {
                 #stack_name: #other_stack_name,
@@ -1799,18 +1793,15 @@ impl Grammar {
             }
 
             fn split_off(&mut self, at: usize) -> Self {
-                let other_tag_stack = self.#tag_stack_name.split_off(at);
+                let __other_tag_stack = self.#tag_stack_name.split_off(at);
 
                 #split_off_count_init_stream
-                for tag in &other_tag_stack {
-                    match tag {
-                        #split_off_count_match_stream
-                        _ => {}
-                    }
+                for &tag in &__other_tag_stack {
+                    __counts[ tag as usize ] += 1;
                 }
                 #split_off_split_stream
                 Self {
-                    #tag_stack_name: other_tag_stack,
+                    #tag_stack_name: __other_tag_stack,
                     #split_off_ctor_stream
                 }
             }
