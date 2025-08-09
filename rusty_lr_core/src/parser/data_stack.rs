@@ -1,4 +1,10 @@
 /// A trait for data stack in the parser.
+///
+/// Since each non-terminal could have different ruletypes,
+/// this effectively handles those rule types into separated `Vec` stack,
+/// instead of using enum of rule types (since it would be costful at memory aspects if the size differs significantly).
+/// For people who is curious about the implementation details,
+/// you should see the actual generated `DataStack` structs, like `GrammarDataStack` in `rusty_lr_parser/src/parser/parser_expanded.rs`.
 pub trait DataStack: Sized + Default {
     /// Type for terminal symbols
     type Term;

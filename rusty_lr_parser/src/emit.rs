@@ -1248,7 +1248,7 @@ impl Grammar {
                         let mut debug_tag_check_stream = TokenStream::new();
                         let mut extract_location_stream = TokenStream::new();
                         let mut stack_mapto_map = std::collections::BTreeMap::new();
-                        for (idx_from_back, token) in rule.tokens.iter().rev().enumerate() {
+                        for (token_index_from_end, token) in rule.tokens.iter().rev().enumerate() {
                             match &token.token {
                                 Token::Term(term) => match &token.mapto {
                                     Some(mapto) => {
@@ -1267,7 +1267,7 @@ impl Grammar {
                                                 debug_tag_check_stream.extend(quote! {
                                                     debug_assert!(
                                                         __data_stack.#tag_stack_name.get(
-                                                            __data_stack.#tag_stack_name.len()-1-#idx_from_back
+                                                            __data_stack.#tag_stack_name.len()-1-#token_index_from_end
                                                         ) == Some( &#tag_enum_name::#terminal_stack_name )
                                                     );
                                                 });
@@ -1279,7 +1279,7 @@ impl Grammar {
                                                 debug_tag_check_stream.extend(quote! {
                                                     debug_assert!(
                                                         __data_stack.#tag_stack_name.get(
-                                                            __data_stack.#tag_stack_name.len()-1-#idx_from_back
+                                                            __data_stack.#tag_stack_name.len()-1-#token_index_from_end
                                                         ) == Some( &#tag_enum_name::#empty_tag_name )
                                                     );
                                                 });
@@ -1302,7 +1302,7 @@ impl Grammar {
                                         debug_tag_check_stream.extend(quote! {
                                             debug_assert!(
                                                 __data_stack.#tag_stack_name.get(
-                                                    __data_stack.#tag_stack_name.len()-1-#idx_from_back
+                                                    __data_stack.#tag_stack_name.len()-1-#token_index_from_end
                                                 ) == Some( &#tag_enum_name::#terminal_stack_name )
                                             );
                                         });
@@ -1328,7 +1328,7 @@ impl Grammar {
                                                 debug_tag_check_stream.extend(quote! {
                                                     debug_assert!(
                                                         __data_stack.#tag_stack_name.get(
-                                                            __data_stack.#tag_stack_name.len()-1-#idx_from_back
+                                                            __data_stack.#tag_stack_name.len()-1-#token_index_from_end
                                                         ) == Some( &#tag_enum_name::#stack_name )
                                                     );
                                                 });
@@ -1339,7 +1339,7 @@ impl Grammar {
                                                 debug_tag_check_stream.extend(quote! {
                                                     debug_assert!(
                                                         __data_stack.#tag_stack_name.get(
-                                                            __data_stack.#tag_stack_name.len()-1-#idx_from_back
+                                                            __data_stack.#tag_stack_name.len()-1-#token_index_from_end
                                                         ) == Some( &#tag_enum_name::#empty_tag_name )
                                                     );
                                                 });
@@ -1357,7 +1357,7 @@ impl Grammar {
                                                 debug_tag_check_stream.extend(quote! {
                                                     debug_assert!(
                                                         __data_stack.#tag_stack_name.get(
-                                                            __data_stack.#tag_stack_name.len()-1-#idx_from_back
+                                                            __data_stack.#tag_stack_name.len()-1-#token_index_from_end
                                                         ) == Some( &#tag_enum_name::#stack_name )
                                                     );
                                                 });
@@ -1368,7 +1368,7 @@ impl Grammar {
                                                 debug_tag_check_stream.extend(quote! {
                                                     debug_assert!(
                                                         __data_stack.#tag_stack_name.get(
-                                                            __data_stack.#tag_stack_name.len()-1-#idx_from_back
+                                                            __data_stack.#tag_stack_name.len()-1-#token_index_from_end
                                                         ) == Some( &#tag_enum_name::#empty_tag_name )
                                                     );
                                                 });
