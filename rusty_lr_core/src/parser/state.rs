@@ -4,8 +4,8 @@ use crate::hash::HashMap;
 use crate::nonterminal::NonTerminal;
 use crate::TerminalSymbol;
 
-/// this intermediate_state is common structure to convert from generated code, grammar builder
-/// into various types of parser states ( SparseState, DenseState, ... )
+/// This intermediate state is a common structure to convert from generated code and grammar builder
+/// into various types of parser states (SparseState, DenseState, ...).
 pub struct IntermediateState<Term, NonTerm, StateIndex, RuleIndex> {
     pub shift_goto_map_term: Vec<(Term, StateIndex)>, // must be sorted
     pub shift_goto_map_nonterm: Vec<(NonTerm, StateIndex)>, // must be sorted
