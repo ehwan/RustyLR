@@ -1257,8 +1257,10 @@ impl Grammar {
 
                                         match term {
                                             TerminalSymbol::Term(_) => {
-                                                stack_mapto_map.entry(&terminal_stack_name).or_insert_with(Vec::new)
-                                                .push(Some(mapto.clone()));
+                                                stack_mapto_map
+                                                    .entry(&terminal_stack_name)
+                                                    .or_insert_with(Vec::new)
+                                                    .push(Some(mapto.clone()));
                                                 extract_location_stream.extend(quote! {
                                                     let #location_varname = __location_stack.pop().unwrap();
                                                 });
@@ -1290,7 +1292,9 @@ impl Grammar {
                                         }
                                     }
                                     None => {
-                                        stack_mapto_map.entry(&terminal_stack_name).or_insert_with(Vec::new)
+                                        stack_mapto_map
+                                            .entry(&terminal_stack_name)
+                                            .or_insert_with(Vec::new)
                                             .push(None);
                                         extract_location_stream.extend(quote! {
                                             __location_stack.pop();
@@ -1314,7 +1318,9 @@ impl Grammar {
 
                                             if let Some(stack_name) = stack_name {
                                                 // extract token data from args
-                                                stack_mapto_map.entry(&stack_name).or_insert_with(Vec::new)
+                                                stack_mapto_map
+                                                    .entry(&stack_name)
+                                                    .or_insert_with(Vec::new)
                                                     .push(Some(mapto.clone()));
                                                 extract_location_stream.extend(quote! {
                                                     let #location_varname = __location_stack.pop().unwrap();
@@ -1326,7 +1332,6 @@ impl Grammar {
                                                         ) == Some( &#tag_enum_name::#stack_name )
                                                     );
                                                 });
-
                                             } else {
                                                 extract_location_stream.extend(quote! {
                                                     let #location_varname = __location_stack.pop().unwrap();
@@ -1338,12 +1343,13 @@ impl Grammar {
                                                         ) == Some( &#tag_enum_name::#empty_tag_name )
                                                     );
                                                 });
-
                                             }
                                         }
                                         None => {
                                             if let Some(stack_name) = stack_name {
-                                                stack_mapto_map.entry(&stack_name).or_insert_with(Vec::new)
+                                                stack_mapto_map
+                                                    .entry(&stack_name)
+                                                    .or_insert_with(Vec::new)
                                                     .push(None);
                                                 extract_location_stream.extend(quote! {
                                                     __location_stack.pop();
@@ -1381,7 +1387,7 @@ impl Grammar {
                             });
                         }
 
-                        let mut extract_data_stream= TokenStream::new();
+                        let mut extract_data_stream = TokenStream::new();
                         for (stack_name, maptos) in stack_mapto_map {
                             for mapto in maptos {
                                 match mapto {
@@ -1391,7 +1397,7 @@ impl Grammar {
                                         });
                                     }
                                     None => {
-                                        extract_data_stream.extend(quote!{ 
+                                        extract_data_stream.extend(quote! {
                                                 __data_stack.#stack_name.pop();
                                         });
                                     }
@@ -1512,17 +1518,16 @@ impl Grammar {
                         }
 
                         let len = rule.tokens.len();
-                        debug_assert!( len > 0 );
+                        debug_assert!(len > 0);
                         let (stack_pop_stream, stack_push_stream) = if let Some((
                             pop_stack,
                             pop_index_from_back,
                         )) = pop_stack_idx_pair
                         {
-                            if pop_index_from_back == stack_count_map.get(pop_stack).copied().unwrap_or(0) {
-                                (
-                                    quote!{},
-                                    quote!{},
-                                )
+                            if pop_index_from_back
+                                == stack_count_map.get(pop_stack).copied().unwrap_or(0)
+                            {
+                                (quote! {}, quote! {})
                             } else {
                                 (
                                     quote! { let __ret = __data_stack.#pop_stack.swap_remove( __data_stack.#pop_stack.len() - 1  - #pop_index_from_back ); },
@@ -1530,32 +1535,22 @@ impl Grammar {
                                 )
                             }
                         } else {
-                            (
-                                quote! {},
-                                quote! {},
-                            )
+                            (quote! {}, quote! {})
                         };
 
                         let (tags_truncate_stream, tag_push_stream) = if identity_token_idx == 0 {
                             let truncate_len = len - 1;
                             if truncate_len > 0 {
                                 (
-                                    quote!{ __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #truncate_len); },
-                                    quote!{}
+                                    quote! { __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #truncate_len); },
+                                    quote! {},
                                 )
                             } else {
-                                (
-                                    quote!{},
-                                    quote!{}
-                                )
+                                (quote! {}, quote! {})
                             }
                         } else {
-                            let tag_push_stream = if let Some((
-                                pop_stack,
-                                _,
-                            )) = pop_stack_idx_pair
-                            {
-                                quote!{ __data_stack.#tag_stack_name.push(#tag_enum_name::#pop_stack); }
+                            let tag_push_stream = if let Some((pop_stack, _)) = pop_stack_idx_pair {
+                                quote! { __data_stack.#tag_stack_name.push(#tag_enum_name::#pop_stack); }
                             } else {
                                 quote! {__data_stack.#tag_stack_name.push(#tag_enum_name::#empty_tag_name); }
                             };
@@ -1565,7 +1560,6 @@ impl Grammar {
                             (tags_truncate_stream, tag_push_stream)
                         };
 
-
                         let mut stack_truncate_stream = TokenStream::new();
                         for (stack_name, count) in stack_count_map {
                             debug_assert!(count > 0);
@@ -1573,7 +1567,8 @@ impl Grammar {
                                 __data_stack.#stack_name.truncate(__data_stack.#stack_name.len() - #count);
                             });
                         }
-                        let location_truncate_stream = quote! { __location_stack.truncate(__location_stack.len() - #len); };
+                        let location_truncate_stream =
+                            quote! { __location_stack.truncate(__location_stack.len() - #len); };
 
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             #[doc = #rule_debug_str]
@@ -1745,7 +1740,7 @@ impl Grammar {
             #empty_tag_name,
             #tag_definition_stream
         }
-        
+
         /// enum for each non-terminal and terminal symbol, that actually hold data
         #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
         #derive_clone_for_glr
