@@ -1,5 +1,4 @@
-/// A trait for token that holds data.
-/// This will be used for data stack in the parser.
+/// A trait for data stack in the parser.
 pub trait DataStack: Sized + Default {
     /// Type for terminal symbols
     type Term;
