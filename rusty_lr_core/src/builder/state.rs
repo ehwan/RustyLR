@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
-/// state in DFA building
+/// state for internal usage during grammar building stage
 #[derive(Debug, Clone)]
 pub struct State<Term, NonTerm, StateIndex, RuleIndex> {
     pub shift_goto_map_term: BTreeMap<Term, StateIndex>,
