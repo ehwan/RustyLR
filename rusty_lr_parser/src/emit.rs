@@ -477,7 +477,7 @@ impl Grammar {
                         });
                     }
                     reduce_body_stream.extend(quote! {
-                        let reduce_rules = std::collections::BTreeSet::from([#rules_body_stream]);
+                        let reduce_rules = vec![#rules_body_stream];
                         __reduce_map.extend(
                             #terms_set_name.iter().map(
                                 |term| (*term, reduce_rules.clone())
@@ -511,11 +511,11 @@ impl Grammar {
                 };
 
                 states_body_stream.extend(quote! {
-                    #module_prefix::builder::State {
-                        shift_goto_map_term: std::collections::BTreeMap::from([#shift_term_body_stream]),
-                        shift_goto_map_nonterm: std::collections::BTreeMap::from([#shift_nonterm_body_stream]),
+                    #module_prefix::parser::state::IntermediateState {
+                        shift_goto_map_term: vec![#shift_term_body_stream],
+                        shift_goto_map_nonterm: vec![#shift_nonterm_body_stream],
                         reduce_map: {
-                            let mut __reduce_map = std::collections::BTreeMap::new();
+                            let mut __reduce_map = Vec::new();
                             #reduce_body_stream
                             __reduce_map
                         },
@@ -586,7 +586,7 @@ impl Grammar {
                 ).collect();
 
                 #terminal_set_initialize_stream
-                let states: Vec<#module_prefix::builder::State<
+                let states: Vec<#module_prefix::parser::state::IntermediateState<
                     #module_prefix::TerminalSymbol<#class_index_typename>, _, #state_index_typename, #rule_index_typename
                 >> = vec![
                     #states_body_stream
@@ -743,7 +743,10 @@ impl Grammar {
                 ).collect();
 
                 let states:Vec<#state_typename> = states.into_iter().map(
-                    |state| state.into(),
+                    |state| {
+                        let state: #module_prefix::parser::state::IntermediateState<_,_,_,_> = state.into();
+                        state.into()
+                    }
                 ).collect();
             }
         };

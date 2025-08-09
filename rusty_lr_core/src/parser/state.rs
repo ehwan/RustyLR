@@ -4,6 +4,15 @@ use crate::hash::HashMap;
 use crate::nonterminal::NonTerminal;
 use crate::TerminalSymbol;
 
+/// This intermediate state is a common structure to convert from generated code and grammar builder
+/// into various types of parser states (SparseState, DenseState, ...).
+pub struct IntermediateState<Term, NonTerm, StateIndex, RuleIndex> {
+    pub shift_goto_map_term: Vec<(Term, StateIndex)>, // must be sorted
+    pub shift_goto_map_nonterm: Vec<(NonTerm, StateIndex)>, // must be sorted
+    pub reduce_map: Vec<(Term, Vec<RuleIndex>)>,      // must be sorted
+    pub ruleset: Vec<crate::rule::ShiftedRuleRef>,
+}
+
 /// For state, terminal and class indices, we use the most compact integer type that can hold the maximum value.
 /// This trait defines the conversion between {u8, u16, u32, usize} <-> usize.
 pub trait Index {
@@ -50,9 +59,7 @@ pub trait ReduceRules {
     type RuleIndex: Index;
 
     fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone;
-    fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(
-        set: std::collections::BTreeSet<RuleIndexFrom>,
-    ) -> Self;
+    fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(set: Vec<RuleIndexFrom>) -> Self;
 }
 
 /// For deterministic parser behavior
@@ -62,9 +69,7 @@ impl<Integral: Index + Copy> ReduceRules for Integral {
     fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
         std::iter::once(self.into_usize())
     }
-    fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(
-        set: std::collections::BTreeSet<RuleIndexFrom>,
-    ) -> Self {
+    fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(set: Vec<RuleIndexFrom>) -> Self {
         debug_assert!(set.len() == 1, "Expected a single element set");
         set.into_iter().next().unwrap().try_into().ok().unwrap()
     }
@@ -78,9 +83,7 @@ where
     fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
         self.iter().map(|&x| x.into_usize())
     }
-    fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(
-        set: std::collections::BTreeSet<RuleIndexFrom>,
-    ) -> Self {
+    fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(set: Vec<RuleIndexFrom>) -> Self {
         set.into_iter()
             .map(|value| value.try_into().ok().unwrap())
             .collect()
@@ -306,7 +309,7 @@ impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + 
 }
 
 impl<Term, TermTo, NonTerm, RuleContainer, StateIndex, StateIndexTo, RuleIndex>
-    From<crate::builder::State<TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>>
+    From<IntermediateState<TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>>
     for SparseState<TermTo, NonTerm, RuleContainer, StateIndexTo>
 where
     Term: Ord + TryInto<TermTo>,
@@ -319,27 +322,73 @@ where
     RuleContainer::RuleIndex: TryFrom<RuleIndex>,
 {
     fn from(
-        mut builder_state: crate::builder::State<
-            TerminalSymbol<Term>,
-            NonTerm,
-            StateIndex,
-            RuleIndex,
-        >,
+        mut builder_state: IntermediateState<TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>,
     ) -> Self {
-        let error_shift = builder_state
+        // TerminalSymbol::Term(_) < TerminalSymbol::Error < TerminalSymbol::Eof
+        // since maps are sorted, eof and error should be at the end of the array
+
+        // make sure the order is preserved
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                TerminalSymbol::Term(0) < TerminalSymbol::Error
+                    && TerminalSymbol::<i32>::Error < TerminalSymbol::Eof
+            );
+            let keys = builder_state
+                .shift_goto_map_term
+                .iter()
+                .map(|(term, _)| term)
+                .collect::<Vec<_>>();
+            debug_assert!(keys.is_sorted());
+
+            let keys = builder_state
+                .reduce_map
+                .iter()
+                .map(|(term, _)| term)
+                .collect::<Vec<_>>();
+            debug_assert!(keys.is_sorted());
+        }
+        let eof_shift = if builder_state
             .shift_goto_map_term
-            .remove(&TerminalSymbol::Error);
-        let eof_shift = builder_state
+            .last()
+            .map(|(term, _)| term)
+            == Some(&TerminalSymbol::Eof)
+        {
+            Some(builder_state.shift_goto_map_term.pop().unwrap().1)
+        } else {
+            None
+        };
+
+        let error_shift = if builder_state
             .shift_goto_map_term
-            .remove(&TerminalSymbol::Eof);
-        let error_reduce = builder_state
-            .reduce_map
-            .remove(&TerminalSymbol::Error)
-            .map(|reduce_rules| RuleContainer::from_set(reduce_rules));
-        let eof_reduce = builder_state
-            .reduce_map
-            .remove(&TerminalSymbol::Eof)
-            .map(|reduce_rules| RuleContainer::from_set(reduce_rules));
+            .last()
+            .map(|(term, _)| term)
+            == Some(&TerminalSymbol::Error)
+        {
+            Some(builder_state.shift_goto_map_term.pop().unwrap().1)
+        } else {
+            None
+        };
+
+        let eof_reduce = if builder_state.reduce_map.last().map(|(term, _)| term)
+            == Some(&TerminalSymbol::Eof)
+        {
+            Some(RuleContainer::from_set(
+                builder_state.reduce_map.pop().unwrap().1,
+            ))
+        } else {
+            None
+        };
+        let error_reduce = if builder_state.reduce_map.last().map(|(term, _)| term)
+            == Some(&TerminalSymbol::Error)
+        {
+            Some(RuleContainer::from_set(
+                builder_state.reduce_map.pop().unwrap().1,
+            ))
+        } else {
+            None
+        };
+
         SparseState {
             shift_goto_map_class: builder_state
                 .shift_goto_map_term
@@ -388,7 +437,7 @@ where
     }
 }
 impl<Term, TermTo, NonTerm, RuleContainer, StateIndex, StateIndexTo: Copy, RuleIndex>
-    From<crate::builder::State<TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>>
+    From<IntermediateState<TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>>
     for DenseState<TermTo, NonTerm, RuleContainer, StateIndexTo>
 where
     Term: Ord + Into<usize> + Copy,
@@ -399,30 +448,79 @@ where
     RuleContainer::RuleIndex: TryFrom<RuleIndex>,
 {
     fn from(
-        mut builder_state: crate::builder::State<
-            TerminalSymbol<Term>,
-            NonTerm,
-            StateIndex,
-            RuleIndex,
-        >,
+        mut builder_state: IntermediateState<TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>,
     ) -> Self {
-        let error_shift = builder_state
+        // TerminalSymbol::Term(_) < TerminalSymbol::Error < TerminalSymbol::Eof
+        // since maps are sorted, eof and error should be at the end of the array
+
+        // make sure the order is preserved
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                TerminalSymbol::Term(0) < TerminalSymbol::Error
+                    && TerminalSymbol::<i32>::Error < TerminalSymbol::Eof
+            );
+            let keys = builder_state
+                .shift_goto_map_term
+                .iter()
+                .map(|(term, _)| term)
+                .collect::<Vec<_>>();
+            debug_assert!(keys.is_sorted());
+
+            let keys = builder_state
+                .reduce_map
+                .iter()
+                .map(|(term, _)| term)
+                .collect::<Vec<_>>();
+            debug_assert!(keys.is_sorted());
+        }
+
+        let eof_shift = if builder_state
             .shift_goto_map_term
-            .remove(&TerminalSymbol::Error);
-        let eof_shift = builder_state
+            .last()
+            .map(|(term, _)| term)
+            == Some(&TerminalSymbol::Eof)
+        {
+            Some(builder_state.shift_goto_map_term.pop().unwrap().1)
+        } else {
+            None
+        };
+
+        let error_shift = if builder_state
             .shift_goto_map_term
-            .remove(&TerminalSymbol::Eof);
-        let error_reduce = builder_state
-            .reduce_map
-            .remove(&TerminalSymbol::Error)
-            .map(|reduce_map| RuleContainer::from_set(reduce_map));
-        let eof_reduce = builder_state
-            .reduce_map
-            .remove(&TerminalSymbol::Eof)
-            .map(|reduce_map| RuleContainer::from_set(reduce_map));
+            .last()
+            .map(|(term, _)| term)
+            == Some(&TerminalSymbol::Error)
+        {
+            Some(builder_state.shift_goto_map_term.pop().unwrap().1)
+        } else {
+            None
+        };
+
+        let eof_reduce = if builder_state.reduce_map.last().map(|(term, _)| term)
+            == Some(&TerminalSymbol::Eof)
+        {
+            Some(RuleContainer::from_set(
+                builder_state.reduce_map.pop().unwrap().1,
+            ))
+        } else {
+            None
+        };
+        let error_reduce = if builder_state.reduce_map.last().map(|(term, _)| term)
+            == Some(&TerminalSymbol::Error)
+        {
+            Some(RuleContainer::from_set(
+                builder_state.reduce_map.pop().unwrap().1,
+            ))
+        } else {
+            None
+        };
 
         let (shift_min, shift_len) = {
-            let mut iter = builder_state.shift_goto_map_term.keys();
+            let mut iter = builder_state
+                .shift_goto_map_term
+                .iter()
+                .map(|(term, _)| term);
             let min: Option<usize> = iter.next().map(|x| x.into_term().unwrap().into());
             let max: Option<usize> = iter
                 .next_back()
@@ -436,7 +534,7 @@ where
             }
         };
         let (reduce_min, reduce_len) = {
-            let mut iter = builder_state.reduce_map.keys();
+            let mut iter = builder_state.reduce_map.iter().map(|(term, _)| term);
             let min: Option<usize> = iter.next().map(|x| x.into_term().unwrap().into());
             let max: Option<usize> = iter
                 .next_back()
@@ -449,7 +547,10 @@ where
             }
         };
         let (nonterm_min, nonterm_len) = {
-            let mut iter = builder_state.shift_goto_map_nonterm.keys();
+            let mut iter = builder_state
+                .shift_goto_map_nonterm
+                .iter()
+                .map(|(nonterm, _)| nonterm);
             let min = iter.next().map(|x| x.to_usize());
             let max = iter.next_back().map(|x| x.to_usize()).or(min);
             if let (Some(min), Some(max)) = (min, max) {
@@ -473,8 +574,8 @@ where
 
         let nonterm_keys = builder_state
             .shift_goto_map_nonterm
-            .keys()
-            .copied()
+            .iter()
+            .map(|(nonterm, _)| *nonterm)
             .collect();
         let mut shift_goto_map_nonterm = vec![None; nonterm_len];
         for (nonterm, state) in builder_state.shift_goto_map_nonterm {
