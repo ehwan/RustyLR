@@ -4011,21 +4011,17 @@ impl GrammarDataStack {
         Ok(())
     }
     ///GrammarLine -> Directive
-    #[inline]
+    #[inline(always)]
     fn reduce_GrammarLine_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::Empty);
     }
     ///Grammar -> GrammarLine+
-    #[inline]
+    #[inline(always)]
     fn reduce_Grammar_0(__data_stack: &mut Self, __location_stack: &mut Vec<SpanPair>) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::Empty);
     }
     ///TokenMapped+ -> TokenMapped
     #[inline]
@@ -4087,7 +4083,7 @@ impl GrammarDataStack {
         Ok(())
     }
     ///TokenMapped* -> TokenMapped+
-    #[inline]
+    #[inline(always)]
     fn reduce__TokenMappedStar16_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4170,7 +4166,7 @@ impl GrammarDataStack {
         Ok(())
     }
     ///PrecDef* -> PrecDef+
-    #[inline]
+    #[inline(always)]
     fn reduce__PrecDefStar18_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4294,7 +4290,7 @@ impl GrammarDataStack {
         Ok(())
     }
     ///TerminalSetItem* -> TerminalSetItem+
-    #[inline]
+    #[inline(always)]
     fn reduce__TerminalSetItemStar21_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4377,7 +4373,7 @@ impl GrammarDataStack {
         Ok(())
     }
     ///Pattern* -> Pattern+
-    #[inline]
+    #[inline(always)]
     fn reduce__PatternStar23_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4507,7 +4503,7 @@ impl GrammarDataStack {
         Ok(())
     }
     ///[^semicolon] -> ident
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4515,7 +4511,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> colon
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4523,7 +4519,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> pipe
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4531,7 +4527,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> percent
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_3(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4539,7 +4535,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> equal
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_4(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4547,7 +4543,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> plus
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_5(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4555,7 +4551,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> star
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_6(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4563,7 +4559,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> question
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_7(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4571,7 +4567,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> caret
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_8(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4579,7 +4575,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> minus
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_9(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4587,7 +4583,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> exclamation
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_10(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4595,7 +4591,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> slash
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_11(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4603,7 +4599,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> dot
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_12(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4611,7 +4607,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> dollar
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_13(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4619,7 +4615,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> comma
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_14(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4627,7 +4623,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> literal
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_15(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4635,7 +4631,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> parengroup
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_16(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4643,7 +4639,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> bracegroup
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_17(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4651,7 +4647,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> lparen
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_18(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4659,7 +4655,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> rparen
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_19(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4667,7 +4663,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> lbracket
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_20(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4675,7 +4671,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> rbracket
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_21(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4683,7 +4679,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> left
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_22(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4691,7 +4687,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> right
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_23(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4699,7 +4695,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> token
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_24(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4707,7 +4703,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> start
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_25(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4715,7 +4711,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> eofdef
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_26(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4723,7 +4719,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> tokentype
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_27(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4731,7 +4727,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> userdata
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_28(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4739,7 +4735,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> errortype
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_29(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4747,7 +4743,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> moduleprefix
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_30(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4755,7 +4751,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> lalr
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_31(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4763,7 +4759,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> glr
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_32(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4771,7 +4767,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> prec
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_33(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4779,7 +4775,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> precedence
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_34(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4787,7 +4783,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> nooptim
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_35(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4795,7 +4791,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> dense
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_36(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4803,7 +4799,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> trace
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_37(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4811,7 +4807,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> dprec
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_38(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4819,7 +4815,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> filter
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_39(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4827,7 +4823,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> runtime
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_40(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4835,7 +4831,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> location
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_41(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -4843,7 +4839,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
     }
     ///[^semicolon] -> <Others>
-    #[inline]
+    #[inline(always)]
     fn reduce__TermSet26_42(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -5028,7 +5024,7 @@ impl GrammarDataStack {
         Ok(())
     }
     ///ident* -> ident+
-    #[inline]
+    #[inline(always)]
     fn reduce__identStar30_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
@@ -5052,34 +5048,30 @@ impl GrammarDataStack {
         Ok(())
     }
     ///GrammarLine+ -> GrammarLine
-    #[inline]
+    #[inline(always)]
     fn reduce__GrammarLinePlus31_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
         __location_stack.truncate(__location_stack.len() - 1usize);
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::Empty);
     }
     ///GrammarLine+ -> GrammarLine GrammarLine+
-    #[inline]
+    #[inline(always)]
     fn reduce__GrammarLinePlus31_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
         __location_stack.truncate(__location_stack.len() - 2usize);
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        __data_stack.__tags.push(GrammarTags::Empty);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
     }
     ///Augmented -> Grammar eof
-    #[inline]
+    #[inline(always)]
     fn reduce_Augmented_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
         __location_stack.truncate(__location_stack.len() - 2usize);
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        __data_stack.__tags.push(GrammarTags::Empty);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
     }
 }
 #[allow(
