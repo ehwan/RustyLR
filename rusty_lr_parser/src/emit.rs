@@ -1259,18 +1259,41 @@ impl Grammar {
                 match &rule.reduce_action {
                     Some(ReduceAction::Custom(reduce_action)) => {
                         let mut debug_tag_check_stream = TokenStream::new();
-                        let mut extract_location_stream = TokenStream::new();
                         let mut stack_mapto_map = std::collections::BTreeMap::new();
                         for (token_index_from_end, token) in rule.tokens.iter().rev().enumerate() {
                             let stack_name = token_to_stack_name(token.token);
                             let tag_name = stack_name.unwrap_or(&empty_tag_name);
 
+                            #[derive(PartialEq, Eq, PartialOrd, Ord)]
+                            enum StackName {
+                                DataStack(Ident),
+                                LocationStack,
+                            }
+                            impl StackName {
+                                pub fn to_token_stream(&self) -> TokenStream {
+                                    match self {
+                                        StackName::DataStack(name) => quote! {__data_stack.#name},
+                                        StackName::LocationStack => quote! {__location_stack},
+                                    }
+                                }
+                            }
+
                             if let Some(stack_name) = stack_name {
                                 stack_mapto_map
-                                    .entry(stack_name)
+                                    .entry(StackName::DataStack(stack_name.clone()))
                                     .or_insert_with(Vec::new)
                                     .push(token.mapto.clone());
                             }
+                            let location_mapto = if let Some(mapto) = &token.mapto {
+                                Some(format_ident!("__rustylr_location_{}", mapto))
+                            } else {
+                                None
+                            };
+                            stack_mapto_map
+                                .entry(StackName::LocationStack)
+                                .or_insert_with(Vec::new)
+                                .push(location_mapto);
+
                             debug_tag_check_stream.extend(quote! {
                                 debug_assert!(
                                     __data_stack.#tag_stack_name.get(
@@ -1278,21 +1301,6 @@ impl Grammar {
                                     ) == Some( &#tag_enum_name::#tag_name )
                                 );
                             });
-
-                            match &token.mapto {
-                                Some(mapto) => {
-                                    let location_varname =
-                                        format_ident!("__rustylr_location_{}", mapto);
-                                    extract_location_stream.extend(quote! {
-                                        let #location_varname = __location_stack.pop().unwrap();
-                                    });
-                                }
-                                None => {
-                                    extract_location_stream.extend(quote! {
-                                        __location_stack.pop();
-                                    });
-                                }
-                            }
                         }
 
                         // new tag that will be inserted by this reduce action
@@ -1330,17 +1338,18 @@ impl Grammar {
                         };
 
                         let mut extract_data_stream = TokenStream::new();
-                        for (stack_name, maptos) in stack_mapto_map {
+                        for (stack_name, maptos) in stack_mapto_map.iter() {
+                            let stack_stream = stack_name.to_token_stream();
                             for mapto in maptos {
                                 match mapto {
                                     Some(mapto) => {
                                         extract_data_stream.extend(quote! {
-                                            let mut #mapto = __data_stack.#stack_name.pop().unwrap();
+                                            let mut #mapto = #stack_stream.pop().unwrap();
                                         });
                                     }
                                     None => {
                                         extract_data_stream.extend(quote! {
-                                            __data_stack.#stack_name.pop();
+                                            #stack_stream.pop();
                                         });
                                     }
                                 }
@@ -1371,7 +1380,6 @@ impl Grammar {
                                     #modify_tag_stream
 
                                     #extract_data_stream
-                                    #extract_location_stream
 
                                     let __res = #reduce_action ;
                                     __data_stack.#stack_name.push(__res);
@@ -1398,7 +1406,6 @@ impl Grammar {
                                     #modify_tag_stream
 
                                     #extract_data_stream
-                                    #extract_location_stream
 
                                     #reduce_action
 
