@@ -1295,13 +1295,39 @@ impl Grammar {
                             }
                         }
 
-                        let mut truncate_tag_stream = TokenStream::new();
-                        if rule.tokens.len() > 0 {
-                            let len = rule.tokens.len();
-                            truncate_tag_stream.extend(quote! {
-                                __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);
-                            });
-                        }
+                        // new tag that will be inserted by this reduce action
+                        let new_tag_name = stack_names_for_nonterm[nonterm_idx]
+                            .as_ref()
+                            .unwrap_or(&empty_tag_name);
+                        // pop n tokens from tag_stack and push new reduced tag
+                        let modify_tag_stream = if rule.tokens.len() > 0 {
+                            // if first token's tag is equal to new_tag, no need to (pop n tokens -> push new token).
+                            // just pop n-1 tokens
+                            let first_tag_name = token_to_stack_name(rule.tokens[0].token)
+                                .unwrap_or(&empty_tag_name);
+
+                            if first_tag_name == new_tag_name {
+                                // pop n-1 tokens, no new insertion
+                                let len = rule.tokens.len() - 1;
+                                let truncate_stream = if len > 0 {
+                                    quote! {__data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);}
+                                } else {
+                                    TokenStream::new()
+                                };
+                                truncate_stream
+                            } else {
+                                let len = rule.tokens.len();
+                                // len > 0 here
+                                quote! {
+                                    __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);
+                                    __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
+                                }
+                            }
+                        } else {
+                            quote! {
+                                __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
+                            }
+                        };
 
                         let mut extract_data_stream = TokenStream::new();
                         for (stack_name, maptos) in stack_mapto_map {
@@ -1321,16 +1347,6 @@ impl Grammar {
                             }
                         }
 
-                        let extract_token_data_from_args = quote! {
-                            #[cfg(debug_assertions)]
-                            {
-                                #debug_tag_check_stream
-                            }
-                            #truncate_tag_stream
-                            #extract_data_stream
-                            #extract_location_stream
-                        };
-
                         reduce_action_case_streams.extend(quote! {
                             #rule_index => Self::#reduce_fn_ident( data_stack, location_stack, shift, lookahead, user_data, location0 ),
                         });
@@ -1348,11 +1364,17 @@ impl Grammar {
                                     #user_data_parameter_name: &mut #user_data_typename,
                                     __rustylr_location0: &mut #location_typename,
                                 ) -> Result<(), #reduce_error_typename> {
-                                    #extract_token_data_from_args
+                                    #[cfg(debug_assertions)]
+                                    {
+                                        #debug_tag_check_stream
+                                    }
+                                    #modify_tag_stream
+
+                                    #extract_data_stream
+                                    #extract_location_stream
 
                                     let __res = #reduce_action ;
                                     __data_stack.#stack_name.push(__res);
-                                    __data_stack.#tag_stack_name.push(#tag_enum_name::#stack_name);
 
                                     Ok(())
                                 }
@@ -1369,10 +1391,16 @@ impl Grammar {
                                     #user_data_parameter_name: &mut #user_data_typename,
                                     __rustylr_location0: &mut #location_typename,
                                 ) -> Result<(), #reduce_error_typename> {
-                                    #extract_token_data_from_args
+                                    #[cfg(debug_assertions)]
+                                    {
+                                        #debug_tag_check_stream
+                                    }
+                                    #modify_tag_stream
+
+                                    #extract_data_stream
+                                    #extract_location_stream
 
                                     #reduce_action
-                                    __data_stack.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
 
                                     Ok(())
                                 }

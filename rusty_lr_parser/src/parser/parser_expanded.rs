@@ -548,6 +548,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 5usize);
+        __data_stack.__tags.push(GrammarTags::__stack2);
         let mut RuleType = __data_stack.__stack3.pop().unwrap();
         let mut RuleLines = __data_stack.__stack4.pop().unwrap();
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
@@ -573,7 +574,6 @@ impl GrammarDataStack {
             }
         };
         __data_stack.__stack2.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack2);
         Ok(())
     }
     ///RuleType -> parengroup
@@ -594,6 +594,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack3);
         let mut parengroup = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_parengroup = __location_stack.pop().unwrap();
         let __res = {
@@ -603,7 +604,6 @@ impl GrammarDataStack {
             Some(group)
         };
         __data_stack.__stack3.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack3);
         Ok(())
     }
     ///RuleType ->
@@ -617,9 +617,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
+        __data_stack.__tags.push(GrammarTags::__stack3);
         let __res = { None };
         __data_stack.__stack3.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack3);
         Ok(())
     }
     ///RuleLines -> RuleLines pipe RuleLine
@@ -647,7 +647,7 @@ impl GrammarDataStack {
                 GrammarTags::__stack4)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         let mut RuleLines = __data_stack.__stack4.pop().unwrap();
         let mut RuleLine = __data_stack.__stack5.pop().unwrap();
         let mut pipe = __data_stack.__terminals.pop().unwrap();
@@ -660,7 +660,6 @@ impl GrammarDataStack {
             RuleLines
         };
         __data_stack.__stack4.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack4);
         Ok(())
     }
     ///RuleLines -> RuleLine
@@ -681,11 +680,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack4);
         let mut RuleLine = __data_stack.__stack5.pop().unwrap();
         let __rustylr_location_RuleLine = __location_stack.pop().unwrap();
         let __res = { vec![RuleLine] };
         __data_stack.__stack4.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack4);
         Ok(())
     }
     ///RuleLine -> TokenMapped* PrecDef* Action
@@ -714,6 +713,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::__stack5);
         let mut TokenMapped = __data_stack.__stack13.pop().unwrap();
         let mut PrecDef = __data_stack.__stack14.pop().unwrap();
         let mut Action = __data_stack.__stack3.pop().unwrap();
@@ -731,7 +731,6 @@ impl GrammarDataStack {
             }
         };
         __data_stack.__stack5.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack5);
         Ok(())
     }
     ///PrecDef -> percent prec IdentOrLiteral
@@ -760,6 +759,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::__stack6);
         let mut IdentOrLiteral = __data_stack.__stack11.pop().unwrap();
         let mut prec = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -768,7 +768,6 @@ impl GrammarDataStack {
         let __rustylr_location_percent = __location_stack.pop().unwrap();
         let __res = { PrecDPrecArgs::Prec(IdentOrLiteral) };
         __data_stack.__stack6.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack6);
         Ok(())
     }
     ///PrecDef -> percent prec error
@@ -797,6 +796,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::__stack6);
         let mut prec = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_error = __location_stack.pop().unwrap();
@@ -813,7 +813,6 @@ impl GrammarDataStack {
             PrecDPrecArgs::None
         };
         __data_stack.__stack6.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack6);
         Ok(())
     }
     ///PrecDef -> percent dprec literal
@@ -842,6 +841,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::__stack6);
         let mut literal = __data_stack.__terminals.pop().unwrap();
         let mut dprec = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -855,7 +855,6 @@ impl GrammarDataStack {
             PrecDPrecArgs::DPrec(literal)
         };
         __data_stack.__stack6.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack6);
         Ok(())
     }
     ///PrecDef -> percent dprec error
@@ -884,6 +883,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::__stack6);
         let mut dprec = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_error = __location_stack.pop().unwrap();
@@ -900,7 +900,6 @@ impl GrammarDataStack {
             PrecDPrecArgs::None
         };
         __data_stack.__stack6.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack6);
         Ok(())
     }
     ///PrecDef -> percent error
@@ -925,6 +924,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        __data_stack.__tags.push(GrammarTags::__stack6);
         let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_error = __location_stack.pop().unwrap();
         let __rustylr_location_percent = __location_stack.pop().unwrap();
@@ -939,7 +939,6 @@ impl GrammarDataStack {
             PrecDPrecArgs::None
         };
         __data_stack.__stack6.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack6);
         Ok(())
     }
     ///TokenMapped -> Pattern
@@ -960,11 +959,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack7);
         let mut Pattern = __data_stack.__stack10.pop().unwrap();
         let __rustylr_location_Pattern = __location_stack.pop().unwrap();
         let __res = { (None, Pattern) };
         __data_stack.__stack7.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack7);
         Ok(())
     }
     ///TokenMapped -> ident equal Pattern
@@ -993,6 +992,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::__stack7);
         let mut Pattern = __data_stack.__stack10.pop().unwrap();
         let mut equal = __data_stack.__terminals.pop().unwrap();
         let mut ident = __data_stack.__terminals.pop().unwrap();
@@ -1006,7 +1006,6 @@ impl GrammarDataStack {
             (Some(ident), Pattern)
         };
         __data_stack.__stack7.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack7);
         Ok(())
     }
     ///TerminalSetItem -> ident
@@ -1027,6 +1026,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack8);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
         let __res = {
@@ -1036,7 +1036,6 @@ impl GrammarDataStack {
             TerminalSetItem::Terminal(ident)
         };
         __data_stack.__stack8.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack8);
         Ok(())
     }
     ///TerminalSetItem -> ident minus ident
@@ -1065,6 +1064,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::__stack8);
         let mut last = __data_stack.__terminals.pop().unwrap();
         let mut minus = __data_stack.__terminals.pop().unwrap();
         let mut first = __data_stack.__terminals.pop().unwrap();
@@ -1081,7 +1081,6 @@ impl GrammarDataStack {
             TerminalSetItem::Range(first, last)
         };
         __data_stack.__stack8.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack8);
         Ok(())
     }
     ///TerminalSetItem -> ident minus error
@@ -1110,6 +1109,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::__stack8);
         let mut minus = __data_stack.__terminals.pop().unwrap();
         let mut ident = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_error = __location_stack.pop().unwrap();
@@ -1126,7 +1126,6 @@ impl GrammarDataStack {
             TerminalSetItem::Terminal(format_ident!("dummy"))
         };
         __data_stack.__stack8.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack8);
         Ok(())
     }
     ///TerminalSetItem -> literal
@@ -1147,6 +1146,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack8);
         let mut literal = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_literal = __location_stack.pop().unwrap();
         let __res = {
@@ -1156,7 +1156,6 @@ impl GrammarDataStack {
             TerminalSetItem::Literal(literal)
         };
         __data_stack.__stack8.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack8);
         Ok(())
     }
     ///TerminalSetItem -> literal minus literal
@@ -1185,6 +1184,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::__stack8);
         let mut last = __data_stack.__terminals.pop().unwrap();
         let mut minus = __data_stack.__terminals.pop().unwrap();
         let mut first = __data_stack.__terminals.pop().unwrap();
@@ -1201,7 +1201,6 @@ impl GrammarDataStack {
             TerminalSetItem::LiteralRange(first, last)
         };
         __data_stack.__stack8.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack8);
         Ok(())
     }
     ///TerminalSetItem -> literal minus error
@@ -1230,6 +1229,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::__stack8);
         let mut minus = __data_stack.__terminals.pop().unwrap();
         let mut literal = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_error = __location_stack.pop().unwrap();
@@ -1246,7 +1246,6 @@ impl GrammarDataStack {
             TerminalSetItem::Terminal(format_ident!("dummy"))
         };
         __data_stack.__stack8.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack8);
         Ok(())
     }
     ///TerminalSet -> lbracket caret? TerminalSetItem* rbracket
@@ -1279,6 +1278,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::__stack9);
         let mut caret = __data_stack.__stack15.pop().unwrap();
         let mut TerminalSetItem = __data_stack.__stack16.pop().unwrap();
         let mut rbracket = __data_stack.__terminals.pop().unwrap();
@@ -1296,7 +1296,6 @@ impl GrammarDataStack {
             }
         };
         __data_stack.__stack9.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack9);
         Ok(())
     }
     ///TerminalSet -> dot
@@ -1317,6 +1316,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack9);
         let mut dot = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_dot = __location_stack.pop().unwrap();
         let __res = {
@@ -1329,7 +1329,6 @@ impl GrammarDataStack {
             }
         };
         __data_stack.__stack9.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack9);
         Ok(())
     }
     ///Pattern -> ident
@@ -1350,6 +1349,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack10);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
         let __res = {
@@ -1359,7 +1359,6 @@ impl GrammarDataStack {
             PatternArgs::Ident(ident)
         };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Pattern -> Pattern plus
@@ -1383,7 +1382,7 @@ impl GrammarDataStack {
                 GrammarTags::__stack10)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut Pattern = __data_stack.__stack10.pop().unwrap();
         let mut plus = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_plus = __location_stack.pop().unwrap();
@@ -1395,7 +1394,6 @@ impl GrammarDataStack {
             PatternArgs::Plus(Box::new(Pattern), __rustylr_location_plus.span())
         };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Pattern -> Pattern star
@@ -1419,7 +1417,7 @@ impl GrammarDataStack {
                 GrammarTags::__stack10)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut Pattern = __data_stack.__stack10.pop().unwrap();
         let mut star = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_star = __location_stack.pop().unwrap();
@@ -1428,7 +1426,6 @@ impl GrammarDataStack {
             PatternArgs::Star(Box::new(Pattern), __rustylr_location_star.span())
         };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Pattern -> Pattern question
@@ -1452,7 +1449,7 @@ impl GrammarDataStack {
                 GrammarTags::__stack10)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut Pattern = __data_stack.__stack10.pop().unwrap();
         let mut question = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_question = __location_stack.pop().unwrap();
@@ -1461,7 +1458,6 @@ impl GrammarDataStack {
             PatternArgs::Question(Box::new(Pattern), __rustylr_location_question.span())
         };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Pattern -> Pattern exclamation
@@ -1485,7 +1481,7 @@ impl GrammarDataStack {
                 GrammarTags::__stack10)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut Pattern = __data_stack.__stack10.pop().unwrap();
         let mut exclamation = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_exclamation = __location_stack.pop().unwrap();
@@ -1497,7 +1493,6 @@ impl GrammarDataStack {
             )
         };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Pattern -> TerminalSet
@@ -1518,11 +1513,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack10);
         let mut TerminalSet = __data_stack.__stack9.pop().unwrap();
         let __rustylr_location_TerminalSet = __location_stack.pop().unwrap();
         let __res = { PatternArgs::TerminalSet(TerminalSet) };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Pattern -> Pattern slash Pattern
@@ -1550,7 +1545,7 @@ impl GrammarDataStack {
                 GrammarTags::__stack10)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         let mut lh = __data_stack.__stack10.pop().unwrap();
         let mut p1 = __data_stack.__stack10.pop().unwrap();
         let mut slash = __data_stack.__terminals.pop().unwrap();
@@ -1559,7 +1554,6 @@ impl GrammarDataStack {
         let __rustylr_location_p1 = __location_stack.pop().unwrap();
         let __res = { PatternArgs::Lookaheads(Box::new(p1), Box::new(lh)) };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Pattern -> lparen $sep(Pattern*, pipe, +) rparen
@@ -1588,6 +1582,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::__stack10);
         let mut Pattern = __data_stack.__stack18.pop().unwrap();
         let mut rparen = __data_stack.__terminals.pop().unwrap();
         let mut lparen = __data_stack.__terminals.pop().unwrap();
@@ -1602,7 +1597,6 @@ impl GrammarDataStack {
             )
         };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Pattern -> lparen error rparen
@@ -1631,6 +1625,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::__stack10);
         let mut rparen = __data_stack.__terminals.pop().unwrap();
         let mut lparen = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_rparen = __location_stack.pop().unwrap();
@@ -1647,7 +1642,6 @@ impl GrammarDataStack {
             PatternArgs::Ident(format_ident!("dummy"))
         };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Pattern -> literal
@@ -1668,6 +1662,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack10);
         let mut literal = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_literal = __location_stack.pop().unwrap();
         let __res = {
@@ -1677,7 +1672,6 @@ impl GrammarDataStack {
             PatternArgs::Literal(literal)
         };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Pattern -> Pattern minus Pattern
@@ -1705,7 +1699,7 @@ impl GrammarDataStack {
                 GrammarTags::__stack10)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         let mut p2 = __data_stack.__stack10.pop().unwrap();
         let mut p1 = __data_stack.__stack10.pop().unwrap();
         let mut minus = __data_stack.__terminals.pop().unwrap();
@@ -1714,7 +1708,6 @@ impl GrammarDataStack {
         let __rustylr_location_p1 = __location_stack.pop().unwrap();
         let __res = { PatternArgs::Minus(Box::new(p1), Box::new(p2)) };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma? rparen
@@ -1763,6 +1756,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 8usize);
+        __data_stack.__tags.push(GrammarTags::__stack10);
         let mut del = __data_stack.__stack10.pop().unwrap();
         let mut base = __data_stack.__stack10.pop().unwrap();
         let mut comma = __data_stack.__stack15.pop().unwrap();
@@ -1795,7 +1789,6 @@ impl GrammarDataStack {
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma plus rparen
@@ -1848,6 +1841,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 9usize);
+        __data_stack.__tags.push(GrammarTags::__stack10);
         let mut del = __data_stack.__stack10.pop().unwrap();
         let mut base = __data_stack.__stack10.pop().unwrap();
         let mut rparen = __data_stack.__terminals.pop().unwrap();
@@ -1882,7 +1876,6 @@ impl GrammarDataStack {
             PatternArgs::Sep(Box::new(base), Box::new(del), true, *__rustylr_location0)
         };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma star rparen
@@ -1935,6 +1928,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 9usize);
+        __data_stack.__tags.push(GrammarTags::__stack10);
         let mut del = __data_stack.__stack10.pop().unwrap();
         let mut base = __data_stack.__stack10.pop().unwrap();
         let mut rparen = __data_stack.__terminals.pop().unwrap();
@@ -1969,7 +1963,6 @@ impl GrammarDataStack {
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern error rparen
@@ -2018,6 +2011,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 8usize);
+        __data_stack.__tags.push(GrammarTags::__stack10);
         let mut del = __data_stack.__stack10.pop().unwrap();
         let mut base = __data_stack.__stack10.pop().unwrap();
         let mut rparen = __data_stack.__terminals.pop().unwrap();
@@ -2056,7 +2050,6 @@ impl GrammarDataStack {
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma error rparen
@@ -2109,6 +2102,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 9usize);
+        __data_stack.__tags.push(GrammarTags::__stack10);
         let mut del = __data_stack.__stack10.pop().unwrap();
         let mut base = __data_stack.__stack10.pop().unwrap();
         let mut rparen = __data_stack.__terminals.pop().unwrap();
@@ -2149,7 +2143,6 @@ impl GrammarDataStack {
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
         __data_stack.__stack10.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack10);
         Ok(())
     }
     ///Action -> bracegroup
@@ -2170,6 +2163,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack3);
         let mut bracegroup = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_bracegroup = __location_stack.pop().unwrap();
         let __res = {
@@ -2179,7 +2173,6 @@ impl GrammarDataStack {
             Some(group)
         };
         __data_stack.__stack3.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack3);
         Ok(())
     }
     ///Action ->
@@ -2193,9 +2186,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
+        __data_stack.__tags.push(GrammarTags::__stack3);
         let __res = { None };
         __data_stack.__stack3.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack3);
         Ok(())
     }
     ///IdentOrLiteral -> ident
@@ -2216,6 +2209,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack11);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_ident = __location_stack.pop().unwrap();
         let __res = {
@@ -2225,7 +2219,6 @@ impl GrammarDataStack {
             IdentOrLiteral::Ident(ident)
         };
         __data_stack.__stack11.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack11);
         Ok(())
     }
     ///IdentOrLiteral -> literal
@@ -2246,6 +2239,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack11);
         let mut literal = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_literal = __location_stack.pop().unwrap();
         let __res = {
@@ -2255,7 +2249,6 @@ impl GrammarDataStack {
             IdentOrLiteral::Literal(literal)
         };
         __data_stack.__stack11.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack11);
         Ok(())
     }
     ///RustCode -> [^semicolon]+
@@ -2276,6 +2269,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack12);
         let mut t = __data_stack.__stack19.pop().unwrap();
         let __rustylr_location_t = __location_stack.pop().unwrap();
         let __res = {
@@ -2286,7 +2280,6 @@ impl GrammarDataStack {
             tokens
         };
         __data_stack.__stack12.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack12);
         Ok(())
     }
     ///Directive -> percent token ident RustCode semicolon
@@ -2323,6 +2316,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 5usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut RustCode = __data_stack.__stack12.pop().unwrap();
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut ident = __data_stack.__terminals.pop().unwrap();
@@ -2339,7 +2333,6 @@ impl GrammarDataStack {
             };
             data.terminals.push((ident, RustCode));
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent token ident semicolon
@@ -2372,6 +2365,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut ident = __data_stack.__terminals.pop().unwrap();
         let mut token = __data_stack.__terminals.pop().unwrap();
@@ -2389,7 +2383,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_ident,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent token error semicolon
@@ -2422,6 +2415,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut token = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -2438,7 +2432,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent start ident semicolon
@@ -2471,6 +2464,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut ident = __data_stack.__terminals.pop().unwrap();
         let mut start = __data_stack.__terminals.pop().unwrap();
@@ -2485,7 +2479,6 @@ impl GrammarDataStack {
             };
             data.start_rule_name.push(ident);
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent start error semicolon
@@ -2518,6 +2511,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut start = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -2534,7 +2528,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent eofdef error semicolon
@@ -2567,6 +2560,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut eofdef = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -2584,7 +2578,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_eofdef,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent tokentype RustCode semicolon
@@ -2617,6 +2610,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut RustCode = __data_stack.__stack12.pop().unwrap();
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut tokentype = __data_stack.__terminals.pop().unwrap();
@@ -2628,7 +2622,6 @@ impl GrammarDataStack {
         {
             data.token_typename.push((__rustylr_location_tokentype.span(), RustCode));
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent tokentype semicolon
@@ -2657,6 +2650,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut tokentype = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -2672,7 +2666,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_tokentype,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent userdata RustCode semicolon
@@ -2705,6 +2698,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut RustCode = __data_stack.__stack12.pop().unwrap();
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut userdata = __data_stack.__terminals.pop().unwrap();
@@ -2716,7 +2710,6 @@ impl GrammarDataStack {
         {
             data.userdata_typename.push((__rustylr_location_userdata.span(), RustCode));
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent userdata semicolon
@@ -2745,6 +2738,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut userdata = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -2760,7 +2754,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_userdata,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent left IdentOrLiteral+ semicolon
@@ -2793,6 +2786,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut IdentOrLiteral = __data_stack.__stack20.pop().unwrap();
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut left = __data_stack.__terminals.pop().unwrap();
@@ -2809,7 +2803,6 @@ impl GrammarDataStack {
                     IdentOrLiteral,
                 ));
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent left error semicolon
@@ -2842,6 +2835,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut left = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -2858,7 +2852,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent right IdentOrLiteral+ semicolon
@@ -2891,6 +2884,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut IdentOrLiteral = __data_stack.__stack20.pop().unwrap();
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut right = __data_stack.__terminals.pop().unwrap();
@@ -2907,7 +2901,6 @@ impl GrammarDataStack {
                     IdentOrLiteral,
                 ));
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent right error semicolon
@@ -2940,6 +2933,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut right = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -2956,7 +2950,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent precedence IdentOrLiteral+ semicolon
@@ -2989,6 +2982,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut IdentOrLiteral = __data_stack.__stack20.pop().unwrap();
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut precedence = __data_stack.__terminals.pop().unwrap();
@@ -3001,7 +2995,6 @@ impl GrammarDataStack {
             data.precedences
                 .push((__rustylr_location_precedence.span(), None, IdentOrLiteral));
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent precedence error semicolon
@@ -3034,6 +3027,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut precedence = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3050,7 +3044,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent errortype RustCode semicolon
@@ -3083,6 +3076,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut RustCode = __data_stack.__stack12.pop().unwrap();
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut errortype = __data_stack.__terminals.pop().unwrap();
@@ -3094,7 +3088,6 @@ impl GrammarDataStack {
         {
             data.error_typename.push((__rustylr_location_errortype.span(), RustCode));
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent errortype semicolon
@@ -3123,6 +3116,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut errortype = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3138,7 +3132,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_errortype,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent moduleprefix RustCode semicolon
@@ -3171,6 +3164,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut RustCode = __data_stack.__stack12.pop().unwrap();
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut moduleprefix = __data_stack.__terminals.pop().unwrap();
@@ -3182,7 +3176,6 @@ impl GrammarDataStack {
         {
             data.module_prefix.push((__rustylr_location_moduleprefix.span(), RustCode));
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent moduleprefix semicolon
@@ -3211,6 +3204,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut moduleprefix = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3226,7 +3220,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_moduleprefix,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent glr semicolon
@@ -3255,6 +3248,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut glr = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3264,7 +3258,6 @@ impl GrammarDataStack {
         {
             data.glr = true;
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent glr error semicolon
@@ -3297,6 +3290,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut glr = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3313,7 +3307,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent lalr semicolon
@@ -3342,6 +3335,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut lalr = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3351,7 +3345,6 @@ impl GrammarDataStack {
         {
             data.lalr = true;
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent lalr error semicolon
@@ -3384,6 +3377,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut lalr = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3400,7 +3394,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent nooptim semicolon
@@ -3429,6 +3422,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut nooptim = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3438,7 +3432,6 @@ impl GrammarDataStack {
         {
             data.no_optim = true;
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent nooptim error semicolon
@@ -3471,6 +3464,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut nooptim = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3487,7 +3481,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent dense semicolon
@@ -3516,6 +3509,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut dense = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3525,7 +3519,6 @@ impl GrammarDataStack {
         {
             data.dense = true;
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent dense error semicolon
@@ -3558,6 +3551,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut dense = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3574,7 +3568,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent trace ident* semicolon
@@ -3607,6 +3600,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut ident = __data_stack.__stack19.pop().unwrap();
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut trace = __data_stack.__terminals.pop().unwrap();
@@ -3626,7 +3620,6 @@ impl GrammarDataStack {
                 });
             data.traces.extend(idents);
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent trace error semicolon
@@ -3659,6 +3652,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut trace = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3675,7 +3669,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent filter RustCode semicolon
@@ -3708,6 +3701,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut RustCode = __data_stack.__stack12.pop().unwrap();
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut filter = __data_stack.__terminals.pop().unwrap();
@@ -3719,7 +3713,6 @@ impl GrammarDataStack {
         {
             data.filter = Some(RustCode);
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent filter semicolon
@@ -3748,6 +3741,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut filter = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3763,7 +3757,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_filter,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent runtime semicolon
@@ -3792,6 +3785,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut runtime = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3801,7 +3795,6 @@ impl GrammarDataStack {
         {
             data.compiled = false;
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent runtime error semicolon
@@ -3834,6 +3827,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut runtime = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3850,7 +3844,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent location RustCode semicolon
@@ -3883,6 +3876,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut RustCode = __data_stack.__stack12.pop().unwrap();
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut location = __data_stack.__terminals.pop().unwrap();
@@ -3894,7 +3888,6 @@ impl GrammarDataStack {
         {
             data.location_typename = Some(RustCode);
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent location semicolon
@@ -3923,6 +3916,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut location = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
@@ -3938,7 +3932,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_location,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///Directive -> percent error semicolon
@@ -3967,6 +3960,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut semicolon = __data_stack.__terminals.pop().unwrap();
         let mut percent = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_semicolon = __location_stack.pop().unwrap();
@@ -3981,7 +3975,6 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///GrammarLine -> Rule
@@ -4002,12 +3995,12 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::Empty);
         let mut Rule = __data_stack.__stack2.pop().unwrap();
         let __rustylr_location_Rule = __location_stack.pop().unwrap();
         {
             data.rules.push(Rule);
         }
-        __data_stack.__tags.push(GrammarTags::Empty);
         Ok(())
     }
     ///GrammarLine -> Directive
@@ -4041,11 +4034,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack13);
         let mut A = __data_stack.__stack7.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __res = { vec![A] };
         __data_stack.__stack13.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack13);
         Ok(())
     }
     ///TokenMapped+ -> TokenMapped+ TokenMapped
@@ -4069,7 +4062,7 @@ impl GrammarDataStack {
                 GrammarTags::__stack13)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut Ap = __data_stack.__stack13.pop().unwrap();
         let mut A = __data_stack.__stack7.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
@@ -4079,7 +4072,6 @@ impl GrammarDataStack {
             Ap
         };
         __data_stack.__stack13.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack13);
         Ok(())
     }
     ///TokenMapped* -> TokenMapped+
@@ -4101,9 +4093,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
+        __data_stack.__tags.push(GrammarTags::__stack13);
         let __res = { vec![] };
         __data_stack.__stack13.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack13);
         Ok(())
     }
     ///PrecDef+ -> PrecDef
@@ -4124,11 +4116,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack14);
         let mut A = __data_stack.__stack6.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __res = { vec![A] };
         __data_stack.__stack14.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack14);
         Ok(())
     }
     ///PrecDef+ -> PrecDef+ PrecDef
@@ -4152,7 +4144,7 @@ impl GrammarDataStack {
                 GrammarTags::__stack14)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut Ap = __data_stack.__stack14.pop().unwrap();
         let mut A = __data_stack.__stack6.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
@@ -4162,7 +4154,6 @@ impl GrammarDataStack {
             Ap
         };
         __data_stack.__stack14.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack14);
         Ok(())
     }
     ///PrecDef* -> PrecDef+
@@ -4184,9 +4175,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
+        __data_stack.__tags.push(GrammarTags::__stack14);
         let __res = { vec![] };
         __data_stack.__stack14.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack14);
         Ok(())
     }
     ///caret? -> caret
@@ -4207,11 +4198,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack15);
         let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __res = Some(A);
         __data_stack.__stack15.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack15);
         Ok(())
     }
     ///caret? ->
@@ -4225,9 +4216,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
+        __data_stack.__tags.push(GrammarTags::__stack15);
         let __res = { None };
         __data_stack.__stack15.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack15);
         Ok(())
     }
     ///TerminalSetItem+ -> TerminalSetItem
@@ -4248,11 +4239,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack16);
         let mut A = __data_stack.__stack8.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __res = { vec![A] };
         __data_stack.__stack16.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack16);
         Ok(())
     }
     ///TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem
@@ -4276,7 +4267,7 @@ impl GrammarDataStack {
                 GrammarTags::__stack16)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut Ap = __data_stack.__stack16.pop().unwrap();
         let mut A = __data_stack.__stack8.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
@@ -4286,7 +4277,6 @@ impl GrammarDataStack {
             Ap
         };
         __data_stack.__stack16.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack16);
         Ok(())
     }
     ///TerminalSetItem* -> TerminalSetItem+
@@ -4308,9 +4298,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
+        __data_stack.__tags.push(GrammarTags::__stack16);
         let __res = { vec![] };
         __data_stack.__stack16.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack16);
         Ok(())
     }
     ///Pattern+ -> Pattern
@@ -4331,11 +4321,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack17);
         let mut A = __data_stack.__stack10.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __res = { vec![A] };
         __data_stack.__stack17.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack17);
         Ok(())
     }
     ///Pattern+ -> Pattern+ Pattern
@@ -4359,7 +4349,7 @@ impl GrammarDataStack {
                 GrammarTags::__stack17)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut A = __data_stack.__stack10.pop().unwrap();
         let mut Ap = __data_stack.__stack17.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
@@ -4369,7 +4359,6 @@ impl GrammarDataStack {
             Ap
         };
         __data_stack.__stack17.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack17);
         Ok(())
     }
     ///Pattern* -> Pattern+
@@ -4391,9 +4380,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
+        __data_stack.__tags.push(GrammarTags::__stack17);
         let __res = { vec![] };
         __data_stack.__stack17.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack17);
         Ok(())
     }
     ///$sep(Pattern*, pipe, +) -> Pattern*
@@ -4414,11 +4403,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack18);
         let mut __token0 = __data_stack.__stack17.pop().unwrap();
         let __rustylr_location___token0 = __location_stack.pop().unwrap();
         let __res = { vec![__token0] };
         __data_stack.__stack18.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack18);
         Ok(())
     }
     ///$sep(Pattern*, pipe, +) -> $sep(Pattern*, pipe, +) pipe Pattern*
@@ -4446,7 +4435,7 @@ impl GrammarDataStack {
                 GrammarTags::__stack18)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         let mut __token1 = __data_stack.__stack17.pop().unwrap();
         let mut __token0 = __data_stack.__stack18.pop().unwrap();
         __data_stack.__terminals.pop();
@@ -4458,7 +4447,6 @@ impl GrammarDataStack {
             __token0
         };
         __data_stack.__stack18.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack18);
         Ok(())
     }
     ///comma? -> comma
@@ -4479,11 +4467,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack15);
         let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __res = Some(A);
         __data_stack.__stack15.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack15);
         Ok(())
     }
     ///comma? ->
@@ -4497,9 +4485,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
+        __data_stack.__tags.push(GrammarTags::__stack15);
         let __res = { None };
         __data_stack.__stack15.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack15);
         Ok(())
     }
     ///[^semicolon] -> ident
@@ -4864,11 +4852,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack19);
         let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __res = { vec![A] };
         __data_stack.__stack19.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack19);
         Ok(())
     }
     ///[^semicolon]+ -> [^semicolon]+ [^semicolon]
@@ -4892,7 +4880,7 @@ impl GrammarDataStack {
                 GrammarTags::__stack19)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut Ap = __data_stack.__stack19.pop().unwrap();
         let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
@@ -4902,7 +4890,6 @@ impl GrammarDataStack {
             Ap
         };
         __data_stack.__stack19.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack19);
         Ok(())
     }
     ///IdentOrLiteral+ -> IdentOrLiteral
@@ -4923,11 +4910,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack20);
         let mut A = __data_stack.__stack11.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __res = { vec![A] };
         __data_stack.__stack20.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack20);
         Ok(())
     }
     ///IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
@@ -4951,7 +4938,7 @@ impl GrammarDataStack {
                 GrammarTags::__stack20)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut A = __data_stack.__stack11.pop().unwrap();
         let mut Ap = __data_stack.__stack20.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
@@ -4961,7 +4948,6 @@ impl GrammarDataStack {
             Ap
         };
         __data_stack.__stack20.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack20);
         Ok(())
     }
     ///ident+ -> ident
@@ -4982,11 +4968,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack19);
         let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
         let __res = { vec![A] };
         __data_stack.__stack19.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack19);
         Ok(())
     }
     ///ident+ -> ident+ ident
@@ -5010,7 +4996,7 @@ impl GrammarDataStack {
                 GrammarTags::__stack19)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut Ap = __data_stack.__stack19.pop().unwrap();
         let mut A = __data_stack.__terminals.pop().unwrap();
         let __rustylr_location_A = __location_stack.pop().unwrap();
@@ -5020,7 +5006,6 @@ impl GrammarDataStack {
             Ap
         };
         __data_stack.__stack19.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack19);
         Ok(())
     }
     ///ident* -> ident+
@@ -5042,9 +5027,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
+        __data_stack.__tags.push(GrammarTags::__stack19);
         let __res = { vec![] };
         __data_stack.__stack19.push(__res);
-        __data_stack.__tags.push(GrammarTags::__stack19);
         Ok(())
     }
     ///GrammarLine+ -> GrammarLine
