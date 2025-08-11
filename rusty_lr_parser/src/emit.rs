@@ -1285,7 +1285,40 @@ impl Grammar {
                                     .push(token.mapto.clone());
                             }
                             let location_mapto = if let Some(mapto) = &token.mapto {
-                                Some(format_ident!("__rustylr_location_{}", mapto))
+                                fn tokenstream_contains_ident(
+                                    stream: TokenStream,
+                                    ident: &Ident,
+                                ) -> bool {
+                                    for t in stream {
+                                        match t {
+                                            proc_macro2::TokenTree::Ident(i) if &i == ident => {
+                                                return true
+                                            }
+                                            proc_macro2::TokenTree::Group(g) => {
+                                                if tokenstream_contains_ident(g.stream(), ident) {
+                                                    return true;
+                                                }
+                                            }
+                                            _ => {}
+                                        }
+                                    }
+                                    false
+                                }
+
+                                let location_varname =
+                                    format_ident!("__rustylr_location_{}", mapto);
+
+                                // if location variable was not used at this reduce action,
+                                // we can use `truncate` instead of `pop` for optimization
+                                // so check it here
+                                if tokenstream_contains_ident(
+                                    reduce_action.clone(),
+                                    &location_varname,
+                                ) {
+                                    Some(location_varname)
+                                } else {
+                                    None
+                                }
                             } else {
                                 None
                             };
