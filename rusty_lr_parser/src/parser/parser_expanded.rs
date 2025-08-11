@@ -4438,9 +4438,9 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         let mut __token1 = __data_stack.__stack17.pop().unwrap();
         let mut __token0 = __data_stack.__stack18.pop().unwrap();
-        __data_stack.__terminals.pop();
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut __rustylr_location___token1 = __location_stack.pop().unwrap();
-        __location_stack.pop();
+        __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location___token0 = __location_stack.pop().unwrap();
         let __res = {
             __token0.push(__token1);

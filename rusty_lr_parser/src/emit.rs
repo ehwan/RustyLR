@@ -1340,19 +1340,31 @@ impl Grammar {
                         let mut extract_data_stream = TokenStream::new();
                         for (stack_name, maptos) in stack_mapto_map.iter() {
                             let stack_stream = stack_name.to_token_stream();
+
+                            // if there are consecutive `None` mapto, truncate instead of pop
+                            let mut last_none_count: usize = 0;
                             for mapto in maptos {
                                 match mapto {
                                     Some(mapto) => {
+                                        if last_none_count > 0 {
+                                            extract_data_stream.extend(quote! {
+                                                #stack_stream.truncate(#stack_stream.len() - #last_none_count);
+                                            });
+                                            last_none_count = 0;
+                                        }
                                         extract_data_stream.extend(quote! {
                                             let mut #mapto = #stack_stream.pop().unwrap();
                                         });
                                     }
                                     None => {
-                                        extract_data_stream.extend(quote! {
-                                            #stack_stream.pop();
-                                        });
+                                        last_none_count += 1;
                                     }
                                 }
+                            }
+                            if last_none_count > 0 {
+                                extract_data_stream.extend(quote! {
+                                    #stack_stream.truncate(#stack_stream.len() - #last_none_count);
+                                });
                             }
                         }
 
