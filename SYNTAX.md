@@ -187,6 +187,14 @@ E(i32): A div a2=A {
 };
 ```
 
+You can reference any data with below patterns:
+ - `data: &mut %UserData`: the user data passed to `feed()` function
+ - `var_name: %RuleType`: token data associated with `var_name`
+ - `@var_name: %LocationType`: location data associated with `var_name`
+ - `@$: &mut %LocationType`: location data of current non-terminal in this reduce action
+ - `lookahead: &TerminalSymbol<%TokenType>`: lookahead token that caused this reduce action
+ - `shift: &mut bool`: for non-deterministic GLR parser, set this value to `false` to revoke the shift action
+
 ## Accessing Token Data in ReduceAction
 Within a ReduceAction, you can access the data associated with tokens and non-terminals:
 
