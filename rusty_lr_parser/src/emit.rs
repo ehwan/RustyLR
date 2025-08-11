@@ -515,9 +515,9 @@ impl Grammar {
                         shift_goto_map_term: vec![#shift_term_body_stream],
                         shift_goto_map_nonterm: vec![#shift_nonterm_body_stream],
                         reduce_map: {
-                            let mut __reduce_map = Vec::new();
+                            let mut __reduce_map = std::collections::BTreeMap::new();
                             #reduce_body_stream
-                            __reduce_map
+                            __reduce_map.into_iter().collect()
                         },
                         ruleset: {
                             let rules: &'static [#rule_index_typename] = &[
@@ -549,11 +549,11 @@ impl Grammar {
                     });
                 }
                 terminal_set_initialize_stream.extend(quote! {
-                    let #name: std::collections::BTreeSet<
+                    let #name: Vec<
                         #module_prefix::TerminalSymbol<
                             #class_index_typename
                         >
-                    > = std::collections::BTreeSet::from([#set_body_stream]);
+                    > = vec![#set_body_stream];
                 });
             }
 
