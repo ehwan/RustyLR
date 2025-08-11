@@ -1818,7 +1818,7 @@ impl GrammarDataStack {
         let mut base = __data_stack.__stack10.pop().unwrap();
         let mut rparen = __data_stack.__terminals.pop().unwrap();
         let mut plus = __data_stack.__terminals.pop().unwrap();
-        let mut comma = __data_stack.__terminals.pop().unwrap();
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut comma = __data_stack.__terminals.pop().unwrap();
         let mut lparen = __data_stack.__terminals.pop().unwrap();
         let mut ident = __data_stack.__terminals.pop().unwrap();
@@ -1899,7 +1899,7 @@ impl GrammarDataStack {
         let mut base = __data_stack.__stack10.pop().unwrap();
         let mut rparen = __data_stack.__terminals.pop().unwrap();
         let mut star = __data_stack.__terminals.pop().unwrap();
-        let mut comma = __data_stack.__terminals.pop().unwrap();
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut comma = __data_stack.__terminals.pop().unwrap();
         let mut lparen = __data_stack.__terminals.pop().unwrap();
         let mut ident = __data_stack.__terminals.pop().unwrap();
@@ -2063,7 +2063,7 @@ impl GrammarDataStack {
         let mut del = __data_stack.__stack10.pop().unwrap();
         let mut base = __data_stack.__stack10.pop().unwrap();
         let mut rparen = __data_stack.__terminals.pop().unwrap();
-        let mut comma = __data_stack.__terminals.pop().unwrap();
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut comma = __data_stack.__terminals.pop().unwrap();
         let mut lparen = __data_stack.__terminals.pop().unwrap();
         let mut ident = __data_stack.__terminals.pop().unwrap();
