@@ -295,7 +295,8 @@ RustyLR consists of two big parts:
   - executable (`rustylr`), the code generator
   - runtime (`rusty_lr`), the main library
 
-Since the `cargo` automatically uses the latest patch in `major.minor.patch` version of a crate, we increase the patch number only if the generated code is compatible with the runtime. That is, any change that could make compile errors with previous generated code will result in a minor version bump.
+Since the `cargo` automatically uses the latest patch in `major.minor.patch` version of a crate, we increase the patch number only if the generated code is compatible with the runtime. That is, for any user who is not using buildscript or proc-macro, and using the executable-generated code itself,
+any code change that could make compile errors with the previous generated code will result in a minor version bump.
 
 ## License
 This project is dual-licensed under either of the following licenses, at your option:
