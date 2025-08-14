@@ -290,6 +290,13 @@ The crates have the following dependency relationships:
 - `rusty_lr_parser` depends on `rusty_lr_core`
 - `rusty_lr_executable` depends on `rusty_lr_buildscript`
 
+### About the Versioning
+RustyLR consists of two big parts:
+  - executable (`rustylr`), the code generator
+  - runtime (`rusty_lr`), the main library
+
+Since the `cargo` automatically uses the latest patch in `major.minor.patch` version of a crate, we increase the patch number only if the generated code is compatible with the runtime. That is, any change that could make compile errors with previous generated code will result in a minor version bump.
+
 ## License
 This project is dual-licensed under either of the following licenses, at your option:
 
