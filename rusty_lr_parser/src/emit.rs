@@ -1710,7 +1710,7 @@ impl Grammar {
         let mut stack_append_stream = TokenStream::new();
         let stack_len = stack_names_in_order.len();
         let split_off_count_init_stream = quote! {
-            let mut __counts: [u8; #stack_len] = [0; #stack_len];
+            let mut __counts: [u8; #stack_len+1] = [0; #stack_len+1];
         };
         let mut split_off_split_stream = TokenStream::new();
         let mut split_off_ctor_stream = TokenStream::new();
@@ -1751,8 +1751,8 @@ impl Grammar {
         #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
         #[derive(Clone, Copy, PartialEq, Eq)]
         pub enum #tag_enum_name {
-            #empty_tag_name,
             #tag_definition_stream
+            #empty_tag_name,
         }
 
         /// enum for each non-terminal and terminal symbol, that actually hold data
