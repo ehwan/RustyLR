@@ -514,7 +514,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         let nodes = std::mem::take(&mut self.current_nodes);
         Ok(nodes.into_iter().map(move |eof_node| {
             let node = self.pop(eof_node).unwrap();
-            // Since <EOF> does not have ruletype, no need to pop
+            self.nodes_pool[node].data_stack.pop(); // pop eof
             self.nodes_pool[node].data_stack.pop_start().unwrap()
         }))
     }
