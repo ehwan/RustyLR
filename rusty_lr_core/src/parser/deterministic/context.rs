@@ -69,7 +69,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         self.feed_eof(parser, userdata)?;
 
         // data_stack must be <Start> <EOF> in this point
-        // Since <EOF> does not have ruletype, no need to pop
+        self.data_stack.pop(); // pop eof
         Ok(self.data_stack.pop_start().unwrap())
     }
 
