@@ -512,8 +512,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         // Root <- Start <- EOF
         //                  ^^^ here, current_node
         let nodes = std::mem::take(&mut self.current_nodes);
-        Ok(nodes.into_iter().map(move |eof_node| {
-            let node = self.pop(eof_node).unwrap();
+        Ok(nodes.into_iter().map(move |node| {
+            // let node = self.pop(eof_node).unwrap();
             self.nodes_pool[node].data_stack.pop(); // pop eof
             self.nodes_pool[node].data_stack.pop_start().unwrap()
         }))
