@@ -431,22 +431,35 @@ impl Grammar {
             }
             let mut states_body_stream = TokenStream::new();
             let mut terminal_sets_name_map = std::collections::BTreeMap::new();
-            let mut get_or_insert_terminal_set =
-                |set: std::collections::BTreeSet<TerminalSymbol<usize>>| -> Ident {
-                    let new_index = terminal_sets_name_map.len();
-                    terminal_sets_name_map
-                        .entry(set)
-                        .or_insert_with(|| format_ident!("__rustylr_tset{new_index}"))
-                        .clone()
-                };
+            let mut get_or_insert_terminal_set = |set: std::collections::BTreeSet<usize>| -> Ident {
+                let new_index = terminal_sets_name_map.len();
+                terminal_sets_name_map
+                    .entry(set)
+                    .or_insert_with(|| format_ident!("__rustylr_tset{new_index}"))
+                    .clone()
+            };
             for state in &self.states {
                 let mut shift_term_body_stream = TokenStream::new();
+                let mut error_shift_stream = quote! {None};
+                let mut eof_shift_stream = quote! {None};
                 for (&term, &next_state) in &state.shift_goto_map_term {
-                    let term = terminal_symbol_to_stream(term);
                     let next_state = proc_macro2::Literal::usize_unsuffixed(next_state);
-                    shift_term_body_stream.extend(quote! {
-                        (#term, #next_state),
-                    });
+                    match term {
+                        TerminalSymbol::Error => {
+                            error_shift_stream = quote! {Some(#next_state)};
+                            continue;
+                        }
+                        TerminalSymbol::Eof => {
+                            eof_shift_stream = quote! {Some(#next_state)};
+                            continue;
+                        }
+                        TerminalSymbol::Term(term) => {
+                            let term = proc_macro2::Literal::usize_unsuffixed(term);
+                            shift_term_body_stream.extend(quote! {
+                                (#term, #next_state),
+                            });
+                        }
+                    }
                 }
 
                 let mut shift_nonterm_body_stream = TokenStream::new();
@@ -460,24 +473,41 @@ impl Grammar {
 
                 let mut reduce_body_stream = TokenStream::new();
                 let mut reduce_rules_terms_map = std::collections::BTreeMap::new();
+                let mut error_reduce_stream = quote! {None};
+                let mut eof_reduce_stream = quote! {None};
                 for (&term, rules) in &state.reduce_map {
-                    reduce_rules_terms_map
-                        .entry(rules)
-                        .or_insert_with(std::collections::BTreeSet::new)
-                        .insert(term);
+                    match term {
+                        TerminalSymbol::Error => {
+                            let rules_it = rules
+                                .iter()
+                                .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
+                            error_reduce_stream = quote! {Some(vec![#(#rules_it),*])};
+                            continue;
+                        }
+                        TerminalSymbol::Eof => {
+                            let rules_it = rules
+                                .iter()
+                                .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
+                            eof_reduce_stream = quote! {Some(vec![#(#rules_it),*])};
+                            continue;
+                        }
+                        TerminalSymbol::Term(term) => {
+                            reduce_rules_terms_map
+                                .entry(rules)
+                                .or_insert_with(std::collections::BTreeSet::new)
+                                .insert(term);
+                        }
+                    }
                 }
                 for (rules, terms) in reduce_rules_terms_map {
                     let terms_set_name = get_or_insert_terminal_set(terms);
 
-                    let mut rules_body_stream = TokenStream::new();
-                    for &rule in rules {
-                        let rule = proc_macro2::Literal::usize_unsuffixed(rule);
-                        rules_body_stream.extend(quote! {
-                            #rule,
-                        });
-                    }
+                    let rules_it = rules
+                        .iter()
+                        .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
+
                     reduce_body_stream.extend(quote! {
-                        let reduce_rules = vec![#rules_body_stream];
+                        let reduce_rules = vec![#(#rules_it),*];
                         __reduce_map.extend(
                             #terms_set_name.iter().map(
                                 |term| (*term, reduce_rules.clone())
@@ -513,12 +543,16 @@ impl Grammar {
                 states_body_stream.extend(quote! {
                     #module_prefix::parser::state::IntermediateState {
                         shift_goto_map_term: vec![#shift_term_body_stream],
+                        error_shift: #error_shift_stream,
+                        eof_shift: #eof_shift_stream,
                         shift_goto_map_nonterm: vec![#shift_nonterm_body_stream],
                         reduce_map: {
                             let mut __reduce_map = std::collections::BTreeMap::new();
                             #reduce_body_stream
                             __reduce_map.into_iter().collect()
                         },
+                        error_reduce: #error_reduce_stream,
+                        eof_reduce: #eof_reduce_stream,
                         ruleset: {
                             let rules: &'static [#rule_index_typename] = &[
                                 #ruleset_rules_body_stream
@@ -541,19 +575,11 @@ impl Grammar {
 
             let mut terminal_set_initialize_stream = TokenStream::new();
             for (set, name) in terminal_sets_name_map {
-                let mut set_body_stream = TokenStream::new();
-                for val in set {
-                    let val = terminal_symbol_to_stream(val);
-                    set_body_stream.extend(quote! {
-                        #val,
-                    });
-                }
+                let set_it = set
+                    .into_iter()
+                    .map(|val| proc_macro2::Literal::usize_unsuffixed(val));
                 terminal_set_initialize_stream.extend(quote! {
-                    let #name: Vec<
-                        #module_prefix::TerminalSymbol<
-                            #class_index_typename
-                        >
-                    > = vec![#set_body_stream];
+                    let #name: Vec<#class_index_typename> = vec![#(#set_it),*];
                 });
             }
 
@@ -587,7 +613,7 @@ impl Grammar {
 
                 #terminal_set_initialize_stream
                 let states: Vec<#module_prefix::parser::state::IntermediateState<
-                    #module_prefix::TerminalSymbol<#class_index_typename>, _, #state_index_typename, #rule_index_typename
+                    #class_index_typename, _, #state_index_typename, #rule_index_typename
                 >> = vec![
                     #states_body_stream
                 ];

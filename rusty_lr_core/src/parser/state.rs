@@ -8,8 +8,12 @@ use crate::TerminalSymbol;
 /// into various types of parser states (SparseState, DenseState, ...).
 pub struct IntermediateState<Term, NonTerm, StateIndex, RuleIndex> {
     pub shift_goto_map_term: Vec<(Term, StateIndex)>, // must be sorted
+    pub eof_shift: Option<StateIndex>,
+    pub error_shift: Option<StateIndex>,
     pub shift_goto_map_nonterm: Vec<(NonTerm, StateIndex)>, // must be sorted
-    pub reduce_map: Vec<(Term, Vec<RuleIndex>)>,      // must be sorted
+    pub reduce_map: Vec<(Term, Vec<RuleIndex>)>,            // must be sorted
+    pub eof_reduce: Option<Vec<RuleIndex>>,
+    pub error_reduce: Option<Vec<RuleIndex>>,
     pub ruleset: Vec<crate::rule::ShiftedRuleRef>,
 }
 
@@ -309,7 +313,7 @@ impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + 
 }
 
 impl<Term, TermTo, NonTerm, RuleContainer, StateIndex, StateIndexTo, RuleIndex>
-    From<IntermediateState<TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>>
+    From<IntermediateState<Term, NonTerm, StateIndex, RuleIndex>>
     for SparseState<TermTo, NonTerm, RuleContainer, StateIndexTo>
 where
     Term: Ord + TryInto<TermTo>,
@@ -321,19 +325,13 @@ where
     RuleContainer: ReduceRules,
     RuleContainer::RuleIndex: TryFrom<RuleIndex>,
 {
-    fn from(
-        mut builder_state: IntermediateState<TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>,
-    ) -> Self {
+    fn from(builder_state: IntermediateState<Term, NonTerm, StateIndex, RuleIndex>) -> Self {
         // TerminalSymbol::Term(_) < TerminalSymbol::Error < TerminalSymbol::Eof
         // since maps are sorted, eof and error should be at the end of the array
 
         // make sure the order is preserved
         #[cfg(debug_assertions)]
         {
-            debug_assert!(
-                TerminalSymbol::Term(0) < TerminalSymbol::Error
-                    && TerminalSymbol::<i32>::Error < TerminalSymbol::Eof
-            );
             let keys = builder_state
                 .shift_goto_map_term
                 .iter()
@@ -348,46 +346,11 @@ where
                 .collect::<Vec<_>>();
             debug_assert!(keys.is_sorted());
         }
-        let eof_shift = if builder_state
-            .shift_goto_map_term
-            .last()
-            .map(|(term, _)| term)
-            == Some(&TerminalSymbol::Eof)
-        {
-            Some(builder_state.shift_goto_map_term.pop().unwrap().1)
-        } else {
-            None
-        };
+        let eof_shift = builder_state.eof_shift;
+        let error_shift = builder_state.error_shift;
 
-        let error_shift = if builder_state
-            .shift_goto_map_term
-            .last()
-            .map(|(term, _)| term)
-            == Some(&TerminalSymbol::Error)
-        {
-            Some(builder_state.shift_goto_map_term.pop().unwrap().1)
-        } else {
-            None
-        };
-
-        let eof_reduce = if builder_state.reduce_map.last().map(|(term, _)| term)
-            == Some(&TerminalSymbol::Eof)
-        {
-            Some(RuleContainer::from_set(
-                builder_state.reduce_map.pop().unwrap().1,
-            ))
-        } else {
-            None
-        };
-        let error_reduce = if builder_state.reduce_map.last().map(|(term, _)| term)
-            == Some(&TerminalSymbol::Error)
-        {
-            Some(RuleContainer::from_set(
-                builder_state.reduce_map.pop().unwrap().1,
-            ))
-        } else {
-            None
-        };
+        let eof_reduce = builder_state.eof_reduce.map(RuleContainer::from_set);
+        let error_reduce = builder_state.error_reduce.map(RuleContainer::from_set);
 
         SparseState {
             shift_goto_map_class: builder_state
@@ -395,10 +358,7 @@ where
                 .into_iter()
                 .map(|(term, state)| {
                     (
-                        term.into_term()
-                            .unwrap()
-                            .try_into()
-                            .expect("term conversion failed"),
+                        term.try_into().expect("term conversion failed"),
                         state.try_into().expect("state conversion failed"),
                     )
                 })
@@ -422,10 +382,7 @@ where
                 .into_iter()
                 .map(|(term, rule)| {
                     (
-                        term.into_term()
-                            .unwrap()
-                            .try_into()
-                            .expect("term conversion failed"),
+                        term.try_into().expect("term conversion failed"),
                         RuleContainer::from_set(rule),
                     )
                 })
@@ -437,7 +394,7 @@ where
     }
 }
 impl<Term, TermTo, NonTerm, RuleContainer, StateIndex, StateIndexTo: Copy, RuleIndex>
-    From<IntermediateState<TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>>
+    From<IntermediateState<Term, NonTerm, StateIndex, RuleIndex>>
     for DenseState<TermTo, NonTerm, RuleContainer, StateIndexTo>
 where
     Term: Ord + Into<usize> + Copy,
@@ -447,19 +404,13 @@ where
     RuleContainer: Clone + ReduceRules,
     RuleContainer::RuleIndex: TryFrom<RuleIndex>,
 {
-    fn from(
-        mut builder_state: IntermediateState<TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>,
-    ) -> Self {
+    fn from(builder_state: IntermediateState<Term, NonTerm, StateIndex, RuleIndex>) -> Self {
         // TerminalSymbol::Term(_) < TerminalSymbol::Error < TerminalSymbol::Eof
         // since maps are sorted, eof and error should be at the end of the array
 
         // make sure the order is preserved
         #[cfg(debug_assertions)]
         {
-            debug_assert!(
-                TerminalSymbol::Term(0) < TerminalSymbol::Error
-                    && TerminalSymbol::<i32>::Error < TerminalSymbol::Eof
-            );
             let keys = builder_state
                 .shift_goto_map_term
                 .iter()
@@ -475,57 +426,19 @@ where
             debug_assert!(keys.is_sorted());
         }
 
-        let eof_shift = if builder_state
-            .shift_goto_map_term
-            .last()
-            .map(|(term, _)| term)
-            == Some(&TerminalSymbol::Eof)
-        {
-            Some(builder_state.shift_goto_map_term.pop().unwrap().1)
-        } else {
-            None
-        };
+        let eof_shift = builder_state.eof_shift;
+        let error_shift = builder_state.error_shift;
 
-        let error_shift = if builder_state
-            .shift_goto_map_term
-            .last()
-            .map(|(term, _)| term)
-            == Some(&TerminalSymbol::Error)
-        {
-            Some(builder_state.shift_goto_map_term.pop().unwrap().1)
-        } else {
-            None
-        };
-
-        let eof_reduce = if builder_state.reduce_map.last().map(|(term, _)| term)
-            == Some(&TerminalSymbol::Eof)
-        {
-            Some(RuleContainer::from_set(
-                builder_state.reduce_map.pop().unwrap().1,
-            ))
-        } else {
-            None
-        };
-        let error_reduce = if builder_state.reduce_map.last().map(|(term, _)| term)
-            == Some(&TerminalSymbol::Error)
-        {
-            Some(RuleContainer::from_set(
-                builder_state.reduce_map.pop().unwrap().1,
-            ))
-        } else {
-            None
-        };
+        let eof_reduce = builder_state.eof_reduce.map(RuleContainer::from_set);
+        let error_reduce = builder_state.error_reduce.map(RuleContainer::from_set);
 
         let (shift_min, shift_len) = {
             let mut iter = builder_state
                 .shift_goto_map_term
                 .iter()
                 .map(|(term, _)| term);
-            let min: Option<usize> = iter.next().map(|x| x.into_term().unwrap().into());
-            let max: Option<usize> = iter
-                .next_back()
-                .map(|x| x.into_term().unwrap().into())
-                .or(min);
+            let min: Option<usize> = iter.next().map(|x| (*x).into());
+            let max: Option<usize> = iter.next_back().map(|x| (*x).into()).or(min);
 
             if let (Some(min), Some(max)) = (min, max) {
                 (min, max - min + 1)
@@ -535,11 +448,8 @@ where
         };
         let (reduce_min, reduce_len) = {
             let mut iter = builder_state.reduce_map.iter().map(|(term, _)| term);
-            let min: Option<usize> = iter.next().map(|x| x.into_term().unwrap().into());
-            let max: Option<usize> = iter
-                .next_back()
-                .map(|x| x.into_term().unwrap().into())
-                .or(min);
+            let min: Option<usize> = iter.next().map(|x| (*x).into());
+            let max: Option<usize> = iter.next_back().map(|x| (*x).into()).or(min);
             if let (Some(min), Some(max)) = (min, max) {
                 (min, max - min + 1)
             } else {
@@ -562,14 +472,13 @@ where
 
         let mut shift_goto_map_class = vec![None; shift_len];
         for (term, state) in builder_state.shift_goto_map_term {
-            shift_goto_map_class[term.into_term().unwrap().into() - shift_min] =
+            shift_goto_map_class[term.into() - shift_min] =
                 Some(state.try_into().expect("state conversion failed"));
         }
 
         let mut reduce_map = vec![None; reduce_len];
         for (term, rule) in builder_state.reduce_map {
-            reduce_map[term.into_term().unwrap().into() - reduce_min] =
-                Some(RuleContainer::from_set(rule));
+            reduce_map[term.into() - reduce_min] = Some(RuleContainer::from_set(rule));
         }
 
         let nonterm_keys = builder_state

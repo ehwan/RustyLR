@@ -38,18 +38,50 @@ impl<Term, NonTerm, StateIndex, RuleIndex> Default for State<Term, NonTerm, Stat
     }
 }
 
-impl<Term, NonTerm, StateIndex, RuleIndex> From<State<Term, NonTerm, StateIndex, RuleIndex>>
+impl<Term, NonTerm, StateIndex, RuleIndex>
+    From<State<crate::TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>>
     for crate::parser::state::IntermediateState<Term, NonTerm, StateIndex, RuleIndex>
+where
+    Term: Ord,
 {
-    fn from(state: crate::builder::State<Term, NonTerm, StateIndex, RuleIndex>) -> Self {
+    fn from(
+        mut state: crate::builder::State<
+            crate::TerminalSymbol<Term>,
+            NonTerm,
+            StateIndex,
+            RuleIndex,
+        >,
+    ) -> Self {
+        let error_shift = state
+            .shift_goto_map_term
+            .remove(&crate::TerminalSymbol::Error);
+        let eof_shift = state
+            .shift_goto_map_term
+            .remove(&crate::TerminalSymbol::Eof);
+        let error_reduce = state
+            .reduce_map
+            .remove(&crate::TerminalSymbol::Error)
+            .map(|rules| rules.into_iter().collect());
+        let eof_reduce = state
+            .reduce_map
+            .remove(&crate::TerminalSymbol::Eof)
+            .map(|rules| rules.into_iter().collect());
         crate::parser::state::IntermediateState {
-            shift_goto_map_term: state.shift_goto_map_term.into_iter().collect(),
+            shift_goto_map_term: state
+                .shift_goto_map_term
+                .into_iter()
+                .map(|(term, state_index)| (term.into_term().unwrap(), state_index))
+                .collect(),
+            error_shift,
+            eof_shift,
             shift_goto_map_nonterm: state.shift_goto_map_nonterm.into_iter().collect(),
             reduce_map: state
                 .reduce_map
                 .into_iter()
-                .map(|(term, rules)| (term, rules.into_iter().collect()))
+                .map(|(term, rules)| (term.into_term().unwrap(), rules.into_iter().collect()))
                 .collect(),
+            error_reduce,
+            eof_reduce,
             ruleset: state.ruleset.into_iter().collect(),
         }
     }
