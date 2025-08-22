@@ -205,12 +205,6 @@ impl Grammar {
         use rusty_lr_core::TerminalSymbol;
         use rusty_lr_core::Token;
 
-        let reduce_type_to_stream = |reduce_type: ReduceType| -> TokenStream {
-            match reduce_type {
-                ReduceType::Left => quote! { #module_prefix::builder::ReduceType::Left },
-                ReduceType::Right => quote! { #module_prefix::builder::ReduceType::Right },
-            }
-        };
         let precedence_to_stream = |op: rusty_lr_core::rule::Precedence| -> TokenStream {
             match op {
                 rusty_lr_core::rule::Precedence::Fixed(level) => {
@@ -379,7 +373,7 @@ impl Grammar {
             quote! { usize }
         };
 
-        let grammar_build_stream = if self.compiled {
+        let grammar_build_stream = {
             // do not build at runtime
             // write all parser tables and production rules directly here
 
@@ -624,156 +618,6 @@ impl Grammar {
                 let states:Vec<#state_typename> = states.into_iter().map(
                     |state| state.into(),
                 ).collect();
-            }
-        } else {
-            // build runtime
-
-            // adding precedence levels
-            let mut add_precedence_levels_stream = TokenStream::new();
-            for (&term, &level) in self.builder.precedence_levels.iter() {
-                let term = terminal_symbol_to_stream(term);
-                add_precedence_levels_stream.extend(quote! {
-                    builder.add_precedence(#term, #level);
-                });
-            }
-
-            // adding production rules
-            let mut add_rules_stream = TokenStream::new();
-            for rule in &self.builder.rules {
-                let mut tokens_vec_body_stream = TokenStream::new();
-                for &token in &rule.rule.rule {
-                    let token_stream = token_to_stream(token);
-                    tokens_vec_body_stream.extend(quote! {
-                        #token_stream,
-                    });
-                }
-
-                // lookaheads
-                let lookaheads_stream = if let Some(lookaheads) = rule.lookaheads.as_ref() {
-                    let mut lookaheads_body_stream = TokenStream::new();
-                    for &lookahead in lookaheads.iter() {
-                        let lookahead = terminal_symbol_to_stream(lookahead);
-                        lookaheads_body_stream.extend(quote! {
-                            #lookahead,
-                        });
-                    }
-                    quote! {
-                        Some(std::collections::BTreeSet::from([#lookaheads_body_stream]))
-                    }
-                } else {
-                    quote! { None }
-                };
-
-                // calculate operator
-                let prec_stream = match rule.rule.precedence {
-                    None => quote! { None },
-                    Some(op) => {
-                        let op_stream = precedence_to_stream(op);
-                        quote! {Some(#op_stream)}
-                    }
-                };
-
-                let priority = rule.priority;
-                let dprec_stream = quote! { #priority };
-
-                let nonterm_name = &nonterminals_token[rule.rule.name];
-                add_rules_stream.extend(quote! {
-                    builder.add_rule(
-                        #nonterm_name,
-                        vec![ #tokens_vec_body_stream ],
-                        #lookaheads_stream,
-                        #prec_stream,
-                        #dprec_stream
-                    );
-                });
-            }
-
-            let prec_cap = self.builder.precedence_types.len();
-            let mut precedence_types_stream = quote! {
-                let mut precedence_types = Vec::with_capacity(#prec_cap);
-            };
-            for &reduce_type in self.builder.precedence_types.iter() {
-                if let Some(reduce_type) = reduce_type {
-                    let reduce_type = reduce_type_to_stream(reduce_type);
-                    precedence_types_stream.extend(quote! {
-                        precedence_types.push(Some(#reduce_type));
-                    });
-                } else {
-                    precedence_types_stream.extend(quote! {
-                        precedence_types.push(None);
-                    });
-                }
-            }
-            precedence_types_stream.extend(quote! {
-                builder.set_precedence_types(precedence_types);
-            });
-
-            // building grammar
-            let augmented_name = Ident::new(utils::AUGMENTED_NAME, Span::call_site());
-            let build_stream = if self.lalr {
-                quote! {
-                    let Ok(states) = builder.build_lalr(
-                        #nonterminals_enum_name::#augmented_name,
-                        &mut #module_prefix::builder::DiagnosticCollector::new(false),
-                    ) else {
-                        unreachable!( "Failed to build LALR parser" )
-                    };
-                    let states = states.states;
-                }
-            } else {
-                quote! {
-                    let Ok(states) = builder.build(
-                        #nonterminals_enum_name::#augmented_name,
-                        &mut #module_prefix::builder::DiagnosticCollector::new(false),
-                    ) else {
-                        unreachable!( "Failed to build LR parser" )
-                    };
-                    let states = states.states;
-                }
-            };
-
-            quote! {
-                // create grammar builder
-                let mut builder: #module_prefix::builder::Grammar<
-                    #module_prefix::TerminalSymbol<#class_index_typename>, _
-                > = #module_prefix::builder::Grammar::new();
-
-                // add reduce types
-                #add_precedence_levels_stream
-
-                // add precedences
-                #precedence_types_stream
-
-                // production rules
-                #add_rules_stream
-
-                #build_stream
-
-                let terminal_class_names = vec![
-                    #terminal_class_names_stream
-                ];
-
-                let rules = builder.rules.into_iter().map(
-                    move |rule| {
-                        rule.rule.map(
-                            |term| match term {
-                                #module_prefix::TerminalSymbol::Term(term) => {
-                                    terminal_class_names[term as usize]
-                                }
-                                #module_prefix::TerminalSymbol::Error => {
-                                    "error"
-                                }
-                                #module_prefix::TerminalSymbol::Eof => {
-                                    "eof"
-                                }
-                            },
-                            |nonterm| nonterm,
-                        )
-                    }
-                ).collect();
-
-                let states:Vec< #module_prefix::parser::state::IntermediateState<_,_,_,_> > = states.into_iter().map(Into::into).collect();
-                let states:Vec<#state_typename> = states.into_iter().map(Into::into).collect();
             }
         };
 

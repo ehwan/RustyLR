@@ -531,7 +531,6 @@ pub struct GrammarArgs {
     pub dense: bool,
     pub traces: Vec<Ident>,
     pub filter: Option<TokenStream>,
-    pub compiled: bool,
     pub location_typename: Option<TokenStream>,
 
     pub error_recovered: Vec<RecoveredError>,
@@ -554,7 +553,6 @@ impl Default for GrammarArgs {
             dense: false,
             traces: Vec::new(),
             filter: None,
-            compiled: true,
             location_typename: None,
             error_recovered: Vec::new(),
         }

@@ -3,13 +3,13 @@ use std::collections::BTreeSet;
 
 /// state for internal usage during grammar building stage
 #[derive(Debug, Clone)]
-pub struct State<Term, NonTerm, StateIndex, RuleIndex> {
-    pub shift_goto_map_term: BTreeMap<Term, StateIndex>,
-    pub shift_goto_map_nonterm: BTreeMap<NonTerm, StateIndex>,
-    pub reduce_map: BTreeMap<Term, BTreeSet<RuleIndex>>,
+pub struct State<Term, NonTerm> {
+    pub shift_goto_map_term: BTreeMap<Term, usize>,
+    pub shift_goto_map_nonterm: BTreeMap<NonTerm, usize>,
+    pub reduce_map: BTreeMap<Term, BTreeSet<usize>>,
     pub ruleset: BTreeSet<crate::rule::ShiftedRuleRef>,
 }
-impl<Term, NonTerm, StateIndex, RuleIndex> State<Term, NonTerm, StateIndex, RuleIndex> {
+impl<Term, NonTerm> State<Term, NonTerm> {
     pub fn new() -> Self {
         State {
             shift_goto_map_term: Default::default(),
@@ -32,26 +32,18 @@ impl<Term, NonTerm, StateIndex, RuleIndex> State<Term, NonTerm, StateIndex, Rule
     }
 }
 
-impl<Term, NonTerm, StateIndex, RuleIndex> Default for State<Term, NonTerm, StateIndex, RuleIndex> {
+impl<Term, NonTerm> Default for State<Term, NonTerm> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<Term, NonTerm, StateIndex, RuleIndex>
-    From<State<crate::TerminalSymbol<Term>, NonTerm, StateIndex, RuleIndex>>
-    for crate::parser::state::IntermediateState<Term, NonTerm, StateIndex, RuleIndex>
+impl<Term, NonTerm> From<State<crate::TerminalSymbol<Term>, NonTerm>>
+    for crate::parser::state::IntermediateState<Term, NonTerm, usize, usize>
 where
     Term: Ord,
 {
-    fn from(
-        mut state: crate::builder::State<
-            crate::TerminalSymbol<Term>,
-            NonTerm,
-            StateIndex,
-            RuleIndex,
-        >,
-    ) -> Self {
+    fn from(mut state: crate::builder::State<crate::TerminalSymbol<Term>, NonTerm>) -> Self {
         let error_shift = state
             .shift_goto_map_term
             .remove(&crate::TerminalSymbol::Error);
