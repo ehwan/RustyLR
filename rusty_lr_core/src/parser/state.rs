@@ -312,16 +312,12 @@ impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + 
     }
 }
 
-impl<Term, TermTo, NonTerm, RuleContainer, StateIndex, StateIndexTo, RuleIndex>
+impl<Term, NonTerm, RuleContainer, StateIndex, RuleIndex>
     From<IntermediateState<Term, NonTerm, StateIndex, RuleIndex>>
-    for SparseState<TermTo, NonTerm, RuleContainer, StateIndexTo>
+    for SparseState<Term, NonTerm, RuleContainer, StateIndex>
 where
-    Term: Ord + TryInto<TermTo>,
-    Term::Error: std::fmt::Debug,
-    TermTo: Hash + Eq,
+    Term: Ord + std::hash::Hash,
     NonTerm: Hash + Eq,
-    StateIndex: TryInto<StateIndexTo>,
-    StateIndex::Error: std::fmt::Debug,
     RuleContainer: ReduceRules,
     RuleContainer::RuleIndex: TryFrom<RuleIndex>,
 {
@@ -356,12 +352,7 @@ where
             shift_goto_map_class: builder_state
                 .shift_goto_map_term
                 .into_iter()
-                .map(|(term, state)| {
-                    (
-                        term.try_into().expect("term conversion failed"),
-                        state.try_into().expect("state conversion failed"),
-                    )
-                })
+                .map(|(term, state)| (term, state.try_into().expect("state conversion failed")))
                 .collect(),
             error_shift: error_shift.map(|s| s.try_into().expect("error shift conversion failed")),
             eof_shift: eof_shift.map(|s| s.try_into().expect("eof shift conversion failed")),
@@ -393,14 +384,13 @@ where
         }
     }
 }
-impl<Term, TermTo, NonTerm, RuleContainer, StateIndex, StateIndexTo: Copy, RuleIndex>
+impl<Term, NonTerm, RuleContainer, StateIndex, RuleIndex>
     From<IntermediateState<Term, NonTerm, StateIndex, RuleIndex>>
-    for DenseState<TermTo, NonTerm, RuleContainer, StateIndexTo>
+    for DenseState<Term, NonTerm, RuleContainer, StateIndex>
 where
     Term: Ord + Into<usize> + Copy,
     NonTerm: Hash + Eq + Copy + NonTerminal,
-    StateIndex: TryInto<StateIndexTo>,
-    StateIndex::Error: std::fmt::Debug,
+    StateIndex: Copy,
     RuleContainer: Clone + ReduceRules,
     RuleContainer::RuleIndex: TryFrom<RuleIndex>,
 {
