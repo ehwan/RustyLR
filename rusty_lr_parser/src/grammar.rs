@@ -132,9 +132,6 @@ pub struct Grammar {
     /// };
     pub filter: Option<TokenStream>,
 
-    /// switch between compile-time and runtime table generation
-    pub compiled: bool,
-
     /// type for location
     pub location_typename: Option<TokenStream>,
 
@@ -365,7 +362,6 @@ impl Grammar {
             emit_dense: grammar_args.dense,
             filter: grammar_args.filter,
 
-            compiled: grammar_args.compiled,
             location_typename: grammar_args.location_typename,
             error_precedence: None,
         };
