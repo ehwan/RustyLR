@@ -383,11 +383,15 @@ impl Grammar {
             // do not build at runtime
             // write all parser tables and production rules directly here
 
-            let state_index_typename = if self.states.len() <= u8::MAX as usize {
+            let states: Vec<
+                rusty_lr_core::parser::state::IntermediateState<usize, usize, usize, usize>,
+            > = self.states.iter().cloned().map(Into::into).collect();
+
+            let state_index_typename = if states.len() <= u8::MAX as usize {
                 quote! { u8 }
-            } else if self.states.len() <= u16::MAX as usize {
+            } else if states.len() <= u16::MAX as usize {
                 quote! { u16 }
-            } else if self.states.len() <= u32::MAX as usize {
+            } else if states.len() <= u32::MAX as usize {
                 quote! { u32 }
             } else {
                 quote! { usize }
@@ -438,32 +442,32 @@ impl Grammar {
                     .or_insert_with(|| format_ident!("__rustylr_tset{new_index}"))
                     .clone()
             };
-            for state in &self.states {
+            for state in &states {
                 let mut shift_term_body_stream = TokenStream::new();
-                let mut error_shift_stream = quote! {None};
-                let mut eof_shift_stream = quote! {None};
-                for (&term, &next_state) in &state.shift_goto_map_term {
+                let error_shift_stream = state
+                    .error_shift
+                    .map(|next_state| {
+                        let next_state = proc_macro2::Literal::usize_unsuffixed(next_state);
+                        quote! {Some(#next_state)}
+                    })
+                    .unwrap_or(quote! {None});
+                let eof_shift_stream = state
+                    .eof_shift
+                    .map(|next_state| {
+                        let next_state = proc_macro2::Literal::usize_unsuffixed(next_state);
+                        quote! {Some(#next_state)}
+                    })
+                    .unwrap_or(quote! {None});
+                for &(term, next_state) in &state.shift_goto_map_term {
                     let next_state = proc_macro2::Literal::usize_unsuffixed(next_state);
-                    match term {
-                        TerminalSymbol::Error => {
-                            error_shift_stream = quote! {Some(#next_state)};
-                            continue;
-                        }
-                        TerminalSymbol::Eof => {
-                            eof_shift_stream = quote! {Some(#next_state)};
-                            continue;
-                        }
-                        TerminalSymbol::Term(term) => {
-                            let term = proc_macro2::Literal::usize_unsuffixed(term);
-                            shift_term_body_stream.extend(quote! {
-                                (#term, #next_state),
-                            });
-                        }
-                    }
+                    let term = proc_macro2::Literal::usize_unsuffixed(term);
+                    shift_term_body_stream.extend(quote! {
+                        (#term, #next_state),
+                    });
                 }
 
                 let mut shift_nonterm_body_stream = TokenStream::new();
-                for (&nonterm, &next_state) in &state.shift_goto_map_nonterm {
+                for &(nonterm, next_state) in &state.shift_goto_map_nonterm {
                     let nonterm_stream = &nonterminals_token[nonterm];
                     let next_state = proc_macro2::Literal::usize_unsuffixed(next_state);
                     shift_nonterm_body_stream.extend(quote! {
@@ -472,32 +476,32 @@ impl Grammar {
                 }
 
                 let mut reduce_body_stream = TokenStream::new();
+                let error_reduce_stream = state
+                    .error_reduce
+                    .as_ref()
+                    .map(|rules| {
+                        let rules_it = rules
+                            .iter()
+                            .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
+                        quote! {Some(vec![#(#rules_it),*])}
+                    })
+                    .unwrap_or(quote! {None});
+                let eof_reduce_stream = state
+                    .eof_reduce
+                    .as_ref()
+                    .map(|rules| {
+                        let rules_it = rules
+                            .iter()
+                            .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
+                        quote! {Some(vec![#(#rules_it),*])}
+                    })
+                    .unwrap_or(quote! {None});
                 let mut reduce_rules_terms_map = std::collections::BTreeMap::new();
-                let mut error_reduce_stream = quote! {None};
-                let mut eof_reduce_stream = quote! {None};
-                for (&term, rules) in &state.reduce_map {
-                    match term {
-                        TerminalSymbol::Error => {
-                            let rules_it = rules
-                                .iter()
-                                .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
-                            error_reduce_stream = quote! {Some(vec![#(#rules_it),*])};
-                            continue;
-                        }
-                        TerminalSymbol::Eof => {
-                            let rules_it = rules
-                                .iter()
-                                .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
-                            eof_reduce_stream = quote! {Some(vec![#(#rules_it),*])};
-                            continue;
-                        }
-                        TerminalSymbol::Term(term) => {
-                            reduce_rules_terms_map
-                                .entry(rules)
-                                .or_insert_with(std::collections::BTreeSet::new)
-                                .insert(term);
-                        }
-                    }
+                for (term, rules) in &state.reduce_map {
+                    reduce_rules_terms_map
+                        .entry(rules)
+                        .or_insert_with(std::collections::BTreeSet::new)
+                        .insert(*term);
                 }
                 for (rules, terms) in reduce_rules_terms_map {
                     let terms_set_name = get_or_insert_terminal_set(terms);
@@ -768,12 +772,8 @@ impl Grammar {
                     }
                 ).collect();
 
-                let states:Vec<#state_typename> = states.into_iter().map(
-                    |state| {
-                        let state: #module_prefix::parser::state::IntermediateState<_,_,_,_> = state.into();
-                        state.into()
-                    }
-                ).collect();
+                let states:Vec< #module_prefix::parser::state::IntermediateState<_,_,_,_> > = states.into_iter().map(Into::into).collect();
+                let states:Vec<#state_typename> = states.into_iter().map(Into::into).collect();
             }
         };
 
