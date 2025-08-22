@@ -51,7 +51,6 @@ pub enum Lexed {
     Right(Ident),        // %right, %r, %shift
     Token(Ident),        // %token
     Start(Ident),        // %start
-    EofDef(Ident),       // %eof
     TokenType(Ident),    // %tokentype
     UserData(Ident),     // %userdata
     ErrorType(Ident),    // %err %error
@@ -65,7 +64,6 @@ pub enum Lexed {
     Trace(Ident),        // %trace
     DPrec(Ident),        // %dprec
     Filter(Ident),       // %filter
-    Runtime(Ident),      // %runtime
     Location(Ident),     // %location
 }
 impl Lexed {
@@ -115,9 +113,6 @@ impl Lexed {
             Lexed::Start(ident) => {
                 stream.append(ident);
             }
-            Lexed::EofDef(ident) => {
-                stream.append(ident);
-            }
             Lexed::TokenType(ident) => {
                 stream.append(ident);
             }
@@ -155,9 +150,6 @@ impl Lexed {
                 stream.append(ident);
             }
             Lexed::Filter(ident) => {
-                stream.append(ident);
-            }
-            Lexed::Runtime(ident) => {
                 stream.append(ident);
             }
             Lexed::Location(ident) => {
@@ -203,7 +195,6 @@ impl std::fmt::Display for Lexed {
             Lexed::Right(_) => write!(f, "right"),
             Lexed::Token(_) => write!(f, "token"),
             Lexed::Start(_) => write!(f, "start"),
-            Lexed::EofDef(_) => write!(f, "eof"),
             Lexed::TokenType(_) => write!(f, "tokentype"),
             Lexed::UserData(_) => write!(f, "userdata"),
             Lexed::ErrorType(_) => write!(f, "error"),
@@ -217,7 +208,6 @@ impl std::fmt::Display for Lexed {
             Lexed::Trace(_) => write!(f, "trace"),
             Lexed::DPrec(_) => write!(f, "dprec"),
             Lexed::Filter(_) => write!(f, "filter"),
-            Lexed::Runtime(_) => write!(f, "runtime"),
             Lexed::Location(_) => write!(f, "location"),
         }
     }
@@ -229,7 +219,6 @@ fn ident_to_keyword(ident: Ident) -> Option<Lexed> {
         "right" | "r" | "shift" => Some(Lexed::Right(ident)),
         "token" => Some(Lexed::Token(ident)),
         "start" => Some(Lexed::Start(ident)),
-        "eof" => Some(Lexed::EofDef(ident)),
         "tokentype" => Some(Lexed::TokenType(ident)),
         "userdata" => Some(Lexed::UserData(ident)),
         "err" | "error" => Some(Lexed::ErrorType(ident)),
@@ -243,7 +232,6 @@ fn ident_to_keyword(ident: Ident) -> Option<Lexed> {
         "trace" => Some(Lexed::Trace(ident)),
         "dprec" => Some(Lexed::DPrec(ident)),
         "filter" => Some(Lexed::Filter(ident)),
-        "runtime" => Some(Lexed::Runtime(ident)),
         "location" => Some(Lexed::Location(ident)),
         _ => None,
     }

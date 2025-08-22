@@ -31,9 +31,6 @@ fn main() {
     if let Some(glr) = args.glr {
         builder.glr(glr);
     }
-    if let Some(runtime) = args.runtime {
-        builder.runtime(runtime);
-    }
     if let Some(dense) = args.dense {
         builder.dense(dense);
     }

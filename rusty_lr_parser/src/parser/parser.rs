@@ -65,7 +65,6 @@ use rusty_lr_core::builder::ReduceType;
 %token right Lexed::Right(_);
 %token token Lexed::Token(_);
 %token start Lexed::Start(_);
-%token eofdef Lexed::EofDef(_);
 %token tokentype Lexed::TokenType(_);
 %token userdata Lexed::UserData(_);
 %token errortype Lexed::ErrorType(_);
@@ -79,7 +78,6 @@ use rusty_lr_core::builder::ReduceType;
 %token trace Lexed::Trace(_);
 %token dprec Lexed::DPrec(_);
 %token filter Lexed::Filter(_);
-%token runtime Lexed::Runtime(_);
 %token location Lexed::Location(_);
 
 %start Grammar;
@@ -476,13 +474,6 @@ Directive
             span: @error
         });
     }
-    | percent eofdef error semicolon {
-        data.error_recovered.push( RecoveredError {
-            message: "%eof directive is deprecated. You don't need to define an eof token explicitly".to_string(),
-            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md".to_string(),
-            span: @eofdef
-        });
-    }
     | percent tokentype RustCode semicolon {
         data.token_typename.push( (@tokentype.span(), RustCode) );
     }
@@ -617,16 +608,6 @@ Directive
             message: "Expected filter definition".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#filter-directive".to_string(),
             span: @filter,
-        });
-    }
-    | percent runtime semicolon {
-        data.compiled = false;
-    }
-    | percent runtime error semicolon {
-        data.error_recovered.push( RecoveredError {
-            message: "Expected semicolon".to_string(),
-            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#runtime-table-calculation".to_string(),
-            span: @error,
         });
     }
     | percent location! RustCode semicolon! {

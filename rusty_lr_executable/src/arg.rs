@@ -42,10 +42,6 @@ pub struct Args {
     #[arg(long)]
     pub glr: Option<bool>,
 
-    /// Override the written code and set parser table to be runtime-calculated
-    #[arg(long)]
-    pub runtime: Option<bool>,
-
     /// Override the written code and set generated parser table to use dense arrays
     #[arg(long)]
     pub dense: Option<bool>,
