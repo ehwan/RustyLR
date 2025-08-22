@@ -180,7 +180,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             let mut popped_states = states.drain(states.len() - len..).collect::<Vec<_>>();
             let last_state = states.last().unwrap().into_usize();
             if let Some(next_state) = parser.get_states()[last_state].shift_goto_nonterm(&nonterm) {
-                states.push(StateIndex::from_usize_unchecked(next_state));
+                states.push(StateIndex::from_usize_unchecked(next_state.state));
                 self.expected_token_impl(parser, states, terms, nonterms);
                 states.pop();
             }
@@ -445,7 +445,12 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 .shift_goto_nonterm(&rule.name)
                 {
                     self.state_stack
-                        .push(StateIndex::from_usize_unchecked(next_state_id));
+                        .push(StateIndex::from_usize_unchecked(next_state_id.state));
+                    if !next_state_id.push {
+                        // TODO no need to pop-and-push if the last pushed data was empty
+                        self.data_stack.pop();
+                        self.data_stack.push_empty();
+                    }
                 } else {
                     unreachable!("shift nonterm failed");
                 }
@@ -630,7 +635,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     [state_stack.last().unwrap().into_usize()]
                 .shift_goto_nonterm(&rule.name)
                 {
-                    state_stack.push(StateIndex::from_usize_unchecked(next_state_id));
+                    state_stack.push(StateIndex::from_usize_unchecked(next_state_id.state));
                 } else {
                     unreachable!("shift nonterm failed");
                 }

@@ -22,8 +22,8 @@ pub struct IntermediateState<Term, NonTerm, StateIndex, RuleIndex> {
     pub shift_goto_map_term: Vec<(Term, ShiftTarget<StateIndex>)>, // must be sorted
     pub eof_shift: Option<StateIndex>,
     pub error_shift: Option<StateIndex>,
-    pub shift_goto_map_nonterm: Vec<(NonTerm, StateIndex)>, // must be sorted
-    pub reduce_map: Vec<(Term, Vec<RuleIndex>)>,            // must be sorted
+    pub shift_goto_map_nonterm: Vec<(NonTerm, ShiftTarget<StateIndex>)>, // must be sorted
+    pub reduce_map: Vec<(Term, Vec<RuleIndex>)>,                         // must be sorted
     pub eof_reduce: Option<Vec<RuleIndex>>,
     pub error_reduce: Option<Vec<RuleIndex>>,
     pub ruleset: Vec<crate::rule::ShiftedRuleRef>,
@@ -117,7 +117,7 @@ pub trait State<NonTerm> {
     fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<ShiftTarget<usize>>;
 
     /// Get the next state for a given non-terminal symbol.
-    fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
+    fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<ShiftTarget<usize>>
     where
         NonTerm: Hash + Eq + NonTerminal;
 
@@ -155,7 +155,7 @@ pub struct SparseState<Term, NonTerm, RuleContainer, StateIndex> {
     pub(crate) eof_shift: Option<StateIndex>,
 
     /// non-terminal symbol -> next state
-    pub(crate) shift_goto_map_nonterm: HashMap<NonTerm, StateIndex>,
+    pub(crate) shift_goto_map_nonterm: HashMap<NonTerm, ShiftTarget<StateIndex>>,
 
     /// terminal symbol -> reduce rule index
     pub(crate) reduce_map: HashMap<Term, RuleContainer>,
@@ -193,14 +193,17 @@ impl<
             }),
         }
     }
-    fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
+    fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<ShiftTarget<usize>>
     where
         NonTerm: Hash + Eq,
     {
         self.shift_goto_map_nonterm
             .get(nonterm)
             .copied()
-            .map(Into::into)
+            .map(|s| ShiftTarget {
+                state: s.state.into(),
+                push: s.push,
+            })
     }
     fn reduce(
         &self,
@@ -246,7 +249,7 @@ pub struct DenseState<Term, NonTerm, RuleContainer, StateIndex> {
     pub(crate) eof_shift: Option<StateIndex>,
 
     /// non-terminal symbol -> next state
-    pub(crate) shift_goto_map_nonterm: Vec<Option<StateIndex>>,
+    pub(crate) shift_goto_map_nonterm: Vec<Option<ShiftTarget<StateIndex>>>,
     pub(crate) shift_nonterm_offset: usize,
     /// set of non-terminal symbols that is keys of `shift_goto_map_nonterm`
     pub(crate) shift_goto_map_nonterm_keys: Vec<NonTerm>,
@@ -287,7 +290,7 @@ impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + 
             }),
         }
     }
-    fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
+    fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<ShiftTarget<usize>>
     where
         NonTerm: Hash + Eq + NonTerminal,
     {
@@ -296,7 +299,10 @@ impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + 
             .get(nonterm.wrapping_sub(self.shift_nonterm_offset))
             .copied()
             .flatten()
-            .map(Into::into)
+            .map(|s| ShiftTarget {
+                state: s.state.into(),
+                push: s.push,
+            })
     }
     fn reduce(
         &self,
@@ -379,25 +385,10 @@ where
         let error_reduce = builder_state.error_reduce.map(RuleContainer::from_set);
 
         SparseState {
-            shift_goto_map_class: builder_state
-                .shift_goto_map_term
-                .into_iter()
-                .map(|(term, state)| (term, state.try_into().expect("state conversion failed")))
-                .collect(),
-            error_shift: error_shift.map(|s| s.try_into().expect("error shift conversion failed")),
-            eof_shift: eof_shift.map(|s| s.try_into().expect("eof shift conversion failed")),
-            shift_goto_map_nonterm: builder_state
-                .shift_goto_map_nonterm
-                .into_iter()
-                .map(|(nonterm, state)| {
-                    (
-                        nonterm,
-                        state
-                            .try_into()
-                            .expect("non-terminal state conversion failed"),
-                    )
-                })
-                .collect(),
+            shift_goto_map_class: builder_state.shift_goto_map_term.into_iter().collect(),
+            error_shift,
+            eof_shift,
+            shift_goto_map_nonterm: builder_state.shift_goto_map_nonterm.into_iter().collect(),
             reduce_map: builder_state
                 .reduce_map
                 .into_iter()
@@ -492,8 +483,7 @@ where
 
         let mut shift_goto_map_class = vec![None; shift_len];
         for (term, state) in builder_state.shift_goto_map_term {
-            shift_goto_map_class[term.into() - shift_min] =
-                Some(state.try_into().expect("state conversion failed"));
+            shift_goto_map_class[term.into() - shift_min] = Some(state);
         }
 
         let mut reduce_map = vec![None; reduce_len];
@@ -508,18 +498,14 @@ where
             .collect();
         let mut shift_goto_map_nonterm = vec![None; nonterm_len];
         for (nonterm, state) in builder_state.shift_goto_map_nonterm {
-            shift_goto_map_nonterm[nonterm.to_usize() - nonterm_min] = Some(
-                state
-                    .try_into()
-                    .expect("non-terminal state conversion failed"),
-            );
+            shift_goto_map_nonterm[nonterm.to_usize() - nonterm_min] = Some(state);
         }
 
         DenseState {
             shift_goto_map_class,
             shift_class_offset: shift_min,
-            error_shift: error_shift.map(|s| s.try_into().expect("error shift conversion failed")),
-            eof_shift: eof_shift.map(|s| s.try_into().expect("EOF shift conversion failed")),
+            error_shift,
+            eof_shift,
             shift_goto_map_nonterm,
             shift_goto_map_nonterm_keys: nonterm_keys,
             shift_nonterm_offset: nonterm_min,

@@ -458,7 +458,12 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     parser.get_states()[state].shift_goto_nonterm(&rule.name)
                 {
                     node.state_stack
-                        .push(StateIndex::from_usize_unchecked(nonterm_shift_state));
+                        .push(StateIndex::from_usize_unchecked(nonterm_shift_state.state));
+                    if !nonterm_shift_state.push {
+                        // TODO no need to pop-and-push if the last pushed data was empty
+                        node.data_stack.pop();
+                        node.data_stack.push_empty();
+                    }
                     node.location_stack.push(new_location);
                     node.precedence_stack.push(precedence);
                     #[cfg(feature = "tree")]

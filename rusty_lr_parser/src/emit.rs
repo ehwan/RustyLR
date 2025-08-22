@@ -460,9 +460,10 @@ impl Grammar {
                 let mut shift_nonterm_body_stream = TokenStream::new();
                 for &(nonterm, next_state) in &state.shift_goto_map_nonterm {
                     let nonterm_stream = &nonterminals_token[nonterm];
-                    let next_state = proc_macro2::Literal::usize_unsuffixed(next_state);
+                    let push = next_state.push;
+                    let next_state = proc_macro2::Literal::usize_unsuffixed(next_state.state);
                     shift_nonterm_body_stream.extend(quote! {
-                        (#nonterm_stream, #next_state),
+                        (#nonterm_stream, #module_prefix::parser::state::ShiftTarget::new(#next_state,#push)),
                     });
                 }
 

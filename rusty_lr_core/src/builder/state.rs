@@ -79,7 +79,15 @@ where
             shift_goto_map_nonterm: state
                 .shift_goto_map_nonterm
                 .into_iter()
-                .map(|(nonterm, state_index)| (nonterm, state_index))
+                .map(|(nonterm, state_index)| {
+                    (
+                        nonterm,
+                        ShiftTarget {
+                            state: state_index.into(),
+                            push: true,
+                        },
+                    )
+                })
                 .collect(),
             reduce_map: state
                 .reduce_map
