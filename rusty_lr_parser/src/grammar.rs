@@ -100,7 +100,7 @@ pub struct Grammar {
     /// do terminal classificate optimization
     pub optimize: bool,
     pub builder: rusty_lr_core::builder::Grammar<TerminalSymbol<usize>, usize>,
-    pub states: Vec<rusty_lr_core::builder::State<TerminalSymbol<usize>, usize>>,
+    pub states: Vec<rusty_lr_core::parser::state::IntermediateState<usize, usize, usize, usize>>,
 
     /// set of terminals for each terminal class
     pub terminal_classes: Vec<TerminalClassDefinition>,
@@ -1552,12 +1552,12 @@ impl Grammar {
             self.builder.build(augmented_idx, &mut collector)
         };
         let states = match states {
-            Ok(states) => states,
+            Ok(states) => states.states,
             Err(err) => {
                 unreachable!("Error building grammar: {:?}", err);
             }
         };
-        self.states = states.states;
+        self.states = states.into_iter().map(Into::into).collect();
 
         collector
     }

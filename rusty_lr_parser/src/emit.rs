@@ -377,15 +377,11 @@ impl Grammar {
             // do not build at runtime
             // write all parser tables and production rules directly here
 
-            let states: Vec<
-                rusty_lr_core::parser::state::IntermediateState<usize, usize, usize, usize>,
-            > = self.states.iter().cloned().map(Into::into).collect();
-
-            let state_index_typename = if states.len() <= u8::MAX as usize {
+            let state_index_typename = if self.states.len() <= u8::MAX as usize {
                 quote! { u8 }
-            } else if states.len() <= u16::MAX as usize {
+            } else if self.states.len() <= u16::MAX as usize {
                 quote! { u16 }
-            } else if states.len() <= u32::MAX as usize {
+            } else if self.states.len() <= u32::MAX as usize {
                 quote! { u32 }
             } else {
                 quote! { usize }
@@ -436,7 +432,7 @@ impl Grammar {
                     .or_insert_with(|| format_ident!("__rustylr_tset{new_index}"))
                     .clone()
             };
-            for state in &states {
+            for state in &self.states {
                 let mut shift_term_body_stream = TokenStream::new();
                 let error_shift_stream = state
                     .error_shift
