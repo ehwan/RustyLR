@@ -275,6 +275,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 }
 
                 // try shift given term again
+                // to check if the given terminal should be merged with `error` token
+                // or it can be shift right after the error token
                 if let Some(next_state) = parser.get_states()
                     [self.state_stack.last().unwrap().into_usize()]
                 .shift_goto_class(class)
@@ -283,12 +285,17 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     self.tree_stack
                         .push(crate::tree::Tree::new_terminal(term.clone()));
 
-                    // shift with `error` token
-                    self.data_stack.push_terminal(term.into_term().unwrap());
+                    // shift after `error` token
+                    if next_state.push {
+                        self.data_stack.push_terminal(term.into_term().unwrap());
+                    } else {
+                        self.data_stack.push_empty();
+                    }
+
                     self.location_stack.push(location.unwrap());
                     self.precedence_stack.push(shift_prec);
                     self.state_stack
-                        .push(StateIndex::from_usize_unchecked(next_state));
+                        .push(StateIndex::from_usize_unchecked(next_state.state));
                 } else {
                     // merge term with previous error
 
@@ -450,20 +457,25 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         // shift with terminal
         if let Some(next_state_id) = shift_to {
             self.state_stack
-                .push(StateIndex::from_usize_unchecked(next_state_id));
+                .push(StateIndex::from_usize_unchecked(next_state_id.state));
 
             #[cfg(feature = "tree")]
             self.tree_stack
                 .push(crate::tree::Tree::new_terminal(term.clone()));
 
-            match term {
-                TerminalSymbol::Term(term) => {
-                    self.data_stack.push_terminal(term);
+            if next_state_id.push {
+                match term {
+                    TerminalSymbol::Term(term) => {
+                        self.data_stack.push_terminal(term);
+                    }
+                    TerminalSymbol::Error | TerminalSymbol::Eof => {
+                        self.data_stack.push_empty();
+                    }
                 }
-                TerminalSymbol::Error | TerminalSymbol::Eof => {
-                    self.data_stack.push_empty();
-                }
+            } else {
+                self.data_stack.push_empty();
             }
+
             // location is `Some` if it is not `Eof`
             if let Some(location) = location {
                 self.location_stack.push(location);

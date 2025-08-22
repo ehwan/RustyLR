@@ -453,10 +453,11 @@ impl Grammar {
                     })
                     .unwrap_or(quote! {None});
                 for &(term, next_state) in &state.shift_goto_map_term {
-                    let next_state = proc_macro2::Literal::usize_unsuffixed(next_state);
+                    let push = next_state.push;
+                    let next_state = proc_macro2::Literal::usize_unsuffixed(next_state.state);
                     let term = proc_macro2::Literal::usize_unsuffixed(term);
                     shift_term_body_stream.extend(quote! {
-                        (#term, #next_state),
+                        (#term, #module_prefix::parser::state::ShiftTarget::new(#next_state,#push)),
                     });
                 }
 

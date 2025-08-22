@@ -4,10 +4,22 @@ use crate::hash::HashMap;
 use crate::nonterminal::NonTerminal;
 use crate::TerminalSymbol;
 
+#[derive(Debug, Clone, Copy)]
+pub struct ShiftTarget<StateIndex> {
+    pub state: StateIndex,
+    /// true if the data should be pushed, false if data should not be pushed
+    pub push: bool,
+}
+impl<StateIndex> ShiftTarget<StateIndex> {
+    pub fn new(state: StateIndex, push: bool) -> Self {
+        ShiftTarget { state, push }
+    }
+}
+
 /// This intermediate state is a common structure to convert from generated code and grammar builder
 /// into various types of parser states (SparseState, DenseState, ...).
 pub struct IntermediateState<Term, NonTerm, StateIndex, RuleIndex> {
-    pub shift_goto_map_term: Vec<(Term, StateIndex)>, // must be sorted
+    pub shift_goto_map_term: Vec<(Term, ShiftTarget<StateIndex>)>, // must be sorted
     pub eof_shift: Option<StateIndex>,
     pub error_shift: Option<StateIndex>,
     pub shift_goto_map_nonterm: Vec<(NonTerm, StateIndex)>, // must be sorted
@@ -102,7 +114,7 @@ pub type SmallVecUsize = smallvec::SmallVec<[usize; 2]>;
 /// A trait representing a parser state.
 pub trait State<NonTerm> {
     /// Get the next state for a given terminal symbol.
-    fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<usize>;
+    fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<ShiftTarget<usize>>;
 
     /// Get the next state for a given non-terminal symbol.
     fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
@@ -138,7 +150,7 @@ pub trait State<NonTerm> {
 #[derive(Debug, Clone)]
 pub struct SparseState<Term, NonTerm, RuleContainer, StateIndex> {
     /// terminal symbol -> next state
-    pub(crate) shift_goto_map_class: HashMap<Term, StateIndex>,
+    pub(crate) shift_goto_map_class: HashMap<Term, ShiftTarget<StateIndex>>,
     pub(crate) error_shift: Option<StateIndex>,
     pub(crate) eof_shift: Option<StateIndex>,
 
@@ -161,16 +173,25 @@ impl<
         StateIndex: Into<usize> + Copy,
     > State<NonTerm> for SparseState<Term, NonTerm, RuleContainer, StateIndex>
 {
-    fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<usize> {
+    fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<ShiftTarget<usize>> {
         match class {
             TerminalSymbol::Term(class) => self
                 .shift_goto_map_class
                 .get(&Term::from_usize_unchecked(class))
-                .copied(),
-            TerminalSymbol::Error => self.error_shift,
-            TerminalSymbol::Eof => self.eof_shift,
+                .copied()
+                .map(|s| ShiftTarget {
+                    state: s.state.into(),
+                    push: s.push,
+                }),
+            TerminalSymbol::Error => self.error_shift.map(|s| ShiftTarget {
+                state: s.into(),
+                push: false,
+            }),
+            TerminalSymbol::Eof => self.eof_shift.map(|s| ShiftTarget {
+                state: s.into(),
+                push: false,
+            }),
         }
-        .map(Into::into)
     }
     fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
     where
@@ -218,7 +239,7 @@ impl<
 #[derive(Debug, Clone)]
 pub struct DenseState<Term, NonTerm, RuleContainer, StateIndex> {
     /// terminal symbol -> next state
-    pub(crate) shift_goto_map_class: Vec<Option<StateIndex>>,
+    pub(crate) shift_goto_map_class: Vec<Option<ShiftTarget<StateIndex>>>,
     /// shift_goto_map_class[i] will contain i+offset 'th class's next state.
     pub(crate) shift_class_offset: usize,
     pub(crate) error_shift: Option<StateIndex>,
@@ -245,17 +266,26 @@ pub struct DenseState<Term, NonTerm, RuleContainer, StateIndex> {
 impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + Copy> State<NonTerm>
     for DenseState<Term, NonTerm, RuleContainer, StateIndex>
 {
-    fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<usize> {
+    fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<ShiftTarget<usize>> {
         match class {
             TerminalSymbol::Term(class) => self
                 .shift_goto_map_class
                 .get(class.wrapping_sub(self.shift_class_offset))
                 .copied()
-                .flatten(),
-            TerminalSymbol::Error => self.error_shift,
-            TerminalSymbol::Eof => self.eof_shift,
+                .flatten()
+                .map(|s| ShiftTarget {
+                    state: s.state.into(),
+                    push: s.push,
+                }),
+            TerminalSymbol::Error => self.error_shift.map(|s| ShiftTarget {
+                state: s.into(),
+                push: false,
+            }),
+            TerminalSymbol::Eof => self.eof_shift.map(|s| ShiftTarget {
+                state: s.into(),
+                push: false,
+            }),
         }
-        .map(Into::into)
     }
     fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<usize>
     where

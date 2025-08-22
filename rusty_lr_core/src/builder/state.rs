@@ -44,6 +44,8 @@ where
     Term: Ord,
 {
     fn from(mut state: crate::builder::State<crate::TerminalSymbol<Term>, NonTerm>) -> Self {
+        use crate::parser::state::ShiftTarget;
+
         let error_shift = state
             .shift_goto_map_term
             .remove(&crate::TerminalSymbol::Error);
@@ -62,11 +64,23 @@ where
             shift_goto_map_term: state
                 .shift_goto_map_term
                 .into_iter()
-                .map(|(term, state_index)| (term.into_term().unwrap(), state_index))
+                .map(|(term, state_index)| {
+                    (
+                        term.into_term().unwrap(),
+                        ShiftTarget {
+                            state: state_index.into(),
+                            push: true,
+                        },
+                    )
+                })
                 .collect(),
             error_shift,
             eof_shift,
-            shift_goto_map_nonterm: state.shift_goto_map_nonterm.into_iter().collect(),
+            shift_goto_map_nonterm: state
+                .shift_goto_map_nonterm
+                .into_iter()
+                .map(|(nonterm, state_index)| (nonterm, state_index))
+                .collect(),
             reduce_map: state
                 .reduce_map
                 .into_iter()

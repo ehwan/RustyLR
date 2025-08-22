@@ -1051,7 +1051,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 let node_ = self.node_mut(node);
                 node_
                     .state_stack
-                    .push(StateIndex::from_usize_unchecked(shift));
+                    .push(StateIndex::from_usize_unchecked(shift.state));
                 node_.precedence_stack.push(shift_prec);
                 if let Some(location) = &location {
                     node_.location_stack.push(location.clone());
@@ -1061,13 +1061,17 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     .tree_stack
                     .push(crate::tree::Tree::new_terminal(term.clone()));
 
-                match term {
-                    TerminalSymbol::Term(term) => {
-                        node_.data_stack.push_terminal(term);
+                if shift.push {
+                    match term {
+                        TerminalSymbol::Term(term) => {
+                            node_.data_stack.push_terminal(term);
+                        }
+                        TerminalSymbol::Eof | TerminalSymbol::Error => {
+                            node_.data_stack.push_empty();
+                        }
                     }
-                    TerminalSymbol::Eof | TerminalSymbol::Error => {
-                        node_.data_stack.push_empty();
-                    }
+                } else {
+                    node_.data_stack.push_empty();
                 }
 
                 self.next_nodes.push(node);
@@ -1083,7 +1087,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             let node_ = self.node_mut(node);
             node_
                 .state_stack
-                .push(StateIndex::from_usize_unchecked(shift));
+                .push(StateIndex::from_usize_unchecked(shift.state));
             node_.precedence_stack.push(shift_prec);
             if let Some(location) = location {
                 node_.location_stack.push(location);
@@ -1093,13 +1097,17 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 .tree_stack
                 .push(crate::tree::Tree::new_terminal(term.clone()));
 
-            match term {
-                TerminalSymbol::Term(term) => {
-                    node_.data_stack.push_terminal(term);
+            if shift.push {
+                match term {
+                    TerminalSymbol::Term(term) => {
+                        node_.data_stack.push_terminal(term);
+                    }
+                    TerminalSymbol::Eof | TerminalSymbol::Error => {
+                        node_.data_stack.push_empty();
+                    }
                 }
-                TerminalSymbol::Eof | TerminalSymbol::Error => {
-                    node_.data_stack.push_empty();
-                }
+            } else {
+                node_.data_stack.push_empty();
             }
 
             self.next_nodes.push(node);
@@ -1243,14 +1251,19 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         // and b is fed, shift error and b
                         let node = self.node_mut(error_node);
                         node.state_stack
-                            .push(StateIndex::from_usize_unchecked(next_state));
+                            .push(StateIndex::from_usize_unchecked(next_state.state));
                         node.precedence_stack.push(shift_prec);
                         node.location_stack.push(location.clone());
                         #[cfg(feature = "tree")]
                         node.tree_stack.push(crate::tree::Tree::new_terminal(
                             TerminalSymbol::Term(term.clone()),
                         ));
-                        node.data_stack.push_terminal(term.clone());
+
+                        if next_state.push {
+                            node.data_stack.push_terminal(term.clone());
+                        } else {
+                            node.data_stack.push_empty();
+                        }
 
                         self.current_nodes.push(error_node);
                     } else {
