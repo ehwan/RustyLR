@@ -1557,7 +1557,187 @@ impl Grammar {
                 unreachable!("Error building grammar: {:?}", err);
             }
         };
-        self.states = states.into_iter().map(Into::into).collect();
+        let mut states: Vec<
+            rusty_lr_core::parser::state::IntermediateState<usize, usize, usize, usize>,
+        > = states.into_iter().map(Into::into).collect();
+
+        // Identify states that only perform a single reduction of a single-token rule.
+        // These are candidates for optimization.
+        let mut reduce_states: Vec<_> = Vec::with_capacity(states.len());
+        for state in states.iter() {
+            if state.eof_shift.is_some()
+                || state.error_shift.is_some()
+                || !state.shift_goto_map_term.is_empty()
+                || !state.shift_goto_map_nonterm.is_empty()
+            {
+                // this state is not a reduce state
+                reduce_states.push(None);
+                continue;
+            }
+
+            let rules = state
+                .reduce_map
+                .iter()
+                .map(|(_, r)| r)
+                .chain(state.eof_reduce.iter())
+                .chain(state.error_reduce.iter())
+                .collect::<BTreeSet<_>>();
+
+            if rules.len() != 1 {
+                reduce_states.push(None);
+                continue;
+            }
+            let rules = rules.into_iter().next().unwrap();
+            if rules.len() != 1 {
+                reduce_states.push(None);
+                continue;
+            }
+            let rule = rules[0];
+            let (nonterm, local_rule_id) = self.get_rule_by_id(rule).unwrap();
+            if nonterm.rules[local_rule_id].tokens.len() != 1 {
+                reduce_states.push(None);
+                continue;
+            }
+
+            let nonterm_idx = self.nonterminals_index[&nonterm.name];
+            reduce_states.push(Some((nonterm_idx, local_rule_id)));
+        }
+
+        // Iteratively optimize the state machine by bypassing the reduce-only states identified above.
+        // This continues until no more optimizations can be made.
+        loop {
+            let mut changed = false;
+
+            for state in &mut states {
+                // Optimize shift-on-terminal transitions.
+                for (_, next_state) in &mut state.shift_goto_map_term {
+                    if let Some((nonterm_idx, rule_local_id)) = reduce_states[next_state.state] {
+                        let rule = &self.nonterminals[nonterm_idx].rules[rule_local_id];
+                        match rule.reduce_action {
+                            None => {
+                                let idx = state
+                                    .shift_goto_map_nonterm
+                                    .iter()
+                                    .position(|(nt, _)| *nt == nonterm_idx)
+                                    .unwrap();
+                                let ns = state.shift_goto_map_nonterm[idx].1;
+                                next_state.state = ns.state;
+                                next_state.push = false;
+                                changed = true;
+                            }
+                            Some(ReduceAction::Identity(_)) => {
+                                let idx = state
+                                    .shift_goto_map_nonterm
+                                    .iter()
+                                    .position(|(nt, _)| *nt == nonterm_idx)
+                                    .unwrap();
+                                let ns = state.shift_goto_map_nonterm[idx].1;
+                                next_state.state = ns.state;
+                                next_state.push = true;
+                                changed = true;
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+
+                // Optimize shift-on-nonterminal transitions.
+                for i in 0..state.shift_goto_map_nonterm.len() {
+                    let next_state = state.shift_goto_map_nonterm[i].1;
+                    if let Some((nonterm_idx, rule_local_id)) = reduce_states[next_state.state] {
+                        let rule = &self.nonterminals[nonterm_idx].rules[rule_local_id];
+                        match rule.reduce_action {
+                            None => {
+                                let idx = state
+                                    .shift_goto_map_nonterm
+                                    .iter()
+                                    .position(|(nt, _)| *nt == nonterm_idx)
+                                    .unwrap();
+                                let ns = state.shift_goto_map_nonterm[idx].1;
+                                state.shift_goto_map_nonterm[i].1.state = ns.state;
+                                state.shift_goto_map_nonterm[i].1.push = false;
+                                changed = true;
+                            }
+                            Some(ReduceAction::Identity(_)) => {
+                                let idx = state
+                                    .shift_goto_map_nonterm
+                                    .iter()
+                                    .position(|(nt, _)| *nt == nonterm_idx)
+                                    .unwrap();
+                                let ns = state.shift_goto_map_nonterm[idx].1;
+                                state.shift_goto_map_nonterm[i].1.state = ns.state;
+                                state.shift_goto_map_nonterm[i].1.push = true;
+                                changed = true;
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+            }
+
+            if !changed {
+                break;
+            }
+        }
+
+        // Identify all reachable states starting from the initial state (state 0).
+        let mut states_used = vec![false; states.len()];
+        let mut ping = vec![0];
+        states_used[0] = true;
+        let mut pong = Vec::new();
+        while !ping.is_empty() {
+            pong.clear();
+            for &p in &ping {
+                let s = &states[p];
+
+                for next_state in s
+                    .shift_goto_map_term
+                    .iter()
+                    .map(|(_, v)| v.state)
+                    .chain(s.shift_goto_map_nonterm.iter().map(|(_, v)| v.state))
+                    .chain(s.eof_shift.iter().copied())
+                    .chain(s.error_shift.iter().copied())
+                {
+                    if !states_used[next_state] {
+                        states_used[next_state] = true;
+                        pong.push(next_state);
+                    }
+                }
+            }
+            std::mem::swap(&mut ping, &mut pong);
+        }
+
+        // Remove unreachable states and remap state indices.
+        let mut state_remap = Vec::with_capacity(states.len());
+        let mut new_states = Vec::with_capacity(states.len());
+        for (i, state) in states.into_iter().enumerate() {
+            state_remap.push(new_states.len());
+            if states_used[i] {
+                new_states.push(state);
+            }
+        }
+        for state in &mut new_states {
+            for (_, next_state) in &mut state.shift_goto_map_term {
+                debug_assert!(states_used[next_state.state]);
+                next_state.state = state_remap[next_state.state];
+            }
+            for (_, next_state) in &mut state.shift_goto_map_nonterm {
+                debug_assert!(states_used[next_state.state]);
+                next_state.state = state_remap[next_state.state];
+            }
+            if let Some(next_state) = &mut state.eof_shift {
+                debug_assert!(states_used[*next_state]);
+                *next_state = state_remap[*next_state];
+            }
+            if let Some(next_state) = &mut state.error_shift {
+                debug_assert!(states_used[*next_state]);
+                *next_state = state_remap[*next_state];
+            }
+        }
+
+        self.states = new_states;
+
+        // self.states = states;
 
         collector
     }
