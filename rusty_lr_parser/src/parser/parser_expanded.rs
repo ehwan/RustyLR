@@ -31,159 +31,159 @@ use rusty_lr_core::builder::ReduceType;
 # of terminal classes: 42
 # of states: 178
 
-Rule -> ident RuleType colon RuleLines semicolon
-RuleType -> parengroup
-RuleType -> 
-RuleLines -> RuleLines pipe RuleLine
-RuleLines -> RuleLine
-RuleLine -> TokenMapped* PrecDef* Action
-PrecDef -> percent prec IdentOrLiteral
-PrecDef -> percent prec error
-PrecDef -> percent dprec literal
-PrecDef -> percent dprec error
-PrecDef -> percent error
-TokenMapped -> Pattern
-TokenMapped -> ident equal Pattern
-TerminalSetItem -> ident
-TerminalSetItem -> ident minus ident
-TerminalSetItem -> ident minus error
-TerminalSetItem -> literal
-TerminalSetItem -> literal minus literal
-TerminalSetItem -> literal minus error
-TerminalSet -> lbracket caret? TerminalSetItem* rbracket
-TerminalSet -> dot
-Pattern -> ident
-Pattern -> Pattern plus
-Pattern -> Pattern star
-Pattern -> Pattern question
-Pattern -> Pattern exclamation
-Pattern -> TerminalSet
-Pattern -> Pattern slash Pattern
-Pattern -> lparen $sep(Pattern*, pipe, +) rparen
-Pattern -> lparen error rparen
-Pattern -> literal
-Pattern -> Pattern minus Pattern
-Pattern -> dollar ident lparen Pattern comma Pattern comma? rparen
-Pattern -> dollar ident lparen Pattern comma Pattern comma plus rparen
-Pattern -> dollar ident lparen Pattern comma Pattern comma star rparen
-Pattern -> dollar ident lparen Pattern comma Pattern error rparen
-Pattern -> dollar ident lparen Pattern comma Pattern comma error rparen
-Action -> bracegroup
-Action -> 
-IdentOrLiteral -> ident
-IdentOrLiteral -> literal
-RustCode -> [^semicolon]+
-Directive -> percent token ident RustCode semicolon
-Directive -> percent token ident semicolon
-Directive -> percent token error semicolon
-Directive -> percent start ident semicolon
-Directive -> percent start error semicolon
-Directive -> percent tokentype RustCode semicolon
-Directive -> percent tokentype semicolon
-Directive -> percent userdata RustCode semicolon
-Directive -> percent userdata semicolon
-Directive -> percent left IdentOrLiteral+ semicolon
-Directive -> percent left error semicolon
-Directive -> percent right IdentOrLiteral+ semicolon
-Directive -> percent right error semicolon
-Directive -> percent precedence IdentOrLiteral+ semicolon
-Directive -> percent precedence error semicolon
-Directive -> percent errortype RustCode semicolon
-Directive -> percent errortype semicolon
-Directive -> percent moduleprefix RustCode semicolon
-Directive -> percent moduleprefix semicolon
-Directive -> percent glr semicolon
-Directive -> percent glr error semicolon
-Directive -> percent lalr semicolon
-Directive -> percent lalr error semicolon
-Directive -> percent nooptim semicolon
-Directive -> percent nooptim error semicolon
-Directive -> percent dense semicolon
-Directive -> percent dense error semicolon
-Directive -> percent trace ident* semicolon
-Directive -> percent trace error semicolon
-Directive -> percent filter RustCode semicolon
-Directive -> percent filter semicolon
-Directive -> percent location RustCode semicolon
-Directive -> percent location semicolon
-Directive -> percent error semicolon
-GrammarLine -> Rule
-GrammarLine -> Directive
-Grammar -> GrammarLine+
-TokenMapped+ -> TokenMapped
-TokenMapped+ -> TokenMapped+ TokenMapped
-TokenMapped* -> TokenMapped+
-TokenMapped* -> 
-PrecDef+ -> PrecDef
-PrecDef+ -> PrecDef+ PrecDef
-PrecDef* -> PrecDef+
-PrecDef* -> 
-caret? -> caret
-caret? -> 
-TerminalSetItem+ -> TerminalSetItem
-TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem
-TerminalSetItem* -> TerminalSetItem+
-TerminalSetItem* -> 
-Pattern+ -> Pattern
-Pattern+ -> Pattern+ Pattern
-Pattern* -> Pattern+
-Pattern* -> 
-$sep(Pattern*, pipe, +) -> Pattern*
-$sep(Pattern*, pipe, +) -> $sep(Pattern*, pipe, +) pipe Pattern*
-comma? -> comma
-comma? -> 
-[^semicolon] -> ident
-[^semicolon] -> colon
-[^semicolon] -> pipe
-[^semicolon] -> percent
-[^semicolon] -> equal
-[^semicolon] -> plus
-[^semicolon] -> star
-[^semicolon] -> question
-[^semicolon] -> caret
-[^semicolon] -> minus
-[^semicolon] -> exclamation
-[^semicolon] -> slash
-[^semicolon] -> dot
-[^semicolon] -> dollar
-[^semicolon] -> comma
-[^semicolon] -> literal
-[^semicolon] -> parengroup
-[^semicolon] -> bracegroup
-[^semicolon] -> lparen
-[^semicolon] -> rparen
-[^semicolon] -> lbracket
-[^semicolon] -> rbracket
-[^semicolon] -> left
-[^semicolon] -> right
-[^semicolon] -> token
-[^semicolon] -> start
-[^semicolon] -> tokentype
-[^semicolon] -> userdata
-[^semicolon] -> errortype
-[^semicolon] -> moduleprefix
-[^semicolon] -> lalr
-[^semicolon] -> glr
-[^semicolon] -> prec
-[^semicolon] -> precedence
-[^semicolon] -> nooptim
-[^semicolon] -> dense
-[^semicolon] -> trace
-[^semicolon] -> dprec
-[^semicolon] -> filter
-[^semicolon] -> location
-[^semicolon] -> <Others>
-[^semicolon]+ -> [^semicolon]
-[^semicolon]+ -> [^semicolon]+ [^semicolon]
-IdentOrLiteral+ -> IdentOrLiteral
-IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
-ident+ -> ident
-ident+ -> ident+ ident
-ident* -> ident+
-ident* -> 
-GrammarLine+ -> GrammarLine
-GrammarLine+ -> GrammarLine GrammarLine+
-Augmented -> Grammar eof
+0: Rule -> ident RuleType colon RuleLines semicolon
+1: RuleType -> parengroup
+2: RuleType -> 
+3: RuleLines -> RuleLines pipe RuleLine
+4: RuleLines -> RuleLine
+5: RuleLine -> TokenMapped* PrecDef* Action
+6: PrecDef -> percent prec IdentOrLiteral
+7: PrecDef -> percent prec error
+8: PrecDef -> percent dprec literal
+9: PrecDef -> percent dprec error
+10: PrecDef -> percent error
+11: TokenMapped -> Pattern
+12: TokenMapped -> ident equal Pattern
+13: TerminalSetItem -> ident
+14: TerminalSetItem -> ident minus ident
+15: TerminalSetItem -> ident minus error
+16: TerminalSetItem -> literal
+17: TerminalSetItem -> literal minus literal
+18: TerminalSetItem -> literal minus error
+19: TerminalSet -> lbracket caret? TerminalSetItem* rbracket
+20: TerminalSet -> dot
+21: Pattern -> ident
+22: Pattern -> Pattern plus
+23: Pattern -> Pattern star
+24: Pattern -> Pattern question
+25: Pattern -> Pattern exclamation
+26: Pattern -> TerminalSet
+27: Pattern -> Pattern slash Pattern
+28: Pattern -> lparen $sep(Pattern*, pipe, +) rparen
+29: Pattern -> lparen error rparen
+30: Pattern -> literal
+31: Pattern -> Pattern minus Pattern
+32: Pattern -> dollar ident lparen Pattern comma Pattern comma? rparen
+33: Pattern -> dollar ident lparen Pattern comma Pattern comma plus rparen
+34: Pattern -> dollar ident lparen Pattern comma Pattern comma star rparen
+35: Pattern -> dollar ident lparen Pattern comma Pattern error rparen
+36: Pattern -> dollar ident lparen Pattern comma Pattern comma error rparen
+37: Action -> bracegroup
+38: Action -> 
+39: IdentOrLiteral -> ident
+40: IdentOrLiteral -> literal
+41: RustCode -> [^semicolon]+
+42: Directive -> percent token ident RustCode semicolon
+43: Directive -> percent token ident semicolon
+44: Directive -> percent token error semicolon
+45: Directive -> percent start ident semicolon
+46: Directive -> percent start error semicolon
+47: Directive -> percent tokentype RustCode semicolon
+48: Directive -> percent tokentype semicolon
+49: Directive -> percent userdata RustCode semicolon
+50: Directive -> percent userdata semicolon
+51: Directive -> percent left IdentOrLiteral+ semicolon
+52: Directive -> percent left error semicolon
+53: Directive -> percent right IdentOrLiteral+ semicolon
+54: Directive -> percent right error semicolon
+55: Directive -> percent precedence IdentOrLiteral+ semicolon
+56: Directive -> percent precedence error semicolon
+57: Directive -> percent errortype RustCode semicolon
+58: Directive -> percent errortype semicolon
+59: Directive -> percent moduleprefix RustCode semicolon
+60: Directive -> percent moduleprefix semicolon
+61: Directive -> percent glr semicolon
+62: Directive -> percent glr error semicolon
+63: Directive -> percent lalr semicolon
+64: Directive -> percent lalr error semicolon
+65: Directive -> percent nooptim semicolon
+66: Directive -> percent nooptim error semicolon
+67: Directive -> percent dense semicolon
+68: Directive -> percent dense error semicolon
+69: Directive -> percent trace ident* semicolon
+70: Directive -> percent trace error semicolon
+71: Directive -> percent filter RustCode semicolon
+72: Directive -> percent filter semicolon
+73: Directive -> percent location RustCode semicolon
+74: Directive -> percent location semicolon
+75: Directive -> percent error semicolon
+76: GrammarLine -> Rule
+77: GrammarLine -> Directive
+78: Grammar -> GrammarLine+
+79: TokenMapped+ -> TokenMapped
+80: TokenMapped+ -> TokenMapped+ TokenMapped
+81: TokenMapped* -> TokenMapped+
+82: TokenMapped* -> 
+83: PrecDef+ -> PrecDef
+84: PrecDef+ -> PrecDef+ PrecDef
+85: PrecDef* -> PrecDef+
+86: PrecDef* -> 
+87: caret? -> caret
+88: caret? -> 
+89: TerminalSetItem+ -> TerminalSetItem
+90: TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem
+91: TerminalSetItem* -> TerminalSetItem+
+92: TerminalSetItem* -> 
+93: Pattern+ -> Pattern
+94: Pattern+ -> Pattern+ Pattern
+95: Pattern* -> Pattern+
+96: Pattern* -> 
+97: $sep(Pattern*, pipe, +) -> Pattern*
+98: $sep(Pattern*, pipe, +) -> $sep(Pattern*, pipe, +) pipe Pattern*
+99: comma? -> comma
+100: comma? -> 
+101: [^semicolon] -> ident
+102: [^semicolon] -> colon
+103: [^semicolon] -> pipe
+104: [^semicolon] -> percent
+105: [^semicolon] -> equal
+106: [^semicolon] -> plus
+107: [^semicolon] -> star
+108: [^semicolon] -> question
+109: [^semicolon] -> caret
+110: [^semicolon] -> minus
+111: [^semicolon] -> exclamation
+112: [^semicolon] -> slash
+113: [^semicolon] -> dot
+114: [^semicolon] -> dollar
+115: [^semicolon] -> comma
+116: [^semicolon] -> literal
+117: [^semicolon] -> parengroup
+118: [^semicolon] -> bracegroup
+119: [^semicolon] -> lparen
+120: [^semicolon] -> rparen
+121: [^semicolon] -> lbracket
+122: [^semicolon] -> rbracket
+123: [^semicolon] -> left
+124: [^semicolon] -> right
+125: [^semicolon] -> token
+126: [^semicolon] -> start
+127: [^semicolon] -> tokentype
+128: [^semicolon] -> userdata
+129: [^semicolon] -> errortype
+130: [^semicolon] -> moduleprefix
+131: [^semicolon] -> lalr
+132: [^semicolon] -> glr
+133: [^semicolon] -> prec
+134: [^semicolon] -> precedence
+135: [^semicolon] -> nooptim
+136: [^semicolon] -> dense
+137: [^semicolon] -> trace
+138: [^semicolon] -> dprec
+139: [^semicolon] -> filter
+140: [^semicolon] -> location
+141: [^semicolon] -> <Others>
+142: [^semicolon]+ -> [^semicolon]
+143: [^semicolon]+ -> [^semicolon]+ [^semicolon]
+144: IdentOrLiteral+ -> IdentOrLiteral
+145: IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
+146: ident+ -> ident
+147: ident+ -> ident+ ident
+148: ident* -> ident+
+149: ident* -> 
+150: GrammarLine+ -> GrammarLine
+151: GrammarLine+ -> GrammarLine GrammarLine+
+152: Augmented -> Grammar eof
 
 */
 // =============================Generated Codes Begin==============================
@@ -3689,19 +3689,6 @@ impl GrammarDataStack {
         }
         Ok(false)
     }
-    ///GrammarLine -> Directive
-    #[inline(always)]
-    fn reduce_GrammarLine_1(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-    }
-    ///Grammar -> GrammarLine+
-    #[inline(always)]
-    fn reduce_Grammar_0(__data_stack: &mut Self, __location_stack: &mut Vec<SpanPair>) {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-    }
     ///TokenMapped+ -> TokenMapped
     #[inline]
     fn reduce__TokenMappedPlus15_0(
@@ -4174,375 +4161,6 @@ impl GrammarDataStack {
         __data_stack.__stack15.push(__res);
         Ok(true)
     }
-    ///[^semicolon] -> ident
-    #[inline(always)]
-    fn reduce__TermSet26_0(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> colon
-    #[inline(always)]
-    fn reduce__TermSet26_1(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> pipe
-    #[inline(always)]
-    fn reduce__TermSet26_2(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> percent
-    #[inline(always)]
-    fn reduce__TermSet26_3(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> equal
-    #[inline(always)]
-    fn reduce__TermSet26_4(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> plus
-    #[inline(always)]
-    fn reduce__TermSet26_5(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> star
-    #[inline(always)]
-    fn reduce__TermSet26_6(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> question
-    #[inline(always)]
-    fn reduce__TermSet26_7(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> caret
-    #[inline(always)]
-    fn reduce__TermSet26_8(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> minus
-    #[inline(always)]
-    fn reduce__TermSet26_9(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> exclamation
-    #[inline(always)]
-    fn reduce__TermSet26_10(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> slash
-    #[inline(always)]
-    fn reduce__TermSet26_11(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> dot
-    #[inline(always)]
-    fn reduce__TermSet26_12(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> dollar
-    #[inline(always)]
-    fn reduce__TermSet26_13(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> comma
-    #[inline(always)]
-    fn reduce__TermSet26_14(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> literal
-    #[inline(always)]
-    fn reduce__TermSet26_15(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> parengroup
-    #[inline(always)]
-    fn reduce__TermSet26_16(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> bracegroup
-    #[inline(always)]
-    fn reduce__TermSet26_17(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> lparen
-    #[inline(always)]
-    fn reduce__TermSet26_18(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> rparen
-    #[inline(always)]
-    fn reduce__TermSet26_19(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> lbracket
-    #[inline(always)]
-    fn reduce__TermSet26_20(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> rbracket
-    #[inline(always)]
-    fn reduce__TermSet26_21(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> left
-    #[inline(always)]
-    fn reduce__TermSet26_22(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> right
-    #[inline(always)]
-    fn reduce__TermSet26_23(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> token
-    #[inline(always)]
-    fn reduce__TermSet26_24(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> start
-    #[inline(always)]
-    fn reduce__TermSet26_25(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> tokentype
-    #[inline(always)]
-    fn reduce__TermSet26_26(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> userdata
-    #[inline(always)]
-    fn reduce__TermSet26_27(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> errortype
-    #[inline(always)]
-    fn reduce__TermSet26_28(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> moduleprefix
-    #[inline(always)]
-    fn reduce__TermSet26_29(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> lalr
-    #[inline(always)]
-    fn reduce__TermSet26_30(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> glr
-    #[inline(always)]
-    fn reduce__TermSet26_31(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> prec
-    #[inline(always)]
-    fn reduce__TermSet26_32(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> precedence
-    #[inline(always)]
-    fn reduce__TermSet26_33(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> nooptim
-    #[inline(always)]
-    fn reduce__TermSet26_34(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> dense
-    #[inline(always)]
-    fn reduce__TermSet26_35(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> trace
-    #[inline(always)]
-    fn reduce__TermSet26_36(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> dprec
-    #[inline(always)]
-    fn reduce__TermSet26_37(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> filter
-    #[inline(always)]
-    fn reduce__TermSet26_38(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> location
-    #[inline(always)]
-    fn reduce__TermSet26_39(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
-    ///[^semicolon] -> <Others>
-    #[inline(always)]
-    fn reduce__TermSet26_40(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        true
-    }
     ///[^semicolon]+ -> [^semicolon]
     #[inline]
     fn reduce___TermSet26Plus27_0(
@@ -4750,15 +4368,6 @@ impl GrammarDataStack {
     ///GrammarLine+ -> GrammarLine GrammarLine+
     #[inline(always)]
     fn reduce__GrammarLinePlus31_1(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-    ) {
-        __location_stack.truncate(__location_stack.len() - 2usize);
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-    }
-    ///Augmented -> Grammar eof
-    #[inline(always)]
-    fn reduce_Augmented_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
     ) {
@@ -5777,12 +5386,10 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             77usize => {
-                Self::reduce_GrammarLine_1(data_stack, location_stack);
-                Ok(false)
+                unreachable!("{rule_index}: this production rule was optimized out")
             }
             78usize => {
-                Self::reduce_Grammar_0(data_stack, location_stack);
-                Ok(false)
+                unreachable!("{rule_index}: this production rule was optimized out")
             }
             79usize => {
                 Self::reduce__TokenMappedPlus15_0(
@@ -5970,47 +5577,129 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            101usize => Ok(Self::reduce__TermSet26_0(data_stack, location_stack)),
-            102usize => Ok(Self::reduce__TermSet26_1(data_stack, location_stack)),
-            103usize => Ok(Self::reduce__TermSet26_2(data_stack, location_stack)),
-            104usize => Ok(Self::reduce__TermSet26_3(data_stack, location_stack)),
-            105usize => Ok(Self::reduce__TermSet26_4(data_stack, location_stack)),
-            106usize => Ok(Self::reduce__TermSet26_5(data_stack, location_stack)),
-            107usize => Ok(Self::reduce__TermSet26_6(data_stack, location_stack)),
-            108usize => Ok(Self::reduce__TermSet26_7(data_stack, location_stack)),
-            109usize => Ok(Self::reduce__TermSet26_8(data_stack, location_stack)),
-            110usize => Ok(Self::reduce__TermSet26_9(data_stack, location_stack)),
-            111usize => Ok(Self::reduce__TermSet26_10(data_stack, location_stack)),
-            112usize => Ok(Self::reduce__TermSet26_11(data_stack, location_stack)),
-            113usize => Ok(Self::reduce__TermSet26_12(data_stack, location_stack)),
-            114usize => Ok(Self::reduce__TermSet26_13(data_stack, location_stack)),
-            115usize => Ok(Self::reduce__TermSet26_14(data_stack, location_stack)),
-            116usize => Ok(Self::reduce__TermSet26_15(data_stack, location_stack)),
-            117usize => Ok(Self::reduce__TermSet26_16(data_stack, location_stack)),
-            118usize => Ok(Self::reduce__TermSet26_17(data_stack, location_stack)),
-            119usize => Ok(Self::reduce__TermSet26_18(data_stack, location_stack)),
-            120usize => Ok(Self::reduce__TermSet26_19(data_stack, location_stack)),
-            121usize => Ok(Self::reduce__TermSet26_20(data_stack, location_stack)),
-            122usize => Ok(Self::reduce__TermSet26_21(data_stack, location_stack)),
-            123usize => Ok(Self::reduce__TermSet26_22(data_stack, location_stack)),
-            124usize => Ok(Self::reduce__TermSet26_23(data_stack, location_stack)),
-            125usize => Ok(Self::reduce__TermSet26_24(data_stack, location_stack)),
-            126usize => Ok(Self::reduce__TermSet26_25(data_stack, location_stack)),
-            127usize => Ok(Self::reduce__TermSet26_26(data_stack, location_stack)),
-            128usize => Ok(Self::reduce__TermSet26_27(data_stack, location_stack)),
-            129usize => Ok(Self::reduce__TermSet26_28(data_stack, location_stack)),
-            130usize => Ok(Self::reduce__TermSet26_29(data_stack, location_stack)),
-            131usize => Ok(Self::reduce__TermSet26_30(data_stack, location_stack)),
-            132usize => Ok(Self::reduce__TermSet26_31(data_stack, location_stack)),
-            133usize => Ok(Self::reduce__TermSet26_32(data_stack, location_stack)),
-            134usize => Ok(Self::reduce__TermSet26_33(data_stack, location_stack)),
-            135usize => Ok(Self::reduce__TermSet26_34(data_stack, location_stack)),
-            136usize => Ok(Self::reduce__TermSet26_35(data_stack, location_stack)),
-            137usize => Ok(Self::reduce__TermSet26_36(data_stack, location_stack)),
-            138usize => Ok(Self::reduce__TermSet26_37(data_stack, location_stack)),
-            139usize => Ok(Self::reduce__TermSet26_38(data_stack, location_stack)),
-            140usize => Ok(Self::reduce__TermSet26_39(data_stack, location_stack)),
-            141usize => Ok(Self::reduce__TermSet26_40(data_stack, location_stack)),
+            101usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            102usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            103usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            104usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            105usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            106usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            107usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            108usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            109usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            110usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            111usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            112usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            113usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            114usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            115usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            116usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            117usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            118usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            119usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            120usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            121usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            122usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            123usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            124usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            125usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            126usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            127usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            128usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            129usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            130usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            131usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            132usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            133usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            134usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            135usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            136usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            137usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            138usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            139usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            140usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
+            141usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
             142usize => {
                 Self::reduce___TermSet26Plus27_0(
                     data_stack,
@@ -6091,8 +5780,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Ok(false)
             }
             152usize => {
-                Self::reduce_Augmented_0(data_stack, location_stack);
-                Ok(false)
+                unreachable!("{rule_index}: this production rule was optimized out")
             }
             _ => {
                 unreachable!("Invalid Rule: {}", rule_index);

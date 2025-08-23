@@ -770,6 +770,7 @@ impl Grammar {
                     lookaheads: None,
                     prec,
                     dprec,
+                    is_used: true,
                 });
             }
 
@@ -869,6 +870,7 @@ impl Grammar {
                 lookaheads: None,
                 prec: None,
                 dprec: None,
+                is_used: true,
             };
             let nonterminal_info = NonTerminalInfo {
                 name: augmented_ident.clone(),
@@ -1735,9 +1737,30 @@ impl Grammar {
             }
         }
 
-        self.states = new_states;
+        // check for unused production rules
+        let mut rules_used = vec![false; self.builder.rules.len()];
+        for state in &new_states {
+            for rules in state
+                .reduce_map
+                .iter()
+                .map(|(_, r)| r)
+                .chain(state.eof_reduce.iter())
+                .chain(state.error_reduce.iter())
+            {
+                for &rule in rules {
+                    rules_used[rule] = true;
+                }
+            }
+        }
+        let mut i = 0;
+        for nonterm in &mut self.nonterminals {
+            for rule in &mut nonterm.rules {
+                rule.is_used = rules_used[i];
+                i += 1;
+            }
+        }
 
-        // self.states = states;
+        self.states = new_states;
 
         collector
     }
