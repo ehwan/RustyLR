@@ -67,3 +67,8 @@ process_and_compare "--dense true --glr true"
 echo "Normal configuration"
 process_and_compare ""
 mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
+
+cargo test --bin glr
+if [ $? -ne 0 ]; then
+    exit 1
+fi

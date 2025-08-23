@@ -62,3 +62,23 @@ fn main() {
     //     println!("---");
     // }
 }
+
+#[test]
+fn test_parser() {
+    let parser = parser::EParser::new();
+    let mut context = parser::EContext::new();
+    let input1 = "  1 + 2 * 3 * 4 + 5 * 6 + 7 ";
+    for ch in input1.chars() {
+        context.feed(&parser, ch, &mut ()).unwrap();
+    }
+
+    let answer = 1 + 2 * 3 * 4 + 5 * 6 + 7;
+
+    let mut results = context
+        .accept(&parser, &mut ())
+        .unwrap()
+        .collect::<Vec<_>>();
+    results.sort();
+    assert_eq!(results.len(), 1);
+    assert_eq!(results, [answer]);
+}
