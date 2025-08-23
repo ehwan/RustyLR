@@ -1267,11 +1267,12 @@ impl Builder {
             .builder
             .rules
             .iter()
-            .map(|rule| {
-                rule.rule
-                    .clone()
-                    .map(class_mapper, nonterm_mapper)
-                    .to_string()
+            .enumerate()
+            .map(|(rule_id, rule)| {
+                format!(
+                    "{rule_id}: {}",
+                    rule.rule.clone().map(class_mapper, nonterm_mapper)
+                )
             })
             .collect::<Vec<_>>()
             .join("\n");
