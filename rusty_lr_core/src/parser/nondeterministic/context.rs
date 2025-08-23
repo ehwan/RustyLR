@@ -453,14 +453,13 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             userdata,
             &mut new_location,
         ) {
-            Ok(_) => {
+            Ok(non_empty_pushed) => {
                 if let Some(nonterm_shift_state) =
                     parser.get_states()[state].shift_goto_nonterm(&rule.name)
                 {
                     node.state_stack
                         .push(StateIndex::from_usize_unchecked(nonterm_shift_state.state));
-                    if !nonterm_shift_state.push {
-                        // TODO no need to pop-and-push if the last pushed data was empty
+                    if !nonterm_shift_state.push && non_empty_pushed {
                         node.data_stack.pop();
                         node.data_stack.push_empty();
                     }

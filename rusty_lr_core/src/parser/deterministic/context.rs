@@ -407,7 +407,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     Data::Location::new(self.location_stack.iter().rev(), tokens_len);
 
                 // call reduce action
-                match Data::reduce_action(
+                let non_empty_pushed = match Data::reduce_action(
                     &mut self.data_stack,
                     &mut self.location_stack,
                     reduce_rule,
@@ -416,7 +416,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     userdata,
                     &mut new_location,
                 ) {
-                    Ok(_) => {}
+                    Ok(ret) => ret,
                     Err(err) => {
                         return Err(ParseError::ReduceAction(term, location, err));
                     }
@@ -446,8 +446,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 {
                     self.state_stack
                         .push(StateIndex::from_usize_unchecked(next_state_id.state));
-                    if !next_state_id.push {
-                        // TODO no need to pop-and-push if the last pushed data was empty
+                    if !next_state_id.push && non_empty_pushed {
                         self.data_stack.pop();
                         self.data_stack.push_empty();
                     }

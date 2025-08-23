@@ -518,7 +518,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -566,7 +566,7 @@ impl GrammarDataStack {
             }
         };
         __data_stack.__stack2.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///RuleType -> parengroup
     #[inline]
@@ -577,7 +577,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -596,7 +596,7 @@ impl GrammarDataStack {
             Some(group)
         };
         __data_stack.__stack3.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///RuleType ->
     #[inline]
@@ -607,12 +607,12 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __data_stack.__tags.push(GrammarTags::__stack3);
         let __res = { None };
         __data_stack.__stack3.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///RuleLines -> RuleLines pipe RuleLine
     #[inline]
@@ -623,7 +623,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -652,7 +652,7 @@ impl GrammarDataStack {
             RuleLines
         };
         __data_stack.__stack4.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///RuleLines -> RuleLine
     #[inline]
@@ -663,7 +663,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -677,7 +677,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![RuleLine] };
         __data_stack.__stack4.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///RuleLine -> TokenMapped* PrecDef* Action
     #[inline]
@@ -688,7 +688,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -721,7 +721,7 @@ impl GrammarDataStack {
             }
         };
         __data_stack.__stack5.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///PrecDef -> percent prec IdentOrLiteral
     #[inline]
@@ -732,7 +732,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -755,7 +755,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = { PrecDPrecArgs::Prec(IdentOrLiteral) };
         __data_stack.__stack6.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///PrecDef -> percent prec error
     #[inline]
@@ -766,7 +766,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -798,7 +798,7 @@ impl GrammarDataStack {
             PrecDPrecArgs::None
         };
         __data_stack.__stack6.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///PrecDef -> percent dprec literal
     #[inline]
@@ -809,7 +809,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -837,7 +837,7 @@ impl GrammarDataStack {
             PrecDPrecArgs::DPrec(literal)
         };
         __data_stack.__stack6.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///PrecDef -> percent dprec error
     #[inline]
@@ -848,7 +848,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -880,7 +880,7 @@ impl GrammarDataStack {
             PrecDPrecArgs::None
         };
         __data_stack.__stack6.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///PrecDef -> percent error
     #[inline]
@@ -891,7 +891,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -919,7 +919,7 @@ impl GrammarDataStack {
             PrecDPrecArgs::None
         };
         __data_stack.__stack6.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///TokenMapped -> Pattern
     #[inline]
@@ -930,7 +930,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -944,7 +944,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { (None, Pattern) };
         __data_stack.__stack7.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///TokenMapped -> ident equal Pattern
     #[inline]
@@ -955,7 +955,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -984,7 +984,7 @@ impl GrammarDataStack {
             (Some(ident), Pattern)
         };
         __data_stack.__stack7.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///TerminalSetItem -> ident
     #[inline]
@@ -995,7 +995,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1014,7 +1014,7 @@ impl GrammarDataStack {
             TerminalSetItem::Terminal(ident)
         };
         __data_stack.__stack8.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///TerminalSetItem -> ident minus ident
     #[inline]
@@ -1025,7 +1025,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1057,7 +1057,7 @@ impl GrammarDataStack {
             TerminalSetItem::Range(first, last)
         };
         __data_stack.__stack8.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///TerminalSetItem -> ident minus error
     #[inline]
@@ -1068,7 +1068,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1100,7 +1100,7 @@ impl GrammarDataStack {
             TerminalSetItem::Terminal(format_ident!("dummy"))
         };
         __data_stack.__stack8.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///TerminalSetItem -> literal
     #[inline]
@@ -1111,7 +1111,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1130,7 +1130,7 @@ impl GrammarDataStack {
             TerminalSetItem::Literal(literal)
         };
         __data_stack.__stack8.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///TerminalSetItem -> literal minus literal
     #[inline]
@@ -1141,7 +1141,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1173,7 +1173,7 @@ impl GrammarDataStack {
             TerminalSetItem::LiteralRange(first, last)
         };
         __data_stack.__stack8.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///TerminalSetItem -> literal minus error
     #[inline]
@@ -1184,7 +1184,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1216,7 +1216,7 @@ impl GrammarDataStack {
             TerminalSetItem::Terminal(format_ident!("dummy"))
         };
         __data_stack.__stack8.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///TerminalSet -> lbracket caret? TerminalSetItem* rbracket
     #[inline]
@@ -1227,7 +1227,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1264,7 +1264,7 @@ impl GrammarDataStack {
             }
         };
         __data_stack.__stack9.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///TerminalSet -> dot
     #[inline]
@@ -1275,7 +1275,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1297,7 +1297,7 @@ impl GrammarDataStack {
             }
         };
         __data_stack.__stack9.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> ident
     #[inline]
@@ -1308,7 +1308,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1327,7 +1327,7 @@ impl GrammarDataStack {
             PatternArgs::Ident(ident)
         };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> Pattern plus
     #[inline]
@@ -1338,7 +1338,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1362,7 +1362,7 @@ impl GrammarDataStack {
             PatternArgs::Plus(Box::new(Pattern), __rustylr_location_plus.span())
         };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> Pattern star
     #[inline]
@@ -1373,7 +1373,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1394,7 +1394,7 @@ impl GrammarDataStack {
             PatternArgs::Star(Box::new(Pattern), __rustylr_location_star.span())
         };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> Pattern question
     #[inline]
@@ -1405,7 +1405,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1426,7 +1426,7 @@ impl GrammarDataStack {
             PatternArgs::Question(Box::new(Pattern), __rustylr_location_question.span())
         };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> Pattern exclamation
     #[inline]
@@ -1437,7 +1437,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1461,7 +1461,7 @@ impl GrammarDataStack {
             )
         };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> TerminalSet
     #[inline]
@@ -1472,7 +1472,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1486,7 +1486,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { PatternArgs::TerminalSet(TerminalSet) };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> Pattern slash Pattern
     #[inline]
@@ -1497,7 +1497,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1520,7 +1520,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = { PatternArgs::Lookaheads(Box::new(p1), Box::new(lh)) };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> lparen $sep(Pattern*, pipe, +) rparen
     #[inline]
@@ -1531,7 +1531,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1562,7 +1562,7 @@ impl GrammarDataStack {
             )
         };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> lparen error rparen
     #[inline]
@@ -1573,7 +1573,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1606,7 +1606,7 @@ impl GrammarDataStack {
             PatternArgs::Ident(format_ident!("dummy"))
         };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> literal
     #[inline]
@@ -1617,7 +1617,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1636,7 +1636,7 @@ impl GrammarDataStack {
             PatternArgs::Literal(literal)
         };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> Pattern minus Pattern
     #[inline]
@@ -1647,7 +1647,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1670,7 +1670,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = { PatternArgs::Minus(Box::new(p1), Box::new(p2)) };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma? rparen
     #[inline]
@@ -1681,7 +1681,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1744,7 +1744,7 @@ impl GrammarDataStack {
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma plus rparen
     #[inline]
@@ -1755,7 +1755,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1821,7 +1821,7 @@ impl GrammarDataStack {
             PatternArgs::Sep(Box::new(base), Box::new(del), true, *__rustylr_location0)
         };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma star rparen
     #[inline]
@@ -1832,7 +1832,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1898,7 +1898,7 @@ impl GrammarDataStack {
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern error rparen
     #[inline]
@@ -1909,7 +1909,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -1980,7 +1980,7 @@ impl GrammarDataStack {
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma error rparen
     #[inline]
@@ -1991,7 +1991,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2066,7 +2066,7 @@ impl GrammarDataStack {
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
         __data_stack.__stack10.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Action -> bracegroup
     #[inline]
@@ -2077,7 +2077,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2096,7 +2096,7 @@ impl GrammarDataStack {
             Some(group)
         };
         __data_stack.__stack3.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Action ->
     #[inline]
@@ -2107,12 +2107,12 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __data_stack.__tags.push(GrammarTags::__stack3);
         let __res = { None };
         __data_stack.__stack3.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///IdentOrLiteral -> ident
     #[inline]
@@ -2123,7 +2123,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2142,7 +2142,7 @@ impl GrammarDataStack {
             IdentOrLiteral::Ident(ident)
         };
         __data_stack.__stack11.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///IdentOrLiteral -> literal
     #[inline]
@@ -2153,7 +2153,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2172,7 +2172,7 @@ impl GrammarDataStack {
             IdentOrLiteral::Literal(literal)
         };
         __data_stack.__stack11.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///RustCode -> [^semicolon]+
     #[inline]
@@ -2183,7 +2183,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2203,7 +2203,7 @@ impl GrammarDataStack {
             tokens
         };
         __data_stack.__stack12.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Directive -> percent token ident RustCode semicolon
     #[inline]
@@ -2214,7 +2214,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2251,7 +2251,7 @@ impl GrammarDataStack {
             };
             data.terminals.push((ident, RustCode));
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent token ident semicolon
     #[inline]
@@ -2262,7 +2262,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2297,7 +2297,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_ident,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent token error semicolon
     #[inline]
@@ -2308,7 +2308,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2343,7 +2343,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent start ident semicolon
     #[inline]
@@ -2354,7 +2354,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2386,7 +2386,7 @@ impl GrammarDataStack {
             };
             data.start_rule_name.push(ident);
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent start error semicolon
     #[inline]
@@ -2397,7 +2397,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2432,7 +2432,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent tokentype RustCode semicolon
     #[inline]
@@ -2443,7 +2443,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2473,7 +2473,7 @@ impl GrammarDataStack {
         {
             data.token_typename.push((__rustylr_location_tokentype.span(), RustCode));
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent tokentype semicolon
     #[inline]
@@ -2484,7 +2484,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2515,7 +2515,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_tokentype,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent userdata RustCode semicolon
     #[inline]
@@ -2526,7 +2526,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2556,7 +2556,7 @@ impl GrammarDataStack {
         {
             data.userdata_typename.push((__rustylr_location_userdata.span(), RustCode));
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent userdata semicolon
     #[inline]
@@ -2567,7 +2567,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2598,7 +2598,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_userdata,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent left IdentOrLiteral+ semicolon
     #[inline]
@@ -2609,7 +2609,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2644,7 +2644,7 @@ impl GrammarDataStack {
                     IdentOrLiteral,
                 ));
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent left error semicolon
     #[inline]
@@ -2655,7 +2655,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2690,7 +2690,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent right IdentOrLiteral+ semicolon
     #[inline]
@@ -2701,7 +2701,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2736,7 +2736,7 @@ impl GrammarDataStack {
                     IdentOrLiteral,
                 ));
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent right error semicolon
     #[inline]
@@ -2747,7 +2747,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2782,7 +2782,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent precedence IdentOrLiteral+ semicolon
     #[inline]
@@ -2793,7 +2793,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2824,7 +2824,7 @@ impl GrammarDataStack {
             data.precedences
                 .push((__rustylr_location_precedence.span(), None, IdentOrLiteral));
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent precedence error semicolon
     #[inline]
@@ -2835,7 +2835,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2870,7 +2870,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent errortype RustCode semicolon
     #[inline]
@@ -2881,7 +2881,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2911,7 +2911,7 @@ impl GrammarDataStack {
         {
             data.error_typename.push((__rustylr_location_errortype.span(), RustCode));
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent errortype semicolon
     #[inline]
@@ -2922,7 +2922,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2953,7 +2953,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_errortype,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent moduleprefix RustCode semicolon
     #[inline]
@@ -2964,7 +2964,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -2994,7 +2994,7 @@ impl GrammarDataStack {
         {
             data.module_prefix.push((__rustylr_location_moduleprefix.span(), RustCode));
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent moduleprefix semicolon
     #[inline]
@@ -3005,7 +3005,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3036,7 +3036,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_moduleprefix,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent glr semicolon
     #[inline]
@@ -3047,7 +3047,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3072,7 +3072,7 @@ impl GrammarDataStack {
         {
             data.glr = true;
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent glr error semicolon
     #[inline]
@@ -3083,7 +3083,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3118,7 +3118,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent lalr semicolon
     #[inline]
@@ -3129,7 +3129,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3154,7 +3154,7 @@ impl GrammarDataStack {
         {
             data.lalr = true;
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent lalr error semicolon
     #[inline]
@@ -3165,7 +3165,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3200,7 +3200,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent nooptim semicolon
     #[inline]
@@ -3211,7 +3211,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3234,7 +3234,7 @@ impl GrammarDataStack {
         {
             data.no_optim = true;
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent nooptim error semicolon
     #[inline]
@@ -3245,7 +3245,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3280,7 +3280,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent dense semicolon
     #[inline]
@@ -3291,7 +3291,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3316,7 +3316,7 @@ impl GrammarDataStack {
         {
             data.dense = true;
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent dense error semicolon
     #[inline]
@@ -3327,7 +3327,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3362,7 +3362,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent trace ident* semicolon
     #[inline]
@@ -3373,7 +3373,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3409,7 +3409,7 @@ impl GrammarDataStack {
                 });
             data.traces.extend(idents);
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent trace error semicolon
     #[inline]
@@ -3420,7 +3420,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3455,7 +3455,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent filter RustCode semicolon
     #[inline]
@@ -3466,7 +3466,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3496,7 +3496,7 @@ impl GrammarDataStack {
         {
             data.filter = Some(RustCode);
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent filter semicolon
     #[inline]
@@ -3507,7 +3507,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3538,7 +3538,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_filter,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent location RustCode semicolon
     #[inline]
@@ -3549,7 +3549,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3577,7 +3577,7 @@ impl GrammarDataStack {
         {
             data.location_typename = Some(RustCode);
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent location semicolon
     #[inline]
@@ -3588,7 +3588,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3619,7 +3619,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_location,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///Directive -> percent error semicolon
     #[inline]
@@ -3630,7 +3630,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3661,7 +3661,7 @@ impl GrammarDataStack {
                     span: __rustylr_location_error,
                 });
         }
-        Ok(())
+        Ok(false)
     }
     ///GrammarLine -> Rule
     #[inline]
@@ -3672,7 +3672,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3687,7 +3687,7 @@ impl GrammarDataStack {
         {
             data.rules.push(Rule);
         }
-        Ok(())
+        Ok(false)
     }
     ///GrammarLine -> Directive
     #[inline(always)]
@@ -3711,7 +3711,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3725,7 +3725,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
         __data_stack.__stack13.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///TokenMapped+ -> TokenMapped+ TokenMapped
     #[inline]
@@ -3736,7 +3736,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3757,15 +3757,16 @@ impl GrammarDataStack {
             Ap
         };
         __data_stack.__stack13.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///TokenMapped* -> TokenMapped+
     #[inline(always)]
     fn reduce__TokenMappedStar16_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///TokenMapped* ->
     #[inline]
@@ -3776,12 +3777,12 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __data_stack.__tags.push(GrammarTags::__stack13);
         let __res = { vec![] };
         __data_stack.__stack13.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///PrecDef+ -> PrecDef
     #[inline]
@@ -3792,7 +3793,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3806,7 +3807,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
         __data_stack.__stack14.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///PrecDef+ -> PrecDef+ PrecDef
     #[inline]
@@ -3817,7 +3818,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3838,15 +3839,16 @@ impl GrammarDataStack {
             Ap
         };
         __data_stack.__stack14.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///PrecDef* -> PrecDef+
     #[inline(always)]
     fn reduce__PrecDefStar18_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///PrecDef* ->
     #[inline]
@@ -3857,12 +3859,12 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __data_stack.__tags.push(GrammarTags::__stack14);
         let __res = { vec![] };
         __data_stack.__stack14.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///caret? -> caret
     #[inline]
@@ -3873,7 +3875,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3887,7 +3889,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = Some(A);
         __data_stack.__stack15.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///caret? ->
     #[inline]
@@ -3898,12 +3900,12 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __data_stack.__tags.push(GrammarTags::__stack15);
         let __res = { None };
         __data_stack.__stack15.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///TerminalSetItem+ -> TerminalSetItem
     #[inline]
@@ -3914,7 +3916,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3928,7 +3930,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
         __data_stack.__stack16.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem
     #[inline]
@@ -3939,7 +3941,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -3960,15 +3962,16 @@ impl GrammarDataStack {
             Ap
         };
         __data_stack.__stack16.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///TerminalSetItem* -> TerminalSetItem+
     #[inline(always)]
     fn reduce__TerminalSetItemStar21_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///TerminalSetItem* ->
     #[inline]
@@ -3979,12 +3982,12 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __data_stack.__tags.push(GrammarTags::__stack16);
         let __res = { vec![] };
         __data_stack.__stack16.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern+ -> Pattern
     #[inline]
@@ -3995,7 +3998,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -4009,7 +4012,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
         __data_stack.__stack17.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern+ -> Pattern+ Pattern
     #[inline]
@@ -4020,7 +4023,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -4041,15 +4044,16 @@ impl GrammarDataStack {
             Ap
         };
         __data_stack.__stack17.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///Pattern* -> Pattern+
     #[inline(always)]
     fn reduce__PatternStar23_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///Pattern* ->
     #[inline]
@@ -4060,12 +4064,12 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __data_stack.__tags.push(GrammarTags::__stack17);
         let __res = { vec![] };
         __data_stack.__stack17.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///$sep(Pattern*, pipe, +) -> Pattern*
     #[inline]
@@ -4076,7 +4080,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -4090,7 +4094,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![__token0] };
         __data_stack.__stack18.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///$sep(Pattern*, pipe, +) -> $sep(Pattern*, pipe, +) pipe Pattern*
     #[inline]
@@ -4101,7 +4105,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -4127,7 +4131,7 @@ impl GrammarDataStack {
             __token0
         };
         __data_stack.__stack18.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///comma? -> comma
     #[inline]
@@ -4138,7 +4142,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -4152,7 +4156,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = Some(A);
         __data_stack.__stack15.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///comma? ->
     #[inline]
@@ -4163,340 +4167,381 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __data_stack.__tags.push(GrammarTags::__stack15);
         let __res = { None };
         __data_stack.__stack15.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///[^semicolon] -> ident
     #[inline(always)]
     fn reduce__TermSet26_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> colon
     #[inline(always)]
     fn reduce__TermSet26_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> pipe
     #[inline(always)]
     fn reduce__TermSet26_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> percent
     #[inline(always)]
     fn reduce__TermSet26_3(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> equal
     #[inline(always)]
     fn reduce__TermSet26_4(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> plus
     #[inline(always)]
     fn reduce__TermSet26_5(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> star
     #[inline(always)]
     fn reduce__TermSet26_6(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> question
     #[inline(always)]
     fn reduce__TermSet26_7(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> caret
     #[inline(always)]
     fn reduce__TermSet26_8(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> minus
     #[inline(always)]
     fn reduce__TermSet26_9(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> exclamation
     #[inline(always)]
     fn reduce__TermSet26_10(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> slash
     #[inline(always)]
     fn reduce__TermSet26_11(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> dot
     #[inline(always)]
     fn reduce__TermSet26_12(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> dollar
     #[inline(always)]
     fn reduce__TermSet26_13(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> comma
     #[inline(always)]
     fn reduce__TermSet26_14(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> literal
     #[inline(always)]
     fn reduce__TermSet26_15(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> parengroup
     #[inline(always)]
     fn reduce__TermSet26_16(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> bracegroup
     #[inline(always)]
     fn reduce__TermSet26_17(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> lparen
     #[inline(always)]
     fn reduce__TermSet26_18(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> rparen
     #[inline(always)]
     fn reduce__TermSet26_19(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> lbracket
     #[inline(always)]
     fn reduce__TermSet26_20(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> rbracket
     #[inline(always)]
     fn reduce__TermSet26_21(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> left
     #[inline(always)]
     fn reduce__TermSet26_22(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> right
     #[inline(always)]
     fn reduce__TermSet26_23(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> token
     #[inline(always)]
     fn reduce__TermSet26_24(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> start
     #[inline(always)]
     fn reduce__TermSet26_25(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> tokentype
     #[inline(always)]
     fn reduce__TermSet26_26(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> userdata
     #[inline(always)]
     fn reduce__TermSet26_27(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> errortype
     #[inline(always)]
     fn reduce__TermSet26_28(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> moduleprefix
     #[inline(always)]
     fn reduce__TermSet26_29(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> lalr
     #[inline(always)]
     fn reduce__TermSet26_30(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> glr
     #[inline(always)]
     fn reduce__TermSet26_31(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> prec
     #[inline(always)]
     fn reduce__TermSet26_32(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> precedence
     #[inline(always)]
     fn reduce__TermSet26_33(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> nooptim
     #[inline(always)]
     fn reduce__TermSet26_34(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> dense
     #[inline(always)]
     fn reduce__TermSet26_35(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> trace
     #[inline(always)]
     fn reduce__TermSet26_36(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> dprec
     #[inline(always)]
     fn reduce__TermSet26_37(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> filter
     #[inline(always)]
     fn reduce__TermSet26_38(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> location
     #[inline(always)]
     fn reduce__TermSet26_39(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon] -> <Others>
     #[inline(always)]
     fn reduce__TermSet26_40(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///[^semicolon]+ -> [^semicolon]
     #[inline]
@@ -4507,7 +4552,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -4521,7 +4566,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
         __data_stack.__stack19.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///[^semicolon]+ -> [^semicolon]+ [^semicolon]
     #[inline]
@@ -4532,7 +4577,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -4553,7 +4598,7 @@ impl GrammarDataStack {
             Ap
         };
         __data_stack.__stack19.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///IdentOrLiteral+ -> IdentOrLiteral
     #[inline]
@@ -4564,7 +4609,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -4578,7 +4623,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
         __data_stack.__stack20.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
     #[inline]
@@ -4589,7 +4634,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -4610,7 +4655,7 @@ impl GrammarDataStack {
             Ap
         };
         __data_stack.__stack20.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///ident+ -> ident
     #[inline]
@@ -4621,7 +4666,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -4635,7 +4680,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
         __data_stack.__stack19.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///ident+ -> ident+ ident
     #[inline]
@@ -4646,7 +4691,7 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -4667,15 +4712,16 @@ impl GrammarDataStack {
             Ap
         };
         __data_stack.__stack19.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///ident* -> ident+
     #[inline(always)]
     fn reduce__identStar30_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+    ) -> bool {
         __location_stack.truncate(__location_stack.len() - 1usize);
+        true
     }
     ///ident* ->
     #[inline]
@@ -4686,12 +4732,12 @@ impl GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __data_stack.__tags.push(GrammarTags::__stack19);
         let __res = { vec![] };
         __data_stack.__stack19.push(__res);
-        Ok(())
+        Ok(true)
     }
     ///GrammarLine+ -> GrammarLine
     #[inline(always)]
@@ -4958,7 +5004,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
         lookahead: &::rusty_lr_core::TerminalSymbol<Self::Term>,
         user_data: &mut Self::UserData,
         location0: &mut Self::Location,
-    ) -> Result<(), Self::ReduceActionError> {
+    ) -> Result<bool, Self::ReduceActionError> {
         match rule_index {
             0usize => {
                 Self::reduce_Rule_0(
@@ -5732,11 +5778,11 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
             }
             77usize => {
                 Self::reduce_GrammarLine_1(data_stack, location_stack);
-                Ok(())
+                Ok(false)
             }
             78usize => {
                 Self::reduce_Grammar_0(data_stack, location_stack);
-                Ok(())
+                Ok(false)
             }
             79usize => {
                 Self::reduce__TokenMappedPlus15_0(
@@ -5758,10 +5804,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            81usize => {
-                Self::reduce__TokenMappedStar16_0(data_stack, location_stack);
-                Ok(())
-            }
+            81usize => Ok(Self::reduce__TokenMappedStar16_0(data_stack, location_stack)),
             82usize => {
                 Self::reduce__TokenMappedStar16_1(
                     data_stack,
@@ -5792,10 +5835,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            85usize => {
-                Self::reduce__PrecDefStar18_0(data_stack, location_stack);
-                Ok(())
-            }
+            85usize => Ok(Self::reduce__PrecDefStar18_0(data_stack, location_stack)),
             86usize => {
                 Self::reduce__PrecDefStar18_1(
                     data_stack,
@@ -5847,8 +5887,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             91usize => {
-                Self::reduce__TerminalSetItemStar21_0(data_stack, location_stack);
-                Ok(())
+                Ok(Self::reduce__TerminalSetItemStar21_0(data_stack, location_stack))
             }
             92usize => {
                 Self::reduce__TerminalSetItemStar21_1(
@@ -5880,10 +5919,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            95usize => {
-                Self::reduce__PatternStar23_0(data_stack, location_stack);
-                Ok(())
-            }
+            95usize => Ok(Self::reduce__PatternStar23_0(data_stack, location_stack)),
             96usize => {
                 Self::reduce__PatternStar23_1(
                     data_stack,
@@ -5934,170 +5970,47 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            101usize => {
-                Self::reduce__TermSet26_0(data_stack, location_stack);
-                Ok(())
-            }
-            102usize => {
-                Self::reduce__TermSet26_1(data_stack, location_stack);
-                Ok(())
-            }
-            103usize => {
-                Self::reduce__TermSet26_2(data_stack, location_stack);
-                Ok(())
-            }
-            104usize => {
-                Self::reduce__TermSet26_3(data_stack, location_stack);
-                Ok(())
-            }
-            105usize => {
-                Self::reduce__TermSet26_4(data_stack, location_stack);
-                Ok(())
-            }
-            106usize => {
-                Self::reduce__TermSet26_5(data_stack, location_stack);
-                Ok(())
-            }
-            107usize => {
-                Self::reduce__TermSet26_6(data_stack, location_stack);
-                Ok(())
-            }
-            108usize => {
-                Self::reduce__TermSet26_7(data_stack, location_stack);
-                Ok(())
-            }
-            109usize => {
-                Self::reduce__TermSet26_8(data_stack, location_stack);
-                Ok(())
-            }
-            110usize => {
-                Self::reduce__TermSet26_9(data_stack, location_stack);
-                Ok(())
-            }
-            111usize => {
-                Self::reduce__TermSet26_10(data_stack, location_stack);
-                Ok(())
-            }
-            112usize => {
-                Self::reduce__TermSet26_11(data_stack, location_stack);
-                Ok(())
-            }
-            113usize => {
-                Self::reduce__TermSet26_12(data_stack, location_stack);
-                Ok(())
-            }
-            114usize => {
-                Self::reduce__TermSet26_13(data_stack, location_stack);
-                Ok(())
-            }
-            115usize => {
-                Self::reduce__TermSet26_14(data_stack, location_stack);
-                Ok(())
-            }
-            116usize => {
-                Self::reduce__TermSet26_15(data_stack, location_stack);
-                Ok(())
-            }
-            117usize => {
-                Self::reduce__TermSet26_16(data_stack, location_stack);
-                Ok(())
-            }
-            118usize => {
-                Self::reduce__TermSet26_17(data_stack, location_stack);
-                Ok(())
-            }
-            119usize => {
-                Self::reduce__TermSet26_18(data_stack, location_stack);
-                Ok(())
-            }
-            120usize => {
-                Self::reduce__TermSet26_19(data_stack, location_stack);
-                Ok(())
-            }
-            121usize => {
-                Self::reduce__TermSet26_20(data_stack, location_stack);
-                Ok(())
-            }
-            122usize => {
-                Self::reduce__TermSet26_21(data_stack, location_stack);
-                Ok(())
-            }
-            123usize => {
-                Self::reduce__TermSet26_22(data_stack, location_stack);
-                Ok(())
-            }
-            124usize => {
-                Self::reduce__TermSet26_23(data_stack, location_stack);
-                Ok(())
-            }
-            125usize => {
-                Self::reduce__TermSet26_24(data_stack, location_stack);
-                Ok(())
-            }
-            126usize => {
-                Self::reduce__TermSet26_25(data_stack, location_stack);
-                Ok(())
-            }
-            127usize => {
-                Self::reduce__TermSet26_26(data_stack, location_stack);
-                Ok(())
-            }
-            128usize => {
-                Self::reduce__TermSet26_27(data_stack, location_stack);
-                Ok(())
-            }
-            129usize => {
-                Self::reduce__TermSet26_28(data_stack, location_stack);
-                Ok(())
-            }
-            130usize => {
-                Self::reduce__TermSet26_29(data_stack, location_stack);
-                Ok(())
-            }
-            131usize => {
-                Self::reduce__TermSet26_30(data_stack, location_stack);
-                Ok(())
-            }
-            132usize => {
-                Self::reduce__TermSet26_31(data_stack, location_stack);
-                Ok(())
-            }
-            133usize => {
-                Self::reduce__TermSet26_32(data_stack, location_stack);
-                Ok(())
-            }
-            134usize => {
-                Self::reduce__TermSet26_33(data_stack, location_stack);
-                Ok(())
-            }
-            135usize => {
-                Self::reduce__TermSet26_34(data_stack, location_stack);
-                Ok(())
-            }
-            136usize => {
-                Self::reduce__TermSet26_35(data_stack, location_stack);
-                Ok(())
-            }
-            137usize => {
-                Self::reduce__TermSet26_36(data_stack, location_stack);
-                Ok(())
-            }
-            138usize => {
-                Self::reduce__TermSet26_37(data_stack, location_stack);
-                Ok(())
-            }
-            139usize => {
-                Self::reduce__TermSet26_38(data_stack, location_stack);
-                Ok(())
-            }
-            140usize => {
-                Self::reduce__TermSet26_39(data_stack, location_stack);
-                Ok(())
-            }
-            141usize => {
-                Self::reduce__TermSet26_40(data_stack, location_stack);
-                Ok(())
-            }
+            101usize => Ok(Self::reduce__TermSet26_0(data_stack, location_stack)),
+            102usize => Ok(Self::reduce__TermSet26_1(data_stack, location_stack)),
+            103usize => Ok(Self::reduce__TermSet26_2(data_stack, location_stack)),
+            104usize => Ok(Self::reduce__TermSet26_3(data_stack, location_stack)),
+            105usize => Ok(Self::reduce__TermSet26_4(data_stack, location_stack)),
+            106usize => Ok(Self::reduce__TermSet26_5(data_stack, location_stack)),
+            107usize => Ok(Self::reduce__TermSet26_6(data_stack, location_stack)),
+            108usize => Ok(Self::reduce__TermSet26_7(data_stack, location_stack)),
+            109usize => Ok(Self::reduce__TermSet26_8(data_stack, location_stack)),
+            110usize => Ok(Self::reduce__TermSet26_9(data_stack, location_stack)),
+            111usize => Ok(Self::reduce__TermSet26_10(data_stack, location_stack)),
+            112usize => Ok(Self::reduce__TermSet26_11(data_stack, location_stack)),
+            113usize => Ok(Self::reduce__TermSet26_12(data_stack, location_stack)),
+            114usize => Ok(Self::reduce__TermSet26_13(data_stack, location_stack)),
+            115usize => Ok(Self::reduce__TermSet26_14(data_stack, location_stack)),
+            116usize => Ok(Self::reduce__TermSet26_15(data_stack, location_stack)),
+            117usize => Ok(Self::reduce__TermSet26_16(data_stack, location_stack)),
+            118usize => Ok(Self::reduce__TermSet26_17(data_stack, location_stack)),
+            119usize => Ok(Self::reduce__TermSet26_18(data_stack, location_stack)),
+            120usize => Ok(Self::reduce__TermSet26_19(data_stack, location_stack)),
+            121usize => Ok(Self::reduce__TermSet26_20(data_stack, location_stack)),
+            122usize => Ok(Self::reduce__TermSet26_21(data_stack, location_stack)),
+            123usize => Ok(Self::reduce__TermSet26_22(data_stack, location_stack)),
+            124usize => Ok(Self::reduce__TermSet26_23(data_stack, location_stack)),
+            125usize => Ok(Self::reduce__TermSet26_24(data_stack, location_stack)),
+            126usize => Ok(Self::reduce__TermSet26_25(data_stack, location_stack)),
+            127usize => Ok(Self::reduce__TermSet26_26(data_stack, location_stack)),
+            128usize => Ok(Self::reduce__TermSet26_27(data_stack, location_stack)),
+            129usize => Ok(Self::reduce__TermSet26_28(data_stack, location_stack)),
+            130usize => Ok(Self::reduce__TermSet26_29(data_stack, location_stack)),
+            131usize => Ok(Self::reduce__TermSet26_30(data_stack, location_stack)),
+            132usize => Ok(Self::reduce__TermSet26_31(data_stack, location_stack)),
+            133usize => Ok(Self::reduce__TermSet26_32(data_stack, location_stack)),
+            134usize => Ok(Self::reduce__TermSet26_33(data_stack, location_stack)),
+            135usize => Ok(Self::reduce__TermSet26_34(data_stack, location_stack)),
+            136usize => Ok(Self::reduce__TermSet26_35(data_stack, location_stack)),
+            137usize => Ok(Self::reduce__TermSet26_36(data_stack, location_stack)),
+            138usize => Ok(Self::reduce__TermSet26_37(data_stack, location_stack)),
+            139usize => Ok(Self::reduce__TermSet26_38(data_stack, location_stack)),
+            140usize => Ok(Self::reduce__TermSet26_39(data_stack, location_stack)),
+            141usize => Ok(Self::reduce__TermSet26_40(data_stack, location_stack)),
             142usize => {
                 Self::reduce___TermSet26Plus27_0(
                     data_stack,
@@ -6158,10 +6071,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            148usize => {
-                Self::reduce__identStar30_0(data_stack, location_stack);
-                Ok(())
-            }
+            148usize => Ok(Self::reduce__identStar30_0(data_stack, location_stack)),
             149usize => {
                 Self::reduce__identStar30_1(
                     data_stack,
@@ -6174,15 +6084,15 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
             }
             150usize => {
                 Self::reduce__GrammarLinePlus31_0(data_stack, location_stack);
-                Ok(())
+                Ok(false)
             }
             151usize => {
                 Self::reduce__GrammarLinePlus31_1(data_stack, location_stack);
-                Ok(())
+                Ok(false)
             }
             152usize => {
                 Self::reduce_Augmented_0(data_stack, location_stack);
-                Ok(())
+                Ok(false)
             }
             _ => {
                 unreachable!("Invalid Rule: {}", rule_index);

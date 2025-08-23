@@ -1299,6 +1299,8 @@ impl Grammar {
                             #rule_index => Self::#reduce_fn_ident( data_stack, location_stack, shift, lookahead, user_data, location0 ),
                         });
 
+                        let returns_non_empty = stack_names_for_nonterm[nonterm_idx].is_some();
+
                         // typename is defined, reduce action must be defined
                         if let Some(stack_name) = &stack_names_for_nonterm[nonterm_idx] {
                             fn_reduce_for_each_rule_stream.extend(quote! {
@@ -1311,7 +1313,7 @@ impl Grammar {
                                     lookahead: &#module_prefix::TerminalSymbol<#token_typename>,
                                     #user_data_parameter_name: &mut #user_data_typename,
                                     __rustylr_location0: &mut #location_typename,
-                                ) -> Result<(), #reduce_error_typename> {
+                                ) -> Result<bool, #reduce_error_typename> {
                                     #[cfg(debug_assertions)]
                                     {
                                         #debug_tag_check_stream
@@ -1323,7 +1325,7 @@ impl Grammar {
                                     let __res = #reduce_action ;
                                     __data_stack.#stack_name.push(__res);
 
-                                    Ok(())
+                                    Ok(#returns_non_empty)
                                 }
                             });
                         } else {
@@ -1337,7 +1339,7 @@ impl Grammar {
                                     lookahead: &#module_prefix::TerminalSymbol<#token_typename>,
                                     #user_data_parameter_name: &mut #user_data_typename,
                                     __rustylr_location0: &mut #location_typename,
-                                ) -> Result<(), #reduce_error_typename> {
+                                ) -> Result<bool, #reduce_error_typename> {
                                     #[cfg(debug_assertions)]
                                     {
                                         #debug_tag_check_stream
@@ -1348,7 +1350,7 @@ impl Grammar {
 
                                     #reduce_action
 
-                                    Ok(())
+                                    Ok(#returns_non_empty)
                                 }
                             });
                         }
@@ -1358,7 +1360,7 @@ impl Grammar {
                     // 'c' will be automatically chosen, even if there is no reduce action
                     &Some(ReduceAction::Identity(identity_token_idx)) => {
                         reduce_action_case_streams.extend(quote! {
-                            #rule_index => { Self::#reduce_fn_ident( data_stack, location_stack ); Ok(()) }
+                            #rule_index => { Ok(Self::#reduce_fn_ident( data_stack, location_stack )) }
                         });
 
                         let mut stack_count_map = std::collections::BTreeMap::new();
@@ -1445,19 +1447,23 @@ impl Grammar {
                         let location_truncate_stream =
                             quote! { __location_stack.truncate(__location_stack.len() - #len); };
 
+                        let returns_non_empty = pop_stack_idx_pair.is_some();
+
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             #[doc = #rule_debug_str]
                             #[inline(always)]
                             fn #reduce_fn_ident(
                                 __data_stack: &mut Self,
                                 __location_stack: &mut Vec<#location_typename>,
-                            ) {
+                            ) -> bool {
                                 #stack_pop_stream // __ret = stack.swap_remove(i);
                                 #stack_truncate_stream // stack.truncate( ... );
                                 #stack_push_stream // stack.push( __ret );
                                 #location_truncate_stream // location.truncate( ... );
                                 #tags_truncate_stream // tags.truncate( ... );
                                 #tag_push_stream // tag.push( ... );
+
+                                #returns_non_empty
                             }
                         });
                     }
@@ -1466,7 +1472,7 @@ impl Grammar {
                     // 'E' does not have rule type, so no need for a reduce action
                     None => {
                         reduce_action_case_streams.extend(quote! {
-                            #rule_index => { Self::#reduce_fn_ident( data_stack, location_stack ); Ok(()) }
+                            #rule_index => { Self::#reduce_fn_ident( data_stack, location_stack ); Ok(false) }
                         });
 
                         let mut stack_count_map = std::collections::BTreeMap::new();
@@ -1706,7 +1712,7 @@ impl Grammar {
                 lookahead: &#module_prefix::TerminalSymbol<Self::Term>,
                 user_data: &mut Self::UserData,
                 location0: &mut Self::Location,
-            ) -> Result<(), Self::ReduceActionError> {
+            ) -> Result<bool, Self::ReduceActionError> {
                 match rule_index {
                     #reduce_action_case_streams
                     _ => {
