@@ -1589,12 +1589,12 @@ impl Grammar {
                 reduce_states.push(None);
                 continue;
             }
-            let rules = rules.into_iter().next().unwrap();
-            if rules.len() != 1 {
+            let rule_set = rules.into_iter().next().unwrap();
+            if rule_set.len() != 1 {
                 reduce_states.push(None);
                 continue;
             }
-            let rule = rules[0];
+            let rule = rule_set[0];
             let (nonterm, local_rule_id) = self.get_rule_by_id(rule).unwrap();
             if nonterm.rules[local_rule_id].tokens.len() != 1 {
                 reduce_states.push(None);
