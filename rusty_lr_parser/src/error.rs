@@ -60,8 +60,8 @@ pub enum ParseError {
     /// different reduce type applied to the same terminal symbol
     MultipleReduceDefinition {
         terminal: String,
-        old: (Span, rusty_lr_core::builder::ReduceType),
-        new: (Span, rusty_lr_core::builder::ReduceType),
+        old: (Span, rusty_lr_core::rule::ReduceType),
+        new: (Span, rusty_lr_core::rule::ReduceType),
     },
 
     /// multiple %token definition

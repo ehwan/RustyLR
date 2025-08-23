@@ -14,7 +14,8 @@ pub(crate) mod location;
 pub use location::DefaultLocation;
 pub use location::Location;
 
-/// module for build parser tables from CFG
+/// module for build parser tables from CFG, (feature "builder")
+#[cfg(feature = "builder")]
 pub mod builder;
 
 /// module for core parser functionality

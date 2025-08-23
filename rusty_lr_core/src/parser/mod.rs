@@ -66,7 +66,7 @@ pub trait Parser {
 
     /// Get the type of precedence for i'th level.
     /// `None` if i'th level was defined as %precedence (no reduce type).
-    fn precedence_types(&self, level: u8) -> Option<crate::builder::ReduceType>;
+    fn precedence_types(&self, level: u8) -> Option<crate::rule::ReduceType>;
 
     /// Get the precedence level (priority) of the given terminal class
     /// `None` if the terminal class has no precedence defined.

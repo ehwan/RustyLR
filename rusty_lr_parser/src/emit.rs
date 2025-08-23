@@ -201,7 +201,7 @@ impl Grammar {
         // ======================
         // building grammar
         // ======================
-        use rusty_lr_core::builder::ReduceType;
+        use rusty_lr_core::rule::ReduceType;
         use rusty_lr_core::TerminalSymbol;
         use rusty_lr_core::Token;
 
@@ -349,12 +349,12 @@ impl Grammar {
             let mut stream = TokenStream::new();
             if !lefts.is_empty() {
                 stream.extend(quote! {
-                    #lefts => Some(#module_prefix::builder::ReduceType::Left),
+                    #lefts => Some(#module_prefix::rule::ReduceType::Left),
                 });
             }
             if !rights.is_empty() {
                 stream.extend(quote! {
-                    #rights => Some(#module_prefix::builder::ReduceType::Right),
+                    #rights => Some(#module_prefix::rule::ReduceType::Right),
                 });
             }
             stream.extend(quote! {
@@ -782,7 +782,7 @@ impl Grammar {
                         }
                     }
                 }
-                fn precedence_types(&self, level: u8) -> Option<#module_prefix::builder::ReduceType> {
+                fn precedence_types(&self, level: u8) -> Option<#module_prefix::rule::ReduceType> {
                     #[allow(unreachable_patterns)]
                     match level {
                         #precedence_types_match_body_stream
@@ -976,7 +976,7 @@ impl Grammar {
                         }
                     }
                 }
-                fn precedence_types(&self, level: u8) -> Option<#module_prefix::builder::ReduceType> {
+                fn precedence_types(&self, level: u8) -> Option<#module_prefix::rule::ReduceType> {
                     #[allow(unreachable_patterns)]
                     match level {
                         #precedence_types_match_body_stream

@@ -520,9 +520,9 @@ pub struct GrammarArgs {
     pub error_typename: Vec<(Span, TokenStream)>,
     pub terminals: Vec<(Ident, TokenStream)>,
     pub precedences: Vec<(
-        Span,                                       // span of %left, %right, %precedence
-        Option<rusty_lr_core::builder::ReduceType>, // actual definition of precedence type
-        Vec<IdentOrLiteral>,                        // items
+        Span,                                    // span of %left, %right, %precedence
+        Option<rusty_lr_core::rule::ReduceType>, // actual definition of precedence type
+        Vec<IdentOrLiteral>,                     // items
     )>,
     pub rules: Vec<RuleDefArgs>,
     pub lalr: bool,

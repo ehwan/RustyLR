@@ -951,7 +951,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                             }
                             std::cmp::Ordering::Equal => {
                                 // check for reduce_type
-                                use crate::builder::ReduceType;
+                                use crate::rule::ReduceType;
                                 match parser.precedence_types(reduce_prec_) {
                                     Some(ReduceType::Left) => {
                                         // no shift
@@ -1337,7 +1337,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                             }
                             std::cmp::Ordering::Equal => {
                                 // check for reduce_type
-                                use crate::builder::ReduceType;
+                                use crate::rule::ReduceType;
                                 match parser.precedence_types(reduce_prec_) {
                                     Some(ReduceType::Left) => {
                                         // no shift

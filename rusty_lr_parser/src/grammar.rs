@@ -77,7 +77,7 @@ pub struct Grammar {
     pub terminals_index: HashMap<TerminalName, TerminalIndex>,
 
     /// %left, %right, or %precedence for each precedence level
-    pub precedence_types: Vec<(Option<rusty_lr_core::builder::ReduceType>, Span)>,
+    pub precedence_types: Vec<(Option<rusty_lr_core::rule::ReduceType>, Span)>,
 
     /// precedence levels; line number of %left, %right, or %precedence directive
     pub precedence_levels: HashMap<IdentOrU32, (usize, Span)>,

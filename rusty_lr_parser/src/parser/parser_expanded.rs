@@ -22,7 +22,7 @@ use proc_macro2::TokenStream;
 use quote::ToTokens;
 use quote::format_ident;
 use std::boxed::Box;
-use rusty_lr_core::builder::ReduceType;
+use rusty_lr_core::rule::ReduceType;
 
 // =================================User Codes End=================================
 /*
@@ -5826,13 +5826,10 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
             }
         }
     }
-    fn precedence_types(
-        &self,
-        level: u8,
-    ) -> Option<::rusty_lr_core::builder::ReduceType> {
+    fn precedence_types(&self, level: u8) -> Option<::rusty_lr_core::rule::ReduceType> {
         #[allow(unreachable_patterns)]
         match level {
-            0..=2 => Some(::rusty_lr_core::builder::ReduceType::Left),
+            0..=2 => Some(::rusty_lr_core::rule::ReduceType::Left),
             _ => None,
         }
     }

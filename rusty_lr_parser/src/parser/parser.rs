@@ -19,7 +19,7 @@ use quote::format_ident;
 
 use std::boxed::Box;
 
-use rusty_lr_core::builder::ReduceType;
+use rusty_lr_core::rule::ReduceType;
 
 // bootstrap the parser for the grammar
 // this define the actual parser for proc-macro line parsing

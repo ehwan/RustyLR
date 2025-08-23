@@ -16,4 +16,5 @@ smallvec = { version = "1.15" }
 
 [features]
 default = []
+builder = []
 tree = ["dep:termtree"]
