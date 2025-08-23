@@ -35,7 +35,8 @@ pub trait DataStack: Sized + Default {
     fn split_off(&mut self, at: usize) -> Self;
     fn append(&mut self, other: &mut Self);
 
-    /// performs a reduce action with the given rule index
+    /// Performs a reduce action with the given rule index.
+    /// Returns false if the empty tag was pushed by this reduce action, true otherwise.
     fn reduce_action(
         // the child tokens for the reduction
         // the caller (usually from generated code) must pops all of the tokens used for this reduce_action
@@ -54,5 +55,5 @@ pub trait DataStack: Sized + Default {
         userdata: &mut Self::UserData,
         // location of this non-terminal, e.g. `@$`
         location0: &mut Self::Location,
-    ) -> Result<(), Self::ReduceActionError>;
+    ) -> Result<bool, Self::ReduceActionError>;
 }

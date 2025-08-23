@@ -162,6 +162,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
                     let line2 = Rule {
                         tokens: vec![
@@ -185,6 +186,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -224,6 +226,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
                     let line2 = Rule {
                         tokens: vec![
@@ -245,6 +248,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -301,6 +305,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
                     let line2 = Rule {
                         tokens: vec![],
@@ -311,6 +316,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -350,6 +356,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
                     let line2 = Rule {
                         tokens: vec![],
@@ -358,6 +365,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
                     let nonterm_info = NonTerminalInfo {
                         name: newrule_name.clone(),
@@ -406,6 +414,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
                     let line2 = Rule {
                         tokens: vec![],
@@ -416,6 +425,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -455,6 +465,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
                     let line2 = Rule {
                         tokens: vec![],
@@ -463,6 +474,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -528,6 +540,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
                     rules.push(rule);
                 }
@@ -580,6 +593,7 @@ impl Pattern {
                         lookaheads: Some(lookaheads),
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -616,6 +630,7 @@ impl Pattern {
                         lookaheads: Some(lookaheads),
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -683,6 +698,7 @@ impl Pattern {
                                 lookaheads: None,
                                 prec: None,
                                 dprec: None,
+                                is_used: true,
                             };
                             (rule, None)
                         }
@@ -698,6 +714,7 @@ impl Pattern {
                                 lookaheads: None,
                                 prec: None,
                                 dprec: None,
+                                is_used: true,
                             };
                             let ruletype = elements[unique_child_idx].ruletype.clone();
                             (rule, ruletype)
@@ -722,6 +739,7 @@ impl Pattern {
                                 lookaheads: None,
                                 prec: None,
                                 dprec: None,
+                                is_used: true,
                             };
                             (rule, Some(typename))
                         }
@@ -817,6 +835,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -866,6 +885,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -917,6 +937,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
                     let rule2 = Rule {
                         tokens: vec![
@@ -949,6 +970,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -985,6 +1007,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
                     let rule2 = Rule {
                         tokens: vec![
@@ -1012,6 +1035,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -1069,6 +1093,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
                     let line2 = Rule {
                         tokens: vec![],
@@ -1079,6 +1104,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
 
                     let nonterm_info = NonTerminalInfo {
@@ -1118,6 +1144,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
                     let line2 = Rule {
                         tokens: vec![],
@@ -1126,6 +1153,7 @@ impl Pattern {
                         lookaheads: None,
                         prec: None,
                         dprec: None,
+                        is_used: true,
                     };
                     let nonterm_info = NonTerminalInfo {
                         name: newrule_name.clone(),

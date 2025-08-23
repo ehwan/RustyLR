@@ -33,6 +33,9 @@ pub struct Rule {
     pub prec: Option<(rusty_lr_core::rule::Precedence, Span)>,
     /// %dprec definition
     pub dprec: Option<(usize, Span)>,
+
+    /// in `Grammar::build_grammar()`, some production rules will be optimized out and deleted
+    pub(crate) is_used: bool,
 }
 
 impl Rule {
