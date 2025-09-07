@@ -1,4 +1,5 @@
 use std::hash::Hash;
+use std::num::NonZeroUsize;
 
 use super::Node;
 use super::ParseError;
@@ -1296,17 +1297,29 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     /// Feed one terminal with location to parser, and update state stack.
     fn can_feed_impl<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
+        extra_state_stack: &mut Vec<StateIndex>,
+        extra_precedence_stack: &mut Vec<Precedence>,
         parser: &P,
-        node: usize,
+        mut node_and_len: Option<(usize, NonZeroUsize)>,
         class: TerminalSymbol<usize>,
         shift_prec: Precedence,
-    ) -> bool
+    ) -> Option<bool>
     where
         P::NonTerm: std::hash::Hash + Eq + NonTerminal,
     {
         use crate::parser::State;
 
-        let last_state = self.state(node);
+        let last_state = extra_state_stack
+            .last()
+            .copied()
+            .map(Index::into_usize)
+            .unwrap_or_else(|| {
+                node_and_len
+                    .map(|(node, stack_len)| {
+                        self.node(node).state_stack[stack_len.get() - 1].into_usize()
+                    })
+                    .unwrap_or(0)
+            });
         let shift_state = parser.get_states()[last_state].shift_goto_class(class);
         if let Some(reduce_rules) = parser.get_states()[last_state].reduce(class) {
             let mut shift = None;
@@ -1318,9 +1331,22 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
                     Some(crate::rule::Precedence::Dynamic(token_index)) => {
                         // fix the value to the offset from current node
-                        let ith = rule.rule.len() - token_index - 1;
-                        let (node, ith) = self.skip_last_n(node, ith).unwrap();
-                        self.node(node).precedence_stack[ith]
+                        let mut ith = rule.rule.len() - token_index - 1;
+                        if ith < extra_precedence_stack.len() {
+                            extra_precedence_stack[extra_precedence_stack.len() - 1 - ith]
+                        } else {
+                            ith -= extra_precedence_stack.len();
+                            let (node, len) = node_and_len.unwrap();
+                            if ith < len.get() {
+                                self.node(node).precedence_stack[len.get() - 1 - ith]
+                            } else {
+                                ith -= len.get();
+                                let parent = self.node(node).parent.unwrap();
+                                let (node, ith) = self.skip_last_n(parent, ith).unwrap();
+                                self.node(node).precedence_stack[ith]
+                            }
+                            // safe unwrap since ith >= extra_precedence_stack.len()
+                        }
                     }
                     None => Precedence::none(),
                 };
@@ -1366,9 +1392,165 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 }
             }
 
-            shift.is_some() || !reduces.is_empty()
+            if shift.is_some() {
+                return Some(true);
+            }
+            if reduces.is_empty() {
+                return None;
+            }
+
+            if reduces.len() == 1 {
+                let (rule, reduce_prec) = reduces[0];
+                let reduce_rule = &parser.get_rules()[rule];
+                let tokens_len = reduce_rule.rule.len();
+
+                // pop state stack
+                // pop precedence stack
+                if tokens_len <= extra_precedence_stack.len() {
+                    extra_precedence_stack.truncate(extra_precedence_stack.len() - tokens_len);
+                    extra_state_stack.truncate(extra_state_stack.len() - tokens_len);
+                } else {
+                    let left = tokens_len - extra_precedence_stack.len();
+                    extra_precedence_stack.clear();
+                    extra_state_stack.clear();
+
+                    let (node, len) = node_and_len.unwrap();
+                    let len = len.get();
+
+                    if left < len {
+                        node_and_len = Some((node, NonZeroUsize::new(len - left).unwrap()));
+                    } else {
+                        let parent = self.node(node).parent;
+                        if let Some(parent) = parent {
+                            node_and_len = self
+                                .skip_last_n(parent, left - len)
+                                .map(|(node, i)| (node, NonZeroUsize::new(i + 1).unwrap()));
+                        } else {
+                            // reached root node
+                            node_and_len = None;
+                        }
+                    }
+                }
+
+                extra_precedence_stack.push(reduce_prec);
+
+                // shift with reduced nonterminal
+                if let Some(next_state_id) = parser.get_states()[extra_state_stack
+                    .last()
+                    .copied()
+                    .map(Index::into_usize)
+                    .unwrap_or_else(|| {
+                        node_and_len
+                            .map(|(node, stack_len)| {
+                                self.node(node).state_stack[stack_len.get() - 1].into_usize()
+                            })
+                            .unwrap_or(0)
+                    })]
+                .shift_goto_nonterm(&reduce_rule.name)
+                {
+                    extra_state_stack.push(StateIndex::from_usize_unchecked(next_state_id.state));
+                } else {
+                    unreachable!(
+                        "unreachable: nonterminal shift should always succeed after reduce operation. \
+Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a parser state machine bug.",
+                        reduce_rule.name.as_str(),
+                        rule
+                    );
+                }
+
+                self.can_feed_impl(
+                    extra_state_stack,
+                    extra_precedence_stack,
+                    parser,
+                    node_and_len,
+                    class,
+                    shift_prec,
+                )
+            } else {
+                let mut ret = None;
+                for (reduce_rule, reduce_prec) in reduces.into_iter() {
+                    let reduce_rule = &parser.get_rules()[reduce_rule];
+                    let tokens_len = reduce_rule.rule.len();
+
+                    let mut extra_state_stack = extra_state_stack.clone();
+                    let mut extra_precedence_stack = extra_precedence_stack.clone();
+
+                    // pop state stack
+                    // pop precedence stack
+                    let new_node_and_len = if tokens_len <= extra_precedence_stack.len() {
+                        extra_precedence_stack.truncate(extra_precedence_stack.len() - tokens_len);
+                        extra_state_stack.truncate(extra_state_stack.len() - tokens_len);
+                        node_and_len
+                    } else {
+                        let left = tokens_len - extra_precedence_stack.len();
+                        extra_precedence_stack.clear();
+                        extra_state_stack.clear();
+
+                        let (node, len) = node_and_len.unwrap();
+                        let len = len.get();
+
+                        if left < len {
+                            Some((node, NonZeroUsize::new(len - left).unwrap()))
+                        } else {
+                            let parent = self.node(node).parent;
+                            if let Some(parent) = parent {
+                                self.skip_last_n(parent, left - len)
+                                    .map(|(node, i)| (node, NonZeroUsize::new(i + 1).unwrap()))
+                            } else {
+                                // reached root node
+                                None
+                            }
+                        }
+                    };
+
+                    extra_precedence_stack.push(reduce_prec);
+
+                    // shift with reduced nonterminal
+                    let last_state = extra_state_stack
+                        .last()
+                        .copied()
+                        .map(Index::into_usize)
+                        .unwrap_or_else(|| {
+                            new_node_and_len
+                                .map(|(node, stack_len)| {
+                                    self.node(node).state_stack[stack_len.get() - 1].into_usize()
+                                })
+                                .unwrap_or(0)
+                        });
+
+                    if let Some(next_state_id) =
+                        parser.get_states()[last_state].shift_goto_nonterm(&reduce_rule.name)
+                    {
+                        extra_state_stack
+                            .push(StateIndex::from_usize_unchecked(next_state_id.state));
+                    } else {
+                        unreachable!(
+                            "unreachable: nonterminal shift should always succeed after reduce operation, but failed for nonterminal '{}' from state {:?}",
+                            reduce_rule.name.as_str(),
+                            last_state
+                        );
+                    }
+
+                    match self.can_feed_impl(
+                        &mut extra_state_stack,
+                        &mut extra_precedence_stack,
+                        parser,
+                        new_node_and_len,
+                        class,
+                        shift_prec,
+                    ) {
+                        Some(true) => return Some(true),
+                        Some(false) => {
+                            ret = Some(false);
+                        }
+                        None => {}
+                    }
+                }
+                ret
+            }
+            // check reduce actions
         } else {
-            shift_state.is_some()
+            Some(shift_state.is_some())
         }
     }
 
@@ -1386,9 +1568,30 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     {
         let class = parser.to_terminal_class(term);
         let shift_prec = parser.class_precedence(TerminalSymbol::Term(class));
-        self.current_nodes
-            .iter()
-            .any(|node| self.can_feed_impl(parser, *node, TerminalSymbol::Term(class), shift_prec))
+        let mut extra_state_stack = Vec::new();
+        let mut extra_precedence_stack = Vec::new();
+        self.current_nodes.iter().any(move |&node| {
+            extra_precedence_stack.clear();
+            extra_state_stack.clear();
+
+            let node_and_len = {
+                let node_ = self.node(node);
+                if node_.len() == 0 {
+                    // only root node can have 0 length stack
+                    None
+                } else {
+                    Some((node, NonZeroUsize::new(node_.len()).unwrap()))
+                }
+            };
+            self.can_feed_impl(
+                &mut extra_state_stack,
+                &mut extra_precedence_stack,
+                parser,
+                node_and_len,
+                TerminalSymbol::Term(class),
+                shift_prec,
+            ) == Some(true)
+        })
     }
 
     /// Check if current context can enter panic mode.
@@ -1404,12 +1607,54 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             return false;
         }
 
-        self.current_nodes.iter().any(|&node| {
-            self.state_iter(node).any(|state| {
-                let state = &parser.get_states()[state];
-                state.shift_goto_class(TerminalSymbol::Error).is_some()
-                    || state.reduce(TerminalSymbol::Error).is_some()
-            })
+        let mut extra_state_stack = Vec::new();
+        let mut extra_precedence_stack = Vec::new();
+        let error_prec = parser.class_precedence(TerminalSymbol::Error);
+
+        self.current_nodes.iter().any(move |&node| {
+            let mut node = node;
+            let mut len = self.node(node).len();
+
+            if len > 0 {
+                loop {
+                    extra_precedence_stack.clear();
+                    extra_state_stack.clear();
+
+                    if self.can_feed_impl(
+                        &mut extra_state_stack,
+                        &mut extra_precedence_stack,
+                        parser,
+                        Some((node, NonZeroUsize::new(len).unwrap())),
+                        TerminalSymbol::Error,
+                        error_prec,
+                    ) == Some(true)
+                    {
+                        return true;
+                    } else {
+                        len -= 1;
+                        if len == 0 {
+                            if let Some(parent) = self.node(node).parent {
+                                node = parent;
+                                len = self.node(parent).len();
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // check root node
+            extra_precedence_stack.clear();
+            extra_state_stack.clear();
+            self.can_feed_impl(
+                &mut extra_state_stack,
+                &mut extra_precedence_stack,
+                parser,
+                None,
+                TerminalSymbol::Error,
+                error_prec,
+            ) == Some(true)
         })
     }
 
@@ -1470,9 +1715,30 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         P::NonTerm: Hash + Eq + NonTerminal,
     {
-        self.current_nodes
-            .iter()
-            .any(|node| self.can_feed_impl(parser, *node, TerminalSymbol::Eof, Precedence::none()))
+        let mut extra_state_stack = Vec::new();
+        let mut extra_precedence_stack = Vec::new();
+        self.current_nodes.iter().any(move |&node| {
+            extra_precedence_stack.clear();
+            extra_state_stack.clear();
+
+            let node_and_len = {
+                let node_ = self.node(node);
+                if node_.len() == 0 {
+                    // only root node can have 0 length stack
+                    None
+                } else {
+                    Some((node, NonZeroUsize::new(node_.len()).unwrap()))
+                }
+            };
+            self.can_feed_impl(
+                &mut extra_state_stack,
+                &mut extra_precedence_stack,
+                parser,
+                node_and_len,
+                TerminalSymbol::Eof,
+                Precedence::none(),
+            ) == Some(true)
+        })
     }
 }
 
