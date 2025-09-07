@@ -127,8 +127,14 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     {
         let mut terms = BTreeSet::new();
         let mut nonterms = BTreeSet::new();
-        let mut states = self.state_stack.clone();
-        self.expected_token_impl(parser, &mut states, &mut terms, &mut nonterms);
+        let mut extra_state_stack = Vec::new();
+        self.expected_token_impl(
+            &mut extra_state_stack,
+            self.precedence_stack.len(),
+            parser,
+            &mut terms,
+            &mut nonterms,
+        );
 
         (terms, nonterms)
     }
@@ -155,33 +161,52 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
     fn expected_token_impl<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
+        extra_state_stack: &mut Vec<StateIndex>,
+        stack_len: usize,
         parser: &P,
-        states: &mut Vec<StateIndex>,
         terms: &mut BTreeSet<usize>,
         nonterms: &mut BTreeSet<Data::NonTerm>,
     ) where
         Data::NonTerm: Ord + Copy + Hash + NonTerminal,
     {
-        let s = states.last().unwrap().into_usize();
-        let s = parser.get_states().get(s).expect("state must exist");
+        let state = &parser.get_states()[extra_state_stack
+            .last()
+            .copied()
+            .unwrap_or_else(|| self.state_stack[stack_len])
+            .into_usize()];
 
-        terms.extend(s.expected_shift_term());
-        nonterms.extend(s.expected_shift_nonterm());
+        terms.extend(state.expected_shift_term());
+        nonterms.extend(state.expected_shift_nonterm());
 
         let mut reduce_nonterms = BTreeSet::new();
-        for reduce_rule in s.expected_reduce_rule() {
+        for reduce_rule in state.expected_reduce_rule() {
             let prod_rule = &parser.get_rules()[reduce_rule];
-            reduce_nonterms.insert((prod_rule.name, prod_rule.rule.len()));
+            reduce_nonterms.insert((prod_rule.rule.len(), prod_rule.name));
         }
-        for &(nonterm, len) in reduce_nonterms.iter() {
-            let mut popped_states = states.drain(states.len() - len..).collect::<Vec<_>>();
-            let last_state = states.last().unwrap().into_usize();
-            if let Some(next_state) = parser.get_states()[last_state].shift_goto_nonterm(&nonterm) {
-                states.push(StateIndex::from_usize_unchecked(next_state.state));
-                self.expected_token_impl(parser, states, terms, nonterms);
-                states.pop();
+        for &(mut tokens_len, nonterm) in reduce_nonterms.iter() {
+            let mut stack_len = stack_len;
+            let mut extra_state_stack = if tokens_len > extra_state_stack.len() {
+                tokens_len -= extra_state_stack.len();
+                stack_len -= tokens_len;
+                Vec::new()
+            } else {
+                extra_state_stack[..extra_state_stack.len() - tokens_len].to_vec()
+            };
+            let state = &parser.get_states()[extra_state_stack
+                .last()
+                .copied()
+                .unwrap_or_else(|| self.state_stack[stack_len])
+                .into_usize()];
+            if let Some(next_state) = state.shift_goto_nonterm(&nonterm) {
+                extra_state_stack.push(Index::from_usize_unchecked(next_state.state));
+                self.expected_token_impl(
+                    &mut extra_state_stack,
+                    stack_len,
+                    parser,
+                    terms,
+                    nonterms,
+                );
             }
-            states.append(&mut popped_states);
         }
     }
 
