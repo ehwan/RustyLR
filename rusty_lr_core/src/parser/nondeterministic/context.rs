@@ -1346,7 +1346,6 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                                 self.node(node).precedence_stack[ith]
                             }
                             // safe unwrap since ith >= extra_precedence_stack.len()
-                            // so ith - extra_precedence_stack.len() < node_.len()
                         }
                     }
                     None => Precedence::none(),
@@ -1401,8 +1400,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             }
 
             if reduces.len() == 1 {
-                let (reduce_rule, reduce_prec) = reduces[0];
-                let reduce_rule = &parser.get_rules()[reduce_rule];
+                let (rule, reduce_prec) = reduces[0];
+                let reduce_rule = &parser.get_rules()[rule];
                 let tokens_len = reduce_rule.rule.len();
 
                 // pop state stack
@@ -1451,7 +1450,12 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 {
                     extra_state_stack.push(StateIndex::from_usize_unchecked(next_state_id.state));
                 } else {
-                    unreachable!("shift nonterm failed");
+                    unreachable!(
+                        "unreachable: nonterminal shift should always succeed after reduce operation. \
+Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a parser state machine bug.",
+                        reduce_rule.name.as_str(),
+                        rule
+                    );
                 }
 
                 self.can_feed_impl(
@@ -1502,7 +1506,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     extra_precedence_stack.push(reduce_prec);
 
                     // shift with reduced nonterminal
-                    if let Some(next_state_id) = parser.get_states()[extra_state_stack
+                    let last_state = extra_state_stack
                         .last()
                         .copied()
                         .map(Index::into_usize)
@@ -1512,13 +1516,19 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                                     self.node(node).state_stack[stack_len.get() - 1].into_usize()
                                 })
                                 .unwrap_or(0)
-                        })]
-                    .shift_goto_nonterm(&reduce_rule.name)
+                        });
+
+                    if let Some(next_state_id) =
+                        parser.get_states()[last_state].shift_goto_nonterm(&reduce_rule.name)
                     {
                         extra_state_stack
                             .push(StateIndex::from_usize_unchecked(next_state_id.state));
                     } else {
-                        unreachable!("shift nonterm failed");
+                        unreachable!(
+                            "unreachable: nonterminal shift should always succeed after reduce operation, but failed for nonterminal '{}' from state {:?}",
+                            reduce_rule.name.as_str(),
+                            last_state
+                        );
                     }
 
                     match self.can_feed_impl(

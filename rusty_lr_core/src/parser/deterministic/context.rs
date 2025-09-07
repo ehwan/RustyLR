@@ -657,7 +657,15 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 {
                     extra_state_stack.push(StateIndex::from_usize_unchecked(next_state_id.state));
                 } else {
-                    unreachable!("shift nonterm failed");
+                    unreachable!(
+                        "unreachable: nonterminal shift should always succeed after reduce operation. Failed to shift nonterminal '{}' in state {}.",
+                        rule.name.as_str(),
+                        extra_state_stack
+                            .last()
+                            .copied()
+                            .unwrap_or_else(|| self.state_stack[stack_len])
+                            .into_usize()
+                    );
                 }
             } else {
                 break shift;
