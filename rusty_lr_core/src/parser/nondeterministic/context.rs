@@ -813,18 +813,84 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
     fn expected_token_impl<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
+        extra_state_stack: &mut Vec<StateIndex>,
         parser: &P,
-        node: usize,
+        node_and_len: Option<(usize, NonZeroUsize)>,
         terms: &mut std::collections::BTreeSet<usize>,
         nonterms: &mut std::collections::BTreeSet<Data::NonTerm>,
     ) where
         Data::NonTerm: Ord + Copy + std::hash::Hash + NonTerminal,
     {
-        let s = self.state(node);
-        let state = parser.get_states().get(s).expect("state must exist");
+        let state = extra_state_stack
+            .last()
+            .copied()
+            .map(Index::into_usize)
+            .unwrap_or_else(|| {
+                node_and_len
+                    .map(|(node, stack_len)| {
+                        self.node(node).state_stack[stack_len.get() - 1].into_usize()
+                    })
+                    .unwrap_or(0)
+            });
+        let state = &parser.get_states()[state];
 
         terms.extend(state.expected_shift_term());
         nonterms.extend(state.expected_shift_nonterm());
+
+        let mut reduce_nonterms = std::collections::BTreeSet::new();
+        for reduce_rule in state.expected_reduce_rule() {
+            let prod_rule = &parser.get_rules()[reduce_rule];
+            reduce_nonterms.insert((prod_rule.rule.len(), prod_rule.name));
+        }
+        for &(mut tokens_len, nonterm) in reduce_nonterms.iter() {
+            let mut node_and_len = node_and_len;
+            let mut extra_state_stack = if tokens_len > extra_state_stack.len() {
+                tokens_len -= extra_state_stack.len();
+
+                let (node, node_len) = node_and_len.unwrap();
+                let node_len = node_len.get();
+
+                if tokens_len < node_len {
+                    node_and_len = Some((node, NonZeroUsize::new(node_len - tokens_len).unwrap()));
+                } else {
+                    let parent = self.node(node).parent;
+                    if let Some(parent) = parent {
+                        node_and_len = self
+                            .skip_last_n(parent, tokens_len - node_len)
+                            .map(|(node, i)| (node, NonZeroUsize::new(i + 1).unwrap()));
+                    } else {
+                        // reached root node
+                        node_and_len = None;
+                    }
+                }
+                Vec::new()
+            } else {
+                extra_state_stack[..extra_state_stack.len() - tokens_len].to_vec()
+            };
+
+            let state = extra_state_stack
+                .last()
+                .copied()
+                .map(Index::into_usize)
+                .unwrap_or_else(|| {
+                    node_and_len
+                        .map(|(node, stack_len)| {
+                            self.node(node).state_stack[stack_len.get() - 1].into_usize()
+                        })
+                        .unwrap_or(0)
+                });
+            let state = &parser.get_states()[state];
+            if let Some(next_state) = state.shift_goto_nonterm(&nonterm) {
+                extra_state_stack.push(Index::from_usize_unchecked(next_state.state));
+                self.expected_token_impl(
+                    &mut extra_state_stack,
+                    parser,
+                    node_and_len,
+                    terms,
+                    nonterms,
+                );
+            }
+        }
     }
 
     /// Get next expected (terminals, non-terminals) for current context.
@@ -840,8 +906,27 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     {
         let mut terms = std::collections::BTreeSet::new();
         let mut nonterms = std::collections::BTreeSet::new();
+        let mut extra_state_stack = Vec::new();
+
         for &node in self.current_nodes.iter() {
-            self.expected_token_impl(parser, node, &mut terms, &mut nonterms);
+            let node_and_len = {
+                let node_ = self.node(node);
+                if node_.len() == 0 {
+                    // only root node can have 0 length stack
+                    None
+                } else {
+                    Some((node, NonZeroUsize::new(node_.len()).unwrap()))
+                }
+            };
+            extra_state_stack.clear();
+
+            self.expected_token_impl(
+                &mut extra_state_stack,
+                parser,
+                node_and_len,
+                &mut terms,
+                &mut nonterms,
+            );
         }
 
         (terms, nonterms)
