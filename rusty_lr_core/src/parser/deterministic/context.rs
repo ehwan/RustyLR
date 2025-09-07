@@ -81,20 +81,17 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         Data::NonTerm: Hash + Eq + NonTerminal,
     {
-        let mut state_stack = self.state_stack.clone();
-        let mut precedence_stack = self.precedence_stack.clone();
+        let mut extra_state_stack = Vec::new();
+        let mut extra_precedence_stack = Vec::new();
 
-        match Self::can_feed_impl(
-            &mut state_stack,
-            &mut precedence_stack,
+        self.can_feed_impl(
+            self.precedence_stack.len(),
+            &mut extra_state_stack,
+            &mut extra_precedence_stack,
             parser,
             TerminalSymbol::Eof,
             Precedence::none(),
-        ) {
-            Some(true) => true,
-            Some(false) => false,
-            None => false,
-        }
+        ) == Some(true)
     }
 
     /// Get current state index
@@ -504,22 +501,19 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         Data::NonTerm: Hash + Eq + NonTerminal,
     {
-        let mut state_stack = self.state_stack.clone();
-        let mut precedence_stack = self.precedence_stack.clone();
+        let mut extra_state_stack = Vec::new();
+        let mut extra_precedence_stack = Vec::new();
         let class = TerminalSymbol::Term(parser.to_terminal_class(term));
         let shift_prec = parser.class_precedence(class);
 
-        match Self::can_feed_impl(
-            &mut state_stack,
-            &mut precedence_stack,
+        self.can_feed_impl(
+            self.precedence_stack.len(),
+            &mut extra_state_stack,
+            &mut extra_precedence_stack,
             parser,
             class,
             shift_prec,
-        ) {
-            Some(true) => true,
-            Some(false) => false,
-            None => false,
-        }
+        ) == Some(true)
     }
 
     /// Check if current context can enter panic mode
@@ -535,31 +529,40 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             return false;
         }
 
-        let mut state_stack = self.state_stack.clone();
-        let mut precedence_stack = self.precedence_stack.clone();
+        let mut extra_state_stack = Vec::new();
+        let mut extra_precedence_stack = Vec::new();
         let error_prec = parser.class_precedence(TerminalSymbol::Error);
+        let mut stack_len = self.precedence_stack.len();
 
         loop {
-            match Self::can_feed_impl(
-                &mut state_stack,
-                &mut precedence_stack,
+            match self.can_feed_impl(
+                stack_len,
+                &mut extra_state_stack,
+                &mut extra_precedence_stack,
                 parser,
                 TerminalSymbol::Error,
                 error_prec,
             ) {
                 Some(true) => break true, // successfully shifted `error`
                 Some(false) => {
-                    state_stack.pop();
-                    precedence_stack.pop();
+                    if stack_len == 0 {
+                        break false;
+                    } else {
+                        stack_len -= 1;
+                    }
                 }
                 None => break false,
             }
+            extra_state_stack.clear();
+            extra_precedence_stack.clear();
         }
     }
 
     fn can_feed_impl<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        state_stack: &mut Vec<StateIndex>,
-        precedence_stack: &mut Vec<Precedence>,
+        &self,
+        mut stack_len: usize,
+        extra_state_stack: &mut Vec<StateIndex>,
+        extra_precedence_stack: &mut Vec<Precedence>,
         parser: &P,
         class: TerminalSymbol<usize>,
         shift_prec: Precedence,
@@ -568,7 +571,11 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         Data::NonTerm: Hash + Eq + NonTerminal,
     {
         let shift_to = loop {
-            let state = &parser.get_states()[state_stack.last().unwrap().into_usize()];
+            let state = &parser.get_states()[extra_state_stack
+                .last()
+                .copied()
+                .unwrap_or_else(|| self.state_stack[stack_len])
+                .into_usize()];
 
             let shift = state.shift_goto_class(class);
             if let Some(mut reduce_rule) = state.reduce(class) {
@@ -580,8 +587,13 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
                     Some(crate::rule::Precedence::Dynamic(token_idx)) => {
                         // get token_idx'th precedence from back of precedence stack
-                        let idx = precedence_stack.len() - tokens_len + token_idx;
-                        precedence_stack[idx]
+                        let idx = stack_len + extra_precedence_stack.len() - tokens_len + token_idx;
+                        if idx < stack_len {
+                            self.precedence_stack[idx]
+                        } else {
+                            let idx = idx - stack_len;
+                            extra_precedence_stack[idx]
+                        }
                     }
                     None => Precedence::none(),
                 };
@@ -621,20 +633,29 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     }
                 }
 
-                // if the code reaches here, it proceed to reduce, without shifting
-
                 // pop state stack
-                state_stack.truncate(state_stack.len() - tokens_len);
                 // pop precedence stack
-                precedence_stack.truncate(precedence_stack.len() - tokens_len);
-                precedence_stack.push(reduce_prec);
+                if tokens_len <= extra_precedence_stack.len() {
+                    extra_precedence_stack.truncate(extra_precedence_stack.len() - tokens_len);
+                    extra_state_stack.truncate(extra_state_stack.len() - tokens_len);
+                } else {
+                    let left = tokens_len - extra_precedence_stack.len();
+                    extra_precedence_stack.clear();
+                    extra_state_stack.clear();
+                    stack_len -= left;
+                }
+
+                extra_precedence_stack.push(reduce_prec);
 
                 // shift with reduced nonterminal
-                if let Some(next_state_id) = parser.get_states()
-                    [state_stack.last().unwrap().into_usize()]
+                if let Some(next_state_id) = parser.get_states()[extra_state_stack
+                    .last()
+                    .copied()
+                    .unwrap_or_else(|| self.state_stack[stack_len])
+                    .into_usize()]
                 .shift_goto_nonterm(&rule.name)
                 {
-                    state_stack.push(StateIndex::from_usize_unchecked(next_state_id.state));
+                    extra_state_stack.push(StateIndex::from_usize_unchecked(next_state_id.state));
                 } else {
                     unreachable!("shift nonterm failed");
                 }
