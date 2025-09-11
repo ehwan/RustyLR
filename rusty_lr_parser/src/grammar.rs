@@ -58,7 +58,7 @@ type TerminalIndex = usize;
 
 pub struct CustomSingleReduceAction {
     pub body: TokenStream,
-    pub input_type: Option<TokenStream>,
+    pub input_type: Option<(Ident, TokenStream)>,
     pub output_type: Option<TokenStream>,
 }
 
@@ -559,6 +559,7 @@ impl Grammar {
                         mapto: mapto.or_else(|| pattern_rule.mapto.clone()),
                         begin_span,
                         end_span,
+                        reduce_action_chains: Vec::new(),
                     });
                     patterns.push(pattern_rule);
                 }
@@ -866,12 +867,14 @@ impl Grammar {
                         mapto: None,
                         begin_span: Span::call_site(),
                         end_span: Span::call_site(),
+                        reduce_action_chains: Vec::new(),
                     },
                     TokenMapped {
                         token: Token::Term(TerminalSymbol::Eof),
                         mapto: None,
                         begin_span: Span::call_site(),
                         end_span: Span::call_site(),
+                        reduce_action_chains: Vec::new(),
                     },
                 ],
                 reduce_action: None,
@@ -1029,8 +1032,8 @@ impl Grammar {
         for nonterm_def in self.nonterminals.iter() {
             let mut same_ruleset = BTreeMap::new();
             for rule in &nonterm_def.rules {
-                for (token_idx, term) in rule.tokens.iter().enumerate() {
-                    if let Token::Term(TerminalSymbol::Term(term)) = term.token {
+                for (token_idx, term_mapped) in rule.tokens.iter().enumerate() {
+                    if let Token::Term(TerminalSymbol::Term(term)) = term_mapped.token {
                         // if this rule has reduce action, and it is not auto-generated,
                         // this terminal should be completely distinct from others (for user-defined inspection action)
                         // so put this terminal into separate class
@@ -1046,15 +1049,16 @@ impl Grammar {
                             .tokens
                             .iter()
                             .take(token_idx)
-                            .map(|token| token.token)
+                            .map(|token| (token.token, &token.reduce_action_chains))
                             .collect::<Vec<_>>();
                         // tokens after this token
                         let suffix = rule
                             .tokens
                             .iter()
                             .skip(token_idx + 1)
-                            .map(|token| token.token)
+                            .map(|token| (token.token, &token.reduce_action_chains))
                             .collect::<Vec<_>>();
+                        let reduce_chains = &term_mapped.reduce_action_chains;
                         let lookaheads = &rule.lookaheads;
                         let prec = rule.prec.map(|(op, _)| op);
                         let dprec = rule.dprec.map_or(0, |(val, _)| val);
@@ -1070,6 +1074,7 @@ impl Grammar {
                             .entry((
                                 prefix,
                                 suffix,
+                                reduce_chains,
                                 lookaheads,
                                 prec,
                                 dprec,
@@ -1204,7 +1209,7 @@ impl Grammar {
                 }
 
                 // change any terminal to its class id
-                //
+
                 //  - tokens in the rule
                 for token in &mut rule.tokens {
                     if let Token::Term(TerminalSymbol::Term(old_class)) = token.token {
@@ -1236,15 +1241,10 @@ impl Grammar {
 
         // remove rules that have single production rule and single token
         // e.g. A -> B, then fix all occurrences of A to B
-        let mut nonterm_replace: HashMap<
-            Token<TerminalSymbol<usize>, usize>,
-            Token<TerminalSymbol<usize>, usize>,
-        > = Default::default();
+        let mut nonterm_replace = BTreeMap::new();
 
         // in one optimize iteration, do not allow optimize-chains (e.g. A -> B, B -> C)
-        let mut optimize_related_nonterminals: BTreeSet<usize> = Default::default();
-
-        let mut custom_reduce_actions_map = BTreeMap::new();
+        let mut optimize_related_nonterminals = BTreeSet::new();
 
         for (nonterm_id, nonterm) in self.nonterminals.iter().enumerate() {
             // do not delete protected non-terminals
@@ -1281,7 +1281,8 @@ impl Grammar {
                 continue;
             }
 
-            nonterm_replace.insert(Token::NonTerm(nonterm_id), totoken);
+            let mut reduce_action_chain = rule.tokens[0].reduce_action_chains.clone();
+
             optimize_related_nonterminals.insert(nonterm_id);
             if let Token::NonTerm(to_nonterm_id) = totoken {
                 optimize_related_nonterminals.insert(to_nonterm_id);
@@ -1290,6 +1291,7 @@ impl Grammar {
             if let Some(ReduceAction::Custom(body)) = &rule.reduce_action {
                 // if this rule has custom reduce action, save it
                 let output_type = nonterm.ruletype.clone();
+                let mapto = rule.tokens[0].mapto.clone();
                 let input_type = match totoken {
                     Token::Term(_) => Some(self.token_typename.clone()),
                     Token::NonTerm(to_nonterm_id) => {
@@ -1299,32 +1301,36 @@ impl Grammar {
                 let idx = self.custom_reduce_actions.len();
                 self.custom_reduce_actions.push(CustomSingleReduceAction {
                     body: body.clone(),
-                    input_type,
+                    input_type: mapto.and_then(|ident| input_type.map(|ts| (ident, ts))),
                     output_type,
                 });
-                custom_reduce_actions_map.insert(nonterm_id, idx);
+                reduce_action_chain.push(idx);
             }
+
+            nonterm_replace.insert(nonterm_id, (totoken, reduce_action_chain));
         }
 
         // replace all Token::NonTerm that can be replaced into Token::Term calculated above
         for nonterm in self.nonterminals.iter_mut() {
             for rule in &mut nonterm.rules {
                 for token in &mut rule.tokens {
-                    if let Some(&newclass) = nonterm_replace.get(&token.token) {
-                        token.token = newclass;
-                        // if is_ruletype_none {
-                        //     token.mapto = None;
-                        // }
+                    if let Token::NonTerm(nonterm_id) = token.token {
+                        if let Some((newclass, custom_reduce_action)) =
+                            nonterm_replace.get(&nonterm_id)
+                        {
+                            token.token = *newclass;
+                            let mut new_reduce_chain = custom_reduce_action.clone();
+                            new_reduce_chain
+                                .append(&mut std::mem::take(&mut token.reduce_action_chains));
+                            token.reduce_action_chains = new_reduce_chain;
+                        }
                     }
                 }
             }
         }
 
         // delete rules - keys of nonterm_replace
-        for &from in nonterm_replace.keys() {
-            let Token::NonTerm(nonterm_id) = from else {
-                unreachable!("nonterm_replace should only contain NonTerm");
-            };
+        for &nonterm_id in nonterm_replace.keys() {
             let nonterm = &mut self.nonterminals[nonterm_id];
             let rules = std::mem::take(&mut nonterm.rules);
             let rule = rules.into_iter().next().unwrap();

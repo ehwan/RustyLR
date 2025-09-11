@@ -9,6 +9,8 @@ pub struct TokenMapped {
     /// variable name that the token's data will be mapped to
     pub mapto: Option<Ident>,
 
+    pub reduce_action_chains: Vec<usize>,
+
     /// span of the token
     pub begin_span: Span,
     pub end_span: Span,
