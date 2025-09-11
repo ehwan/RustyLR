@@ -1231,6 +1231,10 @@ impl Grammar {
             Token<TerminalSymbol<usize>, usize>,
             Token<TerminalSymbol<usize>, usize>,
         > = Default::default();
+
+        // in one optimize iteration, do not allow optimize-chains (e.g. A -> B, B -> C)
+        let mut optimize_related_nonterminals: HashSet<usize> = Default::default();
+
         for (nonterm_id, nonterm) in self.nonterminals.iter_mut().enumerate() {
             // do not delete protected non-terminals
             if nonterm.is_protected() {
@@ -1251,7 +1255,20 @@ impl Grammar {
             if rule.tokens.len() != 1 {
                 continue;
             }
+            if optimize_related_nonterminals.contains(&nonterm_id) {
+                continue;
+            }
             let totoken = rule.tokens[0].token;
+            if let Token::NonTerm(to_nonterm_id) = totoken {
+                if optimize_related_nonterminals.contains(&to_nonterm_id) {
+                    continue;
+                }
+            }
+
+            if totoken == Token::NonTerm(nonterm_id) {
+                // A -> A cycle, do not optimize
+                continue;
+            }
 
             // check if this rule's ruletype is %tokentype and reduce action is auto-generated
             if (nonterm.ruletype.is_none() && rule.reduce_action.is_none())
@@ -1260,46 +1277,10 @@ impl Grammar {
                     && rule.reduce_action.as_ref().unwrap().is_identity())
             {
                 nonterm_replace.insert(Token::NonTerm(nonterm_id), totoken);
-            }
-        }
-
-        // ensure that from -> to map does not create a cycle, and reaches to the leaf
-        let mut cycles: HashSet<Token<TerminalSymbol<usize>, usize>> = Default::default();
-        let mut next_replace: HashMap<
-            Token<TerminalSymbol<usize>, usize>,
-            Token<TerminalSymbol<usize>, usize>,
-        > = Default::default();
-        // calculate cycle
-        for &from in nonterm_replace.keys() {
-            let mut cur = from;
-            let mut chains: HashSet<Token<TerminalSymbol<usize>, usize>> = Default::default();
-            while let Some(&next) = nonterm_replace.get(&cur) {
-                if cycles.contains(&next) {
-                    cycles.insert(from);
-                    break;
+                optimize_related_nonterminals.insert(nonterm_id);
+                if let Token::NonTerm(to_nonterm_id) = totoken {
+                    optimize_related_nonterminals.insert(to_nonterm_id);
                 }
-                if chains.contains(&next) {
-                    cycles.insert(from);
-                    break;
-                }
-                chains.insert(next);
-                cur = next;
-            }
-            if !cycles.contains(&from) {
-                next_replace.insert(from, cur);
-            }
-        }
-        nonterm_replace = next_replace;
-
-        // remove cycle related non-terminals from optimization
-        for cycle in &cycles {
-            let Token::NonTerm(nonterm) = *cycle else {
-                unreachable!("nonterm_replace should only contain NonTerm");
-            };
-            let nonterm = &self.nonterminals[nonterm];
-            if !nonterm.is_auto_generated() {
-                let diag = OptimizeRemove::Cycle(nonterm.name.span());
-                removed_rules_diag.push(diag);
             }
         }
 

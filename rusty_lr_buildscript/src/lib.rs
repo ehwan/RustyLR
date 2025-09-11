@@ -761,7 +761,7 @@ impl Builder {
         // diagnostics for optimization
         if grammar.optimize {
             use rusty_lr_parser::grammar::OptimizeRemove;
-            let optimized = grammar.optimize(10);
+            let optimized = grammar.optimize(25);
 
             if self.note_optimization {
                 // terminals merged into terminal class
