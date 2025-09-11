@@ -56,6 +56,12 @@ pub struct OptimizeDiag {
 type ClassIndex = usize;
 type TerminalIndex = usize;
 
+pub struct CustomSingleReduceAction {
+    pub body: TokenStream,
+    pub input_type: Option<TokenStream>,
+    pub output_type: Option<TokenStream>,
+}
+
 pub struct Grammar {
     /// %moduleprefix, "rusty_lr" for normal use
     pub(crate) module_prefix: TokenStream,
@@ -137,6 +143,8 @@ pub struct Grammar {
 
     /// precedence level of error token
     pub error_precedence: Option<usize>,
+
+    pub custom_reduce_actions: Vec<CustomSingleReduceAction>,
 }
 
 impl Grammar {
@@ -364,6 +372,7 @@ impl Grammar {
 
             location_typename: grammar_args.location_typename,
             error_precedence: None,
+            custom_reduce_actions: Vec::new(),
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";
@@ -1233,9 +1242,11 @@ impl Grammar {
         > = Default::default();
 
         // in one optimize iteration, do not allow optimize-chains (e.g. A -> B, B -> C)
-        let mut optimize_related_nonterminals: HashSet<usize> = Default::default();
+        let mut optimize_related_nonterminals: BTreeSet<usize> = Default::default();
 
-        for (nonterm_id, nonterm) in self.nonterminals.iter_mut().enumerate() {
+        let mut custom_reduce_actions_map = BTreeMap::new();
+
+        for (nonterm_id, nonterm) in self.nonterminals.iter().enumerate() {
             // do not delete protected non-terminals
             if nonterm.is_protected() {
                 continue;
@@ -1270,17 +1281,28 @@ impl Grammar {
                 continue;
             }
 
-            // check if this rule's ruletype is %tokentype and reduce action is auto-generated
-            if (nonterm.ruletype.is_none() && rule.reduce_action.is_none())
-                || (nonterm.ruletype.is_some()
-                    && rule.reduce_action.is_some()
-                    && rule.reduce_action.as_ref().unwrap().is_identity())
-            {
-                nonterm_replace.insert(Token::NonTerm(nonterm_id), totoken);
-                optimize_related_nonterminals.insert(nonterm_id);
-                if let Token::NonTerm(to_nonterm_id) = totoken {
-                    optimize_related_nonterminals.insert(to_nonterm_id);
-                }
+            nonterm_replace.insert(Token::NonTerm(nonterm_id), totoken);
+            optimize_related_nonterminals.insert(nonterm_id);
+            if let Token::NonTerm(to_nonterm_id) = totoken {
+                optimize_related_nonterminals.insert(to_nonterm_id);
+            }
+
+            if let Some(ReduceAction::Custom(body)) = &rule.reduce_action {
+                // if this rule has custom reduce action, save it
+                let output_type = nonterm.ruletype.clone();
+                let input_type = match totoken {
+                    Token::Term(_) => Some(self.token_typename.clone()),
+                    Token::NonTerm(to_nonterm_id) => {
+                        self.nonterminals[to_nonterm_id].ruletype.clone()
+                    }
+                };
+                let idx = self.custom_reduce_actions.len();
+                self.custom_reduce_actions.push(CustomSingleReduceAction {
+                    body: body.clone(),
+                    input_type,
+                    output_type,
+                });
+                custom_reduce_actions_map.insert(nonterm_id, idx);
             }
         }
 
