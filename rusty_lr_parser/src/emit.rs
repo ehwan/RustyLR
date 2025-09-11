@@ -1599,6 +1599,30 @@ impl Grammar {
             });
         }
 
+        // typename for count the number of tokens in each production rule
+        let max_shift = self
+            .nonterminals
+            .iter()
+            .map(|nonterm| {
+                nonterm
+                    .rules
+                    .iter()
+                    .map(|rule| rule.tokens.len())
+                    .max()
+                    .unwrap_or(0)
+            })
+            .max()
+            .unwrap_or(0);
+        let shift_typename = if max_shift <= u8::MAX as usize {
+            quote! { u8 }
+        } else if max_shift <= u16::MAX as usize {
+            quote! { u16 }
+        } else if max_shift <= u32::MAX as usize {
+            quote! { u32 }
+        } else {
+            quote! { usize }
+        };
+
         let mut stack_definition_stream = TokenStream::new();
         let mut stack_default_stream = TokenStream::new();
         let mut pop_match_stream = TokenStream::new();
@@ -1606,7 +1630,7 @@ impl Grammar {
         let mut stack_append_stream = TokenStream::new();
         let stack_len = stack_names_in_order.len();
         let split_off_count_init_stream = quote! {
-            let mut __counts: [u8; #stack_len+1] = [0; #stack_len+1];
+            let mut __counts: [#shift_typename; #stack_len+1] = [0; #stack_len+1];
         };
         let mut split_off_split_stream = TokenStream::new();
         let mut split_off_ctor_stream = TokenStream::new();
