@@ -839,7 +839,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
         let mut reduce_nonterms = std::collections::BTreeSet::new();
         for reduce_rule in state.expected_reduce_rule() {
-            let prod_rule = &parser.get_rules()[reduce_rule];
+            let prod_rule = &parser.get_rules()[reduce_rule.into_usize()];
             reduce_nonterms.insert((prod_rule.rule.len(), prod_rule.name));
         }
         for &(mut tokens_len, nonterm) in reduce_nonterms.iter() {
@@ -1013,7 +1013,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             let mut reduces: smallvec::SmallVec<[_; 2]> = Default::default();
 
             for reduce_rule in reduce_rules {
-                let rule = &parser.get_rules()[reduce_rule];
+                let rule = &parser.get_rules()[reduce_rule.into_usize()];
                 let reduce_prec = match rule.precedence {
                     Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
                     Some(crate::rule::Precedence::Dynamic(token_index)) => {
@@ -1049,7 +1049,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                                     }
                                     None => {
                                         // cannot determine precedence, error
-                                        self.no_precedences.push(reduce_rule);
+                                        self.no_precedences.push(reduce_rule.into_usize());
                                     }
                                 }
                             }
@@ -1087,7 +1087,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     }
                     match self.reduce(
                         parser,
-                        reduce_rule,
+                        reduce_rule.into_usize(),
                         precedence,
                         node,
                         &term,
@@ -1411,7 +1411,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             let mut reduces: smallvec::SmallVec<[_; 2]> = Default::default();
 
             for reduce_rule in reduce_rules {
-                let rule = &parser.get_rules()[reduce_rule];
+                let rule = &parser.get_rules()[reduce_rule.into_usize()];
                 let reduce_prec = match rule.precedence {
                     Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
                     Some(crate::rule::Precedence::Dynamic(token_index)) => {
@@ -1486,7 +1486,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
             if reduces.len() == 1 {
                 let (rule, reduce_prec) = reduces[0];
-                let reduce_rule = &parser.get_rules()[rule];
+                let reduce_rule = &parser.get_rules()[rule.into_usize()];
                 let tokens_len = reduce_rule.rule.len();
 
                 // pop state stack
@@ -1539,7 +1539,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         "unreachable: nonterminal shift should always succeed after reduce operation. \
 Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a parser state machine bug.",
                         reduce_rule.name.as_str(),
-                        rule
+                        rule.into_usize()
                     );
                 }
 
@@ -1554,7 +1554,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
             } else {
                 let mut ret = None;
                 for (reduce_rule, reduce_prec) in reduces.into_iter() {
-                    let reduce_rule = &parser.get_rules()[reduce_rule];
+                    let reduce_rule = &parser.get_rules()[reduce_rule.into_usize()];
                     let tokens_len = reduce_rule.rule.len();
 
                     let mut extra_state_stack = extra_state_stack.clone();

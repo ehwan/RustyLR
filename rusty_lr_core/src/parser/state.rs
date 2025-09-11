@@ -31,7 +31,7 @@ pub struct IntermediateState<Term, NonTerm, StateIndex, RuleIndex> {
 
 /// For state, terminal and class indices, we use the most compact integer type that can hold the maximum value.
 /// This trait defines the conversion between {u8, u16, u32, usize} <-> usize.
-pub trait Index {
+pub trait Index: Copy {
     fn into_usize(self) -> usize;
     fn from_usize_unchecked(value: usize) -> Self;
 }
@@ -74,7 +74,7 @@ impl Index for u32 {
 pub trait ReduceRules {
     type RuleIndex: Index;
 
-    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone;
+    fn to_iter(&self) -> impl Iterator<Item = Self::RuleIndex> + Clone;
     fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(set: Vec<RuleIndexFrom>) -> Self;
 }
 
@@ -82,8 +82,8 @@ pub trait ReduceRules {
 impl<Integral: Index + Copy> ReduceRules for Integral {
     type RuleIndex = Integral;
 
-    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
-        std::iter::once(self.into_usize())
+    fn to_iter(&self) -> impl Iterator<Item = Self::RuleIndex> + Clone {
+        std::iter::once(*self)
     }
     fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(set: Vec<RuleIndexFrom>) -> Self {
         debug_assert!(set.len() == 1, "Expected a single element set");
@@ -96,8 +96,8 @@ where
 {
     type RuleIndex = Arr::Item;
 
-    fn to_usize_list(&self) -> impl Iterator<Item = usize> + Clone {
-        self.iter().map(|&x| x.into_usize())
+    fn to_iter(&self) -> impl Iterator<Item = Self::RuleIndex> + Clone {
+        self.iter().copied()
     }
     fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(set: Vec<RuleIndexFrom>) -> Self {
         set.into_iter()
@@ -125,7 +125,7 @@ pub trait State<NonTerm> {
     fn reduce(
         &self,
         class: TerminalSymbol<usize>,
-    ) -> Option<impl Iterator<Item = usize> + Clone + '_>;
+    ) -> Option<impl Iterator<Item = impl Index> + Clone + '_>;
 
     /// Check if this state is an accept state.
     fn is_accept(&self) -> bool;
@@ -140,7 +140,7 @@ pub trait State<NonTerm> {
     fn expected_reduce_term(&self) -> impl Iterator<Item = usize> + '_;
 
     /// Get the set of production rule for reduce in this state
-    fn expected_reduce_rule(&self) -> impl Iterator<Item = usize> + '_;
+    fn expected_reduce_rule(&self) -> impl Iterator<Item = impl Index> + '_;
 
     /// Get the set of rules that this state is trying to parse
     fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef];
@@ -208,13 +208,13 @@ impl<
     fn reduce(
         &self,
         class: TerminalSymbol<usize>,
-    ) -> Option<impl Iterator<Item = usize> + Clone + '_> {
+    ) -> Option<impl Iterator<Item = impl Index> + Clone + '_> {
         match class {
             TerminalSymbol::Term(class) => self.reduce_map.get(&Term::from_usize_unchecked(class)),
             TerminalSymbol::Error => self.error_reduce.as_ref(),
             TerminalSymbol::Eof => self.eof_reduce.as_ref(),
         }
-        .map(ReduceRules::to_usize_list)
+        .map(ReduceRules::to_iter)
     }
     fn is_accept(&self) -> bool {
         self.reduce_map.is_empty()
@@ -230,8 +230,8 @@ impl<
     fn expected_reduce_term(&self) -> impl Iterator<Item = usize> + '_ {
         self.reduce_map.keys().copied().map(Into::into)
     }
-    fn expected_reduce_rule(&self) -> impl Iterator<Item = usize> + '_ {
-        self.reduce_map.values().flat_map(|r| r.to_usize_list())
+    fn expected_reduce_rule(&self) -> impl Iterator<Item = impl Index> + '_ {
+        self.reduce_map.values().flat_map(RuleContainer::to_iter)
     }
     fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
         &self.ruleset
@@ -307,7 +307,7 @@ impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + 
     fn reduce(
         &self,
         class: TerminalSymbol<usize>,
-    ) -> Option<impl Iterator<Item = usize> + Clone + '_> {
+    ) -> Option<impl Iterator<Item = impl Index> + Clone + '_> {
         match class {
             TerminalSymbol::Term(class) => self
                 .reduce_map
@@ -316,7 +316,7 @@ impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + 
             TerminalSymbol::Error => self.error_reduce.as_ref(),
             TerminalSymbol::Eof => self.eof_reduce.as_ref(),
         }
-        .map(ReduceRules::to_usize_list)
+        .map(ReduceRules::to_iter)
     }
     fn is_accept(&self) -> bool {
         self.reduce_map.is_empty()
@@ -336,11 +336,11 @@ impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + 
             .filter(|&i| self.reduce_map[i].is_some())
             .map(|i| i + self.reduce_offset)
     }
-    fn expected_reduce_rule(&self) -> impl Iterator<Item = usize> + '_ {
+    fn expected_reduce_rule(&self) -> impl Iterator<Item = impl Index> + '_ {
         self.reduce_map
             .iter()
             .filter_map(|r| r.as_ref())
-            .flat_map(|r| r.to_usize_list())
+            .flat_map(RuleContainer::to_iter)
     }
 
     fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {

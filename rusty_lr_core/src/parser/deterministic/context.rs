@@ -180,7 +180,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
         let mut reduce_nonterms = BTreeSet::new();
         for reduce_rule in state.expected_reduce_rule() {
-            let prod_rule = &parser.get_rules()[reduce_rule];
+            let prod_rule = &parser.get_rules()[reduce_rule.into_usize()];
             reduce_nonterms.insert((prod_rule.rule.len(), prod_rule.name));
         }
         for &(mut tokens_len, nonterm) in reduce_nonterms.iter() {
@@ -361,7 +361,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             let shift = state.shift_goto_class(class);
             if let Some(mut reduce_rule) = state.reduce(class) {
                 let reduce_rule = reduce_rule.next().unwrap();
-                let rule = &parser.get_rules()[reduce_rule];
+                let rule = &parser.get_rules()[reduce_rule.into_usize()];
                 let tokens_len = rule.rule.len();
 
                 let reduce_prec = match rule.precedence {
@@ -401,7 +401,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                                     return Err(ParseError::NoPrecedence(
                                         term,
                                         location,
-                                        reduce_rule,
+                                        reduce_rule.into_usize(),
                                     ));
                                 }
                             }
@@ -432,7 +432,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 let non_empty_pushed = match Data::reduce_action(
                     &mut self.data_stack,
                     &mut self.location_stack,
-                    reduce_rule,
+                    reduce_rule.into_usize(),
                     &mut shift,
                     &term,
                     userdata,
@@ -605,7 +605,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             let shift = state.shift_goto_class(class);
             if let Some(mut reduce_rule) = state.reduce(class) {
                 let reduce_rule = reduce_rule.next().unwrap();
-                let rule = &parser.get_rules()[reduce_rule];
+                let rule = &parser.get_rules()[reduce_rule.into_usize()];
                 let tokens_len = rule.rule.len();
 
                 let reduce_prec = match rule.precedence {
