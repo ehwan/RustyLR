@@ -4,7 +4,7 @@
 // There might be a build error if the version is not matched.
 //
 // ================================User Codes Begin================================
-#[derive(Debug, Clone, Copy)]a
+#[derive(Debug, Clone, Copy)]
 pub enum Token {
     Num(i32),
     Plus,
