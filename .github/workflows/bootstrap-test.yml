@@ -19,7 +19,7 @@ jobs:
       run: |
         cd scripts
         chmod +x ./bootstrap_test.sh
-        ./bootstrap_test.sh
+        ./bootstrap_test.sh true
         if [ $? -ne 0 ]; then
             exit 1
         fi
