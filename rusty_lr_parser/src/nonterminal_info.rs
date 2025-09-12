@@ -7,11 +7,30 @@ use proc_macro2::TokenStream;
 
 pub struct CustomReduceAction {
     pub body: TokenStream,
+    idents_used: BTreeSet<Ident>,
 }
 
 impl CustomReduceAction {
+    fn fetch_idents(set: &mut BTreeSet<Ident>, ts: TokenStream) {
+        for token in ts {
+            match token {
+                proc_macro2::TokenTree::Group(g) => {
+                    Self::fetch_idents(set, g.stream());
+                }
+                proc_macro2::TokenTree::Ident(i) => {
+                    set.insert(i);
+                }
+                _ => {}
+            }
+        }
+    }
     pub fn new(body: TokenStream) -> Self {
-        Self { body }
+        let mut idents_used = BTreeSet::new();
+        Self::fetch_idents(&mut idents_used, body.clone());
+        Self { body, idents_used }
+    }
+    pub fn contains_ident(&self, ident: &Ident) -> bool {
+        self.idents_used.contains(ident)
     }
 }
 
