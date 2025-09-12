@@ -5,14 +5,27 @@ use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
+pub struct CustomReduceAction {
+    pub body: TokenStream,
+}
+
+impl CustomReduceAction {
+    pub fn new(body: TokenStream) -> Self {
+        Self { body }
+    }
+}
+
 pub enum ReduceAction {
     /// reduce action that is function-like TokenStream
-    Custom(TokenStream),
+    Custom(CustomReduceAction),
     /// reduce action that is auto-generated, and simply returns the i'th token itself
     Identity(usize), // index of the token in the rule
 }
 
 impl ReduceAction {
+    pub fn new_custom(body: TokenStream) -> Self {
+        ReduceAction::Custom(CustomReduceAction::new(body))
+    }
     pub fn is_identity(&self) -> bool {
         matches!(self, ReduceAction::Identity(_))
     }

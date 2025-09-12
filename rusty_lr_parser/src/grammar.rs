@@ -16,6 +16,7 @@ use rusty_lr_core::Token;
 use crate::error::ArgError;
 use crate::error::ParseArgError;
 use crate::error::ParseError;
+use crate::nonterminal_info::CustomReduceAction;
 use crate::nonterminal_info::NonTerminalInfo;
 use crate::nonterminal_info::ReduceAction;
 use crate::nonterminal_info::Rule;
@@ -719,7 +720,9 @@ impl Grammar {
                     }
 
                     let new_reduce_action = rename_tokenstream_recursive(reduce_action);
-                    Some(ReduceAction::Custom(new_reduce_action))
+                    Some(ReduceAction::Custom(CustomReduceAction::new(
+                        new_reduce_action,
+                    )))
                 } else {
                     // reduce action is not defined,
 

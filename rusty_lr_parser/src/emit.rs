@@ -1175,8 +1175,10 @@ impl Grammar {
                                     // we can use `truncate` instead of `pop` for optimization
                                     // so check it here
                                     let mapto = if let Some(mapto) = &token.mapto {
-                                        if tokenstream_contains_ident(reduce_action.clone(), mapto)
-                                        {
+                                        if tokenstream_contains_ident(
+                                            reduce_action.body.clone(),
+                                            mapto,
+                                        ) {
                                             Some(mapto.clone())
                                         } else {
                                             None
@@ -1197,7 +1199,7 @@ impl Grammar {
                                     // we can use `truncate` instead of `pop` for optimization
                                     // so check it here
                                     if tokenstream_contains_ident(
-                                        reduce_action.clone(),
+                                        reduce_action.body.clone(),
                                         &location_varname,
                                     ) {
                                         Some(location_varname)
@@ -1309,6 +1311,7 @@ impl Grammar {
 
                             // typename is defined, reduce action must be defined
                             if let Some(stack_name) = &stack_names_for_nonterm[nonterm_idx] {
+                                let body = &reduce_action.body;
                                 fn_reduce_for_each_rule_stream.extend(quote! {
                                     #[doc = #rule_debug_str]
                                     #[inline]
@@ -1328,13 +1331,14 @@ impl Grammar {
 
                                         #extract_data_stream
 
-                                        let __res = #reduce_action ;
+                                        let __res = #body;
                                         __data_stack.#stack_name.push(__res);
 
                                         Ok(#returns_non_empty)
                                     }
                                 });
                             } else {
+                                let body = &reduce_action.body;
                                 fn_reduce_for_each_rule_stream.extend(quote! {
                                     #[doc = #rule_debug_str]
                                     #[inline]
@@ -1354,7 +1358,7 @@ impl Grammar {
 
                                         #extract_data_stream
 
-                                        #reduce_action
+                                        #body
 
                                         Ok(#returns_non_empty)
                                     }
