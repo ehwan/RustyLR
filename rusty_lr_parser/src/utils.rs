@@ -2,6 +2,8 @@
 
 use super::error::ParseError;
 use proc_macro2::Ident;
+use proc_macro2::TokenStream;
+use quote::format_ident;
 
 pub static AUGMENTED_NAME: &str = "Augmented";
 pub static EOF_NAME: &str = "eof";
@@ -22,4 +24,23 @@ pub(crate) fn check_reserved_name(ident: &Ident) -> Result<(), ParseError> {
         return Err(ParseError::ReservedName(ident.clone()));
     }
     Ok(())
+}
+
+pub(crate) fn tokenstream_contains_ident(stream: TokenStream, ident: &Ident) -> bool {
+    for t in stream {
+        match t {
+            proc_macro2::TokenTree::Ident(i) if &i == ident => return true,
+            proc_macro2::TokenTree::Group(g) => {
+                if tokenstream_contains_ident(g.stream(), ident) {
+                    return true;
+                }
+            }
+            _ => {}
+        }
+    }
+    false
+}
+
+pub(crate) fn location_variable_name(varname: &Ident) -> Ident {
+    format_ident!("__rustylr_location_{}", varname)
 }

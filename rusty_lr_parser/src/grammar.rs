@@ -59,6 +59,7 @@ type TerminalIndex = usize;
 pub struct CustomSingleReduceAction {
     pub body: TokenStream,
     pub input_type: Option<(Ident, TokenStream)>,
+    pub input_location: Option<Ident>,
     pub output_type: Option<TokenStream>,
 }
 
@@ -1291,17 +1292,43 @@ impl Grammar {
             if let Some(ReduceAction::Custom(body)) = &rule.reduce_action {
                 // if this rule has custom reduce action, save it
                 let output_type = nonterm.ruletype.clone();
-                let mapto = rule.tokens[0].mapto.clone();
-                let input_type = match totoken {
-                    Token::Term(_) => Some(self.token_typename.clone()),
-                    Token::NonTerm(to_nonterm_id) => {
-                        self.nonterminals[to_nonterm_id].ruletype.clone()
+                let mapto = &rule.tokens[0].mapto;
+                let location_mapto = if let Some(mapto) = mapto {
+                    let location_varname = utils::location_variable_name(mapto);
+                    if utils::tokenstream_contains_ident(body.clone(), &location_varname) {
+                        Some(location_varname)
+                    } else {
+                        None
                     }
+                } else {
+                    None
+                };
+
+                let input_type = if let Some(mapto) = mapto {
+                    let ruletype = match totoken {
+                        Token::Term(_) => Some(self.token_typename.clone()),
+                        Token::NonTerm(to_nonterm_id) => {
+                            self.nonterminals[to_nonterm_id].ruletype.clone()
+                        }
+                    };
+
+                    if let Some(ruletype) = ruletype {
+                        if utils::tokenstream_contains_ident(body.clone(), mapto) {
+                            Some((mapto.clone(), ruletype))
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                } else {
+                    None
                 };
                 let idx = self.custom_reduce_actions.len();
                 self.custom_reduce_actions.push(CustomSingleReduceAction {
                     body: body.clone(),
-                    input_type: mapto.and_then(|ident| input_type.map(|ts| (ident, ts))),
+                    input_type,
+                    input_location: location_mapto,
                     output_type,
                 });
                 reduce_action_chain.push(idx);
