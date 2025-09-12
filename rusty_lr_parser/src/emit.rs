@@ -1564,6 +1564,28 @@ impl Grammar {
             }
         }
 
+        // emit custom single reduce actions
+        let mut custom_reduce_action_stream = TokenStream::new();
+        for (idx, action) in self.custom_reduce_actions.iter().enumerate() {
+            let fn_name = format_ident!("__reduce_action_custom_{}", idx);
+            let arg_stream = if let Some((arg_name, arg_type)) = &action.input_type {
+                quote! { mut #arg_name: #arg_type, }
+            } else {
+                quote! {}
+            };
+            let ret_stream = if let Some(ret_type) = &action.output_type {
+                quote! { -> #ret_type }
+            } else {
+                quote! {}
+            };
+            let body = &action.body;
+            custom_reduce_action_stream.extend(quote! {
+                fn #fn_name( #arg_stream ) #ret_stream {
+                    #body
+                }
+            });
+        }
+
         let start_idx = *self.nonterminals_index.get(&self.start_rule_name).unwrap();
         let start_stack_name = &stack_names_for_nonterm[start_idx];
         let (start_typename, pop_start) = match start_stack_name {
@@ -1694,6 +1716,7 @@ impl Grammar {
 
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
         impl #data_stack_typename {
+            #custom_reduce_action_stream
             #fn_reduce_for_each_rule_stream
         }
 
