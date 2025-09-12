@@ -74,8 +74,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # to briefly see the difference of the generated parser in the PR, run for the sample calculator and json parsers
-cargo run --bin rustylr -- "$rustylr_path/example/calculator/src/parser.rs" "$rustylr_path/scripts/calculator_new.rs" > /dev/null
-mv "$rustylr_path/scripts/calculator_new.rs" "$rustylr_path/scripts/diff/calculator.rs"
-cargo run --bin rustylr -- "$rustylr_path/example/json/src/parser.rs" "$rustylr_path/scripts/json_new.rs" > /dev/null
-mv "$rustylr_path/scripts/json_new.rs" "$rustylr_path/scripts/diff/json.rs"
+cargo run --bin rustylr -- "$rustylr_path/example/calculator/src/parser.rs" "$rustylr_path/scripts/diff/calculator.rs" > /dev/null
+
+cargo run --bin rustylr -- "$rustylr_path/example/json/src/parser.rs" "$rustylr_path/scripts/diff/json.rs" > /dev/null
 echo "All tests passed."
