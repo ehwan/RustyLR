@@ -155,7 +155,7 @@ impl Pattern {
                             begin_span: Span::call_site(),
                             end_span: Span::call_site(),
                         }],
-                        reduce_action: Some(ReduceAction::Custom(quote! {
+                        reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![A] }
                         })),
                         separator_span: Span::call_site(),
@@ -179,7 +179,7 @@ impl Pattern {
                                 end_span: Span::call_site(),
                             },
                         ],
-                        reduce_action: Some(ReduceAction::Custom(quote! {
+                        reduce_action: Some(ReduceAction::new_custom(quote! {
                             { Ap.push(A); Ap }
                         })),
                         separator_span: Span::call_site(),
@@ -309,7 +309,7 @@ impl Pattern {
                     };
                     let line2 = Rule {
                         tokens: vec![],
-                        reduce_action: Some(ReduceAction::Custom(quote! {
+                        reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![] }
                         })),
                         separator_span: Span::call_site(),
@@ -409,7 +409,7 @@ impl Pattern {
                             begin_span: Span::call_site(),
                             end_span: Span::call_site(),
                         }],
-                        reduce_action: Some(ReduceAction::Custom(quote! { Some(A) })),
+                        reduce_action: Some(ReduceAction::new_custom(quote! { Some(A) })),
                         separator_span: Span::call_site(),
                         lookaheads: None,
                         prec: None,
@@ -418,7 +418,7 @@ impl Pattern {
                     };
                     let line2 = Rule {
                         tokens: vec![],
-                        reduce_action: Some(ReduceAction::Custom(quote! {
+                        reduce_action: Some(ReduceAction::new_custom(quote! {
                             { None }
                         })),
                         separator_span: Span::call_site(),
@@ -734,7 +734,7 @@ impl Pattern {
                             let initializer = quote! {(#initializer)};
                             let rule = Rule {
                                 tokens,
-                                reduce_action: Some(ReduceAction::Custom(initializer)),
+                                reduce_action: Some(ReduceAction::new_custom(initializer)),
                                 separator_span: Span::call_site(),
                                 lookaheads: None,
                                 prec: None,
@@ -930,7 +930,7 @@ impl Pattern {
                             begin_span: Span::call_site(),
                             end_span: Span::call_site(),
                         }],
-                        reduce_action: Some(ReduceAction::Custom(quote! {
+                        reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![__token0] }
                         })),
                         separator_span: Span::call_site(),
@@ -960,7 +960,7 @@ impl Pattern {
                                 end_span: Span::call_site(),
                             },
                         ],
-                        reduce_action: Some(ReduceAction::Custom(quote! {
+                        reduce_action: Some(ReduceAction::new_custom(quote! {
                             {
                             __token0.push(__token1);
                             __token0
@@ -1097,7 +1097,7 @@ impl Pattern {
                     };
                     let line2 = Rule {
                         tokens: vec![],
-                        reduce_action: Some(ReduceAction::Custom(quote! {
+                        reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![] }
                         })),
                         separator_span: Span::call_site(),

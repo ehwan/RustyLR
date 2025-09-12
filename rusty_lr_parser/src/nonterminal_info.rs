@@ -5,14 +5,46 @@ use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
+pub struct CustomReduceAction {
+    pub body: TokenStream,
+    idents_used: BTreeSet<Ident>,
+}
+
+impl CustomReduceAction {
+    fn fetch_idents(set: &mut BTreeSet<Ident>, ts: TokenStream) {
+        for token in ts {
+            match token {
+                proc_macro2::TokenTree::Group(g) => {
+                    Self::fetch_idents(set, g.stream());
+                }
+                proc_macro2::TokenTree::Ident(i) => {
+                    set.insert(i);
+                }
+                _ => {}
+            }
+        }
+    }
+    pub fn new(body: TokenStream) -> Self {
+        let mut idents_used = BTreeSet::new();
+        Self::fetch_idents(&mut idents_used, body.clone());
+        Self { body, idents_used }
+    }
+    pub fn contains_ident(&self, ident: &Ident) -> bool {
+        self.idents_used.contains(ident)
+    }
+}
+
 pub enum ReduceAction {
     /// reduce action that is function-like TokenStream
-    Custom(TokenStream),
+    Custom(CustomReduceAction),
     /// reduce action that is auto-generated, and simply returns the i'th token itself
     Identity(usize), // index of the token in the rule
 }
 
 impl ReduceAction {
+    pub fn new_custom(body: TokenStream) -> Self {
+        ReduceAction::Custom(CustomReduceAction::new(body))
+    }
     pub fn is_identity(&self) -> bool {
         matches!(self, ReduceAction::Identity(_))
     }

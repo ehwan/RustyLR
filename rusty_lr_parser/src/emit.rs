@@ -1150,33 +1150,13 @@ impl Grammar {
                                         }
                                     }
                                 }
-                                fn tokenstream_contains_ident(
-                                    stream: TokenStream,
-                                    ident: &Ident,
-                                ) -> bool {
-                                    for t in stream {
-                                        match t {
-                                            proc_macro2::TokenTree::Ident(i) if &i == ident => {
-                                                return true
-                                            }
-                                            proc_macro2::TokenTree::Group(g) => {
-                                                if tokenstream_contains_ident(g.stream(), ident) {
-                                                    return true;
-                                                }
-                                            }
-                                            _ => {}
-                                        }
-                                    }
-                                    false
-                                }
 
                                 if let Some(stack_name) = stack_name {
                                     // if variable was not used at this reduce action,
                                     // we can use `truncate` instead of `pop` for optimization
                                     // so check it here
                                     let mapto = if let Some(mapto) = &token.mapto {
-                                        if tokenstream_contains_ident(reduce_action.clone(), mapto)
-                                        {
+                                        if reduce_action.contains_ident(mapto) {
                                             Some(mapto.clone())
                                         } else {
                                             None
@@ -1196,10 +1176,7 @@ impl Grammar {
                                     // if variable was not used at this reduce action,
                                     // we can use `truncate` instead of `pop` for optimization
                                     // so check it here
-                                    if tokenstream_contains_ident(
-                                        reduce_action.clone(),
-                                        &location_varname,
-                                    ) {
+                                    if reduce_action.contains_ident(&location_varname) {
                                         Some(location_varname)
                                     } else {
                                         None
@@ -1309,6 +1286,7 @@ impl Grammar {
 
                             // typename is defined, reduce action must be defined
                             if let Some(stack_name) = &stack_names_for_nonterm[nonterm_idx] {
+                                let body = &reduce_action.body;
                                 fn_reduce_for_each_rule_stream.extend(quote! {
                                     #[doc = #rule_debug_str]
                                     #[inline]
@@ -1328,13 +1306,14 @@ impl Grammar {
 
                                         #extract_data_stream
 
-                                        let __res = #reduce_action ;
+                                        let __res = #body;
                                         __data_stack.#stack_name.push(__res);
 
                                         Ok(#returns_non_empty)
                                     }
                                 });
                             } else {
+                                let body = &reduce_action.body;
                                 fn_reduce_for_each_rule_stream.extend(quote! {
                                     #[doc = #rule_debug_str]
                                     #[inline]
@@ -1354,7 +1333,7 @@ impl Grammar {
 
                                         #extract_data_stream
 
-                                        #reduce_action
+                                        #body
 
                                         Ok(#returns_non_empty)
                                     }

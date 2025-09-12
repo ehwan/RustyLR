@@ -16,6 +16,7 @@ use rusty_lr_core::Token;
 use crate::error::ArgError;
 use crate::error::ParseArgError;
 use crate::error::ParseError;
+use crate::nonterminal_info::CustomReduceAction;
 use crate::nonterminal_info::NonTerminalInfo;
 use crate::nonterminal_info::ReduceAction;
 use crate::nonterminal_info::Rule;
@@ -719,7 +720,51 @@ impl Grammar {
                     }
 
                     let new_reduce_action = rename_tokenstream_recursive(reduce_action);
-                    Some(ReduceAction::Custom(new_reduce_action))
+
+                    // check if this reduce action can be identity action; i.e., { $1 }
+                    fn tokenstream_contains_unique_ident(ts: TokenStream) -> Option<Ident> {
+                        let mut it = ts.into_iter();
+                        match it.next() {
+                            Some(proc_macro2::TokenTree::Ident(ident)) => {
+                                if it.next().is_none() {
+                                    Some(ident)
+                                } else {
+                                    None
+                                }
+                            }
+                            Some(proc_macro2::TokenTree::Group(group)) => {
+                                if group.delimiter() != proc_macro2::Delimiter::Brace {
+                                    return None;
+                                }
+                                if it.next().is_some() {
+                                    return None;
+                                }
+                                tokenstream_contains_unique_ident(group.stream())
+                            }
+                            _ => None,
+                        }
+                    }
+                    if let Some(unique_ident) =
+                        tokenstream_contains_unique_ident(new_reduce_action.clone())
+                    {
+                        if let Some(unique_idx) = tokens
+                            .iter()
+                            .enumerate()
+                            .rev()
+                            .find(move |(_, token)| token.mapto.as_ref() == Some(&unique_ident))
+                            .map(|(idx, _)| idx)
+                        {
+                            Some(ReduceAction::Identity(unique_idx))
+                        } else {
+                            Some(ReduceAction::Custom(CustomReduceAction::new(
+                                new_reduce_action,
+                            )))
+                        }
+                    } else {
+                        Some(ReduceAction::Custom(CustomReduceAction::new(
+                            new_reduce_action,
+                        )))
+                    }
                 } else {
                     // reduce action is not defined,
 
