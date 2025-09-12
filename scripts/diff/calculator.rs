@@ -256,38 +256,16 @@ impl EDataStack {
         Ok(true)
     }
     ///P -> lparen E rparen
-    #[inline]
+    #[inline(always)]
     fn reduce_P_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
-        shift: &mut bool,
-        lookahead: &::rusty_lr::TerminalSymbol<Token>,
-        data: &mut i32,
-        __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, String> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::__terminals)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                ETags::__stack2)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                ETags::__terminals)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(ETags::__stack2);
-        let mut E = __data_stack.__stack2.pop().unwrap();
+    ) -> bool {
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
-        let __res = { E };
-        __data_stack.__stack2.push(__res);
-        Ok(true)
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        __data_stack.__tags.push(ETags::__stack2);
+        true
     }
     ///E -> A
     #[inline(always)]
@@ -411,16 +389,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                     location0,
                 )
             }
-            5usize => {
-                Self::reduce_P_1(
-                    data_stack,
-                    location_stack,
-                    shift,
-                    lookahead,
-                    user_data,
-                    location0,
-                )
-            }
+            5usize => Ok(Self::reduce_P_1(data_stack, location_stack)),
             6usize => Ok(Self::reduce_E_0(data_stack, location_stack)),
             7usize => {
                 unreachable!("{rule_index}: this production rule was optimized out")
