@@ -1105,28 +1105,29 @@ impl Grammar {
         let mut rule_index: usize = 0;
         for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
             for (rule_local_id, rule) in nonterm.rules.iter().enumerate() {
-                let reduce_fn_ident = format_ident!("reduce_{}_{}", nonterm.name, rule_local_id);
+                if rule.is_used {
+                    let reduce_fn_ident =
+                        format_ident!("reduce_{}_{}", nonterm.name, rule_local_id);
 
-                let rule_debug_str = format!(
-                    "{} -> {}",
-                    self.nonterm_pretty_name(nonterm_idx),
-                    rule.tokens
-                        .iter()
-                        .map(|t| {
-                            match t.token {
-                                Token::Term(term) => self.class_pretty_name_list(term, 5),
-                                Token::NonTerm(nonterm) => self.nonterm_pretty_name(nonterm),
-                            }
-                        })
-                        .collect::<Vec<_>>()
-                        .join(" ")
-                );
+                    let rule_debug_str = format!(
+                        "{} -> {}",
+                        self.nonterm_pretty_name(nonterm_idx),
+                        rule.tokens
+                            .iter()
+                            .map(|t| {
+                                match t.token {
+                                    Token::Term(term) => self.class_pretty_name_list(term, 5),
+                                    Token::NonTerm(nonterm) => self.nonterm_pretty_name(nonterm),
+                                }
+                            })
+                            .collect::<Vec<_>>()
+                            .join(" ")
+                    );
 
-                use super::nonterminal_info::ReduceAction;
+                    use super::nonterminal_info::ReduceAction;
 
-                match &rule.reduce_action {
-                    Some(ReduceAction::Custom(reduce_action)) => {
-                        if rule.is_used {
+                    match &rule.reduce_action {
+                        Some(ReduceAction::Custom(reduce_action)) => {
                             let mut debug_tag_check_stream = TokenStream::new();
                             let mut stack_mapto_map = std::collections::BTreeMap::new();
                             for (token_index_from_end, token) in
@@ -1146,7 +1147,9 @@ impl Grammar {
                                             StackName::DataStack(name) => {
                                                 quote! {__data_stack.#name}
                                             }
-                                            StackName::LocationStack => quote! {__location_stack},
+                                            StackName::LocationStack => {
+                                                quote! {__location_stack}
+                                            }
                                         }
                                     }
                                 }
@@ -1360,17 +1363,11 @@ impl Grammar {
                                     }
                                 });
                             }
-                        } else {
-                            reduce_action_case_streams.extend(quote! {
-                                #rule_index => unreachable!("{rule_index}: this production rule was optimized out"),
-                            });
                         }
-                    }
 
-                    // E(i32): a b c(i32) d e ;
-                    // 'c' will be automatically chosen, even if there is no reduce action
-                    &Some(ReduceAction::Identity(identity_token_idx)) => {
-                        if rule.is_used {
+                        // E(i32): a b c(i32) d e ;
+                        // 'c' will be automatically chosen, even if there is no reduce action
+                        &Some(ReduceAction::Identity(identity_token_idx)) => {
                             reduce_action_case_streams.extend(quote! {
                                 #rule_index => { Ok(Self::#reduce_fn_ident( data_stack, location_stack )) }
                             });
@@ -1477,17 +1474,11 @@ impl Grammar {
                                     #returns_non_empty
                                 }
                             });
-                        } else {
-                            reduce_action_case_streams.extend(quote! {
-                                #rule_index => unreachable!("{rule_index}: this production rule was optimized out"),
-                            });
                         }
-                    }
 
-                    // E: a b c d ...
-                    // 'E' does not have rule type, so no need for a reduce action
-                    None => {
-                        if rule.is_used {
+                        // E: a b c d ...
+                        // 'E' does not have rule type, so no need for a reduce action
+                        None => {
                             reduce_action_case_streams.extend(quote! {
                                 #rule_index => { Self::#reduce_fn_ident( data_stack, location_stack ); Ok(false) }
                             });
@@ -1553,13 +1544,14 @@ impl Grammar {
                                     #tag_push_stream
                                 }
                             });
-                        } else {
-                            reduce_action_case_streams.extend(quote! {
-                                #rule_index => unreachable!("{rule_index}: this production rule was optimized out"),
-                            });
                         }
                     }
+                } else {
+                    reduce_action_case_streams.extend(quote! {
+                        #rule_index => unreachable!("{rule_index}: this production rule was optimized out"),
+                    });
                 }
+
                 rule_index += 1;
             }
         }
