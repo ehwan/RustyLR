@@ -1102,6 +1102,44 @@ impl Grammar {
         // TokenStream to define reduce function for each production rule
         let mut fn_reduce_for_each_rule_stream = TokenStream::new();
 
+        for (i, action) in self.custom_reduce_actions.iter().enumerate() {
+            let fn_name = format_ident!("custom_reduce_action_{}", i);
+
+            let data_arg = action
+                .input_type
+                .as_ref()
+                .map(|(name, ty)| {
+                    quote! { #name: #ty, }
+                })
+                .unwrap_or_default();
+
+            let location_arg = action
+                .input_location
+                .as_ref()
+                .map(|name| {
+                    quote! { #name: #location_typename, }
+                })
+                .unwrap_or_default();
+
+            let body = &action.body.body;
+
+            let output_type = if let Some(ty) = action.output_type.as_ref() {
+                ty.clone()
+            } else {
+                quote! { () }
+            };
+
+            fn_reduce_for_each_rule_stream.extend(quote! {
+                fn #fn_name(
+                    #data_arg
+                    #location_arg
+                    #user_data_parameter_name: &mut #user_data_typename
+                ) -> Result<#output_type, #reduce_error_typename> {
+                    Ok(#body)
+                }
+            });
+        }
+
         let mut rule_index: usize = 0;
         for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
             for (rule_local_id, rule) in nonterm.rules.iter().enumerate() {
