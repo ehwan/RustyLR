@@ -146,6 +146,8 @@ pub struct Grammar {
     /// precedence level of error token
     pub error_precedence: Option<usize>,
 
+    /// See `TokenMapped::reduce_action_chains` for more details.
+    /// This is actual body of each reduce action in the chain.
     pub custom_reduce_actions: Vec<CustomSingleReduceAction>,
 }
 
