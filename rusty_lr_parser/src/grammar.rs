@@ -1050,6 +1050,9 @@ impl Grammar {
 
     /// optimize grammar
     fn optimize_iterate(&mut self) -> Option<OptimizeDiag> {
+        // for early stopping optimization loop
+        let mut something_changed = false;
+
         // We are trying to find the 'minimum partitioning' of terminals
         // First we collect all the *groups* of terminals
         // Then we calculate the *minimal partitioning* to compress the groups
@@ -1147,6 +1150,8 @@ impl Grammar {
         let mut removed_rules_diag = Vec::new();
 
         if term_partition.len() != self.terminal_classes.len() {
+            something_changed = true;
+
             // convert all terminals using terminal class
             // delete all rules that using non-first terminals in that class
             // e.g. delete
@@ -1405,6 +1410,7 @@ impl Grammar {
         }
 
         // delete rules - keys of nonterm_replace
+        something_changed |= !nonterm_replace.is_empty();
         for &nonterm_id in nonterm_replace.keys() {
             let nonterm = &mut self.nonterminals[nonterm_id];
             let rules = std::mem::take(&mut nonterm.rules);
@@ -1416,9 +1422,13 @@ impl Grammar {
             }
         }
 
-        Some(OptimizeDiag {
-            removed: removed_rules_diag,
-        })
+        if something_changed {
+            Some(OptimizeDiag {
+                removed: removed_rules_diag,
+            })
+        } else {
+            None
+        }
     }
 
     pub fn optimize(&mut self, max_iter: usize) -> OptimizeDiag {
@@ -1429,9 +1439,6 @@ impl Grammar {
             let ret = self.optimize_iterate();
             match ret {
                 Some(new_diag) => {
-                    if new_diag.removed.is_empty() {
-                        break;
-                    }
                     diag.removed.extend(new_diag.removed.into_iter());
                 }
                 None => {
