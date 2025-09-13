@@ -30,7 +30,7 @@ impl CustomReduceAction {
         Self::fetch_idents(&mut idents_used, body.clone());
         Self { body, idents_used }
     }
-    pub fn contains_ident(&self, ident: &Ident) -> bool {
+    fn contains_ident(&self, ident: &Ident) -> bool {
         self.idents_used.contains(ident)
     }
 }
@@ -80,6 +80,15 @@ impl Rule {
             begin
         };
         (begin, end)
+    }
+    pub fn reduce_action_contains_ident(&self, ident: &Ident) -> bool {
+        match self.reduce_action.as_ref() {
+            Some(ReduceAction::Custom(custom)) => custom.contains_ident(ident),
+            Some(ReduceAction::Identity(identity_idx)) => {
+                self.tokens[*identity_idx].mapto.as_ref() == Some(ident)
+            }
+            None => false,
+        }
     }
 }
 
