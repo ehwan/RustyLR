@@ -1259,6 +1259,7 @@ impl Grammar {
 
                             // typename is defined, reduce action must be defined
                             if let Some(stack_name) = &stack_names_for_nonterm[nonterm_idx] {
+                                let body = &reduce_action.body;
                                 fn_reduce_for_each_rule_stream.extend(quote! {
                                     #[doc = #rule_debug_str]
                                     #[inline]
@@ -1278,13 +1279,14 @@ impl Grammar {
 
                                         #data_extract_stream
 
-                                        let __res = #reduce_action ;
+                                        let __res = #body;
                                         __data_stack.#stack_name.push(__res);
 
                                         Ok(#returns_non_empty)
                                     }
                                 });
                             } else {
+                                let body = &reduce_action.body;
                                 fn_reduce_for_each_rule_stream.extend(quote! {
                                     #[doc = #rule_debug_str]
                                     #[inline]
@@ -1304,7 +1306,7 @@ impl Grammar {
 
                                         #data_extract_stream
 
-                                        #reduce_action
+                                        #body
 
                                         Ok(#returns_non_empty)
                                     }

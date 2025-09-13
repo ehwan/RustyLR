@@ -38,6 +38,7 @@ compare_files() {
 # Get the directory where this script is located and go up one level
 script_dir="$(dirname "$0")"
 rustylr_path="$(realpath "$script_dir/..")"
+is_from_github_actions=$1
 
 process_and_compare() {
     local config="$1"
@@ -72,3 +73,25 @@ cargo test --bin glr
 if [ $? -ne 0 ]; then
     exit 1
 fi
+
+# to briefly see the difference of the generated parser in the PR, run for the sample calculator and json parsers
+cargo run --bin rustylr -- "$rustylr_path/example/calculator/src/parser.rs" "$rustylr_path/scripts/diff/calculator_new.rs" > /dev/null
+cargo run --bin rustylr -- "$rustylr_path/example/json/src/parser.rs" "$rustylr_path/scripts/diff/json_new.rs" > /dev/null
+if [ "$is_from_github_actions" = "true" ]; then
+    diff "$rustylr_path/scripts/diff/calculator.rs" "$rustylr_path/scripts/diff/calculator_new.rs" >/dev/null
+    if [ $? -ne 0 ]; then
+        echo "scripts/diff/ is not updated. Please run scripts/bootstrap_test.sh locally and commit the changes."
+        exit 1
+    fi
+
+    diff "$rustylr_path/scripts/diff/json.rs" "$rustylr_path/scripts/diff/json_new.rs" >/dev/null
+    if [ $? -ne 0 ]; then
+        echo "scripts/diff/ is not updated. Please run scripts/bootstrap_test.sh locally and commit the changes."
+        exit 1
+    fi
+fi
+
+mv "$rustylr_path/scripts/diff/calculator_new.rs" "$rustylr_path/scripts/diff/calculator.rs"
+mv "$rustylr_path/scripts/diff/json_new.rs" "$rustylr_path/scripts/diff/json.rs"
+
+echo "All tests passed."
