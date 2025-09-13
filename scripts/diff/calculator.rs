@@ -143,6 +143,13 @@ impl Default for EDataStack {
     dead_code
 )]
 impl EDataStack {
+    fn custom_reduce_action_0(
+        mut M: i32,
+        data: &mut i32,
+        __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
+    ) -> Result<i32, String> {
+        Ok({ M * 1 })
+    }
     ///A -> A plus A
     #[inline]
     fn reduce_A_0(
@@ -216,11 +223,23 @@ impl EDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        let mut m2 = __data_stack.__stack2.pop().unwrap();
-        let mut M = __data_stack.__stack2.pop().unwrap();
+        let mut __rustylr_data_2 = __data_stack.__stack2.pop().unwrap();
+        let mut __rustylr_data_0 = __data_stack.__stack2.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
-        let __res = { M * m2 };
+        let __rustylr_data_0 = Self::custom_reduce_action_0(
+            __rustylr_data_0,
+            data,
+            __rustylr_location0,
+        )?;
+        let mut M_optim = __rustylr_data_0;
+        let __rustylr_data_2 = Self::custom_reduce_action_0(
+            __rustylr_data_2,
+            data,
+            __rustylr_location0,
+        )?;
+        let mut m2 = __rustylr_data_2;
+        let __res = { M_optim * m2 };
         __data_stack.__stack2.push(__res);
         Ok(true)
     }
