@@ -189,13 +189,27 @@ impl EDataStack {
         Ok(true)
     }
     ///A -> M
-    #[inline(always)]
+    #[inline]
     fn reduce_A_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
-    ) -> bool {
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<Token>,
+        data: &mut i32,
+        __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
+    ) -> Result<bool, String> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                ETags::__stack2)
+            );
+        }
+        let mut M = __data_stack.__stack2.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
-        true
+        let __res = M;
+        __data_stack.__stack2.push(__res);
+        Ok(true)
     }
     ///M -> M star M
     #[inline]
@@ -275,25 +289,61 @@ impl EDataStack {
         Ok(true)
     }
     ///P -> lparen E rparen
-    #[inline(always)]
+    #[inline]
     fn reduce_P_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
-    ) -> bool {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<Token>,
+        data: &mut i32,
+        __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
+    ) -> Result<bool, String> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                ETags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                ETags::__stack2)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                ETags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(ETags::__stack2);
-        true
+        let mut E = __data_stack.__stack2.pop().unwrap();
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        __location_stack.truncate(__location_stack.len() - 3usize);
+        let __res = E;
+        __data_stack.__stack2.push(__res);
+        Ok(true)
     }
     ///E -> A
-    #[inline(always)]
+    #[inline]
     fn reduce_E_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
-    ) -> bool {
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<Token>,
+        data: &mut i32,
+        __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
+    ) -> Result<bool, String> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                ETags::__stack2)
+            );
+        }
+        let mut A = __data_stack.__stack2.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
-        true
+        let __res = A;
+        __data_stack.__stack2.push(__res);
+        Ok(true)
     }
 }
 #[allow(
@@ -384,7 +434,16 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                     location0,
                 )
             }
-            1usize => Ok(Self::reduce_A_1(data_stack, location_stack)),
+            1usize => {
+                Self::reduce_A_1(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
             2usize => {
                 Self::reduce_M_0(
                     data_stack,
@@ -394,9 +453,6 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                     user_data,
                     location0,
                 )
-            }
-            3usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
             }
             4usize => {
                 Self::reduce_P_0(
@@ -408,10 +464,25 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                     location0,
                 )
             }
-            5usize => Ok(Self::reduce_P_1(data_stack, location_stack)),
-            6usize => Ok(Self::reduce_E_0(data_stack, location_stack)),
-            7usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
+            5usize => {
+                Self::reduce_P_1(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
+            6usize => {
+                Self::reduce_E_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             _ => {
                 unreachable!("Invalid Rule: {}", rule_index);

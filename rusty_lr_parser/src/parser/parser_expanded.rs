@@ -3763,13 +3763,27 @@ impl GrammarDataStack {
         Ok(true)
     }
     ///TokenMapped* -> TokenMapped+
-    #[inline(always)]
+    #[inline]
     fn reduce__TokenMappedStar16_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack12)
+            );
+        }
+        let mut __token0 = __data_stack.__stack12.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
-        true
+        let __res = __token0;
+        __data_stack.__stack12.push(__res);
+        Ok(true)
     }
     ///TokenMapped* ->
     #[inline]
@@ -3845,13 +3859,27 @@ impl GrammarDataStack {
         Ok(true)
     }
     ///PrecDef* -> PrecDef+
-    #[inline(always)]
+    #[inline]
     fn reduce__PrecDefStar18_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack13)
+            );
+        }
+        let mut __token0 = __data_stack.__stack13.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
-        true
+        let __res = __token0;
+        __data_stack.__stack13.push(__res);
+        Ok(true)
     }
     ///PrecDef* ->
     #[inline]
@@ -3968,13 +3996,27 @@ impl GrammarDataStack {
         Ok(true)
     }
     ///TerminalSetItem* -> TerminalSetItem+
-    #[inline(always)]
+    #[inline]
     fn reduce__TerminalSetItemStar21_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack15)
+            );
+        }
+        let mut __token0 = __data_stack.__stack15.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
-        true
+        let __res = __token0;
+        __data_stack.__stack15.push(__res);
+        Ok(true)
     }
     ///TerminalSetItem* ->
     #[inline]
@@ -4050,13 +4092,27 @@ impl GrammarDataStack {
         Ok(true)
     }
     ///Pattern* -> Pattern+
-    #[inline(always)]
+    #[inline]
     fn reduce__PatternStar23_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack16)
+            );
+        }
+        let mut __token0 = __data_stack.__stack16.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
-        true
+        let __res = __token0;
+        __data_stack.__stack16.push(__res);
+        Ok(true)
     }
     ///Pattern* ->
     #[inline]
@@ -4349,13 +4405,27 @@ impl GrammarDataStack {
         Ok(true)
     }
     ///ident* -> ident+
-    #[inline(always)]
+    #[inline]
     fn reduce__identStar30_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) -> bool {
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack18)
+            );
+        }
+        let mut __token0 = __data_stack.__stack18.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
-        true
+        let __res = __token0;
+        __data_stack.__stack18.push(__res);
+        Ok(true)
     }
     ///ident* ->
     #[inline]
@@ -4374,21 +4444,49 @@ impl GrammarDataStack {
         Ok(true)
     }
     ///GrammarLine+ -> GrammarLine
-    #[inline(always)]
+    #[inline]
     fn reduce__GrammarLinePlus31_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::Empty)
+            );
+        }
         __location_stack.truncate(__location_stack.len() - 1usize);
+        Ok(false)
     }
     ///GrammarLine+ -> GrammarLine GrammarLine+
-    #[inline(always)]
+    #[inline]
     fn reduce__GrammarLinePlus31_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
-    ) {
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::Empty)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __location_stack.truncate(__location_stack.len() - 2usize);
+        Ok(false)
     }
 }
 #[allow(
@@ -5382,12 +5480,6 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            76usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            77usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
             78usize => {
                 Self::reduce__TokenMappedPlus15_0(
                     data_stack,
@@ -5408,7 +5500,16 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            80usize => Ok(Self::reduce__TokenMappedStar16_0(data_stack, location_stack)),
+            80usize => {
+                Self::reduce__TokenMappedStar16_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
             81usize => {
                 Self::reduce__TokenMappedStar16_1(
                     data_stack,
@@ -5439,7 +5540,16 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            84usize => Ok(Self::reduce__PrecDefStar18_0(data_stack, location_stack)),
+            84usize => {
+                Self::reduce__PrecDefStar18_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
             85usize => {
                 Self::reduce__PrecDefStar18_1(
                     data_stack,
@@ -5491,7 +5601,14 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             90usize => {
-                Ok(Self::reduce__TerminalSetItemStar21_0(data_stack, location_stack))
+                Self::reduce__TerminalSetItemStar21_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             91usize => {
                 Self::reduce__TerminalSetItemStar21_1(
@@ -5523,7 +5640,16 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            94usize => Ok(Self::reduce__PatternStar23_0(data_stack, location_stack)),
+            94usize => {
+                Self::reduce__PatternStar23_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
             95usize => {
                 Self::reduce__PatternStar23_1(
                     data_stack,
@@ -5573,129 +5699,6 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     user_data,
                     location0,
                 )
-            }
-            100usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            101usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            102usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            103usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            104usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            105usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            106usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            107usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            108usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            109usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            110usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            111usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            112usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            113usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            114usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            115usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            116usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            117usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            118usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            119usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            120usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            121usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            122usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            123usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            124usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            125usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            126usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            127usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            128usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            129usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            130usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            131usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            132usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            133usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            134usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            135usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            136usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            137usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            138usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            139usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            140usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
             }
             141usize => {
                 Self::reduce___TermSet26Plus27_0(
@@ -5757,7 +5760,16 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            147usize => Ok(Self::reduce__identStar30_0(data_stack, location_stack)),
+            147usize => {
+                Self::reduce__identStar30_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
             148usize => {
                 Self::reduce__identStar30_1(
                     data_stack,
@@ -5769,15 +5781,24 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             149usize => {
-                Self::reduce__GrammarLinePlus31_0(data_stack, location_stack);
-                Ok(false)
+                Self::reduce__GrammarLinePlus31_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             150usize => {
-                Self::reduce__GrammarLinePlus31_1(data_stack, location_stack);
-                Ok(false)
-            }
-            151usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
+                Self::reduce__GrammarLinePlus31_1(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             _ => {
                 unreachable!("Invalid Rule: {}", rule_index);

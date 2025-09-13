@@ -1335,7 +1335,10 @@ impl Grammar {
             let mut reduce_action_chain = rule.tokens[0].reduce_action_chains.clone();
 
             if let Some(ReduceAction::Custom(body)) = &rule.reduce_action {
-                if body.contains_ident(&format_ident!("{}", utils::LOOKAHEAD_PARAMETER_NAME)) {
+                if rule.reduce_action_contains_ident(&format_ident!(
+                    "{}",
+                    utils::LOOKAHEAD_PARAMETER_NAME
+                )) {
                     continue;
                 }
                 // if this rule has custom reduce action, save it
@@ -1343,7 +1346,7 @@ impl Grammar {
                 let mapto = &rule.tokens[0].mapto;
                 let location_mapto = if let Some(mapto) = mapto {
                     let location_varname = utils::location_variable_name(mapto);
-                    if body.contains_ident(&location_varname) {
+                    if rule.reduce_action_contains_ident(&location_varname) {
                         Some(location_varname)
                     } else {
                         None
@@ -1361,7 +1364,7 @@ impl Grammar {
                     };
 
                     if let Some(ruletype) = ruletype {
-                        if body.contains_ident(&mapto) {
+                        if rule.reduce_action_contains_ident(&mapto) {
                             Some((mapto.clone(), ruletype))
                         } else {
                             None

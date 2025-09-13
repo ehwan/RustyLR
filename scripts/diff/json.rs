@@ -367,26 +367,66 @@ impl Default for JsonDataStack {
 )]
 impl JsonDataStack {
     ///Object -> '{' WS '}'
-    #[inline(always)]
+    #[inline]
     fn reduce_Object_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        __location_stack.truncate(__location_stack.len() - 3usize);
+        Ok(false)
     }
     ///Object -> '{' Members '}'
-    #[inline(always)]
+    #[inline]
     fn reduce_Object_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        __location_stack.truncate(__location_stack.len() - 3usize);
+        Ok(false)
     }
     ///Object -> '{' error '}'
     #[inline]
@@ -427,297 +467,813 @@ impl JsonDataStack {
         Ok(false)
     }
     ///Members -> Member
-    #[inline(always)]
+    #[inline]
     fn reduce_Members_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+        }
         __location_stack.truncate(__location_stack.len() - 1usize);
+        Ok(false)
     }
     ///Members -> Member ',' Members
-    #[inline(always)]
+    #[inline]
     fn reduce_Members_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::Empty)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        Ok(false)
     }
     ///Member -> WS String WS ':' Element
-    #[inline(always)]
+    #[inline]
     fn reduce_Member_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
+                JsonTags::Empty)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 5usize);
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        Ok(false)
     }
     ///Array -> '[' $sep(Element, ',', *) ']'
-    #[inline(always)]
+    #[inline]
     fn reduce_Array_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        __location_stack.truncate(__location_stack.len() - 3usize);
+        Ok(false)
     }
     ///Element -> WS Value WS
-    #[inline(always)]
+    #[inline]
     fn reduce_Element_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::Empty)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        __location_stack.truncate(__location_stack.len() - 3usize);
+        Ok(false)
     }
     ///String -> '"' Character* '"'
-    #[inline(always)]
+    #[inline]
     fn reduce_String_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        __location_stack.truncate(__location_stack.len() - 3usize);
+        Ok(false)
     }
     ///Character -> '\\' Escape
-    #[inline(always)]
+    #[inline]
     fn reduce_Character_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __location_stack.truncate(__location_stack.len() - 2usize);
+        Ok(false)
     }
     ///Escape -> 'u' Hex Hex Hex Hex
-    #[inline(always)]
+    #[inline]
     fn reduce_Escape_8(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
-        __location_stack.truncate(__location_stack.len() - 5usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 5usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __location_stack.truncate(__location_stack.len() - 5usize);
+        Ok(false)
     }
     ///Number -> Integer ('.', Digits)? Exponent
-    #[inline(always)]
+    #[inline]
     fn reduce_Number_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::__stack2)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::Empty)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __data_stack.__stack2.truncate(__data_stack.__stack2.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        Ok(false)
     }
     ///Integer -> ['1'-'9'] (9 terms) Digit+
-    #[inline(always)]
+    #[inline]
     fn reduce_Integer_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __location_stack.truncate(__location_stack.len() - 2usize);
+        Ok(false)
     }
     ///Integer -> '-' ['0'-'9']
-    #[inline(always)]
+    #[inline]
     fn reduce_Integer_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        __location_stack.truncate(__location_stack.len() - 2usize);
+        Ok(false)
     }
     ///Integer -> '-' ['1'-'9'] (9 terms) Digit+
-    #[inline(always)]
+    #[inline]
     fn reduce_Integer_3(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        __location_stack.truncate(__location_stack.len() - 3usize);
+        Ok(false)
     }
     ///Exponent -> 'E' Sign Digit+
-    #[inline(always)]
+    #[inline]
     fn reduce_Exponent_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __location_stack.truncate(__location_stack.len() - 3usize);
+        Ok(false)
     }
     ///Exponent -> 'e' Sign Digit+
-    #[inline(always)]
+    #[inline]
     fn reduce_Exponent_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __location_stack.truncate(__location_stack.len() - 3usize);
+        Ok(false)
     }
     ///WS -> ' ' WS
-    #[inline(always)]
+    #[inline]
     fn reduce_WS_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __location_stack.truncate(__location_stack.len() - 2usize);
+        Ok(false)
     }
     ///WS -> ['\t', '\n', '\r'] (3 terms) WS
-    #[inline(always)]
+    #[inline]
     fn reduce_WS_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __location_stack.truncate(__location_stack.len() - 2usize);
+        Ok(false)
     }
     ///"true" -> 't' 'r' 'u' 'e'
-    #[inline(always)]
+    #[inline]
     fn reduce__LiteralString22_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 4usize);
-        __location_stack.truncate(__location_stack.len() - 4usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 4usize);
+        __location_stack.truncate(__location_stack.len() - 4usize);
+        Ok(false)
     }
     ///"false" -> 'f' 'a' 'l' 's' 'e'
-    #[inline(always)]
+    #[inline]
     fn reduce__LiteralString23_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 5usize);
-        __location_stack.truncate(__location_stack.len() - 5usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 5usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 5usize);
+        __location_stack.truncate(__location_stack.len() - 5usize);
+        Ok(false)
     }
     ///"null" -> 'n' 'u' 'l' 'l'
-    #[inline(always)]
+    #[inline]
     fn reduce__LiteralString24_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 4usize);
-        __location_stack.truncate(__location_stack.len() - 4usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 4usize);
+        __location_stack.truncate(__location_stack.len() - 4usize);
+        Ok(false)
     }
     ///$sep(Element, ',', +) -> Element
-    #[inline(always)]
+    #[inline]
     fn reduce__ElementSepPlus25_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+        }
         __location_stack.truncate(__location_stack.len() - 1usize);
+        Ok(false)
     }
     ///$sep(Element, ',', +) -> Element ',' $sep(Element, ',', +)
-    #[inline(always)]
+    #[inline]
     fn reduce__ElementSepPlus25_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::__terminals)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
+                JsonTags::Empty)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        Ok(false)
     }
     ///$sep(Element, ',', *) ->
-    #[inline(always)]
+    #[inline]
     fn reduce__ElementSepStar26_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)] {}
         __data_stack.__tags.push(JsonTags::Empty);
+        Ok(false)
     }
     ///Character+ -> Character
-    #[inline(always)]
+    #[inline]
     fn reduce__CharacterPlus27_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+        }
         __location_stack.truncate(__location_stack.len() - 1usize);
+        Ok(false)
     }
     ///Character+ -> Character Character+
-    #[inline(always)]
+    #[inline]
     fn reduce__CharacterPlus27_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::Empty)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __location_stack.truncate(__location_stack.len() - 2usize);
+        Ok(false)
     }
     ///Character* ->
-    #[inline(always)]
+    #[inline]
     fn reduce__CharacterStar28_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)] {}
         __data_stack.__tags.push(JsonTags::Empty);
+        Ok(false)
     }
     ///Digit+ -> ['0'-'9']
-    #[inline(always)]
+    #[inline]
     fn reduce__DigitPlus32_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __location_stack.truncate(__location_stack.len() - 1usize);
+        Ok(false)
     }
     ///Digit+ -> ['0'-'9'] Digit+
-    #[inline(always)]
+    #[inline]
     fn reduce__DigitPlus32_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __data_stack.__tags.push(JsonTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __location_stack.truncate(__location_stack.len() - 2usize);
+        Ok(false)
     }
     ///['0'-'9'] -> ['1'-'9'] (9 terms)
-    #[inline(always)]
+    #[inline]
     fn reduce__TermSet33_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) -> bool {
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
+        let mut __token0 = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
-        true
+        let __res = __token0;
+        __data_stack.__terminals.push(__res);
+        Ok(true)
     }
     ///('.', Digits) -> '.' Digit+
-    #[inline(always)]
+    #[inline]
     fn reduce__Group34_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) -> bool {
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                JsonTags::Empty)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                JsonTags::__terminals)
+            );
+        }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        true
+        let mut __token0 = __data_stack.__terminals.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2usize);
+        let __res = __token0;
+        __data_stack.__terminals.push(__res);
+        Ok(true)
     }
     ///('.', Digits)? -> ('.', Digits)
     #[inline]
@@ -761,12 +1317,18 @@ impl JsonDataStack {
         Ok(true)
     }
     ///"" ->
-    #[inline(always)]
+    #[inline]
     fn reduce__LiteralString36_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
-    ) {
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut (),
+        __rustylr_location0: &mut std::ops::Range<usize>,
+    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)] {}
         __data_stack.__tags.push(JsonTags::Empty);
+        Ok(false)
     }
 }
 #[allow(
@@ -847,37 +1409,25 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
         location0: &mut Self::Location,
     ) -> Result<bool, Self::ReduceActionError> {
         match rule_index {
-            0usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            1usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            2usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            3usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            4usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            5usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            6usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            7usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
             8usize => {
-                Self::reduce_Object_0(data_stack, location_stack);
-                Ok(false)
+                Self::reduce_Object_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             9usize => {
-                Self::reduce_Object_1(data_stack, location_stack);
-                Ok(false)
+                Self::reduce_Object_1(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             10usize => {
                 Self::reduce_Object_2(
@@ -890,280 +1440,295 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 )
             }
             11usize => {
-                Self::reduce_Members_0(data_stack, location_stack);
-                Ok(false)
+                Self::reduce_Members_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             12usize => {
-                Self::reduce_Members_1(data_stack, location_stack);
-                Ok(false)
+                Self::reduce_Members_1(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             13usize => {
-                Self::reduce_Member_0(data_stack, location_stack);
-                Ok(false)
+                Self::reduce_Member_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             14usize => {
-                Self::reduce_Array_0(data_stack, location_stack);
-                Ok(false)
+                Self::reduce_Array_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             15usize => {
-                Self::reduce_Element_0(data_stack, location_stack);
-                Ok(false)
+                Self::reduce_Element_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             16usize => {
-                Self::reduce_String_0(data_stack, location_stack);
-                Ok(false)
+                Self::reduce_String_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             17usize => {
-                Self::reduce_Character_0(data_stack, location_stack);
-                Ok(false)
-            }
-            18usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            19usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            20usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            21usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            22usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            23usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            24usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            25usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            26usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
+                Self::reduce_Character_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             27usize => {
-                Self::reduce_Escape_8(data_stack, location_stack);
-                Ok(false)
-            }
-            28usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            29usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            30usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
+                Self::reduce_Escape_8(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             31usize => {
-                Self::reduce_Number_0(data_stack, location_stack);
-                Ok(false)
-            }
-            32usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
+                Self::reduce_Number_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             33usize => {
-                Self::reduce_Integer_1(data_stack, location_stack);
-                Ok(false)
+                Self::reduce_Integer_1(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             34usize => {
-                Self::reduce_Integer_2(data_stack, location_stack);
-                Ok(false)
+                Self::reduce_Integer_2(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             35usize => {
-                Self::reduce_Integer_3(data_stack, location_stack);
-                Ok(false)
-            }
-            36usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
+                Self::reduce_Integer_3(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             37usize => {
-                Self::reduce_Exponent_1(data_stack, location_stack);
-                Ok(false)
+                Self::reduce_Exponent_1(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             38usize => {
-                Self::reduce_Exponent_2(data_stack, location_stack);
-                Ok(false)
-            }
-            39usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            40usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            41usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            42usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
+                Self::reduce_Exponent_2(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             43usize => {
-                Self::reduce_WS_1(data_stack, location_stack);
-                Ok(false)
+                Self::reduce_WS_1(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             44usize => {
-                Self::reduce_WS_2(data_stack, location_stack);
-                Ok(false)
+                Self::reduce_WS_2(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             45usize => {
-                Self::reduce__LiteralString22_0(data_stack, location_stack);
-                Ok(false)
+                Self::reduce__LiteralString22_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             46usize => {
-                Self::reduce__LiteralString23_0(data_stack, location_stack);
-                Ok(false)
+                Self::reduce__LiteralString23_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             47usize => {
-                Self::reduce__LiteralString24_0(data_stack, location_stack);
-                Ok(false)
+                Self::reduce__LiteralString24_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             48usize => {
-                Self::reduce__ElementSepPlus25_0(data_stack, location_stack);
-                Ok(false)
+                Self::reduce__ElementSepPlus25_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             49usize => {
-                Self::reduce__ElementSepPlus25_1(data_stack, location_stack);
-                Ok(false)
-            }
-            50usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
+                Self::reduce__ElementSepPlus25_1(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             51usize => {
-                Self::reduce__ElementSepStar26_1(data_stack, location_stack);
-                Ok(false)
+                Self::reduce__ElementSepStar26_1(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             52usize => {
-                Self::reduce__CharacterPlus27_0(data_stack, location_stack);
-                Ok(false)
+                Self::reduce__CharacterPlus27_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             53usize => {
-                Self::reduce__CharacterPlus27_1(data_stack, location_stack);
-                Ok(false)
-            }
-            54usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
+                Self::reduce__CharacterPlus27_1(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             55usize => {
-                Self::reduce__CharacterStar28_1(data_stack, location_stack);
-                Ok(false)
-            }
-            56usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            57usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            58usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            59usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            60usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            61usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            62usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            63usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            64usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            65usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            66usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            67usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            68usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            69usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            70usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            71usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            72usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            73usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            74usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            75usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            76usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            77usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            78usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            79usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            80usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            81usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            82usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            83usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            84usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            85usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            86usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            87usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            88usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            89usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
+                Self::reduce__CharacterStar28_1(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             90usize => {
-                Self::reduce__DigitPlus32_0(data_stack, location_stack);
-                Ok(false)
+                Self::reduce__DigitPlus32_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             91usize => {
-                Self::reduce__DigitPlus32_1(data_stack, location_stack);
-                Ok(false)
+                Self::reduce__DigitPlus32_1(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
-            92usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
+            93usize => {
+                Self::reduce__TermSet33_1(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
-            93usize => Ok(Self::reduce__TermSet33_1(data_stack, location_stack)),
-            94usize => Ok(Self::reduce__Group34_0(data_stack, location_stack)),
+            94usize => {
+                Self::reduce__Group34_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
             95usize => {
                 Self::reduce___Group34Question35_0(
                     data_stack,
@@ -1185,11 +1750,14 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 )
             }
             97usize => {
-                Self::reduce__LiteralString36_0(data_stack, location_stack);
-                Ok(false)
-            }
-            98usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
+                Self::reduce__LiteralString36_0(
+                    data_stack,
+                    location_stack,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
             }
             _ => {
                 unreachable!("Invalid Rule: {}", rule_index);
