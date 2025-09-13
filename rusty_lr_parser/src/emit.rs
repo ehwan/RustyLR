@@ -1109,7 +1109,7 @@ impl Grammar {
                 .input_type
                 .as_ref()
                 .map(|(name, ty)| {
-                    quote! { #name: #ty, }
+                    quote! { mut #name: #ty, }
                 })
                 .unwrap_or_default();
 
@@ -1117,7 +1117,7 @@ impl Grammar {
                 .input_location
                 .as_ref()
                 .map(|name| {
-                    quote! { #name: #location_typename, }
+                    quote! { mut #name: #location_typename, }
                 })
                 .unwrap_or_default();
 
@@ -1133,7 +1133,8 @@ impl Grammar {
                 fn #fn_name(
                     #data_arg
                     #location_arg
-                    #user_data_parameter_name: &mut #user_data_typename
+                    #user_data_parameter_name: &mut #user_data_typename,
+                    __rustylr_location0: &mut #location_typename,
                 ) -> Result<#output_type, #reduce_error_typename> {
                     Ok(#body)
                 }
@@ -1167,9 +1168,8 @@ impl Grammar {
                         if rule.is_used {
                             let mut debug_tag_check_stream = TokenStream::new();
                             let mut stack_mapto_map = std::collections::BTreeMap::new();
-                            for (token_index_from_end, token) in
-                                rule.tokens.iter().rev().enumerate()
-                            {
+                            for (token_idx, token) in rule.tokens.iter().enumerate().rev() {
+                                let token_index_from_end = rule.tokens.len() - 1 - token_idx;
                                 let stack_name = token_to_stack_name(token.token);
                                 let tag_name = stack_name.unwrap_or(&empty_tag_name);
 
@@ -1190,37 +1190,59 @@ impl Grammar {
                                 }
 
                                 if let Some(stack_name) = stack_name {
-                                    // if variable was not used at this reduce action,
-                                    // we can use `truncate` instead of `pop` for optimization
-                                    // so check it here
-                                    let mapto = if let Some(mapto) = &token.mapto {
-                                        if reduce_action.contains_ident(mapto) {
-                                            Some(mapto.clone())
+                                    let mapto = if let Some(first_chain) =
+                                        token.reduce_action_chains.first()
+                                    {
+                                        let first_chain = &self.custom_reduce_actions[*first_chain];
+                                        if first_chain.input_type.is_some() {
+                                            Some(format_ident!("__rustylr_data_{}", token_idx))
                                         } else {
                                             None
                                         }
                                     } else {
-                                        None
+                                        // if variable was not used at this reduce action,
+                                        // we can use `truncate` instead of `pop` for optimization
+                                        // so check it here
+                                        if let Some(mapto) = &token.mapto {
+                                            if reduce_action.contains_ident(mapto) {
+                                                Some(mapto.clone())
+                                            } else {
+                                                None
+                                            }
+                                        } else {
+                                            None
+                                        }
                                     };
                                     stack_mapto_map
                                         .entry(StackName::DataStack(stack_name.clone()))
                                         .or_insert_with(Vec::new)
                                         .push(mapto);
                                 }
-                                let location_mapto = if let Some(mapto) = &token.mapto {
-                                    let location_varname =
-                                        format_ident!("__rustylr_location_{}", mapto);
+                                let location_mapto = if token.reduce_action_chains.is_empty() {
+                                    if let Some(mapto) = &token.mapto {
+                                        let location_varname =
+                                            format_ident!("__rustylr_location_{}", mapto);
 
-                                    // if variable was not used at this reduce action,
-                                    // we can use `truncate` instead of `pop` for optimization
-                                    // so check it here
-                                    if reduce_action.contains_ident(&location_varname) {
-                                        Some(location_varname)
+                                        // if variable was not used at this reduce action,
+                                        // we can use `truncate` instead of `pop` for optimization
+                                        // so check it here
+                                        if reduce_action.contains_ident(&location_varname) {
+                                            Some(location_varname)
+                                        } else {
+                                            None
+                                        }
                                     } else {
                                         None
                                     }
                                 } else {
-                                    None
+                                    if token.reduce_action_chains.iter().any(|&idx| {
+                                        let action = &self.custom_reduce_actions[idx];
+                                        action.input_location.is_some()
+                                    }) {
+                                        Some(format_ident!("__rustylr_location_{}", token_idx))
+                                    } else {
+                                        None
+                                    }
                                 };
                                 stack_mapto_map
                                     .entry(StackName::LocationStack)
@@ -1228,21 +1250,22 @@ impl Grammar {
                                     .push(location_mapto);
 
                                 debug_tag_check_stream.extend(quote! {
-                                debug_assert!(
-                                    __data_stack.#tag_stack_name.get(
-                                        __data_stack.#tag_stack_name.len()-1-#token_index_from_end
-                                    ) == Some( &#tag_enum_name::#tag_name )
-                                );
-                            });
+                                    debug_assert!(
+                                        __data_stack.#tag_stack_name.get(
+                                            __data_stack.#tag_stack_name.len()-1-#token_index_from_end
+                                        ) == Some( &#tag_enum_name::#tag_name )
+                                    );
+                                });
                             }
 
                             // if there are variable with same name, the last one will be used (by shadowing)
                             // so set the front one to `None`
                             // this will also help optimizing performance by using `truncate` instead of `pop`
                             for maptos in &mut stack_mapto_map.values_mut() {
-                                for var_right in (0..maptos.len()).rev() {
+                                // maptos is in reverse order of the rule tokens
+                                for var_right in 0..maptos.len() {
                                     if let Some(var_name) = maptos[var_right].as_ref().cloned() {
-                                        for var_left in 0..var_right {
+                                        for var_left in var_right + 1..maptos.len() {
                                             if maptos[var_left].as_ref() == Some(&var_name) {
                                                 maptos[var_left] = None;
                                             }
@@ -1316,6 +1339,58 @@ impl Grammar {
                                 }
                             }
 
+                            let mut custom_reduce_action_stream = TokenStream::new();
+                            for (token_idx, token) in rule.tokens.iter().enumerate() {
+                                if token.reduce_action_chains.is_empty() {
+                                    continue;
+                                }
+                                let data_varname = format_ident!("__rustylr_data_{}", token_idx);
+                                let location_varname =
+                                    format_ident!("__rustylr_location_{}", token_idx);
+                                for &chain_idx in &token.reduce_action_chains {
+                                    let action = &self.custom_reduce_actions[chain_idx];
+                                    let fn_name =
+                                        format_ident!("custom_reduce_action_{}", chain_idx);
+
+                                    let data_arg = if action.input_type.is_some() {
+                                        quote! { #data_varname, }
+                                    } else {
+                                        quote! {}
+                                    };
+
+                                    let location_arg = if action.input_location.is_some() {
+                                        quote! { #location_varname.clone(), }
+                                    } else {
+                                        quote! {}
+                                    };
+
+                                    custom_reduce_action_stream.extend(quote! {
+                                        let #data_varname = Self::#fn_name(
+                                            #data_arg
+                                            #location_arg
+                                            #user_data_parameter_name,
+                                            __rustylr_location0,
+                                        )?;
+                                    });
+                                }
+
+                                if let Some(mapto) = &token.mapto {
+                                    if reduce_action.contains_ident(mapto) {
+                                        custom_reduce_action_stream.extend(quote! {
+                                            let mut #mapto = #data_varname;
+                                        });
+                                    }
+                                    let location_mapto_varname =
+                                        format_ident!("__rustylr_location_{}", mapto);
+
+                                    if reduce_action.contains_ident(&location_mapto_varname) {
+                                        custom_reduce_action_stream.extend(quote! {
+                                            let mut #location_mapto_varname = #location_varname;
+                                        });
+                                    }
+                                }
+                            }
+
                             reduce_action_case_streams.extend(quote! {
                                 #rule_index => Self::#reduce_fn_ident( data_stack, location_stack, shift, lookahead, user_data, location0 ),
                             });
@@ -1343,6 +1418,7 @@ impl Grammar {
                                         #modify_tag_stream
 
                                         #extract_data_stream
+                                        #custom_reduce_action_stream
 
                                         let __res = #body;
                                         __data_stack.#stack_name.push(__res);
@@ -1370,6 +1446,7 @@ impl Grammar {
                                         #modify_tag_stream
 
                                         #extract_data_stream
+                                        #custom_reduce_action_stream
 
                                         #body
 
