@@ -29,7 +29,7 @@ use rusty_lr_core::rule::ReduceType;
 ====================================Grammar=====================================
 
 # of terminal classes: 42
-# of states: 178
+# of states: 177
 
 0: Rule -> ident RuleType colon RuleLines semicolon
 1: RuleType -> parengroup
@@ -72,118 +72,117 @@ use rusty_lr_core::rule::ReduceType;
 38: Action -> 
 39: IdentOrLiteral -> ident
 40: IdentOrLiteral -> literal
-41: RustCode -> [^semicolon]+
-42: Directive -> percent token ident RustCode semicolon
-43: Directive -> percent token ident semicolon
-44: Directive -> percent token error semicolon
-45: Directive -> percent start ident semicolon
-46: Directive -> percent start error semicolon
-47: Directive -> percent tokentype RustCode semicolon
-48: Directive -> percent tokentype semicolon
-49: Directive -> percent userdata RustCode semicolon
-50: Directive -> percent userdata semicolon
-51: Directive -> percent left IdentOrLiteral+ semicolon
-52: Directive -> percent left error semicolon
-53: Directive -> percent right IdentOrLiteral+ semicolon
-54: Directive -> percent right error semicolon
-55: Directive -> percent precedence IdentOrLiteral+ semicolon
-56: Directive -> percent precedence error semicolon
-57: Directive -> percent errortype RustCode semicolon
-58: Directive -> percent errortype semicolon
-59: Directive -> percent moduleprefix RustCode semicolon
-60: Directive -> percent moduleprefix semicolon
-61: Directive -> percent glr semicolon
-62: Directive -> percent glr error semicolon
-63: Directive -> percent lalr semicolon
-64: Directive -> percent lalr error semicolon
-65: Directive -> percent nooptim semicolon
-66: Directive -> percent nooptim error semicolon
-67: Directive -> percent dense semicolon
-68: Directive -> percent dense error semicolon
-69: Directive -> percent trace ident* semicolon
-70: Directive -> percent trace error semicolon
-71: Directive -> percent filter RustCode semicolon
-72: Directive -> percent filter semicolon
-73: Directive -> percent location RustCode semicolon
-74: Directive -> percent location semicolon
-75: Directive -> percent error semicolon
-76: GrammarLine -> Rule
-77: GrammarLine -> Directive
-78: Grammar -> GrammarLine+
-79: TokenMapped+ -> TokenMapped
-80: TokenMapped+ -> TokenMapped+ TokenMapped
-81: TokenMapped* -> TokenMapped+
-82: TokenMapped* -> 
-83: PrecDef+ -> PrecDef
-84: PrecDef+ -> PrecDef+ PrecDef
-85: PrecDef* -> PrecDef+
-86: PrecDef* -> 
-87: caret? -> caret
-88: caret? -> 
-89: TerminalSetItem+ -> TerminalSetItem
-90: TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem
-91: TerminalSetItem* -> TerminalSetItem+
-92: TerminalSetItem* -> 
-93: Pattern+ -> Pattern
-94: Pattern+ -> Pattern+ Pattern
-95: Pattern* -> Pattern+
-96: Pattern* -> 
-97: $sep(Pattern*, pipe, +) -> Pattern*
-98: $sep(Pattern*, pipe, +) -> $sep(Pattern*, pipe, +) pipe Pattern*
-99: comma? -> comma
-100: comma? -> 
-101: [^semicolon] -> ident
-102: [^semicolon] -> colon
-103: [^semicolon] -> pipe
-104: [^semicolon] -> percent
-105: [^semicolon] -> equal
-106: [^semicolon] -> plus
-107: [^semicolon] -> star
-108: [^semicolon] -> question
-109: [^semicolon] -> caret
-110: [^semicolon] -> minus
-111: [^semicolon] -> exclamation
-112: [^semicolon] -> slash
-113: [^semicolon] -> dot
-114: [^semicolon] -> dollar
-115: [^semicolon] -> comma
-116: [^semicolon] -> literal
-117: [^semicolon] -> parengroup
-118: [^semicolon] -> bracegroup
-119: [^semicolon] -> lparen
-120: [^semicolon] -> rparen
-121: [^semicolon] -> lbracket
-122: [^semicolon] -> rbracket
-123: [^semicolon] -> left
-124: [^semicolon] -> right
-125: [^semicolon] -> token
-126: [^semicolon] -> start
-127: [^semicolon] -> tokentype
-128: [^semicolon] -> userdata
-129: [^semicolon] -> errortype
-130: [^semicolon] -> moduleprefix
-131: [^semicolon] -> lalr
-132: [^semicolon] -> glr
-133: [^semicolon] -> prec
-134: [^semicolon] -> precedence
-135: [^semicolon] -> nooptim
-136: [^semicolon] -> dense
-137: [^semicolon] -> trace
-138: [^semicolon] -> dprec
-139: [^semicolon] -> filter
-140: [^semicolon] -> location
-141: [^semicolon] -> <Others>
-142: [^semicolon]+ -> [^semicolon]
-143: [^semicolon]+ -> [^semicolon]+ [^semicolon]
-144: IdentOrLiteral+ -> IdentOrLiteral
-145: IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
-146: ident+ -> ident
-147: ident+ -> ident+ ident
-148: ident* -> ident+
-149: ident* -> 
-150: GrammarLine+ -> GrammarLine
-151: GrammarLine+ -> GrammarLine GrammarLine+
-152: Augmented -> Grammar eof
+41: Directive -> percent token ident [^semicolon]+ semicolon
+42: Directive -> percent token ident semicolon
+43: Directive -> percent token error semicolon
+44: Directive -> percent start ident semicolon
+45: Directive -> percent start error semicolon
+46: Directive -> percent tokentype [^semicolon]+ semicolon
+47: Directive -> percent tokentype semicolon
+48: Directive -> percent userdata [^semicolon]+ semicolon
+49: Directive -> percent userdata semicolon
+50: Directive -> percent left IdentOrLiteral+ semicolon
+51: Directive -> percent left error semicolon
+52: Directive -> percent right IdentOrLiteral+ semicolon
+53: Directive -> percent right error semicolon
+54: Directive -> percent precedence IdentOrLiteral+ semicolon
+55: Directive -> percent precedence error semicolon
+56: Directive -> percent errortype [^semicolon]+ semicolon
+57: Directive -> percent errortype semicolon
+58: Directive -> percent moduleprefix [^semicolon]+ semicolon
+59: Directive -> percent moduleprefix semicolon
+60: Directive -> percent glr semicolon
+61: Directive -> percent glr error semicolon
+62: Directive -> percent lalr semicolon
+63: Directive -> percent lalr error semicolon
+64: Directive -> percent nooptim semicolon
+65: Directive -> percent nooptim error semicolon
+66: Directive -> percent dense semicolon
+67: Directive -> percent dense error semicolon
+68: Directive -> percent trace ident* semicolon
+69: Directive -> percent trace error semicolon
+70: Directive -> percent filter [^semicolon]+ semicolon
+71: Directive -> percent filter semicolon
+72: Directive -> percent location [^semicolon]+ semicolon
+73: Directive -> percent location semicolon
+74: Directive -> percent error semicolon
+75: GrammarLine -> Rule
+76: GrammarLine -> Directive
+77: Grammar -> GrammarLine+
+78: TokenMapped+ -> TokenMapped
+79: TokenMapped+ -> TokenMapped+ TokenMapped
+80: TokenMapped* -> TokenMapped+
+81: TokenMapped* -> 
+82: PrecDef+ -> PrecDef
+83: PrecDef+ -> PrecDef+ PrecDef
+84: PrecDef* -> PrecDef+
+85: PrecDef* -> 
+86: caret? -> caret
+87: caret? -> 
+88: TerminalSetItem+ -> TerminalSetItem
+89: TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem
+90: TerminalSetItem* -> TerminalSetItem+
+91: TerminalSetItem* -> 
+92: Pattern+ -> Pattern
+93: Pattern+ -> Pattern+ Pattern
+94: Pattern* -> Pattern+
+95: Pattern* -> 
+96: $sep(Pattern*, pipe, +) -> Pattern*
+97: $sep(Pattern*, pipe, +) -> $sep(Pattern*, pipe, +) pipe Pattern*
+98: comma? -> comma
+99: comma? -> 
+100: [^semicolon] -> ident
+101: [^semicolon] -> colon
+102: [^semicolon] -> pipe
+103: [^semicolon] -> percent
+104: [^semicolon] -> equal
+105: [^semicolon] -> plus
+106: [^semicolon] -> star
+107: [^semicolon] -> question
+108: [^semicolon] -> caret
+109: [^semicolon] -> minus
+110: [^semicolon] -> exclamation
+111: [^semicolon] -> slash
+112: [^semicolon] -> dot
+113: [^semicolon] -> dollar
+114: [^semicolon] -> comma
+115: [^semicolon] -> literal
+116: [^semicolon] -> parengroup
+117: [^semicolon] -> bracegroup
+118: [^semicolon] -> lparen
+119: [^semicolon] -> rparen
+120: [^semicolon] -> lbracket
+121: [^semicolon] -> rbracket
+122: [^semicolon] -> left
+123: [^semicolon] -> right
+124: [^semicolon] -> token
+125: [^semicolon] -> start
+126: [^semicolon] -> tokentype
+127: [^semicolon] -> userdata
+128: [^semicolon] -> errortype
+129: [^semicolon] -> moduleprefix
+130: [^semicolon] -> lalr
+131: [^semicolon] -> glr
+132: [^semicolon] -> prec
+133: [^semicolon] -> precedence
+134: [^semicolon] -> nooptim
+135: [^semicolon] -> dense
+136: [^semicolon] -> trace
+137: [^semicolon] -> dprec
+138: [^semicolon] -> filter
+139: [^semicolon] -> location
+140: [^semicolon] -> <Others>
+141: [^semicolon]+ -> [^semicolon]
+142: [^semicolon]+ -> [^semicolon]+ [^semicolon]
+143: IdentOrLiteral+ -> IdentOrLiteral
+144: IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
+145: ident+ -> ident
+146: ident+ -> ident+ ident
+147: ident* -> ident+
+148: ident* -> 
+149: GrammarLine+ -> GrammarLine
+150: GrammarLine+ -> GrammarLine GrammarLine+
+151: Augmented -> Grammar eof
 
 */
 // =============================Generated Codes Begin==============================
@@ -235,7 +234,6 @@ pub enum GrammarNonTerminals {
     Pattern,
     Action,
     IdentOrLiteral,
-    RustCode,
     Directive,
     GrammarLine,
     Grammar,
@@ -284,7 +282,6 @@ impl ::rusty_lr_core::nonterminal::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::Pattern => "Pattern",
             GrammarNonTerminals::Action => "Action",
             GrammarNonTerminals::IdentOrLiteral => "IdentOrLiteral",
-            GrammarNonTerminals::RustCode => "RustCode",
             GrammarNonTerminals::Directive => "Directive",
             GrammarNonTerminals::GrammarLine => "GrammarLine",
             GrammarNonTerminals::Grammar => "Grammar",
@@ -321,7 +318,6 @@ impl ::rusty_lr_core::nonterminal::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::Pattern => false,
             GrammarNonTerminals::Action => false,
             GrammarNonTerminals::IdentOrLiteral => false,
-            GrammarNonTerminals::RustCode => false,
             GrammarNonTerminals::Directive => false,
             GrammarNonTerminals::GrammarLine => false,
             GrammarNonTerminals::Grammar => false,
@@ -358,7 +354,6 @@ impl ::rusty_lr_core::nonterminal::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::Pattern => None,
             GrammarNonTerminals::Action => None,
             GrammarNonTerminals::IdentOrLiteral => None,
-            GrammarNonTerminals::RustCode => None,
             GrammarNonTerminals::Directive => None,
             GrammarNonTerminals::GrammarLine => None,
             GrammarNonTerminals::Grammar => None,
@@ -445,7 +440,6 @@ pub enum GrammarTags {
     __stack17,
     __stack18,
     __stack19,
-    __stack20,
     Empty,
 }
 /// enum for each non-terminal and terminal symbol, that actually hold data
@@ -463,15 +457,14 @@ pub struct GrammarDataStack {
     __stack9: Vec<TerminalSet>,
     __stack10: Vec<PatternArgs>,
     __stack11: Vec<IdentOrLiteral>,
-    __stack12: Vec<TokenStream>,
-    __stack13: Vec<Vec<(Option<Ident>, PatternArgs)>>,
-    __stack14: Vec<Vec<PrecDPrecArgs>>,
-    __stack15: Vec<Option<Lexed>>,
-    __stack16: Vec<Vec<TerminalSetItem>>,
-    __stack17: Vec<Vec<PatternArgs>>,
-    __stack18: Vec<Vec<Vec<PatternArgs>>>,
-    __stack19: Vec<Vec<Lexed>>,
-    __stack20: Vec<Vec<IdentOrLiteral>>,
+    __stack12: Vec<Vec<(Option<Ident>, PatternArgs)>>,
+    __stack13: Vec<Vec<PrecDPrecArgs>>,
+    __stack14: Vec<Option<Lexed>>,
+    __stack15: Vec<Vec<TerminalSetItem>>,
+    __stack16: Vec<Vec<PatternArgs>>,
+    __stack17: Vec<Vec<Vec<PatternArgs>>>,
+    __stack18: Vec<Vec<Lexed>>,
+    __stack19: Vec<Vec<IdentOrLiteral>>,
 }
 impl Default for GrammarDataStack {
     fn default() -> Self {
@@ -496,7 +489,6 @@ impl Default for GrammarDataStack {
             __stack17: Vec::new(),
             __stack18: Vec::new(),
             __stack19: Vec::new(),
-            __stack20: Vec::new(),
         }
     }
 }
@@ -509,6 +501,19 @@ impl Default for GrammarDataStack {
     dead_code
 )]
 impl GrammarDataStack {
+    fn custom_reduce_action_0(
+        mut t: Vec<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<TokenStream, ::rusty_lr_core::DefaultReduceActionError> {
+        Ok({
+            let mut tokens = TokenStream::new();
+            for token in t.into_iter() {
+                token.append_to_stream(&mut tokens);
+            }
+            tokens
+        })
+    }
     ///Rule -> ident RuleType colon RuleLines semicolon
     #[inline]
     fn reduce_Rule_0(
@@ -697,17 +702,17 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack14)
+                GrammarTags::__stack13)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                GrammarTags::__stack13)
+                GrammarTags::__stack12)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(GrammarTags::__stack5);
-        let mut TokenMapped = __data_stack.__stack13.pop().unwrap();
-        let mut PrecDef = __data_stack.__stack14.pop().unwrap();
+        let mut TokenMapped = __data_stack.__stack12.pop().unwrap();
+        let mut PrecDef = __data_stack.__stack13.pop().unwrap();
         let mut Action = __data_stack.__stack3.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = {
@@ -1236,11 +1241,11 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack16)
+                GrammarTags::__stack15)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                GrammarTags::__stack15)
+                GrammarTags::__stack14)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
@@ -1249,8 +1254,8 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::__stack9);
-        let mut caret = __data_stack.__stack15.pop().unwrap();
-        let mut TerminalSetItem = __data_stack.__stack16.pop().unwrap();
+        let mut caret = __data_stack.__stack14.pop().unwrap();
+        let mut TerminalSetItem = __data_stack.__stack15.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         let mut __rustylr_location_rbracket = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -1540,7 +1545,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack18)
+                GrammarTags::__stack17)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -1549,7 +1554,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(GrammarTags::__stack10);
-        let mut Pattern = __data_stack.__stack18.pop().unwrap();
+        let mut Pattern = __data_stack.__stack17.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         let mut __rustylr_location_rparen = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -1690,7 +1695,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack15)
+                GrammarTags::__stack14)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -1721,7 +1726,7 @@ impl GrammarDataStack {
         __data_stack.__tags.push(GrammarTags::__stack10);
         let mut del = __data_stack.__stack10.pop().unwrap();
         let mut base = __data_stack.__stack10.pop().unwrap();
-        __data_stack.__stack15.truncate(__data_stack.__stack15.len() - 1usize);
+        __data_stack.__stack14.truncate(__data_stack.__stack14.len() - 1usize);
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
@@ -2174,38 +2179,7 @@ impl GrammarDataStack {
         __data_stack.__stack11.push(__res);
         Ok(true)
     }
-    ///RustCode -> [^semicolon]+
-    #[inline]
-    fn reduce_RustCode_0(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-        shift: &mut bool,
-        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
-        data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
-    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack19)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack12);
-        let mut t = __data_stack.__stack19.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        let __res = {
-            let mut tokens = TokenStream::new();
-            for token in t.into_iter() {
-                token.append_to_stream(&mut tokens);
-            }
-            tokens
-        };
-        __data_stack.__stack12.push(__res);
-        Ok(true)
-    }
-    ///Directive -> percent token ident RustCode semicolon
+    ///Directive -> percent token ident [^semicolon]+ semicolon
     #[inline]
     fn reduce_Directive_0(
         __data_stack: &mut Self,
@@ -2223,7 +2197,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack12)
+                GrammarTags::__stack18)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -2240,11 +2214,17 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 5usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut RustCode = __data_stack.__stack12.pop().unwrap();
+        let mut __rustylr_data_3 = __data_stack.__stack18.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 5usize);
+        let __rustylr_data_3 = Self::custom_reduce_action_0(
+            __rustylr_data_3,
+            data,
+            __rustylr_location0,
+        )?;
+        let mut RustCode = __rustylr_data_3;
         {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("TokenDef-Ident");
@@ -2434,7 +2414,7 @@ impl GrammarDataStack {
         }
         Ok(false)
     }
-    ///Directive -> percent tokentype RustCode semicolon
+    ///Directive -> percent tokentype [^semicolon]+ semicolon
     #[inline]
     fn reduce_Directive_5(
         __data_stack: &mut Self,
@@ -2452,7 +2432,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack12)
+                GrammarTags::__stack18)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -2465,11 +2445,17 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut RustCode = __data_stack.__stack12.pop().unwrap();
+        let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_tokentype = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
+        let __rustylr_data_2 = Self::custom_reduce_action_0(
+            __rustylr_data_2,
+            data,
+            __rustylr_location0,
+        )?;
+        let mut RustCode = __rustylr_data_2;
         {
             data.token_typename.push((__rustylr_location_tokentype.span(), RustCode));
         }
@@ -2517,7 +2503,7 @@ impl GrammarDataStack {
         }
         Ok(false)
     }
-    ///Directive -> percent userdata RustCode semicolon
+    ///Directive -> percent userdata [^semicolon]+ semicolon
     #[inline]
     fn reduce_Directive_7(
         __data_stack: &mut Self,
@@ -2535,7 +2521,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack12)
+                GrammarTags::__stack18)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -2548,11 +2534,17 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut RustCode = __data_stack.__stack12.pop().unwrap();
+        let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_userdata = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
+        let __rustylr_data_2 = Self::custom_reduce_action_0(
+            __rustylr_data_2,
+            data,
+            __rustylr_location0,
+        )?;
+        let mut RustCode = __rustylr_data_2;
         {
             data.userdata_typename.push((__rustylr_location_userdata.span(), RustCode));
         }
@@ -2618,7 +2610,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack20)
+                GrammarTags::__stack19)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -2631,7 +2623,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut IdentOrLiteral = __data_stack.__stack20.pop().unwrap();
+        let mut IdentOrLiteral = __data_stack.__stack19.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_left = __location_stack.pop().unwrap();
@@ -2710,7 +2702,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack20)
+                GrammarTags::__stack19)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -2723,7 +2715,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut IdentOrLiteral = __data_stack.__stack20.pop().unwrap();
+        let mut IdentOrLiteral = __data_stack.__stack19.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_right = __location_stack.pop().unwrap();
@@ -2802,7 +2794,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack20)
+                GrammarTags::__stack19)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -2815,7 +2807,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut IdentOrLiteral = __data_stack.__stack20.pop().unwrap();
+        let mut IdentOrLiteral = __data_stack.__stack19.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_precedence = __location_stack.pop().unwrap();
@@ -2872,7 +2864,7 @@ impl GrammarDataStack {
         }
         Ok(false)
     }
-    ///Directive -> percent errortype RustCode semicolon
+    ///Directive -> percent errortype [^semicolon]+ semicolon
     #[inline]
     fn reduce_Directive_15(
         __data_stack: &mut Self,
@@ -2890,7 +2882,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack12)
+                GrammarTags::__stack18)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -2903,11 +2895,17 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut RustCode = __data_stack.__stack12.pop().unwrap();
+        let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_errortype = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
+        let __rustylr_data_2 = Self::custom_reduce_action_0(
+            __rustylr_data_2,
+            data,
+            __rustylr_location0,
+        )?;
+        let mut RustCode = __rustylr_data_2;
         {
             data.error_typename.push((__rustylr_location_errortype.span(), RustCode));
         }
@@ -2955,7 +2953,7 @@ impl GrammarDataStack {
         }
         Ok(false)
     }
-    ///Directive -> percent moduleprefix RustCode semicolon
+    ///Directive -> percent moduleprefix [^semicolon]+ semicolon
     #[inline]
     fn reduce_Directive_17(
         __data_stack: &mut Self,
@@ -2973,7 +2971,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack12)
+                GrammarTags::__stack18)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -2986,11 +2984,17 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut RustCode = __data_stack.__stack12.pop().unwrap();
+        let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_moduleprefix = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
+        let __rustylr_data_2 = Self::custom_reduce_action_0(
+            __rustylr_data_2,
+            data,
+            __rustylr_location0,
+        )?;
+        let mut RustCode = __rustylr_data_2;
         {
             data.module_prefix.push((__rustylr_location_moduleprefix.span(), RustCode));
         }
@@ -3382,7 +3386,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack19)
+                GrammarTags::__stack18)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -3395,7 +3399,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut ident = __data_stack.__stack19.pop().unwrap();
+        let mut ident = __data_stack.__stack18.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
         __location_stack.truncate(__location_stack.len() - 4usize);
         {
@@ -3457,7 +3461,7 @@ impl GrammarDataStack {
         }
         Ok(false)
     }
-    ///Directive -> percent filter RustCode semicolon
+    ///Directive -> percent filter [^semicolon]+ semicolon
     #[inline]
     fn reduce_Directive_29(
         __data_stack: &mut Self,
@@ -3475,7 +3479,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack12)
+                GrammarTags::__stack18)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -3488,11 +3492,17 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut RustCode = __data_stack.__stack12.pop().unwrap();
+        let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut filter = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 4usize);
+        let __rustylr_data_2 = Self::custom_reduce_action_0(
+            __rustylr_data_2,
+            data,
+            __rustylr_location0,
+        )?;
+        let mut RustCode = __rustylr_data_2;
         {
             data.filter = Some(RustCode);
         }
@@ -3540,7 +3550,7 @@ impl GrammarDataStack {
         }
         Ok(false)
     }
-    ///Directive -> percent location RustCode semicolon
+    ///Directive -> percent location [^semicolon]+ semicolon
     #[inline]
     fn reduce_Directive_31(
         __data_stack: &mut Self,
@@ -3558,7 +3568,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack12)
+                GrammarTags::__stack18)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -3571,9 +3581,15 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut RustCode = __data_stack.__stack12.pop().unwrap();
+        let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
         __location_stack.truncate(__location_stack.len() - 4usize);
+        let __rustylr_data_2 = Self::custom_reduce_action_0(
+            __rustylr_data_2,
+            data,
+            __rustylr_location0,
+        )?;
+        let mut RustCode = __rustylr_data_2;
         {
             data.location_typename = Some(RustCode);
         }
@@ -3707,11 +3723,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack13);
+        __data_stack.__tags.push(GrammarTags::__stack12);
         let mut A = __data_stack.__stack7.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack13.push(__res);
+        __data_stack.__stack12.push(__res);
         Ok(true)
     }
     ///TokenMapped+ -> TokenMapped+ TokenMapped
@@ -3732,18 +3748,18 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack13)
+                GrammarTags::__stack12)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        let mut Ap = __data_stack.__stack13.pop().unwrap();
+        let mut Ap = __data_stack.__stack12.pop().unwrap();
         let mut A = __data_stack.__stack7.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
         let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack13.push(__res);
+        __data_stack.__stack12.push(__res);
         Ok(true)
     }
     ///TokenMapped* -> TokenMapped+
@@ -3766,9 +3782,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack13);
+        __data_stack.__tags.push(GrammarTags::__stack12);
         let __res = { vec![] };
-        __data_stack.__stack13.push(__res);
+        __data_stack.__stack12.push(__res);
         Ok(true)
     }
     ///PrecDef+ -> PrecDef
@@ -3789,11 +3805,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack14);
+        __data_stack.__tags.push(GrammarTags::__stack13);
         let mut A = __data_stack.__stack6.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack14.push(__res);
+        __data_stack.__stack13.push(__res);
         Ok(true)
     }
     ///PrecDef+ -> PrecDef+ PrecDef
@@ -3814,18 +3830,18 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack14)
+                GrammarTags::__stack13)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        let mut Ap = __data_stack.__stack14.pop().unwrap();
+        let mut Ap = __data_stack.__stack13.pop().unwrap();
         let mut A = __data_stack.__stack6.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
         let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack14.push(__res);
+        __data_stack.__stack13.push(__res);
         Ok(true)
     }
     ///PrecDef* -> PrecDef+
@@ -3848,9 +3864,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack14);
+        __data_stack.__tags.push(GrammarTags::__stack13);
         let __res = { vec![] };
-        __data_stack.__stack14.push(__res);
+        __data_stack.__stack13.push(__res);
         Ok(true)
     }
     ///caret? -> caret
@@ -3871,11 +3887,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack15);
+        __data_stack.__tags.push(GrammarTags::__stack14);
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = Some(A);
-        __data_stack.__stack15.push(__res);
+        __data_stack.__stack14.push(__res);
         Ok(true)
     }
     ///caret? ->
@@ -3889,9 +3905,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack15);
+        __data_stack.__tags.push(GrammarTags::__stack14);
         let __res = { None };
-        __data_stack.__stack15.push(__res);
+        __data_stack.__stack14.push(__res);
         Ok(true)
     }
     ///TerminalSetItem+ -> TerminalSetItem
@@ -3912,11 +3928,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack16);
+        __data_stack.__tags.push(GrammarTags::__stack15);
         let mut A = __data_stack.__stack8.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack16.push(__res);
+        __data_stack.__stack15.push(__res);
         Ok(true)
     }
     ///TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem
@@ -3937,18 +3953,18 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack16)
+                GrammarTags::__stack15)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        let mut Ap = __data_stack.__stack16.pop().unwrap();
+        let mut Ap = __data_stack.__stack15.pop().unwrap();
         let mut A = __data_stack.__stack8.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
         let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack16.push(__res);
+        __data_stack.__stack15.push(__res);
         Ok(true)
     }
     ///TerminalSetItem* -> TerminalSetItem+
@@ -3971,9 +3987,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack16);
+        __data_stack.__tags.push(GrammarTags::__stack15);
         let __res = { vec![] };
-        __data_stack.__stack16.push(__res);
+        __data_stack.__stack15.push(__res);
         Ok(true)
     }
     ///Pattern+ -> Pattern
@@ -3994,11 +4010,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack17);
+        __data_stack.__tags.push(GrammarTags::__stack16);
         let mut A = __data_stack.__stack10.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack17.push(__res);
+        __data_stack.__stack16.push(__res);
         Ok(true)
     }
     ///Pattern+ -> Pattern+ Pattern
@@ -4019,18 +4035,18 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack17)
+                GrammarTags::__stack16)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut A = __data_stack.__stack10.pop().unwrap();
-        let mut Ap = __data_stack.__stack17.pop().unwrap();
+        let mut Ap = __data_stack.__stack16.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
         let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack17.push(__res);
+        __data_stack.__stack16.push(__res);
         Ok(true)
     }
     ///Pattern* -> Pattern+
@@ -4053,9 +4069,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack17);
+        __data_stack.__tags.push(GrammarTags::__stack16);
         let __res = { vec![] };
-        __data_stack.__stack17.push(__res);
+        __data_stack.__stack16.push(__res);
         Ok(true)
     }
     ///$sep(Pattern*, pipe, +) -> Pattern*
@@ -4072,15 +4088,15 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack17)
+                GrammarTags::__stack16)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack18);
-        let mut __token0 = __data_stack.__stack17.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack17);
+        let mut __token0 = __data_stack.__stack16.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![__token0] };
-        __data_stack.__stack18.push(__res);
+        __data_stack.__stack17.push(__res);
         Ok(true)
     }
     ///$sep(Pattern*, pipe, +) -> $sep(Pattern*, pipe, +) pipe Pattern*
@@ -4097,7 +4113,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack17)
+                GrammarTags::__stack16)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -4105,19 +4121,19 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                GrammarTags::__stack18)
+                GrammarTags::__stack17)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        let mut __token1 = __data_stack.__stack17.pop().unwrap();
-        let mut __token0 = __data_stack.__stack18.pop().unwrap();
+        let mut __token1 = __data_stack.__stack16.pop().unwrap();
+        let mut __token0 = __data_stack.__stack17.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = {
             __token0.push(__token1);
             __token0
         };
-        __data_stack.__stack18.push(__res);
+        __data_stack.__stack17.push(__res);
         Ok(true)
     }
     ///comma? -> comma
@@ -4138,11 +4154,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack15);
+        __data_stack.__tags.push(GrammarTags::__stack14);
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = Some(A);
-        __data_stack.__stack15.push(__res);
+        __data_stack.__stack14.push(__res);
         Ok(true)
     }
     ///comma? ->
@@ -4156,9 +4172,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack15);
+        __data_stack.__tags.push(GrammarTags::__stack14);
         let __res = { None };
-        __data_stack.__stack15.push(__res);
+        __data_stack.__stack14.push(__res);
         Ok(true)
     }
     ///[^semicolon]+ -> [^semicolon]
@@ -4179,11 +4195,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack19);
+        __data_stack.__tags.push(GrammarTags::__stack18);
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack19.push(__res);
+        __data_stack.__stack18.push(__res);
         Ok(true)
     }
     ///[^semicolon]+ -> [^semicolon]+ [^semicolon]
@@ -4204,18 +4220,18 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack19)
+                GrammarTags::__stack18)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        let mut Ap = __data_stack.__stack19.pop().unwrap();
+        let mut Ap = __data_stack.__stack18.pop().unwrap();
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
         let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack19.push(__res);
+        __data_stack.__stack18.push(__res);
         Ok(true)
     }
     ///IdentOrLiteral+ -> IdentOrLiteral
@@ -4236,11 +4252,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack20);
+        __data_stack.__tags.push(GrammarTags::__stack19);
         let mut A = __data_stack.__stack11.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack20.push(__res);
+        __data_stack.__stack19.push(__res);
         Ok(true)
     }
     ///IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
@@ -4261,18 +4277,18 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack20)
+                GrammarTags::__stack19)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut A = __data_stack.__stack11.pop().unwrap();
-        let mut Ap = __data_stack.__stack20.pop().unwrap();
+        let mut Ap = __data_stack.__stack19.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
         let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack20.push(__res);
+        __data_stack.__stack19.push(__res);
         Ok(true)
     }
     ///ident+ -> ident
@@ -4293,11 +4309,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack19);
+        __data_stack.__tags.push(GrammarTags::__stack18);
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack19.push(__res);
+        __data_stack.__stack18.push(__res);
         Ok(true)
     }
     ///ident+ -> ident+ ident
@@ -4318,18 +4334,18 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack19)
+                GrammarTags::__stack18)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        let mut Ap = __data_stack.__stack19.pop().unwrap();
+        let mut Ap = __data_stack.__stack18.pop().unwrap();
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
         let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack19.push(__res);
+        __data_stack.__stack18.push(__res);
         Ok(true)
     }
     ///ident* -> ident+
@@ -4352,9 +4368,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack19);
+        __data_stack.__tags.push(GrammarTags::__stack18);
         let __res = { vec![] };
-        __data_stack.__stack19.push(__res);
+        __data_stack.__stack18.push(__res);
         Ok(true)
     }
     ///GrammarLine+ -> GrammarLine
@@ -4453,9 +4469,6 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
             GrammarTags::__stack19 => {
                 self.__stack19.pop();
             }
-            GrammarTags::__stack20 => {
-                self.__stack20.pop();
-            }
             _ => {}
         }
     }
@@ -4487,14 +4500,13 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
         self.__stack17.clear();
         self.__stack18.clear();
         self.__stack19.clear();
-        self.__stack20.clear();
     }
     fn reserve(&mut self, additional: usize) {
         self.__tags.reserve(additional);
     }
     fn split_off(&mut self, at: usize) -> Self {
         let __other_tag_stack = self.__tags.split_off(at);
-        let mut __counts: [u8; 20usize + 1] = [0; 20usize + 1];
+        let mut __counts: [u8; 19usize + 1] = [0; 19usize + 1];
         for &tag in &__other_tag_stack {
             __counts[tag as usize] += 1;
         }
@@ -4555,9 +4567,6 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
         let __other___stack19 = self
             .__stack19
             .split_off(self.__stack19.len() - (__counts[18usize] as usize));
-        let __other___stack20 = self
-            .__stack20
-            .split_off(self.__stack20.len() - (__counts[19usize] as usize));
         Self {
             __tags: __other_tag_stack,
             __terminals: __other___terminals,
@@ -4579,7 +4588,6 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
             __stack17: __other___stack17,
             __stack18: __other___stack18,
             __stack19: __other___stack19,
-            __stack20: __other___stack20,
         }
     }
     fn append(&mut self, other: &mut Self) {
@@ -4603,7 +4611,6 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
         self.__stack17.append(&mut other.__stack17);
         self.__stack18.append(&mut other.__stack18);
         self.__stack19.append(&mut other.__stack19);
-        self.__stack20.append(&mut other.__stack20);
     }
     fn reduce_action(
         data_stack: &mut Self,
@@ -5026,16 +5033,6 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             41usize => {
-                Self::reduce_RustCode_0(
-                    data_stack,
-                    location_stack,
-                    shift,
-                    lookahead,
-                    user_data,
-                    location0,
-                )
-            }
-            42usize => {
                 Self::reduce_Directive_0(
                     data_stack,
                     location_stack,
@@ -5045,7 +5042,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            43usize => {
+            42usize => {
                 Self::reduce_Directive_1(
                     data_stack,
                     location_stack,
@@ -5055,7 +5052,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            44usize => {
+            43usize => {
                 Self::reduce_Directive_2(
                     data_stack,
                     location_stack,
@@ -5065,7 +5062,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            45usize => {
+            44usize => {
                 Self::reduce_Directive_3(
                     data_stack,
                     location_stack,
@@ -5075,7 +5072,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            46usize => {
+            45usize => {
                 Self::reduce_Directive_4(
                     data_stack,
                     location_stack,
@@ -5085,7 +5082,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            47usize => {
+            46usize => {
                 Self::reduce_Directive_5(
                     data_stack,
                     location_stack,
@@ -5095,7 +5092,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            48usize => {
+            47usize => {
                 Self::reduce_Directive_6(
                     data_stack,
                     location_stack,
@@ -5105,7 +5102,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            49usize => {
+            48usize => {
                 Self::reduce_Directive_7(
                     data_stack,
                     location_stack,
@@ -5115,7 +5112,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            50usize => {
+            49usize => {
                 Self::reduce_Directive_8(
                     data_stack,
                     location_stack,
@@ -5125,7 +5122,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            51usize => {
+            50usize => {
                 Self::reduce_Directive_9(
                     data_stack,
                     location_stack,
@@ -5135,7 +5132,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            52usize => {
+            51usize => {
                 Self::reduce_Directive_10(
                     data_stack,
                     location_stack,
@@ -5145,7 +5142,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            53usize => {
+            52usize => {
                 Self::reduce_Directive_11(
                     data_stack,
                     location_stack,
@@ -5155,7 +5152,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            54usize => {
+            53usize => {
                 Self::reduce_Directive_12(
                     data_stack,
                     location_stack,
@@ -5165,7 +5162,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            55usize => {
+            54usize => {
                 Self::reduce_Directive_13(
                     data_stack,
                     location_stack,
@@ -5175,7 +5172,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            56usize => {
+            55usize => {
                 Self::reduce_Directive_14(
                     data_stack,
                     location_stack,
@@ -5185,7 +5182,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            57usize => {
+            56usize => {
                 Self::reduce_Directive_15(
                     data_stack,
                     location_stack,
@@ -5195,7 +5192,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            58usize => {
+            57usize => {
                 Self::reduce_Directive_16(
                     data_stack,
                     location_stack,
@@ -5205,7 +5202,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            59usize => {
+            58usize => {
                 Self::reduce_Directive_17(
                     data_stack,
                     location_stack,
@@ -5215,7 +5212,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            60usize => {
+            59usize => {
                 Self::reduce_Directive_18(
                     data_stack,
                     location_stack,
@@ -5225,7 +5222,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            61usize => {
+            60usize => {
                 Self::reduce_Directive_19(
                     data_stack,
                     location_stack,
@@ -5235,7 +5232,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            62usize => {
+            61usize => {
                 Self::reduce_Directive_20(
                     data_stack,
                     location_stack,
@@ -5245,7 +5242,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            63usize => {
+            62usize => {
                 Self::reduce_Directive_21(
                     data_stack,
                     location_stack,
@@ -5255,7 +5252,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            64usize => {
+            63usize => {
                 Self::reduce_Directive_22(
                     data_stack,
                     location_stack,
@@ -5265,7 +5262,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            65usize => {
+            64usize => {
                 Self::reduce_Directive_23(
                     data_stack,
                     location_stack,
@@ -5275,7 +5272,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            66usize => {
+            65usize => {
                 Self::reduce_Directive_24(
                     data_stack,
                     location_stack,
@@ -5285,7 +5282,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            67usize => {
+            66usize => {
                 Self::reduce_Directive_25(
                     data_stack,
                     location_stack,
@@ -5295,7 +5292,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            68usize => {
+            67usize => {
                 Self::reduce_Directive_26(
                     data_stack,
                     location_stack,
@@ -5305,7 +5302,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            69usize => {
+            68usize => {
                 Self::reduce_Directive_27(
                     data_stack,
                     location_stack,
@@ -5315,7 +5312,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            70usize => {
+            69usize => {
                 Self::reduce_Directive_28(
                     data_stack,
                     location_stack,
@@ -5325,7 +5322,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            71usize => {
+            70usize => {
                 Self::reduce_Directive_29(
                     data_stack,
                     location_stack,
@@ -5335,7 +5332,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            72usize => {
+            71usize => {
                 Self::reduce_Directive_30(
                     data_stack,
                     location_stack,
@@ -5345,7 +5342,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            73usize => {
+            72usize => {
                 Self::reduce_Directive_31(
                     data_stack,
                     location_stack,
@@ -5355,7 +5352,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            74usize => {
+            73usize => {
                 Self::reduce_Directive_32(
                     data_stack,
                     location_stack,
@@ -5365,7 +5362,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            75usize => {
+            74usize => {
                 Self::reduce_Directive_33(
                     data_stack,
                     location_stack,
@@ -5375,7 +5372,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            76usize => {
+            75usize => {
                 Self::reduce_GrammarLine_0(
                     data_stack,
                     location_stack,
@@ -5385,13 +5382,13 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
+            76usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
+            }
             77usize => {
                 unreachable!("{rule_index}: this production rule was optimized out")
             }
             78usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            79usize => {
                 Self::reduce__TokenMappedPlus15_0(
                     data_stack,
                     location_stack,
@@ -5401,7 +5398,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            80usize => {
+            79usize => {
                 Self::reduce__TokenMappedPlus15_1(
                     data_stack,
                     location_stack,
@@ -5411,8 +5408,8 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            81usize => Ok(Self::reduce__TokenMappedStar16_0(data_stack, location_stack)),
-            82usize => {
+            80usize => Ok(Self::reduce__TokenMappedStar16_0(data_stack, location_stack)),
+            81usize => {
                 Self::reduce__TokenMappedStar16_1(
                     data_stack,
                     location_stack,
@@ -5422,7 +5419,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            83usize => {
+            82usize => {
                 Self::reduce__PrecDefPlus17_0(
                     data_stack,
                     location_stack,
@@ -5432,7 +5429,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            84usize => {
+            83usize => {
                 Self::reduce__PrecDefPlus17_1(
                     data_stack,
                     location_stack,
@@ -5442,8 +5439,8 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            85usize => Ok(Self::reduce__PrecDefStar18_0(data_stack, location_stack)),
-            86usize => {
+            84usize => Ok(Self::reduce__PrecDefStar18_0(data_stack, location_stack)),
+            85usize => {
                 Self::reduce__PrecDefStar18_1(
                     data_stack,
                     location_stack,
@@ -5453,7 +5450,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            87usize => {
+            86usize => {
                 Self::reduce__caretQuestion19_0(
                     data_stack,
                     location_stack,
@@ -5463,7 +5460,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            88usize => {
+            87usize => {
                 Self::reduce__caretQuestion19_1(
                     data_stack,
                     location_stack,
@@ -5473,7 +5470,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            89usize => {
+            88usize => {
                 Self::reduce__TerminalSetItemPlus20_0(
                     data_stack,
                     location_stack,
@@ -5483,7 +5480,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            90usize => {
+            89usize => {
                 Self::reduce__TerminalSetItemPlus20_1(
                     data_stack,
                     location_stack,
@@ -5493,10 +5490,10 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            91usize => {
+            90usize => {
                 Ok(Self::reduce__TerminalSetItemStar21_0(data_stack, location_stack))
             }
-            92usize => {
+            91usize => {
                 Self::reduce__TerminalSetItemStar21_1(
                     data_stack,
                     location_stack,
@@ -5506,7 +5503,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            93usize => {
+            92usize => {
                 Self::reduce__PatternPlus22_0(
                     data_stack,
                     location_stack,
@@ -5516,7 +5513,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            94usize => {
+            93usize => {
                 Self::reduce__PatternPlus22_1(
                     data_stack,
                     location_stack,
@@ -5526,8 +5523,8 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            95usize => Ok(Self::reduce__PatternStar23_0(data_stack, location_stack)),
-            96usize => {
+            94usize => Ok(Self::reduce__PatternStar23_0(data_stack, location_stack)),
+            95usize => {
                 Self::reduce__PatternStar23_1(
                     data_stack,
                     location_stack,
@@ -5537,7 +5534,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            97usize => {
+            96usize => {
                 Self::reduce___PatternStar23SepPlus24_0(
                     data_stack,
                     location_stack,
@@ -5547,7 +5544,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            98usize => {
+            97usize => {
                 Self::reduce___PatternStar23SepPlus24_1(
                     data_stack,
                     location_stack,
@@ -5557,7 +5554,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            99usize => {
+            98usize => {
                 Self::reduce__commaQuestion25_0(
                     data_stack,
                     location_stack,
@@ -5567,7 +5564,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            100usize => {
+            99usize => {
                 Self::reduce__commaQuestion25_1(
                     data_stack,
                     location_stack,
@@ -5576,6 +5573,9 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     user_data,
                     location0,
                 )
+            }
+            100usize => {
+                unreachable!("{rule_index}: this production rule was optimized out")
             }
             101usize => {
                 unreachable!("{rule_index}: this production rule was optimized out")
@@ -5698,9 +5698,6 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 unreachable!("{rule_index}: this production rule was optimized out")
             }
             141usize => {
-                unreachable!("{rule_index}: this production rule was optimized out")
-            }
-            142usize => {
                 Self::reduce___TermSet26Plus27_0(
                     data_stack,
                     location_stack,
@@ -5710,7 +5707,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            143usize => {
+            142usize => {
                 Self::reduce___TermSet26Plus27_1(
                     data_stack,
                     location_stack,
@@ -5720,7 +5717,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            144usize => {
+            143usize => {
                 Self::reduce__IdentOrLiteralPlus28_0(
                     data_stack,
                     location_stack,
@@ -5730,7 +5727,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            145usize => {
+            144usize => {
                 Self::reduce__IdentOrLiteralPlus28_1(
                     data_stack,
                     location_stack,
@@ -5740,7 +5737,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            146usize => {
+            145usize => {
                 Self::reduce__identPlus29_0(
                     data_stack,
                     location_stack,
@@ -5750,7 +5747,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            147usize => {
+            146usize => {
                 Self::reduce__identPlus29_1(
                     data_stack,
                     location_stack,
@@ -5760,8 +5757,8 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            148usize => Ok(Self::reduce__identStar30_0(data_stack, location_stack)),
-            149usize => {
+            147usize => Ok(Self::reduce__identStar30_0(data_stack, location_stack)),
+            148usize => {
                 Self::reduce__identStar30_1(
                     data_stack,
                     location_stack,
@@ -5771,15 +5768,15 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            150usize => {
+            149usize => {
                 Self::reduce__GrammarLinePlus31_0(data_stack, location_stack);
                 Ok(false)
             }
-            151usize => {
+            150usize => {
                 Self::reduce__GrammarLinePlus31_1(data_stack, location_stack);
                 Ok(false)
             }
-            152usize => {
+            151usize => {
                 unreachable!("{rule_index}: this production rule was optimized out")
             }
             _ => {
@@ -6113,14 +6110,11 @@ impl GrammarParser {
             GrammarNonTerminals::IdentOrLiteral, rule :
             vec![::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(16)),],
             precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-            GrammarNonTerminals::RustCode, rule :
-            vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),],
-            precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
             GrammarNonTerminals::Directive, rule :
             vec![::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4)),
             ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(25)),
             ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(0)),
-            ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+            ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),
             ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2)),],
             precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
             GrammarNonTerminals::Directive, rule :
@@ -6150,7 +6144,7 @@ impl GrammarParser {
             GrammarNonTerminals::Directive, rule :
             vec![::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4)),
             ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(27)),
-            ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+            ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),
             ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2)),],
             precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
             GrammarNonTerminals::Directive, rule :
@@ -6161,7 +6155,7 @@ impl GrammarParser {
             GrammarNonTerminals::Directive, rule :
             vec![::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4)),
             ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(28)),
-            ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+            ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),
             ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2)),],
             precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
             GrammarNonTerminals::Directive, rule :
@@ -6208,7 +6202,7 @@ impl GrammarParser {
             GrammarNonTerminals::Directive, rule :
             vec![::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4)),
             ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(29)),
-            ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+            ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),
             ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2)),],
             precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
             GrammarNonTerminals::Directive, rule :
@@ -6219,7 +6213,7 @@ impl GrammarParser {
             GrammarNonTerminals::Directive, rule :
             vec![::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4)),
             ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(30)),
-            ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+            ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),
             ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2)),],
             precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
             GrammarNonTerminals::Directive, rule :
@@ -6286,7 +6280,7 @@ impl GrammarParser {
             GrammarNonTerminals::Directive, rule :
             vec![::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4)),
             ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(39)),
-            ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+            ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),
             ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2)),],
             precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
             GrammarNonTerminals::Directive, rule :
@@ -6297,7 +6291,7 @@ impl GrammarParser {
             GrammarNonTerminals::Directive, rule :
             vec![::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(4)),
             ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(40)),
-            ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RustCode),
+            ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),
             ::rusty_lr_core::Token::Term(::rusty_lr_core::TerminalSymbol::Term(2)),],
             precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
             GrammarNonTerminals::Directive, rule :
@@ -6609,20 +6603,20 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(90, true)),], error_shift :
             None, eof_shift : None, shift_goto_map_nonterm :
             vec![(GrammarNonTerminals::Rule,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(173, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(172, true)),
             (GrammarNonTerminals::Directive,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(174, false)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(173, false)),
             (GrammarNonTerminals::GrammarLine,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(174, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(173, true)),
             (GrammarNonTerminals::Grammar,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(176, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(175, true)),
             (GrammarNonTerminals::_GrammarLinePlus31,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(176, false)),], reduce_map :
+            ::rusty_lr_core::parser::state::ShiftTarget::new(175, false)),], reduce_map :
             { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
             .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [0, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
-            52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
-            71, 72, 73, 74, 75, 76, 77, 78, 150, 151, 152,]; let shifted : & 'static [u8]
+            let rules : & 'static [u8] = & [0, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
+            51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
+            70, 71, 72, 73, 74, 75, 76, 77, 149, 150, 151,]; let shifted : & 'static [u8]
             = & [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
@@ -6681,11 +6675,11 @@ impl GrammarParser {
             (GrammarNonTerminals::_TokenMappedStar16,
             ::rusty_lr_core::parser::state::ShiftTarget::new(72, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![82]; __reduce_map.extend(__rustylr_tset1.iter().map(| term | (* term,
+            vec![81]; __reduce_map.extend(__rustylr_tset1.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
             None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [0, 3, 4,
             5, 11, 12, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34,
-            35, 36, 79, 80, 81, 82,]; let shifted : & 'static [u8] = & [3, 0, 0, 0, 0, 0,
+            35, 36, 78, 79, 80, 81,]; let shifted : & 'static [u8] = & [3, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules
             .iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
@@ -6807,11 +6801,11 @@ impl GrammarParser {
             (GrammarNonTerminals::__PatternStar23SepPlus24,
             ::rusty_lr_core::parser::state::ShiftTarget::new(47, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![96]; __reduce_map.extend(__rustylr_tset4.iter().map(| term | (* term,
+            vec![95]; __reduce_map.extend(__rustylr_tset4.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
             None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [19, 20,
-            21, 22, 23, 24, 25, 26, 27, 28, 28, 29, 29, 30, 31, 32, 33, 34, 35, 36, 93,
-            94, 95, 96, 97, 98,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 0, 0, 0,
+            21, 22, 23, 24, 25, 26, 27, 28, 28, 29, 29, 30, 31, 32, 33, 34, 35, 36, 92,
+            93, 94, 95, 96, 97,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
@@ -6822,19 +6816,19 @@ impl GrammarParser {
             vec![(GrammarNonTerminals::_caretQuestion19,
             ::rusty_lr_core::parser::state::ShiftTarget::new(16, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![88]; __reduce_map.extend(__rustylr_tset5.iter().map(| term | (* term,
+            vec![87]; __reduce_map.extend(__rustylr_tset5.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
-            None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [19, 87,
-            88,]; let shifted : & 'static [u8] = & [1, 0, 0,]; rules.iter().zip(shifted
+            None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [19, 86,
+            87,]; let shifted : & 'static [u8] = & [1, 0, 0,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![87]; __reduce_map
+            std::collections::BTreeMap::new(); let reduce_rules = vec![86]; __reduce_map
             .extend(__rustylr_tset5.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [87,]; let shifted : & 'static
+            ruleset : { let rules : & 'static [u8] = & [86,]; let shifted : & 'static
             [u8] = & [1,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
@@ -6849,10 +6843,10 @@ impl GrammarParser {
             (GrammarNonTerminals::_TerminalSetItemStar21,
             ::rusty_lr_core::parser::state::ShiftTarget::new(28, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![92]; __reduce_map.extend(__rustylr_tset6.iter().map(| term | (* term,
+            vec![91]; __reduce_map.extend(__rustylr_tset6.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
             None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [13, 14,
-            15, 16, 17, 18, 19, 89, 90, 91, 92,]; let shifted : & 'static [u8] = & [0, 0,
+            15, 16, 17, 18, 19, 88, 89, 90, 91,]; let shifted : & 'static [u8] = & [0, 0,
             0, 0, 0, 0, 2, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule,
             & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
             shifted : shifted as usize, } }).collect() } },
@@ -6939,10 +6933,10 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![89]; __reduce_map
+            std::collections::BTreeMap::new(); let reduce_rules = vec![88]; __reduce_map
             .extend(__rustylr_tset5.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [89,]; let shifted : & 'static
+            ruleset : { let rules : & 'static [u8] = & [88,]; let shifted : & 'static
             [u8] = & [1,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
@@ -6953,20 +6947,20 @@ impl GrammarParser {
             vec![(GrammarNonTerminals::TerminalSetItem,
             ::rusty_lr_core::parser::state::ShiftTarget::new(27, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![91]; __reduce_map.extend(__rustylr_tset6.iter().map(| term | (* term,
+            vec![90]; __reduce_map.extend(__rustylr_tset6.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
             None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [13, 14,
-            15, 16, 17, 18, 90, 91,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 0, 0,
+            15, 16, 17, 18, 89, 90,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 0, 0,
             1, 1,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![90]; __reduce_map
+            std::collections::BTreeMap::new(); let reduce_rules = vec![89]; __reduce_map
             .extend(__rustylr_tset5.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [90,]; let shifted : & 'static
+            ruleset : { let rules : & 'static [u8] = & [89,]; let shifted : & 'static
             [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
@@ -7170,10 +7164,10 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(38, true)),], error_shift :
             None, eof_shift : None, shift_goto_map_nonterm : vec![], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![93]; __reduce_map.extend(__rustylr_tset9.iter().map(| term | (* term,
+            vec![92]; __reduce_map.extend(__rustylr_tset9.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
             None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [22, 23,
-            24, 25, 27, 31, 93,]; let shifted : & 'static [u8] = & [1, 1, 1, 1, 1, 1,
+            24, 25, 27, 31, 92,]; let shifted : & 'static [u8] = & [1, 1, 1, 1, 1, 1,
             1,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
@@ -7190,10 +7184,10 @@ impl GrammarParser {
             (GrammarNonTerminals::Pattern,
             ::rusty_lr_core::parser::state::ShiftTarget::new(45, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![95]; __reduce_map.extend(__rustylr_tset4.iter().map(| term | (* term,
+            vec![94]; __reduce_map.extend(__rustylr_tset4.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
             None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [19, 20,
-            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 94, 95,]; let
+            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 93, 94,]; let
             shifted : & 'static [u8] = & [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 1, 1,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
@@ -7207,20 +7201,20 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(38, true)),], error_shift :
             None, eof_shift : None, shift_goto_map_nonterm : vec![], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![94]; __reduce_map.extend(__rustylr_tset9.iter().map(| term | (* term,
+            vec![93]; __reduce_map.extend(__rustylr_tset9.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
             None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [22, 23,
-            24, 25, 27, 31, 94,]; let shifted : & 'static [u8] = & [1, 1, 1, 1, 1, 1,
+            24, 25, 27, 31, 93,]; let shifted : & 'static [u8] = & [1, 1, 1, 1, 1, 1,
             2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![97]; __reduce_map
+            std::collections::BTreeMap::new(); let reduce_rules = vec![96]; __reduce_map
             .extend(__rustylr_tset4.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [97,]; let shifted : & 'static
+            ruleset : { let rules : & 'static [u8] = & [96,]; let shifted : & 'static
             [u8] = & [1,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
@@ -7230,7 +7224,7 @@ impl GrammarParser {
             None, eof_shift : None, shift_goto_map_nonterm : vec![], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
             .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [28, 98,]; let shifted : & 'static [u8] = &
+            let rules : & 'static [u8] = & [28, 97,]; let shifted : & 'static [u8] = &
             [2, 1,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
@@ -7251,21 +7245,21 @@ impl GrammarParser {
             (GrammarNonTerminals::_PatternStar23,
             ::rusty_lr_core::parser::state::ShiftTarget::new(49, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![96]; __reduce_map.extend(__rustylr_tset4.iter().map(| term | (* term,
+            vec![95]; __reduce_map.extend(__rustylr_tset4.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
             None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [19, 20,
-            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 93, 94, 95,
-            96, 98,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 92, 93, 94,
+            95, 97,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2,]; rules.iter().zip(shifted.iter()).map(|
             (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule
             as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![98]; __reduce_map
+            std::collections::BTreeMap::new(); let reduce_rules = vec![97]; __reduce_map
             .extend(__rustylr_tset4.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [98,]; let shifted : & 'static
+            ruleset : { let rules : & 'static [u8] = & [97,]; let shifted : & 'static
             [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
@@ -7291,10 +7285,10 @@ impl GrammarParser {
             vec![(GrammarNonTerminals::_commaQuestion25,
             ::rusty_lr_core::parser::state::ShiftTarget::new(61, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![100]; __reduce_map.extend(__rustylr_tset10.iter().map(| term | (* term,
+            vec![99]; __reduce_map.extend(__rustylr_tset10.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
             None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [22, 23,
-            24, 25, 27, 31, 32, 33, 34, 35, 36, 99, 100,]; let shifted : & 'static [u8] =
+            24, 25, 27, 31, 32, 33, 34, 35, 36, 98, 99,]; let shifted : & 'static [u8] =
             & [1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 6, 0, 0,]; rules.iter().zip(shifted.iter())
             .map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule :
             rule as usize, shifted : shifted as usize, } }).collect() } },
@@ -7303,10 +7297,10 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(55, true)),], error_shift :
             Some(57), eof_shift : None, shift_goto_map_nonterm : vec![], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![99]; __reduce_map.extend(__rustylr_tset10.iter().map(| term | (* term,
+            vec![98]; __reduce_map.extend(__rustylr_tset10.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
             None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [33, 34,
-            36, 99,]; let shifted : & 'static [u8] = & [7, 7, 7, 1,]; rules.iter()
+            36, 98,]; let shifted : & 'static [u8] = & [7, 7, 7, 1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
@@ -7462,11 +7456,11 @@ impl GrammarParser {
             (GrammarNonTerminals::_TokenMappedStar16,
             ::rusty_lr_core::parser::state::ShiftTarget::new(72, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![82]; __reduce_map.extend(__rustylr_tset1.iter().map(| term | (* term,
+            vec![81]; __reduce_map.extend(__rustylr_tset1.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
             None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [3, 5,
             11, 12, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
-            36, 79, 80, 81, 82,]; let shifted : & 'static [u8] = & [2, 0, 0, 0, 0, 0, 0,
+            36, 78, 79, 80, 81,]; let shifted : & 'static [u8] = & [2, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
@@ -7484,10 +7478,10 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![79]; __reduce_map
+            std::collections::BTreeMap::new(); let reduce_rules = vec![78]; __reduce_map
             .extend(__rustylr_tset11.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [79,]; let
+            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [78,]; let
             shifted : & 'static [u8] = & [1,]; rules.iter().zip(shifted.iter()).map(| (&
             rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
             usize, shifted : shifted as usize, } }).collect() } },
@@ -7522,21 +7516,21 @@ impl GrammarParser {
             (GrammarNonTerminals::Pattern,
             ::rusty_lr_core::parser::state::ShiftTarget::new(69, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![81]; __reduce_map.extend(__rustylr_tset1.iter().map(| term | (* term,
+            vec![80]; __reduce_map.extend(__rustylr_tset1.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
             None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [11, 12,
-            19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 80,
-            81,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 79,
+            80,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 1, 1,]; rules.iter().zip(shifted.iter()).map(| (&
             rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
             usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![80]; __reduce_map
+            std::collections::BTreeMap::new(); let reduce_rules = vec![79]; __reduce_map
             .extend(__rustylr_tset11.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [80,]; let
+            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [79,]; let
             shifted : & 'static [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (&
             rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
             usize, shifted : shifted as usize, } }).collect() } },
@@ -7550,10 +7544,10 @@ impl GrammarParser {
             (GrammarNonTerminals::_PrecDefStar18,
             ::rusty_lr_core::parser::state::ShiftTarget::new(86, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![86]; __reduce_map.extend(__rustylr_tset14.iter().map(| term | (* term,
+            vec![85]; __reduce_map.extend(__rustylr_tset14.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
             None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [5, 6, 7,
-            8, 9, 10, 83, 84, 85, 86,]; let shifted : & 'static [u8] = & [1, 0, 0, 0, 0,
+            8, 9, 10, 82, 83, 84, 85,]; let shifted : & 'static [u8] = & [1, 0, 0, 0, 0,
             0, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) |
             { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
@@ -7661,10 +7655,10 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![83]; __reduce_map
+            std::collections::BTreeMap::new(); let reduce_rules = vec![82]; __reduce_map
             .extend(__rustylr_tset1.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [83,]; let shifted : & 'static
+            ruleset : { let rules : & 'static [u8] = & [82,]; let shifted : & 'static
             [u8] = & [1,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
@@ -7674,20 +7668,20 @@ impl GrammarParser {
             vec![(GrammarNonTerminals::PrecDef,
             ::rusty_lr_core::parser::state::ShiftTarget::new(85, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![85]; __reduce_map.extend(__rustylr_tset14.iter().map(| term | (* term,
+            vec![84]; __reduce_map.extend(__rustylr_tset14.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
             None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [6, 7, 8,
-            9, 10, 84, 85,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 0, 1, 1,];
+            9, 10, 83, 84,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 0, 1, 1,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![84]; __reduce_map
+            std::collections::BTreeMap::new(); let reduce_rules = vec![83]; __reduce_map
             .extend(__rustylr_tset1.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [84,]; let shifted : & 'static
+            ruleset : { let rules : & 'static [u8] = & [83,]; let shifted : & 'static
             [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
@@ -7737,25 +7731,25 @@ impl GrammarParser {
             vec![(23, ::rusty_lr_core::parser::state::ShiftTarget::new(91, true)), (24,
             ::rusty_lr_core::parser::state::ShiftTarget::new(98, true)), (25,
             ::rusty_lr_core::parser::state::ShiftTarget::new(103, true)), (26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(113, true)), (27,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(118, true)), (28,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(122, true)), (29,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(126, true)), (30,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(130, true)), (31,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(134, true)), (32,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(138, true)), (34,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(142, true)), (35,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(147, true)), (36,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(151, true)), (37,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(155, true)), (39,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(163, true)), (40,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(167, true)),], error_shift :
-            Some(171), eof_shift : None, shift_goto_map_nonterm : vec![], reduce_map : {
+            ::rusty_lr_core::parser::state::ShiftTarget::new(112, true)), (27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)), (28,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(121, true)), (29,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(125, true)), (30,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(129, true)), (31,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(133, true)), (32,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(137, true)), (34,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(141, true)), (35,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(146, true)), (36,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(150, true)), (37,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(154, true)), (39,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(162, true)), (40,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(166, true)),], error_shift :
+            Some(170), eof_shift : None, shift_goto_map_nonterm : vec![], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
             .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52,
-            53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71,
-            72, 73, 74, 75,]; let shifted : & 'static [u8] = & [1, 1, 1, 1, 1, 1, 1, 1,
+            let rules : & 'static [u8] = & [41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
+            52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
+            71, 72, 73, 74,]; let shifted : & 'static [u8] = & [1, 1, 1, 1, 1, 1, 1, 1,
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
             1,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
@@ -7770,7 +7764,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(95, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
             .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [39, 40, 51, 52, 144, 145,]; let shifted : &
+            let rules : & 'static [u8] = & [39, 40, 50, 51, 143, 144,]; let shifted : &
             'static [u8] = & [0, 0, 2, 2, 0, 0,]; rules.iter().zip(shifted.iter()).map(|
             (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule
             as usize, shifted : shifted as usize, } }).collect() } },
@@ -7779,43 +7773,10 @@ impl GrammarParser {
             error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
             reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [52,]; let shifted : & 'static
+            ruleset : { let rules : & 'static [u8] = & [51,]; let shifted : & 'static
             [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![52]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![52]), ruleset : { let rules : & 'static [u8] = &
-            [52,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![144]; __reduce_map
-            .extend(__rustylr_tset16.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [144,]; let
-            shifted : & 'static [u8] = & [1,]; rules.iter().zip(shifted.iter()).map(| (&
-            rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)), (2,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(96, true)), (16,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(76, true)),], error_shift :
-            None, eof_shift : None, shift_goto_map_nonterm :
-            vec![(GrammarNonTerminals::IdentOrLiteral,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(97, true)),], reduce_map : {
-            let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [39, 40, 51, 145,]; let shifted : & 'static
-            [u8] = & [0, 0, 3, 1,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
@@ -7829,10 +7790,43 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![145]; __reduce_map
+            std::collections::BTreeMap::new(); let reduce_rules = vec![143]; __reduce_map
             .extend(__rustylr_tset16.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [145,]; let
+            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [143,]; let
+            shifted : & 'static [u8] = & [1,]; rules.iter().zip(shifted.iter()).map(| (&
+            rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(96, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(76, true)),], error_shift :
+            None, eof_shift : None, shift_goto_map_nonterm :
+            vec![(GrammarNonTerminals::IdentOrLiteral,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(97, true)),], reduce_map : {
+            let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
+            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
+            let rules : & 'static [u8] = & [39, 40, 50, 144,]; let shifted : & 'static
+            [u8] = & [0, 0, 3, 1,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
+            shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![50]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![50]), ruleset : { let rules : & 'static [u8] = &
+            [50,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![144]; __reduce_map
+            .extend(__rustylr_tset16.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [144,]; let
             shifted : & 'static [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (&
             rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
             usize, shifted : shifted as usize, } }).collect() } },
@@ -7846,7 +7840,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(101, true)),], reduce_map :
             { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
             .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [39, 40, 53, 54, 144, 145,]; let shifted : &
+            let rules : & 'static [u8] = & [39, 40, 52, 53, 143, 144,]; let shifted : &
             'static [u8] = & [0, 0, 2, 2, 0, 0,]; rules.iter().zip(shifted.iter()).map(|
             (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule
             as usize, shifted : shifted as usize, } }).collect() } },
@@ -7855,33 +7849,10 @@ impl GrammarParser {
             error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
             reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [54,]; let shifted : & 'static
+            ruleset : { let rules : & 'static [u8] = & [53,]; let shifted : & 'static
             [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![54]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![54]), ruleset : { let rules : & 'static [u8] = &
-            [54,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)), (2,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(102, true)), (16,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(76, true)),], error_shift :
-            None, eof_shift : None, shift_goto_map_nonterm :
-            vec![(GrammarNonTerminals::IdentOrLiteral,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(97, true)),], reduce_map : {
-            let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [39, 40, 53, 145,]; let shifted : & 'static
-            [u8] = & [0, 0, 3, 1,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
@@ -7893,73 +7864,198 @@ impl GrammarParser {
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(102, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(76, true)),], error_shift :
+            None, eof_shift : None, shift_goto_map_nonterm :
+            vec![(GrammarNonTerminals::IdentOrLiteral,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(97, true)),], reduce_map : {
+            let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
+            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
+            let rules : & 'static [u8] = & [39, 40, 52, 144,]; let shifted : & 'static
+            [u8] = & [0, 0, 3, 1,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
+            shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![52]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![52]), ruleset : { let rules : & 'static [u8] = &
+            [52,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(104, true)),],
-            error_shift : Some(111), eof_shift : None, shift_goto_map_nonterm : vec![],
+            error_shift : Some(110), eof_shift : None, shift_goto_map_nonterm : vec![],
             reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [42, 43, 44,]; let shifted : &
+            ruleset : { let rules : & 'static [u8] = & [41, 42, 43,]; let shifted : &
             'static [u8] = & [2, 2, 2,]; rules.iter().zip(shifted.iter()).map(| (& rule,
             & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
             shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (1,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (2,
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (1,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (2,
             ::rusty_lr_core::parser::state::ShiftTarget::new(105, true)), (3,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (4,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (5,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (6,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (7,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (8,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (9,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (10,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (11,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (12,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (13,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (14,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (15,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (16,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (17,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (18,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (19,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (20,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (21,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (22,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (23,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (24,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (25,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (27,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (28,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (29,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (30,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (31,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (32,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (33,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (34,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (35,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (36,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (37,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (38,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (39,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (40,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (41,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)),], error_shift :
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (4,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (5,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (6,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (7,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (8,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (9,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (10,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (11,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (12,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (13,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (14,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (15,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (17,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (18,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (19,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (20,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (21,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (22,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (23,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (24,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (25,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (28,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (29,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (30,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (31,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (32,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (33,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (34,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (35,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (36,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (37,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (38,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (39,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (40,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (41,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),], error_shift :
             None, eof_shift : None, shift_goto_map_nonterm :
-            vec![(GrammarNonTerminals::RustCode,
+            vec![(GrammarNonTerminals::_TermSet26,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
-            (GrammarNonTerminals::_TermSet26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)),
             (GrammarNonTerminals::__TermSet26Plus27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(107, true)),], reduce_map :
+            { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
+            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
+            let rules : & 'static [u8] = & [41, 42, 100, 101, 102, 103, 104, 105, 106,
+            107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121,
+            122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136,
+            137, 138, 139, 140, 141, 142,]; let shifted : & 'static [u8] = & [3, 3, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![42]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![42]), ruleset : { let rules : & 'static [u8] = &
+            [42,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![141]; __reduce_map
+            .extend(__rustylr_tset17.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [141,]; let
+            shifted : & 'static [u8] = & [1,]; rules.iter().zip(shifted.iter()).map(| (&
+            rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (1,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (3,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (4,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (5,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (6,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (7,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (8,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (9,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (10,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (11,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (12,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (13,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (14,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (15,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (17,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (18,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (19,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (20,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (21,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (22,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (23,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (24,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (25,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (28,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (29,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (30,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (31,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (32,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (33,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (34,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (35,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (36,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (37,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (38,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (39,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (40,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (41,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], error_shift :
+            None, eof_shift : None, shift_goto_map_nonterm :
+            vec![(GrammarNonTerminals::_TermSet26,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], reduce_map :
             { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
             .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [41, 42, 43, 101, 102, 103, 104, 105, 106,
-            107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121,
-            122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136,
-            137, 138, 139, 140, 141, 142, 143,]; let shifted : & 'static [u8] = & [0, 3,
-            3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            let rules : & 'static [u8] = & [41, 100, 101, 102, 103, 104, 105, 106, 107,
+            108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122,
+            123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137,
+            138, 139, 140, 142,]; let shifted : & 'static [u8] = & [4, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 1,]; rules.iter().zip(shifted.iter()).map(| (&
+            rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![41]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![41]), ruleset : { let rules : & 'static [u8] = &
+            [41,]; let shifted : & 'static [u8] = & [5,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![142]; __reduce_map
+            .extend(__rustylr_tset17.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [142,]; let
+            shifted : & 'static [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (&
+            rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(111, true)),],
+            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
+            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
+            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
+            ruleset : { let rules : & 'static [u8] = & [43,]; let shifted : & 'static
+            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
@@ -7973,103 +8069,16 @@ impl GrammarParser {
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(107, true)),],
-            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(113, true)),],
+            error_shift : Some(115), eof_shift : None, shift_goto_map_nonterm : vec![],
             reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [42,]; let shifted : & 'static
-            [u8] = & [4,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
+            ruleset : { let rules : & 'static [u8] = & [44, 45,]; let shifted : & 'static
+            [u8] = & [2, 2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted)
+            | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![42]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![42]), ruleset : { let rules : & 'static [u8] = &
-            [42,]; let shifted : & 'static [u8] = & [5,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![142]; __reduce_map
-            .extend(__rustylr_tset17.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [142,]; let
-            shifted : & 'static [u8] = & [1,]; rules.iter().zip(shifted.iter()).map(| (&
-            rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (1,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (3,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (4,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (5,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (6,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (7,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (8,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (9,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (10,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (11,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (12,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (13,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (14,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (15,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (16,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (17,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (18,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (19,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (20,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (21,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (22,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (23,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (24,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (25,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (27,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (28,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (29,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (30,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (31,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (32,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (33,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (34,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (35,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (36,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (37,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (38,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (39,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (40,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)), (41,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)),], error_shift :
-            None, eof_shift : None, shift_goto_map_nonterm :
-            vec![(GrammarNonTerminals::_TermSet26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(110, true)),], reduce_map :
-            { let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules
-            = vec![41]; __reduce_map.extend(__rustylr_tset18.iter().map(| term | (* term,
-            reduce_rules.clone()))); __reduce_map.into_iter().collect() }, error_reduce :
-            None, eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [41, 101,
-            102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
-            117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131,
-            132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 143,]; let shifted : &
-            'static [u8] = & [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,]; rules
-            .iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![143]; __reduce_map
-            .extend(__rustylr_tset17.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [143,]; let
-            shifted : & 'static [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (&
-            rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(112, true)),],
+            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),],
             error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
             reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
@@ -8088,16 +8097,7 @@ impl GrammarParser {
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),],
-            error_shift : Some(116), eof_shift : None, shift_goto_map_nonterm : vec![],
-            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
-            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [45, 46,]; let shifted : & 'static
-            [u8] = & [2, 2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted)
-            | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(115, true)),],
+            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(116, true)),],
             error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
             reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
@@ -8116,14 +8116,129 @@ impl GrammarParser {
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),],
-            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
-            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
-            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [46,]; let shifted : & 'static
-            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (1,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(118, true)), (3,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (4,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (5,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (6,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (7,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (8,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (9,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (10,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (11,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (12,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (13,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (14,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (15,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (17,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (18,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (19,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (20,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (21,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (22,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (23,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (24,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (25,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (28,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (29,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (30,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (31,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (32,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (33,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (34,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (35,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (36,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (37,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (38,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (39,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (40,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (41,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),], error_shift :
+            None, eof_shift : None, shift_goto_map_nonterm :
+            vec![(GrammarNonTerminals::_TermSet26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
+            (GrammarNonTerminals::__TermSet26Plus27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(119, true)),], reduce_map :
+            { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
+            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
+            let rules : & 'static [u8] = & [46, 47, 100, 101, 102, 103, 104, 105, 106,
+            107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121,
+            122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136,
+            137, 138, 139, 140, 141, 142,]; let shifted : & 'static [u8] = & [2, 2, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![47]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![47]), ruleset : { let rules : & 'static [u8] = &
+            [47,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (1,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(120, true)), (3,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (4,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (5,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (6,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (7,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (8,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (9,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (10,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (11,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (12,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (13,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (14,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (15,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (17,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (18,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (19,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (20,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (21,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (22,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (23,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (24,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (25,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (28,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (29,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (30,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (31,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (32,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (33,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (34,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (35,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (36,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (37,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (38,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (39,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (40,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (41,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], error_shift :
+            None, eof_shift : None, shift_goto_map_nonterm :
+            vec![(GrammarNonTerminals::_TermSet26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], reduce_map :
+            { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
+            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
+            let rules : & 'static [u8] = & [46, 100, 101, 102, 103, 104, 105, 106, 107,
+            108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122,
+            123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137,
+            138, 139, 140, 142,]; let shifted : & 'static [u8] = & [3, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 1,]; rules.iter().zip(shifted.iter()).map(| (&
+            rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
@@ -8135,175 +8250,63 @@ impl GrammarParser {
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (1,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (2,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(119, true)), (3,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (4,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (5,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (6,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (7,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (8,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (9,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (10,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (11,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (12,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (13,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (14,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (15,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (16,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (17,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (18,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (19,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (20,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (21,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (22,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (23,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (24,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (25,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (27,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (28,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (29,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (30,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (31,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (32,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (33,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (34,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (35,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (36,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (37,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (38,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (39,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (40,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (41,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)),], error_shift :
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (1,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(122, true)), (3,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (4,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (5,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (6,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (7,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (8,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (9,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (10,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (11,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (12,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (13,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (14,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (15,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (17,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (18,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (19,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (20,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (21,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (22,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (23,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (24,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (25,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (28,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (29,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (30,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (31,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (32,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (33,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (34,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (35,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (36,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (37,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (38,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (39,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (40,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (41,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),], error_shift :
             None, eof_shift : None, shift_goto_map_nonterm :
-            vec![(GrammarNonTerminals::RustCode,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(120, true)),
-            (GrammarNonTerminals::_TermSet26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)),
+            vec![(GrammarNonTerminals::_TermSet26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
             (GrammarNonTerminals::__TermSet26Plus27,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], reduce_map :
+            ::rusty_lr_core::parser::state::ShiftTarget::new(123, true)),], reduce_map :
             { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
             .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [41, 47, 48, 101, 102, 103, 104, 105, 106,
+            let rules : & 'static [u8] = & [48, 49, 100, 101, 102, 103, 104, 105, 106,
             107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121,
             122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136,
-            137, 138, 139, 140, 141, 142, 143,]; let shifted : & 'static [u8] = & [0, 2,
-            2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![48]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![48]), ruleset : { let rules : & 'static [u8] = &
-            [48,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
+            137, 138, 139, 140, 141, 142,]; let shifted : & 'static [u8] = & [2, 2, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(121, true)),],
-            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
-            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
-            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [47,]; let shifted : & 'static
-            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![47]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![47]), ruleset : { let rules : & 'static [u8] = &
-            [47,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (1,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (2,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(123, true)), (3,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (4,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (5,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (6,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (7,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (8,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (9,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (10,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (11,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (12,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (13,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (14,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (15,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (16,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (17,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (18,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (19,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (20,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (21,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (22,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (23,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (24,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (25,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (27,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (28,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (29,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (30,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (31,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (32,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (33,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (34,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (35,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (36,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (37,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (38,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (39,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (40,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (41,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)),], error_shift :
-            None, eof_shift : None, shift_goto_map_nonterm :
-            vec![(GrammarNonTerminals::RustCode,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(124, true)),
-            (GrammarNonTerminals::_TermSet26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)),
-            (GrammarNonTerminals::__TermSet26Plus27,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], reduce_map :
-            { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [41, 49, 50, 101, 102, 103, 104, 105, 106,
-            107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121,
-            122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136,
-            137, 138, 139, 140, 141, 142, 143,]; let shifted : & 'static [u8] = & [0, 2,
-            2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![50]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![50]), ruleset : { let rules : & 'static [u8] = &
-            [50,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(125, true)),],
-            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
-            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
-            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [49,]; let shifted : & 'static
-            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
@@ -8311,89 +8314,133 @@ impl GrammarParser {
             .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
             eof_reduce : Some(vec![49]), ruleset : { let rules : & 'static [u8] = &
-            [49,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
+            [49,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (1,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (2,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(127, true)), (3,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (4,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (5,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (6,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (7,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (8,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (9,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (10,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (11,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (12,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (13,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (14,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (15,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (16,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (17,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (18,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (19,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (20,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (21,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (22,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (23,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (24,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (25,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (27,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (28,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (29,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (30,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (31,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (32,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (33,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (34,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (35,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (36,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (37,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (38,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (39,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (40,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (41,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)),], error_shift :
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (1,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(124, true)), (3,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (4,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (5,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (6,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (7,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (8,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (9,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (10,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (11,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (12,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (13,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (14,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (15,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (17,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (18,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (19,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (20,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (21,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (22,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (23,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (24,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (25,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (28,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (29,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (30,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (31,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (32,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (33,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (34,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (35,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (36,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (37,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (38,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (39,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (40,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (41,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], error_shift :
             None, eof_shift : None, shift_goto_map_nonterm :
-            vec![(GrammarNonTerminals::RustCode,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(128, true)),
-            (GrammarNonTerminals::_TermSet26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)),
-            (GrammarNonTerminals::__TermSet26Plus27,
+            vec![(GrammarNonTerminals::_TermSet26,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], reduce_map :
             { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
             .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [41, 57, 58, 101, 102, 103, 104, 105, 106,
-            107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121,
-            122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136,
-            137, 138, 139, 140, 141, 142, 143,]; let shifted : & 'static [u8] = & [0, 2,
-            2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            let rules : & 'static [u8] = & [48, 100, 101, 102, 103, 104, 105, 106, 107,
+            108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122,
+            123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137,
+            138, 139, 140, 142,]; let shifted : & 'static [u8] = & [3, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 1,]; rules.iter().zip(shifted.iter()).map(| (&
+            rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![58]; __reduce_map
+            std::collections::BTreeMap::new(); let reduce_rules = vec![48]; __reduce_map
             .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![58]), ruleset : { let rules : & 'static [u8] = &
-            [58,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
+            eof_reduce : Some(vec![48]), ruleset : { let rules : & 'static [u8] = &
+            [48,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(129, true)),],
-            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
-            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
-            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [57,]; let shifted : & 'static
-            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (1,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(126, true)), (3,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (4,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (5,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (6,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (7,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (8,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (9,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (10,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (11,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (12,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (13,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (14,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (15,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (17,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (18,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (19,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (20,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (21,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (22,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (23,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (24,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (25,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (28,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (29,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (30,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (31,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (32,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (33,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (34,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (35,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (36,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (37,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (38,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (39,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (40,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (41,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),], error_shift :
+            None, eof_shift : None, shift_goto_map_nonterm :
+            vec![(GrammarNonTerminals::_TermSet26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
+            (GrammarNonTerminals::__TermSet26Plus27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(127, true)),], reduce_map :
+            { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
+            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
+            let rules : & 'static [u8] = & [56, 57, 100, 101, 102, 103, 104, 105, 106,
+            107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121,
+            122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136,
+            137, 138, 139, 140, 141, 142,]; let shifted : & 'static [u8] = & [2, 2, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
@@ -8401,69 +8448,255 @@ impl GrammarParser {
             .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
             eof_reduce : Some(vec![57]), ruleset : { let rules : & 'static [u8] = &
-            [57,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
+            [57,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (1,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (2,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(131, true)), (3,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (4,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (5,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (6,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (7,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (8,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (9,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (10,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (11,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (12,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (13,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (14,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (15,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (16,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (17,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (18,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (19,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (20,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (21,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (22,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (23,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (24,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (25,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (27,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (28,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (29,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (30,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (31,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (32,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (33,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (34,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (35,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (36,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (37,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (38,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (39,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (40,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (41,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)),], error_shift :
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (1,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(128, true)), (3,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (4,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (5,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (6,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (7,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (8,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (9,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (10,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (11,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (12,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (13,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (14,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (15,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (17,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (18,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (19,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (20,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (21,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (22,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (23,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (24,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (25,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (28,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (29,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (30,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (31,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (32,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (33,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (34,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (35,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (36,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (37,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (38,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (39,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (40,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (41,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], error_shift :
             None, eof_shift : None, shift_goto_map_nonterm :
-            vec![(GrammarNonTerminals::RustCode,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(132, true)),
-            (GrammarNonTerminals::_TermSet26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)),
-            (GrammarNonTerminals::__TermSet26Plus27,
+            vec![(GrammarNonTerminals::_TermSet26,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], reduce_map :
             { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
             .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [41, 59, 60, 101, 102, 103, 104, 105, 106,
+            let rules : & 'static [u8] = & [56, 100, 101, 102, 103, 104, 105, 106, 107,
+            108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122,
+            123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137,
+            138, 139, 140, 142,]; let shifted : & 'static [u8] = & [3, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 1,]; rules.iter().zip(shifted.iter()).map(| (&
+            rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![56]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![56]), ruleset : { let rules : & 'static [u8] = &
+            [56,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (1,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(130, true)), (3,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (4,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (5,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (6,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (7,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (8,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (9,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (10,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (11,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (12,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (13,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (14,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (15,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (17,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (18,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (19,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (20,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (21,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (22,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (23,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (24,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (25,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (28,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (29,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (30,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (31,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (32,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (33,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (34,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (35,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (36,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (37,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (38,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (39,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (40,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (41,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),], error_shift :
+            None, eof_shift : None, shift_goto_map_nonterm :
+            vec![(GrammarNonTerminals::_TermSet26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
+            (GrammarNonTerminals::__TermSet26Plus27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(131, true)),], reduce_map :
+            { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
+            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
+            let rules : & 'static [u8] = & [58, 59, 100, 101, 102, 103, 104, 105, 106,
             107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121,
             122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136,
-            137, 138, 139, 140, 141, 142, 143,]; let shifted : & 'static [u8] = & [0, 2,
-            2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            137, 138, 139, 140, 141, 142,]; let shifted : & 'static [u8] = & [2, 2, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![59]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![59]), ruleset : { let rules : & 'static [u8] = &
+            [59,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (1,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(132, true)), (3,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (4,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (5,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (6,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (7,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (8,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (9,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (10,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (11,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (12,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (13,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (14,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (15,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (17,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (18,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (19,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (20,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (21,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (22,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (23,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (24,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (25,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (28,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (29,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (30,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (31,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (32,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (33,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (34,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (35,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (36,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (37,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (38,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (39,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (40,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (41,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], error_shift :
+            None, eof_shift : None, shift_goto_map_nonterm :
+            vec![(GrammarNonTerminals::_TermSet26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], reduce_map :
+            { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
+            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
+            let rules : & 'static [u8] = & [58, 100, 101, 102, 103, 104, 105, 106, 107,
+            108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122,
+            123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137,
+            138, 139, 140, 142,]; let shifted : & 'static [u8] = & [3, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 1,]; rules.iter().zip(shifted.iter()).map(| (&
+            rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![58]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![58]), ruleset : { let rules : & 'static [u8] = &
+            [58,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(134, true)),],
+            error_shift : Some(135), eof_shift : None, shift_goto_map_nonterm : vec![],
+            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
+            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
+            ruleset : { let rules : & 'static [u8] = & [62, 63,]; let shifted : & 'static
+            [u8] = & [2, 2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted)
+            | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
+            shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![62]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![62]), ruleset : { let rules : & 'static [u8] = &
+            [62,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(136, true)),],
+            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
+            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
+            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
+            ruleset : { let rules : & 'static [u8] = & [63,]; let shifted : & 'static
+            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
+            shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![63]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![63]), ruleset : { let rules : & 'static [u8] = &
+            [63,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(138, true)),],
+            error_shift : Some(139), eof_shift : None, shift_goto_map_nonterm : vec![],
+            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
+            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
+            ruleset : { let rules : & 'static [u8] = & [60, 61,]; let shifted : & 'static
+            [u8] = & [2, 2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted)
+            | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
@@ -8476,70 +8709,13 @@ impl GrammarParser {
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(133, true)),],
+            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(140, true)),],
             error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
             reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [59,]; let shifted : & 'static
+            ruleset : { let rules : & 'static [u8] = & [61,]; let shifted : & 'static
             [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![59]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![59]), ruleset : { let rules : & 'static [u8] = &
-            [59,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(135, true)),],
-            error_shift : Some(136), eof_shift : None, shift_goto_map_nonterm : vec![],
-            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
-            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [63, 64,]; let shifted : & 'static
-            [u8] = & [2, 2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted)
-            | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![63]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![63]), ruleset : { let rules : & 'static [u8] = &
-            [63,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(137, true)),],
-            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
-            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
-            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [64,]; let shifted : & 'static
-            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![64]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![64]), ruleset : { let rules : & 'static [u8] = &
-            [64,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(139, true)),],
-            error_shift : Some(140), eof_shift : None, shift_goto_map_nonterm : vec![],
-            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
-            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [61, 62,]; let shifted : & 'static
-            [u8] = & [2, 2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted)
-            | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
@@ -8548,74 +8724,32 @@ impl GrammarParser {
             .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
             eof_reduce : Some(vec![61]), ruleset : { let rules : & 'static [u8] = &
-            [61,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(141, true)),],
-            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
-            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
-            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [62,]; let shifted : & 'static
-            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![62]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![62]), ruleset : { let rules : & 'static [u8] = &
-            [62,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
+            [61,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)), (16,
             ::rusty_lr_core::parser::state::ShiftTarget::new(76, true)),], error_shift :
-            Some(143), eof_shift : None, shift_goto_map_nonterm :
+            Some(142), eof_shift : None, shift_goto_map_nonterm :
             vec![(GrammarNonTerminals::IdentOrLiteral,
             ::rusty_lr_core::parser::state::ShiftTarget::new(94, true)),
             (GrammarNonTerminals::_IdentOrLiteralPlus28,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(145, true)),], reduce_map :
+            ::rusty_lr_core::parser::state::ShiftTarget::new(144, true)),], reduce_map :
             { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
             .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [39, 40, 55, 56, 144, 145,]; let shifted : &
+            let rules : & 'static [u8] = & [39, 40, 54, 55, 143, 144,]; let shifted : &
             'static [u8] = & [0, 0, 2, 2, 0, 0,]; rules.iter().zip(shifted.iter()).map(|
             (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule
             as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(144, true)),],
+            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(143, true)),],
             error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
             reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [56,]; let shifted : & 'static
+            ruleset : { let rules : & 'static [u8] = & [55,]; let shifted : & 'static
             [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![56]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![56]), ruleset : { let rules : & 'static [u8] = &
-            [56,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)), (2,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(146, true)), (16,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(76, true)),], error_shift :
-            None, eof_shift : None, shift_goto_map_nonterm :
-            vec![(GrammarNonTerminals::IdentOrLiteral,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(97, true)),], reduce_map : {
-            let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [39, 40, 55, 145,]; let shifted : & 'static
-            [u8] = & [0, 0, 3, 1,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
@@ -8627,13 +8761,55 @@ impl GrammarParser {
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(148, true)),],
-            error_shift : Some(149), eof_shift : None, shift_goto_map_nonterm : vec![],
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(145, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(76, true)),], error_shift :
+            None, eof_shift : None, shift_goto_map_nonterm :
+            vec![(GrammarNonTerminals::IdentOrLiteral,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(97, true)),], reduce_map : {
+            let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
+            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
+            let rules : & 'static [u8] = & [39, 40, 54, 144,]; let shifted : & 'static
+            [u8] = & [0, 0, 3, 1,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
+            shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![54]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![54]), ruleset : { let rules : & 'static [u8] = &
+            [54,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(147, true)),],
+            error_shift : Some(148), eof_shift : None, shift_goto_map_nonterm : vec![],
             reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [65, 66,]; let shifted : & 'static
+            ruleset : { let rules : & 'static [u8] = & [64, 65,]; let shifted : & 'static
             [u8] = & [2, 2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted)
             | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
+            shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![64]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![64]), ruleset : { let rules : & 'static [u8] = &
+            [64,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(149, true)),],
+            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
+            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
+            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
+            ruleset : { let rules : & 'static [u8] = & [65,]; let shifted : & 'static
+            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
@@ -8642,17 +8818,17 @@ impl GrammarParser {
             .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
             eof_reduce : Some(vec![65]), ruleset : { let rules : & 'static [u8] = &
-            [65,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
+            [65,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(150, true)),],
-            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
+            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(151, true)),],
+            error_shift : Some(152), eof_shift : None, shift_goto_map_nonterm : vec![],
             reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [66,]; let shifted : & 'static
-            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
+            ruleset : { let rules : & 'static [u8] = & [66, 67,]; let shifted : & 'static
+            [u8] = & [2, 2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted)
+            | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
@@ -8661,17 +8837,17 @@ impl GrammarParser {
             .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
             eof_reduce : Some(vec![66]), ruleset : { let rules : & 'static [u8] = &
-            [66,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
+            [66,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(152, true)),],
-            error_shift : Some(153), eof_shift : None, shift_goto_map_nonterm : vec![],
+            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(153, true)),],
+            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
             reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [67, 68,]; let shifted : & 'static
-            [u8] = & [2, 2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted)
-            | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
+            ruleset : { let rules : & 'static [u8] = & [67,]; let shifted : & 'static
+            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
@@ -8680,95 +8856,36 @@ impl GrammarParser {
             .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
             eof_reduce : Some(vec![67]), ruleset : { let rules : & 'static [u8] = &
-            [67,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
+            [67,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(154, true)),],
-            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
-            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
-            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [68,]; let shifted : & 'static
-            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![68]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![68]), ruleset : { let rules : & 'static [u8] = &
-            [68,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(156, true)),],
-            error_shift : Some(157), eof_shift : None, shift_goto_map_nonterm :
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(155, true)),],
+            error_shift : Some(156), eof_shift : None, shift_goto_map_nonterm :
             vec![(GrammarNonTerminals::_identPlus29,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(159, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(158, true)),
             (GrammarNonTerminals::_identStar30,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(161, true)),], reduce_map :
+            ::rusty_lr_core::parser::state::ShiftTarget::new(160, true)),], reduce_map :
             { let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules
-            = vec![149]; __reduce_map.extend(__rustylr_tset18.iter().map(| term | (*
+            = vec![148]; __reduce_map.extend(__rustylr_tset18.iter().map(| term | (*
             term, reduce_rules.clone()))); __reduce_map.into_iter().collect() },
             error_reduce : None, eof_reduce : None, ruleset : { let rules : & 'static
-            [u8] = & [69, 70, 146, 147, 148, 149,]; let shifted : & 'static [u8] = & [2,
+            [u8] = & [68, 69, 145, 146, 147, 148,]; let shifted : & 'static [u8] = & [2,
             2, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) |
             { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![146]; __reduce_map
+            std::collections::BTreeMap::new(); let reduce_rules = vec![145]; __reduce_map
             .extend(__rustylr_tset19.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [146,]; let
+            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [145,]; let
             shifted : & 'static [u8] = & [1,]; rules.iter().zip(shifted.iter()).map(| (&
             rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
             usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(158, true)),],
-            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
-            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
-            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [70,]; let shifted : & 'static
-            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![70]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![70]), ruleset : { let rules : & 'static [u8] = &
-            [70,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(160, true)),],
-            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
-            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new(); let
-            reduce_rules = vec![148]; __reduce_map.extend(__rustylr_tset18.iter().map(|
-            term | (* term, reduce_rules.clone()))); __reduce_map.into_iter().collect()
-            }, error_reduce : None, eof_reduce : None, ruleset : { let rules : & 'static
-            [u8] = & [147, 148,]; let shifted : & 'static [u8] = & [1, 1,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![147]; __reduce_map
-            .extend(__rustylr_tset19.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [147,]; let
-            shifted : & 'static [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (&
-            rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(162, true)),],
+            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(157, true)),],
             error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
             reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
@@ -8787,85 +8904,103 @@ impl GrammarParser {
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (1,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (2,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(164, true)), (3,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (4,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (5,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (6,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (7,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (8,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (9,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (10,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (11,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (12,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (13,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (14,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (15,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (16,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (17,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (18,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (19,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (20,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (21,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (22,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (23,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (24,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (25,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (27,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (28,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (29,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (30,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (31,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (32,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (33,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (34,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (35,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (36,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (37,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (38,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (39,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (40,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (41,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)),], error_shift :
-            None, eof_shift : None, shift_goto_map_nonterm :
-            vec![(GrammarNonTerminals::RustCode,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(165, true)),
-            (GrammarNonTerminals::_TermSet26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)),
-            (GrammarNonTerminals::__TermSet26Plus27,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], reduce_map :
-            { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [41, 71, 72, 101, 102, 103, 104, 105, 106,
-            107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121,
-            122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136,
-            137, 138, 139, 140, 141, 142, 143,]; let shifted : & 'static [u8] = & [0, 2,
-            2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter()
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(159, true)),],
+            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
+            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new(); let
+            reduce_rules = vec![147]; __reduce_map.extend(__rustylr_tset18.iter().map(|
+            term | (* term, reduce_rules.clone()))); __reduce_map.into_iter().collect()
+            }, error_reduce : None, eof_reduce : None, ruleset : { let rules : & 'static
+            [u8] = & [146, 147,]; let shifted : & 'static [u8] = & [1, 1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![72]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            std::collections::BTreeMap::new(); let reduce_rules = vec![146]; __reduce_map
+            .extend(__rustylr_tset19.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![72]), ruleset : { let rules : & 'static [u8] = &
-            [72,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            eof_reduce : None, ruleset : { let rules : & 'static [u8] = & [146,]; let
+            shifted : & 'static [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (&
+            rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(166, true)),],
+            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(161, true)),],
             error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
             reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
             __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [71,]; let shifted : & 'static
+            ruleset : { let rules : & 'static [u8] = & [68,]; let shifted : & 'static
             [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![68]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![68]), ruleset : { let rules : & 'static [u8] = &
+            [68,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (1,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(163, true)), (3,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (4,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (5,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (6,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (7,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (8,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (9,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (10,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (11,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (12,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (13,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (14,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (15,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (17,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (18,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (19,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (20,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (21,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (22,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (23,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (24,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (25,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (28,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (29,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (30,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (31,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (32,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (33,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (34,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (35,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (36,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (37,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (38,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (39,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (40,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (41,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),], error_shift :
+            None, eof_shift : None, shift_goto_map_nonterm :
+            vec![(GrammarNonTerminals::_TermSet26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
+            (GrammarNonTerminals::__TermSet26Plus27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(164, true)),], reduce_map :
+            { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
+            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
+            let rules : & 'static [u8] = & [70, 71, 100, 101, 102, 103, 104, 105, 106,
+            107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121,
+            122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136,
+            137, 138, 139, 140, 141, 142,]; let shifted : & 'static [u8] = & [2, 2, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
@@ -8873,68 +9008,216 @@ impl GrammarParser {
             .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
             eof_reduce : Some(vec![71]), ruleset : { let rules : & 'static [u8] = &
-            [71,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
+            [71,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (1,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (2,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(168, true)), (3,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (4,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (5,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (6,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (7,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (8,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (9,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (10,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (11,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (12,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (13,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (14,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (15,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (16,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (17,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (18,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (19,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (20,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (21,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (22,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (23,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (24,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (25,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (27,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (28,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (29,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (30,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (31,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (32,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (33,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (34,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (35,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (36,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (37,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (38,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (39,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (40,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)), (41,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)),], error_shift :
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (1,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(165, true)), (3,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (4,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (5,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (6,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (7,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (8,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (9,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (10,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (11,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (12,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (13,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (14,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (15,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (17,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (18,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (19,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (20,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (21,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (22,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (23,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (24,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (25,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (28,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (29,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (30,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (31,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (32,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (33,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (34,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (35,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (36,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (37,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (38,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (39,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (40,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (41,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], error_shift :
             None, eof_shift : None, shift_goto_map_nonterm :
-            vec![(GrammarNonTerminals::RustCode,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(169, true)),
-            (GrammarNonTerminals::_TermSet26,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)),
-            (GrammarNonTerminals::__TermSet26Plus27,
+            vec![(GrammarNonTerminals::_TermSet26,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], reduce_map :
             { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
             .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
-            let rules : & 'static [u8] = & [41, 73, 74, 101, 102, 103, 104, 105, 106,
+            let rules : & 'static [u8] = & [70, 100, 101, 102, 103, 104, 105, 106, 107,
+            108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122,
+            123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137,
+            138, 139, 140, 142,]; let shifted : & 'static [u8] = & [3, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 1,]; rules.iter().zip(shifted.iter()).map(| (&
+            rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![70]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![70]), ruleset : { let rules : & 'static [u8] = &
+            [70,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (1,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(167, true)), (3,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (4,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (5,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (6,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (7,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (8,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (9,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (10,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (11,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (12,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (13,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (14,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (15,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (17,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (18,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (19,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (20,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (21,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (22,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (23,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (24,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (25,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (28,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (29,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (30,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (31,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (32,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (33,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (34,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (35,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (36,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (37,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (38,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (39,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (40,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)), (41,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),], error_shift :
+            None, eof_shift : None, shift_goto_map_nonterm :
+            vec![(GrammarNonTerminals::_TermSet26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
+            (GrammarNonTerminals::__TermSet26Plus27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(168, true)),], reduce_map :
+            { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
+            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
+            let rules : & 'static [u8] = & [72, 73, 100, 101, 102, 103, 104, 105, 106,
             107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121,
             122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136,
-            137, 138, 139, 140, 141, 142, 143,]; let shifted : & 'static [u8] = & [0, 2,
-            2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            137, 138, 139, 140, 141, 142,]; let shifted : & 'static [u8] = & [2, 2, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![73]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![73]), ruleset : { let rules : & 'static [u8] = &
+            [73,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(0, ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (1,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (2,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(169, true)), (3,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (4,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (5,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (6,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (7,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (8,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (9,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (10,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (11,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (12,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (13,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (14,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (15,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (16,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (17,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (18,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (19,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (20,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (21,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (22,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (23,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (24,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (25,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (27,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (28,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (29,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (30,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (31,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (32,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (33,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (34,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (35,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (36,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (37,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (38,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (39,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (40,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)), (41,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], error_shift :
+            None, eof_shift : None, shift_goto_map_nonterm :
+            vec![(GrammarNonTerminals::_TermSet26,
+            ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),], reduce_map :
+            { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
+            .into_iter().collect() }, error_reduce : None, eof_reduce : None, ruleset : {
+            let rules : & 'static [u8] = & [72, 100, 101, 102, 103, 104, 105, 106, 107,
+            108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122,
+            123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137,
+            138, 139, 140, 142,]; let shifted : & 'static [u8] = & [3, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 1,]; rules.iter().zip(shifted.iter()).map(| (&
+            rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
+            vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![72]; __reduce_map
+            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
+            eof_reduce : Some(vec![72]), ruleset : { let rules : & 'static [u8] = &
+            [72,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(171, true)),],
+            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
+            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
+            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
+            ruleset : { let rules : & 'static [u8] = & [74,]; let shifted : & 'static
+            [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
@@ -8948,51 +9231,13 @@ impl GrammarParser {
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(170, true)),],
-            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
-            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
-            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [73,]; let shifted : & 'static
-            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![73]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![73]), ruleset : { let rules : & 'static [u8] = &
-            [73,]; let shifted : & 'static [u8] = & [4,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(2, ::rusty_lr_core::parser::state::ShiftTarget::new(172, true)),],
-            error_shift : None, eof_shift : None, shift_goto_map_nonterm : vec![],
-            reduce_map : { let mut __reduce_map = std::collections::BTreeMap::new();
-            __reduce_map.into_iter().collect() }, error_reduce : None, eof_reduce : None,
-            ruleset : { let rules : & 'static [u8] = & [75,]; let shifted : & 'static
-            [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![75]; __reduce_map
             .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
             eof_reduce : Some(vec![75]), ruleset : { let rules : & 'static [u8] = &
-            [75,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
-            vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![76]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, error_reduce : None,
-            eof_reduce : Some(vec![76]), ruleset : { let rules : & 'static [u8] = &
-            [76,]; let shifted : & 'static [u8] = & [1,]; rules.iter().zip(shifted
+            [75,]; let shifted : & 'static [u8] = & [1,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
             { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
@@ -9000,18 +9245,18 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(90, true)),], error_shift :
             None, eof_shift : None, shift_goto_map_nonterm :
             vec![(GrammarNonTerminals::Rule,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(173, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(172, true)),
             (GrammarNonTerminals::Directive,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(174, false)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(173, false)),
             (GrammarNonTerminals::GrammarLine,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(174, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(173, true)),
             (GrammarNonTerminals::_GrammarLinePlus31,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(175, true)),], reduce_map :
+            ::rusty_lr_core::parser::state::ShiftTarget::new(174, true)),], reduce_map :
             { let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, error_reduce : None, eof_reduce : Some(vec![150]),
-            ruleset : { let rules : & 'static [u8] = & [0, 42, 43, 44, 45, 46, 47, 48,
-            49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67,
-            68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 150, 150, 151, 151,]; let shifted : &
+            .into_iter().collect() }, error_reduce : None, eof_reduce : Some(vec![149]),
+            ruleset : { let rules : & 'static [u8] = & [0, 41, 42, 43, 44, 45, 46, 47,
+            48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66,
+            67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 149, 149, 150, 150,]; let shifted : &
             'static [u8] = & [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -9021,17 +9266,17 @@ impl GrammarParser {
             vec![], error_shift : None, eof_shift : None, shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            error_reduce : None, eof_reduce : Some(vec![151]), ruleset : { let rules : &
-            'static [u8] = & [151,]; let shifted : & 'static [u8] = & [2,]; rules.iter()
+            error_reduce : None, eof_reduce : Some(vec![150]), ruleset : { let rules : &
+            'static [u8] = & [150,]; let shifted : & 'static [u8] = & [2,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], error_shift : None, eof_shift : Some(177), shift_goto_map_nonterm :
+            vec![], error_shift : None, eof_shift : Some(176), shift_goto_map_nonterm :
             vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             error_reduce : None, eof_reduce : None, ruleset : { let rules : & 'static
-            [u8] = & [152,]; let shifted : & 'static [u8] = & [1,]; rules.iter()
+            [u8] = & [151,]; let shifted : & 'static [u8] = & [1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },
@@ -9040,7 +9285,7 @@ impl GrammarParser {
             vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             error_reduce : None, eof_reduce : None, ruleset : { let rules : & 'static
-            [u8] = & [152,]; let shifted : & 'static [u8] = & [2,]; rules.iter()
+            [u8] = & [151,]; let shifted : & 'static [u8] = & [2,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
             shifted as usize, } }).collect() } },

@@ -53,26 +53,6 @@ process_and_compare() {
 
 echo "RustyLR path: $rustylr_path"
 
-echo "Setting Dense = false, GLR = false"
-process_and_compare "--dense false --glr false"
-
-echo "Setting Dense = false, GLR = true"
-process_and_compare "--dense false --glr true"
-
-echo "Setting Dense = true, GLR = false"
-process_and_compare "--dense true --glr false"
-
-echo "Setting Dense = true, GLR = true"
-process_and_compare "--dense true --glr true"
-
-echo "Normal configuration"
-process_and_compare ""
-mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
-
-cargo test --bin glr
-if [ $? -ne 0 ]; then
-    exit 1
-fi
 
 # to briefly see the difference of the generated parser in the PR, run for the sample calculator and json parsers
 cargo run --bin rustylr -- "$rustylr_path/example/calculator/src/parser.rs" "$rustylr_path/scripts/diff/calculator_new.rs" > /dev/null
@@ -93,5 +73,26 @@ fi
 
 mv "$rustylr_path/scripts/diff/calculator_new.rs" "$rustylr_path/scripts/diff/calculator.rs"
 mv "$rustylr_path/scripts/diff/json_new.rs" "$rustylr_path/scripts/diff/json.rs"
+
+echo "Setting Dense = false, GLR = false"
+process_and_compare "--dense false --glr false"
+
+echo "Setting Dense = false, GLR = true"
+process_and_compare "--dense false --glr true"
+
+echo "Setting Dense = true, GLR = false"
+process_and_compare "--dense true --glr false"
+
+echo "Setting Dense = true, GLR = true"
+process_and_compare "--dense true --glr true"
+
+echo "Normal configuration"
+process_and_compare ""
+mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
+
+cargo test --bin glr
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 
 echo "All tests passed."

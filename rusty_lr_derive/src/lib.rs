@@ -41,7 +41,7 @@ pub fn lr1(input: TokenStream) -> TokenStream {
         Err(e) => return e.to_compile_error().into(),
     };
     if grammar.optimize {
-        grammar.optimize(5);
+        grammar.optimize(15);
     }
     grammar.builder = grammar.create_builder();
     let diags = grammar.build_grammar();

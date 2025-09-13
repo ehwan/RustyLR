@@ -61,9 +61,12 @@ A(i32) : A plus a2=A {
     | M
     ;
 
-M(i32) : M star m2=M { M * m2 }
+M(i32) : M_optim star m2=M_optim { M_optim * m2 }
     | P
     ;
+
+// check for single-rule optimization
+M_optim(i32): M { M * 1 };
 
 P(i32) : num {
     if let Token::Num(n) = num { n }

@@ -5,6 +5,7 @@ use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
+#[derive(Clone)]
 pub struct CustomReduceAction {
     pub body: TokenStream,
     idents_used: BTreeSet<Ident>,
