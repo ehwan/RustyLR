@@ -1347,7 +1347,18 @@ impl Grammar {
                                 let data_varname = format_ident!("__rustylr_data_{}", token_idx);
                                 let location_varname =
                                     format_ident!("__rustylr_location_{}", token_idx);
-                                for &chain_idx in &token.reduce_action_chains {
+                                let location_used_in_this_action = if let Some(mapto) = &token.mapto
+                                {
+                                    let location_mapto_varname =
+                                        format_ident!("__rustylr_location_{}", mapto);
+                                    reduce_action.contains_ident(&location_mapto_varname)
+                                } else {
+                                    false
+                                };
+
+                                for (idx, &chain_idx) in
+                                    token.reduce_action_chains.iter().enumerate()
+                                {
                                     let action = &self.custom_reduce_actions[chain_idx];
                                     let fn_name =
                                         format_ident!("custom_reduce_action_{}", chain_idx);
@@ -1358,8 +1369,26 @@ impl Grammar {
                                         quote! {}
                                     };
 
+                                    // if location is needed for later reduce action, pass by clone
+                                    // else, pass by move
+                                    let mut location_used_later = location_used_in_this_action;
+                                    if !location_used_later {
+                                        for &chain_idx in
+                                            token.reduce_action_chains[idx + 1..].iter()
+                                        {
+                                            let action = &self.custom_reduce_actions[chain_idx];
+                                            if action.input_location.is_some() {
+                                                location_used_later = true;
+                                                break;
+                                            }
+                                        }
+                                    }
                                     let location_arg = if action.input_location.is_some() {
-                                        quote! { #location_varname.clone(), }
+                                        if location_used_later {
+                                            quote! { #location_varname.clone(), }
+                                        } else {
+                                            quote! { #location_varname, }
+                                        }
                                     } else {
                                         quote! {}
                                     };
