@@ -58,7 +58,7 @@ type ClassIndex = usize;
 type TerminalIndex = usize;
 
 pub struct CustomSingleReduceAction {
-    pub body: TokenStream,
+    pub body: CustomReduceAction,
     pub input_type: Option<(Ident, TokenStream)>,
     pub input_location: Option<Ident>,
     pub output_type: Option<TokenStream>,
@@ -1329,18 +1329,16 @@ impl Grammar {
 
             let mut reduce_action_chain = rule.tokens[0].reduce_action_chains.clone();
 
-            optimize_related_nonterminals.insert(nonterm_id);
-            if let Token::NonTerm(to_nonterm_id) = totoken {
-                optimize_related_nonterminals.insert(to_nonterm_id);
-            }
-
             if let Some(ReduceAction::Custom(body)) = &rule.reduce_action {
+                if body.contains_ident(&format_ident!("{}", utils::LOOKAHEAD_PARAMETER_NAME)) {
+                    continue;
+                }
                 // if this rule has custom reduce action, save it
                 let output_type = nonterm.ruletype.clone();
                 let mapto = &rule.tokens[0].mapto;
                 let location_mapto = if let Some(mapto) = mapto {
                     let location_varname = utils::location_variable_name(mapto);
-                    if utils::tokenstream_contains_ident(body.clone(), &location_varname) {
+                    if body.contains_ident(&location_varname) {
                         Some(location_varname)
                     } else {
                         None
@@ -1358,7 +1356,7 @@ impl Grammar {
                     };
 
                     if let Some(ruletype) = ruletype {
-                        if utils::tokenstream_contains_ident(body.clone(), mapto) {
+                        if body.contains_ident(&mapto) {
                             Some((mapto.clone(), ruletype))
                         } else {
                             None
@@ -1377,6 +1375,11 @@ impl Grammar {
                     output_type,
                 });
                 reduce_action_chain.push(idx);
+            }
+
+            optimize_related_nonterminals.insert(nonterm_id);
+            if let Token::NonTerm(to_nonterm_id) = totoken {
+                optimize_related_nonterminals.insert(to_nonterm_id);
             }
 
             nonterm_replace.insert(nonterm_id, (totoken, reduce_action_chain));
