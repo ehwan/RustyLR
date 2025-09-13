@@ -1144,145 +1144,145 @@ impl Grammar {
         );
 
         // check if two or more terminals can be merged into one class
-        if term_partition.len() == self.terminal_classes.len() {
-            return None;
-        }
-
-        // convert all terminals using terminal class
-        // delete all rules that using non-first terminals in that class
-        // e.g. delete
-        //      A -> X y Y
-        //      A -> X z Y
-        // and convert x to class so that only
-        //      A -> X <class> Y
-        // remains
-        let mut is_first_oldclass_in_newclass = Vec::new();
-        is_first_oldclass_in_newclass.resize(self.terminal_classes.len(), false);
-
-        let mut old_class_to_new_class = vec![0; self.terminal_classes.len()];
-
-        let mut new_class_defs = Vec::with_capacity(term_partition.len());
-        let mut new_term_class_id = vec![0; self.terminals.len()];
-        let mut multiterm_counter = 0;
-        for (new_class_id, (_setids, old_classes)) in term_partition.into_iter().enumerate() {
-            let mut terms = Vec::new();
-            // terms.len() != len because single terminal could be range-based optimized into multiple characters
-            let mut len = 0;
-            for &old_class in old_classes.iter() {
-                for &term in &self.terminal_classes[old_class].terminals {
-                    new_term_class_id[term] = new_class_id;
-                    terms.push(term);
-
-                    let name = &self.terminals[term].name;
-                    len += name.count();
-                }
-                old_class_to_new_class[old_class] = new_class_id;
-            }
-            is_first_oldclass_in_newclass[old_classes[0]] = true;
-            if len > 1 {
-                multiterm_counter += 1;
-            }
-            let class_def = TerminalClassDefinition {
-                terminals: terms,
-                multiterm_counter,
-                ranges: Vec::new(),
-            };
-            new_class_defs.push(class_def);
-        }
-
-        self.terminal_class_id = new_term_class_id;
-        self.terminal_classes = new_class_defs;
-        self.other_terminal_class_id = self.terminal_class_id[self.other_terminal_index];
-        // terminal class optimization ends
-
         let mut removed_rules_diag = Vec::new();
 
-        // check for unused non-terminals
-        let mut nonterm_used = vec![false; self.nonterminals.len()];
-        for nonterm in &self.nonterminals {
-            for rule in &nonterm.rules {
-                for token in &rule.tokens {
-                    if let Token::NonTerm(nonterm_idx) = token.token {
-                        nonterm_used[nonterm_idx] = true;
+        if term_partition.len() != self.terminal_classes.len() {
+            // convert all terminals using terminal class
+            // delete all rules that using non-first terminals in that class
+            // e.g. delete
+            //      A -> X y Y
+            //      A -> X z Y
+            // and convert x to class so that only
+            //      A -> X <class> Y
+            // remains
+            let mut is_first_oldclass_in_newclass = Vec::new();
+            is_first_oldclass_in_newclass.resize(self.terminal_classes.len(), false);
+
+            let mut old_class_to_new_class = vec![0; self.terminal_classes.len()];
+
+            let mut new_class_defs = Vec::with_capacity(term_partition.len());
+            let mut new_term_class_id = vec![0; self.terminals.len()];
+            let mut multiterm_counter = 0;
+            for (new_class_id, (_setids, old_classes)) in term_partition.into_iter().enumerate() {
+                let mut terms = Vec::new();
+                // terms.len() != len because single terminal could be range-based optimized into multiple characters
+                let mut len = 0;
+                for &old_class in old_classes.iter() {
+                    for &term in &self.terminal_classes[old_class].terminals {
+                        new_term_class_id[term] = new_class_id;
+                        terms.push(term);
+
+                        let name = &self.terminals[term].name;
+                        len += name.count();
                     }
+                    old_class_to_new_class[old_class] = new_class_id;
                 }
-            }
-        }
-        for (nonterm_idx, nonterm) in self.nonterminals.iter_mut().enumerate() {
-            // do not delete protected non-terminals
-            if nonterm.is_protected() {
-                continue;
-            }
-            if nonterm.rules.is_empty() {
-                continue;
+                is_first_oldclass_in_newclass[old_classes[0]] = true;
+                if len > 1 {
+                    multiterm_counter += 1;
+                }
+                let class_def = TerminalClassDefinition {
+                    terminals: terms,
+                    multiterm_counter,
+                    ranges: Vec::new(),
+                };
+                new_class_defs.push(class_def);
             }
 
-            if !nonterm_used[nonterm_idx] {
-                // this rule was not used
-                nonterm.rules.clear();
-                if !nonterm.is_auto_generated() {
-                    let span = nonterm.name.span();
-                    removed_rules_diag.push(OptimizeRemove::NonTermNotUsed(span));
-                }
-            }
-        }
+            self.terminal_class_id = new_term_class_id;
+            self.terminal_classes = new_class_defs;
+            self.other_terminal_class_id = self.terminal_class_id[self.other_terminal_index];
+            // terminal class optimization ends
 
-        let mut other_was_used = false;
-        for nonterm in &mut self.nonterminals {
-            let rules = std::mem::take(&mut nonterm.rules);
-            let mut new_rules = Vec::new();
-            for mut rule in rules {
-                // check if this rule contains any terminal that is not the first terminal in the class
-                let mut remove_this_rule = false;
-                for token in &rule.tokens {
-                    if let Token::Term(TerminalSymbol::Term(old_class)) = token.token {
-                        if !is_first_oldclass_in_newclass[old_class] {
-                            remove_this_rule = true;
-                            break;
+            // check for unused non-terminals
+            let mut nonterm_used = vec![false; self.nonterminals.len()];
+            for nonterm in &self.nonterminals {
+                for rule in &nonterm.rules {
+                    for token in &rule.tokens {
+                        if let Token::NonTerm(nonterm_idx) = token.token {
+                            nonterm_used[nonterm_idx] = true;
                         }
                     }
                 }
-
-                if remove_this_rule {
-                    // this rule contains terminal that is not the first terminal in the class
-                    // so remove this rule
-                    // add to diags only if it was not auto-generated
-                    if !nonterm.is_auto_generated() {
-                        let diag = OptimizeRemove::TerminalClassRuleMerge(rule);
-                        removed_rules_diag.push(diag);
-                    }
+            }
+            for (nonterm_idx, nonterm) in self.nonterminals.iter_mut().enumerate() {
+                // do not delete protected non-terminals
+                if nonterm.is_protected() {
+                    continue;
+                }
+                if nonterm.rules.is_empty() {
                     continue;
                 }
 
-                // change any terminal to its class id
-
-                //  - tokens in the rule
-                for token in &mut rule.tokens {
-                    if let Token::Term(TerminalSymbol::Term(old_class)) = token.token {
-                        let new_class = old_class_to_new_class[old_class];
-                        if new_class == self.other_terminal_class_id {
-                            other_was_used = true;
-                        }
-                        token.token = Token::Term(TerminalSymbol::Term(new_class));
+                if !nonterm_used[nonterm_idx] {
+                    // this rule was not used
+                    nonterm.rules.clear();
+                    if !nonterm.is_auto_generated() {
+                        let span = nonterm.name.span();
+                        removed_rules_diag.push(OptimizeRemove::NonTermNotUsed(span));
                     }
                 }
-                //  - lookaheads in the rule
-                if let Some(lookaheads) = &mut rule.lookaheads {
-                    let new_lookaheads = std::mem::take(lookaheads)
-                        .into_iter()
-                        .map(|old_class| {
+            }
+
+            let mut other_was_used = false;
+            for nonterm in &mut self.nonterminals {
+                let rules = std::mem::take(&mut nonterm.rules);
+                let mut new_rules = Vec::new();
+                for mut rule in rules {
+                    // check if this rule contains any terminal that is not the first terminal in the class
+                    let mut remove_this_rule = false;
+                    for token in &rule.tokens {
+                        if let Token::Term(TerminalSymbol::Term(old_class)) = token.token {
+                            if !is_first_oldclass_in_newclass[old_class] {
+                                remove_this_rule = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if remove_this_rule {
+                        // this rule contains terminal that is not the first terminal in the class
+                        // so remove this rule
+                        // add to diags only if it was not auto-generated
+                        if !nonterm.is_auto_generated() {
+                            let diag = OptimizeRemove::TerminalClassRuleMerge(rule);
+                            removed_rules_diag.push(diag);
+                        }
+                        continue;
+                    }
+
+                    // change any terminal to its class id
+
+                    //  - tokens in the rule
+                    for token in &mut rule.tokens {
+                        if let Token::Term(TerminalSymbol::Term(old_class)) = token.token {
                             let new_class = old_class_to_new_class[old_class];
                             if new_class == self.other_terminal_class_id {
                                 other_was_used = true;
                             }
-                            new_class
-                        })
-                        .collect();
-                    *lookaheads = new_lookaheads;
+                            token.token = Token::Term(TerminalSymbol::Term(new_class));
+                        }
+                    }
+                    //  - lookaheads in the rule
+                    if let Some(lookaheads) = &mut rule.lookaheads {
+                        let new_lookaheads = std::mem::take(lookaheads)
+                            .into_iter()
+                            .map(|old_class| {
+                                let new_class = old_class_to_new_class[old_class];
+                                if new_class == self.other_terminal_class_id {
+                                    other_was_used = true;
+                                }
+                                new_class
+                            })
+                            .collect();
+                        *lookaheads = new_lookaheads;
+                    }
+                    new_rules.push(rule);
                 }
-                new_rules.push(rule);
+                nonterm.rules = new_rules;
             }
-            nonterm.rules = new_rules;
+
+            self.other_used = other_was_used;
         }
 
         // remove rules that have single production rule and single token
@@ -1416,8 +1416,6 @@ impl Grammar {
             }
         }
 
-        self.other_used = other_was_used;
-
         Some(OptimizeDiag {
             removed: removed_rules_diag,
         })
@@ -1431,6 +1429,9 @@ impl Grammar {
             let ret = self.optimize_iterate();
             match ret {
                 Some(new_diag) => {
+                    if new_diag.removed.is_empty() {
+                        break;
+                    }
                     diag.removed.extend(new_diag.removed.into_iter());
                 }
                 None => {

@@ -1334,8 +1334,8 @@ impl Grammar {
                                 }
                                 if last_none_count > 0 {
                                     extract_data_stream.extend(quote! {
-                                    #stack_stream.truncate(#stack_stream.len() - #last_none_count);
-                                });
+                                        #stack_stream.truncate(#stack_stream.len() - #last_none_count);
+                                    });
                                 }
                             }
 
