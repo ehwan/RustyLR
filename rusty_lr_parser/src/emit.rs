@@ -1105,116 +1105,112 @@ impl Grammar {
         let mut rule_index: usize = 0;
         for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
             for (rule_local_id, rule) in nonterm.rules.iter().enumerate() {
-                if rule.is_used {
-                    let reduce_fn_ident =
-                        format_ident!("reduce_{}_{}", nonterm.name, rule_local_id);
+                let reduce_fn_ident = format_ident!("reduce_{}_{}", nonterm.name, rule_local_id);
 
-                    let rule_debug_str = format!(
-                        "{} -> {}",
-                        self.nonterm_pretty_name(nonterm_idx),
-                        rule.tokens
-                            .iter()
-                            .map(|t| {
-                                match t.token {
-                                    Token::Term(term) => self.class_pretty_name_list(term, 5),
-                                    Token::NonTerm(nonterm) => self.nonterm_pretty_name(nonterm),
-                                }
-                            })
-                            .collect::<Vec<_>>()
-                            .join(" ")
-                    );
+                let rule_debug_str = format!(
+                    "{} -> {}",
+                    self.nonterm_pretty_name(nonterm_idx),
+                    rule.tokens
+                        .iter()
+                        .map(|t| {
+                            match t.token {
+                                Token::Term(term) => self.class_pretty_name_list(term, 5),
+                                Token::NonTerm(nonterm) => self.nonterm_pretty_name(nonterm),
+                            }
+                        })
+                        .collect::<Vec<_>>()
+                        .join(" ")
+                );
 
-                    use super::nonterminal_info::ReduceAction;
+                use super::nonterminal_info::ReduceAction;
 
-                    match &rule.reduce_action {
-                        Some(ReduceAction::Custom(reduce_action)) => {
+                match &rule.reduce_action {
+                    Some(ReduceAction::Custom(reduce_action)) => {
+                        if rule.is_used {
                             let mut debug_tag_check_stream = TokenStream::new();
-                            let mut data_extract_stream = TokenStream::new();
+                            let mut stack_mapto_map = std::collections::BTreeMap::new();
                             for (token_index_from_end, token) in
                                 rule.tokens.iter().rev().enumerate()
                             {
                                 let stack_name = token_to_stack_name(token.token);
                                 let tag_name = stack_name.unwrap_or(&empty_tag_name);
 
-                                if token.reduce_action_chains.is_empty() {
-                                    // data stack
-                                    if let Some(stack_name) = stack_name {
-                                        if let Some(mapto) = &token.mapto {
-                                            if utils::tokenstream_contains_ident(
-                                                reduce_action.clone(),
-                                                mapto,
-                                            ) {
-                                                data_extract_stream.extend(quote! {
-                                                    let mut #mapto= __data_stack.#stack_name.pop().unwrap();
-                                                });
-                                            } else {
-                                                data_extract_stream.extend(quote! {
-                                                    __data_stack.#stack_name.pop();
-                                                });
+                                #[derive(PartialEq, Eq, PartialOrd, Ord)]
+                                enum StackName {
+                                    DataStack(Ident),
+                                    LocationStack,
+                                }
+                                impl StackName {
+                                    pub fn to_token_stream(&self) -> TokenStream {
+                                        match self {
+                                            StackName::DataStack(name) => {
+                                                quote! {__data_stack.#name}
                                             }
-                                        } else {
-                                            data_extract_stream.extend(quote! {
-                                                __data_stack.#stack_name.pop();
-                                            });
+                                            StackName::LocationStack => quote! {__location_stack},
                                         }
-                                    }
-
-                                    // location stack
-                                    if let Some(mapto) = &token.mapto {
-                                        let location_varname = utils::location_variable_name(mapto);
-                                        if utils::tokenstream_contains_ident(
-                                            reduce_action.clone(),
-                                            mapto,
-                                        ) {
-                                            data_extract_stream.extend(quote! {
-                                                let mut #location_varname = __location_stack.pop().unwrap();
-                                            });
-                                        } else {
-                                            data_extract_stream.extend(quote! {
-                                                __location_stack.pop();
-                                            });
-                                        }
-                                    } else {
-                                        data_extract_stream.extend(quote! {
-                                            __location_stack.pop();
-                                        });
-                                    }
-                                } else {
-                                    let mut extract_this_data_stream = TokenStream::new();
-                                    let mut data_arg_name = TokenStream::new();
-                                    let mut location_arg_name = TokenStream::new();
-                                    for &action in token.reduce_action_chains.iter() {
-                                        let action_fn_ident =
-                                            format_ident!("__reduce_action_custom_{}", action);
-                                        let action = &self.custom_reduce_actions[action];
-
-                                        let data_arg = if action.input_type.is_some() {
-                                            quote! {#data_arg_name}
-                                        } else {
-                                            quote! {}
-                                        };
-                                        let location_arg = if action.input_location.is_some() {
-                                            quote! {#location_arg_name}
-                                        } else {
-                                            quote! {}
-                                        };
-
-                                        extract_this_data_stream.extend(quote! {
-                                            Self::#action_fn_ident(
-                                                #data_arg,
-                                                #location_arg,
-                                                #user_data_parameter_name,
-                                            );
-                                        });
                                     }
                                 }
+
+                                if let Some(stack_name) = stack_name {
+                                    // if variable was not used at this reduce action,
+                                    // we can use `truncate` instead of `pop` for optimization
+                                    // so check it here
+                                    let mapto = if let Some(mapto) = &token.mapto {
+                                        if reduce_action.contains_ident(mapto) {
+                                            Some(mapto.clone())
+                                        } else {
+                                            None
+                                        }
+                                    } else {
+                                        None
+                                    };
+                                    stack_mapto_map
+                                        .entry(StackName::DataStack(stack_name.clone()))
+                                        .or_insert_with(Vec::new)
+                                        .push(mapto);
+                                }
+                                let location_mapto = if let Some(mapto) = &token.mapto {
+                                    let location_varname =
+                                        format_ident!("__rustylr_location_{}", mapto);
+
+                                    // if variable was not used at this reduce action,
+                                    // we can use `truncate` instead of `pop` for optimization
+                                    // so check it here
+                                    if reduce_action.contains_ident(&location_varname) {
+                                        Some(location_varname)
+                                    } else {
+                                        None
+                                    }
+                                } else {
+                                    None
+                                };
+                                stack_mapto_map
+                                    .entry(StackName::LocationStack)
+                                    .or_insert_with(Vec::new)
+                                    .push(location_mapto);
+
                                 debug_tag_check_stream.extend(quote! {
-                                    debug_assert!(
-                                        __data_stack.#tag_stack_name.get(
-                                            __data_stack.#tag_stack_name.len()-1-#token_index_from_end
-                                        ) == Some( &#tag_enum_name::#tag_name )
-                                    );
-                                });
+                                debug_assert!(
+                                    __data_stack.#tag_stack_name.get(
+                                        __data_stack.#tag_stack_name.len()-1-#token_index_from_end
+                                    ) == Some( &#tag_enum_name::#tag_name )
+                                );
+                            });
+                            }
+
+                            // if there are variable with same name, the last one will be used (by shadowing)
+                            // so set the front one to `None`
+                            // this will also help optimizing performance by using `truncate` instead of `pop`
+                            for maptos in &mut stack_mapto_map.values_mut() {
+                                for var_right in (0..maptos.len()).rev() {
+                                    if let Some(var_name) = maptos[var_right].as_ref().cloned() {
+                                        for var_left in 0..var_right {
+                                            if maptos[var_left].as_ref() == Some(&var_name) {
+                                                maptos[var_left] = None;
+                                            }
+                                        }
+                                    }
+                                }
                             }
 
                             // new tag that will be inserted by this reduce action
@@ -1251,6 +1247,37 @@ impl Grammar {
                                 }
                             };
 
+                            let mut extract_data_stream = TokenStream::new();
+                            for (stack_name, maptos) in stack_mapto_map.iter() {
+                                let stack_stream = stack_name.to_token_stream();
+
+                                // if there are consecutive `None` mapto, truncate instead of pop
+                                let mut last_none_count: usize = 0;
+                                for mapto in maptos {
+                                    match mapto {
+                                        Some(mapto) => {
+                                            if last_none_count > 0 {
+                                                extract_data_stream.extend(quote! {
+                                                #stack_stream.truncate(#stack_stream.len() - #last_none_count);
+                                            });
+                                                last_none_count = 0;
+                                            }
+                                            extract_data_stream.extend(quote! {
+                                                let mut #mapto = #stack_stream.pop().unwrap();
+                                            });
+                                        }
+                                        None => {
+                                            last_none_count += 1;
+                                        }
+                                    }
+                                }
+                                if last_none_count > 0 {
+                                    extract_data_stream.extend(quote! {
+                                    #stack_stream.truncate(#stack_stream.len() - #last_none_count);
+                                });
+                                }
+                            }
+
                             reduce_action_case_streams.extend(quote! {
                                 #rule_index => Self::#reduce_fn_ident( data_stack, location_stack, shift, lookahead, user_data, location0 ),
                             });
@@ -1277,7 +1304,7 @@ impl Grammar {
                                         }
                                         #modify_tag_stream
 
-                                        #data_extract_stream
+                                        #extract_data_stream
 
                                         let __res = #body;
                                         __data_stack.#stack_name.push(__res);
@@ -1304,7 +1331,7 @@ impl Grammar {
                                         }
                                         #modify_tag_stream
 
-                                        #data_extract_stream
+                                        #extract_data_stream
 
                                         #body
 
@@ -1312,11 +1339,17 @@ impl Grammar {
                                     }
                                 });
                             }
+                        } else {
+                            reduce_action_case_streams.extend(quote! {
+                                #rule_index => unreachable!("{rule_index}: this production rule was optimized out"),
+                            });
                         }
+                    }
 
-                        // E(i32): a b c(i32) d e ;
-                        // 'c' will be automatically chosen, even if there is no reduce action
-                        &Some(ReduceAction::Identity(identity_token_idx)) => {
+                    // E(i32): a b c(i32) d e ;
+                    // 'c' will be automatically chosen, even if there is no reduce action
+                    &Some(ReduceAction::Identity(identity_token_idx)) => {
+                        if rule.is_used {
                             reduce_action_case_streams.extend(quote! {
                                 #rule_index => { Ok(Self::#reduce_fn_ident( data_stack, location_stack )) }
                             });
@@ -1423,11 +1456,17 @@ impl Grammar {
                                     #returns_non_empty
                                 }
                             });
+                        } else {
+                            reduce_action_case_streams.extend(quote! {
+                                #rule_index => unreachable!("{rule_index}: this production rule was optimized out"),
+                            });
                         }
+                    }
 
-                        // E: a b c d ...
-                        // 'E' does not have rule type, so no need for a reduce action
-                        None => {
+                    // E: a b c d ...
+                    // 'E' does not have rule type, so no need for a reduce action
+                    None => {
+                        if rule.is_used {
                             reduce_action_case_streams.extend(quote! {
                                 #rule_index => { Self::#reduce_fn_ident( data_stack, location_stack ); Ok(false) }
                             });
@@ -1493,45 +1532,15 @@ impl Grammar {
                                     #tag_push_stream
                                 }
                             });
+                        } else {
+                            reduce_action_case_streams.extend(quote! {
+                                #rule_index => unreachable!("{rule_index}: this production rule was optimized out"),
+                            });
                         }
                     }
-                } else {
-                    reduce_action_case_streams.extend(quote! {
-                        #rule_index => unreachable!("{rule_index}: this production rule was optimized out"),
-                    });
                 }
-
                 rule_index += 1;
             }
-        }
-
-        let error_typename = &self.error_typename;
-
-        // emit custom single reduce actions
-        let mut custom_reduce_action_stream = TokenStream::new();
-        for (idx, action) in self.custom_reduce_actions.iter().enumerate() {
-            let fn_name = format_ident!("__reduce_action_custom_{}", idx);
-            let arg_stream = if let Some((arg_name, arg_type)) = &action.input_type {
-                quote! { mut #arg_name: #arg_type, }
-            } else {
-                quote! {}
-            };
-            let location_stream = if let Some(location_mapto) = &action.input_location {
-                quote! { mut #location_mapto: #location_typename, }
-            } else {
-                quote! {}
-            };
-            let ret_stream = if let Some(ret_type) = &action.output_type {
-                quote! { Result<#ret_type, #error_typename> }
-            } else {
-                quote! { Result<(), #error_typename> }
-            };
-            let body = &action.body;
-            custom_reduce_action_stream.extend(quote! {
-                fn #fn_name( #arg_stream #location_stream ) -> #ret_stream {
-                    Ok(#body)
-                }
-            });
         }
 
         let start_idx = *self.nonterminals_index.get(&self.start_rule_name).unwrap();
@@ -1664,7 +1673,6 @@ impl Grammar {
 
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
         impl #data_stack_typename {
-            #custom_reduce_action_stream
             #fn_reduce_for_each_rule_stream
         }
 
