@@ -821,6 +821,12 @@ impl Grammar {
                     }
                 };
 
+                if let Some(ReduceAction::Identity(idx)) = &reduce_action {
+                    if tokens[*idx].mapto.is_none() {
+                        tokens[*idx].mapto = Some(format_ident!("__rustylr_token{}", idx));
+                    }
+                }
+
                 rule_lines.push(Rule {
                     tokens,
                     reduce_action,
