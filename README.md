@@ -255,13 +255,6 @@ See [SYNTAX.md - Location Tracking](SYNTAX.md#location-tracking) for detailed in
  - [Lua 5.4 syntax parser](https://github.com/ehwan/lua_rust/blob/main/parser/src/parser.rs): A complete Lua language parser
  - [Bootstrap parser](rusty_lr_parser/src/parser/parser.rs): RustyLR's own syntax parser is written in RustyLR itself
 
-## Lexer Capabilities
-While RustyLR is primarily a parser generator, it also functions effectively as a lexer.
-Its design allows for efficient tokenization of input streams,
-addressing challenges like the "too-many-characters" problem (where Unicode's full range of characters would make naive implementations impractical).
-By constructing optimized state automata, it ensures rapid and memory-efficient lexing,
-making it suitable for processing large or complex inputs.
-
 ## Cargo Features
  - `build`: Enables build script tools for generating parsers at compile time.
  - `tree`: Enables automatic syntax tree construction for debugging purposes. Makes `Context` implement `Display` for pretty-printing.
