@@ -178,17 +178,17 @@ pub enum JsonNonTerminals {
 }
 impl std::fmt::Display for JsonNonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use ::rusty_lr::nonterminal::NonTerminal;
+        use ::rusty_lr::parser::nonterminal::NonTerminal;
         write!(f, "{}", self.as_str())
     }
 }
 impl std::fmt::Debug for JsonNonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use ::rusty_lr::nonterminal::NonTerminal;
+        use ::rusty_lr::parser::nonterminal::NonTerminal;
         write!(f, "{}", self.as_str())
     }
 }
-impl ::rusty_lr::nonterminal::NonTerminal for JsonNonTerminals {
+impl ::rusty_lr::parser::nonterminal::NonTerminal for JsonNonTerminals {
     fn as_str(&self) -> &'static str {
         match self {
             JsonNonTerminals::Json => "Json",
@@ -261,7 +261,7 @@ impl ::rusty_lr::nonterminal::NonTerminal for JsonNonTerminals {
             JsonNonTerminals::Augmented => false,
         }
     }
-    fn nonterm_type(&self) -> Option<::rusty_lr::nonterminal::NonTerminalType> {
+    fn nonterm_type(&self) -> Option<::rusty_lr::parser::nonterminal::NonTerminalType> {
         match self {
             JsonNonTerminals::Json => None,
             JsonNonTerminals::Value => None,
@@ -280,52 +280,52 @@ impl ::rusty_lr::nonterminal::NonTerminal for JsonNonTerminals {
             JsonNonTerminals::Sign => None,
             JsonNonTerminals::WS => None,
             JsonNonTerminals::_LiteralString22 => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::LiteralString)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::LiteralString)
             }
             JsonNonTerminals::_LiteralString23 => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::LiteralString)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::LiteralString)
             }
             JsonNonTerminals::_LiteralString24 => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::LiteralString)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::LiteralString)
             }
             JsonNonTerminals::_ElementSepPlus25 => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::PlusRight)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::PlusRight)
             }
             JsonNonTerminals::_ElementSepStar26 => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::Star)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::Star)
             }
             JsonNonTerminals::_CharacterPlus27 => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::PlusRight)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::PlusRight)
             }
             JsonNonTerminals::_CharacterStar28 => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::Star)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::Star)
             }
             JsonNonTerminals::_TermSet29 => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::TerminalSet)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::TerminalSet)
             }
             JsonNonTerminals::_TermSet30 => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::TerminalSet)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::TerminalSet)
             }
             JsonNonTerminals::_TermSet31 => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::TerminalSet)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::TerminalSet)
             }
             JsonNonTerminals::_DigitPlus32 => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::PlusRight)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::PlusRight)
             }
             JsonNonTerminals::_TermSet33 => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::TerminalSet)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::TerminalSet)
             }
             JsonNonTerminals::_Group34 => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::Group)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::Group)
             }
             JsonNonTerminals::__Group34Question35 => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::Optional)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::Optional)
             }
             JsonNonTerminals::_LiteralString36 => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::LiteralString)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::LiteralString)
             }
             JsonNonTerminals::Augmented => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::Augmented)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::Augmented)
             }
         }
     }

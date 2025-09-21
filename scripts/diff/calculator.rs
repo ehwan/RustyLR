@@ -66,17 +66,17 @@ pub enum ENonTerminals {
 }
 impl std::fmt::Display for ENonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use ::rusty_lr::nonterminal::NonTerminal;
+        use ::rusty_lr::parser::nonterminal::NonTerminal;
         write!(f, "{}", self.as_str())
     }
 }
 impl std::fmt::Debug for ENonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use ::rusty_lr::nonterminal::NonTerminal;
+        use ::rusty_lr::parser::nonterminal::NonTerminal;
         write!(f, "{}", self.as_str())
     }
 }
-impl ::rusty_lr::nonterminal::NonTerminal for ENonTerminals {
+impl ::rusty_lr::parser::nonterminal::NonTerminal for ENonTerminals {
     fn as_str(&self) -> &'static str {
         match self {
             ENonTerminals::A => "A",
@@ -95,14 +95,14 @@ impl ::rusty_lr::nonterminal::NonTerminal for ENonTerminals {
             ENonTerminals::Augmented => false,
         }
     }
-    fn nonterm_type(&self) -> Option<::rusty_lr::nonterminal::NonTerminalType> {
+    fn nonterm_type(&self) -> Option<::rusty_lr::parser::nonterminal::NonTerminalType> {
         match self {
             ENonTerminals::A => None,
             ENonTerminals::M => None,
             ENonTerminals::P => None,
             ENonTerminals::E => None,
             ENonTerminals::Augmented => {
-                Some(::rusty_lr::nonterminal::NonTerminalType::Augmented)
+                Some(::rusty_lr::parser::nonterminal::NonTerminalType::Augmented)
             }
         }
     }
