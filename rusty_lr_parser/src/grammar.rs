@@ -946,7 +946,7 @@ impl Grammar {
                 rules: vec![augmented_rule],
                 trace: false,
                 protected: true,
-                nonterm_type: Some(rusty_lr_core::nonterminal::NonTerminalType::Augmented),
+                nonterm_type: Some(rusty_lr_core::parser::nonterminal::NonTerminalType::Augmented),
             };
             // start rule is protected
             grammar.nonterminals[*start_idx].protected = true;

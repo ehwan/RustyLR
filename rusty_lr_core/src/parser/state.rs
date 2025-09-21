@@ -1,7 +1,7 @@
 use std::hash::Hash;
 
 use crate::hash::HashMap;
-use crate::nonterminal::NonTerminal;
+use crate::parser::nonterminal::NonTerminal;
 use crate::TerminalSymbol;
 
 #[derive(Debug, Clone, Copy)]

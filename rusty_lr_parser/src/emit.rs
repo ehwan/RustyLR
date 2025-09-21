@@ -136,7 +136,7 @@ impl Grammar {
                 let enum_name = format!("{:?}", enum_name);
                 let enum_name = Ident::new(&enum_name, Span::call_site());
                 nonterm_type_case.extend(quote! {
-                    #enum_typename::#name => Some(#module_prefix::nonterminal::NonTerminalType::#enum_name),
+                    #enum_typename::#name => Some(#module_prefix::parser::nonterminal::NonTerminalType::#enum_name),
                 });
             } else {
                 nonterm_type_case.extend(quote! {
@@ -155,18 +155,18 @@ impl Grammar {
             }
             impl std::fmt::Display for #enum_typename {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                    use #module_prefix::nonterminal::NonTerminal;
+                    use #module_prefix::parser::nonterminal::NonTerminal;
                     write!(f, "{}", self.as_str())
                 }
             }
             impl std::fmt::Debug for #enum_typename {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                    use #module_prefix::nonterminal::NonTerminal;
+                    use #module_prefix::parser::nonterminal::NonTerminal;
                     write!(f, "{}", self.as_str())
                 }
             }
 
-            impl #module_prefix::nonterminal::NonTerminal for #enum_typename{
+            impl #module_prefix::parser::nonterminal::NonTerminal for #enum_typename{
                 fn as_str(&self) -> &'static str {
                     match self {
                         #case_as_str
@@ -177,7 +177,7 @@ impl Grammar {
                         #nonterm_trait_is_trace_case
                     }
                 }
-                fn nonterm_type(&self) -> Option<#module_prefix::nonterminal::NonTerminalType> {
+                fn nonterm_type(&self) -> Option<#module_prefix::parser::nonterminal::NonTerminalType> {
                     match self {
                         #nonterm_type_case
                     }

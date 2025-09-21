@@ -97,7 +97,7 @@ impl Pattern {
         root_span_pair: (Span, Span),
     ) -> Result<PatternToToken, ParseError> {
         use crate::nonterminal_info::ReduceAction;
-        use rusty_lr_core::nonterminal::NonTerminalType;
+        use rusty_lr_core::parser::nonterminal::NonTerminalType;
 
         match &self.internal {
             PatternInternal::Ident(ident) => {

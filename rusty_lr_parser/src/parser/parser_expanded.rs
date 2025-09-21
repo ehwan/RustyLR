@@ -258,17 +258,17 @@ pub enum GrammarNonTerminals {
 }
 impl std::fmt::Display for GrammarNonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use ::rusty_lr_core::nonterminal::NonTerminal;
+        use ::rusty_lr_core::parser::nonterminal::NonTerminal;
         write!(f, "{}", self.as_str())
     }
 }
 impl std::fmt::Debug for GrammarNonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use ::rusty_lr_core::nonterminal::NonTerminal;
+        use ::rusty_lr_core::parser::nonterminal::NonTerminal;
         write!(f, "{}", self.as_str())
     }
 }
-impl ::rusty_lr_core::nonterminal::NonTerminal for GrammarNonTerminals {
+impl ::rusty_lr_core::parser::nonterminal::NonTerminal for GrammarNonTerminals {
     fn as_str(&self) -> &'static str {
         match self {
             GrammarNonTerminals::Rule => "Rule",
@@ -341,7 +341,9 @@ impl ::rusty_lr_core::nonterminal::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::Augmented => false,
         }
     }
-    fn nonterm_type(&self) -> Option<::rusty_lr_core::nonterminal::NonTerminalType> {
+    fn nonterm_type(
+        &self,
+    ) -> Option<::rusty_lr_core::parser::nonterminal::NonTerminalType> {
         match self {
             GrammarNonTerminals::Rule => None,
             GrammarNonTerminals::RuleType => None,
@@ -358,58 +360,58 @@ impl ::rusty_lr_core::nonterminal::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::GrammarLine => None,
             GrammarNonTerminals::Grammar => None,
             GrammarNonTerminals::_TokenMappedPlus15 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusLeft)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
             GrammarNonTerminals::_TokenMappedStar16 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::Star)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Star)
             }
             GrammarNonTerminals::_PrecDefPlus17 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusLeft)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
             GrammarNonTerminals::_PrecDefStar18 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::Star)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Star)
             }
             GrammarNonTerminals::_caretQuestion19 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::Optional)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Optional)
             }
             GrammarNonTerminals::_TerminalSetItemPlus20 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusLeft)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
             GrammarNonTerminals::_TerminalSetItemStar21 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::Star)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Star)
             }
             GrammarNonTerminals::_PatternPlus22 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusLeft)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
             GrammarNonTerminals::_PatternStar23 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::Star)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Star)
             }
             GrammarNonTerminals::__PatternStar23SepPlus24 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusLeft)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
             GrammarNonTerminals::_commaQuestion25 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::Optional)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Optional)
             }
             GrammarNonTerminals::_TermSet26 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::TerminalSet)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::TerminalSet)
             }
             GrammarNonTerminals::__TermSet26Plus27 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusLeft)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
             GrammarNonTerminals::_IdentOrLiteralPlus28 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusLeft)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
             GrammarNonTerminals::_identPlus29 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusLeft)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
             GrammarNonTerminals::_identStar30 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::Star)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Star)
             }
             GrammarNonTerminals::_GrammarLinePlus31 => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::PlusRight)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusRight)
             }
             GrammarNonTerminals::Augmented => {
-                Some(::rusty_lr_core::nonterminal::NonTerminalType::Augmented)
+                Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Augmented)
             }
         }
     }

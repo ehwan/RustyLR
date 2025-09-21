@@ -5,8 +5,8 @@ use std::ops::DerefMut;
 
 use termtree::Tree as TermTree;
 
-use crate::nonterminal::NonTerminal;
-use crate::nonterminal::NonTerminalType;
+use crate::parser::nonterminal::NonTerminal;
+use crate::parser::nonterminal::NonTerminalType;
 use crate::TerminalSymbol;
 
 /// Tree represention of single non-terminal token.

@@ -21,9 +21,6 @@ pub mod builder;
 /// module for core parser functionality
 pub mod parser;
 
-/// module for auto-generated types of non-terminals representation
-pub mod nonterminal;
-
 /// module for production rules representation
 pub mod rule;
 

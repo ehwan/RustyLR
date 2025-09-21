@@ -4,8 +4,8 @@ use std::num::NonZeroUsize;
 use super::Node;
 use super::ParseError;
 
-use crate::nonterminal::NonTerminal;
 use crate::parser::data_stack::DataStack;
+use crate::parser::nonterminal::NonTerminal;
 use crate::parser::state::Index;
 use crate::parser::Parser;
 use crate::parser::Precedence;
@@ -547,10 +547,9 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         node: usize,
     ) -> crate::hash::HashSet<Data::NonTerm>
     where
-        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::nonterminal::NonTerminal,
+        Data::NonTerm: Copy + Eq + std::hash::Hash + NonTerminal,
     {
         use crate::hash::HashSet;
-        use crate::nonterminal::NonTerminal;
         use crate::token::Token;
         use std::collections::BTreeSet;
 
@@ -649,7 +648,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         parser: &P,
     ) -> crate::hash::HashSet<Data::NonTerm>
     where
-        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::nonterminal::NonTerminal,
+        Data::NonTerm: Copy + Eq + std::hash::Hash + NonTerminal,
     {
         let mut ret: crate::hash::HashSet<Data::NonTerm> = Default::default();
         for &node in self.current_nodes.iter() {
@@ -940,9 +939,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         impl Iterator<Item = &'static str> + 'a,
     )
     where
-        Data::NonTerm: Ord + Copy + Hash + crate::nonterminal::NonTerminal + 'a,
+        Data::NonTerm: Ord + Copy + Hash + NonTerminal + 'a,
     {
-        use crate::nonterminal::NonTerminal;
         let (terms, nonterms) = self.expected_token(parser);
         (
             terms
@@ -1862,7 +1860,7 @@ where
 impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Display for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Display + Clone,
-    Data::NonTerm: std::fmt::Display + Clone + crate::nonterminal::NonTerminal,
+    Data::NonTerm: std::fmt::Display + Clone + NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (i, path) in self.to_tree_lists().enumerate() {
@@ -1876,7 +1874,7 @@ where
 impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Debug for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Debug + Clone,
-    Data::NonTerm: std::fmt::Debug + Clone + crate::nonterminal::NonTerminal,
+    Data::NonTerm: std::fmt::Debug + Clone + NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (i, path) in self.to_tree_lists().enumerate() {

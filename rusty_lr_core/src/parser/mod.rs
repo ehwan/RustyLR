@@ -6,6 +6,9 @@ pub mod nondeterministic;
 
 pub mod data_stack;
 
+/// module for auto-generated types of non-terminals representation
+pub mod nonterminal;
+
 pub mod state;
 pub use state::State;
 
