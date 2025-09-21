@@ -9,6 +9,8 @@ pub mod data_stack;
 /// module for auto-generated types of non-terminals representation
 pub mod nonterminal;
 
+pub mod terminalclass;
+
 pub mod state;
 pub use state::State;
 
@@ -44,6 +46,8 @@ pub trait Parser {
 
     /// The type of terminal symbols.
     type Term;
+    /// The type of terminal classes.
+    type TermClass: terminalclass::TerminalClass<Term = Self::Term>;
     /// The type of non-terminal symbols.
     type NonTerm;
     /// The type of the parser state.
