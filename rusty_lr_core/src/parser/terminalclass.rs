@@ -1,6 +1,9 @@
 pub trait TerminalClass: Copy {
     type Term;
 
+    const ERROR: Self;
+    const EOF: Self;
+
     /// Gets the pretty name of this terminal class.
     fn as_str(&self) -> &'static str;
 
@@ -10,7 +13,4 @@ pub trait TerminalClass: Copy {
     fn from_term(term: &Self::Term) -> Self;
 
     fn precedence(&self) -> crate::parser::Precedence;
-
-    fn error() -> Self;
-    fn eof() -> Self;
 }

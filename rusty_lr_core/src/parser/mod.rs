@@ -49,9 +49,9 @@ pub trait Parser {
     /// The type of terminal classes.
     type TermClass: terminalclass::TerminalClass<Term = Self::Term>;
     /// The type of non-terminal symbols.
-    type NonTerm;
+    type NonTerm: nonterminal::NonTerminal;
     /// The type of the parser state.
-    type State: State<Self::NonTerm>;
+    type State: State<TermClass = Self::TermClass, NonTerm = Self::NonTerm>;
 
     /// A type to represent single element in a terminal class.
     ///
@@ -60,22 +60,10 @@ pub trait Parser {
     type TerminalClassElement;
 
     /// Get list of production rules
-    fn get_rules(&self) -> &[crate::rule::ProductionRule<&'static str, Self::NonTerm>];
+    fn get_rules(&self) -> &[crate::rule::ProductionRule<Self::TermClass, Self::NonTerm>];
     /// Get list of states
     fn get_states(&self) -> &[Self::State];
-    /// Get set of terminals for i'th terminal class
-    fn get_terminals(
-        &self,
-        i: usize,
-    ) -> Option<impl IntoIterator<Item = Self::TerminalClassElement> + '_>;
-    /// Get the terminal class of the given terminal
-    fn to_terminal_class(&self, terminal: &Self::Term) -> usize;
-
     /// Get the type of precedence for i'th level.
     /// `None` if i'th level was defined as %precedence (no reduce type).
     fn precedence_types(&self, level: u8) -> Option<crate::rule::ReduceType>;
-
-    /// Get the precedence level (priority) of the given terminal class
-    /// `None` if the terminal class has no precedence defined.
-    fn class_precedence(&self, class: crate::TerminalSymbol<usize>) -> Precedence;
 }
