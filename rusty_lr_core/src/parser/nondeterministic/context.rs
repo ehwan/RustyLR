@@ -798,7 +798,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     }
 
     /// Get backtrace infos for all paths.
-    pub fn backtrace<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    pub fn backtraces<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &'a self,
         parser: &'a P,
     ) -> impl Iterator<Item = crate::Backtrace<&'static str, P::NonTerm>> + 'a
