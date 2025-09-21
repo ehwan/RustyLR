@@ -2,53 +2,6 @@ use std::fmt::Debug;
 use std::fmt::Display;
 use std::hash::Hash;
 
-/// A type for terminal symbols in the grammar.
-/// just because we have to take care of the `error` token specially,
-/// and future support for other special tokens.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub enum TerminalSymbol<Term> {
-    Term(Term), // index in the terminals vector
-    Error,      // error token
-    Eof,        // end of file token
-}
-impl<Term> TerminalSymbol<Term> {
-    pub fn is_error(&self) -> bool {
-        matches!(self, TerminalSymbol::Error)
-    }
-    pub fn is_term(&self) -> bool {
-        matches!(self, TerminalSymbol::Term(_))
-    }
-    pub fn is_eof(&self) -> bool {
-        matches!(self, TerminalSymbol::Eof)
-    }
-    /// converts self to a term if it is a `Term` variant, otherwise returns `None`.
-    pub fn to_term(&self) -> Option<&Term> {
-        match self {
-            TerminalSymbol::Term(term) => Some(term),
-            TerminalSymbol::Error => None,
-            TerminalSymbol::Eof => None,
-        }
-    }
-    /// converts self to a term if it is a `Term` variant, otherwise returns `None`.
-    pub fn into_term(self) -> Option<Term> {
-        match self {
-            TerminalSymbol::Term(term) => Some(term),
-            TerminalSymbol::Error => None,
-            TerminalSymbol::Eof => None,
-        }
-    }
-}
-
-impl<Term: Display> std::fmt::Display for TerminalSymbol<Term> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            TerminalSymbol::Term(term) => write!(f, "{}", term),
-            TerminalSymbol::Error => write!(f, "error"),
-            TerminalSymbol::Eof => write!(f, "eof"),
-        }
-    }
-}
-
 /// Token represents a terminal or non-terminal symbol in the grammar.
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Token<Term, NonTerm> {
