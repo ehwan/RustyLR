@@ -7,4 +7,6 @@ pub struct Output {
     pub generated_stream: TokenStream,
     /// debug comments attatched to the output file
     pub debug_comments: String,
+
+    pub grammar: rusty_lr_parser::grammar::Grammar,
 }

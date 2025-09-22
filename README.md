@@ -26,18 +26,18 @@ It constructs optimized state machines, ensuring efficient and reliable parsing.
  ```
  
  To work with `rusty_lr`, you need to generate parser code using one of the following methods:
-  - **Procedural macros:** Use the built-in `lr1!` macro
+  - **Executable:** Use the standalone `rustylr` executable to generate parser code
+    ```sh
+    cargo install rustylr
+    ```
   - **Build script:** Enable the `build` feature and generate parser code during the build process
     ```toml
     [build-dependencies]
     rusty_lr = { version = "...", features = ["build"] }
     ```
-  - **Executable:** Use the standalone `rustylr` executable to generate parser code
-    ```sh
-    cargo install rustylr
-    ```
+  - **Procedural macros:** Use the built-in `lr1!` macro
 
-**Recommendation:** Use the `rustylr` executable. It's faster and provides helpful grammar diagnostics.
+**Recommendation:** Use the `rustylr` executable. It's faster and provides helpful grammar diagnostics, and commands for debugging state machines directly.
 
 **Important:** Ensure the version of the generated code targets the same version of `rusty_lr` in your `Cargo.toml`. Otherwise, you may encounter build errors.
 

@@ -1290,6 +1290,7 @@ impl Builder {
             user_stream: output_stream,
             generated_stream: expanded_stream,
             debug_comments,
+            grammar,
         })
     }
 }
