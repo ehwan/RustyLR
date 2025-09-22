@@ -7,7 +7,7 @@ pub trait TerminalClass: Copy {
     /// Gets the pretty name of this terminal class.
     fn as_str(&self) -> &'static str;
 
-    /// converts this non-terminal to a usize
+    /// Converts this terminal class to a usize
     fn to_usize(&self) -> usize;
 
     fn from_term(term: &Self::Term) -> Self;
