@@ -45,4 +45,8 @@ pub struct Args {
     /// Override the written code and set generated parser table to use dense arrays
     #[arg(long)]
     pub dense: Option<bool>,
+
+    /// Print the details of a specific state
+    #[arg(long)]
+    pub state: Option<usize>,
 }
