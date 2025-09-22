@@ -9,6 +9,54 @@ use crate::grammar::Grammar;
 use crate::terminal_info::TerminalName;
 use crate::utils;
 
+// helper function to generate match-case stream.
+// convert integer list to `a | b..=c | d` syntax
+fn list_to_case_stream(list: impl Iterator<Item = usize>) -> TokenStream {
+    let mut stream = TokenStream::new();
+    let mut prev = None;
+    for val in list {
+        if let Some((prev_start, prev_last)) = prev {
+            if prev_last + 1 == val {
+                // extend the range
+                prev = Some((prev_start, val));
+            } else {
+                // push the previous range
+                if !stream.is_empty() {
+                    stream.extend(quote! { | });
+                }
+                if prev_start == prev_last {
+                    let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
+                    stream.extend(quote! { #prev_start });
+                } else {
+                    let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
+                    let prev_last = proc_macro2::Literal::usize_unsuffixed(prev_last);
+                    stream.extend(quote! { #prev_start..=#prev_last });
+                }
+
+                prev = Some((val, val));
+            }
+        } else {
+            prev = Some((val, val));
+        }
+    }
+    // push the previous range
+    if let Some((prev_start, prev_last)) = prev {
+        if !stream.is_empty() {
+            stream.extend(quote! { | });
+        }
+        if prev_start == prev_last {
+            let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
+            stream.extend(quote! { #prev_start });
+        } else {
+            let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
+            let prev_last = proc_macro2::Literal::usize_unsuffixed(prev_last);
+            stream.extend(quote! { #prev_start..=#prev_last });
+        }
+    }
+
+    stream
+}
+
 /// emit Rust code for the parser
 impl Grammar {
     /// write type alias Context, Rule, State, Error...
@@ -17,10 +65,11 @@ impl Grammar {
         let start_rule_name = &self.start_rule_name;
         let rule_typename = format_ident!("{}Rule", start_rule_name);
         let state_typename = format_ident!("{}State", start_rule_name);
-        let enum_name = format_ident!("{}NonTerminals", start_rule_name);
+        let nonterm_typename = format_ident!("{}NonTerminals", start_rule_name);
         let parse_error_typename = format_ident!("{}ParseError", start_rule_name);
         let context_struct_name = format_ident!("{}Context", start_rule_name);
         let data_stack_typename = format_ident!("{}DataStack", start_rule_name);
+        let termclass_typename = format_ident!("{}TerminalClasses", start_rule_name);
 
         let state_structname = if self.emit_dense {
             format_ident!("DenseState")
@@ -33,15 +82,6 @@ impl Grammar {
         } else if self.states.len() <= u16::MAX as usize {
             quote! { u16 }
         } else if self.states.len() <= u32::MAX as usize {
-            quote! { u32 }
-        } else {
-            quote! { usize }
-        };
-        let class_index_typename = if self.terminal_classes.len() <= u8::MAX as usize {
-            quote! { u8 }
-        } else if self.terminal_classes.len() <= u16::MAX as usize {
-            quote! { u16 }
-        } else if self.terminal_classes.len() <= u32::MAX as usize {
             quote! { u32 }
         } else {
             quote! { usize }
@@ -66,10 +106,10 @@ impl Grammar {
                     pub type #context_struct_name = #module_prefix::parser::nondeterministic::Context<#data_stack_typename, #state_index_typename>;
                     /// type alias for CFG production rule
                     #[allow(non_camel_case_types,dead_code)]
-                    pub type #rule_typename = #module_prefix::rule::ProductionRule<&'static str, #enum_name>;
+                    pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;
                     /// type alias for DFA state
                     #[allow(non_camel_case_types,dead_code)]
-                    pub type #state_typename = #module_prefix::parser::state::#state_structname<#class_index_typename, #enum_name, #rule_container_type, #state_index_typename>;
+                    pub type #state_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
                     /// type alias for `InvalidTerminalError`
                     #[allow(non_camel_case_types,dead_code)]
                     pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#data_stack_typename>;
@@ -83,16 +123,259 @@ impl Grammar {
                 pub type #context_struct_name = #module_prefix::parser::deterministic::Context<#data_stack_typename, #state_index_typename>;
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #rule_typename = #module_prefix::rule::ProductionRule<&'static str, #enum_name>;
+                pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;
                 /// type alias for DFA state
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #state_typename = #module_prefix::parser::state::#state_structname<#class_index_typename, #enum_name, usize, #state_index_typename>;
+                pub type #state_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, usize, #state_index_typename>;
                 /// type alias for `ParseError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#data_stack_typename>;
             }
             );
         }
+    }
+
+    fn emit_termclass_enum(&self, stream: &mut TokenStream) {
+        let start_rule_name = &self.start_rule_name;
+        let termclass_typename = format_ident!("{}TerminalClasses", start_rule_name);
+        let module_prefix = &self.module_prefix;
+        let error_name = format_ident!("{}", utils::ERROR_NAME);
+        let eof_name = format_ident!("{}", utils::EOF_NAME);
+        let token_typename = &self.token_typename;
+
+        let mut class_variants = Vec::with_capacity(self.terminal_classes.len());
+        let mut as_str_match_stream = TokenStream::new();
+        for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
+            let (variant_name, pretty_name) = if self.is_u8 || self.is_char {
+                let name = format_ident!("TermClass{}", class_id);
+                let pretty_name =
+                    self.class_pretty_name_list(rusty_lr_core::TerminalSymbol::Term(class_id), 4);
+                (name, pretty_name)
+            } else {
+                if class_def.terminals.len() == 1 {
+                    let term_idx = class_def.terminals[0];
+                    let term = self.terminals[term_idx].name.ident().unwrap();
+                    (term.clone(), term.to_string())
+                } else {
+                    let name = format_ident!("TermClass{}", class_id);
+                    let pretty_name = self
+                        .class_pretty_name_list(rusty_lr_core::TerminalSymbol::Term(class_id), 4);
+                    (name, pretty_name)
+                }
+            };
+            as_str_match_stream.extend(quote! {
+                #termclass_typename::#variant_name => #pretty_name,
+            });
+            class_variants.push(variant_name);
+        }
+        // generate `Parser::class_precedence()` terminal class -> precedence level match body
+        let mut precedence_match_stream = TokenStream::new();
+        {
+            let mut level_classes = Vec::new();
+            level_classes.resize(
+                self.builder.precedence_types.len(),
+                std::collections::BTreeSet::new(),
+            );
+            for (&class, &level) in self.builder.precedence_levels.iter() {
+                level_classes[level].insert(class.into_term().unwrap());
+            }
+
+            for (level, classes) in level_classes.into_iter().enumerate() {
+                if classes.is_empty() {
+                    continue;
+                } else {
+                    debug_assert!(level < u8::MAX as usize);
+                    let iter = classes.iter().map(|&c| {
+                        let var = &class_variants[c];
+                        quote! { #termclass_typename::#var }
+                    });
+                    let level = proc_macro2::Literal::usize_unsuffixed(level);
+                    let case_stream = quote! { #(#iter)|* };
+                    precedence_match_stream.extend(quote! {
+                        #case_stream => #module_prefix::parser::Precedence::new(#level),
+                    });
+                }
+            }
+            if let Some(error_prec) = self.error_precedence {
+                debug_assert!(error_prec < u8::MAX as usize);
+                let error_prec = proc_macro2::Literal::usize_unsuffixed(error_prec);
+                precedence_match_stream.extend(quote! {
+                #termclass_typename::#error_name => #module_prefix::parser::Precedence::new(#error_prec),
+            });
+            }
+            precedence_match_stream.extend(quote! {
+                #termclass_typename::#eof_name => {
+                    unreachable!("eof token cannot be used in precedence levels")
+                },
+                _ => #module_prefix::parser::Precedence::none(),
+            });
+        }
+
+        let use_range_based_optimization = if self.is_char || self.is_u8 {
+            self.calculate_range_terminal_class_map()
+        } else {
+            false
+        };
+
+        let other_class_id = self.other_terminal_class_id;
+
+        let match_terminal_filter_expression = if let Some(filter) = &self.filter {
+            quote! { #filter(terminal) }
+        } else {
+            quote! {terminal}
+        };
+        let mut from_term_match_stream = TokenStream::new();
+
+        // building terminal-class_id map
+        if use_range_based_optimization {
+            // range-compressed Vec based terminal-class_id map
+
+            // for terminal -> terminal_class_id map to_terminal_class()
+            for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
+                if class_id == self.other_terminal_class_id {
+                    continue;
+                }
+                let mut match_case_stream = TokenStream::new();
+                for (i, &(s, e)) in class_def.ranges.iter().enumerate() {
+                    let stream = if self.is_char {
+                        let s = unsafe { char::from_u32_unchecked(s) };
+                        let e = unsafe { char::from_u32_unchecked(e) };
+
+                        if s == e {
+                            quote! { #s }
+                        } else {
+                            quote! { #s..=#e }
+                        }
+                    } else if self.is_u8 {
+                        let s = s as u8;
+                        let e = e as u8;
+
+                        if s == e {
+                            quote! { #s }
+                        } else {
+                            quote! { #s..=#e }
+                        }
+                    } else {
+                        unreachable!("unexpected char type")
+                    };
+
+                    if i > 0 {
+                        match_case_stream.extend(quote! {|});
+                    }
+                    match_case_stream.extend(quote! { #stream });
+                }
+                let class_variant = &class_variants[class_id];
+                from_term_match_stream.extend(quote! {
+                    #match_case_stream => #termclass_typename::#class_variant,
+                });
+            }
+            let other_variant = &class_variants[other_class_id];
+            from_term_match_stream.extend(quote! {
+                _ => #termclass_typename::#other_variant,
+            });
+        } else {
+            // match based terminal-class_id map
+
+            // for terminal -> terminal_class_id map to_terminal_class()
+            for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
+                if class_id == self.other_terminal_class_id {
+                    continue;
+                }
+                let mut match_case_stream = TokenStream::new();
+                for (i, &term) in class_def.terminals.iter().enumerate() {
+                    // check if this term is range-based character
+                    let case_stream = match &self.terminals[term].name {
+                        TerminalName::CharRange(s, l) => {
+                            if self.is_char {
+                                if s == l {
+                                    quote! {#s}
+                                } else {
+                                    quote! {#s..=#l}
+                                }
+                            } else if self.is_u8 {
+                                let s = *s as u8;
+                                let l = *l as u8;
+                                if s == l {
+                                    quote! {#s}
+                                } else {
+                                    quote! {#s..=#l}
+                                }
+                            } else {
+                                unreachable!("unexpected char type")
+                            }
+                        }
+                        TerminalName::Ident(_) => {
+                            let term_stream = &self.terminals[term].body;
+                            quote! {#term_stream}
+                        }
+                    };
+
+                    if i > 0 {
+                        match_case_stream.extend(quote! { | });
+                    }
+                    match_case_stream.extend(case_stream);
+                }
+                let class_variant = &class_variants[class_id];
+                from_term_match_stream.extend(quote! {
+                    #match_case_stream => #termclass_typename::#class_variant,
+                });
+            }
+            let other_class_variant = &class_variants[other_class_id];
+            from_term_match_stream.extend(quote! {
+                _ => #termclass_typename::#other_class_variant,
+            });
+        }
+
+        stream.extend(quote! {
+            /// A enum that represents terminal classes
+            #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
+            #[derive(Clone, Copy, std::hash::Hash, std::cmp::PartialEq, std::cmp::Eq, std::cmp::PartialOrd, std::cmp::Ord)]
+            pub enum #termclass_typename {
+                #(#class_variants),*,
+                #error_name,
+                #eof_name,
+            }
+
+            impl #module_prefix::parser::terminalclass::TerminalClass for #termclass_typename {
+                type Term = #token_typename;
+                const ERROR:Self = Self::#error_name;
+                const EOF:Self = Self::#eof_name;
+
+                fn as_str(&self) -> &'static str {
+                    match self {
+                        #as_str_match_stream
+                        #termclass_typename::#error_name => "error",
+                        #termclass_typename::#eof_name => "eof",
+                    }
+                }
+                fn to_usize(&self) -> usize {
+                    *self as usize
+                }
+                fn precedence(&self) -> #module_prefix::parser::Precedence {
+                    match self {
+                        #precedence_match_stream
+                    }
+                }
+                fn from_term(terminal: &Self::Term) -> Self {
+                    match #match_terminal_filter_expression {
+                        #from_term_match_stream
+                    }
+                }
+            }
+
+            impl std::fmt::Display for #termclass_typename {
+                fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    use #module_prefix::parser::terminalclass::TerminalClass;
+                    write!(f, "{}", self.as_str())
+                }
+            }
+            impl std::fmt::Debug for #termclass_typename {
+                fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    use #module_prefix::parser::terminalclass::TerminalClass;
+                    write!(f, "{}", self.as_str())
+                }
+            }
+        });
     }
 
     /// write `NonTerminal` enum
@@ -197,6 +480,25 @@ impl Grammar {
         let state_typename = format_ident!("{}State", self.start_rule_name);
         let parser_struct_name = format_ident!("{}Parser", self.start_rule_name);
         let token_typename = &self.token_typename;
+        let termclass_typename = format_ident!("{}TerminalClasses", &self.start_rule_name);
+
+        let mut class_variants = Vec::with_capacity(self.terminal_classes.len());
+        for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
+            let variant_name = if self.is_u8 || self.is_char {
+                let name = format_ident!("TermClass{}", class_id);
+                name
+            } else {
+                if class_def.terminals.len() == 1 {
+                    let term_idx = class_def.terminals[0];
+                    let term = self.terminals[term_idx].name.ident().unwrap();
+                    term.clone()
+                } else {
+                    let name = format_ident!("TermClass{}", class_id);
+                    name
+                }
+            };
+            class_variants.push(variant_name);
+        }
 
         // ======================
         // building grammar
@@ -225,24 +527,37 @@ impl Grammar {
                 }
             })
             .collect();
-        let terminal_symbol_to_stream = |term: TerminalSymbol<usize>| -> TokenStream {
-            match term {
-                TerminalSymbol::Term(term) => {
-                    let term = proc_macro2::Literal::usize_unsuffixed(term);
-                    quote! { #module_prefix::TerminalSymbol::Term(#term) }
-                }
-                TerminalSymbol::Error => {
-                    quote! { #module_prefix::TerminalSymbol::Error }
-                }
-                TerminalSymbol::Eof => {
-                    quote! { #module_prefix::TerminalSymbol::Eof }
-                }
-            }
-        };
+        // let terminal_symbol_to_stream = |term: TerminalSymbol<usize>| -> TokenStream {
+        //     match term {
+        //         TerminalSymbol::Term(term) => {
+        //             let term = proc_macro2::Literal::usize_unsuffixed(term);
+        //             quote! { #module_prefix::TerminalSymbol::Term(#term) }
+        //         }
+        //         TerminalSymbol::Error => {
+        //             quote! { #module_prefix::TerminalSymbol::Error }
+        //         }
+        //         TerminalSymbol::Eof => {
+        //             quote! { #module_prefix::TerminalSymbol::Eof }
+        //         }
+        //     }
+        // };
         let token_to_stream = |token: Token<TerminalSymbol<usize>, usize>| -> TokenStream {
             match token {
                 Token::Term(term) => {
-                    let term = terminal_symbol_to_stream(term);
+                    let term = match term {
+                        TerminalSymbol::Term(term) => {
+                            let var = &class_variants[term];
+                            quote! { #termclass_typename::#var }
+                        }
+                        TerminalSymbol::Error => {
+                            let error_name = format_ident!("{}", utils::ERROR_NAME);
+                            quote! { #termclass_typename::#error_name }
+                        }
+                        TerminalSymbol::Eof => {
+                            let eof_name = format_ident!("{}", utils::EOF_NAME);
+                            quote! { #termclass_typename::#eof_name }
+                        }
+                    };
                     quote! { #module_prefix::Token::Term(#term) }
                 }
                 Token::NonTerm(nonterm) => {
@@ -251,62 +566,6 @@ impl Grammar {
                 }
             }
         };
-
-        let mut terminal_class_names_stream = TokenStream::new();
-        for class in 0..self.terminal_classes.len() {
-            let name = self.class_pretty_name_list(TerminalSymbol::Term(class), 4);
-            terminal_class_names_stream.extend(quote! {
-                #name,
-            });
-        }
-
-        // helper function to generate match-case stream.
-        // convert integer list to `a | b..=c | d` syntax
-        fn list_to_case_stream(list: impl Iterator<Item = usize>) -> TokenStream {
-            let mut stream = TokenStream::new();
-            let mut prev = None;
-            for val in list {
-                if let Some((prev_start, prev_last)) = prev {
-                    if prev_last + 1 == val {
-                        // extend the range
-                        prev = Some((prev_start, val));
-                    } else {
-                        // push the previous range
-                        if !stream.is_empty() {
-                            stream.extend(quote! { | });
-                        }
-                        if prev_start == prev_last {
-                            let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
-                            stream.extend(quote! { #prev_start });
-                        } else {
-                            let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
-                            let prev_last = proc_macro2::Literal::usize_unsuffixed(prev_last);
-                            stream.extend(quote! { #prev_start..=#prev_last });
-                        }
-
-                        prev = Some((val, val));
-                    }
-                } else {
-                    prev = Some((val, val));
-                }
-            }
-            // push the previous range
-            if let Some((prev_start, prev_last)) = prev {
-                if !stream.is_empty() {
-                    stream.extend(quote! { | });
-                }
-                if prev_start == prev_last {
-                    let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
-                    stream.extend(quote! { #prev_start });
-                } else {
-                    let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
-                    let prev_last = proc_macro2::Literal::usize_unsuffixed(prev_last);
-                    stream.extend(quote! { #prev_start..=#prev_last });
-                }
-            }
-
-            stream
-        }
 
         // generate precedence level -> reduce type match stream
         // match level {
@@ -363,16 +622,6 @@ impl Grammar {
             stream
         };
 
-        let class_index_typename = if self.terminal_classes.len() <= u8::MAX as usize {
-            quote! { u8 }
-        } else if self.terminal_classes.len() <= u16::MAX as usize {
-            quote! { u16 }
-        } else if self.terminal_classes.len() <= u32::MAX as usize {
-            quote! { u32 }
-        } else {
-            quote! { usize }
-        };
-
         let grammar_build_stream = {
             // do not build at runtime
             // write all parser tables and production rules directly here
@@ -425,33 +674,33 @@ impl Grammar {
             }
             let mut states_body_stream = TokenStream::new();
             let mut terminal_sets_name_map = std::collections::BTreeMap::new();
-            let mut get_or_insert_terminal_set = |set: std::collections::BTreeSet<usize>| -> Ident {
-                let new_index = terminal_sets_name_map.len();
-                terminal_sets_name_map
-                    .entry(set)
-                    .or_insert_with(|| format_ident!("__rustylr_tset{new_index}"))
-                    .clone()
-            };
+            let mut get_or_insert_terminal_set =
+                |set: std::collections::BTreeSet<TerminalSymbol<usize>>| -> Ident {
+                    let new_index = terminal_sets_name_map.len();
+                    terminal_sets_name_map
+                        .entry(set)
+                        .or_insert_with(|| format_ident!("__rustylr_tset{new_index}"))
+                        .clone()
+                };
             for state in &self.states {
                 let mut shift_term_body_stream = TokenStream::new();
-                let error_shift_stream = state
-                    .error_shift
-                    .map(|next_state| {
-                        let next_state = proc_macro2::Literal::usize_unsuffixed(next_state);
-                        quote! {Some(#next_state)}
-                    })
-                    .unwrap_or(quote! {None});
-                let eof_shift_stream = state
-                    .eof_shift
-                    .map(|next_state| {
-                        let next_state = proc_macro2::Literal::usize_unsuffixed(next_state);
-                        quote! {Some(#next_state)}
-                    })
-                    .unwrap_or(quote! {None});
                 for &(term, next_state) in &state.shift_goto_map_term {
                     let push = next_state.push;
                     let next_state = proc_macro2::Literal::usize_unsuffixed(next_state.state);
-                    let term = proc_macro2::Literal::usize_unsuffixed(term);
+                    let term = match term {
+                        TerminalSymbol::Term(term) => {
+                            let var = &class_variants[term];
+                            quote! { #termclass_typename::#var }
+                        }
+                        TerminalSymbol::Error => {
+                            let error_name = format_ident!("{}", utils::ERROR_NAME);
+                            quote! { #termclass_typename::#error_name }
+                        }
+                        TerminalSymbol::Eof => {
+                            let eof_name = format_ident!("{}", utils::EOF_NAME);
+                            quote! { #termclass_typename::#eof_name }
+                        }
+                    };
                     shift_term_body_stream.extend(quote! {
                         (#term, #module_prefix::parser::state::ShiftTarget::new(#next_state,#push)),
                     });
@@ -468,26 +717,6 @@ impl Grammar {
                 }
 
                 let mut reduce_body_stream = TokenStream::new();
-                let error_reduce_stream = state
-                    .error_reduce
-                    .as_ref()
-                    .map(|rules| {
-                        let rules_it = rules
-                            .iter()
-                            .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
-                        quote! {Some(vec![#(#rules_it),*])}
-                    })
-                    .unwrap_or(quote! {None});
-                let eof_reduce_stream = state
-                    .eof_reduce
-                    .as_ref()
-                    .map(|rules| {
-                        let rules_it = rules
-                            .iter()
-                            .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
-                        quote! {Some(vec![#(#rules_it),*])}
-                    })
-                    .unwrap_or(quote! {None});
                 let mut reduce_rules_terms_map = std::collections::BTreeMap::new();
                 for (term, rules) in &state.reduce_map {
                     reduce_rules_terms_map
@@ -539,16 +768,12 @@ impl Grammar {
                 states_body_stream.extend(quote! {
                     #module_prefix::parser::state::IntermediateState {
                         shift_goto_map_term: vec![#shift_term_body_stream],
-                        error_shift: #error_shift_stream,
-                        eof_shift: #eof_shift_stream,
                         shift_goto_map_nonterm: vec![#shift_nonterm_body_stream],
                         reduce_map: {
                             let mut __reduce_map = std::collections::BTreeMap::new();
                             #reduce_body_stream
                             __reduce_map.into_iter().collect()
                         },
-                        error_reduce: #error_reduce_stream,
-                        eof_reduce: #eof_reduce_stream,
                         ruleset: {
                             let rules: &'static [#rule_index_typename] = &[
                                 #ruleset_rules_body_stream
@@ -571,45 +796,35 @@ impl Grammar {
 
             let mut terminal_set_initialize_stream = TokenStream::new();
             for (set, name) in terminal_sets_name_map {
-                let set_it = set
-                    .into_iter()
-                    .map(|val| proc_macro2::Literal::usize_unsuffixed(val));
+                let set_it = set.into_iter().map(|val| match val {
+                    TerminalSymbol::Term(term) => {
+                        let var = &class_variants[term];
+                        quote! { #termclass_typename::#var }
+                    }
+                    TerminalSymbol::Error => {
+                        let error_name = format_ident!("{}", utils::ERROR_NAME);
+                        quote! { #termclass_typename::#error_name }
+                    }
+                    TerminalSymbol::Eof => {
+                        let eof_name = format_ident!("{}", utils::EOF_NAME);
+                        quote! { #termclass_typename::#eof_name }
+                    }
+                });
                 terminal_set_initialize_stream.extend(quote! {
-                    let #name: Vec<#class_index_typename> = vec![#(#set_it),*];
+                    let #name: Vec<#termclass_typename> = vec![#(#set_it),*];
                 });
             }
 
             quote! {
                 let rules: Vec<#module_prefix::rule::ProductionRule<
-                    #module_prefix::TerminalSymbol<#class_index_typename>, _
+                    #termclass_typename, #nonterminals_enum_name
                 >> = vec![
                     #production_rules_body_stream
                 ];
-                let terminal_class_names = vec![
-                    #terminal_class_names_stream
-                ];
-                let rules = rules.into_iter().map(
-                    move |rule| {
-                        rule.map(
-                            |term| match term {
-                                #module_prefix::TerminalSymbol::Term(term) => {
-                                    terminal_class_names[term as usize]
-                                }
-                                #module_prefix::TerminalSymbol::Error => {
-                                    "error"
-                                }
-                                #module_prefix::TerminalSymbol::Eof => {
-                                    "eof"
-                                }
-                            },
-                            |nonterm| nonterm,
-                        )
-                    }
-                ).collect();
 
                 #terminal_set_initialize_stream
                 let states: Vec<#module_prefix::parser::state::IntermediateState<
-                    #class_index_typename, _, #state_index_typename, #rule_index_typename
+                    #termclass_typename, #nonterminals_enum_name, #state_index_typename, #rule_index_typename
                 >> = vec![
                     #states_body_stream
                 ];
@@ -619,136 +834,10 @@ impl Grammar {
             }
         };
 
-        let use_range_based_optimization = if self.is_char || self.is_u8 {
-            self.calculate_range_terminal_class_map()
-        } else {
-            false
-        };
-
-        let other_class_id = self.other_terminal_class_id;
-
-        // generate `Parser::class_precedence()` terminal class -> precedence level match body
-        let class_level_match_body_stream = {
-            let mut stream = TokenStream::new();
-
-            let mut level_classes = Vec::new();
-            level_classes.resize(
-                self.builder.precedence_types.len(),
-                std::collections::BTreeSet::new(),
-            );
-            for (&class, &level) in self.builder.precedence_levels.iter() {
-                level_classes[level].insert(class.into_term().unwrap());
-            }
-
-            for (level, classes) in level_classes.into_iter().enumerate() {
-                if classes.is_empty() {
-                    continue;
-                } else {
-                    let case_stream = list_to_case_stream(classes.into_iter());
-                    debug_assert!(level < u8::MAX as usize);
-                    let level = proc_macro2::Literal::usize_unsuffixed(level);
-                    stream.extend(quote! {
-                        #case_stream => #module_prefix::parser::Precedence::new(#level),
-                    });
-                }
-            }
-            stream
-        };
-
         let error_used = self.error_used;
-        let error_prec_stream = if let Some(error_prec) = self.error_precedence {
-            debug_assert!(error_prec < u8::MAX as usize);
-            let error_prec = proc_macro2::Literal::usize_unsuffixed(error_prec);
-            quote! { #module_prefix::parser::Precedence::new(#error_prec) }
-        } else {
-            quote! { #module_prefix::parser::Precedence::none() }
-        };
 
-        // building terminal-class_id map
-        if use_range_based_optimization {
-            // range-compressed Vec based terminal-class_id map
-
-            // for terminal_class -> [terminals] map get_terminals()
-            let mut classes_body = TokenStream::new();
-            for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
-                if class_id == self.other_terminal_class_id {
-                    classes_body.extend(quote! {
-                        vec![],
-                    });
-                }
-                let mut terminals_body = TokenStream::new();
-                for &(s, e) in class_def.ranges.iter() {
-                    let stream = if self.is_char {
-                        let s = unsafe { char::from_u32_unchecked(s) };
-                        let e = unsafe { char::from_u32_unchecked(e) };
-
-                        quote! { #s..=#e }
-                    } else if self.is_u8 {
-                        let s = s as u8;
-                        let e = e as u8;
-
-                        quote! { #s..=#e }
-                    } else {
-                        unreachable!("unexpected char type")
-                    };
-
-                    terminals_body.extend(quote! {
-                        #stream,
-                    });
-                }
-                classes_body.extend(quote! {
-                    vec![ #terminals_body ],
-                });
-            }
-
-            // for terminal -> terminal_class_id map to_terminal_class()
-            let mut terminal_class_match_body_stream = TokenStream::new();
-            for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
-                if class_id == self.other_terminal_class_id {
-                    continue;
-                }
-                let mut match_case_stream = TokenStream::new();
-                for (i, &(s, e)) in class_def.ranges.iter().enumerate() {
-                    let stream = if self.is_char {
-                        let s = unsafe { char::from_u32_unchecked(s) };
-                        let e = unsafe { char::from_u32_unchecked(e) };
-
-                        if s == e {
-                            quote! { #s }
-                        } else {
-                            quote! { #s..=#e }
-                        }
-                    } else if self.is_u8 {
-                        let s = s as u8;
-                        let e = e as u8;
-
-                        if s == e {
-                            quote! { #s }
-                        } else {
-                            quote! { #s..=#e }
-                        }
-                    } else {
-                        unreachable!("unexpected char type")
-                    };
-
-                    if i > 0 {
-                        match_case_stream.extend(quote! {|});
-                    }
-                    match_case_stream.extend(quote! { #stream });
-                }
-                let class_id = proc_macro2::Literal::usize_unsuffixed(class_id);
-                terminal_class_match_body_stream.extend(quote! {
-                    #match_case_stream => #class_id,
-                });
-            }
-            {
-                let other_class_id = proc_macro2::Literal::usize_unsuffixed(other_class_id);
-                terminal_class_match_body_stream.extend(quote! {
-                    _ => #other_class_id,
-                });
-            }
-
-            stream.extend(quote! {
+        // range-compressed Vec based terminal-class_id map
+        stream.extend(quote! {
             /// A struct that holds the entire parser table and production rules.
             #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
             pub struct #parser_struct_name {
@@ -756,32 +845,15 @@ impl Grammar {
                 pub rules: Vec<#rule_typename>,
                 /// states
                 pub states: Vec<#state_typename>,
-                /// terminal classes
-                pub classes: Vec<Vec<::std::ops::RangeInclusive<#token_typename>>>,
             }
             impl #module_prefix::parser::Parser for #parser_struct_name {
                 type Term = #token_typename;
+                type TermClass = #termclass_typename;
                 type NonTerm = #nonterminals_enum_name;
                 type State = #state_typename;
-                type TerminalClassElement = ::std::ops::RangeInclusive<#token_typename>;
 
                 const ERROR_USED:bool = #error_used;
 
-                fn class_precedence(&self, class: #module_prefix::TerminalSymbol<usize>) -> #module_prefix::parser::Precedence {
-                    match class {
-                        #module_prefix::TerminalSymbol::Term(class) => {
-                            #[allow(unreachable_patterns)]
-                            match class {
-                                #class_level_match_body_stream
-                                _ => #module_prefix::parser::Precedence::none(),
-                            }
-                        }
-                        #module_prefix::TerminalSymbol::Error => #error_prec_stream,
-                        #module_prefix::TerminalSymbol::Eof => {
-                            unreachable!("eof token cannot be used in precedence levels")
-                        }
-                    }
-                }
                 fn precedence_types(&self, level: u8) -> Option<#module_prefix::rule::ReduceType> {
                     #[allow(unreachable_patterns)]
                     match level {
@@ -793,18 +865,6 @@ impl Grammar {
                 }
                 fn get_states(&self) -> &[#state_typename] {
                     &self.states
-                }
-                fn get_terminals(&self, i: usize) -> Option<impl IntoIterator<Item = Self::TerminalClassElement> + '_> {
-                    self.classes.get(i).map(
-                        |class| class.iter().cloned()
-                    )
-                }
-                fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
-                    // Self::Term is char or u8 here
-                    #[allow(unreachable_patterns)]
-                    match *terminal {
-                        #terminal_class_match_body_stream
-                    }
                 }
             }
 
@@ -819,206 +879,10 @@ impl Grammar {
                     Self {
                         rules,
                         states,
-                        classes: vec![ #classes_body ],
                     }
                 }
             }
-
-            });
-        } else {
-            // match based terminal-class_id map
-
-            // for terminal_class -> [terminals] map get_terminals()
-            let mut classes_body = TokenStream::new();
-            for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
-                // no need to store all characters for 'other' class, if it was not used in the grammar
-                if class_id == self.other_terminal_class_id {
-                    continue;
-                }
-                let mut terminals_body = TokenStream::new();
-                for &term in &class_def.terminals {
-                    // check if this term is range-based character
-                    match &self.terminals[term].name {
-                        TerminalName::CharRange(s, l) => {
-                            if self.is_char {
-                                let range_stream = if s == l {
-                                    quote! { #s }.to_string()
-                                } else {
-                                    quote! {
-                                        #s-#l
-                                    }
-                                    .to_string()
-                                };
-                                terminals_body.extend(quote! {
-                                    #range_stream,
-                                });
-                            } else if self.is_u8 {
-                                let s = *s as u8;
-                                let l = *l as u8;
-                                let range_stream = if s == l {
-                                    quote! { #s }.to_string()
-                                } else {
-                                    quote! {
-                                        #s-#l
-                                    }
-                                    .to_string()
-                                };
-                                terminals_body.extend(quote! {
-                                    #range_stream,
-                                });
-                            } else {
-                                unreachable!("unexpected char type")
-                            }
-                        }
-                        TerminalName::Ident(ident) => {
-                            let name = ident.to_string();
-                            terminals_body.extend(quote! {
-                                #name,
-                            });
-                        }
-                    }
-                }
-
-                classes_body.extend(quote! {
-                    vec![ #terminals_body ],
-                });
-            }
-
-            // for terminal -> terminal_class_id map to_terminal_class()
-            let mut terminal_class_match_body_stream = TokenStream::new();
-            for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
-                if class_id == self.other_terminal_class_id {
-                    continue;
-                }
-                let mut match_case_stream = TokenStream::new();
-                for (i, &term) in class_def.terminals.iter().enumerate() {
-                    // check if this term is range-based character
-                    let case_stream = match &self.terminals[term].name {
-                        TerminalName::CharRange(s, l) => {
-                            if self.is_char {
-                                if s == l {
-                                    quote! {#s}
-                                } else {
-                                    quote! {#s..=#l}
-                                }
-                            } else if self.is_u8 {
-                                let s = *s as u8;
-                                let l = *l as u8;
-                                if s == l {
-                                    quote! {#s}
-                                } else {
-                                    quote! {#s..=#l}
-                                }
-                            } else {
-                                unreachable!("unexpected char type")
-                            }
-                        }
-                        TerminalName::Ident(_) => {
-                            let term_stream = &self.terminals[term].body;
-                            quote! {#term_stream}
-                        }
-                    };
-
-                    if i > 0 {
-                        match_case_stream.extend(quote! { | });
-                    }
-                    match_case_stream.extend(case_stream);
-                }
-                let class_id = proc_macro2::Literal::usize_unsuffixed(class_id);
-                terminal_class_match_body_stream.extend(quote! {
-                    #match_case_stream => #class_id,
-                });
-            }
-            {
-                let other_class_id = proc_macro2::Literal::usize_unsuffixed(other_class_id);
-                terminal_class_match_body_stream.extend(quote! {
-                    _ => #other_class_id,
-                });
-            }
-
-            let match_terminal_filter_expression = if let Some(filter) = &self.filter {
-                quote! { #filter(terminal) }
-            } else {
-                quote! {terminal}
-            };
-
-            stream.extend(quote! {
-            /// A struct that holds the entire parser table and production rules.
-            #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-            pub struct #parser_struct_name {
-                /// production rules
-                pub rules: Vec<#rule_typename>,
-                /// states
-                pub states: Vec<#state_typename>,
-                /// terminal classes
-                pub classes: Vec<Vec<&'static str>>,
-            }
-            impl #module_prefix::parser::Parser for #parser_struct_name {
-                type Term = #token_typename;
-                type NonTerm = #nonterminals_enum_name;
-                type State = #state_typename;
-                type TerminalClassElement = &'static str;
-
-                const ERROR_USED:bool = #error_used;
-
-                fn class_precedence(&self, class: #module_prefix::TerminalSymbol<usize>) -> #module_prefix::parser::Precedence {
-                    match class {
-                        #module_prefix::TerminalSymbol::Term(class) => {
-                            #[allow(unreachable_patterns)]
-                            match class {
-                                #class_level_match_body_stream
-                                _ => #module_prefix::parser::Precedence::none(),
-                            }
-                        }
-                        #module_prefix::TerminalSymbol::Error => #error_prec_stream,
-                        #module_prefix::TerminalSymbol::Eof => {
-                            unreachable!("eof token cannot be used in precedence levels")
-                        }
-                    }
-                }
-                fn precedence_types(&self, level: u8) -> Option<#module_prefix::rule::ReduceType> {
-                    #[allow(unreachable_patterns)]
-                    match level {
-                        #precedence_types_match_body_stream
-                    }
-                }
-                fn get_rules(&self) -> &[#rule_typename] {
-                    &self.rules
-                }
-                fn get_states(&self) -> &[#state_typename] {
-                    &self.states
-                }
-                fn get_terminals(&self, i: usize) -> Option<impl IntoIterator<Item = Self::TerminalClassElement> + '_> {
-                    self.classes.get(i).map(
-                        |class| class.iter().copied()
-                    )
-                }
-                fn to_terminal_class(&self, terminal: &Self::Term) -> usize {
-                    #[allow(unreachable_patterns)]
-                    match #match_terminal_filter_expression {
-                        #terminal_class_match_body_stream
-                    }
-                }
-            }
-
-            /// A struct that holds the whole parser table.
-            #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-            impl #parser_struct_name {
-                /// Calculates the states and parser tables from the grammar.
-                #[allow(clippy::clone_on_copy)]
-                pub fn new() -> Self {
-                    #grammar_build_stream
-
-                    Self {
-                        rules,
-                        states,
-                        classes: vec![#classes_body],
-                    }
-                }
-            }
-
-            });
-        }
+        });
     }
 
     fn emit_data_stack(&self, stream: &mut TokenStream) {
@@ -1693,6 +1557,7 @@ impl Grammar {
     pub fn emit_compiletime(&self) -> TokenStream {
         let mut stream = TokenStream::new();
         self.emit_type_alises(&mut stream);
+        self.emit_termclass_enum(&mut stream);
         self.emit_nonterm_enum(&mut stream);
         self.emit_data_stack(&mut stream);
         self.emit_parser(&mut stream);
