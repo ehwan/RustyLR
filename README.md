@@ -253,6 +253,7 @@ See [SYNTAX.md - Location Tracking](SYNTAX.md#location-tracking) for detailed in
  - [Calculator (u8 version)](examples/calculator_u8/src/parser.rs): A numeric expression parser using byte tokens
  - [JSON Validator](examples/json/src/parser.rs): A JSON syntax validator
  - [Lua 5.4 syntax parser](https://github.com/ehwan/lua_rust/blob/main/parser/src/parser.rs): A complete Lua language parser
+ - [C language parser](https://github.com/ehwan/C-language-Parser-In-Rust/blob/main/src/ast/parser_lr.rs): A C language parser
  - [Bootstrap parser](rusty_lr_parser/src/parser/parser.rs): RustyLR's own syntax parser is written in RustyLR itself
 
 ## Cargo Features
