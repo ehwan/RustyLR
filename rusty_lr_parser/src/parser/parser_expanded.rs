@@ -212,7 +212,7 @@ pub type GrammarParseError = ::rusty_lr_core::parser::deterministic::ParseError<
     GrammarDataStack,
 >;
 /// A enum that represents terminal classes
-#[allow(non_camel_case_types)]
+#[allow(non_camel_case_types, dead_code)]
 #[derive(
     Clone,
     Copy,
@@ -342,6 +342,7 @@ impl ::rusty_lr_core::parser::terminalclass::TerminalClass for GrammarTerminalCl
         }
     }
     fn from_term(terminal: &Self::Term) -> Self {
+        #[allow(unreachable_patterns)]
         match terminal {
             Lexed::Ident(_) => GrammarTerminalClasses::ident,
             Lexed::Colon(_) => GrammarTerminalClasses::colon,

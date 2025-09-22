@@ -52,7 +52,7 @@ pub type EState = ::rusty_lr::parser::state::SparseState<
 #[allow(non_camel_case_types, dead_code)]
 pub type EParseError = ::rusty_lr::parser::deterministic::ParseError<EDataStack>;
 /// A enum that represents terminal classes
-#[allow(non_camel_case_types)]
+#[allow(non_camel_case_types, dead_code)]
 #[derive(
     Clone,
     Copy,
@@ -102,6 +102,7 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for ETerminalClasses {
         }
     }
     fn from_term(terminal: &Self::Term) -> Self {
+        #[allow(unreachable_patterns)]
         match filter(terminal) {
             Token::Num(_) => ETerminalClasses::num,
             Token::Plus => ETerminalClasses::plus,

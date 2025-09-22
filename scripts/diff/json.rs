@@ -135,7 +135,7 @@ pub type JsonState = ::rusty_lr::parser::state::DenseState<
 #[allow(non_camel_case_types, dead_code)]
 pub type JsonParseError = ::rusty_lr::parser::deterministic::ParseError<JsonDataStack>;
 /// A enum that represents terminal classes
-#[allow(non_camel_case_types)]
+#[allow(non_camel_case_types, dead_code)]
 #[derive(
     Clone,
     Copy,
@@ -233,6 +233,7 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for JsonTerminalClasses {
         }
     }
     fn from_term(terminal: &Self::Term) -> Self {
+        #[allow(unreachable_patterns)]
         match terminal {
             '\t'..='\n' | '\r' => JsonTerminalClasses::TermClass0,
             ' ' => JsonTerminalClasses::TermClass1,
