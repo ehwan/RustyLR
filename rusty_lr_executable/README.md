@@ -44,15 +44,13 @@ Options:
 
           [possible values: true, false]
 
-      --runtime <RUNTIME>
-          Override the written code and set parser table to be runtime-calculated
-
-          [possible values: true, false]
-
       --dense <DENSE>
           Override the written code and set generated parser table to use dense arrays
 
           [possible values: true, false]
+
+      --state <STATE>
+          Print the details of a specific state
 
   -h, --help
           Print help (see a summary with '-h')
@@ -140,6 +138,53 @@ fn main() {
     if let Ok(result) = context.accept( &parser, &mut () ) {
         println!("Parse successful: {:?}", result);
     }
+}
+```
+
+## The `--state` Option
+You can inspect the details of a specific parser state using the `--state` option. This is useful for debugging and understanding how the parser processes input.
+
+```bash
+$ rustylr my_grammar.rs --state 5 // get details of state 5
+```
+```
+State 5:
+Production Rules: {
+    Pattern -> TerminalSet •
+}
+Reduce on Terminals: {
+    ident => { Pattern -> TerminalSet }
+    semicolon => { Pattern -> TerminalSet }
+    pipe => { Pattern -> TerminalSet }
+    percent => { Pattern -> TerminalSet }
+    plus => { Pattern -> TerminalSet }
+    star => { Pattern -> TerminalSet }
+    question => { Pattern -> TerminalSet }
+    minus => { Pattern -> TerminalSet }
+    exclamation => { Pattern -> TerminalSet }
+    slash => { Pattern -> TerminalSet }
+     dot => { Pattern -> TerminalSet }
+    dollar => { Pattern -> TerminalSet }
+    comma => { Pattern -> TerminalSet }
+    literal => { Pattern -> TerminalSet }
+    bracegroup => { Pattern -> TerminalSet }
+    lparen => { Pattern -> TerminalSet }
+    rparen => { Pattern -> TerminalSet }
+    lbracket => { Pattern -> TerminalSet }
+    error => { Pattern -> TerminalSet }
+}
+From States: {
+    State 4
+    State 6
+    State 11
+    State 13
+    State 35
+    State 38
+    State 40
+    State 44
+    State 48
+    State 66
+    State 70
 }
 ```
 
