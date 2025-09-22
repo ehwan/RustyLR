@@ -117,6 +117,8 @@ fn main() {
                 }
                 println!("}}");
             }
+        } else {
+            println!("State {state_idx} does not exist.");
         }
     }
 
