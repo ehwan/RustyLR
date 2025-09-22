@@ -198,7 +198,7 @@ let mut context = <Start>Context::new();
 
 // ... parsing ...
 
-context.expected_token();    // Get expected terminal symbols
+context.expected_token();    // Get expected (terminal, non-terminal) symbols for current state
 context.can_feed(&term);     // Check if a terminal symbol can be fed
 context.trace();             // Get all `%trace` non-terminals currently being parsed
 println!("{}", context.backtrace()); // Print backtrace of the parser state
