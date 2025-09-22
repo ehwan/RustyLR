@@ -4,9 +4,10 @@ use std::num::NonZeroUsize;
 use super::Node;
 use super::ParseError;
 
-use crate::nonterminal::NonTerminal;
 use crate::parser::data_stack::DataStack;
+use crate::parser::nonterminal::NonTerminal;
 use crate::parser::state::Index;
+use crate::parser::terminalclass::TerminalClass;
 use crate::parser::Parser;
 use crate::parser::Precedence;
 use crate::parser::State;
@@ -428,8 +429,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ) -> Result<usize, Data::ReduceActionError>
     where
         Data: Clone,
-        Data::Term: Clone,
-        Data::NonTerm: Clone + std::fmt::Debug + NonTerminal + Hash + Eq,
+        P::Term: Clone,
+        P::NonTerm: std::fmt::Debug,
     {
         use crate::Location;
         let rule = &parser.get_rules()[reduce_rule];
@@ -456,7 +457,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         ) {
             Ok(non_empty_pushed) => {
                 if let Some(nonterm_shift_state) =
-                    parser.get_states()[state].shift_goto_nonterm(&rule.name)
+                    parser.get_states()[state].shift_goto_nonterm(rule.name)
                 {
                     node.state_stack
                         .push(StateIndex::from_usize_unchecked(nonterm_shift_state.state));
@@ -510,7 +511,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         Data: Clone,
         P::Term: Clone,
-        P::NonTerm: Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
+        P::NonTerm: std::fmt::Debug,
     {
         self.feed_eof(parser, userdata)?;
         // since `eof` is feeded, every node graph should be like this:
@@ -547,10 +548,9 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         node: usize,
     ) -> crate::hash::HashSet<Data::NonTerm>
     where
-        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::nonterminal::NonTerminal,
+        Data::NonTerm: Eq + Hash,
     {
         use crate::hash::HashSet;
-        use crate::nonterminal::NonTerminal;
         use crate::token::Token;
         use std::collections::BTreeSet;
 
@@ -649,7 +649,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         parser: &P,
     ) -> crate::hash::HashSet<Data::NonTerm>
     where
-        Data::NonTerm: Copy + Eq + std::hash::Hash + crate::nonterminal::NonTerminal,
+        Data::NonTerm: Copy + Eq + std::hash::Hash + NonTerminal,
     {
         let mut ret: crate::hash::HashSet<Data::NonTerm> = Default::default();
         for &node in self.current_nodes.iter() {
@@ -663,10 +663,10 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         &self,
         parser: &P,
         node: usize,
-    ) -> crate::Backtrace<&'static str, Data::NonTerm>
+    ) -> crate::Backtrace<P::TermClass, P::NonTerm>
     where
-        Data::Term: Clone,
-        Data::NonTerm: std::hash::Hash + Eq + Clone,
+        P::Term: Clone,
+        P::NonTerm: std::hash::Hash + Eq,
     {
         use crate::hash::HashSet;
         use crate::rule::ShiftedRule;
@@ -801,10 +801,10 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     pub fn backtraces<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &'a self,
         parser: &'a P,
-    ) -> impl Iterator<Item = crate::Backtrace<&'static str, P::NonTerm>> + 'a
+    ) -> impl Iterator<Item = crate::Backtrace<P::TermClass, P::NonTerm>> + 'a
     where
         Data::Term: Clone,
-        Data::NonTerm: Clone + Hash + Eq,
+        Data::NonTerm: Hash + Eq,
     {
         self.current_nodes
             .iter()
@@ -816,10 +816,11 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         extra_state_stack: &mut Vec<StateIndex>,
         parser: &P,
         node_and_len: Option<(usize, NonZeroUsize)>,
-        terms: &mut std::collections::BTreeSet<usize>,
+        terms: &mut std::collections::BTreeSet<P::TermClass>,
         nonterms: &mut std::collections::BTreeSet<Data::NonTerm>,
     ) where
-        Data::NonTerm: Ord + Copy + std::hash::Hash + NonTerminal,
+        P::TermClass: Ord,
+        P::NonTerm: Ord,
     {
         let state = extra_state_stack
             .last()
@@ -880,7 +881,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         .unwrap_or(0)
                 });
             let state = &parser.get_states()[state];
-            if let Some(next_state) = state.shift_goto_nonterm(&nonterm) {
+            if let Some(next_state) = state.shift_goto_nonterm(nonterm) {
                 extra_state_stack.push(Index::from_usize_unchecked(next_state.state));
                 self.expected_token_impl(
                     &mut extra_state_stack,
@@ -898,11 +899,12 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         &self,
         parser: &P,
     ) -> (
-        std::collections::BTreeSet<usize>,
-        std::collections::BTreeSet<Data::NonTerm>,
+        std::collections::BTreeSet<P::TermClass>,
+        std::collections::BTreeSet<P::NonTerm>,
     )
     where
-        Data::NonTerm: Ord + Copy + Hash + NonTerminal,
+        P::TermClass: Ord,
+        P::NonTerm: Ord,
     {
         let mut terms = std::collections::BTreeSet::new();
         let mut nonterms = std::collections::BTreeSet::new();
@@ -934,20 +936,18 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     /// Same as `expected_token()`, but returns as printable type.
     pub fn expected_token_str<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
-        parser: &'a P,
+        parser: &P,
     ) -> (
-        impl Iterator<Item = P::TerminalClassElement> + 'a,
-        impl Iterator<Item = &'static str> + 'a,
+        impl Iterator<Item = &'static str>,
+        impl Iterator<Item = &'static str>,
     )
     where
-        Data::NonTerm: Ord + Copy + Hash + crate::nonterminal::NonTerminal + 'a,
+        P::TermClass: Ord,
+        P::NonTerm: Ord,
     {
-        use crate::nonterminal::NonTerminal;
         let (terms, nonterms) = self.expected_token(parser);
         (
-            terms
-                .into_iter()
-                .flat_map(|term| parser.get_terminals(term).unwrap()),
+            terms.into_iter().map(|term| term.as_str()),
             nonterms.into_iter().map(|nonterm| nonterm.as_str()),
         )
     }
@@ -962,7 +962,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ) -> Result<(), ParseError<Data>>
     where
         P::Term: Clone,
-        P::NonTerm: Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
+        P::NonTerm: std::fmt::Debug,
         Data: Clone,
         Data::Location: Default,
     {
@@ -990,15 +990,15 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         parser: &P,
         node: usize,
         term: TerminalSymbol<P::Term>,
-        class: TerminalSymbol<usize>,
+        class: P::TermClass,
         shift_prec: Precedence,
         location: Option<Data::Location>,
         userdata: &mut Data::UserData,
     ) -> Result<(), (usize, TerminalSymbol<P::Term>, Option<Data::Location>)>
     where
         Data: Clone,
-        Data::Term: Clone,
-        Data::NonTerm: Clone + std::fmt::Debug + NonTerminal + Hash + Eq,
+        P::Term: Clone,
+        P::NonTerm: std::fmt::Debug,
     {
         debug_assert!(
             (term.is_eof() && location.is_none()) || (!term.is_eof() && location.is_some())
@@ -1217,8 +1217,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ) -> bool
     where
         Data: Clone,
-        Data::Term: Clone,
-        Data::NonTerm: std::hash::Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
+        P::Term: Clone,
+        P::NonTerm: std::fmt::Debug,
     {
         use crate::Location;
 
@@ -1229,7 +1229,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 parser,
                 node,
                 TerminalSymbol::Error,
-                TerminalSymbol::Error,
+                P::TermClass::ERROR,
                 error_prec,
                 Some(error_location),
                 userdata,
@@ -1265,7 +1265,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ) -> Result<(), ParseError<Data>>
     where
         P::Term: Clone,
-        P::NonTerm: Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
+        P::NonTerm: std::fmt::Debug,
         Data: Clone,
     {
         use crate::parser::State;
@@ -1276,8 +1276,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         self.fallback_nodes.clear();
         self.next_nodes.clear();
 
-        let class = parser.to_terminal_class(&term);
-        let shift_prec = parser.class_precedence(TerminalSymbol::Term(class));
+        let class = P::TermClass::from_term(&term);
+        let shift_prec = class.precedence();
 
         let mut current_nodes = std::mem::take(&mut self.current_nodes);
         for node in current_nodes.drain(..) {
@@ -1285,7 +1285,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 parser,
                 node,
                 TerminalSymbol::Term(term.clone()),
-                TerminalSymbol::Term(class),
+                class,
                 shift_prec,
                 Some(location.clone()),
                 userdata,
@@ -1312,7 +1312,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 });
             }
 
-            let error_prec = parser.class_precedence(TerminalSymbol::Error);
+            let error_prec = P::TermClass::ERROR.precedence();
 
             let mut fallback_nodes = std::mem::take(&mut self.fallback_nodes);
             // try enter panic mode and store error nodes to next_nodes
@@ -1334,8 +1334,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 let mut next_nodes = std::mem::take(&mut self.next_nodes);
                 for error_node in next_nodes.drain(..) {
                     let last_state = self.state(error_node);
-                    if let Some(next_state) = parser.get_states()[last_state]
-                        .shift_goto_class(TerminalSymbol::Term(class))
+                    if let Some(next_state) =
+                        parser.get_states()[last_state].shift_goto_class(class)
                     {
                         // A -> a . error b
                         // and b is fed, shift error and b
@@ -1386,12 +1386,9 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         extra_precedence_stack: &mut Vec<Precedence>,
         parser: &P,
         mut node_and_len: Option<(usize, NonZeroUsize)>,
-        class: TerminalSymbol<usize>,
+        class: P::TermClass,
         shift_prec: Precedence,
-    ) -> Option<bool>
-    where
-        P::NonTerm: std::hash::Hash + Eq + NonTerminal,
-    {
+    ) -> Option<bool> {
         use crate::parser::State;
 
         let last_state = extra_state_stack
@@ -1531,7 +1528,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                             })
                             .unwrap_or(0)
                     })]
-                .shift_goto_nonterm(&reduce_rule.name)
+                .shift_goto_nonterm(reduce_rule.name)
                 {
                     extra_state_stack.push(StateIndex::from_usize_unchecked(next_state_id.state));
                 } else {
@@ -1604,7 +1601,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                         });
 
                     if let Some(next_state_id) =
-                        parser.get_states()[last_state].shift_goto_nonterm(&reduce_rule.name)
+                        parser.get_states()[last_state].shift_goto_nonterm(reduce_rule.name)
                     {
                         extra_state_stack
                             .push(StateIndex::from_usize_unchecked(next_state_id.state));
@@ -1647,12 +1644,9 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
         &self,
         parser: &P,
         term: &P::Term,
-    ) -> bool
-    where
-        P::NonTerm: Hash + Eq + NonTerminal,
-    {
-        let class = parser.to_terminal_class(term);
-        let shift_prec = parser.class_precedence(TerminalSymbol::Term(class));
+    ) -> bool {
+        let class = P::TermClass::from_term(term);
+        let shift_prec = class.precedence();
         let mut extra_state_stack = Vec::new();
         let mut extra_precedence_stack = Vec::new();
         self.current_nodes.iter().any(move |&node| {
@@ -1673,7 +1667,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 &mut extra_precedence_stack,
                 parser,
                 node_and_len,
-                TerminalSymbol::Term(class),
+                class,
                 shift_prec,
             ) == Some(true)
         })
@@ -1683,10 +1677,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     pub fn can_panic<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> bool
-    where
-        Data::NonTerm: Hash + Eq + NonTerminal,
-    {
+    ) -> bool {
         // if `error` token was not used in the grammar, early return here
         if !P::ERROR_USED {
             return false;
@@ -1694,7 +1685,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
 
         let mut extra_state_stack = Vec::new();
         let mut extra_precedence_stack = Vec::new();
-        let error_prec = parser.class_precedence(TerminalSymbol::Error);
+        let error_prec = P::TermClass::ERROR.precedence();
 
         self.current_nodes.iter().any(move |&node| {
             let mut node = node;
@@ -1710,7 +1701,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                         &mut extra_precedence_stack,
                         parser,
                         Some((node, NonZeroUsize::new(len).unwrap())),
-                        TerminalSymbol::Error,
+                        P::TermClass::ERROR,
                         error_prec,
                     ) == Some(true)
                     {
@@ -1737,7 +1728,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 &mut extra_precedence_stack,
                 parser,
                 None,
-                TerminalSymbol::Error,
+                P::TermClass::ERROR,
                 error_prec,
             ) == Some(true)
         })
@@ -1751,7 +1742,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     ) -> Result<(), ParseError<Data>>
     where
         P::Term: Clone,
-        P::NonTerm: Hash + Eq + Clone + std::fmt::Debug + NonTerminal,
+        P::NonTerm: std::fmt::Debug,
         Data: Clone,
     {
         self.reduce_errors.clear();
@@ -1765,7 +1756,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 parser,
                 node,
                 TerminalSymbol::Eof,
-                TerminalSymbol::Eof,
+                P::TermClass::EOF,
                 Precedence::none(),
                 None,
                 userdata,
@@ -1796,10 +1787,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     pub fn can_accept<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> bool
-    where
-        P::NonTerm: Hash + Eq + NonTerminal,
-    {
+    ) -> bool {
         let mut extra_state_stack = Vec::new();
         let mut extra_precedence_stack = Vec::new();
         self.current_nodes.iter().any(move |&node| {
@@ -1820,7 +1808,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 &mut extra_precedence_stack,
                 parser,
                 node_and_len,
-                TerminalSymbol::Eof,
+                P::TermClass::EOF,
                 Precedence::none(),
             ) == Some(true)
         })
@@ -1862,7 +1850,7 @@ where
 impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Display for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Display + Clone,
-    Data::NonTerm: std::fmt::Display + Clone + crate::nonterminal::NonTerminal,
+    Data::NonTerm: std::fmt::Display + Clone,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (i, path) in self.to_tree_lists().enumerate() {
@@ -1876,7 +1864,7 @@ where
 impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Debug for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Debug + Clone,
-    Data::NonTerm: std::fmt::Debug + Clone + crate::nonterminal::NonTerminal,
+    Data::NonTerm: std::fmt::Debug + Clone,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (i, path) in self.to_tree_lists().enumerate() {

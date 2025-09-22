@@ -3,9 +3,10 @@ use std::hash::Hash;
 
 use super::ParseError;
 
-use crate::nonterminal::NonTerminal;
 use crate::parser::data_stack::DataStack;
+use crate::parser::nonterminal::NonTerminal;
 use crate::parser::state::Index;
+use crate::parser::terminalclass::TerminalClass;
 use crate::parser::Parser;
 use crate::parser::Precedence;
 use crate::parser::State;
@@ -89,7 +90,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             &mut extra_state_stack,
             &mut extra_precedence_stack,
             parser,
-            TerminalSymbol::Eof,
+            P::TermClass::EOF,
             Precedence::none(),
         ) == Some(true)
     }
@@ -121,9 +122,10 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     pub fn expected_token<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> (BTreeSet<usize>, BTreeSet<Data::NonTerm>)
+    ) -> (BTreeSet<P::TermClass>, BTreeSet<P::NonTerm>)
     where
-        Data::NonTerm: Ord + Copy + Hash + NonTerminal,
+        P::TermClass: Ord,
+        P::NonTerm: Ord,
     {
         let mut terms = BTreeSet::new();
         let mut nonterms = BTreeSet::new();
@@ -141,20 +143,18 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     /// Same as `expected_token()`, but returns as printable type.
     pub fn expected_token_str<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
-        parser: &'a P,
+        parser: &P,
     ) -> (
-        impl Iterator<Item = P::TerminalClassElement> + 'a,
-        impl Iterator<Item = &'static str> + 'a,
+        impl Iterator<Item = &'static str>,
+        impl Iterator<Item = &'static str>,
     )
     where
-        Data::NonTerm: Ord + Copy + Hash + crate::nonterminal::NonTerminal + 'a,
+        P::TermClass: Ord,
+        P::NonTerm: Ord,
     {
-        use crate::nonterminal::NonTerminal;
         let (terms, nonterms) = self.expected_token(parser);
         (
-            terms
-                .into_iter()
-                .flat_map(|term| parser.get_terminals(term).unwrap()),
+            terms.into_iter().map(|term| term.as_str()),
             nonterms.into_iter().map(|nonterm| nonterm.as_str()),
         )
     }
@@ -164,10 +164,11 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         extra_state_stack: &mut Vec<StateIndex>,
         stack_len: usize,
         parser: &P,
-        terms: &mut BTreeSet<usize>,
-        nonterms: &mut BTreeSet<Data::NonTerm>,
+        terms: &mut BTreeSet<P::TermClass>,
+        nonterms: &mut BTreeSet<P::NonTerm>,
     ) where
-        Data::NonTerm: Ord + Copy + Hash + NonTerminal,
+        P::TermClass: Ord,
+        P::NonTerm: Ord,
     {
         let state = &parser.get_states()[extra_state_stack
             .last()
@@ -197,7 +198,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 .copied()
                 .unwrap_or_else(|| self.state_stack[stack_len])
                 .into_usize()];
-            if let Some(next_state) = state.shift_goto_nonterm(&nonterm) {
+            if let Some(next_state) = state.shift_goto_nonterm(nonterm) {
                 extra_state_stack.push(Index::from_usize_unchecked(next_state.state));
                 self.expected_token_impl(
                     &mut extra_state_stack,
@@ -219,9 +220,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         userdata: &mut Data::UserData,
     ) -> Result<(), ParseError<Data>>
     where
-        Data::Term: Clone,
-        Data::NonTerm: Hash + Eq + Copy + NonTerminal,
         Data::Location: Default,
+        P::Term: Clone,
     {
         self.feed_location(parser, term, userdata, Default::default())
     }
@@ -230,17 +230,16 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     pub fn feed_location<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &mut self,
         parser: &P,
-        term: Data::Term,
+        term: P::Term,
         userdata: &mut Data::UserData,
         location: Data::Location,
     ) -> Result<(), ParseError<Data>>
     where
-        Data::Term: Clone,
-        Data::NonTerm: Hash + Eq + Copy + NonTerminal,
+        P::Term: Clone,
     {
         use crate::Location;
-        let class = TerminalSymbol::Term(parser.to_terminal_class(&term));
-        let shift_prec = parser.class_precedence(class);
+        let class = P::TermClass::from_term(&term);
+        let shift_prec = class.precedence();
 
         match self.feed_location_impl(
             parser,
@@ -260,13 +259,14 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 }
 
                 let mut error_location = Location::new(self.location_stack.iter().rev(), 0);
-                let error_prec = parser.class_precedence(TerminalSymbol::Error);
+                let error = P::TermClass::ERROR;
+                let error_prec = error.precedence();
 
                 loop {
                     match self.feed_location_impl(
                         parser,
                         TerminalSymbol::Error,
-                        TerminalSymbol::Error,
+                        error,
                         error_prec,
                         userdata,
                         Some(error_location),
@@ -340,15 +340,14 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     fn feed_location_impl<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &mut self,
         parser: &P,
-        term: TerminalSymbol<Data::Term>,
-        class: TerminalSymbol<usize>,
+        term: TerminalSymbol<P::Term>,
+        class: P::TermClass,
         shift_prec: Precedence,
         userdata: &mut Data::UserData,
         location: Option<Data::Location>,
     ) -> Result<(), ParseError<Data>>
     where
-        Data::Term: Clone,
-        Data::NonTerm: Hash + Eq + Copy + NonTerminal,
+        P::Term: Clone,
     {
         debug_assert!(
             (term.is_eof() && location.is_none()) || (!term.is_eof() && location.is_some())
@@ -464,7 +463,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 // shift with reduced nonterminal
                 if let Some(next_state_id) = parser.get_states()
                     [self.state_stack.last().unwrap().into_usize()]
-                .shift_goto_nonterm(&rule.name)
+                .shift_goto_nonterm(rule.name)
                 {
                     self.state_stack
                         .push(StateIndex::from_usize_unchecked(next_state_id.state));
@@ -491,12 +490,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
             if next_state_id.push {
                 match term {
-                    TerminalSymbol::Term(term) => {
-                        self.data_stack.push_terminal(term);
-                    }
-                    TerminalSymbol::Error | TerminalSymbol::Eof => {
-                        self.data_stack.push_empty();
-                    }
+                    TerminalSymbol::Term(t) => self.data_stack.push_terminal(t),
+                    TerminalSymbol::Error | TerminalSymbol::Eof => self.data_stack.push_empty(),
                 }
             } else {
                 self.data_stack.push_empty();
@@ -522,14 +517,11 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         &self,
         parser: &P,
         term: &Data::Term,
-    ) -> bool
-    where
-        Data::NonTerm: Hash + Eq + NonTerminal,
-    {
+    ) -> bool {
         let mut extra_state_stack = Vec::new();
         let mut extra_precedence_stack = Vec::new();
-        let class = TerminalSymbol::Term(parser.to_terminal_class(term));
-        let shift_prec = parser.class_precedence(class);
+        let class = P::TermClass::from_term(term);
+        let shift_prec = class.precedence();
 
         self.can_feed_impl(
             self.precedence_stack.len(),
@@ -545,10 +537,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     pub fn can_panic<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> bool
-    where
-        Data::NonTerm: Hash + Eq + NonTerminal,
-    {
+    ) -> bool {
         // if `error` token was not used in the grammar, early return here
         if !P::ERROR_USED {
             return false;
@@ -556,7 +545,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
         let mut extra_state_stack = Vec::new();
         let mut extra_precedence_stack = Vec::new();
-        let error_prec = parser.class_precedence(TerminalSymbol::Error);
+        let error = P::TermClass::ERROR;
+        let error_prec = error.precedence();
         let mut stack_len = self.precedence_stack.len();
 
         loop {
@@ -565,7 +555,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 &mut extra_state_stack,
                 &mut extra_precedence_stack,
                 parser,
-                TerminalSymbol::Error,
+                error,
                 error_prec,
             ) {
                 Some(true) => break true, // successfully shifted `error`
@@ -589,12 +579,9 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         extra_state_stack: &mut Vec<StateIndex>,
         extra_precedence_stack: &mut Vec<Precedence>,
         parser: &P,
-        class: TerminalSymbol<usize>,
+        class: P::TermClass,
         shift_prec: Precedence,
-    ) -> Option<bool>
-    where
-        Data::NonTerm: Hash + Eq + NonTerminal,
-    {
+    ) -> Option<bool> {
         let shift_to = loop {
             let state = &parser.get_states()[extra_state_stack
                 .last()
@@ -678,7 +665,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     .copied()
                     .unwrap_or_else(|| self.state_stack[stack_len])
                     .into_usize()]
-                .shift_goto_nonterm(&rule.name)
+                .shift_goto_nonterm(rule.name)
                 {
                     extra_state_stack.push(StateIndex::from_usize_unchecked(next_state_id.state));
                 } else {
@@ -707,13 +694,12 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         userdata: &mut Data::UserData,
     ) -> Result<(), ParseError<Data>>
     where
-        Data::Term: Clone,
-        Data::NonTerm: Hash + Eq + Copy + NonTerminal,
+        P::Term: Clone,
     {
         self.feed_location_impl(
             parser,
             TerminalSymbol::Eof,
-            TerminalSymbol::Eof,
+            P::TermClass::EOF,
             Precedence::none(),
             userdata,
             None,
@@ -734,10 +720,9 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         parser: &P,
     ) -> crate::hash::HashSet<Data::NonTerm>
     where
-        Data::NonTerm: Copy + Eq + Hash + crate::nonterminal::NonTerminal,
+        P::NonTerm: Hash + Eq,
     {
         use crate::hash::HashSet;
-        use crate::nonterminal::NonTerminal;
         use crate::token::Token;
 
         let rules = parser.get_rules();
@@ -826,10 +811,9 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     pub fn backtrace<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> crate::Backtrace<&'static str, Data::NonTerm>
+    ) -> crate::Backtrace<P::TermClass, P::NonTerm>
     where
-        Data::Term: Clone,
-        Data::NonTerm: Hash + Eq + Clone,
+        P::NonTerm: Hash + Eq,
     {
         use crate::hash::HashSet;
         use crate::rule::ShiftedRule;
@@ -954,7 +938,7 @@ where
 impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Display for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Display + Clone,
-    Data::NonTerm: std::fmt::Display + Clone + crate::nonterminal::NonTerminal,
+    Data::NonTerm: std::fmt::Display + Clone + NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.to_tree_list())
@@ -964,7 +948,7 @@ where
 impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Debug for Context<Data, StateIndex>
 where
     Data::Term: std::fmt::Debug + Clone,
-    Data::NonTerm: std::fmt::Debug + Clone + crate::nonterminal::NonTerminal,
+    Data::NonTerm: std::fmt::Debug + Clone + NonTerminal,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.to_tree_list())

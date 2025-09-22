@@ -1,8 +1,8 @@
 use std::hash::Hash;
 
 use crate::hash::HashMap;
-use crate::nonterminal::NonTerminal;
-use crate::TerminalSymbol;
+use crate::parser::nonterminal::NonTerminal;
+use crate::parser::terminalclass::TerminalClass;
 
 #[derive(Debug, Clone, Copy)]
 pub struct ShiftTarget<StateIndex> {
@@ -18,14 +18,10 @@ impl<StateIndex> ShiftTarget<StateIndex> {
 
 /// This intermediate state is a common structure to convert from generated code and grammar builder
 /// into various types of parser states (SparseState, DenseState, ...).
-pub struct IntermediateState<Term, NonTerm, StateIndex, RuleIndex> {
-    pub shift_goto_map_term: Vec<(Term, ShiftTarget<StateIndex>)>, // must be sorted
-    pub eof_shift: Option<StateIndex>,
-    pub error_shift: Option<StateIndex>,
+pub struct IntermediateState<TermClass, NonTerm, StateIndex, RuleIndex> {
+    pub shift_goto_map_term: Vec<(TermClass, ShiftTarget<StateIndex>)>, // must be sorted
     pub shift_goto_map_nonterm: Vec<(NonTerm, ShiftTarget<StateIndex>)>, // must be sorted
-    pub reduce_map: Vec<(Term, Vec<RuleIndex>)>,                         // must be sorted
-    pub eof_reduce: Option<Vec<RuleIndex>>,
-    pub error_reduce: Option<Vec<RuleIndex>>,
+    pub reduce_map: Vec<(TermClass, Vec<RuleIndex>)>,                   // must be sorted
     pub ruleset: Vec<crate::rule::ShiftedRuleRef>,
 }
 
@@ -112,32 +108,33 @@ pub type SmallVecU32 = smallvec::SmallVec<[u32; 4]>;
 pub type SmallVecUsize = smallvec::SmallVec<[usize; 2]>;
 
 /// A trait representing a parser state.
-pub trait State<NonTerm> {
+pub trait State {
+    type TermClass: TerminalClass;
+    type NonTerm: NonTerminal;
+
     /// Get the next state for a given terminal symbol.
-    fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<ShiftTarget<usize>>;
+    fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<usize>>;
 
     /// Get the next state for a given non-terminal symbol.
-    fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<ShiftTarget<usize>>
-    where
-        NonTerm: Hash + Eq + NonTerminal;
+    fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<usize>>;
 
     /// Get the reduce rule index for a given terminal symbol.
     fn reduce(
         &self,
-        class: TerminalSymbol<usize>,
+        class: Self::TermClass,
     ) -> Option<impl Iterator<Item = impl Index> + Clone + '_>;
 
     /// Check if this state is an accept state.
     fn is_accept(&self) -> bool;
 
     /// Get the set of expected terminal classes for shift in this state
-    fn expected_shift_term(&self) -> impl Iterator<Item = usize> + '_;
+    fn expected_shift_term(&self) -> impl Iterator<Item = Self::TermClass> + '_;
 
     /// Get the set of expected non-terminal symbols for shift in this state
-    fn expected_shift_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_;
+    fn expected_shift_nonterm(&self) -> impl Iterator<Item = Self::NonTerm> + '_;
 
     /// Get the set of expected terminal classes for reduce in this state
-    fn expected_reduce_term(&self) -> impl Iterator<Item = usize> + '_;
+    fn expected_reduce_term(&self) -> impl Iterator<Item = Self::TermClass> + '_;
 
     /// Get the set of production rule for reduce in this state
     fn expected_reduce_rule(&self) -> impl Iterator<Item = impl Index> + '_;
@@ -148,58 +145,39 @@ pub trait State<NonTerm> {
 
 /// `State` implementation for a sparse state representation using HashMap
 #[derive(Debug, Clone)]
-pub struct SparseState<Term, NonTerm, RuleContainer, StateIndex> {
+pub struct SparseState<TermClass, NonTerm, RuleContainer, StateIndex> {
     /// terminal symbol -> next state
-    pub(crate) shift_goto_map_class: HashMap<Term, ShiftTarget<StateIndex>>,
-    pub(crate) error_shift: Option<StateIndex>,
-    pub(crate) eof_shift: Option<StateIndex>,
+    pub(crate) shift_goto_map_class: HashMap<TermClass, ShiftTarget<StateIndex>>,
 
     /// non-terminal symbol -> next state
     pub(crate) shift_goto_map_nonterm: HashMap<NonTerm, ShiftTarget<StateIndex>>,
 
     /// terminal symbol -> reduce rule index
-    pub(crate) reduce_map: HashMap<Term, RuleContainer>,
-    pub(crate) error_reduce: Option<RuleContainer>,
-    pub(crate) eof_reduce: Option<RuleContainer>,
+    pub(crate) reduce_map: HashMap<TermClass, RuleContainer>,
 
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
 }
 
 impl<
-        Term: Into<usize> + Index + Copy + Hash + Eq,
-        NonTerm: Copy,
+        TermClass: TerminalClass + Hash + Eq,
+        NonTerm: NonTerminal + Hash + Eq,
         RuleContainer: ReduceRules,
         StateIndex: Into<usize> + Copy,
-    > State<NonTerm> for SparseState<Term, NonTerm, RuleContainer, StateIndex>
+    > State for SparseState<TermClass, NonTerm, RuleContainer, StateIndex>
 {
-    fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<ShiftTarget<usize>> {
-        match class {
-            TerminalSymbol::Term(class) => self
-                .shift_goto_map_class
-                .get(&Term::from_usize_unchecked(class))
-                .copied()
-                .map(|s| ShiftTarget {
-                    state: s.state.into(),
-                    push: s.push,
-                }),
-            TerminalSymbol::Error => self.error_shift.map(|s| ShiftTarget {
-                state: s.into(),
-                push: false,
-            }),
-            TerminalSymbol::Eof => self.eof_shift.map(|s| ShiftTarget {
-                state: s.into(),
-                push: false,
-            }),
-        }
+    type TermClass = TermClass;
+    type NonTerm = NonTerm;
+
+    fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<usize>> {
+        self.shift_goto_map_class.get(&class).map(|s| ShiftTarget {
+            state: s.state.into(),
+            push: s.push,
+        })
     }
-    fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<ShiftTarget<usize>>
-    where
-        NonTerm: Hash + Eq,
-    {
+    fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<usize>> {
         self.shift_goto_map_nonterm
-            .get(nonterm)
-            .copied()
+            .get(&nonterm)
             .map(|s| ShiftTarget {
                 state: s.state.into(),
                 push: s.push,
@@ -207,28 +185,23 @@ impl<
     }
     fn reduce(
         &self,
-        class: TerminalSymbol<usize>,
+        class: Self::TermClass,
     ) -> Option<impl Iterator<Item = impl Index> + Clone + '_> {
-        match class {
-            TerminalSymbol::Term(class) => self.reduce_map.get(&Term::from_usize_unchecked(class)),
-            TerminalSymbol::Error => self.error_reduce.as_ref(),
-            TerminalSymbol::Eof => self.eof_reduce.as_ref(),
-        }
-        .map(ReduceRules::to_iter)
+        self.reduce_map.get(&class).map(ReduceRules::to_iter)
     }
     fn is_accept(&self) -> bool {
         self.reduce_map.is_empty()
             && self.shift_goto_map_class.is_empty()
             && self.shift_goto_map_nonterm.is_empty()
     }
-    fn expected_shift_term(&self) -> impl Iterator<Item = usize> + '_ {
-        self.shift_goto_map_class.keys().copied().map(Into::into)
+    fn expected_shift_term(&self) -> impl Iterator<Item = Self::TermClass> + '_ {
+        self.shift_goto_map_class.keys().copied()
     }
-    fn expected_shift_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_ {
+    fn expected_shift_nonterm(&self) -> impl Iterator<Item = Self::NonTerm> + '_ {
         self.shift_goto_map_nonterm.keys().copied()
     }
-    fn expected_reduce_term(&self) -> impl Iterator<Item = usize> + '_ {
-        self.reduce_map.keys().copied().map(Into::into)
+    fn expected_reduce_term(&self) -> impl Iterator<Item = Self::TermClass> + '_ {
+        self.reduce_map.keys().copied()
     }
     fn expected_reduce_rule(&self) -> impl Iterator<Item = impl Index> + '_ {
         self.reduce_map.values().flat_map(RuleContainer::to_iter)
@@ -240,13 +213,13 @@ impl<
 
 /// `State` implementation for a dense state representation using Vec
 #[derive(Debug, Clone)]
-pub struct DenseState<Term, NonTerm, RuleContainer, StateIndex> {
+pub struct DenseState<TermClass, NonTerm, RuleContainer, StateIndex> {
     /// terminal symbol -> next state
     pub(crate) shift_goto_map_class: Vec<Option<ShiftTarget<StateIndex>>>,
     /// shift_goto_map_class[i] will contain i+offset 'th class's next state.
     pub(crate) shift_class_offset: usize,
-    pub(crate) error_shift: Option<StateIndex>,
-    pub(crate) eof_shift: Option<StateIndex>,
+    /// set of terminal classes that is keys of `shift_goto_map_class`
+    pub(crate) shift_goto_map_class_keys: Vec<TermClass>,
 
     /// non-terminal symbol -> next state
     pub(crate) shift_goto_map_nonterm: Vec<Option<ShiftTarget<StateIndex>>>,
@@ -258,45 +231,35 @@ pub struct DenseState<Term, NonTerm, RuleContainer, StateIndex> {
     pub(crate) reduce_map: Vec<Option<RuleContainer>>,
     /// reduce_map[i] will contain i+offset 'th class's reduce rule.
     pub(crate) reduce_offset: usize,
-    pub(crate) error_reduce: Option<RuleContainer>,
-    pub(crate) eof_reduce: Option<RuleContainer>,
+    pub(crate) reduce_map_keys: Vec<TermClass>,
 
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
 
-    _phantom: std::marker::PhantomData<Term>,
+    _phantom: std::marker::PhantomData<TermClass>,
 }
-impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + Copy> State<NonTerm>
-    for DenseState<Term, NonTerm, RuleContainer, StateIndex>
+impl<
+        TermClass: TerminalClass,
+        NonTerm: NonTerminal,
+        RuleContainer: ReduceRules,
+        StateIndex: Into<usize> + Copy,
+    > State for DenseState<TermClass, NonTerm, RuleContainer, StateIndex>
 {
-    fn shift_goto_class(&self, class: TerminalSymbol<usize>) -> Option<ShiftTarget<usize>> {
-        match class {
-            TerminalSymbol::Term(class) => self
-                .shift_goto_map_class
-                .get(class.wrapping_sub(self.shift_class_offset))
-                .copied()
-                .flatten()
-                .map(|s| ShiftTarget {
-                    state: s.state.into(),
-                    push: s.push,
-                }),
-            TerminalSymbol::Error => self.error_shift.map(|s| ShiftTarget {
-                state: s.into(),
-                push: false,
-            }),
-            TerminalSymbol::Eof => self.eof_shift.map(|s| ShiftTarget {
-                state: s.into(),
-                push: false,
-            }),
-        }
+    type TermClass = TermClass;
+    type NonTerm = NonTerm;
+    fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<usize>> {
+        self.shift_goto_map_class
+            .get(class.to_usize().wrapping_sub(self.shift_class_offset))
+            .copied()
+            .flatten()
+            .map(|s| ShiftTarget {
+                state: s.state.into(),
+                push: s.push,
+            })
     }
-    fn shift_goto_nonterm(&self, nonterm: &NonTerm) -> Option<ShiftTarget<usize>>
-    where
-        NonTerm: Hash + Eq + NonTerminal,
-    {
-        let nonterm = nonterm.to_usize();
+    fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<usize>> {
         self.shift_goto_map_nonterm
-            .get(nonterm.wrapping_sub(self.shift_nonterm_offset))
+            .get(nonterm.to_usize().wrapping_sub(self.shift_nonterm_offset))
             .copied()
             .flatten()
             .map(|s| ShiftTarget {
@@ -306,35 +269,26 @@ impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + 
     }
     fn reduce(
         &self,
-        class: TerminalSymbol<usize>,
+        class: Self::TermClass,
     ) -> Option<impl Iterator<Item = impl Index> + Clone + '_> {
-        match class {
-            TerminalSymbol::Term(class) => self
-                .reduce_map
-                .get(class.wrapping_sub(self.reduce_offset))
-                .and_then(|r| r.as_ref()),
-            TerminalSymbol::Error => self.error_reduce.as_ref(),
-            TerminalSymbol::Eof => self.eof_reduce.as_ref(),
-        }
-        .map(ReduceRules::to_iter)
+        self.reduce_map
+            .get(class.to_usize().wrapping_sub(self.reduce_offset))
+            .and_then(|r| r.as_ref())
+            .map(ReduceRules::to_iter)
     }
     fn is_accept(&self) -> bool {
         self.reduce_map.is_empty()
             && self.shift_goto_map_class.is_empty()
             && self.shift_goto_map_nonterm.is_empty()
     }
-    fn expected_shift_term(&self) -> impl Iterator<Item = usize> + '_ {
-        (0..self.shift_goto_map_class.len())
-            .filter(|&i| self.shift_goto_map_class[i].is_some())
-            .map(|i| i + self.shift_class_offset)
+    fn expected_shift_term(&self) -> impl Iterator<Item = Self::TermClass> + '_ {
+        self.shift_goto_map_class_keys.iter().copied()
     }
     fn expected_shift_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_ {
         self.shift_goto_map_nonterm_keys.iter().copied()
     }
-    fn expected_reduce_term(&self) -> impl Iterator<Item = usize> + '_ {
-        (0..self.reduce_map.len())
-            .filter(|&i| self.reduce_map[i].is_some())
-            .map(|i| i + self.reduce_offset)
+    fn expected_reduce_term(&self) -> impl Iterator<Item = Self::TermClass> + '_ {
+        self.reduce_map_keys.iter().copied()
     }
     fn expected_reduce_rule(&self) -> impl Iterator<Item = impl Index> + '_ {
         self.reduce_map
@@ -348,16 +302,16 @@ impl<Term, NonTerm: Copy, RuleContainer: ReduceRules, StateIndex: Into<usize> + 
     }
 }
 
-impl<Term, NonTerm, RuleContainer, StateIndex, RuleIndex>
-    From<IntermediateState<Term, NonTerm, StateIndex, RuleIndex>>
-    for SparseState<Term, NonTerm, RuleContainer, StateIndex>
+impl<TermClass: TerminalClass, NonTerm: NonTerminal, RuleContainer, StateIndex, RuleIndex>
+    From<IntermediateState<TermClass, NonTerm, StateIndex, RuleIndex>>
+    for SparseState<TermClass, NonTerm, RuleContainer, StateIndex>
 where
-    Term: Ord + std::hash::Hash,
+    TermClass: Ord + Hash,
     NonTerm: Hash + Eq,
     RuleContainer: ReduceRules,
     RuleContainer::RuleIndex: TryFrom<RuleIndex>,
 {
-    fn from(builder_state: IntermediateState<Term, NonTerm, StateIndex, RuleIndex>) -> Self {
+    fn from(builder_state: IntermediateState<TermClass, NonTerm, StateIndex, RuleIndex>) -> Self {
         // TerminalSymbol::Term(_) < TerminalSymbol::Error < TerminalSymbol::Eof
         // since maps are sorted, eof and error should be at the end of the array
 
@@ -378,16 +332,8 @@ where
                 .collect::<Vec<_>>();
             debug_assert!(keys.is_sorted());
         }
-        let eof_shift = builder_state.eof_shift;
-        let error_shift = builder_state.error_shift;
-
-        let eof_reduce = builder_state.eof_reduce.map(RuleContainer::from_set);
-        let error_reduce = builder_state.error_reduce.map(RuleContainer::from_set);
-
         SparseState {
             shift_goto_map_class: builder_state.shift_goto_map_term.into_iter().collect(),
-            error_shift,
-            eof_shift,
             shift_goto_map_nonterm: builder_state.shift_goto_map_nonterm.into_iter().collect(),
             reduce_map: builder_state
                 .reduce_map
@@ -399,23 +345,21 @@ where
                     )
                 })
                 .collect(),
-            error_reduce,
-            eof_reduce,
             ruleset: builder_state.ruleset.into_iter().collect(),
         }
     }
 }
-impl<Term, NonTerm, RuleContainer, StateIndex, RuleIndex>
-    From<IntermediateState<Term, NonTerm, StateIndex, RuleIndex>>
-    for DenseState<Term, NonTerm, RuleContainer, StateIndex>
+impl<TermClass: TerminalClass, NonTerm: NonTerminal, RuleContainer, StateIndex, RuleIndex>
+    From<IntermediateState<TermClass, NonTerm, StateIndex, RuleIndex>>
+    for DenseState<TermClass, NonTerm, RuleContainer, StateIndex>
 where
-    Term: Ord + Into<usize> + Copy,
+    TermClass: Ord + Copy,
     NonTerm: Hash + Eq + Copy + NonTerminal,
     StateIndex: Copy,
     RuleContainer: Clone + ReduceRules,
     RuleContainer::RuleIndex: TryFrom<RuleIndex>,
 {
-    fn from(builder_state: IntermediateState<Term, NonTerm, StateIndex, RuleIndex>) -> Self {
+    fn from(builder_state: IntermediateState<TermClass, NonTerm, StateIndex, RuleIndex>) -> Self {
         // TerminalSymbol::Term(_) < TerminalSymbol::Error < TerminalSymbol::Eof
         // since maps are sorted, eof and error should be at the end of the array
 
@@ -437,19 +381,13 @@ where
             debug_assert!(keys.is_sorted());
         }
 
-        let eof_shift = builder_state.eof_shift;
-        let error_shift = builder_state.error_shift;
-
-        let eof_reduce = builder_state.eof_reduce.map(RuleContainer::from_set);
-        let error_reduce = builder_state.error_reduce.map(RuleContainer::from_set);
-
         let (shift_min, shift_len) = {
             let mut iter = builder_state
                 .shift_goto_map_term
                 .iter()
                 .map(|(term, _)| term);
-            let min: Option<usize> = iter.next().map(|x| (*x).into());
-            let max: Option<usize> = iter.next_back().map(|x| (*x).into()).or(min);
+            let min: Option<usize> = iter.next().map(|x| x.to_usize());
+            let max: Option<usize> = iter.next_back().map(|x| x.to_usize()).or(min);
 
             if let (Some(min), Some(max)) = (min, max) {
                 (min, max - min + 1)
@@ -459,8 +397,8 @@ where
         };
         let (reduce_min, reduce_len) = {
             let mut iter = builder_state.reduce_map.iter().map(|(term, _)| term);
-            let min: Option<usize> = iter.next().map(|x| (*x).into());
-            let max: Option<usize> = iter.next_back().map(|x| (*x).into()).or(min);
+            let min: Option<usize> = iter.next().map(|x| x.to_usize());
+            let max: Option<usize> = iter.next_back().map(|x| x.to_usize()).or(min);
             if let (Some(min), Some(max)) = (min, max) {
                 (min, max - min + 1)
             } else {
@@ -481,14 +419,24 @@ where
             }
         };
 
+        let shift_term_keys = builder_state
+            .shift_goto_map_term
+            .iter()
+            .map(|(term, _)| *term)
+            .collect();
         let mut shift_goto_map_class = vec![None; shift_len];
         for (term, state) in builder_state.shift_goto_map_term {
-            shift_goto_map_class[term.into() - shift_min] = Some(state);
+            shift_goto_map_class[term.to_usize() - shift_min] = Some(state);
         }
 
+        let reduce_map_keys = builder_state
+            .reduce_map
+            .iter()
+            .map(|(term, _)| *term)
+            .collect();
         let mut reduce_map = vec![None; reduce_len];
         for (term, rule) in builder_state.reduce_map {
-            reduce_map[term.into() - reduce_min] = Some(RuleContainer::from_set(rule));
+            reduce_map[term.to_usize() - reduce_min] = Some(RuleContainer::from_set(rule));
         }
 
         let nonterm_keys = builder_state
@@ -504,15 +452,13 @@ where
         DenseState {
             shift_goto_map_class,
             shift_class_offset: shift_min,
-            error_shift,
-            eof_shift,
+            shift_goto_map_class_keys: shift_term_keys,
             shift_goto_map_nonterm,
             shift_goto_map_nonterm_keys: nonterm_keys,
             shift_nonterm_offset: nonterm_min,
             reduce_map,
+            reduce_map_keys,
             reduce_offset: reduce_min,
-            error_reduce,
-            eof_reduce,
             ruleset: builder_state.ruleset.into_iter().collect(),
             _phantom: std::marker::PhantomData,
         }

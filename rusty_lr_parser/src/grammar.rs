@@ -108,7 +108,9 @@ pub struct Grammar {
     /// do terminal classificate optimization
     pub optimize: bool,
     pub builder: rusty_lr_core::builder::Grammar<TerminalSymbol<usize>, usize>,
-    pub states: Vec<rusty_lr_core::parser::state::IntermediateState<usize, usize, usize, usize>>,
+    pub states: Vec<
+        rusty_lr_core::parser::state::IntermediateState<TerminalSymbol<usize>, usize, usize, usize>,
+    >,
 
     /// set of terminals for each terminal class
     pub terminal_classes: Vec<TerminalClassDefinition>,
@@ -946,7 +948,7 @@ impl Grammar {
                 rules: vec![augmented_rule],
                 trace: false,
                 protected: true,
-                nonterm_type: Some(rusty_lr_core::nonterminal::NonTerminalType::Augmented),
+                nonterm_type: Some(rusty_lr_core::parser::nonterminal::NonTerminalType::Augmented),
             };
             // start rule is protected
             grammar.nonterminals[*start_idx].protected = true;
@@ -1572,7 +1574,7 @@ impl Grammar {
                         .map(|&term| self.term_pretty_name(term))
                         .collect::<Vec<_>>()
                         .join(", ");
-                    format!("[{f}] ({len} terms)")
+                    format!("[{f}]")
                 } else {
                     let class = &self.terminal_classes[class_idx];
                     let first = class.terminals[0];
@@ -1582,7 +1584,7 @@ impl Grammar {
                     let first = self.term_pretty_name(first);
                     let second = self.term_pretty_name(second);
                     let last = self.term_pretty_name(last);
-                    format!("[{first}, {second}, ..., {last}] ({len} terms)")
+                    format!("[{first}, {second}, ..., {last}]")
                 }
             }
         }
@@ -1663,18 +1665,19 @@ impl Grammar {
             }
         };
         let mut states: Vec<
-            rusty_lr_core::parser::state::IntermediateState<usize, usize, usize, usize>,
+            rusty_lr_core::parser::state::IntermediateState<
+                TerminalSymbol<usize>,
+                usize,
+                usize,
+                usize,
+            >,
         > = states.into_iter().map(Into::into).collect();
 
         // Identify states that only perform a single reduction of a single-token rule.
         // These are candidates for optimization.
         let mut reduce_states: Vec<_> = Vec::with_capacity(states.len());
         for state in states.iter() {
-            if state.eof_shift.is_some()
-                || state.error_shift.is_some()
-                || !state.shift_goto_map_term.is_empty()
-                || !state.shift_goto_map_nonterm.is_empty()
-            {
+            if !state.shift_goto_map_term.is_empty() || !state.shift_goto_map_nonterm.is_empty() {
                 // this state is not a reduce state
                 reduce_states.push(None);
                 continue;
@@ -1684,8 +1687,6 @@ impl Grammar {
                 .reduce_map
                 .iter()
                 .map(|(_, r)| r)
-                .chain(state.eof_reduce.iter())
-                .chain(state.error_reduce.iter())
                 .collect::<BTreeSet<_>>();
 
             if rules.len() != 1 {
@@ -1800,8 +1801,6 @@ impl Grammar {
                     .iter()
                     .map(|(_, v)| v.state)
                     .chain(s.shift_goto_map_nonterm.iter().map(|(_, v)| v.state))
-                    .chain(s.eof_shift.iter().copied())
-                    .chain(s.error_shift.iter().copied())
                 {
                     if !states_used[next_state] {
                         states_used[next_state] = true;
@@ -1830,26 +1829,12 @@ impl Grammar {
                 debug_assert!(states_used[next_state.state]);
                 next_state.state = state_remap[next_state.state];
             }
-            if let Some(next_state) = &mut state.eof_shift {
-                debug_assert!(states_used[*next_state]);
-                *next_state = state_remap[*next_state];
-            }
-            if let Some(next_state) = &mut state.error_shift {
-                debug_assert!(states_used[*next_state]);
-                *next_state = state_remap[*next_state];
-            }
         }
 
         // check for unused production rules
         let mut rules_used = vec![false; self.builder.rules.len()];
         for state in &new_states {
-            for rules in state
-                .reduce_map
-                .iter()
-                .map(|(_, r)| r)
-                .chain(state.eof_reduce.iter())
-                .chain(state.error_reduce.iter())
-            {
+            for rules in state.reduce_map.iter().map(|(_, r)| r) {
                 for &rule in rules {
                     rules_used[rule] = true;
                 }
