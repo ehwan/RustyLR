@@ -527,20 +527,6 @@ impl Grammar {
                 }
             })
             .collect();
-        // let terminal_symbol_to_stream = |term: TerminalSymbol<usize>| -> TokenStream {
-        //     match term {
-        //         TerminalSymbol::Term(term) => {
-        //             let term = proc_macro2::Literal::usize_unsuffixed(term);
-        //             quote! { #module_prefix::TerminalSymbol::Term(#term) }
-        //         }
-        //         TerminalSymbol::Error => {
-        //             quote! { #module_prefix::TerminalSymbol::Error }
-        //         }
-        //         TerminalSymbol::Eof => {
-        //             quote! { #module_prefix::TerminalSymbol::Eof }
-        //         }
-        //     }
-        // };
         let token_to_stream = |token: Token<TerminalSymbol<usize>, usize>| -> TokenStream {
             match token {
                 Token::Term(term) => {
