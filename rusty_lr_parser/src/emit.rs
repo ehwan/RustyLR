@@ -328,7 +328,7 @@ impl Grammar {
 
         stream.extend(quote! {
             /// A enum that represents terminal classes
-            #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
+            #[allow(non_camel_case_types)]
             #[derive(Clone, Copy, std::hash::Hash, std::cmp::PartialEq, std::cmp::Eq, std::cmp::PartialOrd, std::cmp::Ord)]
             pub enum #termclass_typename {
                 #(#class_variants),*,
