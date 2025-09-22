@@ -328,7 +328,7 @@ impl Grammar {
 
         stream.extend(quote! {
             /// A enum that represents terminal classes
-            #[allow(non_camel_case_types)]
+            #[allow(non_camel_case_types, dead_code)]
             #[derive(Clone, Copy, std::hash::Hash, std::cmp::PartialEq, std::cmp::Eq, std::cmp::PartialOrd, std::cmp::Ord)]
             pub enum #termclass_typename {
                 #(#class_variants),*,
@@ -357,6 +357,7 @@ impl Grammar {
                     }
                 }
                 fn from_term(terminal: &Self::Term) -> Self {
+                    #[allow(unreachable_patterns)]
                     match #match_terminal_filter_expression {
                         #from_term_match_stream
                     }
