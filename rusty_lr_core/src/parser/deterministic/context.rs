@@ -62,7 +62,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         mut self,
         parser: &P,
         userdata: &mut Data::UserData,
-    ) -> Result<Data::StartType, ParseError<Data>>
+    ) -> Result<Data::StartType, ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         Data::Term: Clone,
         Data::NonTerm: Hash + Eq + Copy + NonTerminal,
@@ -222,7 +222,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         parser: &P,
         term: Data::Term,
         userdata: &mut Data::UserData,
-    ) -> Result<(), ParseError<Data>>
+    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         Data::Location: Default,
         P::Term: Clone,
@@ -237,7 +237,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         term: P::Term,
         userdata: &mut Data::UserData,
         location: Data::Location,
-    ) -> Result<(), ParseError<Data>>
+    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
     {
@@ -254,12 +254,12 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             Some(location),
         ) {
             Ok(()) => Ok(()),
-            Err(ParseError::NoAction(term, location)) => {
+            Err(ParseError::NoAction(err)) => {
                 // nothing shifted; enters panic mode
 
                 // if `error` token was not used in the grammar, early return here
                 if !P::ERROR_USED {
-                    return Err(ParseError::NoAction(term, location));
+                    return Err(ParseError::NoAction(err));
                 }
 
                 let mut error_location = Location::new(self.location_stack.iter().rev(), 0);
@@ -275,15 +275,19 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         userdata,
                         Some(error_location),
                     ) {
-                        Err(ParseError::NoAction(_, error_loc)) => {
+                        Err(ParseError::NoAction(err)) => {
                             if self.state_stack.len() == 1 {
-                                return Err(ParseError::NoAction(term, location));
+                                return Err(ParseError::NoAction(super::error::NoActionError {
+                                    term: err.term,
+                                    location: err.location,
+                                    state: err.state,
+                                }));
                             }
 
                             // no action for `error` token, continue to panic mode
                             // merge location with previous
                             error_location = Data::Location::new(
-                                std::iter::once(&error_loc.unwrap())
+                                std::iter::once(&err.location.unwrap())
                                     .chain(self.location_stack.iter().rev()),
                                 2, // error node
                             );
@@ -309,16 +313,16 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 {
                     #[cfg(feature = "tree")]
                     self.tree_stack
-                        .push(crate::tree::Tree::new_terminal(term.clone()));
+                        .push(crate::tree::Tree::new_terminal(err.term.clone()));
 
                     // shift after `error` token
                     if next_state.push {
-                        self.data_stack.push_terminal(term.into_term().unwrap());
+                        self.data_stack.push_terminal(err.term.into_term().unwrap());
                     } else {
                         self.data_stack.push_empty();
                     }
 
-                    self.location_stack.push(location.unwrap());
+                    self.location_stack.push(err.location.unwrap());
                     self.precedence_stack.push(shift_prec);
                     self.state_stack
                         .push(StateIndex::from_usize_unchecked(next_state.state));
@@ -326,7 +330,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     // merge term with previous error
 
                     let error_location = Data::Location::new(
-                        std::iter::once(&location.unwrap()).chain(self.location_stack.iter().rev()),
+                        std::iter::once(&err.location.unwrap())
+                            .chain(self.location_stack.iter().rev()),
                         2, // error node
                     );
                     if let Some(err_loc) = self.location_stack.last_mut() {
@@ -349,7 +354,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         shift_prec: Precedence,
         userdata: &mut Data::UserData,
         location: Option<Data::Location>,
-    ) -> Result<(), ParseError<Data>>
+    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
     {
@@ -402,9 +407,12 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                                 None => {
                                     // error
                                     return Err(ParseError::NoPrecedence(
-                                        term,
-                                        location,
-                                        reduce_rule.into_usize(),
+                                        super::error::NoPrecedenceError {
+                                            term,
+                                            location,
+                                            state: self.state_stack.last().unwrap().into_usize(),
+                                            rule: reduce_rule.into_usize(),
+                                        },
                                     ));
                                 }
                             }
@@ -443,7 +451,12 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 ) {
                     Ok(ret) => ret,
                     Err(err) => {
-                        return Err(ParseError::ReduceAction(term, location, err));
+                        return Err(ParseError::ReduceAction(super::error::ReduceActionError {
+                            term,
+                            location,
+                            state: self.state(),
+                            source: err,
+                        }));
                     }
                 };
                 self.location_stack.push(new_location);
@@ -509,7 +522,11 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
             Ok(())
         } else {
-            Err(ParseError::NoAction(term, location))
+            Err(ParseError::NoAction(super::error::NoActionError {
+                term,
+                location,
+                state: self.state(),
+            }))
         }
     }
 
@@ -696,7 +713,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         &mut self,
         parser: &P,
         userdata: &mut Data::UserData,
-    ) -> Result<(), ParseError<Data>>
+    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
     {

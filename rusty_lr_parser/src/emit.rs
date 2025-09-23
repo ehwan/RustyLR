@@ -70,12 +70,19 @@ impl Grammar {
         let context_struct_name = format_ident!("{}Context", start_rule_name);
         let data_stack_typename = format_ident!("{}DataStack", start_rule_name);
         let termclass_typename = format_ident!("{}TerminalClasses", start_rule_name);
+        let location_typename = self
+            .location_typename
+            .as_ref()
+            .cloned()
+            .unwrap_or_else(|| quote! { #module_prefix::DefaultLocation });
+        let reduce_error_typename = &self.error_typename;
 
         let state_structname = if self.emit_dense {
             format_ident!("DenseState")
         } else {
             format_ident!("SparseState")
         };
+        let token_typename = &self.token_typename;
 
         let state_index_typename = if self.states.len() <= u8::MAX as usize {
             quote! { u8 }
@@ -129,7 +136,7 @@ impl Grammar {
                 pub type #state_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, usize, #state_index_typename>;
                 /// type alias for `ParseError`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#data_stack_typename>;
+                pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
             }
             );
         }

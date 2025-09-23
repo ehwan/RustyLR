@@ -21,6 +21,7 @@ use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 use quote::format_ident;
+use rusty_lr_core::DefaultReduceActionError;
 use std::boxed::Box;
 use rusty_lr_core::rule::ReduceType;
 
@@ -209,7 +210,9 @@ pub type GrammarState = ::rusty_lr_core::parser::state::SparseState<
 /// type alias for `ParseError`
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarParseError = ::rusty_lr_core::parser::deterministic::ParseError<
-    GrammarDataStack,
+    Lexed,
+    super::span_pair::SpanPair,
+    DefaultReduceActionError
 >;
 /// A enum that represents terminal classes
 #[allow(non_camel_case_types, dead_code)]

@@ -1,84 +1,93 @@
 use std::fmt::Debug;
 use std::fmt::Display;
 
-use crate::parser::data_stack::DataStack;
 use crate::TerminalSymbol;
 
+#[derive(Clone, Debug)]
+pub struct NoActionError<Term, Location> {
+    pub term: TerminalSymbol<Term>,
+    pub location: Option<Location>,
+    pub state: usize,
+}
+#[derive(Clone, Debug)]
+pub struct ReduceActionError<Term, Location, Source> {
+    pub term: TerminalSymbol<Term>,
+    pub location: Option<Location>,
+    pub state: usize,
+    pub source: Source,
+}
+
+#[derive(Clone, Debug)]
+pub struct NoPrecedenceError<Term, Location> {
+    pub term: TerminalSymbol<Term>,
+    pub location: Option<Location>,
+    pub state: usize,
+    pub rule: usize,
+}
+
 /// Error type for feed()
-#[derive(Clone)]
-pub enum ParseError<Data: DataStack> {
+#[derive(Clone, Debug)]
+pub enum ParseError<Term, Location, ReduceAction> {
     /// No action defined for the given terminal in the parser table.
     /// location will be `None` if the terminal was eof.
-    NoAction(TerminalSymbol<Data::Term>, Option<Data::Location>),
+    NoAction(NoActionError<Term, Location>),
 
     /// Error from reduce action.
     /// location will be `None` if the terminal was eof.
-    ReduceAction(
-        TerminalSymbol<Data::Term>,
-        Option<Data::Location>,
-        Data::ReduceActionError,
-    ),
+    ReduceAction(ReduceActionError<Term, Location, ReduceAction>),
 
     /// Rule index when shift/reduce conflict occur with no shift/reduce precedence defined.
     /// This is same as when setting %nonassoc in Bison.
     /// location will be `None` if the terminal was eof.
-    NoPrecedence(TerminalSymbol<Data::Term>, Option<Data::Location>, usize),
+    NoPrecedence(NoPrecedenceError<Term, Location>),
 }
 
-impl<Data: DataStack> ParseError<Data> {
+impl<Term, Location, ReduceAction> ParseError<Term, Location, ReduceAction> {
     /// location will be `None` if the terminal was eof.
-    pub fn location(&self) -> &Option<Data::Location> {
+    pub fn location(&self) -> &Option<Location> {
         match self {
-            ParseError::NoAction(_, location) => location,
-            ParseError::ReduceAction(_, location, _) => location,
-            ParseError::NoPrecedence(_, location, _) => location,
+            ParseError::NoAction(err) => &err.location,
+            ParseError::ReduceAction(err) => &err.location,
+            ParseError::NoPrecedence(err) => &err.location,
         }
     }
 
-    pub fn term(&self) -> &TerminalSymbol<Data::Term> {
+    pub fn term(&self) -> &TerminalSymbol<Term> {
         match self {
-            ParseError::NoAction(term, _) => term,
-            ParseError::ReduceAction(term, _, _) => term,
-            ParseError::NoPrecedence(term, _, _) => term,
+            ParseError::NoAction(err) => &err.term,
+            ParseError::ReduceAction(err) => &err.term,
+            ParseError::NoPrecedence(err) => &err.term,
         }
     }
-}
 
-impl<Data: DataStack> Display for ParseError<Data>
-where
-    Data::Term: Display,
-    Data::ReduceActionError: Display,
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    pub fn state(&self) -> usize {
         match self {
-            ParseError::NoAction(term, _location) => {
-                write!(f, "NoAction: {}", term)
-            }
-            ParseError::ReduceAction(_term, _location, err) => {
-                write!(f, "ReduceAction: {}", err)
-            }
-            ParseError::NoPrecedence(_term, _location, rule) => {
-                write!(f, "NoPrecedence: {}", rule)
-            }
+            ParseError::NoAction(err) => err.state,
+            ParseError::ReduceAction(err) => err.state,
+            ParseError::NoPrecedence(err) => err.state,
         }
     }
 }
 
-impl<Data: DataStack> Debug for ParseError<Data>
+impl<Term, Location, ReduceAction> Display for ParseError<Term, Location, ReduceAction>
 where
-    Data::Term: Debug,
-    Data::ReduceActionError: Debug,
+    Term: Display,
+    ReduceAction: Display,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ParseError::NoAction(term, _location) => {
-                write!(f, "{:?}", term)
+            ParseError::NoAction(err) => {
+                write!(f, "NoAction: {}, State: {}", err.term, err.state)
             }
-            ParseError::ReduceAction(_term, _location, err) => {
-                write!(f, "{:?}", err)
+            ParseError::ReduceAction(err) => {
+                write!(
+                    f,
+                    "ReduceAction: {}, State: {}\nSource: {}",
+                    err.term, err.state, err.source
+                )
             }
-            ParseError::NoPrecedence(_term, _location, rule) => {
-                write!(f, "{}", rule)
+            ParseError::NoPrecedence(err) => {
+                write!(f, "NoPrecedence: {}, State: {}", err.rule, err.state)
             }
         }
     }
