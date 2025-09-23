@@ -60,6 +60,13 @@ fn main() {
                 }
             }
 
+            let mut similar_states = Vec::new();
+            for (i, s) in out.grammar.states.iter().enumerate() {
+                if state.ruleset == s.ruleset && i != state_idx {
+                    similar_states.push(i);
+                }
+            }
+
             println!("State {state_idx}:");
             println!("Production Rules: {{");
             for rule in &state.ruleset {
@@ -114,6 +121,13 @@ fn main() {
                 println!("From States: {{");
                 for from_state in from_states {
                     println!("    State {}", from_state);
+                }
+                println!("}}");
+            }
+            if !similar_states.is_empty() {
+                println!("Similar States: {{");
+                for similar_state in similar_states {
+                    println!("    State {}", similar_state);
                 }
                 println!("}}");
             }

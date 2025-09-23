@@ -50,7 +50,11 @@ pub type EState = ::rusty_lr::parser::state::SparseState<
 >;
 /// type alias for `ParseError`
 #[allow(non_camel_case_types, dead_code)]
-pub type EParseError = ::rusty_lr::parser::deterministic::ParseError<EDataStack>;
+pub type EParseError = ::rusty_lr::parser::deterministic::ParseError<
+    Token,
+    ::rusty_lr::DefaultLocation,
+    String,
+>;
 /// A enum that represents terminal classes
 #[allow(non_camel_case_types, dead_code)]
 #[derive(

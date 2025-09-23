@@ -133,7 +133,11 @@ pub type JsonState = ::rusty_lr::parser::state::DenseState<
 >;
 /// type alias for `ParseError`
 #[allow(non_camel_case_types, dead_code)]
-pub type JsonParseError = ::rusty_lr::parser::deterministic::ParseError<JsonDataStack>;
+pub type JsonParseError = ::rusty_lr::parser::deterministic::ParseError<
+    char,
+    std::ops::Range<usize>,
+    ::rusty_lr::DefaultReduceActionError,
+>;
 /// A enum that represents terminal classes
 #[allow(non_camel_case_types, dead_code)]
 #[derive(
