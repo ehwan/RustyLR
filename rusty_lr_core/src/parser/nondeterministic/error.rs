@@ -15,7 +15,7 @@ pub struct ParseError<Term, Location, ReduceActionError> {
     /// This is same as when setting %nonassoc in Bison.
     pub no_precedences: Vec<usize>,
 
-    /// States when the error occurred (from every diverged paths)
+    /// States when the error occurred (from all diverged paths)
     pub(crate) states: Vec<usize>,
 }
 
@@ -27,7 +27,7 @@ impl<Term, Location, ReduceActionError> ParseError<Term, Location, ReduceActionE
     pub fn term(&self) -> &crate::TerminalSymbol<Term> {
         &self.term
     }
-    /// States when the error occurred (from every diverged paths)
+    /// States when the error occurred (from all diverged paths)
     pub fn states(&self) -> impl Iterator<Item = usize> + '_ {
         self.states.iter().copied()
     }
