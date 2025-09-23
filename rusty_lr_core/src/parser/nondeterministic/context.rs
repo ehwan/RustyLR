@@ -514,7 +514,10 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         mut self,
         parser: &P,
         userdata: &mut Data::UserData,
-    ) -> Result<impl Iterator<Item = Data::StartType>, ParseError<Data>>
+    ) -> Result<
+        impl Iterator<Item = Data::StartType>,
+        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
+    >
     where
         Data: Clone,
         P::Term: Clone,
@@ -966,7 +969,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         parser: &P,
         term: Data::Term,
         userdata: &mut Data::UserData,
-    ) -> Result<(), ParseError<Data>>
+    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
@@ -1269,7 +1272,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         term: P::Term,
         userdata: &mut Data::UserData,
         location: Data::Location,
-    ) -> Result<(), ParseError<Data>>
+    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
@@ -1316,6 +1319,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     location: Some(location),
                     reduce_action_errors: std::mem::take(&mut self.reduce_errors),
                     no_precedences: std::mem::take(&mut self.no_precedences),
+                    states: self.states().collect(),
                 });
             }
 
@@ -1335,6 +1339,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     location: Some(location),
                     reduce_action_errors: std::mem::take(&mut self.reduce_errors),
                     no_precedences: std::mem::take(&mut self.no_precedences),
+                    states: self.states().collect(),
                 })
             } else {
                 // try shift term to error state
@@ -1746,7 +1751,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
         &mut self,
         parser: &P,
         userdata: &mut Data::UserData,
-    ) -> Result<(), ParseError<Data>>
+    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
@@ -1784,6 +1789,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 location: None,
                 reduce_action_errors: std::mem::take(&mut self.reduce_errors),
                 no_precedences: std::mem::take(&mut self.no_precedences),
+                states: self.states().collect(),
             })
         } else {
             std::mem::swap(&mut self.current_nodes, &mut self.next_nodes);

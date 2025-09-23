@@ -119,7 +119,7 @@ impl Grammar {
                     pub type #state_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
                     /// type alias for `InvalidTerminalError`
                     #[allow(non_camel_case_types,dead_code)]
-                    pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#data_stack_typename>;
+                    pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
                 }
             );
         } else {
