@@ -220,6 +220,18 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         self.node(node).state_stack.last().unwrap().into_usize()
     }
 
+    /// Get current states in every diverged paths.
+    pub fn states(&self) -> impl Iterator<Item = usize> + '_ {
+        self.current_nodes.iter().map(|&node| self.state(node))
+    }
+
+    /// Get iterators of state stacks in every diverged paths.
+    pub fn state_stacks(&self) -> impl Iterator<Item = impl Iterator<Item = usize> + '_> + '_ {
+        self.current_nodes
+            .iter()
+            .map(move |&node| self.state_iter(node).chain(std::iter::once(0)))
+    }
+
     /// pop one stack from the node.
     fn pop(&mut self, node: usize) -> Option<usize> {
         match self.node(node).len() {
@@ -495,11 +507,6 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     /// Is there any path alive?
     pub fn is_empty(&self) -> bool {
         self.current_nodes.is_empty()
-    }
-
-    /// Get current index of states in every diverged paths.
-    pub fn states(&self) -> impl Iterator<Item = usize> + '_ {
-        self.current_nodes.iter().map(|node| self.state(*node))
     }
 
     /// End this context and return iterator of the start value from the data stack.

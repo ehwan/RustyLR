@@ -100,6 +100,10 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     pub fn state(&self) -> usize {
         self.state_stack.last().unwrap().into_usize()
     }
+    /// Get iterator of state stack
+    pub fn state_stack(&self) -> impl Iterator<Item = usize> + '_ {
+        self.state_stack.iter().map(|s| s.into_usize())
+    }
 
     /// For debugging.
     /// Get `TreeList` that current context holds.
