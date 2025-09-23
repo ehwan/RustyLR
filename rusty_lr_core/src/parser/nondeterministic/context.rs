@@ -225,7 +225,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         self.current_nodes.iter().map(|&node| self.state(node))
     }
 
-    /// Get iterators of state stacks in every diverged paths.
+    /// Get iterators of state stacks in all diverged paths.
     pub fn state_stacks(&self) -> impl Iterator<Item = impl Iterator<Item = usize> + '_> + '_ {
         self.current_nodes
             .iter()
