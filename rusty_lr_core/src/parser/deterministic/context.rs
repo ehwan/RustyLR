@@ -361,14 +361,15 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         debug_assert!(
             (term.is_eof() && location.is_none()) || (!term.is_eof() && location.is_some())
         );
+        use super::super::state::ReduceRules;
         use crate::Location;
 
         let shift_to = loop {
             let state = &parser.get_states()[self.state_stack.last().unwrap().into_usize()];
 
             let shift = state.shift_goto_class(class);
-            if let Some(mut reduce_rule) = state.reduce(class) {
-                let reduce_rule = reduce_rule.next().unwrap();
+            if let Some(reduce_rule) = state.reduce(class) {
+                let reduce_rule = reduce_rule.to_iter().next().unwrap();
                 let rule = &parser.get_rules()[reduce_rule.into_usize()];
                 let tokens_len = rule.rule.len();
 
@@ -611,8 +612,9 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 .into_usize()];
 
             let shift = state.shift_goto_class(class);
-            if let Some(mut reduce_rule) = state.reduce(class) {
-                let reduce_rule = reduce_rule.next().unwrap();
+            if let Some(reduce_rule) = state.reduce(class) {
+                use super::super::state::ReduceRules;
+                let reduce_rule = reduce_rule.to_iter().next().unwrap();
                 let rule = &parser.get_rules()[reduce_rule.into_usize()];
                 let tokens_len = rule.rule.len();
 

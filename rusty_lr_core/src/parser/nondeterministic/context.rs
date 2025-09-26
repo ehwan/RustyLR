@@ -1014,6 +1014,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             (term.is_eof() && location.is_none()) || (!term.is_eof() && location.is_some())
         );
         debug_assert!(self.node(node).is_leaf());
+        use crate::parser::state::ReduceRules;
         use crate::parser::State;
 
         let last_state = self.state(node);
@@ -1022,7 +1023,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             let mut shift = None;
             let mut reduces: smallvec::SmallVec<[_; 2]> = Default::default();
 
-            for reduce_rule in reduce_rules {
+            for reduce_rule in reduce_rules.to_iter() {
                 let rule = &parser.get_rules()[reduce_rule.into_usize()];
                 let reduce_prec = match rule.precedence {
                     Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
@@ -1419,7 +1420,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             let mut shift = None;
             let mut reduces: smallvec::SmallVec<[_; 2]> = Default::default();
 
-            for reduce_rule in reduce_rules {
+            use crate::parser::state::ReduceRules;
+            for reduce_rule in reduce_rules.to_iter() {
                 let rule = &parser.get_rules()[reduce_rule.into_usize()];
                 let reduce_prec = match rule.precedence {
                     Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),

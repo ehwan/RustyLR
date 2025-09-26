@@ -105,6 +105,7 @@ impl<T: Index, const CAP: usize> ReduceRules for ArrayVec<T, CAP> {
 pub trait State {
     type TermClass: TerminalClass;
     type NonTerm: NonTerminal;
+    type ReduceRules: ReduceRules;
 
     /// Get the next state for a given terminal symbol.
     fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<usize>>;
@@ -113,10 +114,7 @@ pub trait State {
     fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<usize>>;
 
     /// Get the reduce rule index for a given terminal symbol.
-    fn reduce(
-        &self,
-        class: Self::TermClass,
-    ) -> Option<impl Iterator<Item = impl Index> + Clone + '_>;
+    fn reduce(&self, class: Self::TermClass) -> Option<&Self::ReduceRules>;
 
     /// Check if this state is an accept state.
     fn is_accept(&self) -> bool;
@@ -162,6 +160,7 @@ impl<
 {
     type TermClass = TermClass;
     type NonTerm = NonTerm;
+    type ReduceRules = RuleContainer;
 
     fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<usize>> {
         self.shift_goto_map_class.get(&class).map(|s| ShiftTarget {
@@ -177,11 +176,8 @@ impl<
                 push: s.push,
             })
     }
-    fn reduce(
-        &self,
-        class: Self::TermClass,
-    ) -> Option<impl Iterator<Item = impl Index> + Clone + '_> {
-        self.reduce_map.get(&class).map(ReduceRules::to_iter)
+    fn reduce(&self, class: Self::TermClass) -> Option<&Self::ReduceRules> {
+        self.reduce_map.get(&class)
     }
     fn is_accept(&self) -> bool {
         self.reduce_map.is_empty()
@@ -241,6 +237,8 @@ impl<
 {
     type TermClass = TermClass;
     type NonTerm = NonTerm;
+    type ReduceRules = RuleContainer;
+
     fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<usize>> {
         self.shift_goto_map_class
             .get(class.to_usize().wrapping_sub(self.shift_class_offset))
@@ -261,14 +259,10 @@ impl<
                 push: s.push,
             })
     }
-    fn reduce(
-        &self,
-        class: Self::TermClass,
-    ) -> Option<impl Iterator<Item = impl Index> + Clone + '_> {
+    fn reduce(&self, class: Self::TermClass) -> Option<&Self::ReduceRules> {
         self.reduce_map
             .get(class.to_usize().wrapping_sub(self.reduce_offset))
             .and_then(|r| r.as_ref())
-            .map(ReduceRules::to_iter)
     }
     fn is_accept(&self) -> bool {
         self.reduce_map.is_empty()
