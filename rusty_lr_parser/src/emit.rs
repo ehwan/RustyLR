@@ -122,7 +122,7 @@ impl Grammar {
             quote! {
                     /// type alias for `Context`
                     #[allow(non_camel_case_types,dead_code)]
-                    pub type #context_struct_name = #module_prefix::parser::nondeterministic::Context<#data_stack_typename, #state_index_typename>;
+                    pub type #context_struct_name = #module_prefix::parser::nondeterministic::Context<#data_stack_typename, #state_index_typename, #max_reduce_rules>;
                     /// type alias for CFG production rule
                     #[allow(non_camel_case_types,dead_code)]
                     pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;

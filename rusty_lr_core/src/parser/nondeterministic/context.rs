@@ -18,12 +18,12 @@ type SmallVecNode = smallvec::SmallVec<[usize; 3]>;
 /// Iterator for traverse node to root.
 /// Note that root node is not included in this iterator.
 #[derive(Clone)]
-pub struct NodeRefIterator<'a, Data: DataStack, StateIndex> {
-    context: &'a Context<Data, StateIndex>,
+pub struct NodeRefIterator<'a, Data: DataStack, StateIndex, const MAX_REDUCE_RULES: usize> {
+    context: &'a Context<Data, StateIndex, MAX_REDUCE_RULES>,
     node: Option<usize>,
 }
-impl<'a, Data: DataStack, StateIndex: Index + Copy> Iterator
-    for NodeRefIterator<'a, Data, StateIndex>
+impl<'a, Data: DataStack, StateIndex: Index + Copy, const MAX_REDUCE_RULES: usize> Iterator
+    for NodeRefIterator<'a, Data, StateIndex, MAX_REDUCE_RULES>
 {
     type Item = &'a Node<Data, StateIndex>;
 
@@ -36,7 +36,7 @@ impl<'a, Data: DataStack, StateIndex: Index + Copy> Iterator
 
 /// A struct that maintains the current state and the values associated with each symbol.
 /// This handles the divergence and merging of the parser.
-pub struct Context<Data: DataStack, StateIndex> {
+pub struct Context<Data: DataStack, StateIndex, const MAX_REDUCE_RULES: usize> {
     pub(crate) nodes_pool: Vec<Node<Data, StateIndex>>,
     pub(crate) empty_node_indices: std::collections::BTreeSet<usize>,
 
@@ -58,7 +58,9 @@ pub struct Context<Data: DataStack, StateIndex> {
     pub(crate) no_precedences: Vec<usize>,
 }
 
-impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
+impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
+    Context<Data, StateIndex, MAX_REDUCE_RULES>
+{
     /// Create a new context.
     /// `current_nodes` is initialized with a root node.
     pub fn new() -> Self {
@@ -174,7 +176,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     }
 
     /// Get iterator for all nodes in the current context.
-    fn node_iter(&self, node: usize) -> NodeRefIterator<'_, Data, StateIndex> {
+    fn node_iter(&self, node: usize) -> NodeRefIterator<'_, Data, StateIndex, MAX_REDUCE_RULES> {
         NodeRefIterator {
             context: self,
             node: Some(node),
@@ -1027,7 +1029,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         let shift_state = parser.get_states()[last_state].shift_goto_class(class);
         if let Some(reduce_rules) = parser.get_states()[last_state].reduce(class) {
             let mut shift = None;
-            let mut reduces: smallvec::SmallVec<[_; 2]> = Default::default();
+            let mut reduces: arrayvec::ArrayVec<_, MAX_REDUCE_RULES> = Default::default();
 
             for reduce_rule in reduce_rules.to_iter() {
                 let rule = &parser.get_rules()[reduce_rule.into_usize()];
@@ -1424,7 +1426,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         let shift_state = parser.get_states()[last_state].shift_goto_class(class);
         if let Some(reduce_rules) = parser.get_states()[last_state].reduce(class) {
             let mut shift = None;
-            let mut reduces: smallvec::SmallVec<[_; 2]> = Default::default();
+            let mut reduces: arrayvec::ArrayVec<_, MAX_REDUCE_RULES> = Default::default();
 
             use crate::parser::state::ReduceRules;
             for reduce_rule in reduce_rules.to_iter() {
@@ -1845,7 +1847,9 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     }
 }
 
-impl<Data: DataStack, StateIndex: Index + Copy> Default for Context<Data, StateIndex> {
+impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize> Default
+    for Context<Data, StateIndex, MAX_REDUCE_RULES>
+{
     fn default() -> Self {
         let mut context = Context {
             nodes_pool: Default::default(),
@@ -1862,7 +1866,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Default for Context<Data, StateI
     }
 }
 
-impl<Data: DataStack, StateIndex: Index + Copy> Clone for Context<Data, StateIndex>
+impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize> Clone
+    for Context<Data, StateIndex, MAX_REDUCE_RULES>
 where
     Node<Data, StateIndex>: Clone,
 {
@@ -1877,7 +1882,8 @@ where
 }
 
 #[cfg(feature = "tree")]
-impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Display for Context<Data, StateIndex>
+impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize> std::fmt::Display
+    for Context<Data, StateIndex, MAX_REDUCE_RULES>
 where
     Data::Term: std::fmt::Display + Clone,
     Data::NonTerm: std::fmt::Display + Clone,
@@ -1891,7 +1897,8 @@ where
     }
 }
 #[cfg(feature = "tree")]
-impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Debug for Context<Data, StateIndex>
+impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize> std::fmt::Debug
+    for Context<Data, StateIndex, MAX_REDUCE_RULES>
 where
     Data::Term: std::fmt::Debug + Clone,
     Data::NonTerm: std::fmt::Debug + Clone,
