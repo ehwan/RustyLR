@@ -93,24 +93,36 @@ impl Grammar {
         } else {
             quote! { usize }
         };
+        let rule_index_type = if self.builder.rules.len() <= u8::MAX as usize {
+            quote! { u8 }
+        } else if self.builder.rules.len() <= u16::MAX as usize {
+            quote! { u16 }
+        } else if self.builder.rules.len() <= u32::MAX as usize {
+            quote! { u32 }
+        } else {
+            quote! { usize }
+        };
 
         if self.glr {
-            // count the number of rules
-            // and calculate the integral type for rule index -> u8, u16, u32, usize ...
-            let rule_container_type = if self.builder.rules.len() <= u8::MAX as usize {
-                quote! { #module_prefix::parser::state::SmallVecU8 }
-            } else if self.builder.rules.len() <= u16::MAX as usize {
-                quote! { #module_prefix::parser::state::SmallVecU16 }
-            } else if self.builder.rules.len() <= u32::MAX as usize {
-                quote! { #module_prefix::parser::state::SmallVecU32 }
+            // count the max number of multiple reduce rules in a single state
+            let max_reduce_rules = self
+                .states
+                .iter()
+                .flat_map(|s| s.reduce_map.iter().map(|(_, rules)| rules.len()))
+                .max()
+                .unwrap_or(1);
+
+            let rule_container_type = if max_reduce_rules == 1 {
+                rule_index_type.clone()
             } else {
-                quote! { #module_prefix::parser::state::SmallVecUsize }
+                quote! { #module_prefix::parser::state::ArrayVec<#rule_index_type, #max_reduce_rules> }
             };
+
             stream.extend(
             quote! {
                     /// type alias for `Context`
                     #[allow(non_camel_case_types,dead_code)]
-                    pub type #context_struct_name = #module_prefix::parser::nondeterministic::Context<#data_stack_typename, #state_index_typename>;
+                    pub type #context_struct_name = #module_prefix::parser::nondeterministic::Context<#data_stack_typename, #state_index_typename, #max_reduce_rules>;
                     /// type alias for CFG production rule
                     #[allow(non_camel_case_types,dead_code)]
                     pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;
@@ -133,7 +145,7 @@ impl Grammar {
                 pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;
                 /// type alias for DFA state
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #state_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, usize, #state_index_typename>;
+                pub type #state_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, #rule_index_type, #state_index_typename>;
                 /// type alias for `ParseError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;

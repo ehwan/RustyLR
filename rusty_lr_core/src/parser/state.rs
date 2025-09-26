@@ -68,6 +68,7 @@ impl Index for u32 {
 /// we need to handle the set of reduce rules efficiently, usually 2~3 items.
 /// this trait implements the stack-allocated vector for this purpose.
 pub trait ReduceRules {
+    const CAP: usize;
     type RuleIndex: Index;
 
     fn to_iter(&self) -> impl Iterator<Item = Self::RuleIndex> + Clone;
@@ -76,6 +77,7 @@ pub trait ReduceRules {
 
 /// For deterministic parser behavior
 impl<Integral: Index + Copy> ReduceRules for Integral {
+    const CAP: usize = 1;
     type RuleIndex = Integral;
 
     fn to_iter(&self) -> impl Iterator<Item = Self::RuleIndex> + Clone {
@@ -86,11 +88,11 @@ impl<Integral: Index + Copy> ReduceRules for Integral {
         set.into_iter().next().unwrap().try_into().ok().unwrap()
     }
 }
-impl<Arr: smallvec::Array> ReduceRules for smallvec::SmallVec<Arr>
-where
-    Arr::Item: Index + Copy,
-{
-    type RuleIndex = Arr::Item;
+
+pub use arrayvec::ArrayVec;
+impl<T: Index, const CAP: usize> ReduceRules for ArrayVec<T, CAP> {
+    const CAP: usize = CAP;
+    type RuleIndex = T;
 
     fn to_iter(&self) -> impl Iterator<Item = Self::RuleIndex> + Clone {
         self.iter().copied()
@@ -102,27 +104,20 @@ where
     }
 }
 
-pub type SmallVecU8 = smallvec::SmallVec<[u8; 16]>;
-pub type SmallVecU16 = smallvec::SmallVec<[u16; 8]>;
-pub type SmallVecU32 = smallvec::SmallVec<[u32; 4]>;
-pub type SmallVecUsize = smallvec::SmallVec<[usize; 2]>;
-
 /// A trait representing a parser state.
 pub trait State {
     type TermClass: TerminalClass;
     type NonTerm: NonTerminal;
+    type ReduceRules: ReduceRules;
+    type StateIndex: Index;
 
     /// Get the next state for a given terminal symbol.
-    fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<usize>>;
+    fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<Self::StateIndex>>;
 
     /// Get the next state for a given non-terminal symbol.
-    fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<usize>>;
-
+    fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<Self::StateIndex>>;
     /// Get the reduce rule index for a given terminal symbol.
-    fn reduce(
-        &self,
-        class: Self::TermClass,
-    ) -> Option<impl Iterator<Item = impl Index> + Clone + '_>;
+    fn reduce(&self, class: Self::TermClass) -> Option<&Self::ReduceRules>;
 
     /// Check if this state is an accept state.
     fn is_accept(&self) -> bool;
@@ -163,31 +158,22 @@ impl<
         TermClass: TerminalClass + Hash + Eq,
         NonTerm: NonTerminal + Hash + Eq,
         RuleContainer: ReduceRules,
-        StateIndex: Into<usize> + Copy,
+        StateIndex: Index,
     > State for SparseState<TermClass, NonTerm, RuleContainer, StateIndex>
 {
     type TermClass = TermClass;
     type NonTerm = NonTerm;
+    type ReduceRules = RuleContainer;
+    type StateIndex = StateIndex;
 
-    fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<usize>> {
-        self.shift_goto_map_class.get(&class).map(|s| ShiftTarget {
-            state: s.state.into(),
-            push: s.push,
-        })
+    fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<Self::StateIndex>> {
+        self.shift_goto_map_class.get(&class).copied()
     }
-    fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<usize>> {
-        self.shift_goto_map_nonterm
-            .get(&nonterm)
-            .map(|s| ShiftTarget {
-                state: s.state.into(),
-                push: s.push,
-            })
+    fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<Self::StateIndex>> {
+        self.shift_goto_map_nonterm.get(&nonterm).copied()
     }
-    fn reduce(
-        &self,
-        class: Self::TermClass,
-    ) -> Option<impl Iterator<Item = impl Index> + Clone + '_> {
-        self.reduce_map.get(&class).map(ReduceRules::to_iter)
+    fn reduce(&self, class: Self::TermClass) -> Option<&Self::ReduceRules> {
+        self.reduce_map.get(&class)
     }
     fn is_accept(&self) -> bool {
         self.reduce_map.is_empty()
@@ -242,39 +228,30 @@ impl<
         TermClass: TerminalClass,
         NonTerm: NonTerminal,
         RuleContainer: ReduceRules,
-        StateIndex: Into<usize> + Copy,
+        StateIndex: Index,
     > State for DenseState<TermClass, NonTerm, RuleContainer, StateIndex>
 {
     type TermClass = TermClass;
     type NonTerm = NonTerm;
-    fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<usize>> {
+    type ReduceRules = RuleContainer;
+    type StateIndex = StateIndex;
+
+    fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<Self::StateIndex>> {
         self.shift_goto_map_class
             .get(class.to_usize().wrapping_sub(self.shift_class_offset))
             .copied()
             .flatten()
-            .map(|s| ShiftTarget {
-                state: s.state.into(),
-                push: s.push,
-            })
     }
-    fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<usize>> {
+    fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<Self::StateIndex>> {
         self.shift_goto_map_nonterm
             .get(nonterm.to_usize().wrapping_sub(self.shift_nonterm_offset))
             .copied()
             .flatten()
-            .map(|s| ShiftTarget {
-                state: s.state.into(),
-                push: s.push,
-            })
     }
-    fn reduce(
-        &self,
-        class: Self::TermClass,
-    ) -> Option<impl Iterator<Item = impl Index> + Clone + '_> {
+    fn reduce(&self, class: Self::TermClass) -> Option<&Self::ReduceRules> {
         self.reduce_map
             .get(class.to_usize().wrapping_sub(self.reduce_offset))
             .and_then(|r| r.as_ref())
-            .map(ReduceRules::to_iter)
     }
     fn is_accept(&self) -> bool {
         self.reduce_map.is_empty()

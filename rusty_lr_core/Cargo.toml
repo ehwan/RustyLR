@@ -12,7 +12,7 @@ categories = ["parsing"]
 [dependencies]
 rustc-hash = "2.1"
 termtree = { version = "0.5", optional = true }
-smallvec = { version = "1.15" }
+arrayvec = "0.7"
 
 [features]
 default = []

@@ -13,17 +13,15 @@ use crate::parser::Precedence;
 use crate::parser::State;
 use crate::TerminalSymbol;
 
-type SmallVecNode = smallvec::SmallVec<[usize; 3]>;
-
 /// Iterator for traverse node to root.
 /// Note that root node is not included in this iterator.
 #[derive(Clone)]
-pub struct NodeRefIterator<'a, Data: DataStack, StateIndex> {
-    context: &'a Context<Data, StateIndex>,
+pub struct NodeRefIterator<'a, Data: DataStack, StateIndex, const MAX_REDUCE_RULES: usize> {
+    context: &'a Context<Data, StateIndex, MAX_REDUCE_RULES>,
     node: Option<usize>,
 }
-impl<'a, Data: DataStack, StateIndex: Index + Copy> Iterator
-    for NodeRefIterator<'a, Data, StateIndex>
+impl<'a, Data: DataStack, StateIndex: Index + Copy, const MAX_REDUCE_RULES: usize> Iterator
+    for NodeRefIterator<'a, Data, StateIndex, MAX_REDUCE_RULES>
 {
     type Item = &'a Node<Data, StateIndex>;
 
@@ -36,18 +34,18 @@ impl<'a, Data: DataStack, StateIndex: Index + Copy> Iterator
 
 /// A struct that maintains the current state and the values associated with each symbol.
 /// This handles the divergence and merging of the parser.
-pub struct Context<Data: DataStack, StateIndex> {
+pub struct Context<Data: DataStack, StateIndex, const MAX_REDUCE_RULES: usize> {
     pub(crate) nodes_pool: Vec<Node<Data, StateIndex>>,
     pub(crate) empty_node_indices: std::collections::BTreeSet<usize>,
 
     /// each element represents an end-point of diverged paths.
-    pub(crate) current_nodes: SmallVecNode,
+    pub(crate) current_nodes: Vec<usize>,
 
     /// temporary storage
-    pub(crate) next_nodes: SmallVecNode,
+    pub(crate) next_nodes: Vec<usize>,
 
     /// For recovery from error
-    pub(crate) fallback_nodes: SmallVecNode,
+    pub(crate) fallback_nodes: Vec<usize>,
 
     /// For temporary use. store reduce errors returned from `reduce_action`.
     /// But we don't want to reallocate every `feed` call
@@ -58,7 +56,9 @@ pub struct Context<Data: DataStack, StateIndex> {
     pub(crate) no_precedences: Vec<usize>,
 }
 
-impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
+impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
+    Context<Data, StateIndex, MAX_REDUCE_RULES>
+{
     /// Create a new context.
     /// `current_nodes` is initialized with a root node.
     pub fn new() -> Self {
@@ -174,7 +174,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     }
 
     /// Get iterator for all nodes in the current context.
-    fn node_iter(&self, node: usize) -> NodeRefIterator<'_, Data, StateIndex> {
+    fn node_iter(&self, node: usize) -> NodeRefIterator<'_, Data, StateIndex, MAX_REDUCE_RULES> {
         NodeRefIterator {
             context: self,
             node: Some(node),
@@ -443,6 +443,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         Data: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
     {
         use crate::Location;
         let rule = &parser.get_rules()[reduce_rule];
@@ -471,8 +472,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 if let Some(nonterm_shift_state) =
                     parser.get_states()[state].shift_goto_nonterm(rule.name)
                 {
-                    node.state_stack
-                        .push(StateIndex::from_usize_unchecked(nonterm_shift_state.state));
+                    node.state_stack.push(nonterm_shift_state.state);
                     if !nonterm_shift_state.push && non_empty_pushed {
                         node.data_stack.pop();
                         node.data_stack.push_empty();
@@ -522,6 +522,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         Data: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
     {
         self.feed_eof(parser, userdata)?;
         // since `eof` is feeded, every node graph should be like this:
@@ -831,6 +832,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ) where
         P::TermClass: Ord,
         P::NonTerm: Ord,
+        P::State: State<StateIndex = StateIndex>,
     {
         let state = extra_state_stack
             .last()
@@ -892,7 +894,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 });
             let state = &parser.get_states()[state];
             if let Some(next_state) = state.shift_goto_nonterm(nonterm) {
-                extra_state_stack.push(Index::from_usize_unchecked(next_state.state));
+                extra_state_stack.push(next_state.state);
                 self.expected_token_impl(
                     &mut extra_state_stack,
                     parser,
@@ -915,6 +917,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         P::TermClass: Ord,
         P::NonTerm: Ord,
+        P::State: State<StateIndex = StateIndex>,
     {
         let mut terms = std::collections::BTreeSet::new();
         let mut nonterms = std::collections::BTreeSet::new();
@@ -954,6 +957,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         P::TermClass: Ord,
         P::NonTerm: Ord,
+        P::State: State<StateIndex = StateIndex>,
     {
         let (terms, nonterms) = self.expected_token(parser);
         (
@@ -973,6 +977,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
         Data: Clone,
         Data::Location: Default,
     {
@@ -1009,20 +1014,22 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         Data: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
     {
         debug_assert!(
             (term.is_eof() && location.is_none()) || (!term.is_eof() && location.is_some())
         );
         debug_assert!(self.node(node).is_leaf());
+        use crate::parser::state::ReduceRules;
         use crate::parser::State;
 
         let last_state = self.state(node);
         let shift_state = parser.get_states()[last_state].shift_goto_class(class);
         if let Some(reduce_rules) = parser.get_states()[last_state].reduce(class) {
             let mut shift = None;
-            let mut reduces: smallvec::SmallVec<[_; 2]> = Default::default();
+            let mut reduces: arrayvec::ArrayVec<_, MAX_REDUCE_RULES> = Default::default();
 
-            for reduce_rule in reduce_rules {
+            for reduce_rule in reduce_rules.to_iter() {
                 let rule = &parser.get_rules()[reduce_rule.into_usize()];
                 let reduce_prec = match rule.precedence {
                     Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
@@ -1149,9 +1156,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             }
             if let Some(shift) = shift {
                 let node_ = self.node_mut(node);
-                node_
-                    .state_stack
-                    .push(StateIndex::from_usize_unchecked(shift.state));
+                node_.state_stack.push(shift.state);
                 node_.precedence_stack.push(shift_prec);
                 if let Some(location) = &location {
                     node_.location_stack.push(location.clone());
@@ -1185,9 +1190,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             }
         } else if let Some(shift) = shift_state {
             let node_ = self.node_mut(node);
-            node_
-                .state_stack
-                .push(StateIndex::from_usize_unchecked(shift.state));
+            node_.state_stack.push(shift.state);
             node_.precedence_stack.push(shift_prec);
             if let Some(location) = location {
                 node_.location_stack.push(location);
@@ -1229,6 +1232,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         Data: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
     {
         use crate::Location;
 
@@ -1276,6 +1280,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
         Data: Clone,
     {
         use crate::parser::State;
@@ -1352,8 +1357,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         // A -> a . error b
                         // and b is fed, shift error and b
                         let node = self.node_mut(error_node);
-                        node.state_stack
-                            .push(StateIndex::from_usize_unchecked(next_state.state));
+                        node.state_stack.push(next_state.state);
                         node.precedence_stack.push(shift_prec);
                         node.location_stack.push(location.clone());
                         #[cfg(feature = "tree")]
@@ -1400,7 +1404,10 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         mut node_and_len: Option<(usize, NonZeroUsize)>,
         class: P::TermClass,
         shift_prec: Precedence,
-    ) -> Option<bool> {
+    ) -> Option<bool>
+    where
+        P::State: State<StateIndex = StateIndex>,
+    {
         use crate::parser::State;
 
         let last_state = extra_state_stack
@@ -1417,9 +1424,10 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         let shift_state = parser.get_states()[last_state].shift_goto_class(class);
         if let Some(reduce_rules) = parser.get_states()[last_state].reduce(class) {
             let mut shift = None;
-            let mut reduces: smallvec::SmallVec<[_; 2]> = Default::default();
+            let mut reduces: arrayvec::ArrayVec<_, MAX_REDUCE_RULES> = Default::default();
 
-            for reduce_rule in reduce_rules {
+            use crate::parser::state::ReduceRules;
+            for reduce_rule in reduce_rules.to_iter() {
                 let rule = &parser.get_rules()[reduce_rule.into_usize()];
                 let reduce_prec = match rule.precedence {
                     Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
@@ -1542,7 +1550,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     })]
                 .shift_goto_nonterm(reduce_rule.name)
                 {
-                    extra_state_stack.push(StateIndex::from_usize_unchecked(next_state_id.state));
+                    extra_state_stack.push(next_state_id.state);
                 } else {
                     unreachable!(
                         "unreachable: nonterminal shift should always succeed after reduce operation. \
@@ -1615,8 +1623,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                     if let Some(next_state_id) =
                         parser.get_states()[last_state].shift_goto_nonterm(reduce_rule.name)
                     {
-                        extra_state_stack
-                            .push(StateIndex::from_usize_unchecked(next_state_id.state));
+                        extra_state_stack.push(next_state_id.state);
                     } else {
                         unreachable!(
                             "unreachable: nonterminal shift should always succeed after reduce operation, but failed for nonterminal '{}' from state {:?}",
@@ -1656,7 +1663,10 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
         &self,
         parser: &P,
         term: &P::Term,
-    ) -> bool {
+    ) -> bool
+    where
+        P::State: State<StateIndex = StateIndex>,
+    {
         let class = P::TermClass::from_term(term);
         let shift_prec = class.precedence();
         let mut extra_state_stack = Vec::new();
@@ -1689,7 +1699,10 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     pub fn can_panic<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> bool {
+    ) -> bool
+    where
+        P::State: State<StateIndex = StateIndex>,
+    {
         // if `error` token was not used in the grammar, early return here
         if !P::ERROR_USED {
             return false;
@@ -1755,6 +1768,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
         Data: Clone,
     {
         self.reduce_errors.clear();
@@ -1800,7 +1814,10 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     pub fn can_accept<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> bool {
+    ) -> bool
+    where
+        P::State: State<StateIndex = StateIndex>,
+    {
         let mut extra_state_stack = Vec::new();
         let mut extra_precedence_stack = Vec::new();
         self.current_nodes.iter().any(move |&node| {
@@ -1828,7 +1845,9 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     }
 }
 
-impl<Data: DataStack, StateIndex: Index + Copy> Default for Context<Data, StateIndex> {
+impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize> Default
+    for Context<Data, StateIndex, MAX_REDUCE_RULES>
+{
     fn default() -> Self {
         let mut context = Context {
             nodes_pool: Default::default(),
@@ -1845,7 +1864,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Default for Context<Data, StateI
     }
 }
 
-impl<Data: DataStack, StateIndex: Index + Copy> Clone for Context<Data, StateIndex>
+impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize> Clone
+    for Context<Data, StateIndex, MAX_REDUCE_RULES>
 where
     Node<Data, StateIndex>: Clone,
 {
@@ -1860,7 +1880,8 @@ where
 }
 
 #[cfg(feature = "tree")]
-impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Display for Context<Data, StateIndex>
+impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize> std::fmt::Display
+    for Context<Data, StateIndex, MAX_REDUCE_RULES>
 where
     Data::Term: std::fmt::Display + Clone,
     Data::NonTerm: std::fmt::Display + Clone,
@@ -1874,7 +1895,8 @@ where
     }
 }
 #[cfg(feature = "tree")]
-impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Debug for Context<Data, StateIndex>
+impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize> std::fmt::Debug
+    for Context<Data, StateIndex, MAX_REDUCE_RULES>
 where
     Data::Term: std::fmt::Debug + Clone,
     Data::NonTerm: std::fmt::Debug + Clone,

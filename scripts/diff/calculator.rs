@@ -45,7 +45,7 @@ pub type ERule = ::rusty_lr::rule::ProductionRule<ETerminalClasses, ENonTerminal
 pub type EState = ::rusty_lr::parser::state::SparseState<
     ETerminalClasses,
     ENonTerminals,
-    usize,
+    u8,
     u8,
 >;
 /// type alias for `ParseError`
