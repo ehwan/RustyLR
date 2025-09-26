@@ -68,6 +68,7 @@ impl Index for u32 {
 /// we need to handle the set of reduce rules efficiently, usually 2~3 items.
 /// this trait implements the stack-allocated vector for this purpose.
 pub trait ReduceRules {
+    const CAP: usize;
     type RuleIndex: Index;
 
     fn to_iter(&self) -> impl Iterator<Item = Self::RuleIndex> + Clone;
@@ -76,6 +77,7 @@ pub trait ReduceRules {
 
 /// For deterministic parser behavior
 impl<Integral: Index + Copy> ReduceRules for Integral {
+    const CAP: usize = 1;
     type RuleIndex = Integral;
 
     fn to_iter(&self) -> impl Iterator<Item = Self::RuleIndex> + Clone {
@@ -89,6 +91,7 @@ impl<Integral: Index + Copy> ReduceRules for Integral {
 
 pub use arrayvec::ArrayVec;
 impl<T: Index, const CAP: usize> ReduceRules for ArrayVec<T, CAP> {
+    const CAP: usize = CAP;
     type RuleIndex = T;
 
     fn to_iter(&self) -> impl Iterator<Item = Self::RuleIndex> + Clone {
