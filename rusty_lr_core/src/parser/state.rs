@@ -128,9 +128,6 @@ pub trait State {
     /// Get the set of expected non-terminal symbols for shift in this state
     fn expected_shift_nonterm(&self) -> impl Iterator<Item = Self::NonTerm> + '_;
 
-    /// Get the set of expected terminal classes for reduce in this state
-    fn expected_reduce_term(&self) -> impl Iterator<Item = Self::TermClass> + '_;
-
     /// Get the set of production rule for reduce in this state
     fn expected_reduce_rule(&self) -> impl Iterator<Item = impl Index> + '_;
 
@@ -186,9 +183,6 @@ impl<
     fn expected_shift_nonterm(&self) -> impl Iterator<Item = Self::NonTerm> + '_ {
         self.shift_goto_map_nonterm.keys().copied()
     }
-    fn expected_reduce_term(&self) -> impl Iterator<Item = Self::TermClass> + '_ {
-        self.reduce_map.keys().copied()
-    }
     fn expected_reduce_rule(&self) -> impl Iterator<Item = impl Index> + '_ {
         self.reduce_map.values().flat_map(RuleContainer::to_iter)
     }
@@ -217,7 +211,6 @@ pub struct DenseState<TermClass, NonTerm, RuleContainer, StateIndex> {
     pub(crate) reduce_map: Vec<Option<RuleContainer>>,
     /// reduce_map[i] will contain i+offset 'th class's reduce rule.
     pub(crate) reduce_offset: usize,
-    pub(crate) reduce_map_keys: Vec<TermClass>,
 
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
@@ -263,9 +256,6 @@ impl<
     }
     fn expected_shift_nonterm(&self) -> impl Iterator<Item = NonTerm> + '_ {
         self.shift_goto_map_nonterm_keys.iter().copied()
-    }
-    fn expected_reduce_term(&self) -> impl Iterator<Item = Self::TermClass> + '_ {
-        self.reduce_map_keys.iter().copied()
     }
     fn expected_reduce_rule(&self) -> impl Iterator<Item = impl Index> + '_ {
         self.reduce_map
@@ -406,11 +396,6 @@ where
             shift_goto_map_class[term.to_usize() - shift_min] = Some(state);
         }
 
-        let reduce_map_keys = builder_state
-            .reduce_map
-            .iter()
-            .map(|(term, _)| *term)
-            .collect();
         let mut reduce_map = vec![None; reduce_len];
         for (term, rule) in builder_state.reduce_map {
             reduce_map[term.to_usize() - reduce_min] = Some(RuleContainer::from_set(rule));
@@ -434,7 +419,6 @@ where
             shift_goto_map_nonterm_keys: nonterm_keys,
             shift_nonterm_offset: nonterm_min,
             reduce_map,
-            reduce_map_keys,
             reduce_offset: reduce_min,
             ruleset: builder_state.ruleset.into_iter().collect(),
             _phantom: std::marker::PhantomData,
