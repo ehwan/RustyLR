@@ -86,11 +86,10 @@ impl<Integral: Index + Copy> ReduceRules for Integral {
         set.into_iter().next().unwrap().try_into().ok().unwrap()
     }
 }
-impl<Arr: smallvec::Array> ReduceRules for smallvec::SmallVec<Arr>
-where
-    Arr::Item: Index + Copy,
-{
-    type RuleIndex = Arr::Item;
+
+pub use arrayvec::ArrayVec;
+impl<T: Index, const CAP: usize> ReduceRules for ArrayVec<T, CAP> {
+    type RuleIndex = T;
 
     fn to_iter(&self) -> impl Iterator<Item = Self::RuleIndex> + Clone {
         self.iter().copied()
@@ -101,11 +100,6 @@ where
             .collect()
     }
 }
-
-pub type SmallVecU8 = smallvec::SmallVec<[u8; 16]>;
-pub type SmallVecU16 = smallvec::SmallVec<[u16; 8]>;
-pub type SmallVecU32 = smallvec::SmallVec<[u32; 4]>;
-pub type SmallVecUsize = smallvec::SmallVec<[usize; 2]>;
 
 /// A trait representing a parser state.
 pub trait State {

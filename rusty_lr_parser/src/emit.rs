@@ -93,19 +93,31 @@ impl Grammar {
         } else {
             quote! { usize }
         };
+        let rule_index_type = if self.builder.rules.len() <= u8::MAX as usize {
+            quote! { u8 }
+        } else if self.builder.rules.len() <= u16::MAX as usize {
+            quote! { u16 }
+        } else if self.builder.rules.len() <= u32::MAX as usize {
+            quote! { u32 }
+        } else {
+            quote! { usize }
+        };
 
         if self.glr {
-            // count the number of rules
-            // and calculate the integral type for rule index -> u8, u16, u32, usize ...
-            let rule_container_type = if self.builder.rules.len() <= u8::MAX as usize {
-                quote! { #module_prefix::parser::state::SmallVecU8 }
-            } else if self.builder.rules.len() <= u16::MAX as usize {
-                quote! { #module_prefix::parser::state::SmallVecU16 }
-            } else if self.builder.rules.len() <= u32::MAX as usize {
-                quote! { #module_prefix::parser::state::SmallVecU32 }
+            // count the max number of multiple reduce rules in a single state
+            let max_reduce_rules = self
+                .states
+                .iter()
+                .filter_map(|s| s.reduce_map.iter().map(|(_, r)| r.len()).max())
+                .max()
+                .unwrap_or(1);
+
+            let rule_container_type = if max_reduce_rules == 1 {
+                rule_index_type.clone()
             } else {
-                quote! { #module_prefix::parser::state::SmallVecUsize }
+                quote! { #module_prefix::parser::state::ArrayVec<#rule_index_type, #max_reduce_rules> }
             };
+
             stream.extend(
             quote! {
                     /// type alias for `Context`
@@ -123,16 +135,6 @@ impl Grammar {
                 }
             );
         } else {
-            let rule_index_type = if self.builder.rules.len() <= u8::MAX as usize {
-                quote! { u8 }
-            } else if self.builder.rules.len() <= u16::MAX as usize {
-                quote! { u16 }
-            } else if self.builder.rules.len() <= u32::MAX as usize {
-                quote! { u32 }
-            } else {
-                quote! { usize }
-            };
-
             stream.extend(
         quote! {
                 /// type alias for `Context`
