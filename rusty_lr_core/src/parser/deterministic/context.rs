@@ -66,6 +66,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         Data::Term: Clone,
         Data::NonTerm: Hash + Eq + Copy + NonTerminal,
+        P::State: State<StateIndex = StateIndex>,
     {
         self.feed_eof(parser, userdata)?;
 
@@ -81,6 +82,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ) -> bool
     where
         Data::NonTerm: Hash + Eq + NonTerminal,
+        P::State: State<StateIndex = StateIndex>,
     {
         let mut extra_state_stack = Vec::new();
         let mut extra_precedence_stack = Vec::new();
@@ -130,6 +132,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         P::TermClass: Ord,
         P::NonTerm: Ord,
+        P::State: State<StateIndex = StateIndex>,
     {
         let mut terms = BTreeSet::new();
         let mut nonterms = BTreeSet::new();
@@ -155,6 +158,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         P::TermClass: Ord,
         P::NonTerm: Ord,
+        P::State: State<StateIndex = StateIndex>,
     {
         let (terms, nonterms) = self.expected_token(parser);
         (
@@ -173,6 +177,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ) where
         P::TermClass: Ord,
         P::NonTerm: Ord,
+        P::State: State<StateIndex = StateIndex>,
     {
         let state = &parser.get_states()[extra_state_stack
             .last()
@@ -203,7 +208,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 .unwrap_or_else(|| self.state_stack[stack_len])
                 .into_usize()];
             if let Some(next_state) = state.shift_goto_nonterm(nonterm) {
-                extra_state_stack.push(Index::from_usize_unchecked(next_state.state));
+                extra_state_stack.push(next_state.state);
                 self.expected_token_impl(
                     &mut extra_state_stack,
                     stack_len,
@@ -226,6 +231,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         Data::Location: Default,
         P::Term: Clone,
+        P::State: State<StateIndex = StateIndex>,
     {
         self.feed_location(parser, term, userdata, Default::default())
     }
@@ -240,6 +246,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
+        P::State: State<StateIndex = StateIndex>,
     {
         use crate::Location;
         let class = P::TermClass::from_term(&term);
@@ -324,8 +331,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
                     self.location_stack.push(err.location.unwrap());
                     self.precedence_stack.push(shift_prec);
-                    self.state_stack
-                        .push(StateIndex::from_usize_unchecked(next_state.state));
+                    self.state_stack.push(next_state.state);
                 } else {
                     // merge term with previous error
 
@@ -357,6 +363,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
+        P::State: State<StateIndex = StateIndex>,
     {
         debug_assert!(
             (term.is_eof() && location.is_none()) || (!term.is_eof() && location.is_some())
@@ -483,8 +490,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     [self.state_stack.last().unwrap().into_usize()]
                 .shift_goto_nonterm(rule.name)
                 {
-                    self.state_stack
-                        .push(StateIndex::from_usize_unchecked(next_state_id.state));
+                    self.state_stack.push(next_state_id.state);
                     if !next_state_id.push && non_empty_pushed {
                         self.data_stack.pop();
                         self.data_stack.push_empty();
@@ -499,8 +505,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
         // shift with terminal
         if let Some(next_state_id) = shift_to {
-            self.state_stack
-                .push(StateIndex::from_usize_unchecked(next_state_id.state));
+            self.state_stack.push(next_state_id.state);
 
             #[cfg(feature = "tree")]
             self.tree_stack
@@ -539,7 +544,10 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         &self,
         parser: &P,
         term: &Data::Term,
-    ) -> bool {
+    ) -> bool
+    where
+        P::State: State<StateIndex = StateIndex>,
+    {
         let mut extra_state_stack = Vec::new();
         let mut extra_precedence_stack = Vec::new();
         let class = P::TermClass::from_term(term);
@@ -559,7 +567,10 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     pub fn can_panic<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> bool {
+    ) -> bool
+    where
+        P::State: State<StateIndex = StateIndex>,
+    {
         // if `error` token was not used in the grammar, early return here
         if !P::ERROR_USED {
             return false;
@@ -603,7 +614,10 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         parser: &P,
         class: P::TermClass,
         shift_prec: Precedence,
-    ) -> Option<bool> {
+    ) -> Option<bool>
+    where
+        P::State: State<StateIndex = StateIndex>,
+    {
         let shift_to = loop {
             let state = &parser.get_states()[extra_state_stack
                 .last()
@@ -690,7 +704,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     .into_usize()]
                 .shift_goto_nonterm(rule.name)
                 {
-                    extra_state_stack.push(StateIndex::from_usize_unchecked(next_state_id.state));
+                    extra_state_stack.push(next_state_id.state);
                 } else {
                     unreachable!(
                         "unreachable: nonterminal shift should always succeed after reduce operation. Failed to shift nonterminal '{}' in state {}.",
@@ -718,6 +732,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
+        P::State: State<StateIndex = StateIndex>,
     {
         self.feed_location_impl(
             parser,

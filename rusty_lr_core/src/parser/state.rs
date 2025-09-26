@@ -109,13 +109,13 @@ pub trait State {
     type TermClass: TerminalClass;
     type NonTerm: NonTerminal;
     type ReduceRules: ReduceRules;
+    type StateIndex: Index;
 
     /// Get the next state for a given terminal symbol.
-    fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<usize>>;
+    fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<Self::StateIndex>>;
 
     /// Get the next state for a given non-terminal symbol.
-    fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<usize>>;
-
+    fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<Self::StateIndex>>;
     /// Get the reduce rule index for a given terminal symbol.
     fn reduce(&self, class: Self::TermClass) -> Option<&Self::ReduceRules>;
 
@@ -158,26 +158,19 @@ impl<
         TermClass: TerminalClass + Hash + Eq,
         NonTerm: NonTerminal + Hash + Eq,
         RuleContainer: ReduceRules,
-        StateIndex: Into<usize> + Copy,
+        StateIndex: Index,
     > State for SparseState<TermClass, NonTerm, RuleContainer, StateIndex>
 {
     type TermClass = TermClass;
     type NonTerm = NonTerm;
     type ReduceRules = RuleContainer;
+    type StateIndex = StateIndex;
 
-    fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<usize>> {
-        self.shift_goto_map_class.get(&class).map(|s| ShiftTarget {
-            state: s.state.into(),
-            push: s.push,
-        })
+    fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<Self::StateIndex>> {
+        self.shift_goto_map_class.get(&class).copied()
     }
-    fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<usize>> {
-        self.shift_goto_map_nonterm
-            .get(&nonterm)
-            .map(|s| ShiftTarget {
-                state: s.state.into(),
-                push: s.push,
-            })
+    fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<Self::StateIndex>> {
+        self.shift_goto_map_nonterm.get(&nonterm).copied()
     }
     fn reduce(&self, class: Self::TermClass) -> Option<&Self::ReduceRules> {
         self.reduce_map.get(&class)
@@ -235,32 +228,25 @@ impl<
         TermClass: TerminalClass,
         NonTerm: NonTerminal,
         RuleContainer: ReduceRules,
-        StateIndex: Into<usize> + Copy,
+        StateIndex: Index,
     > State for DenseState<TermClass, NonTerm, RuleContainer, StateIndex>
 {
     type TermClass = TermClass;
     type NonTerm = NonTerm;
     type ReduceRules = RuleContainer;
+    type StateIndex = StateIndex;
 
-    fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<usize>> {
+    fn shift_goto_class(&self, class: Self::TermClass) -> Option<ShiftTarget<Self::StateIndex>> {
         self.shift_goto_map_class
             .get(class.to_usize().wrapping_sub(self.shift_class_offset))
             .copied()
             .flatten()
-            .map(|s| ShiftTarget {
-                state: s.state.into(),
-                push: s.push,
-            })
     }
-    fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<usize>> {
+    fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<Self::StateIndex>> {
         self.shift_goto_map_nonterm
             .get(nonterm.to_usize().wrapping_sub(self.shift_nonterm_offset))
             .copied()
             .flatten()
-            .map(|s| ShiftTarget {
-                state: s.state.into(),
-                push: s.push,
-            })
     }
     fn reduce(&self, class: Self::TermClass) -> Option<&Self::ReduceRules> {
         self.reduce_map

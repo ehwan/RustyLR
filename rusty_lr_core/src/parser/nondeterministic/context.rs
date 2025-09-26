@@ -443,6 +443,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         Data: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
     {
         use crate::Location;
         let rule = &parser.get_rules()[reduce_rule];
@@ -471,8 +472,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 if let Some(nonterm_shift_state) =
                     parser.get_states()[state].shift_goto_nonterm(rule.name)
                 {
-                    node.state_stack
-                        .push(StateIndex::from_usize_unchecked(nonterm_shift_state.state));
+                    node.state_stack.push(nonterm_shift_state.state);
                     if !nonterm_shift_state.push && non_empty_pushed {
                         node.data_stack.pop();
                         node.data_stack.push_empty();
@@ -522,6 +522,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         Data: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
     {
         self.feed_eof(parser, userdata)?;
         // since `eof` is feeded, every node graph should be like this:
@@ -831,6 +832,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ) where
         P::TermClass: Ord,
         P::NonTerm: Ord,
+        P::State: State<StateIndex = StateIndex>,
     {
         let state = extra_state_stack
             .last()
@@ -892,7 +894,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 });
             let state = &parser.get_states()[state];
             if let Some(next_state) = state.shift_goto_nonterm(nonterm) {
-                extra_state_stack.push(Index::from_usize_unchecked(next_state.state));
+                extra_state_stack.push(next_state.state);
                 self.expected_token_impl(
                     &mut extra_state_stack,
                     parser,
@@ -915,6 +917,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         P::TermClass: Ord,
         P::NonTerm: Ord,
+        P::State: State<StateIndex = StateIndex>,
     {
         let mut terms = std::collections::BTreeSet::new();
         let mut nonterms = std::collections::BTreeSet::new();
@@ -954,6 +957,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         P::TermClass: Ord,
         P::NonTerm: Ord,
+        P::State: State<StateIndex = StateIndex>,
     {
         let (terms, nonterms) = self.expected_token(parser);
         (
@@ -973,6 +977,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
         Data: Clone,
         Data::Location: Default,
     {
@@ -1009,6 +1014,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         Data: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
     {
         debug_assert!(
             (term.is_eof() && location.is_none()) || (!term.is_eof() && location.is_some())
@@ -1150,9 +1156,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             }
             if let Some(shift) = shift {
                 let node_ = self.node_mut(node);
-                node_
-                    .state_stack
-                    .push(StateIndex::from_usize_unchecked(shift.state));
+                node_.state_stack.push(shift.state);
                 node_.precedence_stack.push(shift_prec);
                 if let Some(location) = &location {
                     node_.location_stack.push(location.clone());
@@ -1186,9 +1190,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             }
         } else if let Some(shift) = shift_state {
             let node_ = self.node_mut(node);
-            node_
-                .state_stack
-                .push(StateIndex::from_usize_unchecked(shift.state));
+            node_.state_stack.push(shift.state);
             node_.precedence_stack.push(shift_prec);
             if let Some(location) = location {
                 node_.location_stack.push(location);
@@ -1230,6 +1232,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         Data: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
     {
         use crate::Location;
 
@@ -1277,6 +1280,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
         Data: Clone,
     {
         use crate::parser::State;
@@ -1353,8 +1357,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         // A -> a . error b
                         // and b is fed, shift error and b
                         let node = self.node_mut(error_node);
-                        node.state_stack
-                            .push(StateIndex::from_usize_unchecked(next_state.state));
+                        node.state_stack.push(next_state.state);
                         node.precedence_stack.push(shift_prec);
                         node.location_stack.push(location.clone());
                         #[cfg(feature = "tree")]
@@ -1401,7 +1404,10 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         mut node_and_len: Option<(usize, NonZeroUsize)>,
         class: P::TermClass,
         shift_prec: Precedence,
-    ) -> Option<bool> {
+    ) -> Option<bool>
+    where
+        P::State: State<StateIndex = StateIndex>,
+    {
         use crate::parser::State;
 
         let last_state = extra_state_stack
@@ -1544,7 +1550,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     })]
                 .shift_goto_nonterm(reduce_rule.name)
                 {
-                    extra_state_stack.push(StateIndex::from_usize_unchecked(next_state_id.state));
+                    extra_state_stack.push(next_state_id.state);
                 } else {
                     unreachable!(
                         "unreachable: nonterminal shift should always succeed after reduce operation. \
@@ -1617,8 +1623,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                     if let Some(next_state_id) =
                         parser.get_states()[last_state].shift_goto_nonterm(reduce_rule.name)
                     {
-                        extra_state_stack
-                            .push(StateIndex::from_usize_unchecked(next_state_id.state));
+                        extra_state_stack.push(next_state_id.state);
                     } else {
                         unreachable!(
                             "unreachable: nonterminal shift should always succeed after reduce operation, but failed for nonterminal '{}' from state {:?}",
@@ -1658,7 +1663,10 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
         &self,
         parser: &P,
         term: &P::Term,
-    ) -> bool {
+    ) -> bool
+    where
+        P::State: State<StateIndex = StateIndex>,
+    {
         let class = P::TermClass::from_term(term);
         let shift_prec = class.precedence();
         let mut extra_state_stack = Vec::new();
@@ -1691,7 +1699,10 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     pub fn can_panic<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> bool {
+    ) -> bool
+    where
+        P::State: State<StateIndex = StateIndex>,
+    {
         // if `error` token was not used in the grammar, early return here
         if !P::ERROR_USED {
             return false;
@@ -1757,6 +1768,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
         Data: Clone,
     {
         self.reduce_errors.clear();
@@ -1802,7 +1814,10 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     pub fn can_accept<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &self,
         parser: &P,
-    ) -> bool {
+    ) -> bool
+    where
+        P::State: State<StateIndex = StateIndex>,
+    {
         let mut extra_state_stack = Vec::new();
         let mut extra_precedence_stack = Vec::new();
         self.current_nodes.iter().any(move |&node| {
