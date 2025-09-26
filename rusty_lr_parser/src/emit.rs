@@ -108,7 +108,7 @@ impl Grammar {
             let max_reduce_rules = self
                 .states
                 .iter()
-                .filter_map(|s| s.reduce_map.iter().map(|(_, r)| r.len()).max())
+                .flat_map(|s| s.reduce_map.iter().map(|(_, rules)| rules.len()))
                 .max()
                 .unwrap_or(1);
 
