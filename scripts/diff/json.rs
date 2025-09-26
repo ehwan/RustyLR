@@ -128,7 +128,7 @@ pub type JsonRule = ::rusty_lr::rule::ProductionRule<
 pub type JsonState = ::rusty_lr::parser::state::DenseState<
     JsonTerminalClasses,
     JsonNonTerminals,
-    usize,
+    u8,
     u8,
 >;
 /// type alias for `ParseError`

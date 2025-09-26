@@ -123,6 +123,16 @@ impl Grammar {
                 }
             );
         } else {
+            let rule_index_type = if self.builder.rules.len() <= u8::MAX as usize {
+                quote! { u8 }
+            } else if self.builder.rules.len() <= u16::MAX as usize {
+                quote! { u16 }
+            } else if self.builder.rules.len() <= u32::MAX as usize {
+                quote! { u32 }
+            } else {
+                quote! { usize }
+            };
+
             stream.extend(
         quote! {
                 /// type alias for `Context`
@@ -133,7 +143,7 @@ impl Grammar {
                 pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;
                 /// type alias for DFA state
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #state_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, usize, #state_index_typename>;
+                pub type #state_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, #rule_index_type, #state_index_typename>;
                 /// type alias for `ParseError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;

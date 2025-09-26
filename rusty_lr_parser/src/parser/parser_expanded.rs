@@ -203,7 +203,7 @@ pub type GrammarRule = ::rusty_lr_core::rule::ProductionRule<
 pub type GrammarState = ::rusty_lr_core::parser::state::SparseState<
     GrammarTerminalClasses,
     GrammarNonTerminals,
-    usize,
+    u8,
     u8,
 >;
 /// type alias for `ParseError`
