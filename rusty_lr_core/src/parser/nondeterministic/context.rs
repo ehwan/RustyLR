@@ -13,8 +13,6 @@ use crate::parser::Precedence;
 use crate::parser::State;
 use crate::TerminalSymbol;
 
-type SmallVecNode = smallvec::SmallVec<[usize; 3]>;
-
 /// Iterator for traverse node to root.
 /// Note that root node is not included in this iterator.
 #[derive(Clone)]
@@ -41,13 +39,13 @@ pub struct Context<Data: DataStack, StateIndex, const MAX_REDUCE_RULES: usize> {
     pub(crate) empty_node_indices: std::collections::BTreeSet<usize>,
 
     /// each element represents an end-point of diverged paths.
-    pub(crate) current_nodes: SmallVecNode,
+    pub(crate) current_nodes: Vec<usize>,
 
     /// temporary storage
-    pub(crate) next_nodes: SmallVecNode,
+    pub(crate) next_nodes: Vec<usize>,
 
     /// For recovery from error
-    pub(crate) fallback_nodes: SmallVecNode,
+    pub(crate) fallback_nodes: Vec<usize>,
 
     /// For temporary use. store reduce errors returned from `reduce_action`.
     /// But we don't want to reallocate every `feed` call
