@@ -47,6 +47,7 @@ pub enum OptimizeRemove {
     SingleNonTerminalRule(Rule, Span),
     NonTermNotUsed(Span),
     Cycle(Span),
+    NonTermDataNotUsed(usize),
 }
 pub struct OptimizeDiag {
     /// deleted rules
@@ -1463,10 +1464,10 @@ impl Grammar {
                 if nonterm.ruletype.is_none() {
                     continue;
                 }
-                if data_used.contains(&Token::NonTerm(nonterm_idx)) {
+                if nonterm.rules.is_empty() {
                     continue;
                 }
-                if nonterm.rules.is_empty() {
+                if data_used.contains(&Token::NonTerm(nonterm_idx)) {
                     continue;
                 }
 
@@ -1477,21 +1478,7 @@ impl Grammar {
                         rule.reduce_action = None;
                     }
                 } else {
-                    println!(
-                        "Warning: Non-terminal '{}' has <RuleType> defined, but its data is never used in any reduce action. Consider removing <RuleType>.",
-                        nonterm.pretty_name
-                    );
-                    for rule in nonterm.rules.iter() {
-                        match &rule.reduce_action {
-                            Some(ReduceAction::Custom(custom)) => {
-                                println!("{}", custom.body);
-                            }
-                            Some(ReduceAction::Identity(idx)) => {
-                                println!("identity: {}", idx);
-                            }
-                            _ => {}
-                        }
-                    }
+                    removed_rules_diag.push(OptimizeRemove::NonTermDataNotUsed(nonterm_idx));
                 }
             }
 
