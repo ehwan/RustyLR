@@ -56,9 +56,16 @@ echo "RustyLR path: $rustylr_path"
 
 # to briefly see the difference of the generated parser in the PR, run for the sample calculator and json parsers
 cargo run --bin rustylr -- "$rustylr_path/example/calculator/src/parser.rs" "$rustylr_path/scripts/diff/calculator_new.rs" > /dev/null
+cargo run --bin rustylr -- "$rustylr_path/example/calculator_u8/src/parser.rs" "$rustylr_path/scripts/diff/calculator_u8_new.rs" > /dev/null
 cargo run --bin rustylr -- "$rustylr_path/example/json/src/parser.rs" "$rustylr_path/scripts/diff/json_new.rs" > /dev/null
 if [ "$is_from_github_actions" = "true" ]; then
     diff "$rustylr_path/scripts/diff/calculator.rs" "$rustylr_path/scripts/diff/calculator_new.rs" >/dev/null
+    if [ $? -ne 0 ]; then
+        echo "scripts/diff/ is not updated. Please run scripts/bootstrap_test.sh locally and commit the changes."
+        exit 1
+    fi
+
+    diff "$rustylr_path/scripts/diff/calculator_u8.rs" "$rustylr_path/scripts/diff/calculator_u8_new.rs" >/dev/null
     if [ $? -ne 0 ]; then
         echo "scripts/diff/ is not updated. Please run scripts/bootstrap_test.sh locally and commit the changes."
         exit 1
@@ -72,6 +79,7 @@ if [ "$is_from_github_actions" = "true" ]; then
 fi
 
 mv "$rustylr_path/scripts/diff/calculator_new.rs" "$rustylr_path/scripts/diff/calculator.rs"
+mv "$rustylr_path/scripts/diff/calculator_u8_new.rs" "$rustylr_path/scripts/diff/calculator_u8.rs"
 mv "$rustylr_path/scripts/diff/json_new.rs" "$rustylr_path/scripts/diff/json.rs"
 
 echo "Setting Dense = false, GLR = false"

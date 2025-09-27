@@ -1,4 +1,5 @@
-pub mod parser;
+pub mod parser_expanded;
+use parser_expanded as parser;
 
 fn main() {
     let input = "  1 +  -20 *   (3 + 4 )   ";
