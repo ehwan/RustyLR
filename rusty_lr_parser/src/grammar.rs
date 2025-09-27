@@ -1435,6 +1435,50 @@ impl Grammar {
             }
         }
 
+        {
+            let mut data_used = BTreeSet::new();
+
+            for nonterm in &self.nonterminals {
+                for rule in &nonterm.rules {
+                    for token in &rule.tokens {
+                        // check for data of this token is used in the reduce action
+
+                        if let Some(first_chain) = token.reduce_action_chains.first() {
+                            let first_chain = &self.custom_reduce_actions[*first_chain];
+                            if first_chain.input_type.is_some() {
+                                data_used.insert(token.token);
+                            }
+                        } else {
+                            if let Some(mapto) = &token.mapto {
+                                if rule.reduce_action_contains_ident(mapto) {
+                                    data_used.insert(token.token);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (nonterm_idx, nonterm) in self.nonterminals.iter_mut().enumerate() {
+                if nonterm.ruletype.is_none() {
+                    continue;
+                }
+                if data_used.contains(&Token::NonTerm(nonterm_idx)) {
+                    continue;
+                }
+
+                if nonterm.is_auto_generated() {
+                    nonterm.ruletype = None;
+                    for rule in &mut nonterm.rules {
+                        something_changed = true;
+                        rule.reduce_action = None;
+                    }
+                }
+            }
+
+            // for (class_id, term_class) in self.terminal_classes.iter_mut().enumerate() {}
+        }
+
         if something_changed {
             Some(OptimizeDiag {
                 removed: removed_rules_diag,

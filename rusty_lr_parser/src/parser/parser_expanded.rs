@@ -1889,7 +1889,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack14)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -1920,7 +1920,6 @@ impl GrammarDataStack {
         __data_stack.__tags.push(GrammarTags::__stack10);
         let mut del = __data_stack.__stack10.pop().unwrap();
         let mut base = __data_stack.__stack10.pop().unwrap();
-        __data_stack.__stack14.truncate(__data_stack.__stack14.len() - 1usize);
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
@@ -4404,12 +4403,10 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack14);
-        let mut A = __data_stack.__terminals.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
-        let __res = Some(A);
-        __data_stack.__stack14.push(__res);
-        Ok(true)
+        Ok(false)
     }
     ///comma? ->
     #[inline]
@@ -4422,10 +4419,8 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack14);
-        let __res = { None };
-        __data_stack.__stack14.push(__res);
-        Ok(true)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(false)
     }
     ///[^semicolon]+ -> [^semicolon]
     #[inline]
