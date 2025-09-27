@@ -47,6 +47,7 @@ pub enum OptimizeRemove {
     SingleNonTerminalRule(Rule, Span),
     NonTermNotUsed(Span),
     Cycle(Span),
+    NonTermDataNotUsed(usize),
 }
 pub struct OptimizeDiag {
     /// deleted rules
@@ -1432,6 +1433,70 @@ impl Grammar {
             if !nonterm.is_auto_generated() {
                 let diag = OptimizeRemove::SingleNonTerminalRule(rule, nonterm.name.span());
                 removed_rules_diag.push(diag);
+            }
+        }
+
+        loop {
+            let mut changed = false;
+            let mut data_used = BTreeSet::new();
+
+            for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
+                for rule in &nonterm.rules {
+                    for token in &rule.tokens {
+                        // check for data of this token is used in the reduce action
+
+                        if let Some(first_chain) = token.reduce_action_chains.first() {
+                            let first_chain = &self.custom_reduce_actions[*first_chain];
+                            if first_chain.input_type.is_some() {
+                                data_used.insert(token.token);
+                            }
+                        } else {
+                            if let Some(mapto) = &token.mapto {
+                                if rule.reduce_action_contains_ident(mapto) {
+                                    // some of the auto generated rules like:
+                                    // A* : A* A
+                                    //    | A
+                                    // will always set A* is being used, so A*'s data will not be removed in any case.
+                                    // to prevent this case, we do not count for the case that auto-generated nonterminals is used in its own rule.
+                                    if !(token.token == Token::NonTerm(nonterm_idx)
+                                        && nonterm.is_auto_generated())
+                                    {
+                                        data_used.insert(token.token);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (nonterm_idx, nonterm) in self.nonterminals.iter_mut().enumerate() {
+                if nonterm.is_protected() {
+                    continue;
+                }
+                if nonterm.ruletype.is_none() {
+                    continue;
+                }
+                if nonterm.rules.is_empty() {
+                    continue;
+                }
+                if data_used.contains(&Token::NonTerm(nonterm_idx)) {
+                    continue;
+                }
+
+                something_changed = true;
+                changed = true;
+                nonterm.ruletype = None;
+                if nonterm.is_auto_generated() {
+                    for rule in &mut nonterm.rules {
+                        rule.reduce_action = None;
+                    }
+                } else {
+                    removed_rules_diag.push(OptimizeRemove::NonTermDataNotUsed(nonterm_idx));
+                }
+            }
+            if !changed {
+                break;
             }
         }
 

@@ -885,6 +885,31 @@ impl Builder {
                             term::emit(&mut writer.lock(), &config, &files, &diag)
                                 .expect("Failed to write to verbose stream");
                         }
+                        OptimizeRemove::NonTermDataNotUsed(nonterm_idx) => {
+                            let nonterm = &grammar.nonterminals[nonterm_idx];
+                            let message = "NonTerminal data type not used";
+                            let mut labels = Vec::new();
+                            let notes = vec![
+                                "This non-terminal's data type is not used in any reduce action"
+                                    .to_string(),
+                                "Consider removing data type to optimize memory usage".to_string(),
+                            ];
+
+                            labels.push(
+                                Label::primary(file_id, nonterm.name.span().byte_range())
+                                    .with_message("non-terminal defined here"),
+                            );
+
+                            let diag = Diagnostic::note()
+                                .with_message(message)
+                                .with_labels(labels)
+                                .with_notes(notes);
+
+                            let writer = self.note_stream();
+                            let config = codespan_reporting::term::Config::default();
+                            term::emit(&mut writer.lock(), &config, &files, &diag)
+                                .expect("Failed to write to verbose stream");
+                        }
                     }
                 }
 

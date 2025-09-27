@@ -1287,12 +1287,15 @@ impl Grammar {
                     let returns_non_empty = stack_names_for_nonterm[nonterm_idx].is_some();
 
                     let reduce_action_body = match &rule.reduce_action {
-                        Some(ReduceAction::Custom(custom)) => &custom.body,
+                        Some(ReduceAction::Custom(custom)) => {
+                            let body = &custom.body;
+                            quote! { #body; }
+                        }
                         Some(ReduceAction::Identity(identity_idx)) => {
                             let ith_ident = rule.tokens[*identity_idx].mapto.as_ref().unwrap();
-                            &quote! { #ith_ident }
+                            quote! { #ith_ident; }
                         }
-                        None => &TokenStream::new(),
+                        None => TokenStream::new(),
                     };
                     if let Some(stack_name) = &stack_names_for_nonterm[nonterm_idx] {
                         fn_reduce_for_each_rule_stream.extend(quote! {
@@ -1315,7 +1318,7 @@ impl Grammar {
                                 #extract_data_stream
                                 #custom_reduce_action_stream
 
-                                let __res = #reduce_action_body;
+                                let __res = #reduce_action_body
                                 __data_stack.#stack_name.push(__res);
 
                                 Ok(#returns_non_empty)

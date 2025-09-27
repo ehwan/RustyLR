@@ -1889,7 +1889,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack14)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -1920,7 +1920,6 @@ impl GrammarDataStack {
         __data_stack.__tags.push(GrammarTags::__stack10);
         let mut del = __data_stack.__stack10.pop().unwrap();
         let mut base = __data_stack.__stack10.pop().unwrap();
-        __data_stack.__stack14.truncate(__data_stack.__stack14.len() - 1usize);
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
@@ -2424,7 +2423,7 @@ impl GrammarDataStack {
                 unreachable!("TokenDef-Ident");
             };
             data.terminals.push((ident, RustCode));
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent token ident semicolon
@@ -2470,7 +2469,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_ident,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent token error semicolon
@@ -2516,7 +2515,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_error,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent start ident semicolon
@@ -2559,7 +2558,7 @@ impl GrammarDataStack {
                 unreachable!("StartDef-Ident");
             };
             data.start_rule_name.push(ident);
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent start error semicolon
@@ -2605,7 +2604,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_error,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent tokentype [^semicolon]+ semicolon
@@ -2652,7 +2651,7 @@ impl GrammarDataStack {
         let mut RustCode = __rustylr_data_2;
         {
             data.token_typename.push((__rustylr_location_tokentype.span(), RustCode));
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent tokentype semicolon
@@ -2694,7 +2693,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_tokentype,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent userdata [^semicolon]+ semicolon
@@ -2741,7 +2740,7 @@ impl GrammarDataStack {
         let mut RustCode = __rustylr_data_2;
         {
             data.userdata_typename.push((__rustylr_location_userdata.span(), RustCode));
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent userdata semicolon
@@ -2783,7 +2782,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_userdata,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent left IdentOrLiteral+ semicolon
@@ -2829,7 +2828,7 @@ impl GrammarDataStack {
                     Some(ReduceType::Left),
                     IdentOrLiteral,
                 ));
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent left error semicolon
@@ -2875,7 +2874,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_error,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent right IdentOrLiteral+ semicolon
@@ -2921,7 +2920,7 @@ impl GrammarDataStack {
                     Some(ReduceType::Right),
                     IdentOrLiteral,
                 ));
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent right error semicolon
@@ -2967,7 +2966,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_error,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent precedence IdentOrLiteral+ semicolon
@@ -3009,7 +3008,7 @@ impl GrammarDataStack {
         {
             data.precedences
                 .push((__rustylr_location_precedence.span(), None, IdentOrLiteral));
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent precedence error semicolon
@@ -3055,7 +3054,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_error,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent errortype [^semicolon]+ semicolon
@@ -3102,7 +3101,7 @@ impl GrammarDataStack {
         let mut RustCode = __rustylr_data_2;
         {
             data.error_typename.push((__rustylr_location_errortype.span(), RustCode));
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent errortype semicolon
@@ -3144,7 +3143,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_errortype,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent moduleprefix [^semicolon]+ semicolon
@@ -3191,7 +3190,7 @@ impl GrammarDataStack {
         let mut RustCode = __rustylr_data_2;
         {
             data.module_prefix.push((__rustylr_location_moduleprefix.span(), RustCode));
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent moduleprefix semicolon
@@ -3233,7 +3232,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_moduleprefix,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent glr semicolon
@@ -3269,7 +3268,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 3usize);
         {
             data.glr = true;
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent glr error semicolon
@@ -3315,7 +3314,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_error,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent lalr semicolon
@@ -3351,7 +3350,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 3usize);
         {
             data.lalr = true;
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent lalr error semicolon
@@ -3397,7 +3396,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_error,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent nooptim semicolon
@@ -3431,7 +3430,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 3usize);
         {
             data.no_optim = true;
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent nooptim error semicolon
@@ -3477,7 +3476,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_error,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent dense semicolon
@@ -3513,7 +3512,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 3usize);
         {
             data.dense = true;
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent dense error semicolon
@@ -3559,7 +3558,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_error,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent trace ident* semicolon
@@ -3606,7 +3605,7 @@ impl GrammarDataStack {
                     ident
                 });
             data.traces.extend(idents);
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent trace error semicolon
@@ -3652,7 +3651,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_error,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent filter [^semicolon]+ semicolon
@@ -3699,7 +3698,7 @@ impl GrammarDataStack {
         let mut RustCode = __rustylr_data_2;
         {
             data.filter = Some(RustCode);
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent filter semicolon
@@ -3741,7 +3740,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_filter,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent location [^semicolon]+ semicolon
@@ -3786,7 +3785,7 @@ impl GrammarDataStack {
         let mut RustCode = __rustylr_data_2;
         {
             data.location_typename = Some(RustCode);
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent location semicolon
@@ -3828,7 +3827,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_location,
                 });
-        }
+        };
         Ok(false)
     }
     ///Directive -> percent error semicolon
@@ -3870,7 +3869,7 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_error,
                 });
-        }
+        };
         Ok(false)
     }
     ///GrammarLine -> Rule
@@ -3896,7 +3895,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         {
             data.rules.push(Rule);
-        }
+        };
         Ok(false)
     }
     ///TokenMapped+ -> TokenMapped
@@ -4404,12 +4403,10 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack14);
-        let mut A = __data_stack.__terminals.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::Empty);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
-        let __res = Some(A);
-        __data_stack.__stack14.push(__res);
-        Ok(true)
+        Ok(false)
     }
     ///comma? ->
     #[inline]
@@ -4422,10 +4419,8 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack14);
-        let __res = { None };
-        __data_stack.__stack14.push(__res);
-        Ok(true)
+        __data_stack.__tags.push(GrammarTags::Empty);
+        Ok(false)
     }
     ///[^semicolon]+ -> [^semicolon]
     #[inline]
