@@ -1436,7 +1436,8 @@ impl Grammar {
             }
         }
 
-        {
+        loop {
+            let mut changed = false;
             let mut data_used = BTreeSet::new();
 
             for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
@@ -1481,6 +1482,7 @@ impl Grammar {
                 }
 
                 something_changed = true;
+                changed = true;
                 nonterm.ruletype = None;
                 if nonterm.is_auto_generated() {
                     for rule in &mut nonterm.rules {
@@ -1490,8 +1492,9 @@ impl Grammar {
                     removed_rules_diag.push(OptimizeRemove::NonTermDataNotUsed(nonterm_idx));
                 }
             }
-
-            // for (class_id, term_class) in self.terminal_classes.iter_mut().enumerate() {}
+            if !changed {
+                break;
+            }
         }
 
         if something_changed {
