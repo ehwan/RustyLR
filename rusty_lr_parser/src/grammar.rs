@@ -1439,7 +1439,7 @@ impl Grammar {
         {
             let mut data_used = BTreeSet::new();
 
-            for nonterm in &self.nonterminals {
+            for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
                 for rule in &nonterm.rules {
                     for token in &rule.tokens {
                         // check for data of this token is used in the reduce action
@@ -1452,7 +1452,16 @@ impl Grammar {
                         } else {
                             if let Some(mapto) = &token.mapto {
                                 if rule.reduce_action_contains_ident(mapto) {
-                                    data_used.insert(token.token);
+                                    // some of the auto generated rules like:
+                                    // A* : A* A
+                                    //    | A
+                                    // will always set A* is being used, so A*'s data will not be removed in any case.
+                                    // to prevent this case, we do not count for the case that auto-generated nonterminals is used in its own rule.
+                                    if !(token.token == Token::NonTerm(nonterm_idx)
+                                        && nonterm.is_auto_generated())
+                                    {
+                                        data_used.insert(token.token);
+                                    }
                                 }
                             }
                         }
