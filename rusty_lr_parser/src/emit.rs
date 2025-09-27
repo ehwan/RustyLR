@@ -1342,7 +1342,7 @@ impl Grammar {
                                 #extract_data_stream
                                 #custom_reduce_action_stream
 
-                                #reduce_action_body
+                                #reduce_action_body;
 
                                 Ok(#returns_non_empty)
                             }

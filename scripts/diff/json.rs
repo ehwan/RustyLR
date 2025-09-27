@@ -624,7 +624,7 @@ impl JsonDataStack {
             let start = __rustylr_location_error.start;
             let end = __rustylr_location_error.end;
             println!("Error recovered with '}}' at {start}..{end}");
-        }
+        };
         Ok(false)
     }
     ///Members -> Member

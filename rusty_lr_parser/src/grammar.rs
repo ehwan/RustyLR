@@ -1466,12 +1466,31 @@ impl Grammar {
                 if data_used.contains(&Token::NonTerm(nonterm_idx)) {
                     continue;
                 }
+                if nonterm.rules.is_empty() {
+                    continue;
+                }
 
+                something_changed = true;
+                nonterm.ruletype = None;
                 if nonterm.is_auto_generated() {
-                    nonterm.ruletype = None;
                     for rule in &mut nonterm.rules {
-                        something_changed = true;
                         rule.reduce_action = None;
+                    }
+                } else {
+                    println!(
+                        "Warning: Non-terminal '{}' has <RuleType> defined, but its data is never used in any reduce action. Consider removing <RuleType>.",
+                        nonterm.pretty_name
+                    );
+                    for rule in nonterm.rules.iter() {
+                        match &rule.reduce_action {
+                            Some(ReduceAction::Custom(custom)) => {
+                                println!("{}", custom.body);
+                            }
+                            Some(ReduceAction::Identity(idx)) => {
+                                println!("identity: {}", idx);
+                            }
+                            _ => {}
+                        }
                     }
                 }
             }
