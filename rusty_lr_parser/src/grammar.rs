@@ -1471,6 +1471,9 @@ impl Grammar {
             }
 
             for (nonterm_idx, nonterm) in self.nonterminals.iter_mut().enumerate() {
+                if nonterm.is_protected() {
+                    continue;
+                }
                 if nonterm.ruletype.is_none() {
                     continue;
                 }
