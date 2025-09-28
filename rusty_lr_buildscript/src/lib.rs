@@ -57,8 +57,8 @@ pub struct Builder {
     /// Print debug information about optimization process.
     note_optimization: bool,
 
-    /// Print every `note_*` information to stderr.
-    note_on_stderr: bool,
+    /// Print to stderr.
+    stderr: bool,
 
     /// Print backtrace of production rules when conflicts occurred. ruleset could be messed up
     note_backtrace: bool,
@@ -77,7 +77,7 @@ impl Builder {
             input_file: None,
             note_conflicts: true,
             note_conflicts_resolving: true,
-            note_on_stderr: false,
+            stderr: false,
             note_optimization: true,
             note_backtrace: true,
             is_executable: false,
@@ -125,9 +125,9 @@ impl Builder {
         self
     }
 
-    /// Print every `note_*` information to stderr.
-    pub fn note_on_stderr(&mut self, val: bool) -> &mut Self {
-        self.note_on_stderr = val;
+    /// Print to stderr.
+    pub fn stderr(&mut self, val: bool) -> &mut Self {
+        self.stderr = val;
         self
     }
 
@@ -137,8 +137,8 @@ impl Builder {
         self
     }
 
-    fn note_stream(&self) -> StandardStream {
-        if self.note_on_stderr {
+    fn stream(&self) -> StandardStream {
+        if self.stderr {
             StandardStream::stderr(ColorChoice::Auto)
         } else {
             StandardStream::stdout(ColorChoice::Auto)
@@ -261,7 +261,7 @@ impl Builder {
                     .with_labels(vec![
                         Label::primary(file_id, range).with_message(e.to_string())
                     ]);
-                let writer = StandardStream::stderr(ColorChoice::Auto);
+                let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
                 term::emit(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
@@ -279,7 +279,7 @@ impl Builder {
                     "Please put `%%` to separate the code part and the context-free grammar part"
                         .to_string(),
                 ]);
-                let writer = StandardStream::stderr(ColorChoice::Auto);
+                let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
                 term::emit(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
@@ -312,7 +312,7 @@ impl Builder {
                         }
                     };
 
-                let writer = StandardStream::stderr(ColorChoice::Auto);
+                let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
                 term::emit(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
@@ -334,7 +334,7 @@ impl Builder {
                     Label::primary(file_id, range).with_message(error.message.clone())
                 ])
                 .with_notes(vec![format!("refer to: {}", error.link)]);
-            let writer = StandardStream::stderr(ColorChoice::Auto);
+            let writer = self.stream();
             let config = codespan_reporting::term::Config::default();
             term::emit(&mut writer.lock(), &config, &files, &diag)
                 .expect("Failed to write to stderr");
@@ -486,7 +486,7 @@ impl Builder {
                     }
                 };
 
-                let writer = StandardStream::stderr(ColorChoice::Auto);
+                let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
                 term::emit(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
@@ -749,7 +749,7 @@ impl Builder {
                     }
                 };
 
-                let writer = StandardStream::stderr(ColorChoice::Auto);
+                let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
                 term::emit(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
@@ -758,10 +758,20 @@ impl Builder {
             }
         };
 
+        let mut optimize_diags = Vec::new();
+
         // diagnostics for optimization
         if grammar.optimize {
             use rusty_lr_parser::grammar::OptimizeRemove;
-            let optimized = grammar.optimize(25);
+            let mut optimized = grammar.optimize(25);
+
+            optimized.removed.sort_by_key(|a| match a {
+                OptimizeRemove::TerminalClassRuleMerge(_) => 0,
+                OptimizeRemove::SingleNonTerminalRule(_, _) => 1,
+                OptimizeRemove::NonTermNotUsed(_) => 2,
+                OptimizeRemove::Cycle(_) => 3,
+                OptimizeRemove::NonTermDataNotUsed(_) => 4,
+            });
 
             if self.note_optimization {
                 // terminals merged into terminal class
@@ -787,10 +797,7 @@ impl Builder {
                         .with_message("These terminals are merged into terminal class".to_string())
                         .with_notes(class_message);
 
-                    let writer = StandardStream::stdout(ColorChoice::Auto);
-                    let config = codespan_reporting::term::Config::default();
-                    term::emit(&mut writer.lock(), &config, &files, &diag)
-                        .expect("Failed to write to stdout");
+                    optimize_diags.push(diag);
                 }
 
                 for o in optimized.removed {
@@ -808,10 +815,7 @@ impl Builder {
                                 .with_labels(labels)
                                 .with_notes(notes);
 
-                            let writer = self.note_stream();
-                            let config = codespan_reporting::term::Config::default();
-                            term::emit(&mut writer.lock(), &config, &files, &diag)
-                                .expect("Failed to write to verbose stream");
+                            optimize_diags.push(diag);
                         }
                         OptimizeRemove::SingleNonTerminalRule(rule, nonterm_span) => {
                             let message = "NonTerminal deleted";
@@ -837,10 +841,7 @@ impl Builder {
                                 .with_labels(labels)
                                 .with_notes(notes);
 
-                            let writer = self.note_stream();
-                            let config = codespan_reporting::term::Config::default();
-                            term::emit(&mut writer.lock(), &config, &files, &diag)
-                                .expect("Failed to write to verbose stream");
+                            optimize_diags.push(diag);
                         }
                         OptimizeRemove::NonTermNotUsed(span) => {
                             let message = "NonTerminal deleted";
@@ -854,15 +855,12 @@ impl Builder {
                                     .with_message("non-terminal defined here"),
                             );
 
-                            let diag = Diagnostic::note()
+                            let diag = Diagnostic::warning()
                                 .with_message(message)
                                 .with_labels(labels)
                                 .with_notes(notes);
 
-                            let writer = self.note_stream();
-                            let config = codespan_reporting::term::Config::default();
-                            term::emit(&mut writer.lock(), &config, &files, &diag)
-                                .expect("Failed to write to verbose stream");
+                            optimize_diags.push(diag);
                         }
                         OptimizeRemove::Cycle(span) => {
                             let message = "Cycle detected";
@@ -880,10 +878,7 @@ impl Builder {
                                 .with_labels(labels)
                                 .with_notes(notes);
 
-                            let writer = self.note_stream();
-                            let config = codespan_reporting::term::Config::default();
-                            term::emit(&mut writer.lock(), &config, &files, &diag)
-                                .expect("Failed to write to verbose stream");
+                            optimize_diags.push(diag);
                         }
                         OptimizeRemove::NonTermDataNotUsed(nonterm_idx) => {
                             let nonterm = &grammar.nonterminals[nonterm_idx];
@@ -900,15 +895,12 @@ impl Builder {
                                     .with_message("non-terminal defined here"),
                             );
 
-                            let diag = Diagnostic::note()
+                            let diag = Diagnostic::warning()
                                 .with_message(message)
                                 .with_labels(labels)
                                 .with_notes(notes);
 
-                            let writer = self.note_stream();
-                            let config = codespan_reporting::term::Config::default();
-                            term::emit(&mut writer.lock(), &config, &files, &diag)
-                                .expect("Failed to write to verbose stream");
+                            optimize_diags.push(diag);
                         }
                     }
                 }
@@ -927,15 +919,10 @@ impl Builder {
                     notes.push(format!("{class_name}: {terms}"));
 
                     let diag = Diagnostic::warning()
-                        .with_message(
-                            "These terminals are not used in the grammar, consider removing them",
-                        )
+                        .with_message("These terminals are not used in the grammar")
                         .with_notes(notes);
 
-                    let writer = self.note_stream();
-                    let config = codespan_reporting::term::Config::default();
-                    term::emit(&mut writer.lock(), &config, &files, &diag)
-                        .expect("Failed to write to verbose stream");
+                    optimize_diags.push(diag);
                 }
             }
         }
@@ -1246,7 +1233,7 @@ impl Builder {
         // print note about shift/reduce conflict resolved with `%left` or `%right`
         if self.note_conflicts_resolving {
             for diag in conflict_diags_resolved.into_iter() {
-                let writer = self.note_stream();
+                let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
                 term::emit(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to verbose stream");
@@ -1256,7 +1243,7 @@ impl Builder {
         if !grammar.glr {
             let has_diags = !conflict_diags.is_empty();
             for diag in conflict_diags.into_iter() {
-                let writer = StandardStream::stderr(ColorChoice::Auto);
+                let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
                 term::emit(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
@@ -1268,15 +1255,22 @@ impl Builder {
         // print note about reduce/reduce conflict and shift/reduce conflict not resolved
         else if self.note_conflicts {
             for diag in conflict_diags.into_iter() {
-                let diag = Diagnostic::note()
+                let diag = Diagnostic::help()
                     .with_message(diag.message)
                     .with_labels(diag.labels)
                     .with_notes(diag.notes);
-                let writer = self.note_stream();
+                let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
                 term::emit(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
             }
+        }
+
+        for diag in optimize_diags.into_iter() {
+            let writer = self.stream();
+            let config = codespan_reporting::term::Config::default();
+            term::emit(&mut writer.lock(), &config, &files, &diag)
+                .expect("Failed to write to verbose stream");
         }
 
         // expand macro
