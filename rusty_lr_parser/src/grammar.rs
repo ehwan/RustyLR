@@ -1469,11 +1469,10 @@ impl Grammar {
                     }
                 }
             }
+            let start_rule_idx = *self.nonterminals_index.get(&self.start_rule_name).unwrap();
+            data_used.insert(Token::NonTerm(start_rule_idx));
 
             for (nonterm_idx, nonterm) in self.nonterminals.iter_mut().enumerate() {
-                if nonterm.is_protected() {
-                    continue;
-                }
                 if nonterm.ruletype.is_none() {
                     continue;
                 }
@@ -1484,17 +1483,32 @@ impl Grammar {
                     continue;
                 }
 
-                something_changed = true;
-                changed = true;
                 nonterm.ruletype = None;
                 if nonterm.is_auto_generated() {
                     for rule in &mut nonterm.rules {
+                        if rule.reduce_action.is_some() {
+                            changed = true;
+                        }
                         rule.reduce_action = None;
                     }
                 } else {
-                    removed_rules_diag.push(OptimizeRemove::NonTermDataNotUsed(nonterm_idx));
+                    let mut found_custom = false;
+                    for rule in &mut nonterm.rules {
+                        if matches!(rule.reduce_action, Some(ReduceAction::Identity(_))) {
+                            changed = true;
+                            rule.reduce_action = None;
+                        } else {
+                            found_custom = true;
+                        }
+                    }
+                    // there is any custom reduce action that cannot be removed automatically
+                    if found_custom {
+                        changed = true;
+                        removed_rules_diag.push(OptimizeRemove::NonTermDataNotUsed(nonterm_idx));
+                    }
                 }
             }
+            something_changed |= changed;
             if !changed {
                 break;
             }
