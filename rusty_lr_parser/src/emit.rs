@@ -230,12 +230,6 @@ impl Grammar {
             });
         }
 
-        let use_range_based_optimization = if self.is_char || self.is_u8 {
-            self.calculate_range_terminal_class_map()
-        } else {
-            false
-        };
-
         let other_class_id = self.other_terminal_class_id;
 
         let match_terminal_filter_expression = if let Some(filter) = &self.filter {
@@ -246,7 +240,7 @@ impl Grammar {
         let mut from_term_match_stream = TokenStream::new();
 
         // building terminal-class_id map
-        if use_range_based_optimization {
+        if self.is_char || self.is_u8 {
             // range-compressed Vec based terminal-class_id map
 
             // for terminal -> terminal_class_id map to_terminal_class()

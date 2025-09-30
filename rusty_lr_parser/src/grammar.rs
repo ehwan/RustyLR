@@ -1022,43 +1022,6 @@ impl Grammar {
         Ok(grammar)
     }
 
-    /// calculate range-based terminal-class_id map
-    /// only works if %tokentype is char or u8
-    /// do not apply this optimization if |RangeCompressed| > |Terminals|/2
-    pub(crate) fn calculate_range_terminal_class_map(&self) -> bool {
-        let compressed_len_sum: usize = self
-            .terminal_classes
-            .iter()
-            .enumerate()
-            .map(|(class_id, class)| {
-                if class_id == self.other_terminal_class_id {
-                    0
-                } else {
-                    class.ranges.len()
-                }
-            })
-            .sum();
-        let noncompressed_len_sum: usize = self
-            .terminal_classes
-            .iter()
-            .enumerate()
-            .map(|(class_id, class)| {
-                if class_id == self.other_terminal_class_id {
-                    0
-                } else {
-                    let sum: usize = class
-                        .terminals
-                        .iter()
-                        .map(|term_idx| self.terminals[*term_idx].name.count())
-                        .sum();
-
-                    sum
-                }
-            })
-            .sum();
-        compressed_len_sum * 2 <= noncompressed_len_sum
-    }
-
     /// optimize grammar
     fn optimize_iterate(&mut self) -> Option<OptimizeDiag> {
         // for early stopping optimization loop
@@ -1591,14 +1554,13 @@ impl Grammar {
 
                 let mut ranges: Vec<(u32, u32)> = Vec::new();
                 for (s, l) in ranges0 {
-                    if let Some((_, last)) = ranges.last_mut() {
-                        if *last + 1 == s {
+                    match ranges.last_mut() {
+                        Some((_, last)) if *last + 1 == s => {
                             *last = l;
-                        } else {
+                        }
+                        _ => {
                             ranges.push((s, l));
                         }
-                    } else {
-                        ranges.push((s, l));
                     }
                 }
                 class.ranges = ranges;
