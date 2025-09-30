@@ -8,7 +8,6 @@ use quote::format_ident;
 use quote::quote;
 use quote::ToTokens;
 use rusty_lr_core::hash::HashMap;
-use rusty_lr_core::hash::HashSet;
 use rusty_lr_core::rule::Precedence;
 use rusty_lr_core::TerminalSymbol;
 use rusty_lr_core::Token;
@@ -848,51 +847,65 @@ impl Grammar {
 
         // check for nonterminals in %prec,
         // all production rules in that nonterminal must have precedence defined.
-        //
-        // construct a directed graph, where node is nonterminal,
-        // and edge of (A -> B) means one of A's production rules has %prec to B, so B must have precedence defined.
-        {
-            fn check_prec_defined_for_all_production_rules(
-                grammar: &Grammar,
-                nonterm_idx: usize,
-                visited: &mut HashSet<usize>,
-            ) -> bool {
-                visited.insert(nonterm_idx);
-                for rule in &grammar.nonterminals[nonterm_idx].rules {
-                    if rule.prec.is_none() {
-                        return false;
-                    }
-                    if let Some((Precedence::Dynamic(token_idx), _)) = &rule.prec {
-                        if let Token::NonTerm(nonterm_idx) = rule.tokens[*token_idx].token {
-                            if !visited.contains(&nonterm_idx) {
-                                if !check_prec_defined_for_all_production_rules(
-                                    grammar,
-                                    nonterm_idx,
-                                    visited,
-                                ) {
-                                    return false;
+        let mut nonterm_prec_candidates: Vec<BTreeSet<Option<usize>>> =
+            vec![BTreeSet::new(); grammar.nonterminals.len()];
+        loop {
+            let mut changed = false;
+            for (nonterm_idx, nonterm) in grammar.nonterminals.iter().enumerate() {
+                for rule in &nonterm.rules {
+                    match rule.prec {
+                        Some(prec) => match prec.0 {
+                            Precedence::Dynamic(token_idx) => {
+                                if let Token::NonTerm(token_nonterm_idx) =
+                                    rule.tokens[token_idx].token
+                                {
+                                    let mut target_candidates =
+                                        nonterm_prec_candidates[token_nonterm_idx].clone();
+                                    let len0 = nonterm_prec_candidates[nonterm_idx].len();
+                                    nonterm_prec_candidates[nonterm_idx]
+                                        .append(&mut target_candidates);
+                                    if nonterm_prec_candidates[nonterm_idx].len() != len0 {
+                                        changed = true;
+                                    }
                                 }
+                            }
+                            Precedence::Fixed(level) => {
+                                if nonterm_prec_candidates[nonterm_idx].insert(Some(level)) {
+                                    changed = true;
+                                }
+                            }
+                        },
+                        _ => {
+                            if nonterm_prec_candidates[nonterm_idx].insert(None) {
+                                changed = true;
                             }
                         }
                     }
                 }
-                true
             }
-            for nonterm in &grammar.nonterminals {
-                for rule in &nonterm.rules {
-                    if let Some((Precedence::Dynamic(token_idx), span)) = &rule.prec {
-                        if let Token::NonTerm(nonterm_idx) = rule.tokens[*token_idx].token {
-                            let mut visited = Default::default();
-                            if !check_prec_defined_for_all_production_rules(
-                                &grammar,
-                                nonterm_idx,
-                                &mut visited,
-                            ) {
-                                // this nonterminal has production rules that do not have precedence defined
+
+            if !changed {
+                break;
+            }
+        }
+        for nonterm in &mut grammar.nonterminals {
+            for rule in &mut nonterm.rules {
+                if let Some(prec) = &mut rule.prec {
+                    if let Precedence::Dynamic(token_idx) = prec.0 {
+                        if let Token::NonTerm(token_nonterm_idx) = rule.tokens[token_idx].token {
+                            let target_candidates = &nonterm_prec_candidates[token_nonterm_idx];
+                            if target_candidates.contains(&None) {
+                                // TODO
+                                // no need to be an error on GLR parser?
                                 return Err(ParseError::NonTerminalPrecedenceNotDefined(
-                                    *span, // but this nonterminal is used as %prec here
-                                    nonterm_idx,
+                                    prec.1,
+                                    token_nonterm_idx,
                                 ));
+                            }
+
+                            if target_candidates.len() == 1 {
+                                let fixed = target_candidates.iter().next().unwrap().unwrap();
+                                prec.0 = Precedence::Fixed(fixed);
                             }
                         }
                     }
