@@ -1426,84 +1426,6 @@ impl Grammar {
             }
         }
 
-        loop {
-            let mut changed = false;
-            let mut data_used = BTreeSet::new();
-
-            for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
-                for rule in &nonterm.rules {
-                    for token in &rule.tokens {
-                        // check for data of this token is used in the reduce action
-
-                        if let Some(first_chain) = token.reduce_action_chains.first() {
-                            let first_chain = &self.custom_reduce_actions[*first_chain];
-                            if first_chain.input_type.is_some() {
-                                data_used.insert(token.token);
-                            }
-                        } else {
-                            if let Some(mapto) = &token.mapto {
-                                if rule.reduce_action_contains_ident(mapto) {
-                                    // some of the auto generated rules like:
-                                    // A* : A* A
-                                    //    | A
-                                    // will always set A* is being used, so A*'s data will not be removed in any case.
-                                    // to prevent this case, we do not count for the case that auto-generated nonterminals is used in its own rule.
-                                    if !(token.token == Token::NonTerm(nonterm_idx)
-                                        && nonterm.is_auto_generated())
-                                    {
-                                        data_used.insert(token.token);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            let start_rule_idx = *self.nonterminals_index.get(&self.start_rule_name).unwrap();
-            data_used.insert(Token::NonTerm(start_rule_idx));
-
-            for (nonterm_idx, nonterm) in self.nonterminals.iter_mut().enumerate() {
-                if nonterm.ruletype.is_none() {
-                    continue;
-                }
-                if nonterm.rules.is_empty() {
-                    continue;
-                }
-                if data_used.contains(&Token::NonTerm(nonterm_idx)) {
-                    continue;
-                }
-
-                nonterm.ruletype = None;
-                if nonterm.is_auto_generated() {
-                    for rule in &mut nonterm.rules {
-                        if rule.reduce_action.is_some() {
-                            changed = true;
-                        }
-                        rule.reduce_action = None;
-                    }
-                } else {
-                    let mut found_custom = false;
-                    for rule in &mut nonterm.rules {
-                        if matches!(rule.reduce_action, Some(ReduceAction::Identity(_))) {
-                            changed = true;
-                            rule.reduce_action = None;
-                        } else {
-                            found_custom = true;
-                        }
-                    }
-                    // there is any custom reduce action that cannot be removed automatically
-                    if found_custom {
-                        changed = true;
-                        removed_rules_diag.push(OptimizeRemove::NonTermDataNotUsed(nonterm_idx));
-                    }
-                }
-            }
-            something_changed |= changed;
-            if !changed {
-                break;
-            }
-        }
-
         if something_changed {
             Some(OptimizeDiag {
                 removed: removed_rules_diag,
@@ -1517,6 +1439,109 @@ impl Grammar {
         let mut diag = OptimizeDiag {
             removed: Vec::new(),
         };
+
+        // check if RuleType and ReduceAction can be removed from certain non-terminals
+        let mut add_to_diags = BTreeSet::new();
+        loop {
+            let start_rule_idx = *self.nonterminals_index.get(&self.start_rule_name).unwrap();
+            let mut changed = false;
+            let mut can_removes = Vec::new();
+
+            for (i, nonterm) in self.nonterminals.iter().enumerate() {
+                if i == start_rule_idx {
+                    // do not remove ruletype from start rule
+                    continue;
+                }
+
+                if nonterm.ruletype.is_none() {
+                    continue;
+                }
+
+                let mut can_remove = true;
+
+                // check for every production rules,
+                // if it is still compilable without this nonterminal's ruletype
+                // if it is possible, we can remove this nonterminal's ruletype (and reduce action)
+                for (j, nonterm_j) in self.nonterminals.iter().enumerate() {
+                    if i == j {
+                        if nonterm_j.is_auto_generated() {
+                            // if nonterm_i is auto-generated, do not check self rules
+                            continue;
+                        }
+                    }
+                    for rule in nonterm_j.rules.iter() {
+                        for token in rule.tokens.iter() {
+                            if token.token != Token::NonTerm(i) {
+                                continue;
+                            }
+
+                            // nonterm_i's data was used in this rule
+                            let used = if let Some(mapto) = &token.mapto {
+                                rule.reduce_action_contains_ident(mapto)
+                            } else {
+                                false
+                            };
+
+                            if used {
+                                // nonterm_i's data cannot be removed
+                                can_remove = false;
+                                break;
+                            }
+                        }
+                        if !can_remove {
+                            break;
+                        }
+                    }
+                    if !can_remove {
+                        break;
+                    }
+                }
+
+                if can_remove {
+                    can_removes.push(i);
+                }
+            }
+
+            for i in can_removes {
+                let nonterm = &mut self.nonterminals[i];
+                if nonterm.ruletype.is_some() {
+                    changed = true;
+                    nonterm.ruletype = None;
+                }
+                if nonterm.is_auto_generated() {
+                    for rule in &mut nonterm.rules {
+                        if rule.reduce_action.is_some() {
+                            changed = true;
+                            rule.reduce_action = None;
+                        }
+                    }
+                } else {
+                    for rule in &mut nonterm.rules {
+                        if let Some(reduce_action) = &rule.reduce_action {
+                            match reduce_action {
+                                ReduceAction::Custom(_) => {
+                                    // cannot remove custom reduce action;
+                                    // add to diag
+                                    add_to_diags.insert(i);
+                                }
+                                ReduceAction::Identity(_) => {
+                                    changed = true;
+                                    rule.reduce_action = None;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if !changed {
+                break;
+            }
+        }
+        for i in add_to_diags {
+            diag.removed.push(OptimizeRemove::NonTermDataNotUsed(i));
+        }
+
         for _ in 0..max_iter {
             let ret = self.optimize_iterate();
             match ret {
