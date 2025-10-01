@@ -1119,22 +1119,6 @@ impl Grammar {
                         });
                     }
 
-                    // if there are variable with same name, the last one will be used (by shadowing)
-                    // so set the front one to `None`
-                    // this will also help optimizing performance by using `truncate` instead of `pop`
-                    for maptos in &mut stack_mapto_map.values_mut() {
-                        // maptos is in reverse order of the rule tokens
-                        for var_right in 0..maptos.len() {
-                            if let Some(var_name) = maptos[var_right].as_ref().cloned() {
-                                for var_left in var_right + 1..maptos.len() {
-                                    if maptos[var_left].as_ref() == Some(&var_name) {
-                                        maptos[var_left] = None;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
                     // new tag that will be inserted by this reduce action
                     let new_tag_name = stack_names_for_nonterm[nonterm_idx]
                         .as_ref()

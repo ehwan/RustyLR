@@ -829,6 +829,20 @@ impl Grammar {
                     }
                 }
 
+                // check for duplicated token.mapto
+                // if there are variable with same name, the last one will be used (by shadowing)
+                // so set the front one to `None`
+                for right_token in 0..tokens.len() {
+                    if let Some(right_mapto) = tokens[right_token].mapto.as_ref().cloned() {
+                        for left_token in 0..right_token {
+                            if tokens[left_token].mapto.as_ref() == Some(&right_mapto) {
+                                tokens[left_token].mapto =
+                                    Some(format_ident!("__rustylr_token{}", left_token));
+                            }
+                        }
+                    }
+                }
+
                 rule_lines.push(Rule {
                     tokens,
                     reduce_action,
