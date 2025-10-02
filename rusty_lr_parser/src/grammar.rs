@@ -39,6 +39,9 @@ pub struct TerminalClassDefinition {
 
     /// compressed ranges, only if %tokentype is char or u8
     pub ranges: Vec<(u32, u32)>,
+
+    /// Wheather this class's data was used in any reduce action
+    pub data_used: bool,
 }
 
 pub enum OptimizeRemove {
@@ -1021,6 +1024,7 @@ impl Grammar {
                 terminals: vec![i],
                 multiterm_counter,
                 ranges,
+                data_used: true,
             });
         }
         grammar.other_terminal_class_id = grammar.terminal_class_id[grammar.other_terminal_index];
@@ -1191,6 +1195,7 @@ impl Grammar {
                     terminals: terms,
                     multiterm_counter,
                     ranges: Vec::new(),
+                    data_used: self.terminal_classes[old_classes[0]].data_used,
                 };
                 new_class_defs.push(class_def);
             }
