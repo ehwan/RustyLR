@@ -955,7 +955,13 @@ impl Grammar {
         // Token -> Option<stack_name> map, `None` for empty
         let token_to_stack_name = |token: Token<TerminalSymbol<usize>, usize>| match token {
             Token::Term(term) => match term {
-                TerminalSymbol::Term(_) => Some(&terminal_stack_name),
+                TerminalSymbol::Term(term) => {
+                    if self.terminal_classes[term].data_used {
+                        Some(&terminal_stack_name)
+                    } else {
+                        None
+                    }
+                }
                 TerminalSymbol::Error | TerminalSymbol::Eof => None,
             },
             Token::NonTerm(nonterm_idx) => stack_names_for_nonterm[nonterm_idx].as_ref(),
