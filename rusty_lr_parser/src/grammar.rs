@@ -1547,6 +1547,23 @@ impl Grammar {
             diag.removed.push(OptimizeRemove::NonTermDataNotUsed(i));
         }
 
+        for class_def in &mut self.terminal_classes {
+            class_def.data_used = false;
+        }
+        for nonterm in &self.nonterminals {
+            for rule in &nonterm.rules {
+                for token in &rule.tokens {
+                    if let Token::Term(TerminalSymbol::Term(term)) = token.token {
+                        if let Some(mapto) = &token.mapto {
+                            if rule.reduce_action_contains_ident(mapto) {
+                                self.terminal_classes[term].data_used = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         for _ in 0..max_iter {
             let ret = self.optimize_iterate();
             match ret {
