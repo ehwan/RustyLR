@@ -909,9 +909,9 @@ impl Grammar {
 
         // empty tag
         let empty_tag_name = format_ident!("Empty");
-
         // stack name for terminal symbol
         let terminal_stack_name = format_ident!("__terminals");
+
         // stack name for each non-terminal
         let mut stack_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
 
@@ -923,33 +923,57 @@ impl Grammar {
         // for consistent output
         let mut stack_names_in_order = Vec::new();
 
-        // insert stack for empty
-        ruletype_stack_map.insert("".to_string(), None);
+        let mut empty_tag_used = false;
+
+        let mut terminal_data_used = false;
 
         // insert stack for terminal token type
-        ruletype_stack_map.insert(
-            self.token_typename.to_string(),
-            Some(terminal_stack_name.clone()),
-        );
-        stack_names_in_order.push((terminal_stack_name.clone(), self.token_typename.clone()));
+        for class_def in &self.terminal_classes {
+            if class_def.data_used {
+                terminal_data_used = true;
+                ruletype_stack_map.insert(
+                    self.token_typename.to_string(),
+                    Some(terminal_stack_name.clone()),
+                );
+                stack_names_in_order
+                    .push((terminal_stack_name.clone(), self.token_typename.clone()));
+                break;
+            } else {
+                empty_tag_used = true;
+            }
+        }
+        let push_terminal_body_stream = if terminal_data_used {
+            quote! {
+                self.#tag_stack_name.push(#tag_enum_name::#terminal_stack_name);
+                self.#terminal_stack_name.push( term );
+            }
+        } else {
+            quote! {
+                unreachable!();
+            }
+        };
 
         fn remove_whitespaces(s: String) -> String {
             s.chars().filter(|c| !c.is_whitespace()).collect()
         }
 
         for nonterm in self.nonterminals.iter() {
-            let ruletype_stream = nonterm.ruletype.as_ref().cloned().unwrap_or_default();
-
-            let cur_len = ruletype_stack_map.len();
-            let stack_name = ruletype_stack_map
-                .entry(remove_whitespaces(ruletype_stream.to_string()))
-                .or_insert_with(|| {
-                    let new_stack_name = format_ident!("__stack{}", cur_len);
-                    stack_names_in_order.push((new_stack_name.clone(), ruletype_stream.clone()));
-                    Some(new_stack_name)
-                })
-                .clone();
-            stack_names_for_nonterm.push(stack_name);
+            if let Some(ruletype_stream) = nonterm.ruletype.as_ref().cloned() {
+                let cur_len = ruletype_stack_map.len();
+                let stack_name = ruletype_stack_map
+                    .entry(remove_whitespaces(ruletype_stream.to_string()))
+                    .or_insert_with(|| {
+                        let new_stack_name = format_ident!("__stack{}", cur_len);
+                        stack_names_in_order
+                            .push((new_stack_name.clone(), ruletype_stream.clone()));
+                        Some(new_stack_name)
+                    })
+                    .clone();
+                stack_names_for_nonterm.push(stack_name);
+            } else {
+                empty_tag_used = true;
+                stack_names_for_nonterm.push(None);
+            }
         }
 
         // Token -> Option<stack_name> map, `None` for empty
@@ -1493,8 +1517,7 @@ impl Grammar {
                 }
             }
             fn push_terminal(&mut self, term: Self::Term) {
-                self.#tag_stack_name.push(#tag_enum_name::#terminal_stack_name);
-                self.#terminal_stack_name.push( term );
+                #push_terminal_body_stream
             }
             fn push_empty(&mut self) {
                 self.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);

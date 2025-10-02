@@ -501,21 +501,16 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for JsonNonTerminals {
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum JsonTags {
-    __terminals,
     Empty,
 }
 /// enum for each non-terminal and terminal symbol, that actually hold data
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
 pub struct JsonDataStack {
     pub __tags: Vec<JsonTags>,
-    __terminals: Vec<char>,
 }
 impl Default for JsonDataStack {
     fn default() -> Self {
-        Self {
-            __tags: Vec::new(),
-            __terminals: Vec::new(),
-        }
+        Self { __tags: Vec::new() }
     }
 }
 #[allow(
@@ -1437,43 +1432,31 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
     }
     fn pop(&mut self) {
         match self.__tags.pop().unwrap() {
-            JsonTags::__terminals => {
-                self.__terminals.pop();
-            }
             _ => {}
         }
     }
     fn push_terminal(&mut self, term: Self::Term) {
-        self.__tags.push(JsonTags::__terminals);
-        self.__terminals.push(term);
+        unreachable!();
     }
     fn push_empty(&mut self) {
         self.__tags.push(JsonTags::Empty);
     }
     fn clear(&mut self) {
         self.__tags.clear();
-        self.__terminals.clear();
     }
     fn reserve(&mut self, additional: usize) {
         self.__tags.reserve(additional);
     }
     fn split_off(&mut self, at: usize) -> Self {
         let __other_tag_stack = self.__tags.split_off(at);
-        let mut __counts: [u8; 1usize + 1] = [0; 1usize + 1];
+        let mut __counts: [u8; 0usize + 1] = [0; 0usize + 1];
         for &tag in &__other_tag_stack {
             __counts[tag as usize] += 1;
         }
-        let __other___terminals = self
-            .__terminals
-            .split_off(self.__terminals.len() - (__counts[0usize] as usize));
-        Self {
-            __tags: __other_tag_stack,
-            __terminals: __other___terminals,
-        }
+        Self { __tags: __other_tag_stack }
     }
     fn append(&mut self, other: &mut Self) {
         self.__tags.append(&mut other.__tags);
-        self.__terminals.append(&mut other.__terminals);
     }
     fn reduce_action(
         data_stack: &mut Self,
