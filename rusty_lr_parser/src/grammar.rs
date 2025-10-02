@@ -40,7 +40,7 @@ pub struct TerminalClassDefinition {
     /// compressed ranges, only if %tokentype is char or u8
     pub ranges: Vec<(u32, u32)>,
 
-    /// Wheather this class's data was used in any reduce action
+    /// Whether this class's data was used in any reduce action
     pub data_used: bool,
 }
 
