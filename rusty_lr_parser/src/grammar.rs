@@ -39,6 +39,9 @@ pub struct TerminalClassDefinition {
 
     /// compressed ranges, only if %tokentype is char or u8
     pub ranges: Vec<(u32, u32)>,
+
+    /// Whether this class's data was used in any reduce action
+    pub data_used: bool,
 }
 
 pub enum OptimizeRemove {
@@ -1021,6 +1024,7 @@ impl Grammar {
                 terminals: vec![i],
                 multiterm_counter,
                 ranges,
+                data_used: true,
             });
         }
         grammar.other_terminal_class_id = grammar.terminal_class_id[grammar.other_terminal_index];
@@ -1191,6 +1195,7 @@ impl Grammar {
                     terminals: terms,
                     multiterm_counter,
                     ranges: Vec::new(),
+                    data_used: self.terminal_classes[old_classes[0]].data_used,
                 };
                 new_class_defs.push(class_def);
             }
@@ -1540,6 +1545,24 @@ impl Grammar {
         }
         for i in add_to_diags {
             diag.removed.push(OptimizeRemove::NonTermDataNotUsed(i));
+        }
+
+        // check for any data of terminal symbol was used in any reduce action
+        for class_def in &mut self.terminal_classes {
+            class_def.data_used = false;
+        }
+        for nonterm in &self.nonterminals {
+            for rule in &nonterm.rules {
+                for token in &rule.tokens {
+                    if let Token::Term(TerminalSymbol::Term(term)) = token.token {
+                        if let Some(mapto) = &token.mapto {
+                            if rule.reduce_action_contains_ident(mapto) {
+                                self.terminal_classes[term].data_used = true;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         for _ in 0..max_iter {
@@ -1938,6 +1961,14 @@ impl Grammar {
             for rule in &mut nonterm.rules {
                 rule.is_used = rules_used[i];
                 i += 1;
+            }
+        }
+
+        for state in &mut new_states {
+            for (term, shift_target) in &mut state.shift_goto_map_term {
+                if let TerminalSymbol::Term(term) = *term {
+                    shift_target.push = self.terminal_classes[term].data_used;
+                }
             }
         }
 

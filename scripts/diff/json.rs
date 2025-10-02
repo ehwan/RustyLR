@@ -541,7 +541,7 @@ impl JsonDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -549,12 +549,10 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -572,7 +570,7 @@ impl JsonDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -580,12 +578,10 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -603,7 +599,7 @@ impl JsonDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -611,12 +607,10 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -665,7 +659,7 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -673,7 +667,6 @@ impl JsonDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -695,7 +688,7 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -711,7 +704,6 @@ impl JsonDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 5usize);
         Ok(false)
     }
@@ -729,7 +721,7 @@ impl JsonDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -737,12 +729,10 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -789,7 +779,7 @@ impl JsonDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -797,12 +787,10 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -824,12 +812,10 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         Ok(false)
     }
@@ -863,12 +849,10 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 5usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __location_stack.truncate(__location_stack.len() - 5usize);
         Ok(false)
     }
@@ -919,12 +903,10 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         Ok(false)
     }
@@ -946,12 +928,10 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         Ok(false)
     }
@@ -973,16 +953,14 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -1008,12 +986,10 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -1039,12 +1015,10 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -1066,12 +1040,10 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         Ok(false)
     }
@@ -1093,12 +1065,10 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         Ok(false)
     }
@@ -1116,24 +1086,22 @@ impl JsonDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 4usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __location_stack.truncate(__location_stack.len() - 4usize);
         Ok(false)
     }
@@ -1151,28 +1119,26 @@ impl JsonDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 5usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 5usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __location_stack.truncate(__location_stack.len() - 5usize);
         Ok(false)
     }
@@ -1190,24 +1156,22 @@ impl JsonDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 4usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __location_stack.truncate(__location_stack.len() - 4usize);
         Ok(false)
     }
@@ -1249,7 +1213,7 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -1257,7 +1221,6 @@ impl JsonDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -1393,12 +1356,9 @@ impl JsonDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         Ok(false)
     }
@@ -1420,12 +1380,10 @@ impl JsonDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::__terminals)
+                JsonTags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        __data_stack.__tags.push(JsonTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         Ok(false)
     }
@@ -2365,9 +2323,9 @@ impl JsonParser {
         > = vec![
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(1, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(1, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(2, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(2, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::Json,
             ::rusty_lr::parser::state::ShiftTarget::new(5, true)),
             (JsonNonTerminals::Element, ::rusty_lr::parser::state::ShiftTarget::new(5,
@@ -2384,9 +2342,9 @@ impl JsonParser {
             as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(1, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(1, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(2, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(2, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(4, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -2400,9 +2358,9 @@ impl JsonParser {
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(1, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(1, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(2, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(2, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(3, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -2447,23 +2405,23 @@ impl JsonParser {
             usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass6,
-            ::rusty_lr::parser::state::ShiftTarget::new(8, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(8, false)),
             (JsonTerminalClasses::TermClass7,
-            ::rusty_lr::parser::state::ShiftTarget::new(13, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(13, false)),
             (JsonTerminalClasses::TermClass9,
-            ::rusty_lr::parser::state::ShiftTarget::new(17, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(17, false)),
             (JsonTerminalClasses::TermClass11,
-            ::rusty_lr::parser::state::ShiftTarget::new(21, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(21, false)),
             (JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(110, false)),
             (JsonTerminalClasses::TermClass15,
-            ::rusty_lr::parser::state::ShiftTarget::new(27, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(27, false)),
             (JsonTerminalClasses::TermClass20,
-            ::rusty_lr::parser::state::ShiftTarget::new(29, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(29, false)),
             (JsonTerminalClasses::TermClass27,
-            ::rusty_lr::parser::state::ShiftTarget::new(39, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(39, false)),
             (JsonTerminalClasses::TermClass29,
-            ::rusty_lr::parser::state::ShiftTarget::new(52, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(52, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::Value,
             ::rusty_lr::parser::state::ShiftTarget::new(107, true)),
             (JsonNonTerminals::Object, ::rusty_lr::parser::state::ShiftTarget::new(107,
@@ -2490,7 +2448,7 @@ impl JsonParser {
             shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass22,
-            ::rusty_lr::parser::state::ShiftTarget::new(9, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(9, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [46,]; let shifted : & 'static
@@ -2498,7 +2456,7 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass24,
-            ::rusty_lr::parser::state::ShiftTarget::new(10, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(10, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [46,]; let shifted : & 'static
@@ -2506,7 +2464,7 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass25,
-            ::rusty_lr::parser::state::ShiftTarget::new(11, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(11, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [46,]; let shifted : & 'static
@@ -2514,7 +2472,7 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass19,
-            ::rusty_lr::parser::state::ShiftTarget::new(12, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(12, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [46,]; let shifted : & 'static
@@ -2530,7 +2488,7 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass26,
-            ::rusty_lr::parser::state::ShiftTarget::new(14, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(14, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [47,]; let shifted : & 'static
@@ -2538,7 +2496,7 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass24,
-            ::rusty_lr::parser::state::ShiftTarget::new(15, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(15, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [47,]; let shifted : & 'static
@@ -2546,7 +2504,7 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass24,
-            ::rusty_lr::parser::state::ShiftTarget::new(16, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(16, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [47,]; let shifted : & 'static
@@ -2562,7 +2520,7 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass8,
-            ::rusty_lr::parser::state::ShiftTarget::new(18, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(18, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [45,]; let shifted : & 'static
@@ -2570,7 +2528,7 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass26,
-            ::rusty_lr::parser::state::ShiftTarget::new(19, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(19, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [45,]; let shifted : & 'static
@@ -2578,7 +2536,7 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass19,
-            ::rusty_lr::parser::state::ShiftTarget::new(20, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(20, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [45,]; let shifted : & 'static
@@ -2596,7 +2554,7 @@ impl JsonParser {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(26, false)),
             (JsonTerminalClasses::TermClass15,
-            ::rusty_lr::parser::state::ShiftTarget::new(22, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(22, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(26, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
@@ -2686,9 +2644,9 @@ impl JsonParser {
             rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(1, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(1, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(2, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(2, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::Element,
             ::rusty_lr::parser::state::ShiftTarget::new(30, true)),
             (JsonNonTerminals::WS, ::rusty_lr::parser::state::ShiftTarget::new(32,
@@ -2709,7 +2667,7 @@ impl JsonParser {
             shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass12,
-            ::rusty_lr::parser::state::ShiftTarget::new(31, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(31, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![48]; __reduce_map
             .extend(__rustylr_tset5.iter().map(| term | (* term, reduce_rules.clone())));
@@ -2719,9 +2677,9 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(1, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(1, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(2, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(2, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::Element,
             ::rusty_lr::parser::state::ShiftTarget::new(30, true)),
             (JsonNonTerminals::WS, ::rusty_lr::parser::state::ShiftTarget::new(32,
@@ -2738,23 +2696,23 @@ impl JsonParser {
             rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass6,
-            ::rusty_lr::parser::state::ShiftTarget::new(8, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(8, false)),
             (JsonTerminalClasses::TermClass7,
-            ::rusty_lr::parser::state::ShiftTarget::new(13, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(13, false)),
             (JsonTerminalClasses::TermClass9,
-            ::rusty_lr::parser::state::ShiftTarget::new(17, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(17, false)),
             (JsonTerminalClasses::TermClass11,
-            ::rusty_lr::parser::state::ShiftTarget::new(33, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(33, false)),
             (JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(97, false)),
             (JsonTerminalClasses::TermClass15,
-            ::rusty_lr::parser::state::ShiftTarget::new(36, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(36, false)),
             (JsonTerminalClasses::TermClass20,
-            ::rusty_lr::parser::state::ShiftTarget::new(29, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(29, false)),
             (JsonTerminalClasses::TermClass27,
-            ::rusty_lr::parser::state::ShiftTarget::new(39, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(39, false)),
             (JsonTerminalClasses::TermClass29,
-            ::rusty_lr::parser::state::ShiftTarget::new(52, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(52, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::Value,
             ::rusty_lr::parser::state::ShiftTarget::new(94, true)),
             (JsonNonTerminals::Object, ::rusty_lr::parser::state::ShiftTarget::new(94,
@@ -2783,7 +2741,7 @@ impl JsonParser {
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(26, false)),
             (JsonTerminalClasses::TermClass15,
-            ::rusty_lr::parser::state::ShiftTarget::new(34, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(34, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(26, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
@@ -2841,7 +2799,7 @@ impl JsonParser {
             usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass21,
-            ::rusty_lr::parser::state::ShiftTarget::new(38, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(38, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [14,]; let shifted : & 'static
@@ -2857,9 +2815,9 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(40, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(40, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(41, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(41, false)),
             (JsonTerminalClasses::error, ::rusty_lr::parser::state::ShiftTarget::new(42,
             true)),], shift_goto_map_nonterm : vec![(JsonNonTerminals::Members,
             ::rusty_lr::parser::state::ShiftTarget::new(44, true)),
@@ -2877,9 +2835,9 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(40, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(40, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(41, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(41, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(4, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -2893,9 +2851,9 @@ impl JsonParser {
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(40, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(40, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(41, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(41, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(3, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -2909,7 +2867,7 @@ impl JsonParser {
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass28,
-            ::rusty_lr::parser::state::ShiftTarget::new(43, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(43, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [10,]; let shifted : & 'static
@@ -2925,7 +2883,7 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass28,
-            ::rusty_lr::parser::state::ShiftTarget::new(45, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(45, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [9,]; let shifted : & 'static [u8]
@@ -2941,7 +2899,7 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass12,
-            ::rusty_lr::parser::state::ShiftTarget::new(47, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(47, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![11]; __reduce_map
             .extend(__rustylr_tset8.iter().map(| term | (* term, reduce_rules.clone())));
@@ -2951,9 +2909,9 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(48, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(48, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(49, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(49, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::Members,
             ::rusty_lr::parser::state::ShiftTarget::new(50, true)),
             (JsonNonTerminals::Member, ::rusty_lr::parser::state::ShiftTarget::new(46,
@@ -2970,9 +2928,9 @@ impl JsonParser {
             rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(48, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(48, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(49, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(49, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(4, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -2986,9 +2944,9 @@ impl JsonParser {
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(48, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(48, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(49, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(49, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(3, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -3010,7 +2968,7 @@ impl JsonParser {
             rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass29,
-            ::rusty_lr::parser::state::ShiftTarget::new(52, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(52, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::String,
             ::rusty_lr::parser::state::ShiftTarget::new(64, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
@@ -3074,7 +3032,7 @@ impl JsonParser {
             (JsonTerminalClasses::TermClass28,
             ::rusty_lr::parser::state::ShiftTarget::new(60, false)),
             (JsonTerminalClasses::TermClass30,
-            ::rusty_lr::parser::state::ShiftTarget::new(53, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(53, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::Character,
             ::rusty_lr::parser::state::ShiftTarget::new(60, true)),
             (JsonNonTerminals::_CharacterPlus27,
@@ -3106,7 +3064,7 @@ impl JsonParser {
             (JsonTerminalClasses::TermClass9,
             ::rusty_lr::parser::state::ShiftTarget::new(59, false)),
             (JsonTerminalClasses::TermClass26,
-            ::rusty_lr::parser::state::ShiftTarget::new(54, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(54, false)),
             (JsonTerminalClasses::TermClass29,
             ::rusty_lr::parser::state::ShiftTarget::new(59, false)),
             (JsonTerminalClasses::TermClass30,
@@ -3323,7 +3281,7 @@ impl JsonParser {
             (JsonTerminalClasses::TermClass28,
             ::rusty_lr::parser::state::ShiftTarget::new(60, false)),
             (JsonTerminalClasses::TermClass30,
-            ::rusty_lr::parser::state::ShiftTarget::new(53, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(53, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::Character,
             ::rusty_lr::parser::state::ShiftTarget::new(60, true)),
             (JsonNonTerminals::_CharacterPlus27,
@@ -3349,7 +3307,7 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass29,
-            ::rusty_lr::parser::state::ShiftTarget::new(63, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(63, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [16,]; let shifted : & 'static
@@ -3365,9 +3323,9 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(65, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(65, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(66, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(66, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(67, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -3381,9 +3339,9 @@ impl JsonParser {
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(65, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(65, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(66, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(66, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(4, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -3397,9 +3355,9 @@ impl JsonParser {
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(65, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(65, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(66, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(66, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(3, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -3413,7 +3371,7 @@ impl JsonParser {
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass16,
-            ::rusty_lr::parser::state::ShiftTarget::new(68, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(68, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [13,]; let shifted : & 'static
@@ -3421,9 +3379,9 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(1, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(1, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(2, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(2, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::Element,
             ::rusty_lr::parser::state::ShiftTarget::new(69, true)),
             (JsonNonTerminals::WS, ::rusty_lr::parser::state::ShiftTarget::new(70,
@@ -3446,23 +3404,23 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass6,
-            ::rusty_lr::parser::state::ShiftTarget::new(8, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(8, false)),
             (JsonTerminalClasses::TermClass7,
-            ::rusty_lr::parser::state::ShiftTarget::new(13, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(13, false)),
             (JsonTerminalClasses::TermClass9,
-            ::rusty_lr::parser::state::ShiftTarget::new(17, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(17, false)),
             (JsonTerminalClasses::TermClass11,
-            ::rusty_lr::parser::state::ShiftTarget::new(71, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(71, false)),
             (JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(81, false)),
             (JsonTerminalClasses::TermClass15,
-            ::rusty_lr::parser::state::ShiftTarget::new(74, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(74, false)),
             (JsonTerminalClasses::TermClass20,
-            ::rusty_lr::parser::state::ShiftTarget::new(29, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(29, false)),
             (JsonTerminalClasses::TermClass27,
-            ::rusty_lr::parser::state::ShiftTarget::new(39, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(39, false)),
             (JsonTerminalClasses::TermClass29,
-            ::rusty_lr::parser::state::ShiftTarget::new(52, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(52, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::Value,
             ::rusty_lr::parser::state::ShiftTarget::new(77, true)),
             (JsonNonTerminals::Object, ::rusty_lr::parser::state::ShiftTarget::new(77,
@@ -3491,7 +3449,7 @@ impl JsonParser {
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(26, false)),
             (JsonTerminalClasses::TermClass15,
-            ::rusty_lr::parser::state::ShiftTarget::new(72, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(72, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(26, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
@@ -3549,9 +3507,9 @@ impl JsonParser {
             usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass28,
-            ::rusty_lr::parser::state::ShiftTarget::new(76, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(76, false)),
             (JsonTerminalClasses::TermClass29,
-            ::rusty_lr::parser::state::ShiftTarget::new(52, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(52, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::String,
             ::rusty_lr::parser::state::ShiftTarget::new(64, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
@@ -3569,9 +3527,9 @@ impl JsonParser {
             rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(78, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(78, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(79, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(79, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(80, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -3585,9 +3543,9 @@ impl JsonParser {
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(78, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(78, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(79, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(79, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(4, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -3601,9 +3559,9 @@ impl JsonParser {
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(78, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(78, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(79, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(79, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(3, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -3625,7 +3583,7 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass13,
-            ::rusty_lr::parser::state::ShiftTarget::new(82, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(82, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::_Group34,
             ::rusty_lr::parser::state::ShiftTarget::new(85, false)),
             (JsonNonTerminals::__Group34Question35,
@@ -3677,9 +3635,9 @@ impl JsonParser {
             usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass18,
-            ::rusty_lr::parser::state::ShiftTarget::new(86, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(86, false)),
             (JsonTerminalClasses::TermClass19,
-            ::rusty_lr::parser::state::ShiftTarget::new(90, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(90, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::Exponent,
             ::rusty_lr::parser::state::ShiftTarget::new(93, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -3793,9 +3751,9 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(95, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(95, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(96, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(96, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(80, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -3809,9 +3767,9 @@ impl JsonParser {
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(95, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(95, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(96, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(96, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(4, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -3825,9 +3783,9 @@ impl JsonParser {
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(95, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(95, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(96, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(96, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(3, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -3841,7 +3799,7 @@ impl JsonParser {
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass13,
-            ::rusty_lr::parser::state::ShiftTarget::new(98, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(98, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::_Group34,
             ::rusty_lr::parser::state::ShiftTarget::new(100, false)),
             (JsonNonTerminals::__Group34Question35,
@@ -3885,9 +3843,9 @@ impl JsonParser {
             usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass18,
-            ::rusty_lr::parser::state::ShiftTarget::new(101, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(101, false)),
             (JsonTerminalClasses::TermClass19,
-            ::rusty_lr::parser::state::ShiftTarget::new(104, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(104, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::Exponent,
             ::rusty_lr::parser::state::ShiftTarget::new(93, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -3985,9 +3943,9 @@ impl JsonParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(108, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(108, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(109, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(109, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(80, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -4001,9 +3959,9 @@ impl JsonParser {
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(108, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(108, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(109, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(109, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(4, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -4017,9 +3975,9 @@ impl JsonParser {
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(108, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(108, false)),
             (JsonTerminalClasses::TermClass1,
-            ::rusty_lr::parser::state::ShiftTarget::new(109, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(109, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::WS,
             ::rusty_lr::parser::state::ShiftTarget::new(3, true)),
             (JsonNonTerminals::_LiteralString36,
@@ -4033,7 +3991,7 @@ impl JsonParser {
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass13,
-            ::rusty_lr::parser::state::ShiftTarget::new(111, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(111, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::_Group34,
             ::rusty_lr::parser::state::ShiftTarget::new(113, false)),
             (JsonNonTerminals::__Group34Question35,
@@ -4077,9 +4035,9 @@ impl JsonParser {
             usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass18,
-            ::rusty_lr::parser::state::ShiftTarget::new(114, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(114, false)),
             (JsonTerminalClasses::TermClass19,
-            ::rusty_lr::parser::state::ShiftTarget::new(117, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(117, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::Exponent,
             ::rusty_lr::parser::state::ShiftTarget::new(93, true)),
             (JsonNonTerminals::_LiteralString36,
