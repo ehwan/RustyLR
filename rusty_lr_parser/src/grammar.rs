@@ -1547,6 +1547,7 @@ impl Grammar {
             diag.removed.push(OptimizeRemove::NonTermDataNotUsed(i));
         }
 
+        // check for any data of terminal symbol was used in any reduce action
         for class_def in &mut self.terminal_classes {
             class_def.data_used = false;
         }
