@@ -1963,6 +1963,14 @@ impl Grammar {
             }
         }
 
+        for state in &mut new_states {
+            for (term, shift_target) in &mut state.shift_goto_map_term {
+                if let TerminalSymbol::Term(term) = *term {
+                    shift_target.push = self.terminal_classes[term].data_used;
+                }
+            }
+        }
+
         self.states = new_states;
 
         collector

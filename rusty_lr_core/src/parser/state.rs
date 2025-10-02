@@ -7,7 +7,7 @@ use crate::parser::terminalclass::TerminalClass;
 #[derive(Debug, Clone, Copy)]
 pub struct ShiftTarget<StateIndex> {
     pub state: StateIndex,
-    /// true if the data should be pushed, false if data should not be pushed
+    /// true if the data should be pushed, false if data should not be pushed (so `Empty` tag will be pushed)
     pub push: bool,
 }
 impl<StateIndex> ShiftTarget<StateIndex> {

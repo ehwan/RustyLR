@@ -275,10 +275,11 @@ impl EDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::__terminals)
+                ETags::Empty)
             );
         }
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(ETags::__terminals);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { '0' };
         __data_stack.__terminals.push(__res);
@@ -360,7 +361,7 @@ impl EDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                ETags::__terminals)
+                ETags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -368,7 +369,7 @@ impl EDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
-                ETags::__terminals)
+                ETags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
@@ -378,7 +379,6 @@ impl EDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 5usize);
         __data_stack.__tags.push(ETags::__stack3);
         let mut E = __data_stack.__stack3.pop().unwrap();
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 5usize);
         let __res = E;
         __data_stack.__stack3.push(__res);
@@ -444,7 +444,7 @@ impl EDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                ETags::__terminals)
+                ETags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -454,7 +454,6 @@ impl EDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(ETags::__stack3);
         let mut E = __data_stack.__stack3.pop().unwrap();
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = { -E };
         __data_stack.__stack3.push(__res);
@@ -474,7 +473,7 @@ impl EDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::__terminals)
+                ETags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -482,7 +481,6 @@ impl EDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         Ok(false)
     }
@@ -1002,7 +1000,7 @@ impl EParser {
             { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted
             as usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(ETerminalClasses::TermClass0,
-            ::rusty_lr::parser::state::ShiftTarget::new(7, true)),],
+            ::rusty_lr::parser::state::ShiftTarget::new(7, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![12]; __reduce_map
             .extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules.clone())));
@@ -1020,11 +1018,11 @@ impl EParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(ETerminalClasses::TermClass2,
-            ::rusty_lr::parser::state::ShiftTarget::new(9, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(9, false)),
             (ETerminalClasses::TermClass4,
-            ::rusty_lr::parser::state::ShiftTarget::new(23, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(23, false)),
             (ETerminalClasses::TermClass5,
-            ::rusty_lr::parser::state::ShiftTarget::new(18, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(18, false)),
             (ETerminalClasses::TermClass6,
             ::rusty_lr::parser::state::ShiftTarget::new(19, true)),],
             shift_goto_map_nonterm : vec![(ENonTerminals::Digit,
@@ -1056,7 +1054,7 @@ impl EParser {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(ETerminalClasses::TermClass3,
-            ::rusty_lr::parser::state::ShiftTarget::new(11, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(11, false)),
             (ETerminalClasses::TermClass7,
             ::rusty_lr::parser::state::ShiftTarget::new(13, true)),
             (ETerminalClasses::TermClass8,
@@ -1123,11 +1121,11 @@ impl EParser {
             { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted
             as usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(ETerminalClasses::TermClass2,
-            ::rusty_lr::parser::state::ShiftTarget::new(9, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(9, false)),
             (ETerminalClasses::TermClass4,
-            ::rusty_lr::parser::state::ShiftTarget::new(16, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(16, false)),
             (ETerminalClasses::TermClass5,
-            ::rusty_lr::parser::state::ShiftTarget::new(18, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(18, false)),
             (ETerminalClasses::TermClass6,
             ::rusty_lr::parser::state::ShiftTarget::new(19, true)),],
             shift_goto_map_nonterm : vec![(ENonTerminals::Digit,
@@ -1187,7 +1185,7 @@ impl EParser {
             shift_goto_map_term : vec![(ETerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(6, false)),
             (ETerminalClasses::TermClass5,
-            ::rusty_lr::parser::state::ShiftTarget::new(18, true)),
+            ::rusty_lr::parser::state::ShiftTarget::new(18, false)),
             (ETerminalClasses::TermClass6,
             ::rusty_lr::parser::state::ShiftTarget::new(21, true)),],
             shift_goto_map_nonterm : vec![(ENonTerminals::Digit,

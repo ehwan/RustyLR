@@ -722,7 +722,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -745,7 +745,7 @@ impl GrammarDataStack {
         __data_stack.__tags.push(GrammarTags::__stack2);
         let mut RuleType = __data_stack.__stack3.pop().unwrap();
         let mut RuleLines = __data_stack.__stack4.pop().unwrap();
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_colon = __location_stack.pop().unwrap();
@@ -2386,7 +2386,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -2408,7 +2408,6 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 5usize);
         __data_stack.__tags.push(GrammarTags::Empty);
         let mut __rustylr_data_3 = __data_stack.__stack18.pop().unwrap();
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 5usize);
@@ -2440,7 +2439,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -2457,7 +2456,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 4usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -2486,7 +2485,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -2503,7 +2502,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -2532,7 +2531,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -2549,7 +2548,6 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 4usize);
@@ -2575,7 +2573,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -2592,7 +2590,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -2621,7 +2619,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -2639,7 +2637,7 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
         let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_tokentype = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -2668,7 +2666,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -2681,7 +2679,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_tokentype = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -2710,7 +2708,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -2728,7 +2726,7 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
         let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_userdata = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -2757,7 +2755,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -2770,7 +2768,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_userdata = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -2799,7 +2797,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -2817,7 +2815,7 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
         let mut IdentOrLiteral = __data_stack.__stack19.pop().unwrap();
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_left = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -2845,7 +2843,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -2862,7 +2860,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -2891,7 +2889,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -2909,7 +2907,7 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
         let mut IdentOrLiteral = __data_stack.__stack19.pop().unwrap();
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_right = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -2937,7 +2935,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -2954,7 +2952,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -2983,7 +2981,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3001,7 +2999,7 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
         let mut IdentOrLiteral = __data_stack.__stack19.pop().unwrap();
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_precedence = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -3025,7 +3023,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3042,7 +3040,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -3071,7 +3069,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3089,7 +3087,7 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
         let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_errortype = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -3118,7 +3116,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3131,7 +3129,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_errortype = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -3160,7 +3158,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3178,7 +3176,7 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
         let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_moduleprefix = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -3207,7 +3205,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3220,7 +3218,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_moduleprefix = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -3249,7 +3247,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3262,7 +3260,6 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut glr = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
@@ -3285,7 +3282,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3302,7 +3299,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -3331,7 +3328,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3344,7 +3341,6 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut lalr = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
@@ -3367,7 +3363,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3384,7 +3380,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -3413,7 +3409,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3426,7 +3422,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         {
             data.no_optim = true;
@@ -3447,7 +3443,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3464,7 +3460,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -3493,7 +3489,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3506,7 +3502,6 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut dense = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
@@ -3529,7 +3524,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3546,7 +3541,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -3575,7 +3570,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3593,7 +3588,7 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
         let mut ident = __data_stack.__stack18.pop().unwrap();
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 4usize);
         {
             let idents = ident
@@ -3622,7 +3617,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3639,7 +3634,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -3668,7 +3663,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3686,7 +3681,6 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
         let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut filter = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 4usize);
@@ -3715,7 +3709,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3728,7 +3722,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_filter = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -3757,7 +3751,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3775,7 +3769,7 @@ impl GrammarDataStack {
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
         let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 4usize);
         let __rustylr_data_2 = Self::custom_reduce_action_0(
             __rustylr_data_2,
@@ -3802,7 +3796,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3815,7 +3809,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_location = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -3844,7 +3838,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__terminals)
+                GrammarTags::Empty)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3857,7 +3851,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -7687,7 +7681,7 @@ impl GrammarParser {
             shifted : shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(65, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(65, false)),
             (GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(66, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
@@ -8062,7 +8056,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(93, true)),],
+            ::rusty_lr_core::parser::state::ShiftTarget::new(93, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [51,]; let shifted : & 'static
@@ -8091,7 +8085,7 @@ impl GrammarParser {
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(96, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(96, false)),
             (GrammarTerminalClasses::literal,
             ::rusty_lr_core::parser::state::ShiftTarget::new(76, true)),],
             shift_goto_map_nonterm : vec![(GrammarNonTerminals::IdentOrLiteral,
@@ -8139,7 +8133,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(100, true)),],
+            ::rusty_lr_core::parser::state::ShiftTarget::new(100, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [53,]; let shifted : & 'static
@@ -8159,7 +8153,7 @@ impl GrammarParser {
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(102, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(102, false)),
             (GrammarTerminalClasses::literal,
             ::rusty_lr_core::parser::state::ShiftTarget::new(76, true)),],
             shift_goto_map_nonterm : vec![(GrammarNonTerminals::IdentOrLiteral,
@@ -8196,7 +8190,7 @@ impl GrammarParser {
             (GrammarTerminalClasses::colon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(105, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(105, false)),
             (GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
             (GrammarTerminalClasses::percent,
@@ -8313,7 +8307,7 @@ impl GrammarParser {
             (GrammarTerminalClasses::colon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(108, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(108, false)),
             (GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
             (GrammarTerminalClasses::percent,
@@ -8424,7 +8418,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(111, true)),],
+            ::rusty_lr_core::parser::state::ShiftTarget::new(111, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [43,]; let shifted : & 'static
@@ -8453,7 +8447,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),],
+            ::rusty_lr_core::parser::state::ShiftTarget::new(114, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [44,]; let shifted : & 'static
@@ -8471,7 +8465,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(116, true)),],
+            ::rusty_lr_core::parser::state::ShiftTarget::new(116, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [45,]; let shifted : & 'static
@@ -8493,7 +8487,7 @@ impl GrammarParser {
             (GrammarTerminalClasses::colon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(118, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(118, false)),
             (GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
             (GrammarTerminalClasses::percent,
@@ -8601,7 +8595,7 @@ impl GrammarParser {
             (GrammarTerminalClasses::colon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(120, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(120, false)),
             (GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
             (GrammarTerminalClasses::percent,
@@ -8707,7 +8701,7 @@ impl GrammarParser {
             (GrammarTerminalClasses::colon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(122, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(122, false)),
             (GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
             (GrammarTerminalClasses::percent,
@@ -8815,7 +8809,7 @@ impl GrammarParser {
             (GrammarTerminalClasses::colon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(124, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(124, false)),
             (GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
             (GrammarTerminalClasses::percent,
@@ -8921,7 +8915,7 @@ impl GrammarParser {
             (GrammarTerminalClasses::colon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(126, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(126, false)),
             (GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
             (GrammarTerminalClasses::percent,
@@ -9029,7 +9023,7 @@ impl GrammarParser {
             (GrammarTerminalClasses::colon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(128, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(128, false)),
             (GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
             (GrammarTerminalClasses::percent,
@@ -9135,7 +9129,7 @@ impl GrammarParser {
             (GrammarTerminalClasses::colon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(130, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(130, false)),
             (GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
             (GrammarTerminalClasses::percent,
@@ -9243,7 +9237,7 @@ impl GrammarParser {
             (GrammarTerminalClasses::colon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(132, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(132, false)),
             (GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
             (GrammarTerminalClasses::percent,
@@ -9345,7 +9339,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(134, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(134, false)),
             (GrammarTerminalClasses::error,
             ::rusty_lr_core::parser::state::ShiftTarget::new(135, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
@@ -9365,7 +9359,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(136, true)),],
+            ::rusty_lr_core::parser::state::ShiftTarget::new(136, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [63,]; let shifted : & 'static
@@ -9383,7 +9377,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(138, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(138, false)),
             (GrammarTerminalClasses::error,
             ::rusty_lr_core::parser::state::ShiftTarget::new(139, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
@@ -9403,7 +9397,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(140, true)),],
+            ::rusty_lr_core::parser::state::ShiftTarget::new(140, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [61,]; let shifted : & 'static
@@ -9438,7 +9432,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(143, true)),],
+            ::rusty_lr_core::parser::state::ShiftTarget::new(143, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [55,]; let shifted : & 'static
@@ -9458,7 +9452,7 @@ impl GrammarParser {
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(145, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(145, false)),
             (GrammarTerminalClasses::literal,
             ::rusty_lr_core::parser::state::ShiftTarget::new(76, true)),],
             shift_goto_map_nonterm : vec![(GrammarNonTerminals::IdentOrLiteral,
@@ -9480,7 +9474,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(147, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(147, false)),
             (GrammarTerminalClasses::error,
             ::rusty_lr_core::parser::state::ShiftTarget::new(148, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
@@ -9500,7 +9494,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(149, true)),],
+            ::rusty_lr_core::parser::state::ShiftTarget::new(149, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [65,]; let shifted : & 'static
@@ -9518,7 +9512,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(151, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(151, false)),
             (GrammarTerminalClasses::error,
             ::rusty_lr_core::parser::state::ShiftTarget::new(152, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
@@ -9538,7 +9532,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(153, true)),],
+            ::rusty_lr_core::parser::state::ShiftTarget::new(153, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [67,]; let shifted : & 'static
@@ -9581,7 +9575,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(157, true)),],
+            ::rusty_lr_core::parser::state::ShiftTarget::new(157, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [69,]; let shifted : & 'static
@@ -9619,7 +9613,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(161, true)),],
+            ::rusty_lr_core::parser::state::ShiftTarget::new(161, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [68,]; let shifted : & 'static
@@ -9641,7 +9635,7 @@ impl GrammarParser {
             (GrammarTerminalClasses::colon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(163, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(163, false)),
             (GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
             (GrammarTerminalClasses::percent,
@@ -9749,7 +9743,7 @@ impl GrammarParser {
             (GrammarTerminalClasses::colon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(165, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(165, false)),
             (GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
             (GrammarTerminalClasses::percent,
@@ -9855,7 +9849,7 @@ impl GrammarParser {
             (GrammarTerminalClasses::colon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(167, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(167, false)),
             (GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
             (GrammarTerminalClasses::percent,
@@ -9963,7 +9957,7 @@ impl GrammarParser {
             (GrammarTerminalClasses::colon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
             (GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(169, true)),
+            ::rusty_lr_core::parser::state::ShiftTarget::new(169, false)),
             (GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
             (GrammarTerminalClasses::percent,
@@ -10065,7 +10059,7 @@ impl GrammarParser {
             shifted as usize, } }).collect() } },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
-            ::rusty_lr_core::parser::state::ShiftTarget::new(171, true)),],
+            ::rusty_lr_core::parser::state::ShiftTarget::new(171, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
             ruleset : { let rules : & 'static [u8] = & [74,]; let shifted : & 'static
