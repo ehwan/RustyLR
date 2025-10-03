@@ -469,7 +469,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     userdata,
                     &mut new_location,
                 ) {
-                    Ok(ret) => ret,
+                    Ok(_) => {}
                     Err(err) => {
                         return Err(ParseError::ReduceAction(super::error::ReduceActionError {
                             term,

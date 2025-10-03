@@ -243,7 +243,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<Token>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, String> {
+    ) -> Result<(), String> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -277,7 +277,7 @@ impl EDataStack {
         if __push_data {
             __data_stack.__stack1.push(__res);
         }
-        Ok(true)
+        Ok(())
     }
     ///A -> M
     #[inline]
@@ -289,7 +289,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<Token>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, String> {
+    ) -> Result<(), String> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -307,7 +307,7 @@ impl EDataStack {
         if __push_data {
             __data_stack.__stack1.push(__res);
         }
-        Ok(true)
+        Ok(())
     }
     ///M -> M star M
     #[inline]
@@ -319,7 +319,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<Token>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, String> {
+    ) -> Result<(), String> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -360,7 +360,7 @@ impl EDataStack {
         if __push_data {
             __data_stack.__stack1.push(__res);
         }
-        Ok(true)
+        Ok(())
     }
     ///P -> num
     #[inline]
@@ -372,7 +372,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<Token>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, String> {
+    ) -> Result<(), String> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -398,7 +398,7 @@ impl EDataStack {
         if __push_data {
             __data_stack.__stack1.push(__res);
         }
-        Ok(true)
+        Ok(())
     }
     ///P -> lparen E rparen
     #[inline]
@@ -410,7 +410,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<Token>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, String> {
+    ) -> Result<(), String> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -438,7 +438,7 @@ impl EDataStack {
         if __push_data {
             __data_stack.__stack1.push(__res);
         }
-        Ok(true)
+        Ok(())
     }
     ///E -> A
     #[inline]
@@ -450,7 +450,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<Token>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, String> {
+    ) -> Result<(), String> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -468,7 +468,7 @@ impl EDataStack {
         if __push_data {
             __data_stack.__stack1.push(__res);
         }
-        Ok(true)
+        Ok(())
     }
 }
 #[allow(
@@ -548,7 +548,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<Self::Term>,
         user_data: &mut Self::UserData,
         location0: &mut Self::Location,
-    ) -> Result<bool, Self::ReduceActionError> {
+    ) -> Result<(), Self::ReduceActionError> {
         match rule_index {
             0usize => {
                 Self::reduce_A_0(

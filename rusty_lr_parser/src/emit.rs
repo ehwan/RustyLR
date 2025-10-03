@@ -1355,8 +1355,6 @@ impl Grammar {
                         #rule_index => Self::#reduce_fn_ident( data_stack, location_stack, push_data, shift, lookahead, user_data, location0 ),
                     });
 
-                    let returns_non_empty = stack_names_for_nonterm[nonterm_idx].is_some();
-
                     let reduce_action_body = match &rule.reduce_action {
                         Some(ReduceAction::Custom(custom)) => {
                             let body = &custom.body;
@@ -1380,7 +1378,7 @@ impl Grammar {
                                 lookahead: &#module_prefix::TerminalSymbol<#token_typename>,
                                 #user_data_parameter_name: &mut #user_data_typename,
                                 __rustylr_location0: &mut #location_typename,
-                            ) -> Result<bool, #reduce_error_typename> {
+                            ) -> Result<(), #reduce_error_typename> {
                                 #[cfg(debug_assertions)]
                                 {
                                     #debug_tag_check_stream
@@ -1395,7 +1393,7 @@ impl Grammar {
                                     __data_stack.#stack_name.push(__res);
                                 }
 
-                                Ok(#returns_non_empty)
+                                Ok(())
                             }
                         });
                     } else {
@@ -1410,7 +1408,7 @@ impl Grammar {
                                 lookahead: &#module_prefix::TerminalSymbol<#token_typename>,
                                 #user_data_parameter_name: &mut #user_data_typename,
                                 __rustylr_location0: &mut #location_typename,
-                            ) -> Result<bool, #reduce_error_typename> {
+                            ) -> Result<(), #reduce_error_typename> {
                                 #[cfg(debug_assertions)]
                                 {
                                     #debug_tag_check_stream
@@ -1422,7 +1420,7 @@ impl Grammar {
 
                                 #reduce_action_body
 
-                                Ok(#returns_non_empty)
+                                Ok(())
                             }
                         });
                     }
@@ -1738,7 +1736,7 @@ impl Grammar {
                 lookahead: &#module_prefix::TerminalSymbol<Self::Term>,
                 user_data: &mut Self::UserData,
                 location0: &mut Self::Location,
-            ) -> Result<bool, Self::ReduceActionError> {
+            ) -> Result<(), Self::ReduceActionError> {
                 match rule_index {
                     #reduce_action_case_streams
                     _ => {

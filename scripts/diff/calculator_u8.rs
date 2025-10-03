@@ -271,7 +271,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -288,7 +288,7 @@ impl EDataStack {
         if __push_data {
             __data_stack.__terminals.push(__res);
         }
-        Ok(true)
+        Ok(())
     }
     ///Number -> ' '* Digit+ ' '*
     #[inline]
@@ -300,7 +300,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -328,7 +328,7 @@ impl EDataStack {
         if __push_data {
             __data_stack.__stack1.push(__res);
         }
-        Ok(true)
+        Ok(())
     }
     ///P -> Number
     #[inline]
@@ -340,7 +340,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -360,7 +360,7 @@ impl EDataStack {
         if __push_data {
             __data_stack.__stack2.push(__res);
         }
-        Ok(true)
+        Ok(())
     }
     ///P -> ' '* '(' E ')' ' '*
     #[inline]
@@ -372,7 +372,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -408,7 +408,7 @@ impl EDataStack {
         if __push_data {
             __data_stack.__stack2.push(__res);
         }
-        Ok(true)
+        Ok(())
     }
     ///E -> E Op E
     #[inline]
@@ -420,7 +420,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -458,7 +458,7 @@ impl EDataStack {
         if __push_data {
             __data_stack.__stack2.push(__res);
         }
-        Ok(true)
+        Ok(())
     }
     ///E -> ' '* '-' E
     #[inline]
@@ -470,7 +470,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -498,7 +498,7 @@ impl EDataStack {
         if __push_data {
             __data_stack.__stack2.push(__res);
         }
-        Ok(true)
+        Ok(())
     }
     ///' '+ -> ' '+ ' '
     #[inline]
@@ -510,7 +510,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -524,7 +524,7 @@ impl EDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///' '* -> ' '+
     #[inline]
@@ -536,7 +536,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -545,7 +545,7 @@ impl EDataStack {
             );
         }
         __location_stack.truncate(__location_stack.len() - 1usize);
-        Ok(false)
+        Ok(())
     }
     ///' '* ->
     #[inline]
@@ -557,10 +557,10 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __data_stack.__tags.push(ETags::Empty);
-        Ok(false)
+        Ok(())
     }
     ///Digit+ -> Digit
     #[inline]
@@ -572,7 +572,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -592,7 +592,7 @@ impl EDataStack {
         if __push_data {
             __data_stack.__stack3.push(__res);
         }
-        Ok(true)
+        Ok(())
     }
     ///Digit+ -> Digit+ Digit
     #[inline]
@@ -604,7 +604,7 @@ impl EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -632,7 +632,7 @@ impl EDataStack {
         if __push_data {
             __data_stack.__stack3.push(__res);
         }
-        Ok(true)
+        Ok(())
     }
 }
 #[allow(
@@ -730,7 +730,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<Self::Term>,
         user_data: &mut Self::UserData,
         location0: &mut Self::Location,
-    ) -> Result<bool, Self::ReduceActionError> {
+    ) -> Result<(), Self::ReduceActionError> {
         match rule_index {
             0usize => {
                 Self::reduce_Digit_0(

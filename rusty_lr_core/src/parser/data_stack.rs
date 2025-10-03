@@ -56,5 +56,5 @@ pub trait DataStack: Sized + Default {
         userdata: &mut Self::UserData,
         // location of this non-terminal, e.g. `@$`
         location0: &mut Self::Location,
-    ) -> Result<bool, Self::ReduceActionError>;
+    ) -> Result<(), Self::ReduceActionError>;
 }

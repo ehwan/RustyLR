@@ -524,10 +524,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Object -> '{' Members '}'
     #[inline]
@@ -539,10 +539,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Object -> '{' error '}'
     #[inline]
@@ -554,7 +554,7 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
@@ -564,7 +564,7 @@ impl JsonDataStack {
             let end = __rustylr_location_error.end;
             println!("Error recovered with '}}' at {start}..{end}");
         };
-        Ok(false)
+        Ok(())
     }
     ///Members -> Member
     #[inline]
@@ -576,10 +576,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
-        Ok(false)
+        Ok(())
     }
     ///Members -> Member ',' Members
     #[inline]
@@ -591,10 +591,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Member -> WS String WS ':' Element
     #[inline]
@@ -606,10 +606,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 5usize);
-        Ok(false)
+        Ok(())
     }
     ///Array -> '[' $sep(Element, ',', *) ']'
     #[inline]
@@ -621,10 +621,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Element -> WS Value WS
     #[inline]
@@ -636,10 +636,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///String -> '"' Character* '"'
     #[inline]
@@ -651,10 +651,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Character -> '\\' Escape
     #[inline]
@@ -666,10 +666,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///Escape -> 'u' Hex Hex Hex Hex
     #[inline]
@@ -681,10 +681,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 5usize);
-        Ok(false)
+        Ok(())
     }
     ///Number -> Integer ('.', Digits)? Exponent
     #[inline]
@@ -696,10 +696,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Integer -> ['1'-'9'] Digit+
     #[inline]
@@ -711,10 +711,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///Integer -> '-' ['0'-'9']
     #[inline]
@@ -726,10 +726,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///Integer -> '-' ['1'-'9'] Digit+
     #[inline]
@@ -741,10 +741,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Exponent -> 'E' Sign Digit+
     #[inline]
@@ -756,10 +756,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Exponent -> 'e' Sign Digit+
     #[inline]
@@ -771,10 +771,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///WS -> ' ' WS
     #[inline]
@@ -786,10 +786,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///WS -> ['\t', '\n', '\r'] WS
     #[inline]
@@ -801,10 +801,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///"true" -> 't' 'r' 'u' 'e'
     #[inline]
@@ -816,10 +816,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 4usize);
-        Ok(false)
+        Ok(())
     }
     ///"false" -> 'f' 'a' 'l' 's' 'e'
     #[inline]
@@ -831,10 +831,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 5usize);
-        Ok(false)
+        Ok(())
     }
     ///"null" -> 'n' 'u' 'l' 'l'
     #[inline]
@@ -846,10 +846,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 4usize);
-        Ok(false)
+        Ok(())
     }
     ///$sep(Element, ',', +) -> Element
     #[inline]
@@ -861,10 +861,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
-        Ok(false)
+        Ok(())
     }
     ///$sep(Element, ',', +) -> Element ',' $sep(Element, ',', +)
     #[inline]
@@ -876,10 +876,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///$sep(Element, ',', *) ->
     #[inline]
@@ -891,9 +891,9 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        Ok(false)
+        Ok(())
     }
     ///Character+ -> Character
     #[inline]
@@ -905,10 +905,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
-        Ok(false)
+        Ok(())
     }
     ///Character+ -> Character Character+
     #[inline]
@@ -920,10 +920,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///Character* ->
     #[inline]
@@ -935,9 +935,9 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        Ok(false)
+        Ok(())
     }
     ///Digit+ -> ['0'-'9']
     #[inline]
@@ -949,10 +949,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
-        Ok(false)
+        Ok(())
     }
     ///Digit+ -> ['0'-'9'] Digit+
     #[inline]
@@ -964,10 +964,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///['0'-'9'] -> ['1'-'9']
     #[inline]
@@ -979,10 +979,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
-        Ok(false)
+        Ok(())
     }
     ///('.', Digits) -> '.' Digit+
     #[inline]
@@ -994,10 +994,10 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///('.', Digits)? ->
     #[inline]
@@ -1009,9 +1009,9 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        Ok(false)
+        Ok(())
     }
     ///"" ->
     #[inline]
@@ -1023,9 +1023,9 @@ impl JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        Ok(false)
+        Ok(())
     }
 }
 #[allow(
@@ -1065,7 +1065,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
         lookahead: &::rusty_lr::TerminalSymbol<Self::Term>,
         user_data: &mut Self::UserData,
         location0: &mut Self::Location,
-    ) -> Result<bool, Self::ReduceActionError> {
+    ) -> Result<(), Self::ReduceActionError> {
         match rule_index {
             8usize => {
                 Self::reduce_Object_0(
