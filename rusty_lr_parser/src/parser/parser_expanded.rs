@@ -7311,132 +7311,204 @@ impl GrammarParser {
             ::rusty_lr_core::Token::Term(GrammarTerminalClasses::eof),], precedence :
             None, },
         ];
-        let __rustylr_tset17: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::ident, GrammarTerminalClasses::colon,
-            GrammarTerminalClasses::semicolon, GrammarTerminalClasses::pipe,
-            GrammarTerminalClasses::percent, GrammarTerminalClasses::equal,
-            GrammarTerminalClasses::plus, GrammarTerminalClasses::star,
-            GrammarTerminalClasses::question, GrammarTerminalClasses::caret,
-            GrammarTerminalClasses::minus, GrammarTerminalClasses::exclamation,
-            GrammarTerminalClasses::slash, GrammarTerminalClasses::dot,
-            GrammarTerminalClasses::dollar, GrammarTerminalClasses::comma,
-            GrammarTerminalClasses::literal, GrammarTerminalClasses::parengroup,
-            GrammarTerminalClasses::bracegroup, GrammarTerminalClasses::lparen,
-            GrammarTerminalClasses::rparen, GrammarTerminalClasses::lbracket,
-            GrammarTerminalClasses::rbracket, GrammarTerminalClasses::left,
-            GrammarTerminalClasses::right, GrammarTerminalClasses::token,
-            GrammarTerminalClasses::start, GrammarTerminalClasses::tokentype,
-            GrammarTerminalClasses::userdata, GrammarTerminalClasses::errortype,
-            GrammarTerminalClasses::moduleprefix, GrammarTerminalClasses::lalr,
-            GrammarTerminalClasses::glr, GrammarTerminalClasses::prec,
-            GrammarTerminalClasses::precedence, GrammarTerminalClasses::nooptim,
-            GrammarTerminalClasses::dense, GrammarTerminalClasses::trace,
-            GrammarTerminalClasses::dprec, GrammarTerminalClasses::filter,
+        static __RUSTYLR_TSET17: [GrammarTerminalClasses; 42usize] = [
+            GrammarTerminalClasses::ident,
+            GrammarTerminalClasses::colon,
+            GrammarTerminalClasses::semicolon,
+            GrammarTerminalClasses::pipe,
+            GrammarTerminalClasses::percent,
+            GrammarTerminalClasses::equal,
+            GrammarTerminalClasses::plus,
+            GrammarTerminalClasses::star,
+            GrammarTerminalClasses::question,
+            GrammarTerminalClasses::caret,
+            GrammarTerminalClasses::minus,
+            GrammarTerminalClasses::exclamation,
+            GrammarTerminalClasses::slash,
+            GrammarTerminalClasses::dot,
+            GrammarTerminalClasses::dollar,
+            GrammarTerminalClasses::comma,
+            GrammarTerminalClasses::literal,
+            GrammarTerminalClasses::parengroup,
+            GrammarTerminalClasses::bracegroup,
+            GrammarTerminalClasses::lparen,
+            GrammarTerminalClasses::rparen,
+            GrammarTerminalClasses::lbracket,
+            GrammarTerminalClasses::rbracket,
+            GrammarTerminalClasses::left,
+            GrammarTerminalClasses::right,
+            GrammarTerminalClasses::token,
+            GrammarTerminalClasses::start,
+            GrammarTerminalClasses::tokentype,
+            GrammarTerminalClasses::userdata,
+            GrammarTerminalClasses::errortype,
+            GrammarTerminalClasses::moduleprefix,
+            GrammarTerminalClasses::lalr,
+            GrammarTerminalClasses::glr,
+            GrammarTerminalClasses::prec,
+            GrammarTerminalClasses::precedence,
+            GrammarTerminalClasses::nooptim,
+            GrammarTerminalClasses::dense,
+            GrammarTerminalClasses::trace,
+            GrammarTerminalClasses::dprec,
+            GrammarTerminalClasses::filter,
             GrammarTerminalClasses::location,
-            GrammarTerminalClasses::__rustylr_other_terminals
+            GrammarTerminalClasses::__rustylr_other_terminals,
         ];
-        let __rustylr_tset19: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::ident, GrammarTerminalClasses::semicolon
+        static __RUSTYLR_TSET19: [GrammarTerminalClasses; 2usize] = [
+            GrammarTerminalClasses::ident,
+            GrammarTerminalClasses::semicolon,
         ];
-        let __rustylr_tset3: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::ident, GrammarTerminalClasses::semicolon,
-            GrammarTerminalClasses::pipe, GrammarTerminalClasses::percent,
-            GrammarTerminalClasses::plus, GrammarTerminalClasses::star,
-            GrammarTerminalClasses::question, GrammarTerminalClasses::minus,
-            GrammarTerminalClasses::exclamation, GrammarTerminalClasses::slash,
-            GrammarTerminalClasses::dot, GrammarTerminalClasses::dollar,
-            GrammarTerminalClasses::comma, GrammarTerminalClasses::literal,
-            GrammarTerminalClasses::bracegroup, GrammarTerminalClasses::lparen,
-            GrammarTerminalClasses::rparen, GrammarTerminalClasses::lbracket,
-            GrammarTerminalClasses::error
+        static __RUSTYLR_TSET3: [GrammarTerminalClasses; 19usize] = [
+            GrammarTerminalClasses::ident,
+            GrammarTerminalClasses::semicolon,
+            GrammarTerminalClasses::pipe,
+            GrammarTerminalClasses::percent,
+            GrammarTerminalClasses::plus,
+            GrammarTerminalClasses::star,
+            GrammarTerminalClasses::question,
+            GrammarTerminalClasses::minus,
+            GrammarTerminalClasses::exclamation,
+            GrammarTerminalClasses::slash,
+            GrammarTerminalClasses::dot,
+            GrammarTerminalClasses::dollar,
+            GrammarTerminalClasses::comma,
+            GrammarTerminalClasses::literal,
+            GrammarTerminalClasses::bracegroup,
+            GrammarTerminalClasses::lparen,
+            GrammarTerminalClasses::rparen,
+            GrammarTerminalClasses::lbracket,
+            GrammarTerminalClasses::error,
         ];
-        let __rustylr_tset2: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::ident, GrammarTerminalClasses::semicolon,
-            GrammarTerminalClasses::pipe, GrammarTerminalClasses::percent,
-            GrammarTerminalClasses::plus, GrammarTerminalClasses::star,
-            GrammarTerminalClasses::question, GrammarTerminalClasses::minus,
-            GrammarTerminalClasses::exclamation, GrammarTerminalClasses::slash,
-            GrammarTerminalClasses::dot, GrammarTerminalClasses::dollar,
-            GrammarTerminalClasses::literal, GrammarTerminalClasses::bracegroup,
-            GrammarTerminalClasses::lparen, GrammarTerminalClasses::lbracket
+        static __RUSTYLR_TSET2: [GrammarTerminalClasses; 16usize] = [
+            GrammarTerminalClasses::ident,
+            GrammarTerminalClasses::semicolon,
+            GrammarTerminalClasses::pipe,
+            GrammarTerminalClasses::percent,
+            GrammarTerminalClasses::plus,
+            GrammarTerminalClasses::star,
+            GrammarTerminalClasses::question,
+            GrammarTerminalClasses::minus,
+            GrammarTerminalClasses::exclamation,
+            GrammarTerminalClasses::slash,
+            GrammarTerminalClasses::dot,
+            GrammarTerminalClasses::dollar,
+            GrammarTerminalClasses::literal,
+            GrammarTerminalClasses::bracegroup,
+            GrammarTerminalClasses::lparen,
+            GrammarTerminalClasses::lbracket,
         ];
-        let __rustylr_tset8: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::ident, GrammarTerminalClasses::semicolon,
-            GrammarTerminalClasses::pipe, GrammarTerminalClasses::percent,
-            GrammarTerminalClasses::minus, GrammarTerminalClasses::slash,
-            GrammarTerminalClasses::dot, GrammarTerminalClasses::dollar,
-            GrammarTerminalClasses::comma, GrammarTerminalClasses::literal,
-            GrammarTerminalClasses::bracegroup, GrammarTerminalClasses::lparen,
-            GrammarTerminalClasses::rparen, GrammarTerminalClasses::lbracket,
-            GrammarTerminalClasses::error
+        static __RUSTYLR_TSET8: [GrammarTerminalClasses; 15usize] = [
+            GrammarTerminalClasses::ident,
+            GrammarTerminalClasses::semicolon,
+            GrammarTerminalClasses::pipe,
+            GrammarTerminalClasses::percent,
+            GrammarTerminalClasses::minus,
+            GrammarTerminalClasses::slash,
+            GrammarTerminalClasses::dot,
+            GrammarTerminalClasses::dollar,
+            GrammarTerminalClasses::comma,
+            GrammarTerminalClasses::literal,
+            GrammarTerminalClasses::bracegroup,
+            GrammarTerminalClasses::lparen,
+            GrammarTerminalClasses::rparen,
+            GrammarTerminalClasses::lbracket,
+            GrammarTerminalClasses::error,
         ];
-        let __rustylr_tset7: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::ident, GrammarTerminalClasses::semicolon,
-            GrammarTerminalClasses::pipe, GrammarTerminalClasses::percent,
-            GrammarTerminalClasses::minus, GrammarTerminalClasses::dot,
-            GrammarTerminalClasses::dollar, GrammarTerminalClasses::comma,
-            GrammarTerminalClasses::literal, GrammarTerminalClasses::bracegroup,
-            GrammarTerminalClasses::lparen, GrammarTerminalClasses::rparen,
-            GrammarTerminalClasses::lbracket, GrammarTerminalClasses::error
+        static __RUSTYLR_TSET7: [GrammarTerminalClasses; 14usize] = [
+            GrammarTerminalClasses::ident,
+            GrammarTerminalClasses::semicolon,
+            GrammarTerminalClasses::pipe,
+            GrammarTerminalClasses::percent,
+            GrammarTerminalClasses::minus,
+            GrammarTerminalClasses::dot,
+            GrammarTerminalClasses::dollar,
+            GrammarTerminalClasses::comma,
+            GrammarTerminalClasses::literal,
+            GrammarTerminalClasses::bracegroup,
+            GrammarTerminalClasses::lparen,
+            GrammarTerminalClasses::rparen,
+            GrammarTerminalClasses::lbracket,
+            GrammarTerminalClasses::error,
         ];
-        let __rustylr_tset11: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::ident, GrammarTerminalClasses::semicolon,
-            GrammarTerminalClasses::pipe, GrammarTerminalClasses::percent,
-            GrammarTerminalClasses::dot, GrammarTerminalClasses::dollar,
-            GrammarTerminalClasses::literal, GrammarTerminalClasses::bracegroup,
-            GrammarTerminalClasses::lparen, GrammarTerminalClasses::lbracket
+        static __RUSTYLR_TSET11: [GrammarTerminalClasses; 10usize] = [
+            GrammarTerminalClasses::ident,
+            GrammarTerminalClasses::semicolon,
+            GrammarTerminalClasses::pipe,
+            GrammarTerminalClasses::percent,
+            GrammarTerminalClasses::dot,
+            GrammarTerminalClasses::dollar,
+            GrammarTerminalClasses::literal,
+            GrammarTerminalClasses::bracegroup,
+            GrammarTerminalClasses::lparen,
+            GrammarTerminalClasses::lbracket,
         ];
-        let __rustylr_tset15: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::ident, GrammarTerminalClasses::semicolon,
-            GrammarTerminalClasses::pipe, GrammarTerminalClasses::percent,
-            GrammarTerminalClasses::literal, GrammarTerminalClasses::bracegroup
+        static __RUSTYLR_TSET15: [GrammarTerminalClasses; 6usize] = [
+            GrammarTerminalClasses::ident,
+            GrammarTerminalClasses::semicolon,
+            GrammarTerminalClasses::pipe,
+            GrammarTerminalClasses::percent,
+            GrammarTerminalClasses::literal,
+            GrammarTerminalClasses::bracegroup,
         ];
-        let __rustylr_tset16: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::ident, GrammarTerminalClasses::semicolon,
-            GrammarTerminalClasses::literal
+        static __RUSTYLR_TSET16: [GrammarTerminalClasses; 3usize] = [
+            GrammarTerminalClasses::ident,
+            GrammarTerminalClasses::semicolon,
+            GrammarTerminalClasses::literal,
         ];
-        let __rustylr_tset9: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::ident, GrammarTerminalClasses::pipe,
-            GrammarTerminalClasses::dot, GrammarTerminalClasses::dollar,
-            GrammarTerminalClasses::literal, GrammarTerminalClasses::lparen,
-            GrammarTerminalClasses::rparen, GrammarTerminalClasses::lbracket
+        static __RUSTYLR_TSET9: [GrammarTerminalClasses; 8usize] = [
+            GrammarTerminalClasses::ident,
+            GrammarTerminalClasses::pipe,
+            GrammarTerminalClasses::dot,
+            GrammarTerminalClasses::dollar,
+            GrammarTerminalClasses::literal,
+            GrammarTerminalClasses::lparen,
+            GrammarTerminalClasses::rparen,
+            GrammarTerminalClasses::lbracket,
         ];
-        let __rustylr_tset12: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::ident, GrammarTerminalClasses::percent,
-            GrammarTerminalClasses::eof
+        static __RUSTYLR_TSET12: [GrammarTerminalClasses; 3usize] = [
+            GrammarTerminalClasses::ident,
+            GrammarTerminalClasses::percent,
+            GrammarTerminalClasses::eof,
         ];
-        let __rustylr_tset5: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::ident, GrammarTerminalClasses::literal,
-            GrammarTerminalClasses::rbracket
+        static __RUSTYLR_TSET5: [GrammarTerminalClasses; 3usize] = [
+            GrammarTerminalClasses::ident,
+            GrammarTerminalClasses::literal,
+            GrammarTerminalClasses::rbracket,
         ];
-        let __rustylr_tset0: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::colon
+        static __RUSTYLR_TSET0: [GrammarTerminalClasses; 1usize] = [
+            GrammarTerminalClasses::colon,
         ];
-        let __rustylr_tset18: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::semicolon
+        static __RUSTYLR_TSET18: [GrammarTerminalClasses; 1usize] = [
+            GrammarTerminalClasses::semicolon,
         ];
-        let __rustylr_tset13: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::semicolon, GrammarTerminalClasses::pipe
+        static __RUSTYLR_TSET13: [GrammarTerminalClasses; 2usize] = [
+            GrammarTerminalClasses::semicolon,
+            GrammarTerminalClasses::pipe,
         ];
-        let __rustylr_tset1: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::semicolon, GrammarTerminalClasses::pipe,
-            GrammarTerminalClasses::percent, GrammarTerminalClasses::bracegroup
+        static __RUSTYLR_TSET1: [GrammarTerminalClasses; 4usize] = [
+            GrammarTerminalClasses::semicolon,
+            GrammarTerminalClasses::pipe,
+            GrammarTerminalClasses::percent,
+            GrammarTerminalClasses::bracegroup,
         ];
-        let __rustylr_tset14: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::semicolon, GrammarTerminalClasses::pipe,
-            GrammarTerminalClasses::bracegroup
+        static __RUSTYLR_TSET14: [GrammarTerminalClasses; 3usize] = [
+            GrammarTerminalClasses::semicolon,
+            GrammarTerminalClasses::pipe,
+            GrammarTerminalClasses::bracegroup,
         ];
-        let __rustylr_tset4: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::pipe, GrammarTerminalClasses::rparen
+        static __RUSTYLR_TSET4: [GrammarTerminalClasses; 2usize] = [
+            GrammarTerminalClasses::pipe,
+            GrammarTerminalClasses::rparen,
         ];
-        let __rustylr_tset10: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::rparen
+        static __RUSTYLR_TSET10: [GrammarTerminalClasses; 1usize] = [
+            GrammarTerminalClasses::rparen,
         ];
-        let __rustylr_tset6: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::rbracket
+        static __RUSTYLR_TSET6: [GrammarTerminalClasses; 1usize] = [
+            GrammarTerminalClasses::rbracket,
         ];
-        let __rustylr_tset20: Vec<GrammarTerminalClasses> = vec![
-            GrammarTerminalClasses::eof
+        static __RUSTYLR_TSET20: [GrammarTerminalClasses; 1usize] = [
+            GrammarTerminalClasses::eof,
         ];
         let states: Vec<
             ::rusty_lr_core::parser::state::IntermediateState<
@@ -7476,7 +7548,7 @@ impl GrammarParser {
             shift_goto_map_nonterm : vec![(GrammarNonTerminals::RuleType,
             ::rusty_lr_core::parser::state::ShiftTarget::new(3, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![2]; __reduce_map.extend(__rustylr_tset0.iter().map(| term | (* term,
+            vec![2]; __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [0, 1, 2,]; let shifted : & 'static [u8] = &
             [1, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7485,7 +7557,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![1]; __reduce_map
-            .extend(__rustylr_tset0.iter().map(| term | (* term, reduce_rules.clone())));
+            .extend(__RUSTYLR_TSET0.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
             = & [1,]; let shifted : & 'static [u8] = & [1,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
@@ -7527,7 +7599,7 @@ impl GrammarParser {
             (GrammarNonTerminals::_TokenMappedStar16,
             ::rusty_lr_core::parser::state::ShiftTarget::new(72, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![81]; __reduce_map.extend(__rustylr_tset1.iter().map(| term | (* term,
+            vec![81]; __reduce_map.extend(__RUSTYLR_TSET1.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [0, 3, 4, 5, 11, 12, 19, 20, 21, 22, 23, 24,
             25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 78, 79, 80, 81,]; let shifted
@@ -7540,7 +7612,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(6, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![21]; __reduce_map
-            .extend(__rustylr_tset2.iter().map(| term | (* term, reduce_rules.clone())));
+            .extend(__RUSTYLR_TSET2.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
             = & [12, 21,]; let shifted : & 'static [u8] = & [1, 1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7573,7 +7645,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![21];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [21,]; let shifted : & 'static [u8] = & [1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7582,7 +7654,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![20];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [20,]; let shifted : & 'static [u8] = & [1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7633,7 +7705,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![30];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [30,]; let shifted : & 'static [u8] = & [1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7665,7 +7737,7 @@ impl GrammarParser {
             (GrammarNonTerminals::__PatternStar23SepPlus24,
             ::rusty_lr_core::parser::state::ShiftTarget::new(47, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![95]; __reduce_map.extend(__rustylr_tset4.iter().map(| term | (* term,
+            vec![95]; __reduce_map.extend(__RUSTYLR_TSET4.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 28,
             29, 29, 30, 31, 32, 33, 34, 35, 36, 92, 93, 94, 95, 96, 97,]; let shifted : &
@@ -7679,7 +7751,7 @@ impl GrammarParser {
             shift_goto_map_nonterm : vec![(GrammarNonTerminals::_caretQuestion19,
             ::rusty_lr_core::parser::state::ShiftTarget::new(16, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![87]; __reduce_map.extend(__rustylr_tset5.iter().map(| term | (* term,
+            vec![87]; __reduce_map.extend(__RUSTYLR_TSET5.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [19, 86, 87,]; let shifted : & 'static [u8] =
             & [1, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7688,7 +7760,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![86];
-            __reduce_map.extend(__rustylr_tset5.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET5.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [86,]; let shifted : & 'static [u8] = & [1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7706,7 +7778,7 @@ impl GrammarParser {
             (GrammarNonTerminals::_TerminalSetItemStar21,
             ::rusty_lr_core::parser::state::ShiftTarget::new(28, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![91]; __reduce_map.extend(__rustylr_tset6.iter().map(| term | (* term,
+            vec![91]; __reduce_map.extend(__RUSTYLR_TSET6.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [13, 14, 15, 16, 17, 18, 19, 88, 89, 90, 91,];
             let shifted : & 'static [u8] = & [0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0,]; rules
@@ -7718,7 +7790,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(18, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![13]; __reduce_map
-            .extend(__rustylr_tset5.iter().map(| term | (* term, reduce_rules.clone())));
+            .extend(__RUSTYLR_TSET5.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
             = & [13, 14, 15,]; let shifted : & 'static [u8] = & [1, 1, 1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7738,7 +7810,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![14];
-            __reduce_map.extend(__rustylr_tset5.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET5.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [14,]; let shifted : & 'static [u8] = & [3,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7747,7 +7819,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![15];
-            __reduce_map.extend(__rustylr_tset5.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET5.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [15,]; let shifted : & 'static [u8] = & [3,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7758,7 +7830,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(22, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![16]; __reduce_map
-            .extend(__rustylr_tset5.iter().map(| term | (* term, reduce_rules.clone())));
+            .extend(__RUSTYLR_TSET5.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
             = & [16, 17, 18,]; let shifted : & 'static [u8] = & [1, 1, 1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7778,7 +7850,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![17];
-            __reduce_map.extend(__rustylr_tset5.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET5.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [17,]; let shifted : & 'static [u8] = & [3,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7787,7 +7859,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![18];
-            __reduce_map.extend(__rustylr_tset5.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET5.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [18,]; let shifted : & 'static [u8] = & [3,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7796,7 +7868,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![88];
-            __reduce_map.extend(__rustylr_tset5.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET5.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [88,]; let shifted : & 'static [u8] = & [1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7810,7 +7882,7 @@ impl GrammarParser {
             shift_goto_map_nonterm : vec![(GrammarNonTerminals::TerminalSetItem,
             ::rusty_lr_core::parser::state::ShiftTarget::new(27, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![90]; __reduce_map.extend(__rustylr_tset6.iter().map(| term | (* term,
+            vec![90]; __reduce_map.extend(__RUSTYLR_TSET6.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [13, 14, 15, 16, 17, 18, 89, 90,]; let shifted
             : & 'static [u8] = & [0, 0, 0, 0, 0, 0, 1, 1,]; rules.iter().zip(shifted
@@ -7819,7 +7891,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![89];
-            __reduce_map.extend(__rustylr_tset5.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET5.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [89,]; let shifted : & 'static [u8] = & [2,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7837,7 +7909,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![19];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [19,]; let shifted : & 'static [u8] = & [4,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7846,7 +7918,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![26];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [26,]; let shifted : & 'static [u8] = & [1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7877,7 +7949,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![22];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [22,]; let shifted : & 'static [u8] = & [2,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7886,7 +7958,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![23];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [23,]; let shifted : & 'static [u8] = & [2,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7895,7 +7967,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![24];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [24,]; let shifted : & 'static [u8] = & [2,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7938,7 +8010,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(38, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![31]; __reduce_map
-            .extend(__rustylr_tset7.iter().map(| term | (* term, reduce_rules.clone())));
+            .extend(__RUSTYLR_TSET7.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
             = & [22, 23, 24, 25, 27, 31,]; let shifted : & 'static [u8] = & [1, 1, 1, 1,
             1, 3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7947,7 +8019,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![25];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [25,]; let shifted : & 'static [u8] = & [2,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -7988,7 +8060,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(37, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![27]; __reduce_map
-            .extend(__rustylr_tset8.iter().map(| term | (* term, reduce_rules.clone())));
+            .extend(__RUSTYLR_TSET8.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
             = & [22, 23, 24, 25, 27,]; let shifted : & 'static [u8] = & [1, 1, 1, 1, 3,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8030,7 +8102,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![29];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [29,]; let shifted : & 'static [u8] = & [3,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8051,7 +8123,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(38, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![92]; __reduce_map
-            .extend(__rustylr_tset9.iter().map(| term | (* term, reduce_rules.clone())));
+            .extend(__RUSTYLR_TSET9.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
             = & [22, 23, 24, 25, 27, 31, 92,]; let shifted : & 'static [u8] = & [1, 1, 1,
             1, 1, 1, 1,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8075,7 +8147,7 @@ impl GrammarParser {
             (GrammarNonTerminals::Pattern,
             ::rusty_lr_core::parser::state::ShiftTarget::new(45, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![94]; __reduce_map.extend(__rustylr_tset4.iter().map(| term | (* term,
+            vec![94]; __reduce_map.extend(__RUSTYLR_TSET4.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
             30, 31, 32, 33, 34, 35, 36, 93, 94,]; let shifted : & 'static [u8] = & [0, 0,
@@ -8098,7 +8170,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(38, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![93]; __reduce_map
-            .extend(__rustylr_tset9.iter().map(| term | (* term, reduce_rules.clone())));
+            .extend(__RUSTYLR_TSET9.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
             = & [22, 23, 24, 25, 27, 31, 93,]; let shifted : & 'static [u8] = & [1, 1, 1,
             1, 1, 1, 2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8107,7 +8179,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![96];
-            __reduce_map.extend(__rustylr_tset4.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET4.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [96,]; let shifted : & 'static [u8] = & [1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8146,7 +8218,7 @@ impl GrammarParser {
             (GrammarNonTerminals::_PatternStar23,
             ::rusty_lr_core::parser::state::ShiftTarget::new(49, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![95]; __reduce_map.extend(__rustylr_tset4.iter().map(| term | (* term,
+            vec![95]; __reduce_map.extend(__RUSTYLR_TSET4.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
             30, 31, 32, 33, 34, 35, 36, 92, 93, 94, 95, 97,]; let shifted : & 'static
@@ -8157,7 +8229,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![97];
-            __reduce_map.extend(__rustylr_tset4.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET4.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [97,]; let shifted : & 'static [u8] = & [3,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8166,7 +8238,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![28];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [28,]; let shifted : & 'static [u8] = & [3,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8192,7 +8264,7 @@ impl GrammarParser {
             shift_goto_map_nonterm : vec![(GrammarNonTerminals::_commaQuestion25,
             ::rusty_lr_core::parser::state::ShiftTarget::new(61, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![99]; __reduce_map.extend(__rustylr_tset10.iter().map(| term | (* term,
+            vec![99]; __reduce_map.extend(__RUSTYLR_TSET10.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [22, 23, 24, 25, 27, 31, 32, 33, 34, 35, 36,
             98, 99,]; let shifted : & 'static [u8] = & [1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 6,
@@ -8208,7 +8280,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(57, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![98]; __reduce_map
-            .extend(__rustylr_tset10.iter().map(| term | (* term, reduce_rules
+            .extend(__RUSTYLR_TSET10.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [33, 34, 36, 98,]; let shifted : & 'static [u8] = & [7, 7,
             7, 1,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8226,7 +8298,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![33];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [33,]; let shifted : & 'static [u8] = & [9,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8244,7 +8316,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![34];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [34,]; let shifted : & 'static [u8] = & [9,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8262,7 +8334,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![36];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [36,]; let shifted : & 'static [u8] = & [9,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8280,7 +8352,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![35];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [35,]; let shifted : & 'static [u8] = & [8,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8298,7 +8370,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![32];
-            __reduce_map.extend(__rustylr_tset3.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [32,]; let shifted : & 'static [u8] = & [8,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8319,7 +8391,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(38, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![12]; __reduce_map
-            .extend(__rustylr_tset11.iter().map(| term | (* term, reduce_rules
+            .extend(__RUSTYLR_TSET11.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [12, 22, 23, 24, 25, 27, 31,]; let shifted : & 'static [u8]
             = & [3, 1, 1, 1, 1, 1, 1,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
@@ -8339,7 +8411,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![0]; __reduce_map
-            .extend(__rustylr_tset12.iter().map(| term | (* term, reduce_rules
+            .extend(__RUSTYLR_TSET12.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [0,]; let shifted : & 'static [u8] = & [5,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8371,7 +8443,7 @@ impl GrammarParser {
             (GrammarNonTerminals::_TokenMappedStar16,
             ::rusty_lr_core::parser::state::ShiftTarget::new(72, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![81]; __reduce_map.extend(__rustylr_tset1.iter().map(| term | (* term,
+            vec![81]; __reduce_map.extend(__RUSTYLR_TSET1.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [3, 5, 11, 12, 19, 20, 21, 22, 23, 24, 25, 26,
             27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 78, 79, 80, 81,]; let shifted : &
@@ -8382,7 +8454,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![3]; __reduce_map
-            .extend(__rustylr_tset13.iter().map(| term | (* term, reduce_rules
+            .extend(__RUSTYLR_TSET13.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [3,]; let shifted : & 'static [u8] = & [3,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8391,7 +8463,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![78];
-            __reduce_map.extend(__rustylr_tset11.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET11.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [78,]; let shifted : & 'static [u8] = & [1,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8412,7 +8484,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(38, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![11]; __reduce_map
-            .extend(__rustylr_tset11.iter().map(| term | (* term, reduce_rules
+            .extend(__RUSTYLR_TSET11.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [11, 22, 23, 24, 25, 27, 31,]; let shifted : & 'static [u8]
             = & [1, 1, 1, 1, 1, 1, 1,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
@@ -8438,7 +8510,7 @@ impl GrammarParser {
             (GrammarNonTerminals::Pattern,
             ::rusty_lr_core::parser::state::ShiftTarget::new(69, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![80]; __reduce_map.extend(__rustylr_tset1.iter().map(| term | (* term,
+            vec![80]; __reduce_map.extend(__RUSTYLR_TSET1.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [11, 12, 19, 20, 21, 22, 23, 24, 25, 26, 27,
             28, 29, 30, 31, 32, 33, 34, 35, 36, 79, 80,]; let shifted : & 'static [u8] =
@@ -8449,7 +8521,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![79];
-            __reduce_map.extend(__rustylr_tset11.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET11.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [79,]; let shifted : & 'static [u8] = & [2,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8465,7 +8537,7 @@ impl GrammarParser {
             (GrammarNonTerminals::_PrecDefStar18,
             ::rusty_lr_core::parser::state::ShiftTarget::new(86, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![85]; __reduce_map.extend(__rustylr_tset14.iter().map(| term | (* term,
+            vec![85]; __reduce_map.extend(__RUSTYLR_TSET14.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [5, 6, 7, 8, 9, 10, 82, 83, 84, 85,]; let
             shifted : & 'static [u8] = & [1, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter()
@@ -8503,7 +8575,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![39];
-            __reduce_map.extend(__rustylr_tset15.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET15.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [39,]; let shifted : & 'static [u8] = & [1,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8512,7 +8584,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![40];
-            __reduce_map.extend(__rustylr_tset15.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET15.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [40,]; let shifted : & 'static [u8] = & [1,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8521,7 +8593,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![7]; __reduce_map
-            .extend(__rustylr_tset1.iter().map(| term | (* term, reduce_rules.clone())));
+            .extend(__RUSTYLR_TSET1.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
             = & [7,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
@@ -8529,7 +8601,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![6]; __reduce_map
-            .extend(__rustylr_tset1.iter().map(| term | (* term, reduce_rules.clone())));
+            .extend(__RUSTYLR_TSET1.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
             = & [6,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
@@ -8548,7 +8620,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![8]; __reduce_map
-            .extend(__rustylr_tset1.iter().map(| term | (* term, reduce_rules.clone())));
+            .extend(__RUSTYLR_TSET1.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
             = & [8,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
@@ -8556,7 +8628,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![9]; __reduce_map
-            .extend(__rustylr_tset1.iter().map(| term | (* term, reduce_rules.clone())));
+            .extend(__RUSTYLR_TSET1.iter().map(| term | (* term, reduce_rules.clone())));
             __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
             = & [9,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
@@ -8564,7 +8636,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![10];
-            __reduce_map.extend(__rustylr_tset1.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET1.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [10,]; let shifted : & 'static [u8] = & [2,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8573,7 +8645,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![82];
-            __reduce_map.extend(__rustylr_tset1.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET1.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [82,]; let shifted : & 'static [u8] = & [1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8585,7 +8657,7 @@ impl GrammarParser {
             shift_goto_map_nonterm : vec![(GrammarNonTerminals::PrecDef,
             ::rusty_lr_core::parser::state::ShiftTarget::new(85, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![84]; __reduce_map.extend(__rustylr_tset14.iter().map(| term | (* term,
+            vec![84]; __reduce_map.extend(__RUSTYLR_TSET14.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [6, 7, 8, 9, 10, 83, 84,]; let shifted : &
             'static [u8] = & [0, 0, 0, 0, 0, 1, 1,]; rules.iter().zip(shifted.iter())
@@ -8594,7 +8666,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![83];
-            __reduce_map.extend(__rustylr_tset1.iter().map(| term | (* term, reduce_rules
+            __reduce_map.extend(__RUSTYLR_TSET1.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [83,]; let shifted : & 'static [u8] = & [2,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8606,7 +8678,7 @@ impl GrammarParser {
             shift_goto_map_nonterm : vec![(GrammarNonTerminals::Action,
             ::rusty_lr_core::parser::state::ShiftTarget::new(88, true)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![38]; __reduce_map.extend(__rustylr_tset13.iter().map(| term | (* term,
+            vec![38]; __reduce_map.extend(__RUSTYLR_TSET13.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [5, 37, 38,]; let shifted : & 'static [u8] = &
             [2, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8615,7 +8687,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![37];
-            __reduce_map.extend(__rustylr_tset13.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET13.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [37,]; let shifted : & 'static [u8] = & [1,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8624,7 +8696,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![5]; __reduce_map
-            .extend(__rustylr_tset13.iter().map(| term | (* term, reduce_rules
+            .extend(__RUSTYLR_TSET13.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [5,]; let shifted : & 'static [u8] = & [3,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8633,7 +8705,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![4]; __reduce_map
-            .extend(__rustylr_tset13.iter().map(| term | (* term, reduce_rules
+            .extend(__RUSTYLR_TSET13.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [4,]; let shifted : & 'static [u8] = & [1,]; rules.iter()
             .zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8712,7 +8784,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![51];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [51,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8721,7 +8793,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![143];
-            __reduce_map.extend(__rustylr_tset16.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET16.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [143,]; let shifted : & 'static [u8] = & [1,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8745,7 +8817,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![50];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [50,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8754,7 +8826,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![144];
-            __reduce_map.extend(__rustylr_tset16.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET16.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [144,]; let shifted : & 'static [u8] = & [2,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8789,7 +8861,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![53];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [53,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8813,7 +8885,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![52];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [52,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8932,7 +9004,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![42];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [42,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -8941,7 +9013,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![141];
-            __reduce_map.extend(__rustylr_tset17.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET17.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [141,]; let shifted : & 'static [u8] = & [1,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -9047,7 +9119,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![41];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [41,]; let shifted : & 'static [u8] = & [5,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -9056,7 +9128,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![142];
-            __reduce_map.extend(__rustylr_tset17.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET17.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [142,]; let shifted : & 'static [u8] = & [2,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -9074,7 +9146,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![43];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [43,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -9103,7 +9175,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![44];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [44,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -9121,7 +9193,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![45];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [45,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -9229,7 +9301,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![47];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [47,]; let shifted : & 'static [u8] = & [3,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -9335,7 +9407,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![46];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [46,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -9443,7 +9515,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![49];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [49,]; let shifted : & 'static [u8] = & [3,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -9549,7 +9621,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![48];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [48,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -9657,7 +9729,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![57];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [57,]; let shifted : & 'static [u8] = & [3,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -9763,7 +9835,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![56];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [56,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -9871,7 +9943,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![59];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [59,]; let shifted : & 'static [u8] = & [3,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -9977,7 +10049,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![58];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [58,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -9997,7 +10069,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![62];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [62,]; let shifted : & 'static [u8] = & [3,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10015,7 +10087,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![63];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [63,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10035,7 +10107,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![60];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [60,]; let shifted : & 'static [u8] = & [3,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10053,7 +10125,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![61];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [61,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10088,7 +10160,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![55];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [55,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10112,7 +10184,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![54];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [54,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10132,7 +10204,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![64];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [64,]; let shifted : & 'static [u8] = & [3,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10150,7 +10222,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![65];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [65,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10170,7 +10242,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![66];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [66,]; let shifted : & 'static [u8] = & [3,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10188,7 +10260,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![67];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [67,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10204,7 +10276,7 @@ impl GrammarParser {
             (GrammarNonTerminals::_identStar30,
             ::rusty_lr_core::parser::state::ShiftTarget::new(160, true)),], reduce_map :
             { let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules
-            = vec![148]; __reduce_map.extend(__rustylr_tset18.iter().map(| term | (*
+            = vec![148]; __reduce_map.extend(__RUSTYLR_TSET18.iter().map(| term | (*
             term, reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset
             : { let rules : & 'static [u8] = & [68, 69, 145, 146, 147, 148,]; let shifted
             : & 'static [u8] = & [2, 2, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter())
@@ -10213,7 +10285,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![145];
-            __reduce_map.extend(__rustylr_tset19.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET19.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [145,]; let shifted : & 'static [u8] = & [1,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10231,7 +10303,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![69];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [69,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10242,7 +10314,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::ShiftTarget::new(159, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![147]; __reduce_map
-            .extend(__rustylr_tset18.iter().map(| term | (* term, reduce_rules
+            .extend(__RUSTYLR_TSET18.iter().map(| term | (* term, reduce_rules
             .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
             'static [u8] = & [146, 147,]; let shifted : & 'static [u8] = & [1, 1,]; rules
             .iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10251,7 +10323,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![146];
-            __reduce_map.extend(__rustylr_tset19.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET19.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [146,]; let shifted : & 'static [u8] = & [2,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10269,7 +10341,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![68];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [68,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10377,7 +10449,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![71];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [71,]; let shifted : & 'static [u8] = & [3,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10483,7 +10555,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![70];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [70,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10591,7 +10663,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![73];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [73,]; let shifted : & 'static [u8] = & [3,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10697,7 +10769,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![72];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [72,]; let shifted : & 'static [u8] = & [4,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10715,7 +10787,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![74];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [74,]; let shifted : & 'static [u8] = & [3,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10724,7 +10796,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![75];
-            __reduce_map.extend(__rustylr_tset12.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [75,]; let shifted : & 'static [u8] = & [1,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
@@ -10744,7 +10816,7 @@ impl GrammarParser {
             (GrammarNonTerminals::_GrammarLinePlus31,
             ::rusty_lr_core::parser::state::ShiftTarget::new(174, true)),], reduce_map :
             { let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules
-            = vec![149]; __reduce_map.extend(__rustylr_tset20.iter().map(| term | (*
+            = vec![149]; __reduce_map.extend(__RUSTYLR_TSET20.iter().map(| term | (*
             term, reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset
             : { let rules : & 'static [u8] = & [0, 41, 42, 43, 44, 45, 46, 47, 48, 49,
             50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68,
@@ -10757,7 +10829,7 @@ impl GrammarParser {
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); let reduce_rules = vec![150];
-            __reduce_map.extend(__rustylr_tset20.iter().map(| term | (* term,
+            __reduce_map.extend(__RUSTYLR_TSET20.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
             let rules : & 'static [u8] = & [150,]; let shifted : & 'static [u8] = & [2,];
             rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {

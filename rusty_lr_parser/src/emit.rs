@@ -679,7 +679,7 @@ impl Grammar {
                     let new_index = terminal_sets_name_map.len();
                     terminal_sets_name_map
                         .entry(set)
-                        .or_insert_with(|| format_ident!("__rustylr_tset{new_index}"))
+                        .or_insert_with(|| format_ident!("__RUSTYLR_TSET{new_index}"))
                         .clone()
                 };
             for state in &self.states {
@@ -796,6 +796,7 @@ impl Grammar {
 
             let mut terminal_set_initialize_stream = TokenStream::new();
             for (set, name) in terminal_sets_name_map {
+                let len = set.len();
                 let set_it = set.into_iter().map(|val| match val {
                     TerminalSymbol::Term(term) => {
                         let var = &class_variants[term];
@@ -811,7 +812,7 @@ impl Grammar {
                     }
                 });
                 terminal_set_initialize_stream.extend(quote! {
-                    let #name: Vec<#termclass_typename> = vec![#(#set_it),*];
+                    static #name: [#termclass_typename; #len] = [#(#set_it),*];
                 });
             }
 
