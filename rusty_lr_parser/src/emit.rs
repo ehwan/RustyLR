@@ -927,19 +927,16 @@ impl Grammar {
         let mut terminal_data_used = false;
 
         // insert stack for terminal token type
-        for class_def in &self.terminal_classes {
-            if class_def.data_used {
-                terminal_data_used = true;
-                ruletype_stack_map.insert(
-                    self.token_typename.to_string(),
-                    Some(terminal_stack_name.clone()),
-                );
-                stack_names_in_order
-                    .push((terminal_stack_name.clone(), self.token_typename.clone()));
-                break;
-            } else {
-                empty_tag_used = true;
-            }
+        if self.terminal_classes.iter().any(|c| c.data_used) {
+            terminal_data_used = true;
+            ruletype_stack_map.insert(
+                self.token_typename.to_string(),
+                Some(terminal_stack_name.clone()),
+            );
+            stack_names_in_order.push((terminal_stack_name.clone(), self.token_typename.clone()));
+        }
+        if self.terminal_classes.iter().any(|c| !c.data_used) {
+            empty_tag_used = true;
         }
 
         fn remove_whitespaces(s: String) -> String {
