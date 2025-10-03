@@ -942,16 +942,6 @@ impl Grammar {
                 empty_tag_used = true;
             }
         }
-        let push_terminal_body_stream = if terminal_data_used {
-            quote! {
-                self.#tag_stack_name.push(#tag_enum_name::#terminal_stack_name);
-                self.#terminal_stack_name.push( term );
-            }
-        } else {
-            quote! {
-                unreachable!();
-            }
-        };
 
         fn remove_whitespaces(s: String) -> String {
             s.chars().filter(|c| !c.is_whitespace()).collect()
@@ -1466,13 +1456,36 @@ impl Grammar {
             quote! {}
         };
 
+        let push_terminal_body_stream = if terminal_data_used {
+            quote! {
+                self.#tag_stack_name.push(#tag_enum_name::#terminal_stack_name);
+                self.#terminal_stack_name.push( term );
+            }
+        } else {
+            quote! {
+                unreachable!();
+            }
+        };
+        let empty_tag_definition = if empty_tag_used {
+            quote! { #empty_tag_name, }
+        } else {
+            TokenStream::new()
+        };
+        let push_empty_body_stream = if empty_tag_used {
+            quote! {
+                self.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
+            }
+        } else {
+            quote! { unreachable!(); }
+        };
+
         stream.extend(quote! {
         /// tag for token that represents which stack a token is using
         #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
         #[derive(Clone, Copy, PartialEq, Eq)]
         pub enum #tag_enum_name {
             #tag_definition_stream
-            #empty_tag_name,
+            #empty_tag_definition
         }
 
         /// enum for each non-terminal and terminal symbol, that actually hold data
@@ -1520,7 +1533,7 @@ impl Grammar {
                 #push_terminal_body_stream
             }
             fn push_empty(&mut self) {
-                self.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
+                #push_empty_body_stream
             }
 
             fn clear(&mut self) {
