@@ -616,6 +616,7 @@ impl ::rusty_lr_core::parser::nonterminal::NonTerminal for GrammarNonTerminals {
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum GrammarTags {
     __terminals,
+    __stack1,
     __stack2,
     __stack3,
     __stack4,
@@ -633,7 +634,6 @@ pub enum GrammarTags {
     __stack16,
     __stack17,
     __stack18,
-    __stack19,
     Empty,
 }
 /// enum for each non-terminal and terminal symbol, that actually hold data
@@ -641,30 +641,31 @@ pub enum GrammarTags {
 pub struct GrammarDataStack {
     pub __tags: Vec<GrammarTags>,
     __terminals: Vec<Lexed>,
-    __stack2: Vec<RuleDefArgs>,
-    __stack3: Vec<Option<Group>>,
-    __stack4: Vec<Vec<RuleLineArgs>>,
-    __stack5: Vec<RuleLineArgs>,
-    __stack6: Vec<PrecDPrecArgs>,
-    __stack7: Vec<(Option<Ident>, PatternArgs)>,
-    __stack8: Vec<TerminalSetItem>,
-    __stack9: Vec<TerminalSet>,
-    __stack10: Vec<PatternArgs>,
-    __stack11: Vec<IdentOrLiteral>,
-    __stack12: Vec<Vec<(Option<Ident>, PatternArgs)>>,
-    __stack13: Vec<Vec<PrecDPrecArgs>>,
-    __stack14: Vec<Option<Lexed>>,
-    __stack15: Vec<Vec<TerminalSetItem>>,
-    __stack16: Vec<Vec<PatternArgs>>,
-    __stack17: Vec<Vec<Vec<PatternArgs>>>,
-    __stack18: Vec<Vec<Lexed>>,
-    __stack19: Vec<Vec<IdentOrLiteral>>,
+    __stack1: Vec<RuleDefArgs>,
+    __stack2: Vec<Option<Group>>,
+    __stack3: Vec<Vec<RuleLineArgs>>,
+    __stack4: Vec<RuleLineArgs>,
+    __stack5: Vec<PrecDPrecArgs>,
+    __stack6: Vec<(Option<Ident>, PatternArgs)>,
+    __stack7: Vec<TerminalSetItem>,
+    __stack8: Vec<TerminalSet>,
+    __stack9: Vec<PatternArgs>,
+    __stack10: Vec<IdentOrLiteral>,
+    __stack11: Vec<Vec<(Option<Ident>, PatternArgs)>>,
+    __stack12: Vec<Vec<PrecDPrecArgs>>,
+    __stack13: Vec<Option<Lexed>>,
+    __stack14: Vec<Vec<TerminalSetItem>>,
+    __stack15: Vec<Vec<PatternArgs>>,
+    __stack16: Vec<Vec<Vec<PatternArgs>>>,
+    __stack17: Vec<Vec<Lexed>>,
+    __stack18: Vec<Vec<IdentOrLiteral>>,
 }
 impl Default for GrammarDataStack {
     fn default() -> Self {
         Self {
             __tags: Vec::new(),
             __terminals: Vec::new(),
+            __stack1: Vec::new(),
             __stack2: Vec::new(),
             __stack3: Vec::new(),
             __stack4: Vec::new(),
@@ -682,7 +683,6 @@ impl Default for GrammarDataStack {
             __stack16: Vec::new(),
             __stack17: Vec::new(),
             __stack18: Vec::new(),
-            __stack19: Vec::new(),
         }
     }
 }
@@ -726,7 +726,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack4)
+                GrammarTags::__stack3)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -734,7 +734,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
-                GrammarTags::__stack3)
+                GrammarTags::__stack2)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
@@ -742,9 +742,9 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 5usize);
-        __data_stack.__tags.push(GrammarTags::__stack2);
-        let mut RuleType = __data_stack.__stack3.pop().unwrap();
-        let mut RuleLines = __data_stack.__stack4.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack1);
+        let mut RuleType = __data_stack.__stack2.pop().unwrap();
+        let mut RuleLines = __data_stack.__stack3.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -764,7 +764,7 @@ impl GrammarDataStack {
                 rule_lines: RuleLines,
             }
         };
-        __data_stack.__stack2.push(__res);
+        __data_stack.__stack1.push(__res);
         Ok(true)
     }
     ///RuleType -> parengroup
@@ -785,7 +785,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack3);
+        __data_stack.__tags.push(GrammarTags::__stack2);
         let mut parengroup = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -794,7 +794,7 @@ impl GrammarDataStack {
             };
             Some(group)
         };
-        __data_stack.__stack3.push(__res);
+        __data_stack.__stack2.push(__res);
         Ok(true)
     }
     ///RuleType ->
@@ -808,9 +808,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack3);
+        __data_stack.__tags.push(GrammarTags::__stack2);
         let __res = { None };
-        __data_stack.__stack3.push(__res);
+        __data_stack.__stack2.push(__res);
         Ok(true)
     }
     ///RuleLines -> RuleLines pipe RuleLine
@@ -827,7 +827,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack5)
+                GrammarTags::__stack4)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -835,12 +835,12 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                GrammarTags::__stack4)
+                GrammarTags::__stack3)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        let mut RuleLines = __data_stack.__stack4.pop().unwrap();
-        let mut RuleLine = __data_stack.__stack5.pop().unwrap();
+        let mut RuleLines = __data_stack.__stack3.pop().unwrap();
+        let mut RuleLine = __data_stack.__stack4.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_pipe = __location_stack.pop().unwrap();
@@ -850,7 +850,7 @@ impl GrammarDataStack {
             RuleLines.push(RuleLine);
             RuleLines
         };
-        __data_stack.__stack4.push(__res);
+        __data_stack.__stack3.push(__res);
         Ok(true)
     }
     ///RuleLines -> RuleLine
@@ -867,15 +867,15 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack5)
+                GrammarTags::__stack4)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack4);
-        let mut RuleLine = __data_stack.__stack5.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack3);
+        let mut RuleLine = __data_stack.__stack4.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![RuleLine] };
-        __data_stack.__stack4.push(__res);
+        __data_stack.__stack3.push(__res);
         Ok(true)
     }
     ///RuleLine -> TokenMapped* PrecDef* Action
@@ -892,22 +892,22 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack3)
+                GrammarTags::__stack2)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack13)
+                GrammarTags::__stack12)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                GrammarTags::__stack12)
+                GrammarTags::__stack11)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack5);
-        let mut TokenMapped = __data_stack.__stack12.pop().unwrap();
-        let mut PrecDef = __data_stack.__stack13.pop().unwrap();
-        let mut Action = __data_stack.__stack3.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack4);
+        let mut TokenMapped = __data_stack.__stack11.pop().unwrap();
+        let mut PrecDef = __data_stack.__stack12.pop().unwrap();
+        let mut Action = __data_stack.__stack2.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = {
             RuleLineArgs {
@@ -919,7 +919,7 @@ impl GrammarDataStack {
                 dprec: None,
             }
         };
-        __data_stack.__stack5.push(__res);
+        __data_stack.__stack4.push(__res);
         Ok(true)
     }
     ///PrecDef -> percent prec IdentOrLiteral
@@ -936,7 +936,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack11)
+                GrammarTags::__stack10)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -948,12 +948,12 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack6);
-        let mut IdentOrLiteral = __data_stack.__stack11.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack5);
+        let mut IdentOrLiteral = __data_stack.__stack10.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = { PrecDPrecArgs::Prec(IdentOrLiteral) };
-        __data_stack.__stack6.push(__res);
+        __data_stack.__stack5.push(__res);
         Ok(true)
     }
     ///PrecDef -> percent prec error
@@ -982,7 +982,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack6);
+        __data_stack.__tags.push(GrammarTags::__stack5);
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -996,7 +996,7 @@ impl GrammarDataStack {
                 });
             PrecDPrecArgs::None
         };
-        __data_stack.__stack6.push(__res);
+        __data_stack.__stack5.push(__res);
         Ok(true)
     }
     ///PrecDef -> percent dprec literal
@@ -1025,7 +1025,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack6);
+        __data_stack.__tags.push(GrammarTags::__stack5);
         let mut literal = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
@@ -1035,7 +1035,7 @@ impl GrammarDataStack {
             };
             PrecDPrecArgs::DPrec(literal)
         };
-        __data_stack.__stack6.push(__res);
+        __data_stack.__stack5.push(__res);
         Ok(true)
     }
     ///PrecDef -> percent dprec error
@@ -1064,7 +1064,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack6);
+        __data_stack.__tags.push(GrammarTags::__stack5);
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -1078,7 +1078,7 @@ impl GrammarDataStack {
                 });
             PrecDPrecArgs::None
         };
-        __data_stack.__stack6.push(__res);
+        __data_stack.__stack5.push(__res);
         Ok(true)
     }
     ///PrecDef -> percent error
@@ -1103,7 +1103,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        __data_stack.__tags.push(GrammarTags::__stack6);
+        __data_stack.__tags.push(GrammarTags::__stack5);
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -1117,7 +1117,7 @@ impl GrammarDataStack {
                 });
             PrecDPrecArgs::None
         };
-        __data_stack.__stack6.push(__res);
+        __data_stack.__stack5.push(__res);
         Ok(true)
     }
     ///TokenMapped -> Pattern
@@ -1134,15 +1134,15 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack7);
-        let mut Pattern = __data_stack.__stack10.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack6);
+        let mut Pattern = __data_stack.__stack9.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { (None, Pattern) };
-        __data_stack.__stack7.push(__res);
+        __data_stack.__stack6.push(__res);
         Ok(true)
     }
     ///TokenMapped -> ident equal Pattern
@@ -1159,7 +1159,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -1171,8 +1171,8 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack7);
-        let mut Pattern = __data_stack.__stack10.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack6);
+        let mut Pattern = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 3usize);
@@ -1182,7 +1182,7 @@ impl GrammarDataStack {
             };
             (Some(ident), Pattern)
         };
-        __data_stack.__stack7.push(__res);
+        __data_stack.__stack6.push(__res);
         Ok(true)
     }
     ///TerminalSetItem -> ident
@@ -1203,7 +1203,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack8);
+        __data_stack.__tags.push(GrammarTags::__stack7);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -1212,7 +1212,7 @@ impl GrammarDataStack {
             };
             TerminalSetItem::Terminal(ident)
         };
-        __data_stack.__stack8.push(__res);
+        __data_stack.__stack7.push(__res);
         Ok(true)
     }
     ///TerminalSetItem -> ident minus ident
@@ -1241,7 +1241,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack8);
+        __data_stack.__tags.push(GrammarTags::__stack7);
         let mut last = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut first = __data_stack.__terminals.pop().unwrap();
@@ -1255,7 +1255,7 @@ impl GrammarDataStack {
             };
             TerminalSetItem::Range(first, last)
         };
-        __data_stack.__stack8.push(__res);
+        __data_stack.__stack7.push(__res);
         Ok(true)
     }
     ///TerminalSetItem -> ident minus error
@@ -1284,7 +1284,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack8);
+        __data_stack.__tags.push(GrammarTags::__stack7);
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -1298,7 +1298,7 @@ impl GrammarDataStack {
                 });
             TerminalSetItem::Terminal(format_ident!("dummy"))
         };
-        __data_stack.__stack8.push(__res);
+        __data_stack.__stack7.push(__res);
         Ok(true)
     }
     ///TerminalSetItem -> literal
@@ -1319,7 +1319,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack8);
+        __data_stack.__tags.push(GrammarTags::__stack7);
         let mut literal = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -1328,7 +1328,7 @@ impl GrammarDataStack {
             };
             TerminalSetItem::Literal(literal)
         };
-        __data_stack.__stack8.push(__res);
+        __data_stack.__stack7.push(__res);
         Ok(true)
     }
     ///TerminalSetItem -> literal minus literal
@@ -1357,7 +1357,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack8);
+        __data_stack.__tags.push(GrammarTags::__stack7);
         let mut last = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut first = __data_stack.__terminals.pop().unwrap();
@@ -1371,7 +1371,7 @@ impl GrammarDataStack {
             };
             TerminalSetItem::LiteralRange(first, last)
         };
-        __data_stack.__stack8.push(__res);
+        __data_stack.__stack7.push(__res);
         Ok(true)
     }
     ///TerminalSetItem -> literal minus error
@@ -1400,7 +1400,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack8);
+        __data_stack.__tags.push(GrammarTags::__stack7);
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -1414,7 +1414,7 @@ impl GrammarDataStack {
                 });
             TerminalSetItem::Terminal(format_ident!("dummy"))
         };
-        __data_stack.__stack8.push(__res);
+        __data_stack.__stack7.push(__res);
         Ok(true)
     }
     ///TerminalSet -> lbracket caret? TerminalSetItem* rbracket
@@ -1435,11 +1435,11 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack15)
+                GrammarTags::__stack14)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                GrammarTags::__stack14)
+                GrammarTags::__stack13)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
@@ -1447,9 +1447,9 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
-        __data_stack.__tags.push(GrammarTags::__stack9);
-        let mut caret = __data_stack.__stack14.pop().unwrap();
-        let mut TerminalSetItem = __data_stack.__stack15.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack8);
+        let mut caret = __data_stack.__stack13.pop().unwrap();
+        let mut TerminalSetItem = __data_stack.__stack14.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         let mut __rustylr_location_rbracket = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -1462,7 +1462,7 @@ impl GrammarDataStack {
                 close_span: __rustylr_location_rbracket.span(),
             }
         };
-        __data_stack.__stack9.push(__res);
+        __data_stack.__stack8.push(__res);
         Ok(true)
     }
     ///TerminalSet -> dot
@@ -1483,7 +1483,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack9);
+        __data_stack.__tags.push(GrammarTags::__stack8);
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut __rustylr_location_dot = __location_stack.pop().unwrap();
         let __res = {
@@ -1495,7 +1495,7 @@ impl GrammarDataStack {
                 close_span: span,
             }
         };
-        __data_stack.__stack9.push(__res);
+        __data_stack.__stack8.push(__res);
         Ok(true)
     }
     ///Pattern -> ident
@@ -1516,7 +1516,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack10);
+        __data_stack.__tags.push(GrammarTags::__stack9);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -1525,7 +1525,7 @@ impl GrammarDataStack {
             };
             PatternArgs::Ident(ident)
         };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Pattern -> Pattern plus
@@ -1546,11 +1546,11 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        let mut Pattern = __data_stack.__stack10.pop().unwrap();
+        let mut Pattern = __data_stack.__stack9.pop().unwrap();
         let mut plus = __data_stack.__terminals.pop().unwrap();
         let mut __rustylr_location_plus = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -1560,7 +1560,7 @@ impl GrammarDataStack {
             };
             PatternArgs::Plus(Box::new(Pattern), __rustylr_location_plus.span())
         };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Pattern -> Pattern star
@@ -1581,18 +1581,18 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        let mut Pattern = __data_stack.__stack10.pop().unwrap();
+        let mut Pattern = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut __rustylr_location_star = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
             PatternArgs::Star(Box::new(Pattern), __rustylr_location_star.span())
         };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Pattern -> Pattern question
@@ -1613,18 +1613,18 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        let mut Pattern = __data_stack.__stack10.pop().unwrap();
+        let mut Pattern = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut __rustylr_location_question = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
             PatternArgs::Question(Box::new(Pattern), __rustylr_location_question.span())
         };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Pattern -> Pattern exclamation
@@ -1645,11 +1645,11 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        let mut Pattern = __data_stack.__stack10.pop().unwrap();
+        let mut Pattern = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut __rustylr_location_exclamation = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -1659,7 +1659,7 @@ impl GrammarDataStack {
                 __rustylr_location_exclamation.span(),
             )
         };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Pattern -> TerminalSet
@@ -1676,15 +1676,15 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack9)
+                GrammarTags::__stack8)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack10);
-        let mut TerminalSet = __data_stack.__stack9.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack9);
+        let mut TerminalSet = __data_stack.__stack8.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { PatternArgs::TerminalSet(TerminalSet) };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Pattern -> Pattern slash Pattern
@@ -1701,7 +1701,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -1709,16 +1709,16 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        let mut lh = __data_stack.__stack10.pop().unwrap();
-        let mut p1 = __data_stack.__stack10.pop().unwrap();
+        let mut lh = __data_stack.__stack9.pop().unwrap();
+        let mut p1 = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = { PatternArgs::Lookaheads(Box::new(p1), Box::new(lh)) };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Pattern -> lparen $sep(Pattern*, pipe, +) rparen
@@ -1739,7 +1739,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack17)
+                GrammarTags::__stack16)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -1747,8 +1747,8 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack10);
-        let mut Pattern = __data_stack.__stack17.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack9);
+        let mut Pattern = __data_stack.__stack16.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         let mut __rustylr_location_rparen = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -1760,7 +1760,7 @@ impl GrammarDataStack {
                 __rustylr_location_rparen.span(),
             )
         };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Pattern -> lparen error rparen
@@ -1789,7 +1789,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack10);
+        __data_stack.__tags.push(GrammarTags::__stack9);
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
@@ -1804,7 +1804,7 @@ impl GrammarDataStack {
                 });
             PatternArgs::Ident(format_ident!("dummy"))
         };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Pattern -> literal
@@ -1825,7 +1825,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack10);
+        __data_stack.__tags.push(GrammarTags::__stack9);
         let mut literal = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -1834,7 +1834,7 @@ impl GrammarDataStack {
             };
             PatternArgs::Literal(literal)
         };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Pattern -> Pattern minus Pattern
@@ -1851,7 +1851,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -1859,16 +1859,16 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        let mut p2 = __data_stack.__stack10.pop().unwrap();
-        let mut p1 = __data_stack.__stack10.pop().unwrap();
+        let mut p2 = __data_stack.__stack9.pop().unwrap();
+        let mut p1 = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = { PatternArgs::Minus(Box::new(p1), Box::new(p2)) };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma? rparen
@@ -1893,7 +1893,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
@@ -1901,7 +1901,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 5usize) == Some(&
@@ -1917,9 +1917,9 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 8usize);
-        __data_stack.__tags.push(GrammarTags::__stack10);
-        let mut del = __data_stack.__stack10.pop().unwrap();
-        let mut base = __data_stack.__stack10.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack9);
+        let mut del = __data_stack.__stack9.pop().unwrap();
+        let mut base = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
@@ -1941,7 +1941,7 @@ impl GrammarDataStack {
             }
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma plus rparen
@@ -1970,7 +1970,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
@@ -1978,7 +1978,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 5usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 6usize) == Some(&
@@ -1994,9 +1994,9 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 9usize);
-        __data_stack.__tags.push(GrammarTags::__stack10);
-        let mut del = __data_stack.__stack10.pop().unwrap();
-        let mut base = __data_stack.__stack10.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack9);
+        let mut del = __data_stack.__stack9.pop().unwrap();
+        let mut base = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 5usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
@@ -2018,7 +2018,7 @@ impl GrammarDataStack {
             }
             PatternArgs::Sep(Box::new(base), Box::new(del), true, *__rustylr_location0)
         };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma star rparen
@@ -2047,7 +2047,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
@@ -2055,7 +2055,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 5usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 6usize) == Some(&
@@ -2071,9 +2071,9 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 9usize);
-        __data_stack.__tags.push(GrammarTags::__stack10);
-        let mut del = __data_stack.__stack10.pop().unwrap();
-        let mut base = __data_stack.__stack10.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack9);
+        let mut del = __data_stack.__stack9.pop().unwrap();
+        let mut base = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 5usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
@@ -2095,7 +2095,7 @@ impl GrammarDataStack {
             }
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern error rparen
@@ -2120,7 +2120,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
@@ -2128,7 +2128,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 5usize) == Some(&
@@ -2144,9 +2144,9 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 8usize);
-        __data_stack.__tags.push(GrammarTags::__stack10);
-        let mut del = __data_stack.__stack10.pop().unwrap();
-        let mut base = __data_stack.__stack10.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack9);
+        let mut del = __data_stack.__stack9.pop().unwrap();
+        let mut base = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
@@ -2177,7 +2177,7 @@ impl GrammarDataStack {
                 });
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma error rparen
@@ -2206,7 +2206,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
@@ -2214,7 +2214,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 5usize) == Some(&
-                GrammarTags::__stack10)
+                GrammarTags::__stack9)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 6usize) == Some(&
@@ -2230,9 +2230,9 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 9usize);
-        __data_stack.__tags.push(GrammarTags::__stack10);
-        let mut del = __data_stack.__stack10.pop().unwrap();
-        let mut base = __data_stack.__stack10.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack9);
+        let mut del = __data_stack.__stack9.pop().unwrap();
+        let mut base = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 4usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
@@ -2263,7 +2263,7 @@ impl GrammarDataStack {
                 });
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
-        __data_stack.__stack10.push(__res);
+        __data_stack.__stack9.push(__res);
         Ok(true)
     }
     ///Action -> bracegroup
@@ -2284,7 +2284,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack3);
+        __data_stack.__tags.push(GrammarTags::__stack2);
         let mut bracegroup = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -2293,7 +2293,7 @@ impl GrammarDataStack {
             };
             Some(group)
         };
-        __data_stack.__stack3.push(__res);
+        __data_stack.__stack2.push(__res);
         Ok(true)
     }
     ///Action ->
@@ -2307,9 +2307,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack3);
+        __data_stack.__tags.push(GrammarTags::__stack2);
         let __res = { None };
-        __data_stack.__stack3.push(__res);
+        __data_stack.__stack2.push(__res);
         Ok(true)
     }
     ///IdentOrLiteral -> ident
@@ -2330,7 +2330,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack11);
+        __data_stack.__tags.push(GrammarTags::__stack10);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -2339,7 +2339,7 @@ impl GrammarDataStack {
             };
             IdentOrLiteral::Ident(ident)
         };
-        __data_stack.__stack11.push(__res);
+        __data_stack.__stack10.push(__res);
         Ok(true)
     }
     ///IdentOrLiteral -> literal
@@ -2360,7 +2360,7 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack11);
+        __data_stack.__tags.push(GrammarTags::__stack10);
         let mut literal = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -2369,7 +2369,7 @@ impl GrammarDataStack {
             };
             IdentOrLiteral::Literal(literal)
         };
-        __data_stack.__stack11.push(__res);
+        __data_stack.__stack10.push(__res);
         Ok(true)
     }
     ///Directive -> percent token ident [^semicolon]+ semicolon
@@ -2390,7 +2390,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack18)
+                GrammarTags::__stack17)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -2407,7 +2407,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 5usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut __rustylr_data_3 = __data_stack.__stack18.pop().unwrap();
+        let mut __rustylr_data_3 = __data_stack.__stack17.pop().unwrap();
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 5usize);
@@ -2623,7 +2623,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack18)
+                GrammarTags::__stack17)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -2636,7 +2636,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
+        let mut __rustylr_data_2 = __data_stack.__stack17.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_tokentype = __location_stack.pop().unwrap();
@@ -2712,7 +2712,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack18)
+                GrammarTags::__stack17)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -2725,7 +2725,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
+        let mut __rustylr_data_2 = __data_stack.__stack17.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_userdata = __location_stack.pop().unwrap();
@@ -2801,7 +2801,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack19)
+                GrammarTags::__stack18)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -2814,7 +2814,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut IdentOrLiteral = __data_stack.__stack19.pop().unwrap();
+        let mut IdentOrLiteral = __data_stack.__stack18.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_left = __location_stack.pop().unwrap();
@@ -2893,7 +2893,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack19)
+                GrammarTags::__stack18)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -2906,7 +2906,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut IdentOrLiteral = __data_stack.__stack19.pop().unwrap();
+        let mut IdentOrLiteral = __data_stack.__stack18.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_right = __location_stack.pop().unwrap();
@@ -2985,7 +2985,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack19)
+                GrammarTags::__stack18)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -2998,7 +2998,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut IdentOrLiteral = __data_stack.__stack19.pop().unwrap();
+        let mut IdentOrLiteral = __data_stack.__stack18.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_precedence = __location_stack.pop().unwrap();
@@ -3073,7 +3073,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack18)
+                GrammarTags::__stack17)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -3086,7 +3086,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
+        let mut __rustylr_data_2 = __data_stack.__stack17.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_errortype = __location_stack.pop().unwrap();
@@ -3162,7 +3162,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack18)
+                GrammarTags::__stack17)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -3175,7 +3175,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
+        let mut __rustylr_data_2 = __data_stack.__stack17.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_moduleprefix = __location_stack.pop().unwrap();
@@ -3574,7 +3574,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack18)
+                GrammarTags::__stack17)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -3587,7 +3587,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut ident = __data_stack.__stack18.pop().unwrap();
+        let mut ident = __data_stack.__stack17.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 4usize);
         {
@@ -3667,7 +3667,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack18)
+                GrammarTags::__stack17)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -3680,7 +3680,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
+        let mut __rustylr_data_2 = __data_stack.__stack17.pop().unwrap();
         let mut filter = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 4usize);
@@ -3755,7 +3755,7 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack18)
+                GrammarTags::__stack17)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -3768,7 +3768,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut __rustylr_data_2 = __data_stack.__stack18.pop().unwrap();
+        let mut __rustylr_data_2 = __data_stack.__stack17.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 4usize);
         let __rustylr_data_2 = Self::custom_reduce_action_0(
@@ -3880,12 +3880,12 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack2)
+                GrammarTags::__stack1)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        let mut Rule = __data_stack.__stack2.pop().unwrap();
+        let mut Rule = __data_stack.__stack1.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         {
             data.rules.push(Rule);
@@ -3906,15 +3906,15 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack7)
+                GrammarTags::__stack6)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack12);
-        let mut A = __data_stack.__stack7.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack11);
+        let mut A = __data_stack.__stack6.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack12.push(__res);
+        __data_stack.__stack11.push(__res);
         Ok(true)
     }
     ///TokenMapped+ -> TokenMapped+ TokenMapped
@@ -3931,7 +3931,103 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack7)
+                GrammarTags::__stack6)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack11)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut Ap = __data_stack.__stack11.pop().unwrap();
+        let mut A = __data_stack.__stack6.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2usize);
+        let __res = {
+            Ap.push(A);
+            Ap
+        };
+        __data_stack.__stack11.push(__res);
+        Ok(true)
+    }
+    ///TokenMapped* -> TokenMapped+
+    #[inline]
+    fn reduce__TokenMappedStar16_0(
+        __data_stack: &mut Self,
+        __location_stack: &mut Vec<SpanPair>,
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack11)
+            );
+        }
+        let mut __token0 = __data_stack.__stack11.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 1usize);
+        let __res = __token0;
+        __data_stack.__stack11.push(__res);
+        Ok(true)
+    }
+    ///TokenMapped* ->
+    #[inline]
+    fn reduce__TokenMappedStar16_1(
+        __data_stack: &mut Self,
+        __location_stack: &mut Vec<SpanPair>,
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)] {}
+        __data_stack.__tags.push(GrammarTags::__stack11);
+        let __res = { vec![] };
+        __data_stack.__stack11.push(__res);
+        Ok(true)
+    }
+    ///PrecDef+ -> PrecDef
+    #[inline]
+    fn reduce__PrecDefPlus17_0(
+        __data_stack: &mut Self,
+        __location_stack: &mut Vec<SpanPair>,
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack5)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack12);
+        let mut A = __data_stack.__stack5.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 1usize);
+        let __res = { vec![A] };
+        __data_stack.__stack12.push(__res);
+        Ok(true)
+    }
+    ///PrecDef+ -> PrecDef+ PrecDef
+    #[inline]
+    fn reduce__PrecDefPlus17_1(
+        __data_stack: &mut Self,
+        __location_stack: &mut Vec<SpanPair>,
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack5)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -3940,7 +4036,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut Ap = __data_stack.__stack12.pop().unwrap();
-        let mut A = __data_stack.__stack7.pop().unwrap();
+        let mut A = __data_stack.__stack5.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
         let __res = {
             Ap.push(A);
@@ -3949,9 +4045,9 @@ impl GrammarDataStack {
         __data_stack.__stack12.push(__res);
         Ok(true)
     }
-    ///TokenMapped* -> TokenMapped+
+    ///PrecDef* -> PrecDef+
     #[inline]
-    fn reduce__TokenMappedStar16_0(
+    fn reduce__PrecDefStar18_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
@@ -3972,102 +4068,6 @@ impl GrammarDataStack {
         __data_stack.__stack12.push(__res);
         Ok(true)
     }
-    ///TokenMapped* ->
-    #[inline]
-    fn reduce__TokenMappedStar16_1(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-        shift: &mut bool,
-        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
-        data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
-    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack12);
-        let __res = { vec![] };
-        __data_stack.__stack12.push(__res);
-        Ok(true)
-    }
-    ///PrecDef+ -> PrecDef
-    #[inline]
-    fn reduce__PrecDefPlus17_0(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-        shift: &mut bool,
-        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
-        data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
-    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack6)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack13);
-        let mut A = __data_stack.__stack6.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        let __res = { vec![A] };
-        __data_stack.__stack13.push(__res);
-        Ok(true)
-    }
-    ///PrecDef+ -> PrecDef+ PrecDef
-    #[inline]
-    fn reduce__PrecDefPlus17_1(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-        shift: &mut bool,
-        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
-        data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
-    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack6)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack13)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        let mut Ap = __data_stack.__stack13.pop().unwrap();
-        let mut A = __data_stack.__stack6.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 2usize);
-        let __res = {
-            Ap.push(A);
-            Ap
-        };
-        __data_stack.__stack13.push(__res);
-        Ok(true)
-    }
-    ///PrecDef* -> PrecDef+
-    #[inline]
-    fn reduce__PrecDefStar18_0(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-        shift: &mut bool,
-        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
-        data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
-    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack13)
-            );
-        }
-        let mut __token0 = __data_stack.__stack13.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        let __res = __token0;
-        __data_stack.__stack13.push(__res);
-        Ok(true)
-    }
     ///PrecDef* ->
     #[inline]
     fn reduce__PrecDefStar18_1(
@@ -4079,9 +4079,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack13);
+        __data_stack.__tags.push(GrammarTags::__stack12);
         let __res = { vec![] };
-        __data_stack.__stack13.push(__res);
+        __data_stack.__stack12.push(__res);
         Ok(true)
     }
     ///caret? -> caret
@@ -4102,11 +4102,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack14);
+        __data_stack.__tags.push(GrammarTags::__stack13);
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = Some(A);
-        __data_stack.__stack14.push(__res);
+        __data_stack.__stack13.push(__res);
         Ok(true)
     }
     ///caret? ->
@@ -4120,9 +4120,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack14);
+        __data_stack.__tags.push(GrammarTags::__stack13);
         let __res = { None };
-        __data_stack.__stack14.push(__res);
+        __data_stack.__stack13.push(__res);
         Ok(true)
     }
     ///TerminalSetItem+ -> TerminalSetItem
@@ -4139,15 +4139,15 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack8)
+                GrammarTags::__stack7)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack15);
-        let mut A = __data_stack.__stack8.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack14);
+        let mut A = __data_stack.__stack7.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack15.push(__res);
+        __data_stack.__stack14.push(__res);
         Ok(true)
     }
     ///TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem
@@ -4164,7 +4164,103 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack8)
+                GrammarTags::__stack7)
+            );
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
+                GrammarTags::__stack14)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        let mut Ap = __data_stack.__stack14.pop().unwrap();
+        let mut A = __data_stack.__stack7.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2usize);
+        let __res = {
+            Ap.push(A);
+            Ap
+        };
+        __data_stack.__stack14.push(__res);
+        Ok(true)
+    }
+    ///TerminalSetItem* -> TerminalSetItem+
+    #[inline]
+    fn reduce__TerminalSetItemStar21_0(
+        __data_stack: &mut Self,
+        __location_stack: &mut Vec<SpanPair>,
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack14)
+            );
+        }
+        let mut __token0 = __data_stack.__stack14.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 1usize);
+        let __res = __token0;
+        __data_stack.__stack14.push(__res);
+        Ok(true)
+    }
+    ///TerminalSetItem* ->
+    #[inline]
+    fn reduce__TerminalSetItemStar21_1(
+        __data_stack: &mut Self,
+        __location_stack: &mut Vec<SpanPair>,
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)] {}
+        __data_stack.__tags.push(GrammarTags::__stack14);
+        let __res = { vec![] };
+        __data_stack.__stack14.push(__res);
+        Ok(true)
+    }
+    ///Pattern+ -> Pattern
+    #[inline]
+    fn reduce__PatternPlus22_0(
+        __data_stack: &mut Self,
+        __location_stack: &mut Vec<SpanPair>,
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack9)
+            );
+        }
+        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        __data_stack.__tags.push(GrammarTags::__stack15);
+        let mut A = __data_stack.__stack9.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 1usize);
+        let __res = { vec![A] };
+        __data_stack.__stack15.push(__res);
+        Ok(true)
+    }
+    ///Pattern+ -> Pattern+ Pattern
+    #[inline]
+    fn reduce__PatternPlus22_1(
+        __data_stack: &mut Self,
+        __location_stack: &mut Vec<SpanPair>,
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut SpanPair,
+    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
+                GrammarTags::__stack9)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -4173,7 +4269,7 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
         let mut Ap = __data_stack.__stack15.pop().unwrap();
-        let mut A = __data_stack.__stack8.pop().unwrap();
+        let mut A = __data_stack.__stack9.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
         let __res = {
             Ap.push(A);
@@ -4182,9 +4278,9 @@ impl GrammarDataStack {
         __data_stack.__stack15.push(__res);
         Ok(true)
     }
-    ///TerminalSetItem* -> TerminalSetItem+
+    ///Pattern* -> Pattern+
     #[inline]
-    fn reduce__TerminalSetItemStar21_0(
+    fn reduce__PatternStar23_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
         shift: &mut bool,
@@ -4205,102 +4301,6 @@ impl GrammarDataStack {
         __data_stack.__stack15.push(__res);
         Ok(true)
     }
-    ///TerminalSetItem* ->
-    #[inline]
-    fn reduce__TerminalSetItemStar21_1(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-        shift: &mut bool,
-        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
-        data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
-    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack15);
-        let __res = { vec![] };
-        __data_stack.__stack15.push(__res);
-        Ok(true)
-    }
-    ///Pattern+ -> Pattern
-    #[inline]
-    fn reduce__PatternPlus22_0(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-        shift: &mut bool,
-        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
-        data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
-    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack10)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack16);
-        let mut A = __data_stack.__stack10.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        let __res = { vec![A] };
-        __data_stack.__stack16.push(__res);
-        Ok(true)
-    }
-    ///Pattern+ -> Pattern+ Pattern
-    #[inline]
-    fn reduce__PatternPlus22_1(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-        shift: &mut bool,
-        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
-        data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
-    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack10)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack16)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        let mut A = __data_stack.__stack10.pop().unwrap();
-        let mut Ap = __data_stack.__stack16.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 2usize);
-        let __res = {
-            Ap.push(A);
-            Ap
-        };
-        __data_stack.__stack16.push(__res);
-        Ok(true)
-    }
-    ///Pattern* -> Pattern+
-    #[inline]
-    fn reduce__PatternStar23_0(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
-        shift: &mut bool,
-        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
-        data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
-    ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack16)
-            );
-        }
-        let mut __token0 = __data_stack.__stack16.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
-        let __res = __token0;
-        __data_stack.__stack16.push(__res);
-        Ok(true)
-    }
     ///Pattern* ->
     #[inline]
     fn reduce__PatternStar23_1(
@@ -4312,9 +4312,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack16);
+        __data_stack.__tags.push(GrammarTags::__stack15);
         let __res = { vec![] };
-        __data_stack.__stack16.push(__res);
+        __data_stack.__stack15.push(__res);
         Ok(true)
     }
     ///$sep(Pattern*, pipe, +) -> Pattern*
@@ -4331,15 +4331,15 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack16)
+                GrammarTags::__stack15)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack17);
-        let mut __token0 = __data_stack.__stack16.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack16);
+        let mut __token0 = __data_stack.__stack15.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![__token0] };
-        __data_stack.__stack17.push(__res);
+        __data_stack.__stack16.push(__res);
         Ok(true)
     }
     ///$sep(Pattern*, pipe, +) -> $sep(Pattern*, pipe, +) pipe Pattern*
@@ -4356,7 +4356,7 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack16)
+                GrammarTags::__stack15)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -4364,19 +4364,19 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                GrammarTags::__stack17)
+                GrammarTags::__stack16)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        let mut __token1 = __data_stack.__stack16.pop().unwrap();
-        let mut __token0 = __data_stack.__stack17.pop().unwrap();
+        let mut __token1 = __data_stack.__stack15.pop().unwrap();
+        let mut __token0 = __data_stack.__stack16.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = {
             __token0.push(__token1);
             __token0
         };
-        __data_stack.__stack17.push(__res);
+        __data_stack.__stack16.push(__res);
         Ok(true)
     }
     ///comma? -> comma
@@ -4434,11 +4434,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack18);
+        __data_stack.__tags.push(GrammarTags::__stack17);
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack18.push(__res);
+        __data_stack.__stack17.push(__res);
         Ok(true)
     }
     ///[^semicolon]+ -> [^semicolon]+ [^semicolon]
@@ -4459,18 +4459,18 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack18)
+                GrammarTags::__stack17)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        let mut Ap = __data_stack.__stack18.pop().unwrap();
+        let mut Ap = __data_stack.__stack17.pop().unwrap();
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
         let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack18.push(__res);
+        __data_stack.__stack17.push(__res);
         Ok(true)
     }
     ///IdentOrLiteral+ -> IdentOrLiteral
@@ -4487,15 +4487,15 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack11)
+                GrammarTags::__stack10)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack19);
-        let mut A = __data_stack.__stack11.pop().unwrap();
+        __data_stack.__tags.push(GrammarTags::__stack18);
+        let mut A = __data_stack.__stack10.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack19.push(__res);
+        __data_stack.__stack18.push(__res);
         Ok(true)
     }
     ///IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
@@ -4512,22 +4512,22 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack11)
+                GrammarTags::__stack10)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack19)
+                GrammarTags::__stack18)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        let mut A = __data_stack.__stack11.pop().unwrap();
-        let mut Ap = __data_stack.__stack19.pop().unwrap();
+        let mut A = __data_stack.__stack10.pop().unwrap();
+        let mut Ap = __data_stack.__stack18.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
         let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack19.push(__res);
+        __data_stack.__stack18.push(__res);
         Ok(true)
     }
     ///ident+ -> ident
@@ -4548,11 +4548,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack18);
+        __data_stack.__tags.push(GrammarTags::__stack17);
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack18.push(__res);
+        __data_stack.__stack17.push(__res);
         Ok(true)
     }
     ///ident+ -> ident+ ident
@@ -4573,18 +4573,18 @@ impl GrammarDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                GrammarTags::__stack18)
+                GrammarTags::__stack17)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        let mut Ap = __data_stack.__stack18.pop().unwrap();
+        let mut Ap = __data_stack.__stack17.pop().unwrap();
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
         let __res = {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack18.push(__res);
+        __data_stack.__stack17.push(__res);
         Ok(true)
     }
     ///ident* -> ident+
@@ -4601,13 +4601,13 @@ impl GrammarDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                GrammarTags::__stack18)
+                GrammarTags::__stack17)
             );
         }
-        let mut __token0 = __data_stack.__stack18.pop().unwrap();
+        let mut __token0 = __data_stack.__stack17.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = __token0;
-        __data_stack.__stack18.push(__res);
+        __data_stack.__stack17.push(__res);
         Ok(true)
     }
     ///ident* ->
@@ -4621,9 +4621,9 @@ impl GrammarDataStack {
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack18);
+        __data_stack.__tags.push(GrammarTags::__stack17);
         let __res = { vec![] };
-        __data_stack.__stack18.push(__res);
+        __data_stack.__stack17.push(__res);
         Ok(true)
     }
     ///GrammarLine+ -> GrammarLine
@@ -4696,6 +4696,9 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
             GrammarTags::__terminals => {
                 self.__terminals.pop();
             }
+            GrammarTags::__stack1 => {
+                self.__stack1.pop();
+            }
             GrammarTags::__stack2 => {
                 self.__stack2.pop();
             }
@@ -4747,9 +4750,6 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
             GrammarTags::__stack18 => {
                 self.__stack18.pop();
             }
-            GrammarTags::__stack19 => {
-                self.__stack19.pop();
-            }
             _ => {}
         }
     }
@@ -4763,6 +4763,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
     fn clear(&mut self) {
         self.__tags.clear();
         self.__terminals.clear();
+        self.__stack1.clear();
         self.__stack2.clear();
         self.__stack3.clear();
         self.__stack4.clear();
@@ -4780,77 +4781,76 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
         self.__stack16.clear();
         self.__stack17.clear();
         self.__stack18.clear();
-        self.__stack19.clear();
     }
     fn reserve(&mut self, additional: usize) {
         self.__tags.reserve(additional);
     }
     fn split_off(&mut self, at: usize) -> Self {
-        let __other_tag_stack = self.__tags.split_off(at);
         let mut __counts: [u8; 19usize + 1] = [0; 19usize + 1];
+        let __other_tag_stack = self.__tags.split_off(at);
         for &tag in &__other_tag_stack {
             __counts[tag as usize] += 1;
         }
         let __other___terminals = self
             .__terminals
             .split_off(self.__terminals.len() - (__counts[0usize] as usize));
+        let __other___stack1 = self
+            .__stack1
+            .split_off(self.__stack1.len() - (__counts[1usize] as usize));
         let __other___stack2 = self
             .__stack2
-            .split_off(self.__stack2.len() - (__counts[1usize] as usize));
+            .split_off(self.__stack2.len() - (__counts[2usize] as usize));
         let __other___stack3 = self
             .__stack3
-            .split_off(self.__stack3.len() - (__counts[2usize] as usize));
+            .split_off(self.__stack3.len() - (__counts[3usize] as usize));
         let __other___stack4 = self
             .__stack4
-            .split_off(self.__stack4.len() - (__counts[3usize] as usize));
+            .split_off(self.__stack4.len() - (__counts[4usize] as usize));
         let __other___stack5 = self
             .__stack5
-            .split_off(self.__stack5.len() - (__counts[4usize] as usize));
+            .split_off(self.__stack5.len() - (__counts[5usize] as usize));
         let __other___stack6 = self
             .__stack6
-            .split_off(self.__stack6.len() - (__counts[5usize] as usize));
+            .split_off(self.__stack6.len() - (__counts[6usize] as usize));
         let __other___stack7 = self
             .__stack7
-            .split_off(self.__stack7.len() - (__counts[6usize] as usize));
+            .split_off(self.__stack7.len() - (__counts[7usize] as usize));
         let __other___stack8 = self
             .__stack8
-            .split_off(self.__stack8.len() - (__counts[7usize] as usize));
+            .split_off(self.__stack8.len() - (__counts[8usize] as usize));
         let __other___stack9 = self
             .__stack9
-            .split_off(self.__stack9.len() - (__counts[8usize] as usize));
+            .split_off(self.__stack9.len() - (__counts[9usize] as usize));
         let __other___stack10 = self
             .__stack10
-            .split_off(self.__stack10.len() - (__counts[9usize] as usize));
+            .split_off(self.__stack10.len() - (__counts[10usize] as usize));
         let __other___stack11 = self
             .__stack11
-            .split_off(self.__stack11.len() - (__counts[10usize] as usize));
+            .split_off(self.__stack11.len() - (__counts[11usize] as usize));
         let __other___stack12 = self
             .__stack12
-            .split_off(self.__stack12.len() - (__counts[11usize] as usize));
+            .split_off(self.__stack12.len() - (__counts[12usize] as usize));
         let __other___stack13 = self
             .__stack13
-            .split_off(self.__stack13.len() - (__counts[12usize] as usize));
+            .split_off(self.__stack13.len() - (__counts[13usize] as usize));
         let __other___stack14 = self
             .__stack14
-            .split_off(self.__stack14.len() - (__counts[13usize] as usize));
+            .split_off(self.__stack14.len() - (__counts[14usize] as usize));
         let __other___stack15 = self
             .__stack15
-            .split_off(self.__stack15.len() - (__counts[14usize] as usize));
+            .split_off(self.__stack15.len() - (__counts[15usize] as usize));
         let __other___stack16 = self
             .__stack16
-            .split_off(self.__stack16.len() - (__counts[15usize] as usize));
+            .split_off(self.__stack16.len() - (__counts[16usize] as usize));
         let __other___stack17 = self
             .__stack17
-            .split_off(self.__stack17.len() - (__counts[16usize] as usize));
+            .split_off(self.__stack17.len() - (__counts[17usize] as usize));
         let __other___stack18 = self
             .__stack18
-            .split_off(self.__stack18.len() - (__counts[17usize] as usize));
-        let __other___stack19 = self
-            .__stack19
-            .split_off(self.__stack19.len() - (__counts[18usize] as usize));
+            .split_off(self.__stack18.len() - (__counts[18usize] as usize));
         Self {
-            __tags: __other_tag_stack,
             __terminals: __other___terminals,
+            __stack1: __other___stack1,
             __stack2: __other___stack2,
             __stack3: __other___stack3,
             __stack4: __other___stack4,
@@ -4868,12 +4868,13 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
             __stack16: __other___stack16,
             __stack17: __other___stack17,
             __stack18: __other___stack18,
-            __stack19: __other___stack19,
+            __tags: __other_tag_stack,
         }
     }
     fn append(&mut self, other: &mut Self) {
         self.__tags.append(&mut other.__tags);
         self.__terminals.append(&mut other.__terminals);
+        self.__stack1.append(&mut other.__stack1);
         self.__stack2.append(&mut other.__stack2);
         self.__stack3.append(&mut other.__stack3);
         self.__stack4.append(&mut other.__stack4);
@@ -4891,7 +4892,6 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
         self.__stack16.append(&mut other.__stack16);
         self.__stack17.append(&mut other.__stack17);
         self.__stack18.append(&mut other.__stack18);
-        self.__stack19.append(&mut other.__stack19);
     }
     fn reduce_action(
         data_stack: &mut Self,

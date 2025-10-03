@@ -531,7 +531,6 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
         let nodes = std::mem::take(&mut self.current_nodes);
         Ok(nodes.into_iter().map(move |node| {
             // let node = self.pop(eof_node).unwrap();
-            self.nodes_pool[node].data_stack.pop(); // pop eof
             self.nodes_pool[node].data_stack.pop_start().unwrap()
         }))
     }
@@ -1171,12 +1170,18 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
                         TerminalSymbol::Term(term) => {
                             node_.data_stack.push_terminal(term);
                         }
-                        TerminalSymbol::Eof | TerminalSymbol::Error => {
+                        TerminalSymbol::Error => {
                             node_.data_stack.push_empty();
                         }
+                        TerminalSymbol::Eof => {} // do not push for eof
                     }
                 } else {
-                    node_.data_stack.push_empty();
+                    match term {
+                        TerminalSymbol::Term(_) | TerminalSymbol::Error => {
+                            node_.data_stack.push_empty();
+                        }
+                        TerminalSymbol::Eof => {} // do not push for eof
+                    }
                 }
 
                 self.next_nodes.push(node);
@@ -1205,12 +1210,18 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
                     TerminalSymbol::Term(term) => {
                         node_.data_stack.push_terminal(term);
                     }
-                    TerminalSymbol::Eof | TerminalSymbol::Error => {
+                    TerminalSymbol::Error => {
                         node_.data_stack.push_empty();
                     }
+                    TerminalSymbol::Eof => {} // no push for eof
                 }
             } else {
-                node_.data_stack.push_empty();
+                match term {
+                    TerminalSymbol::Term(_) | TerminalSymbol::Error => {
+                        node_.data_stack.push_empty();
+                    }
+                    TerminalSymbol::Eof => {} // no push for eof
+                }
             }
 
             self.next_nodes.push(node);

@@ -909,9 +909,9 @@ impl Grammar {
 
         // empty tag
         let empty_tag_name = format_ident!("Empty");
-
         // stack name for terminal symbol
         let terminal_stack_name = format_ident!("__terminals");
+
         // stack name for each non-terminal
         let mut stack_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
 
@@ -923,34 +923,49 @@ impl Grammar {
         // for consistent output
         let mut stack_names_in_order = Vec::new();
 
-        // insert stack for empty
-        ruletype_stack_map.insert("".to_string(), None);
+        let mut empty_tag_used = false;
+        let mut terminal_data_used = false;
 
         // insert stack for terminal token type
-        ruletype_stack_map.insert(
-            self.token_typename.to_string(),
-            Some(terminal_stack_name.clone()),
-        );
-        stack_names_in_order.push((terminal_stack_name.clone(), self.token_typename.clone()));
+        if self.terminal_classes.iter().any(|c| c.data_used) {
+            terminal_data_used = true;
+            ruletype_stack_map.insert(
+                self.token_typename.to_string(),
+                Some(terminal_stack_name.clone()),
+            );
+            stack_names_in_order.push((terminal_stack_name.clone(), self.token_typename.clone()));
+        }
+        if self.terminal_classes.iter().any(|c| !c.data_used) {
+            empty_tag_used = true;
+        }
 
         fn remove_whitespaces(s: String) -> String {
             s.chars().filter(|c| !c.is_whitespace()).collect()
         }
 
+        // iterates through nonterminals
         for nonterm in self.nonterminals.iter() {
-            let ruletype_stream = nonterm.ruletype.as_ref().cloned().unwrap_or_default();
-
-            let cur_len = ruletype_stack_map.len();
-            let stack_name = ruletype_stack_map
-                .entry(remove_whitespaces(ruletype_stream.to_string()))
-                .or_insert_with(|| {
-                    let new_stack_name = format_ident!("__stack{}", cur_len);
-                    stack_names_in_order.push((new_stack_name.clone(), ruletype_stream.clone()));
-                    Some(new_stack_name)
-                })
-                .clone();
-            stack_names_for_nonterm.push(stack_name);
+            if let Some(ruletype_stream) = nonterm.ruletype.as_ref().cloned() {
+                let cur_len = ruletype_stack_map.len();
+                let stack_name = ruletype_stack_map
+                    .entry(remove_whitespaces(ruletype_stream.to_string()))
+                    .or_insert_with(|| {
+                        let new_stack_name = format_ident!("__stack{}", cur_len);
+                        stack_names_in_order
+                            .push((new_stack_name.clone(), ruletype_stream.clone()));
+                        Some(new_stack_name)
+                    })
+                    .clone();
+                stack_names_for_nonterm.push(stack_name);
+            } else {
+                empty_tag_used = true;
+                stack_names_for_nonterm.push(None);
+            }
         }
+
+        // if only one tag kind was used, no need to emit tag_stack
+        let unique_tag = (empty_tag_used && stack_names_in_order.is_empty())
+            || (!empty_tag_used && stack_names_in_order.len() == 1);
 
         // Token -> Option<stack_name> map, `None` for empty
         let token_to_stack_name = |token: Token<TerminalSymbol<usize>, usize>| match token {
@@ -1116,13 +1131,15 @@ impl Grammar {
                             .or_insert_with(Vec::new)
                             .push(location_mapto);
 
-                        debug_tag_check_stream.extend(quote! {
-                            debug_assert!(
-                                __data_stack.#tag_stack_name.get(
-                                    __data_stack.#tag_stack_name.len()-1-#token_index_from_end
-                                ) == Some( &#tag_enum_name::#tag_name )
-                            );
-                        });
+                        if !unique_tag {
+                            debug_tag_check_stream.extend(quote! {
+                                debug_assert!(
+                                    __data_stack.#tag_stack_name.get(
+                                        __data_stack.#tag_stack_name.len()-1-#token_index_from_end
+                                    ) == Some( &#tag_enum_name::#tag_name )
+                                );
+                            });
+                        }
                     }
 
                     // new tag that will be inserted by this reduce action
@@ -1130,32 +1147,36 @@ impl Grammar {
                         .as_ref()
                         .unwrap_or(&empty_tag_name);
                     // pop n tokens from tag_stack and push new reduced tag
-                    let modify_tag_stream = if rule.tokens.len() > 0 {
-                        // if first token's tag is equal to new_tag, no need to (pop n tokens -> push new token).
-                        // just pop n-1 tokens
-                        let first_tag_name =
-                            token_to_stack_name(rule.tokens[0].token).unwrap_or(&empty_tag_name);
+                    let modify_tag_stream = if unique_tag {
+                        TokenStream::new()
+                    } else {
+                        if rule.tokens.len() > 0 {
+                            // if first token's tag is equal to new_tag, no need to (pop n tokens -> push new token).
+                            // just pop n-1 tokens
+                            let first_tag_name = token_to_stack_name(rule.tokens[0].token)
+                                .unwrap_or(&empty_tag_name);
 
-                        if first_tag_name == new_tag_name {
-                            // pop n-1 tokens, no new insertion
-                            let len = rule.tokens.len() - 1;
-                            let truncate_stream = if len > 0 {
-                                quote! {__data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);}
+                            if first_tag_name == new_tag_name {
+                                // pop n-1 tokens, no new insertion
+                                let len = rule.tokens.len() - 1;
+                                let truncate_stream = if len > 0 {
+                                    quote! {__data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);}
+                                } else {
+                                    TokenStream::new()
+                                };
+                                truncate_stream
                             } else {
-                                TokenStream::new()
-                            };
-                            truncate_stream
+                                let len = rule.tokens.len();
+                                // len > 0 here
+                                quote! {
+                                    __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);
+                                    __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
+                                }
+                            }
                         } else {
-                            let len = rule.tokens.len();
-                            // len > 0 here
                             quote! {
-                                __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);
                                 __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
                             }
-                        }
-                    } else {
-                        quote! {
-                            __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
                         }
                     };
 
@@ -1342,6 +1363,15 @@ impl Grammar {
 
         let start_idx = *self.nonterminals_index.get(&self.start_rule_name).unwrap();
         let start_stack_name = &stack_names_for_nonterm[start_idx];
+        let tag_name = start_stack_name.as_ref().unwrap_or(&empty_tag_name);
+        let tag_check_stream = if unique_tag {
+            TokenStream::new()
+        } else {
+            quote! {
+                let tag = self.#tag_stack_name.pop();
+                debug_assert!(tag == Some(#tag_enum_name::#tag_name));
+            }
+        };
         let (start_typename, pop_start) = match start_stack_name {
             Some(stack_name) => {
                 let ruletype = self.nonterminals[start_idx]
@@ -1349,11 +1379,11 @@ impl Grammar {
                     .as_ref()
                     .unwrap()
                     .clone();
+
                 (
                     ruletype,
                     quote! {
-                        let tag = self.#tag_stack_name.pop();
-                        debug_assert!(tag == Some(#tag_enum_name::#stack_name));
+                        #tag_check_stream
                         self.#stack_name.pop()
                     },
                 )
@@ -1361,19 +1391,11 @@ impl Grammar {
             None => (
                 quote! {()},
                 quote! {
-                    let tag = self.#tag_stack_name.pop();
-                    debug_assert!(tag == Some(#tag_enum_name::#empty_tag_name));
+                    #tag_check_stream
                     Some(())
                 },
             ),
         };
-
-        let mut tag_definition_stream = TokenStream::new();
-        for (stack_name, _) in &stack_names_in_order {
-            tag_definition_stream.extend(quote! {
-                #stack_name,
-            });
-        }
 
         // typename for count the number of tokens in each production rule
         let max_shift = self
@@ -1401,13 +1423,10 @@ impl Grammar {
 
         let mut stack_definition_stream = TokenStream::new();
         let mut stack_default_stream = TokenStream::new();
-        let mut pop_match_stream = TokenStream::new();
+        let mut pop_body_stream = TokenStream::new();
         let mut stack_clear_stream = TokenStream::new();
         let mut stack_append_stream = TokenStream::new();
         let stack_len = stack_names_in_order.len();
-        let split_off_count_init_stream = quote! {
-            let mut __counts: [#shift_typename; #stack_len+1] = [0; #stack_len+1];
-        };
         let mut split_off_split_stream = TokenStream::new();
         let mut split_off_ctor_stream = TokenStream::new();
         for (stack_idx, (stack_name, typename)) in stack_names_in_order.iter().enumerate() {
@@ -1417,9 +1436,15 @@ impl Grammar {
             stack_default_stream.extend(quote! {
                 #stack_name: Vec::new(),
             });
-            pop_match_stream.extend(quote! {
-                #tag_enum_name::#stack_name => { self.#stack_name.pop(); }
-            });
+            if unique_tag {
+                pop_body_stream.extend(quote! {
+                    self.#stack_name.pop();
+                });
+            } else {
+                pop_body_stream.extend(quote! {
+                    #tag_enum_name::#stack_name => { self.#stack_name.pop(); }
+                });
+            };
             stack_clear_stream.extend(quote! {
                 self.#stack_name.clear();
             });
@@ -1428,11 +1453,45 @@ impl Grammar {
             });
 
             let other_stack_name = format_ident!("__other_{}", stack_name);
-            split_off_split_stream.extend(quote! {
-                let #other_stack_name = self.#stack_name.split_off( self.#stack_name.len() - (__counts[#stack_idx] as usize) );
-            });
+            if unique_tag {
+                split_off_split_stream.extend(quote! {
+                    let #other_stack_name = self.#stack_name.split_off( at );
+                });
+            } else {
+                split_off_split_stream.extend(quote! {
+                    let #other_stack_name = self.#stack_name.split_off( self.#stack_name.len() - (__counts[#stack_idx] as usize) );
+                });
+            };
             split_off_ctor_stream.extend(quote! {
                 #stack_name: #other_stack_name,
+            });
+        }
+
+        let pop_stream = if unique_tag {
+            pop_body_stream
+        } else {
+            quote! {
+                match self.#tag_stack_name.pop().unwrap() {
+                    #pop_body_stream
+                    _ => {}
+                }
+            }
+        };
+
+        let split_off_count_stream = if unique_tag {
+            quote! {}
+        } else {
+            quote! {
+                let mut __counts: [#shift_typename; #stack_len+1] = [0; #stack_len+1];
+                let __other_tag_stack = self.#tag_stack_name.split_off(at);
+                for &tag in &__other_tag_stack {
+                    __counts[ tag as usize ] += 1;
+                }
+            }
+        };
+        if !unique_tag {
+            split_off_ctor_stream.extend(quote! {
+                #tag_stack_name: __other_tag_stack,
             });
         }
 
@@ -1442,27 +1501,111 @@ impl Grammar {
             quote! {}
         };
 
+        let push_terminal_body_stream = if terminal_data_used {
+            if unique_tag {
+                quote! {
+                    self.#terminal_stack_name.push( term );
+                }
+            } else {
+                quote! {
+                    self.#tag_stack_name.push(#tag_enum_name::#terminal_stack_name);
+                    self.#terminal_stack_name.push( term );
+                }
+            }
+        } else {
+            quote! {
+                unreachable!();
+            }
+        };
+        let push_empty_body_stream = if empty_tag_used {
+            if unique_tag {
+                TokenStream::new()
+            } else {
+                quote! {
+                    self.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
+                }
+            }
+        } else {
+            quote! { unreachable!(); }
+        };
+
+        let tag_definition_stream = if unique_tag {
+            TokenStream::new()
+        } else {
+            let mut tag_definition_body_stream = TokenStream::new();
+            for (stack_name, _) in &stack_names_in_order {
+                tag_definition_body_stream.extend(quote! {
+                    #stack_name,
+                });
+            }
+            if empty_tag_used {
+                tag_definition_body_stream.extend(quote! {
+                    #empty_tag_name,
+                });
+            }
+            quote! {
+                /// tag for token that represents which stack a token is using
+                #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
+                #[derive(Clone, Copy, PartialEq, Eq)]
+                pub enum #tag_enum_name {
+                    #tag_definition_body_stream
+                }
+            }
+        };
+
+        let tag_stack_definition_stream = if unique_tag {
+            TokenStream::new()
+        } else {
+            quote! { pub #tag_stack_name: Vec<#tag_enum_name>, }
+        };
+        let tag_stack_init_stream = if unique_tag {
+            TokenStream::new()
+        } else {
+            quote! {
+                #tag_stack_name: Vec::new(),
+            }
+        };
+
+        let tag_stack_clear_stream = if unique_tag {
+            TokenStream::new()
+        } else {
+            quote! {
+                self.#tag_stack_name.clear();
+            }
+        };
+
+        let tag_stack_reserve_stream = if unique_tag {
+            TokenStream::new()
+        } else {
+            quote! {
+                self.#tag_stack_name.reserve(additional);
+            }
+        };
+
+        let tag_stack_append_stream = if unique_tag {
+            TokenStream::new()
+        } else {
+            quote! {
+                self.#tag_stack_name.append(&mut other.#tag_stack_name);
+            }
+        };
+
         stream.extend(quote! {
-        /// tag for token that represents which stack a token is using
-        #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-        #[derive(Clone, Copy, PartialEq, Eq)]
-        pub enum #tag_enum_name {
-            #tag_definition_stream
-            #empty_tag_name,
-        }
+
+        #tag_definition_stream
 
         /// enum for each non-terminal and terminal symbol, that actually hold data
         #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
         #derive_clone_for_glr
         pub struct #data_stack_typename {
-            pub #tag_stack_name: Vec<#tag_enum_name>,
+            #tag_stack_definition_stream
             #stack_definition_stream
         }
 
         impl Default for #data_stack_typename {
             fn default() -> Self {
                 Self {
-                    #tag_stack_name: Vec::new(),
+                    #tag_stack_init_stream
                     #stack_default_stream
                 }
             }
@@ -1487,42 +1630,32 @@ impl Grammar {
                 #pop_start
             }
             fn pop(&mut self) {
-                match self.#tag_stack_name.pop().unwrap() {
-                    #pop_match_stream
-                    _ => {}
-                }
+                #pop_stream
             }
             fn push_terminal(&mut self, term: Self::Term) {
-                self.#tag_stack_name.push(#tag_enum_name::#terminal_stack_name);
-                self.#terminal_stack_name.push( term );
+                #push_terminal_body_stream
             }
             fn push_empty(&mut self) {
-                self.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
+                #push_empty_body_stream
             }
 
             fn clear(&mut self) {
-                self.#tag_stack_name.clear();
+                #tag_stack_clear_stream
                 #stack_clear_stream
             }
             fn reserve(&mut self, additional: usize) {
-                self.#tag_stack_name.reserve(additional);
+                #tag_stack_reserve_stream
             }
 
             fn split_off(&mut self, at: usize) -> Self {
-                let __other_tag_stack = self.#tag_stack_name.split_off(at);
-
-                #split_off_count_init_stream
-                for &tag in &__other_tag_stack {
-                    __counts[ tag as usize ] += 1;
-                }
+                #split_off_count_stream
                 #split_off_split_stream
                 Self {
-                    #tag_stack_name: __other_tag_stack,
                     #split_off_ctor_stream
                 }
             }
             fn append(&mut self, other: &mut Self) {
-                self.#tag_stack_name.append(&mut other.#tag_stack_name);
+                #tag_stack_append_stream
                 #stack_append_stream
             }
 

@@ -198,7 +198,7 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for ENonTerminals {
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ETags {
     __terminals,
-    __stack2,
+    __stack1,
     Empty,
 }
 /// enum for each non-terminal and terminal symbol, that actually hold data
@@ -206,14 +206,14 @@ pub enum ETags {
 pub struct EDataStack {
     pub __tags: Vec<ETags>,
     __terminals: Vec<Token>,
-    __stack2: Vec<i32>,
+    __stack1: Vec<i32>,
 }
 impl Default for EDataStack {
     fn default() -> Self {
         Self {
             __tags: Vec::new(),
             __terminals: Vec::new(),
-            __stack2: Vec::new(),
+            __stack1: Vec::new(),
         }
     }
 }
@@ -247,7 +247,7 @@ impl EDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::__stack2)
+                ETags::__stack1)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -255,12 +255,12 @@ impl EDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                ETags::__stack2)
+                ETags::__stack1)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        let mut a2 = __data_stack.__stack2.pop().unwrap();
-        let mut A = __data_stack.__stack2.pop().unwrap();
+        let mut a2 = __data_stack.__stack1.pop().unwrap();
+        let mut A = __data_stack.__stack1.pop().unwrap();
         let mut plus = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = {
@@ -268,7 +268,7 @@ impl EDataStack {
             *data += 1;
             A + a2
         };
-        __data_stack.__stack2.push(__res);
+        __data_stack.__stack1.push(__res);
         Ok(true)
     }
     ///A -> M
@@ -285,13 +285,13 @@ impl EDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::__stack2)
+                ETags::__stack1)
             );
         }
-        let mut M = __data_stack.__stack2.pop().unwrap();
+        let mut M = __data_stack.__stack1.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = M;
-        __data_stack.__stack2.push(__res);
+        __data_stack.__stack1.push(__res);
         Ok(true)
     }
     ///M -> M star M
@@ -308,7 +308,7 @@ impl EDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::__stack2)
+                ETags::__stack1)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
@@ -316,12 +316,12 @@ impl EDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                ETags::__stack2)
+                ETags::__stack1)
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        let mut __rustylr_data_2 = __data_stack.__stack2.pop().unwrap();
-        let mut __rustylr_data_0 = __data_stack.__stack2.pop().unwrap();
+        let mut __rustylr_data_2 = __data_stack.__stack1.pop().unwrap();
+        let mut __rustylr_data_0 = __data_stack.__stack1.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __rustylr_data_0 = Self::custom_reduce_action_0(
             __rustylr_data_0,
@@ -336,7 +336,7 @@ impl EDataStack {
         )?;
         let mut m2 = __rustylr_data_2;
         let __res = { M_optim * m2 };
-        __data_stack.__stack2.push(__res);
+        __data_stack.__stack1.push(__res);
         Ok(true)
     }
     ///P -> num
@@ -357,7 +357,7 @@ impl EDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(ETags::__stack2);
+        __data_stack.__tags.push(ETags::__stack1);
         let mut num = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -367,7 +367,7 @@ impl EDataStack {
                 return Err(format!("{:?}", num));
             }
         };
-        __data_stack.__stack2.push(__res);
+        __data_stack.__stack1.push(__res);
         Ok(true)
     }
     ///P -> lparen E rparen
@@ -388,7 +388,7 @@ impl EDataStack {
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                ETags::__stack2)
+                ETags::__stack1)
             );
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
@@ -396,11 +396,11 @@ impl EDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(ETags::__stack2);
-        let mut E = __data_stack.__stack2.pop().unwrap();
+        __data_stack.__tags.push(ETags::__stack1);
+        let mut E = __data_stack.__stack1.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = E;
-        __data_stack.__stack2.push(__res);
+        __data_stack.__stack1.push(__res);
         Ok(true)
     }
     ///E -> A
@@ -417,13 +417,13 @@ impl EDataStack {
         {
             debug_assert!(
                 __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::__stack2)
+                ETags::__stack1)
             );
         }
-        let mut A = __data_stack.__stack2.pop().unwrap();
+        let mut A = __data_stack.__stack1.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = A;
-        __data_stack.__stack2.push(__res);
+        __data_stack.__stack1.push(__res);
         Ok(true)
     }
 }
@@ -443,16 +443,16 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
     type Location = ::rusty_lr::DefaultLocation;
     fn pop_start(&mut self) -> Option<Self::StartType> {
         let tag = self.__tags.pop();
-        debug_assert!(tag == Some(ETags::__stack2));
-        self.__stack2.pop()
+        debug_assert!(tag == Some(ETags::__stack1));
+        self.__stack1.pop()
     }
     fn pop(&mut self) {
         match self.__tags.pop().unwrap() {
             ETags::__terminals => {
                 self.__terminals.pop();
             }
-            ETags::__stack2 => {
-                self.__stack2.pop();
+            ETags::__stack1 => {
+                self.__stack1.pop();
             }
             _ => {}
         }
@@ -467,33 +467,33 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
     fn clear(&mut self) {
         self.__tags.clear();
         self.__terminals.clear();
-        self.__stack2.clear();
+        self.__stack1.clear();
     }
     fn reserve(&mut self, additional: usize) {
         self.__tags.reserve(additional);
     }
     fn split_off(&mut self, at: usize) -> Self {
-        let __other_tag_stack = self.__tags.split_off(at);
         let mut __counts: [u8; 2usize + 1] = [0; 2usize + 1];
+        let __other_tag_stack = self.__tags.split_off(at);
         for &tag in &__other_tag_stack {
             __counts[tag as usize] += 1;
         }
         let __other___terminals = self
             .__terminals
             .split_off(self.__terminals.len() - (__counts[0usize] as usize));
-        let __other___stack2 = self
-            .__stack2
-            .split_off(self.__stack2.len() - (__counts[1usize] as usize));
+        let __other___stack1 = self
+            .__stack1
+            .split_off(self.__stack1.len() - (__counts[1usize] as usize));
         Self {
-            __tags: __other_tag_stack,
             __terminals: __other___terminals,
-            __stack2: __other___stack2,
+            __stack1: __other___stack1,
+            __tags: __other_tag_stack,
         }
     }
     fn append(&mut self, other: &mut Self) {
         self.__tags.append(&mut other.__tags);
         self.__terminals.append(&mut other.__terminals);
-        self.__stack2.append(&mut other.__stack2);
+        self.__stack1.append(&mut other.__stack1);
     }
     fn reduce_action(
         data_stack: &mut Self,

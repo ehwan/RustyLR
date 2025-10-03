@@ -70,8 +70,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     {
         self.feed_eof(parser, userdata)?;
 
-        // data_stack must be <Start> <EOF> in this point
-        self.data_stack.pop(); // pop eof
+        // data_stack must be <Start> in this point
         Ok(self.data_stack.pop_start().unwrap())
     }
 
@@ -514,10 +513,14 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             if next_state_id.push {
                 match term {
                     TerminalSymbol::Term(t) => self.data_stack.push_terminal(t),
-                    TerminalSymbol::Error | TerminalSymbol::Eof => self.data_stack.push_empty(),
+                    TerminalSymbol::Error => self.data_stack.push_empty(),
+                    TerminalSymbol::Eof => {} // do not push anything for eof
                 }
             } else {
-                self.data_stack.push_empty();
+                match term {
+                    TerminalSymbol::Term(_) | TerminalSymbol::Error => self.data_stack.push_empty(),
+                    TerminalSymbol::Eof => {} // do not push anything for eof
+                }
             }
 
             // location is `Some` if it is not `Eof`
