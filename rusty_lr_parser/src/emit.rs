@@ -679,7 +679,7 @@ impl Grammar {
                     let new_index = terminal_sets_name_map.len();
                     terminal_sets_name_map
                         .entry(set)
-                        .or_insert_with(|| format_ident!("__rustylr_tset{new_index}"))
+                        .or_insert_with(|| format_ident!("__RUSTYLR_TSET{new_index}"))
                         .clone()
                 };
             for state in &self.states {
@@ -743,6 +743,7 @@ impl Grammar {
 
                 let mut ruleset_rules_body_stream = TokenStream::new();
                 let mut ruleset_shifted_body_stream = TokenStream::new();
+                let ruleset_len = state.ruleset.len();
                 let mut max_shifted = 0;
                 for &rule in &state.ruleset {
                     max_shifted = max_shifted.max(rule.shifted);
@@ -765,23 +766,31 @@ impl Grammar {
                     quote! { usize }
                 };
 
+                let reduce_map_construct_stream = if reduce_body_stream.is_empty() {
+                    quote! { Default::default() }
+                } else {
+                    quote! {
+                        {
+                        let mut __reduce_map = std::collections::BTreeMap::new();
+                        #reduce_body_stream
+                        __reduce_map.into_iter().collect()
+                        }
+                    }
+                };
+
                 states_body_stream.extend(quote! {
                     #module_prefix::parser::state::IntermediateState {
                         shift_goto_map_term: vec![#shift_term_body_stream],
                         shift_goto_map_nonterm: vec![#shift_nonterm_body_stream],
-                        reduce_map: {
-                            let mut __reduce_map = std::collections::BTreeMap::new();
-                            #reduce_body_stream
-                            __reduce_map.into_iter().collect()
-                        },
+                        reduce_map: #reduce_map_construct_stream,
                         ruleset: {
-                            let rules: &'static [#rule_index_typename] = &[
+                            static __RULES: [#rule_index_typename; #ruleset_len] = [
                                 #ruleset_rules_body_stream
                             ];
-                            let shifted: &'static [#shifted_typename] = &[
+                            static __SHIFTED: [#shifted_typename; #ruleset_len] = [
                                 #ruleset_shifted_body_stream
                             ];
-                            rules.iter().zip(shifted.iter()).map(
+                            __RULES.iter().zip(__SHIFTED.iter()).map(
                                 |(&rule, &shifted)| {
                                     #module_prefix::rule::ShiftedRuleRef {
                                         rule: rule as usize,
@@ -796,6 +805,7 @@ impl Grammar {
 
             let mut terminal_set_initialize_stream = TokenStream::new();
             for (set, name) in terminal_sets_name_map {
+                let len = set.len();
                 let set_it = set.into_iter().map(|val| match val {
                     TerminalSymbol::Term(term) => {
                         let var = &class_variants[term];
@@ -811,7 +821,7 @@ impl Grammar {
                     }
                 });
                 terminal_set_initialize_stream.extend(quote! {
-                    let #name: Vec<#termclass_typename> = vec![#(#set_it),*];
+                    static #name: [#termclass_typename; #len] = [#(#set_it),*];
                 });
             }
 
