@@ -4786,8 +4786,8 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
         self.__tags.reserve(additional);
     }
     fn split_off(&mut self, at: usize) -> Self {
-        let __other_tag_stack = self.__tags.split_off(at);
         let mut __counts: [u8; 19usize + 1] = [0; 19usize + 1];
+        let __other_tag_stack = self.__tags.split_off(at);
         for &tag in &__other_tag_stack {
             __counts[tag as usize] += 1;
         }
@@ -4849,7 +4849,6 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
             .__stack18
             .split_off(self.__stack18.len() - (__counts[18usize] as usize));
         Self {
-            __tags: __other_tag_stack,
             __terminals: __other___terminals,
             __stack1: __other___stack1,
             __stack2: __other___stack2,
@@ -4869,6 +4868,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
             __stack16: __other___stack16,
             __stack17: __other___stack17,
             __stack18: __other___stack18,
+            __tags: __other_tag_stack,
         }
     }
     fn append(&mut self, other: &mut Self) {

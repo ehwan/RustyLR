@@ -497,20 +497,12 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for JsonNonTerminals {
         *self as usize
     }
 }
-/// tag for token that represents which stack a token is using
-#[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsonTags {
-    Empty,
-}
 /// enum for each non-terminal and terminal symbol, that actually hold data
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-pub struct JsonDataStack {
-    pub __tags: Vec<JsonTags>,
-}
+pub struct JsonDataStack {}
 impl Default for JsonDataStack {
     fn default() -> Self {
-        Self { __tags: Vec::new() }
+        Self {}
     }
 }
 #[allow(
@@ -532,22 +524,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -561,22 +538,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -590,22 +552,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -626,13 +573,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
         Ok(false)
     }
@@ -646,22 +587,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -675,30 +601,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 5usize);
         Ok(false)
     }
@@ -712,22 +615,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -741,22 +629,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -770,22 +643,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -799,18 +657,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
         Ok(false)
     }
@@ -824,30 +671,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 5usize);
         Ok(false)
     }
@@ -861,22 +685,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -890,18 +699,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
         Ok(false)
     }
@@ -915,18 +713,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
         Ok(false)
     }
@@ -940,22 +727,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -969,22 +741,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -998,22 +755,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -1027,18 +769,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
         Ok(false)
     }
@@ -1052,18 +783,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
         Ok(false)
     }
@@ -1077,26 +797,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 4usize);
         Ok(false)
     }
@@ -1110,30 +811,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 5usize);
         Ok(false)
     }
@@ -1147,26 +825,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 4usize);
         Ok(false)
     }
@@ -1180,13 +839,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
         Ok(false)
     }
@@ -1200,22 +853,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
         Ok(false)
     }
@@ -1230,7 +868,6 @@ impl JsonDataStack {
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(JsonTags::Empty);
         Ok(false)
     }
     ///Character+ -> Character
@@ -1243,13 +880,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
         Ok(false)
     }
@@ -1263,18 +894,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
         Ok(false)
     }
@@ -1289,7 +909,6 @@ impl JsonDataStack {
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(JsonTags::Empty);
         Ok(false)
     }
     ///Digit+ -> ['0'-'9']
@@ -1302,13 +921,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
         Ok(false)
     }
@@ -1322,18 +935,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
         Ok(false)
     }
@@ -1347,13 +949,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
         Ok(false)
     }
@@ -1367,18 +963,7 @@ impl JsonDataStack {
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                JsonTags::Empty)
-            );
-            debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                JsonTags::Empty)
-            );
-        }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
         Ok(false)
     }
@@ -1393,7 +978,6 @@ impl JsonDataStack {
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(JsonTags::Empty);
         Ok(false)
     }
     ///"" ->
@@ -1407,7 +991,6 @@ impl JsonDataStack {
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(JsonTags::Empty);
         Ok(false)
     }
 }
@@ -1426,38 +1009,19 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
     type StartType = ();
     type Location = std::ops::Range<usize>;
     fn pop_start(&mut self) -> Option<Self::StartType> {
-        let tag = self.__tags.pop();
-        debug_assert!(tag == Some(JsonTags::Empty));
         Some(())
     }
-    fn pop(&mut self) {
-        match self.__tags.pop().unwrap() {
-            _ => {}
-        }
-    }
+    fn pop(&mut self) {}
     fn push_terminal(&mut self, term: Self::Term) {
         unreachable!();
     }
-    fn push_empty(&mut self) {
-        self.__tags.push(JsonTags::Empty);
-    }
-    fn clear(&mut self) {
-        self.__tags.clear();
-    }
-    fn reserve(&mut self, additional: usize) {
-        self.__tags.reserve(additional);
-    }
+    fn push_empty(&mut self) {}
+    fn clear(&mut self) {}
+    fn reserve(&mut self, additional: usize) {}
     fn split_off(&mut self, at: usize) -> Self {
-        let __other_tag_stack = self.__tags.split_off(at);
-        let mut __counts: [u8; 0usize + 1] = [0; 0usize + 1];
-        for &tag in &__other_tag_stack {
-            __counts[tag as usize] += 1;
-        }
-        Self { __tags: __other_tag_stack }
+        Self {}
     }
-    fn append(&mut self, other: &mut Self) {
-        self.__tags.append(&mut other.__tags);
-    }
+    fn append(&mut self, other: &mut Self) {}
     fn reduce_action(
         data_stack: &mut Self,
         location_stack: &mut Vec<std::ops::Range<usize>>,
